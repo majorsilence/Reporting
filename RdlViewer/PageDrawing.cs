@@ -1369,6 +1369,30 @@ namespace Majorsilence.Reporting.RdlViewer
                 } 
 
                 drawBrush = new SolidBrush(si.Color);
+                
+                // Handle rotation for non-standard writing modes
+                System.Drawing.Drawing2D.GraphicsState graphicsState = null;
+                if (si.WritingMode == WritingModeEnum.rl_bt || si.WritingMode == WritingModeEnum.tb_lr)
+                {
+                    graphicsState = g.Save();
+                    
+                    // Calculate rotation based on writing mode
+                    if (si.WritingMode == WritingModeEnum.rl_bt)
+                    {
+                        // 180 degree rotation
+                        g.TranslateTransform(r.Left + r.Width / 2, r.Top + r.Height / 2);
+                        g.RotateTransform(180);
+                        g.TranslateTransform(-(r.Left + r.Width / 2), -(r.Top + r.Height / 2));
+                    }
+                    else if (si.WritingMode == WritingModeEnum.tb_lr)
+                    {
+                        // 270 degree rotation (90 counter-clockwise)
+                        g.TranslateTransform(r.Left, r.Top);
+                        g.RotateTransform(270);
+                        g.TranslateTransform(-r.Left, -r.Top);
+                    }
+                }
+                
                 if (si.TextAlign == TextAlignEnum.Justified)
                 {
                     GraphicsExtended.DrawStringJustified(g, pt.Text, drawFont, drawBrush, r2); 
@@ -1384,6 +1408,13 @@ namespace Majorsilence.Reporting.RdlViewer
                     g.DrawString(pt.Text, drawFont, drawBrush, r2, drawFormat);
                     HighlightString(g, pt, r2, drawFont, drawFormat);
                 }
+                
+                // Restore graphics state if we applied rotation
+                if (graphicsState != null)
+                {
+                    g.Restore(graphicsState);
+                }
+                
                 if (SelectTool)
                 {
                     if (pt.AllowSelect && _SelectList.Contains(pt))
