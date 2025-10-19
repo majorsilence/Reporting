@@ -660,6 +660,78 @@ namespace Majorsilence.Reporting.Rdl
 		{
 			get {return _Cache;}
 		}
+
+		/// <summary>
+		/// Export the report to a file with the specified format.
+		/// This is a convenience method that combines RunGetData and RunRender.
+		/// </summary>
+		/// <param name="outputType">The output format type (PDF, Excel2007, CSV, etc.)</param>
+		/// <param name="filePath">Full path where the file should be saved</param>
+		/// <param name="parameters">Optional report parameters</param>
+		public async Task Export(OutputPresentationType outputType, string filePath, IDictionary parameters = null)
+		{
+			if (string.IsNullOrEmpty(filePath))
+				throw new ArgumentException("File path cannot be null or empty.", nameof(filePath));
+
+			// Get the data first if parameters are provided or if data hasn't been retrieved yet
+			if (parameters != null)
+			{
+				await RunGetData(parameters);
+			}
+
+			// Create the file stream generator
+			OneFileStreamGen sg = null;
+			try
+			{
+				sg = new OneFileStreamGen(filePath, true);  // overwrite with this name
+				await RunRender(sg, outputType);
+			}
+			finally
+			{
+				if (sg != null)
+				{
+					sg.CloseMainStream();
+				}
+			}
+		}
+
+		/// <summary>
+		/// Export the report to a memory stream (byte array) with the specified format.
+		/// This is a convenience method that combines RunGetData and RunRender for in-memory processing.
+		/// </summary>
+		/// <param name="outputType">The output format type (PDF, Excel2007, CSV, etc.)</param>
+		/// <param name="parameters">Optional report parameters</param>
+		/// <returns>Byte array containing the rendered report</returns>
+		public async Task<byte[]> ExportToMemory(OutputPresentationType outputType, IDictionary parameters = null)
+		{
+			// Get the data first if parameters are provided or if data hasn't been retrieved yet
+			if (parameters != null)
+			{
+				await RunGetData(parameters);
+			}
+
+			// Create a memory stream generator
+			MemoryStreamGen msg = null;
+			try
+			{
+				msg = new MemoryStreamGen();
+				await RunRender(msg, outputType);
+				
+				// Get the memory stream and convert to byte array
+				Stream stream = msg.GetStream();
+				stream.Position = 0;
+				byte[] buffer = new byte[stream.Length];
+				await stream.ReadAsync(buffer, 0, buffer.Length);
+				return buffer;
+			}
+			finally
+			{
+				if (msg != null)
+				{
+					msg.Dispose();
+				}
+			}
+		}
 	}
 
     internal class RCache
