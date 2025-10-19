@@ -486,7 +486,14 @@ namespace Majorsilence.Reporting.Rdl
             }
             sb.AppendLine("</numFmts>");
             // output the font list
-            sb.AppendFormat("<fonts count=\"{0}\">", _FontCache.Count);
+            // Excel requires at least one font to be defined
+            int fontCount = _FontCache.Count > 0 ? _FontCache.Count : 1;
+            sb.AppendFormat("<fonts count=\"{0}\">", fontCount);
+            if (_FontCache.Count == 0)
+            {
+                // Add a default font if none exists
+                sb.AppendLine("<font><sz val=\"11\"/><color rgb=\"FF000000\"/><name val=\"Calibri\"/></font>");
+            }
             foreach (string f in _FontCache)
             {
                 sb.AppendLine(f);
@@ -639,11 +646,21 @@ namespace Majorsilence.Reporting.Rdl
                 "<Relationships xmlns=\"http://schemas.openxmlformats.org/package/2006/relationships\">");
 
             int id = 1;
-            foreach (SheetInfo sinfo in _Sheets)
+            if (_Sheets.Count == 0)
             {
+                // Add relationship for the empty sheet that will be created
                 sb.AppendFormat("<Relationship Id=\"rId{0}\" Type=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet\" " +
-                    "Target=\"worksheets/{1}.xml\"/>", id, sinfo.Name);
+                    "Target=\"worksheets/sheet1.xml\"/>", id);
                 id++;
+            }
+            else
+            {
+                foreach (SheetInfo sinfo in _Sheets)
+                {
+                    sb.AppendFormat("<Relationship Id=\"rId{0}\" Type=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet\" " +
+                        "Target=\"worksheets/{1}.xml\"/>", id, sinfo.Name);
+                    id++;
+                }
             }
 
             sb.AppendFormat("<Relationship Id=\"rId{0}\" " +
