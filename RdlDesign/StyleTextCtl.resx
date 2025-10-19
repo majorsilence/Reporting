@@ -467,6 +467,9 @@
   <data name="cbWritingMode.Items2" xml:space="preserve">
     <value>tb-lr</value>
   </data>
+  <data name="cbWritingMode.Items3" xml:space="preserve">
+    <value>rl-bt</value>
+  </data>
   <data name="button2.TextAlign" type="System.Drawing.ContentAlignment, System.Drawing">
     <value>MiddleLeft</value>
   </data>
