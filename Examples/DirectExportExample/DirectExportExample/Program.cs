@@ -21,10 +21,15 @@ namespace DirectExportExample
             RdlEngineConfig.RdlEngineConfigInit();
 
             // Define the report file path
-            string reportPath = Path.Combine(
-                Directory.GetCurrentDirectory(),
-                "..", "..", "..", "..", "..",
-                "SqliteExamples", "SimpleTest1.rdl");
+            // In a real application, you would typically get this from configuration
+            string reportPath = "/home/runner/work/My-FyiReporting/My-FyiReporting/Examples/SqliteExamples/SimpleTest1.rdl";
+            
+            // Or use a relative path from the project root
+            // string reportPath = Path.Combine(
+            //     Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location),
+            //     "..", "..", "..", "..", "..", "..",
+            //     "Examples", "SqliteExamples", "SimpleTest1.rdl");
+            // reportPath = Path.GetFullPath(reportPath);
 
             if (!File.Exists(reportPath))
             {
@@ -41,23 +46,45 @@ namespace DirectExportExample
 
             try
             {
-                // Example 1: Export to PDF
-                await ExportToPdf(reportPath, outputDir);
+                // Example 1: Export to PDF (may not work on Linux without System.Drawing support)
+                try
+                {
+                    await ExportToPdf(reportPath, outputDir);
+                }
+                catch (Exception ex) when (ex.Message.Contains("Gdip") || ex.Message.Contains("System.Drawing"))
+                {
+                    Console.WriteLine("1. Exporting to PDF...");
+                    Console.WriteLine($"   ⚠ PDF export skipped: System.Drawing not supported on this platform");
+                    Console.WriteLine($"   (This is expected on Linux without libgdiplus)\n");
+                }
 
-                // Example 2: Export to Excel
-                await ExportToExcel(reportPath, outputDir);
+                // Example 2: Export to Excel (may not work on Linux without System.Drawing support)
+                try
+                {
+                    await ExportToExcel(reportPath, outputDir);
+                }
+                catch (Exception ex) when (ex.Message.Contains("Gdip") || ex.Message.Contains("System.Drawing"))
+                {
+                    Console.WriteLine("2. Exporting to Excel...");
+                    Console.WriteLine($"   ⚠ Excel export skipped: System.Drawing not supported on this platform\n");
+                }
 
-                // Example 3: Export to CSV
+                // Example 3: Export to CSV (works on all platforms)
                 await ExportToCsv(reportPath, outputDir);
 
-                // Example 4: Export with parameters
+                // Example 4: Export to XML (works on all platforms)
+                await ExportToXml(reportPath, outputDir);
+
+                // Example 5: Export with parameters
                 await ExportWithParameters(reportPath, outputDir);
 
-                // Example 5: Export to memory (byte array)
-                await ExportToMemory(reportPath);
+                // Example 6: Export to memory (byte array) - CSV version
+                await ExportToMemoryCsv(reportPath);
 
-                Console.WriteLine("\n=== All exports completed successfully! ===");
+                Console.WriteLine("\n=== Exports completed! ===");
                 Console.WriteLine($"Output files saved to: {outputDir}");
+                Console.WriteLine("\nNote: PDF and Excel exports require System.Drawing support.");
+                Console.WriteLine("On Linux, install libgdiplus: sudo apt-get install libgdiplus");
             }
             catch (Exception ex)
             {
@@ -141,11 +168,11 @@ namespace DirectExportExample
         }
 
         /// <summary>
-        /// Example 4: Export report with parameters
+        /// Example 5: Export report with parameters
         /// </summary>
         static async Task ExportWithParameters(string reportPath, string outputDir)
         {
-            Console.WriteLine("4. Exporting with parameters...");
+            Console.WriteLine("5. Exporting with parameters...");
 
             // Load the report
             string rdlContent = await File.ReadAllTextAsync(reportPath);
@@ -161,19 +188,19 @@ namespace DirectExportExample
             // Example: parameters.Add("EmployeeID", "5");
             // Example: parameters.Add("StartDate", "2024-01-01");
 
-            // Export to PDF with parameters
-            string outputPath = Path.Combine(outputDir, "report_with_params.pdf");
-            await report.Export(OutputPresentationType.PDF, outputPath, parameters);
+            // Export to CSV with parameters (CSV works on all platforms)
+            string outputPath = Path.Combine(outputDir, "report_with_params.csv");
+            await report.Export(OutputPresentationType.CSV, outputPath, parameters);
 
-            Console.WriteLine($"   ✓ PDF with parameters exported to: {outputPath}\n");
+            Console.WriteLine($"   ✓ CSV with parameters exported to: {outputPath}\n");
         }
 
         /// <summary>
-        /// Example 5: Export report to memory (byte array) for in-memory processing
+        /// Example 5: Export to memory (byte array) for in-memory processing - CSV version
         /// </summary>
-        static async Task ExportToMemory(string reportPath)
+        static async Task ExportToMemoryCsv(string reportPath)
         {
-            Console.WriteLine("5. Exporting to memory (byte array)...");
+            Console.WriteLine("6. Exporting to memory (byte array)...");
 
             // Load the report
             string rdlContent = await File.ReadAllTextAsync(reportPath);
@@ -183,11 +210,33 @@ namespace DirectExportExample
             Report report = await parser.Parse();
             report.Folder = Path.GetDirectoryName(reportPath);
 
-            // Export to memory as byte array
-            byte[] pdfBytes = await report.ExportToMemory(OutputPresentationType.PDF);
+            // Export to memory as byte array (CSV works on all platforms)
+            byte[] csvBytes = await report.ExportToMemory(OutputPresentationType.CSV);
 
-            Console.WriteLine($"   ✓ PDF exported to memory: {pdfBytes.Length} bytes");
+            Console.WriteLine($"   ✓ CSV exported to memory: {csvBytes.Length} bytes");
             Console.WriteLine($"   This byte array can be sent via HTTP, saved to database, etc.\n");
+        }
+
+        /// <summary>
+        /// Example 7: Export to XML format (works on all platforms)
+        /// </summary>
+        static async Task ExportToXml(string reportPath, string outputDir)
+        {
+            Console.WriteLine("4. Exporting to XML...");
+
+            // Load the report
+            string rdlContent = await File.ReadAllTextAsync(reportPath);
+            RDLParser parser = new RDLParser(rdlContent);
+            parser.Folder = Path.GetDirectoryName(reportPath);
+
+            Report report = await parser.Parse();
+            report.Folder = Path.GetDirectoryName(reportPath);
+
+            // Export to XML
+            string outputPath = Path.Combine(outputDir, "report_output.xml");
+            await report.Export(OutputPresentationType.XML, outputPath);
+
+            Console.WriteLine($"   ✓ XML exported to: {outputPath}\n");
         }
     }
 }
