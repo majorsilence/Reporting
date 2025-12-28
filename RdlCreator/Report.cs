@@ -1,14 +1,19 @@
 ﻿using Majorsilence.Reporting.Rdl;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Reflection.Metadata;
 using System.Reflection.Metadata.Ecma335;
+using System.Threading.Tasks;
 using System.Xml.Serialization;
 
 namespace Majorsilence.Reporting.RdlCreator
 {
     // Report class representing the root element
     [XmlRoot(ElementName = "Report", Namespace = "http://schemas.microsoft.com/sqlserver/reporting/2005/01/reportdefinition")]
+#if AOT
+    [DotWrap.DotWrapExpose] 
+#endif
     public class Report
     {
         [XmlElement(ElementName = "Description")]
@@ -273,6 +278,32 @@ namespace Majorsilence.Reporting.RdlCreator
             }
             this.Body.ReportItems.Images.Add(image);
             return this;
+        }
+
+        /// <summary>
+        /// Create a PDF document from the Report definition.
+        /// If you wish to create an RDL report use the Create class.
+        /// </summary>
+        /// <param name="ouput"></param>
+        public async Task Create(Stream ouput)
+        {
+            await Create(ouput, Majorsilence.Reporting.Rdl.OutputPresentationType.PDF);
+        }
+
+        /// <summary>
+        /// Create a report in PDF/Html/Excel or other support types from the Report definition.
+        /// If you wish to create an RDL report use the Create class.
+        /// </summary>
+        /// <param name="ouput"></param>
+        public async Task Create(Stream ouput, Majorsilence.Reporting.Rdl.OutputPresentationType outputType)
+        {
+            var create = new Create();
+            using var report = await create.GenerateRdl(this);
+            using var streamGen = new Majorsilence.Reporting.Rdl.MemoryStreamGen();
+            await report.RunRender(streamGen, outputType);
+            await using var reportData = streamGen.GetStream();
+            reportData.Position = 0;
+            await reportData.CopyToAsync(ouput);
         }
 
     }

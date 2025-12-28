@@ -2,6 +2,9 @@
 
 namespace Majorsilence.Reporting.RdlCreator
 {
+#if AOT
+    [DotWrap.DotWrapExpose] 
+#endif
     public class CustomProperty
     {
         [XmlElement(ElementName = "Name")]

@@ -2,6 +2,9 @@ using System;
 
 namespace Majorsilence.Reporting.RdlCreator
 {
+#if AOT
+    [DotWrap.DotWrapExpose] 
+#endif
     public class ReportItemSize : System.Xml.Serialization.IXmlSerializable
     {
         // implicitly convert from ReportItemSize to string

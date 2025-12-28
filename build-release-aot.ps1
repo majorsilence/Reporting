@@ -4,7 +4,7 @@ $CURRENTPATH=$pwd.Path
 
 # /p:Configuration="Debug", "Debug-DrawingCompat", "Release", "Release-DrawingCompat"
 $pConfigurationCompat="Release-DrawingCompat"
-$pTargetFrameworkGeneric="net8.0"
+$pTargetFrameworkGeneric="net10.0"
 
 function delete_files([string]$path)
 {

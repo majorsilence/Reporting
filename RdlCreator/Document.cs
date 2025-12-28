@@ -13,10 +13,10 @@ namespace Majorsilence.Reporting.RdlCreator
     /// Programmatically create PDFs.
     /// </summary>
     /// <remarks>Internally it is a combination of RDL and https://github.com/VahidN/iTextSharp.LGPLv2.Core</remarks>
+    [XmlRoot(ElementName = "Report", Namespace = "http://schemas.microsoft.com/sqlserver/reporting/2005/01/reportdefinition")]
 #if AOT
     [DotWrap.DotWrapExpose] 
 #endif
-    [XmlRoot(ElementName = "Report", Namespace = "http://schemas.microsoft.com/sqlserver/reporting/2005/01/reportdefinition")]
     public class Document
     {
         public List<Page> Pages { get; private set; } = new List<Page>();
@@ -136,7 +136,11 @@ namespace Majorsilence.Reporting.RdlCreator
             await Create(ms);
             return ms.ToArray();
         }
-
+        
+        /// <summary>
+        /// Create the PDF document.
+        /// </summary>
+        /// <param name="output">Stream where the pdf will be saved.</param>
         public async Task Create(Stream output)
         {
             using var itextDocument = new iTextSharp.text.Document();
@@ -160,11 +164,11 @@ namespace Majorsilence.Reporting.RdlCreator
                 var fyiReport = await create.GenerateRdl(report);
                 using var ms = new Majorsilence.Reporting.Rdl.MemoryStreamGen();
                 await fyiReport.RunGetData(null);
-                await fyiReport.RunRender(ms, Majorsilence.Reporting.Rdl.OutputPresentationType.PDF);
-                var pdf = ms.GetStream();
-                pdf.Position = 0;
+                await fyiReport.RunRender(ms,  Majorsilence.Reporting.Rdl.OutputPresentationType.PDF);
+                var documentData = ms.GetStream();
+                documentData.Position = 0;
 
-                using var reader = new PdfReader(pdf);
+                using var reader = new PdfReader(documentData);
                 for (int i = 1; i <= reader.NumberOfPages; i++)
                 {
                     iTextCopy.AddPage(iTextCopy.GetImportedPage(reader, i));
