@@ -77,4 +77,4 @@ await document.Create(fileStream);
 
 ## Reference
 
-[Majorsilence Reporting Wiki contents page](https://github.com/majorsilence/My-FyiReporting/wiki/_pages) - external link.
+[Majorsilence Reporting Wiki contents page](https://github.com/majorsilence/Reporting/wiki/_pages) - external link.
