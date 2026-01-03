@@ -1,0 +1,383 @@
+<?xml version='1.0' encoding='utf-8'?>
+<root xmlns:ns1="urn:schemas-microsoft-com:xml-msdata" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  
+  <xs:schema id="root">
+    <xs:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xs:element name="root" ns1:IsDataSet="true">
+      <xs:complexType>
+        <xs:choice maxOccurs="unbounded">
+          <xs:element name="metadata">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="value" type="xsd:string" minOccurs="0" />
+              </xs:sequence>
+              <xs:attribute name="name" use="required" type="xsd:string" />
+              <xs:attribute name="type" type="xsd:string" />
+              <xs:attribute name="mimetype" type="xsd:string" />
+              <xs:attribute ref="xml:space" />
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="assembly">
+            <xs:complexType>
+              <xs:attribute name="alias" type="xsd:string" />
+              <xs:attribute name="name" type="xsd:string" />
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="data">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="value" type="xsd:string" minOccurs="0" ns1:Ordinal="1" />
+                <xs:element name="comment" type="xsd:string" minOccurs="0" ns1:Ordinal="2" />
+              </xs:sequence>
+              <xs:attribute name="name" type="xsd:string" use="required" ns1:Ordinal="1" />
+              <xs:attribute name="type" type="xsd:string" ns1:Ordinal="3" />
+              <xs:attribute name="mimetype" type="xsd:string" ns1:Ordinal="4" />
+              <xs:attribute ref="xml:space" />
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="resheader">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="value" type="xsd:string" minOccurs="0" ns1:Ordinal="1" />
+              </xs:sequence>
+              <xs:attribute name="name" type="xsd:string" use="required" />
+            </xs:complexType>
+          </xs:element>
+        </xs:choice>
+      </xs:complexType>
+    </xs:element>
+  </xs:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="CharReader_Error_FileReaderUnGetFirstChar" xml:space="preserve">
+    <value>error: primer carácter no encontrado</value>
+  </data>
+  <data name="ChartLayout_Error_PlotAreaHeightIs0" xml:space="preserve">
+    <value>La altura del área de trazado es menor o igual a 0</value>
+  </data>
+  <data name="ChartLayout_Error_PlotAreaWidthIs0" xml:space="preserve">
+    <value>El ancho del área de trazado es menor o igual a 0</value>
+  </data>
+  <data name="DataSourceDefn_Error_NoPasswordForDSR" xml:space="preserve">
+    <value>No se proporcionó contraseña para la referencia del origen de datos compartido</value>
+  </data>
+  <data name="Filter_Error_TopNAndBottomNRequireInt" xml:space="preserve">
+    <value>Los operadores de filtro TopN y BottomN requieren un valor entero, se obtuvo {0}.</value>
+  </data>
+  <data name="Financial_Error_IPmtNotSupportPayments" xml:space="preserve">
+    <value>IPmt no admite pagos al inicio del período.</value>
+  </data>
+  <data name="FunctionCode_Error_MethodNotFound" xml:space="preserve">
+    <value>El método "{0}" no se encontró en el código</value>
+  </data>
+  <data name="FunctionCustomInstance_Error_MethodNotFoundInClass" xml:space="preserve">
+    <value>El método "{0}" no se encontró en la clase "{1}"</value>
+  </data>
+  <data name="FunctionCustomStatic_Error_MethodNotFoundInClass" xml:space="preserve">
+    <value>El método "{0}" no se encontró en la clase "{1}"</value>
+  </data>
+  <data name="FunctionFieldCollection_Error_FieldCollectionInvalid" xml:space="preserve">
+    <value>El argumento "{0}" es inválido para la colección Field</value>
+  </data>
+  <data name="FunctionFieldCollection_Error_FieldCollectionNull" xml:space="preserve">
+    <value>El argumento de la colección Field es nulo</value>
+  </data>
+  <data name="FunctionGlobalCollection_Error_GlobalsNull" xml:space="preserve">
+    <value>El argumento de la colección Globals es nulo</value>
+  </data>
+  <data name="FunctionGlobalCollection_Error_GlobalsUnknown" xml:space="preserve">
+    <value>El argumento "{0}" es inválido para la colección Globals</value>
+  </data>
+  <data name="FunctionParameterCollection_Error_ParameterCollectionInvalid" xml:space="preserve">
+    <value>El argumento "{0}" es inválido para la colección Parameter</value>
+  </data>
+  <data name="FunctionParameterCollection_Error_ParameterCollectionNull" xml:space="preserve">
+    <value>El argumento de la colección Parameter es nulo</value>
+  </data>
+  <data name="FunctionReportItemCollection_Error_ReportItemCollectionInvalid" xml:space="preserve">
+    <value>El argumento "{0}" es inválido para la colección ReportItem</value>
+  </data>
+  <data name="FunctionReportItemCollection_Error_ReportItemCollectionNull" xml:space="preserve">
+    <value>El argumento de la colección ReportItem es nulo</value>
+  </data>
+  <data name="FunctionReportParameter_Error_UnknownReporParameterMethod" xml:space="preserve">
+    <value>Error interno: método de parámetro de informe desconocido</value>
+  </data>
+  <data name="FunctionSystem_Error_MethodNotFound" xml:space="preserve">
+    <value>El método "{0}" no se encontró en la clase "{1}"</value>
+  </data>
+  <data name="FunctionUserCollection_Error_UserCollectionInvalid" xml:space="preserve">
+    <value>El argumento "{0}" es inválido para la colección User</value>
+  </data>
+  <data name="FunctionUserCollection_Error_UserCollectionNull" xml:space="preserve">
+    <value>El argumento de la colección User es nulo</value>
+  </data>
+  <data name="FunctionUserLanguage_Error_ConvertToBoolean" xml:space="preserve">
+    <value>Conversión inválida del idioma a Boolean.</value>
+  </data>
+  <data name="FunctionUserLanguage_Error_ConvertToDateTime" xml:space="preserve">
+    <value>Conversión inválida del idioma a DateTime.</value>
+  </data>
+  <data name="FunctionUserLanguage_Error_ConvertToDecimal" xml:space="preserve">
+    <value>Conversión inválida del idioma a Decimal.</value>
+  </data>
+  <data name="FunctionUserLanguage_Error_ConvertToDouble" xml:space="preserve">
+    <value>Conversión inválida del idioma a Double.</value>
+  </data>
+  <data name="FunctionUserLanguage_Error_ConvertToInt32" xml:space="preserve">
+    <value>Conversión inválida del idioma a Int32.</value>
+  </data>
+  <data name="MhtBuilder_Error_Extension" xml:space="preserve">
+    <value>La extensión del nombre de archivo '{0}' no tiene una extensión adecuada de '{1}'</value>
+  </data>
+  <data name="MhtBuilder_Error_FilenameNoExtension" xml:space="preserve">
+    <value>The filename provided, '{0}', has no extension. If are specifying a folder, make sure it ends in a trailing slash. The expected file extension(s) are '{1}'</value>
+  </data>
+  <data name="MhtWebFile_Error_ConvertOnlyHTMLOrCSS" xml:space="preserve">
+    <value>La conversión de referencias solo tiene sentido para archivos HTML o CSS; este archivo es de tipo '{0}'</value>
+  </data>
+  <data name="MhtWebFile_Error_NoFilename" xml:space="preserve">
+    <value>No se especificó el nombre del archivo y no se encontró la etiqueta de encabezado HTML, por lo que el nombre del archivo no se puede calcular automáticamente. Debe especificar un nombre de archivo, no una carpeta.</value>
+  </data>
+  <data name="OneFileStreamGen_Error_FileAlreadyExists" xml:space="preserve">
+    <value>El archivo {0} ya existe.</value>
+  </data>
+  <data name="Pages_Error_CurrentPageMustInList" xml:space="preserve">
+    <value>La página actual debe estar en la lista de páginas.</value>
+  </data>
+  <data name="PageTextHtml_Error_BuildMethodMustCalledPriorTotalHeight" xml:space="preserve">
+    <value>El método Build debe llamarse antes de acceder a la propiedad TotalHeight.</value>
+  </data>
+  <data name="PdfOutline_Error_GetObjectNumberMustBeforeGetOutlineDict" xml:space="preserve">
+    <value>GetObjectNumber debe llamarse antes de GetOutlineDict</value>
+  </data>
+  <data name="ProcessReport_Error_ReportHasErrors" xml:space="preserve">
+    <value>El informe tiene errores y no se puede procesar.</value>
+  </data>
+  <data name="Query_Error_XMLMustContainTopLevelRows" xml:space="preserve">
+    <value>Error: los datos XML deben contener filas de nivel superior.</value>
+  </data>
+  <data name="RdlEngineConfig_Error_CashModuleNotFound" xml:space="preserve">
+    <value>No se pudo encontrar el módulo {0}</value>
+  </data>
+  <data name="RdlEngineConfig_Error_CodeModuleNotLoaded" xml:space="preserve">
+    <value>No se pudo cargar el módulo {0}</value>
+  </data>
+  <data name="RdlEngineConfig_Error_NotKnownCustomReportItemType" xml:space="preserve">
+    <value>{0} no es un tipo CustomReportItem conocido.</value>
+  </data>
+  <data name="RdlEngineConfig_Error_UnableCreateInstance" xml:space="preserve">
+    <value>No se pudo crear una instancia de '{0}' para el proveedor '{1}'</value>
+  </data>
+  <data name="ReportLog_Error_Severity" xml:space="preserve">
+    <value>Severidad</value>
+  </data>
+  <data name="Subreport_Error_SubreportNotParameter" xml:space="preserve">
+    <value>El subinforme {0} no define el parámetro {1}.</value>
+  </data>
+  <data name="TableRows_Error_TableRowsMustOwnedTable" xml:space="preserve">
+    <value>Error interno: las filas de la tabla deben pertenecer a una tabla.</value>
+  </data>
+  <data name="TableRow_Error_TableRowNotRelatedToTable" xml:space="preserve">
+    <value>Error interno: la fila de la tabla no está relacionada con una tabla.</value>
+  </data>
+  <data name="Table_Error_RecursiveGroupsMustOnlyGroupDefinition" xml:space="preserve">
+    <value>Error: el grupo recursivo debe ser la única definición de grupo.</value>
+  </data>
+  <data name="MhtBuilder_Error_UnableDownload" xml:space="preserve">
+    <value>No se pudo cargar '{0}': {1}</value>
+  </data>
+  <data name="Lexer_ErrorP_InvalidNumberConstant" xml:space="preserve">
+    <value>Invalid number constant.</value>
+  </data>
+  <data name="Lexer_ErrorP_UnterminatedString" xml:space="preserve">
+    <value>Unterminated string!</value>
+  </data>
+  <data name="Lexer_Error_SeparatorMustFollowedNumber" xml:space="preserve">
+    <value>'{0}' debe seguir a un número</value>
+  </data>
+  <data name="Lexer_Error_UnterminatedComment" xml:space="preserve">
+    <value>Unterminated comment!</value>
+  </data>
+  <data name="Parser_ErrorP_AggregateCannotNestedInAnotherAggregate" xml:space="preserve">
+    <value>La función agregada '{0}' no puede anidarse en otra función agregada.</value>
+  </data>
+  <data name="Parser_ErrorP_AggregateCannotUsedWithinGrouping" xml:space="preserve">
+    <value>La función agregada '{0}' no puede usarse en una expresión de agrupación.</value>
+  </data>
+  <data name="Parser_ErrorP_AggregateMust1Argument" xml:space="preserve">
+    <value>Aggregate function must have at least one argument.</value>
+  </data>
+  <data name="Parser_ErrorP_AND_OR_RequiresBoolean" xml:space="preserve">
+    <value>Las operaciones AND/OR requieren expresiones booleanas en ambos lados.</value>
+  </data>
+  <data name="Parser_ErrorP_AtColumn" xml:space="preserve">
+    <value>  At column {0}</value>
+  </data>
+  <data name="Parser_ErrorP_BracketExpected" xml:space="preserve">
+    <value>Se esperaba ')', pero no se encontró.</value>
+  </data>
+  <data name="Parser_ErrorP_ChooseFirstArgumentMustNumeric" xml:space="preserve">
+    <value>First argument to Choose function must be numeric.</value>
+  </data>
+  <data name="Parser_ErrorP_ChooseRequires2Arguments" xml:space="preserve">
+    <value>Choose function requires at least 2 arguments.</value>
+  </data>
+  <data name="Parser_ErrorP_ClassUnknown" xml:space="preserve">
+    <value>Class {0} is not known.</value>
+  </data>
+  <data name="Parser_ErrorP_EndExpressionExpected" xml:space="preserve">
+    <value>End of expression expected.</value>
+  </data>
+  <data name="Parser_ErrorP_ExpectingComma" xml:space="preserve">
+    <value>Expecting ',' or ')'.</value>
+  </data>
+  <data name="Parser_ErrorP_FieldNotFound" xml:space="preserve">
+    <value>Field '{0}'  not found.</value>
+  </data>
+  <data name="Parser_ErrorP_FieldNotInDataSet" xml:space="preserve">
+    <value>Field '{0}' is not in DataSet {1}.</value>
+  </data>
+  <data name="Parser_ErrorP_FieldsRequires1Argument" xml:space="preserve">
+    <value>Fields collection requires exactly 1 argument.</value>
+  </data>
+  <data name="Parser_ErrorP_FieldSupportsValueAndIsMissing" xml:space="preserve">
+    <value>Field '{0}'  only supports 'Value' and 'IsMissing' properties.</value>
+  </data>
+  <data name="Parser_ErrorP_FormatRequires2Arguments" xml:space="preserve">
+    <value>Format function requires 2 arguments.</value>
+  </data>
+  <data name="Parser_ErrorP_FoundValue" xml:space="preserve">
+    <value>  Found '{0}'</value>
+  </data>
+  <data name="Parser_ErrorP_FunctionOfClassUnknown" xml:space="preserve">
+    <value>Function '{0}' of class '{1}' is not known.</value>
+  </data>
+  <data name="Parser_ErrorP_FunctionUnknown" xml:space="preserve">
+    <value>Function {0} is not known.</value>
+  </data>
+  <data name="Parser_ErrorP_GlobalsNotFound" xml:space="preserve">
+    <value>Globals '{0}'  not found.</value>
+  </data>
+  <data name="Parser_ErrorP_GlobalsRequires1Argument" xml:space="preserve">
+    <value>Globals collection requires exactly 1 argument.</value>
+  </data>
+  <data name="Parser_ErrorP_IdentifierExpected" xml:space="preserve">
+    <value>Constant or Identifier expected but not found.</value>
+  </data>
+  <data name="Parser_ErrorP_iff_function_requires_3_arguments" xml:space="preserve">
+    <value>iff function requires 3 arguments.</value>
+  </data>
+  <data name="Parser_ErrorP_Invalid_function_arguments" xml:space="preserve">
+    <value>Invalid function arguments.</value>
+  </data>
+  <data name="Parser_ErrorP_ItemNotFound" xml:space="preserve">
+    <value>ReportItem '{0}'  not found.</value>
+  </data>
+  <data name="Parser_ErrorP_ItemSupportsValue" xml:space="preserve">
+    <value>ReportItem '{0}'  only supports 'Value' property.</value>
+  </data>
+  <data name="Parser_ErrorP_MinusNeedNumbers" xml:space="preserve">
+    <value>'-' operator works only on numbers.</value>
+  </data>
+  <data name="Parser_ErrorP_NoScope4Aggregate" xml:space="preserve">
+    <value>No scope provided for aggregate function '{0}' but more than one DataSet defined.</value>
+  </data>
+  <data name="Parser_ErrorP_NotCodeMethod" xml:space="preserve">
+    <value>{0} is not a Code method.  Verify the name of the method and its arguments match an existing code function.</value>
+  </data>
+  <data name="Parser_ErrorP_NOTRequiresBoolean" xml:space="preserve">
+    <value>NOT requires boolean expression.</value>
+  </data>
+  <data name="Parser_ErrorP_ParameterNotFound" xml:space="preserve">
+    <value>Report parameter '{0}'  not found.</value>
+  </data>
+  <data name="Parser_ErrorP_ParametersRequires1Argument" xml:space="preserve">
+    <value>Parameters collection requires exactly 1 argument.</value>
+  </data>
+  <data name="Parser_ErrorP_ParameterSupportsValueAndLabel" xml:space="preserve">
+    <value>Parameter '{0}'  only supports 'Value' and 'Label' properties.</value>
+  </data>
+  <data name="Parser_ErrorP_ReportItemsRequires1Argument" xml:space="preserve">
+    <value>ReportItems collection requires exactly 1 argument.</value>
+  </data>
+  <data name="Parser_ErrorP_RunningValueArgumentInvalid" xml:space="preserve">
+    <value>El argumento 'Function' de RunningValue no es válido.</value>
+  </data>
+  <data name="Parser_ErrorP_RunningValueNotSupported" xml:space="preserve">
+    <value>RunningValue function '{0}' is not supported.</value>
+  </data>
+  <data name="Parser_ErrorP_RunningValue_takes_2_or_3_arguments" xml:space="preserve">
+    <value>RunningValue takes 2 or 3 arguments.</value>
+  </data>
+  <data name="Parser_ErrorP_ScopeIdentifer" xml:space="preserve">
+    <value>Illegal scope identifer specified.</value>
+  </data>
+  <data name="Parser_ErrorP_ScopeMustConstant" xml:space="preserve">
+    <value>{0} function's scope must be a constant.</value>
+  </data>
+  <data name="Parser_ErrorP_ScopeNotKnownDataSet" xml:space="preserve">
+    <value>Scope '{0}' does not reference a known DataSet.</value>
+  </data>
+  <data name="Parser_ErrorP_ScopeNotKnownGrouping" xml:space="preserve">
+    <value>Scope '{0}' is not a known Grouping, DataSet or DataRegion name.</value>
+  </data>
+  <data name="Parser_ErrorP_ScopeNotSpecifiedInHeaderOrFooter" xml:space="preserve">
+    <value>Scope '{0}' can't be specified in a Page Header or Footer expression.</value>
+  </data>
+  <data name="Parser_ErrorP_SecondMustString" xml:space="preserve">
+    <value>Second argument to Format function must be a string.</value>
+  </data>
+  <data name="Parser_ErrorP_SwitchMustBoolean" xml:space="preserve">
+    <value>Switch function must have a boolean expression every other argument.</value>
+  </data>
+  <data name="Parser_ErrorP_SwitchMustEvenArguments" xml:space="preserve">
+    <value>Switch function must have an even number of arguments.</value>
+  </data>
+  <data name="Parser_ErrorP_SwitchRequires2Arguments" xml:space="preserve">
+    <value>Switch function requires at least 2 arguments.</value>
+  </data>
+  <data name="Parser_ErrorP_UnknownIdentifer" xml:space="preserve">
+    <value>'{0}' is an unknown identifer.</value>
+  </data>
+  <data name="Parser_ErrorP_UnknownProperty" xml:space="preserve">
+    <value>{0} is not a known property for {1}.</value>
+  </data>
+  <data name="Parser_ErrorP_UserRequires1Argument" xml:space="preserve">
+    <value>User collection requires exactly 1 argument.</value>
+  </data>
+  <data name="Parser_ErrorP_UserVarNotFound" xml:space="preserve">
+    <value>User variable '{0}'  not found.</value>
+  </data>
+  <data name="RDLParser_ErrorP_XMLFailed" xml:space="preserve">
+    <value>Error: XML failed </value>
+  </data>
+  <data name="RDLParser_ErrorP__NoReport" xml:space="preserve">
+    <value>Error: RDL doesn't contain a report element. </value>
+  </data>
+  <data name="Parser_ErrorP_CurlyBracketExpected" xml:space="preserve">
+    <value>'}' expected but not found.</value>
+  </data>
+  <data name="SaveToFile_CheckIf_SameFilesInDir" xml:space="preserve">
+    <value>Directory contains file with the same name, do you want to overwrite it?</value>
+  </data>
+  <data name="ButtonSave_Text" xml:space="preserve">
+    <value>Guardar</value>
+  </data>
+  <data name="ButtonCancel_Text" xml:space="preserve">
+    <value>Cancelar</value>
+  </data>
+  <data name="FileChooser_SaveFileTo_Title" xml:space="preserve">
+    <value>Save File As</value>
+  </data>
+</root>
