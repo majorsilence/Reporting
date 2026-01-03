@@ -63,6 +63,9 @@ namespace RdlEngine.Render.ExcelConverter
 				case WritingModeEnum.tb_rl:
 					style.Rotation = -90;
 					break;
+				case WritingModeEnum.rl_bt:
+					style.Rotation = 180;
+					break;
 				case WritingModeEnum.tb_lr:
 					style.Rotation = 90;
 					break;
