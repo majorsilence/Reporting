@@ -56,7 +56,7 @@ namespace Majorsilence.Reporting.RdlDesign
 
 		private bool _ShowPreviewWaitDialog = true;
 		private bool _ShowEditLines = true;
-		private bool _ShowReportItemOutline = false;
+		private bool _ShowReportItemOutline = true;  // Changed default to true for better visibility
 		private bool _ShowTabbedInterface = true;
 		private bool _ShowProperties = true;
 
@@ -176,6 +176,9 @@ namespace Majorsilence.Reporting.RdlDesign
             this.ShowWaiter();
             KeyPreview = true;
             await GetStartupStateAsync();
+
+            // Enable alignment grid by default for better visibility
+            AlignmentGridEnable.Checked = true;
 
             // Initialize the recent file menu
             RecentFilesMenu();
