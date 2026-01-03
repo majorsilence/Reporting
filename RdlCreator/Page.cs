@@ -1,12 +1,27 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
 
 namespace Majorsilence.Reporting.RdlCreator
 {
+    
+    internal static class AotPreserve
+    {
+        [ModuleInitializer]
+        internal static void PreserveProviderTypes()
+        {
+            // Touch types to keep them from being trimmed.
+            // Requires you to reference the provider packages at compile time.
+            _ = typeof(Page);
+            _ = typeof(Report);
+            _ = typeof(Document);
+        }
+    }
+    
 #if AOT
     [DotWrap.DotWrapExpose] 
 #endif

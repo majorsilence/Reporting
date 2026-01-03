@@ -122,6 +122,9 @@ namespace Majorsilence.Reporting.RdlCreator
             return this;
         }
 
+#if !AOT
+        // Exclude this delegate-based convenience overload from AOT builds so the DotWrap generator
+        // does not attempt to generate wrappers for the delegate generic type (which causes errors).
         public Document WithPage(Action<Page> options)
         {
             var p = new Page();
@@ -129,6 +132,7 @@ namespace Majorsilence.Reporting.RdlCreator
             Pages.Add(p);
             return this;
         }
+#endif
 
         public async Task<byte[]>Create()
         {
