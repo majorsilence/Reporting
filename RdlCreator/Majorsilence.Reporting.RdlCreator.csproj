@@ -1,7 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
 		<OutputType>Library</OutputType>
-		<AssemblyName>RdlCreator</AssemblyName>
 		<PackageId>Majorsilence.Reporting.RdlCreator</PackageId>
 		<Configurations>Debug;Release;Debug-DrawingCompat;Release-DrawingCompat</Configurations>
 		<TargetFrameworks>net8.0;net10.0</TargetFrameworks>
@@ -26,5 +25,4 @@
 	  <PackageReference Include="DotWrap" />
         <Using Include="System.Threading.Tasks" />
 	</ItemGroup>
-
 </Project>

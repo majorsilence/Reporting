@@ -107,4 +107,8 @@
 	<ItemGroup Condition="'$(DefineConstants.Contains(DRAWINGCOMPAT))'">
 		<Compile Remove="Definition\EMFConverter\**\**\*.cs" />
 	</ItemGroup>
+    <ItemGroup Condition="'$(PublishAot)' == 'true'">
+        <PackageReference Include="DotWrap" />
+        <Using Include="System.Threading.Tasks" />
+    </ItemGroup>
 </Project>
