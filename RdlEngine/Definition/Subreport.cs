@@ -111,10 +111,14 @@ namespace Majorsilence.Reporting.Rdl
 
 			// need to save the owner report and nest in this defintion
 			ReportDefn saveReport = r.ReportDefinition;
+#if !AOT
             NeedPassword np = r.GetDataSourceReferencePassword;   // get current password
+#endif
             r.SetReportDefinition(_ReportDefn);
 			r.Folder = _ReportDefn.ParseFolder;		// folder needs to get set since the id of the report is used by the cache
+#if !AOT
             r.GetDataSourceReferencePassword = np;
+#endif
 		
             DataSourcesDefn saveDS = r.ParentConnections;
 			if (this.MergeTransactions)
@@ -155,11 +159,15 @@ namespace Majorsilence.Reporting.Rdl
 
 			// need to save the owner report and nest in this defintion
 			ReportDefn saveReport = r.ReportDefinition;
+#if !AOT
             NeedPassword np = r.GetDataSourceReferencePassword;   // get current password
+#endif
 
 			r.SetReportDefinition(_ReportDefn);
 			r.Folder = _ReportDefn.ParseFolder;		// folder needs to get set since the id of the report is used by the cache
+#if !AOT
             r.GetDataSourceReferencePassword = np;
+#endif
 
 			DataSourcesDefn saveDS = r.ParentConnections;
 			if (this.MergeTransactions)

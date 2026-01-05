@@ -12,6 +12,9 @@ using System.Xml.Serialization;
 
 namespace Majorsilence.Reporting.RdlCreator
 {
+#if AOT
+    [DotWrap.DotWrapExpose] 
+#endif
     public class Create
     {
         public async Task<Rdl.Report> GenerateRdl(Report report)
@@ -112,6 +115,7 @@ namespace Majorsilence.Reporting.RdlCreator
             return fyiReport;
         }
 
+#if !AOT
         public async Task<Rdl.Report> GenerateRdl<T>(IEnumerable<T> data,
             string description = "",
             string author = "",
@@ -180,7 +184,7 @@ namespace Majorsilence.Reporting.RdlCreator
             await fyiReport.DataSets["Data"].SetData(data);
             return fyiReport;
         }
-
+#endif
         
         
         private string GetDataProviderString(DataProviders dataProvider)

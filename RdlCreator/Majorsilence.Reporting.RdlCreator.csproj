@@ -23,6 +23,18 @@
 	</ItemGroup>
     <ItemGroup Condition="'$(PublishAot)' == 'true'">
 	  <PackageReference Include="DotWrap" />
-        <Using Include="System.Threading.Tasks" />
 	</ItemGroup>
+    <ItemGroup>
+        <Using Include="System.Threading.Tasks" />
+        <Using Include="System.Collections.Generic" />
+    </ItemGroup>
+    <ItemGroup>
+      <Compile Remove="python_project_root\**" />
+    </ItemGroup>
+    <ItemGroup>
+      <EmbeddedResource Remove="python_project_root\**" />
+    </ItemGroup>
+    <ItemGroup>
+      <None Remove="python_project_root\**" />
+    </ItemGroup>
 </Project>

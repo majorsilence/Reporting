@@ -109,6 +109,9 @@
 	</ItemGroup>
     <ItemGroup Condition="'$(PublishAot)' == 'true'">
         <PackageReference Include="DotWrap" />
+    </ItemGroup>
+    <ItemGroup>
         <Using Include="System.Threading.Tasks" />
+        <Using Include="System.Collections.Generic" />
     </ItemGroup>
 </Project>

@@ -1,9 +1,5 @@
-﻿using Majorsilence.Reporting.Rdl;
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
-using System.Reflection.Metadata;
-using System.Reflection.Metadata.Ecma335;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
 
@@ -305,6 +301,5 @@ namespace Majorsilence.Reporting.RdlCreator
             reportData.Position = 0;
             await reportData.CopyToAsync(ouput);
         }
-
     }
 }

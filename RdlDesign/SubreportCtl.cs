@@ -262,7 +262,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			if (report == null)
 				return;					// error: message already displayed
 			
-			ICollection rps = report.UserReportParameters;
+			var rps = report.UserReportParameters;
 			string[] rowValues = new string[2];
 			_DataTable.Rows.Clear();
 			foreach (UserReportParameter rp in rps)

@@ -17,6 +17,9 @@ namespace Majorsilence.Reporting.Rdl
 	/// Main Report definition; this is the top of the tree that contains the complete
 	/// definition of a instance of a report.
 	///</summary>
+#if AOT
+    [DotWrap.DotWrapExpose] 
+#endif
 	public class Report : IDisposable
 	{
         // private definitions
@@ -25,7 +28,7 @@ namespace Majorsilence.Reporting.Rdl
 		DataSets _DataSets;
 		int _RuntimeName=0;		// used for the generation of unique runtime names
 		IDictionary _LURuntimeName;		// Runtime names
-		ICollection _UserParameters;	// User parameters
+		ICollection<UserReportParameter> _UserParameters;	// User parameters
 		internal ReportLog rl;	// report log
 		RCache _Cache;
 
@@ -402,12 +405,13 @@ namespace Majorsilence.Reporting.Rdl
 
 			return pgs;
 		}
-
+#if !AOT
 		public NeedPassword GetDataSourceReferencePassword
 		{
 			get {return _Report.GetDataSourceReferencePassword;}
 			set {_Report.GetDataSourceReferencePassword = value;}
 		}
+#endif
 
 		public ReportDefn ReportDefinition
 		{
@@ -482,7 +486,7 @@ namespace Majorsilence.Reporting.Rdl
 		/// <summary>
 		/// User provided parameters to the report.  IEnumerable is a list of UserReportParameter.
 		/// </summary>
-		public ICollection UserReportParameters
+		public ICollection<UserReportParameter> UserReportParameters
 		{
 			get 
 			{
