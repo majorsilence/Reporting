@@ -18,7 +18,7 @@ namespace Majorsilence.Reporting.Rdl
 	/// definition of a instance of a report.
 	///</summary>
 #if AOT
-    [DotWrap.DotWrapExpose] 
+    [DotWrap.DotWrapExpose()] 
 #endif
 	public class Report : IDisposable
 	{

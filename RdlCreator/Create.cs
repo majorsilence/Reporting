@@ -12,9 +12,6 @@ using System.Xml.Serialization;
 
 namespace Majorsilence.Reporting.RdlCreator
 {
-#if AOT
-    [DotWrap.DotWrapExpose] 
-#endif
     public class Create
     {
         public async Task<Rdl.Report> GenerateRdl(Report report)
@@ -44,7 +41,8 @@ namespace Majorsilence.Reporting.RdlCreator
                     var errorMessages = string.Join(Environment.NewLine, fyiReport.ErrorItems.Cast<string>());
                     int severity = fyiReport.ErrorMaxSeverity;
                     fyiReport.ErrorReset();
-                    throw new Exception($"Errors encountered with severity {severity}:{Environment.NewLine}{errorMessages}");
+                    throw new Exception(
+                        $"Errors encountered with severity {severity}:{Environment.NewLine}{errorMessages}");
                 }
             }
         }
@@ -60,7 +58,7 @@ namespace Majorsilence.Reporting.RdlCreator
             string rightMargin = ".25in",
             string bottomMargin = ".25in",
             string pageHeaderText = "",
-            string name="")
+            string name = "")
         {
             var headerTableCells = new List<TableCell>();
             var bodyTableCells = new List<TableCell>();
@@ -96,12 +94,7 @@ namespace Majorsilence.Reporting.RdlCreator
                     }
                 });
 
-                fields.Add(new Field
-                {
-                    Name = colName,
-                    DataField = colName,
-                    TypeName = colType.ToString()
-                });
+                fields.Add(new Field { Name = colName, DataField = colName, TypeName = colType.ToString() });
             }
 
             var xml = InternalReportCreation("", "",
@@ -114,8 +107,76 @@ namespace Majorsilence.Reporting.RdlCreator
             await fyiReport.DataSets["Data"].SetData(data);
             return fyiReport;
         }
-
-#if !AOT
+        
+#if AOT
+        public async Task<Rdl.Report> GenerateRdl(System.Collections.IEnumerable data, Type itemType,
+            string description = "",
+            string author = "",
+            string pageHeight = "11in",
+            string pageWidth = "8.5in",
+            string width = "7.5in",
+            string topMargin = ".25in",
+            string leftMargin = ".25in",
+            string rightMargin = ".25in",
+            string bottomMargin = ".25in",
+            string pageHeaderText = "",
+            string name = "")
+        {
+            var headerTableCells = new List<TableCell>();
+            var bodyTableCells = new List<TableCell>();
+            var fields = new List<Field>();
+        
+            var properties = itemType.GetProperties();
+        
+            for (int i = 0; i < properties.Length; i++)
+            {
+                string colName = properties[i].Name;
+                TypeCode colType = Type.GetTypeCode(properties[i].PropertyType);
+                headerTableCells.Add(new TableCell
+                {
+                    ReportItems = new TableCellReportItems()
+                    {
+                        ReportItem = new Text
+                        {
+                            Name = $"TextboxH{colName}",
+                            Value = new Value { Text = colName },
+                            Style = new Style { TextAlign = "Center", FontWeight = "Bold" }
+                        }
+                    }
+                });
+        
+                bodyTableCells.Add(new TableCell
+                {
+                    ReportItems = new TableCellReportItems()
+                    {
+                        ReportItem = new Text
+                        {
+                            Name = $"TextBoxB{colName}",
+                            Value = new Value { Text = $"=Fields!{colName}.Value" },
+                            CanGrow = true
+                        }
+                    }
+                });
+        
+                fields.Add(new Field
+                {
+                    Name = colName,
+                    DataField = colName,
+                    TypeName = colType.ToString()
+                });
+            }
+        
+            var xml = InternalReportCreation("", "",
+                "", description, author, pageHeight, pageWidth, width, topMargin, leftMargin,
+                rightMargin, bottomMargin, pageHeaderText, headerTableCells, bodyTableCells, fields, name);
+        
+            var rdlp = new RDLParser(xml);
+            var fyiReport = await rdlp.Parse();
+            ValidateReport(fyiReport);
+            await fyiReport.DataSets["Data"].SetData(data);
+            return fyiReport;
+        }
+#else
         public async Task<Rdl.Report> GenerateRdl<T>(IEnumerable<T> data,
             string description = "",
             string author = "",
@@ -127,7 +188,7 @@ namespace Majorsilence.Reporting.RdlCreator
             string rightMargin = ".25in",
             string bottomMargin = ".25in",
             string pageHeaderText = "",
-            string name="")
+            string name = "")
         {
             var headerTableCells = new List<TableCell>();
             var bodyTableCells = new List<TableCell>();
@@ -165,12 +226,7 @@ namespace Majorsilence.Reporting.RdlCreator
                     }
                 });
 
-                fields.Add(new Field
-                {
-                    Name = colName,
-                    DataField = colName,
-                    TypeName = colType.ToString()
-                });
+                fields.Add(new Field { Name = colName, DataField = colName, TypeName = colType.ToString() });
             }
 
             var xml = InternalReportCreation("", "",
@@ -185,7 +241,6 @@ namespace Majorsilence.Reporting.RdlCreator
             return fyiReport;
         }
 #endif
-        
         
         private string GetDataProviderString(DataProviders dataProvider)
         {
@@ -211,7 +266,7 @@ namespace Majorsilence.Reporting.RdlCreator
                 _ => throw new ArgumentOutOfRangeException(nameof(dataProvider), dataProvider, null)
             };
         }
-        
+
         public async Task<Rdl.Report> GenerateRdl(DataProviders dataProvider,
             string connectionString,
             string commandText,
@@ -229,14 +284,14 @@ namespace Majorsilence.Reporting.RdlCreator
             string name = "")
         {
             string providerString = GetDataProviderString(dataProvider);
-            return await GenerateRdl(providerString, 
-                connectionString, 
-                commandText, 
-                commandType, 
-                description, 
-                author, 
-                pageHeight, 
-                pageWidth, 
+            return await GenerateRdl(providerString,
+                connectionString,
+                commandText,
+                commandType,
+                description,
+                author,
+                pageHeight,
+                pageWidth,
                 width,
                 topMargin,
                 leftMargin,
@@ -245,7 +300,7 @@ namespace Majorsilence.Reporting.RdlCreator
                 pageHeaderText,
                 name);
         }
-        
+
         public async Task<Rdl.Report> GenerateRdl(string dataProvider,
             string connectionString,
             string commandText,
@@ -262,7 +317,6 @@ namespace Majorsilence.Reporting.RdlCreator
             string pageHeaderText = "",
             string name = "")
         {
-
             var headerTableCells = new List<TableCell>();
             var bodyTableCells = new List<TableCell>();
             var fields = new List<Field>();
@@ -309,14 +363,10 @@ namespace Majorsilence.Reporting.RdlCreator
 
                             fields.Add(new Field
                             {
-                                Name = colName,
-                                DataField = colName,
-                                TypeName = colType.ToString()
+                                Name = colName, DataField = colName, TypeName = colType.ToString()
                             });
-
                         }
                     }
-
                 }
             }
 
@@ -341,7 +391,7 @@ namespace Majorsilence.Reporting.RdlCreator
             {
                 Description = description,
                 Author = author,
-                Name=name,
+                Name = name,
                 PageHeight = pageHeight,
                 PageWidth = pageWidth,
                 Width = width,
@@ -349,53 +399,50 @@ namespace Majorsilence.Reporting.RdlCreator
                 LeftMargin = leftMargin,
                 RightMargin = rightMargin,
                 BottomMargin = bottomMargin,
-                DataSources = new DataSources
-                {
-                    DataSource = new DataSource
+                DataSources =
+                    new DataSources
                     {
-                        Name = "DS1",
-                        ConnectionProperties = new ConnectionProperties
+                        DataSource = new DataSource
                         {
-                            DataProvider = dataProvider,
-                            ConnectString = connectionString
-                        }
-                    }
-                },
-                DataSets = new DataSets
-                {
-                    DataSet = new DataSet
-                    {
-                        Name = "Data",
-                        Query = new Query
-                        {
-                            DataSourceName = "DS1",
-                            CommandText = commandText
-                        },
-                        Fields = new Fields
-                        {
-                            Field = fields
-                        }
-                    }
-                },
-                PageHeader = new PageHeader
-                {
-                    Height = ".5in",
-                    ReportItems = new ReportItemsHeader
-                    {
-                        Textbox = new Text
-                        {
-                            Name = "Textbox1",
-                            Top = ".1in",
-                            Left = ".1in",
-                            Width = "6in",
-                            Height = ".25in",
-                            Value = new Value { Text = pageHeaderText },
-                            Style = new Style { FontSize = "15pt", FontWeight = "Bold" }
+                            Name = "DS1",
+                            ConnectionProperties =
+                                new ConnectionProperties
+                                {
+                                    DataProvider = dataProvider, ConnectString = connectionString
+                                }
                         }
                     },
-                    PrintOnFirstPage = "true",
-                    PrintOnLastPage = "true"
-                },
+                DataSets =
+                    new DataSets
+                    {
+                        DataSet = new DataSet
+                        {
+                            Name = "Data",
+                            Query = new Query { DataSourceName = "DS1", CommandText = commandText },
+                            Fields = new Fields { Field = fields }
+                        }
+                    },
+                PageHeader =
+                    new PageHeader
+                    {
+                        Height = ".5in",
+                        ReportItems =
+                            new ReportItemsHeader
+                            {
+                                Textbox = new Text
+                                {
+                                    Name = "Textbox1",
+                                    Top = ".1in",
+                                    Left = ".1in",
+                                    Width = "6in",
+                                    Height = ".25in",
+                                    Value = new Value { Text = pageHeaderText },
+                                    Style = new Style { FontSize = "15pt", FontWeight = "Bold" }
+                                }
+                            },
+                        PrintOnFirstPage = "true",
+                        PrintOnLastPage = "true"
+                    },
                 Body = new Body
                 {
                     ReportItems = new ReportItemsBody
@@ -412,35 +459,31 @@ namespace Majorsilence.Reporting.RdlCreator
                                     Width = "1in" // You can adjust the width as needed
                                 }).ToList()
                             },
-                            Header = new Header
-                            {
-                                TableRows = new TableRows
+                            Header =
+                                new Header
                                 {
-                                    TableRow = new TableRow
+                                    TableRows = new TableRows
                                     {
-                                        Height = "12pt",
-                                        TableCells = new TableCells()
+                                        TableRow = new TableRow
                                         {
-                                            TableCell = headerTableCells
+                                            Height = "12pt",
+                                            TableCells = new TableCells() { TableCell = headerTableCells }
                                         }
-                                    }
+                                    },
+                                    RepeatOnNewPage = "true"
                                 },
-                                RepeatOnNewPage = "true"
-                            },
-                            Details = new Details
-                            {
-                                TableRows = new TableRows
+                            Details =
+                                new Details
                                 {
-                                    TableRow = new TableRow
+                                    TableRows = new TableRows
                                     {
-                                        Height = "12pt",
-                                        TableCells = new TableCells()
+                                        TableRow = new TableRow
                                         {
-                                            TableCell = bodyTableCells
+                                            Height = "12pt",
+                                            TableCells = new TableCells() { TableCell = bodyTableCells }
                                         }
                                     }
                                 }
-                            }
                         }
                     },
                     Height = "36pt"
@@ -482,5 +525,4 @@ namespace Majorsilence.Reporting.RdlCreator
     {
         public override Encoding Encoding => Encoding.UTF8;
     }
-
 }

@@ -4,16 +4,18 @@
 		<DelaySign>false</DelaySign>
 		<OutputType>Library</OutputType>
 		<RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
-		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
 		<AssemblyTitle>RDL Engine</AssemblyTitle>
 		<DelaySign>false</DelaySign>
 		<PackageId>Majorsilence.Reporting.RdlEngine</PackageId>
 		<Configurations>Debug;Release;Debug-DrawingCompat;Release-DrawingCompat</Configurations>
 		<TargetFrameworks>net8.0;net10.0</TargetFrameworks>
 		<WarningsAsErrors>4014</WarningsAsErrors>
-		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
-        <IncludeSymbols>true</IncludeSymbols>
 	</PropertyGroup>
+    <PropertyGroup Condition="'$(PublishAot)' == 'false'">
+        <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+        <IncludeSymbols>true</IncludeSymbols>
+        <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    </PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)' == 'Debug-DrawingCompat' Or '$(Configuration)' == 'Release-DrawingCompat'">
 		<PackageId>Majorsilence.Reporting.RdlEngine.SkiaSharp</PackageId>
 	</PropertyGroup>
