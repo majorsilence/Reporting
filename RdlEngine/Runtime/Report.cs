@@ -357,12 +357,14 @@ namespace Majorsilence.Reporting.Rdl
 			}
 			return;
 		}
-
-
+        
 		/// <summary>
 		/// Build the Pages for this report.
 		/// </summary>
 		/// <returns></returns>
+        #if AOT
+            [DotWrap.DotWrapIgnore] 
+        #endif
 		public async Task<Pages> BuildPages()
 		{
 			PageNumber = 1;		// reset page numbers

@@ -285,6 +285,17 @@ namespace Majorsilence.Reporting.RdlCreator
         {
             await Create(ouput, Majorsilence.Reporting.Rdl.OutputPresentationType.PDF);
         }
+        
+        /// <summary>
+        /// Create a PDF document from the Report definition.
+        /// If you wish to create an RDL report use the Create class.
+        /// </summary>
+        /// <param name="ouput"></param>
+        public async Task Create(string filepath)
+        {
+            await using var ouput = File.Create(filepath);
+            await Create(ouput, Majorsilence.Reporting.Rdl.OutputPresentationType.PDF);
+        }
 
         /// <summary>
         /// Create a report in PDF/Html/Excel or other support types from the Report definition.
