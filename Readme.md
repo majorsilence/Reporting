@@ -45,7 +45,7 @@ sudo apt install ttf-mscorefonts-installer
 
 You are now ready to create and generate reports.
 
-## c# example connected to an sql database
+## c# example, create report, connected to an sql database
 
 See [Database Providers](https://github.com/majorsilence/My-FyiReporting/wiki/Database-Providers-Howto).
 
@@ -58,13 +58,13 @@ RdlEngineConfig.RdlEngineConfigInit();
 string dataProvider = "[PLACEHOLDER/Json/Microsoft.Data.SqlClient/MySQL.NET/Firebird.NET 2.0/Microsoft.Data.Sqlite/PostgreSQL";
 var create = new Majorsilence.Reporting.RdlCreator.Create();
 
-var report = await create.GenerateRdl(dataProvider,
+using var report = await create.GenerateRdl(dataProvider,
     connectionString,
     "SELECT CategoryID, CategoryName, Description FROM Categories",
     pageHeaderText: "DataProviderTest TestMethod1");
 
 string filepath = System.IO.Path.Combine(Environment.CurrentDirectory, "PLACEHOLDER.pdf");
-var ofs = new Majorsilence.Reporting.Rdl.OneFileStreamGen(filepath, true);
+using var ofs = new Majorsilence.Reporting.Rdl.OneFileStreamGen(filepath, true);
 await report.RunGetData(null);
 await report.RunRender(ofs, Majorsilence.Reporting.Rdl.OutputPresentationType.PDF);
 ```
@@ -107,6 +107,25 @@ var document = new Majorsilence.Reporting.RdlCreator.Document()
 
 using var fileStream = new FileStream("PLACEHOLDER.pdf", FileMode.Create, FileAccess.Write);
 await document.Create(fileStream);
+```
+
+## c# load an existing rdl report via RdlEngine
+
+note: Notice the namespace and type difference of Majorsilence.Reporting.RdlCreator.Report for creating new rdl reports versus Majorsilence.Reporting.Rdl.Report for running a report.
+
+```cs
+using Majorsilence.Reporting.Rdl;
+
+// One time per app instance
+RdlEngineConfig.RdlEngineConfigInit();
+
+var rdlp = new RDLParser(System.IO.File.ReadAllText(@"C:\path\to\report\file.rdl"));
+using var report = await rdlp.Parse();
+
+string filepath = System.IO.Path.Combine(Environment.CurrentDirectory, "PLACEHOLDER.pdf");
+using var ofs = new Majorsilence.Reporting.Rdl.OneFileStreamGen(filepath, true);
+await report.RunGetData(null);
+await report.RunRender(ofs, Majorsilence.Reporting.Rdl.OutputPresentationType.PDF);
 ```
 
 
