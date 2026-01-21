@@ -1,0 +1,190 @@
+<?xml version='1.0' encoding='utf-8'?>
+<root xmlns:ns1="urn:schemas-microsoft-com:xml-msdata" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  
+  <xs:schema id="root">
+    <xs:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xs:element name="root" ns1:IsDataSet="true">
+      <xs:complexType>
+        <xs:choice maxOccurs="unbounded">
+          <xs:element name="metadata">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="value" type="xsd:string" minOccurs="0" />
+              </xs:sequence>
+              <xs:attribute name="name" use="required" type="xsd:string" />
+              <xs:attribute name="type" type="xsd:string" />
+              <xs:attribute name="mimetype" type="xsd:string" />
+              <xs:attribute ref="xml:space" />
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="assembly">
+            <xs:complexType>
+              <xs:attribute name="alias" type="xsd:string" />
+              <xs:attribute name="name" type="xsd:string" />
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="data">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="value" type="xsd:string" minOccurs="0" ns1:Ordinal="1" />
+                <xs:element name="comment" type="xsd:string" minOccurs="0" ns1:Ordinal="2" />
+              </xs:sequence>
+              <xs:attribute name="name" type="xsd:string" use="required" ns1:Ordinal="1" />
+              <xs:attribute name="type" type="xsd:string" ns1:Ordinal="3" />
+              <xs:attribute name="mimetype" type="xsd:string" ns1:Ordinal="4" />
+              <xs:attribute ref="xml:space" />
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="resheader">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="value" type="xsd:string" minOccurs="0" ns1:Ordinal="1" />
+              </xs:sequence>
+              <xs:attribute name="name" type="xsd:string" use="required" />
+            </xs:complexType>
+          </xs:element>
+        </xs:choice>
+      </xs:complexType>
+    </xs:element>
+  </xs:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="DesignXmlDraw_SetMapFile_ErrorOpeningFile" xml:space="preserve">
+    <value>Error Opening File</value>
+  </data>
+  <data name="DesignXmlDraw_SetMapFile_Unable_to_open_file" xml:space="preserve">
+    <value>Unable to open file</value>
+  </data>
+  <data name="MapFile_helpHelpToolStripMenuItem_Click_Help_URL_Invalid" xml:space="preserve">
+    <value>Referencia de ayuda no válida</value>
+  </data>
+  <data name="MapFile_openToolStripMenuItem_Click_ErrorOpening" xml:space="preserve">
+    <value>Error opening</value>
+  </data>
+  <data name="MapFile_reducePolygonPointsToolStripMenuItem_Click_Reduce_Polygon_Count" xml:space="preserve">
+    <value>Reduce Polygon Count</value>
+  </data>
+  <data name="MapFile_reducePolygonPointsToolStripMenuItem_ReducePolygon" xml:space="preserve">
+    <value>Polygon point count reduced by</value>
+  </data>
+  <data name="MapFile_ShowB_RdlMapFileDesigner" xml:space="preserve">
+    <value>RdlMapFile designer</value>
+  </data>
+  <data name="MapFile_ShowB_Untitled" xml:space="preserve">
+    <value>sin nombre</value>
+  </data>
+  <data name="MapFile_ShowB_WantSave" xml:space="preserve">
+    <value>Do you want to save changes you made to '{0}'?</value>
+  </data>
+  <data name="MapFile_supportToolStripMenuItem_Click_Support_URL_Invalid" xml:space="preserve">
+    <value>Referencia de soporte no válida</value>
+  </data>
+  <data name="DialogAbout_About" xml:space="preserve">
+    <value>Map File Designer creates XML files that can be used in map Charts within the RDL designer.
+
+Copyright (C) 2004-2008  fyiReporting Software, LLC
+	
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+For additional information, email info@fyireporting.com or visit
+the website www.fyiReporting.com.</value>
+  </data>
+  <data name="DialogAbout_Version" xml:space="preserve">
+    <value>Versión {0}</value>
+  </data>
+  <data name="MapFile_editToolStripMenuItem_DropDownOpening_Undo" xml:space="preserve">
+    <value>Cancelar</value>
+  </data>
+  <data name="MapFile_SetTitle_fyiReporting_MapFile_Designer" xml:space="preserve">
+    <value>Editor de mapas</value>
+  </data>
+  <data name="MapFile_SetTitle_untitled" xml:space="preserve">
+    <value>sin nombre</value>
+  </data>
+  <data name="DesignXmlDraw_Undo_Delete" xml:space="preserve">
+    <value>eliminación</value>
+  </data>
+  <data name="DesignXmlDraw_Undo_InsertLinePoint" xml:space="preserve">
+    <value>Insert Line Point</value>
+  </data>
+  <data name="DesignXmlDraw_Undo_InsertPolygonPoint" xml:space="preserve">
+    <value>Insert Polygon Point</value>
+  </data>
+  <data name="DesignXmlDraw_Undo_InsertText" xml:space="preserve">
+    <value>Insert Text</value>
+  </data>
+  <data name="DesignXmlDraw_Undo_Move" xml:space="preserve">
+    <value>movimiento</value>
+  </data>
+  <data name="DesignXmlDraw_Undo_Paste" xml:space="preserve">
+    <value>Paste</value>
+  </data>
+  <data name="DesignXmlDraw_Undo_ReducePointCount" xml:space="preserve">
+    <value>Reduce Point Count</value>
+  </data>
+  <data name="DesignXmlDraw_Undo_Resize" xml:space="preserve">
+    <value>cambio de tamaño</value>
+  </data>
+  <data name="NodeChangedUndo_Undo_change" xml:space="preserve">
+    <value>modificación</value>
+  </data>
+  <data name="NodeInsertedUndo_Undo_insert" xml:space="preserve">
+    <value>inserción</value>
+  </data>
+  <data name="NodeRemovedUndo_Undo_remove" xml:space="preserve">
+    <value>eliminación</value>
+  </data>
+  <data name="PropertyBase_Undo_change" xml:space="preserve">
+    <value>modificación</value>
+  </data>
+  <data name="PropertyText_Undo_FontChange" xml:space="preserve">
+    <value>Font change</value>
+  </data>
+  <data name="DesignXmlDraw_Error_XMLNotMapData" xml:space="preserve">
+    <value>El XML del mapa no contiene el elemento 'MapData'.</value>
+  </data>
+  <data name="Undo_Error_EndGroupNotMatchStartGroup" xml:space="preserve">
+    <value>Internal logic error: EndGroup doesn't match StartGroup</value>
+  </data>
+  <data name="Undo_Error_UnknownAction" xml:space="preserve">
+    <value>Acción desconocida</value>
+  </data>
+  <data name="ShapeFile_ErrorA_InvalidFileCode" xml:space="preserve">
+    <value>Invalid FileCode encountered. Expecting {0}.</value>
+  </data>
+  <data name="ShapeFile_ErrorA_ShapeTypeNotSupported" xml:space="preserve">
+    <value>ShapeType {0} is not supported.</value>
+  </data>
+  <data name="MapFile_importMenuItem_Click_OpenShape" xml:space="preserve">
+    <value>Shape Files (*.shp)|*.shp|All files (*.*)|*.*</value>
+  </data>
+  <data name="MapFile_openToolStripMenuItem_Click_OpenMap" xml:space="preserve">
+    <value>Map files (*.xml)|*.xml|All files (*.*)|*.*</value>
+  </data>
+  <data name="MapFile_setBackgroundImageToolStripMenuItem_Click_OpenPicture" xml:space="preserve">
+    <value>Bitmap Files (*.bmp)|*.bmp|JPEG (*.jpg;*.jpeg;*.jpe;*.jfif)|*.jpg;*.jpeg;*.jpe;*.jfif|GIF (*.gif)|*.gif|TIFF (*.tif;*.tiff)|*.tif;*.tiff|PNG (*.png)|*.png|All Picture Files|*.bmp;*.jpg;*.jpeg;*.jpe;*.jfif;*.gif;*.tif;*.tiff;*.png|All files (*.*)|*.*</value>
+  </data>
+  <data name="MapFile_SaveAs_RDL_MapFilesFilter" xml:space="preserve">
+    <value>Mapas (*.xml)|*.xml|Todos los archivos (*.*)|*.*</value>
+  </data>
+</root>
