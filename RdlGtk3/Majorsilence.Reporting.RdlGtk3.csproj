@@ -7,8 +7,6 @@
         <Configurations>Debug;Release;Debug-DrawingCompat;Release-DrawingCompat</Configurations>
         <TargetFrameworks>net8.0;net10.0</TargetFrameworks>
         <WarningsAsErrors>4014</WarningsAsErrors>
-        <SymbolPackageFormat>snupkg</SymbolPackageFormat>
-        <IncludeSymbols>true</IncludeSymbols>
     </PropertyGroup>
     <ItemGroup>
         <PackageReference Include="GtkSharp"/>

@@ -9,7 +9,6 @@
 		<UseWindowsForms>true</UseWindowsForms>
 		<ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
 		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-        <IncludeSymbols>true</IncludeSymbols>
 		<AssemblyTitle>RDL Viewer</AssemblyTitle>
 		<DelaySign>false</DelaySign>
 		<PackageId>Majorsilence.Reporting.RdlViewer</PackageId>

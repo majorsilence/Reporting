@@ -19,5 +19,7 @@
     <Copyright>Copyright © 2004-2008  fyiReporting Software, LLC, Majorsilence Reporting Devs 2025</Copyright>
     <LangVersion>latest</LangVersion>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
 </Project>

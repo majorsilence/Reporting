@@ -12,8 +12,6 @@
 		<TargetFrameworks>net48;net8.0;net10.0</TargetFrameworks>
         <TargetFrameworks Condition="'$(OS)' == 'Unix'">net8.0;net10.0</TargetFrameworks>
 		<WarningsAsErrors>4014</WarningsAsErrors>
-		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
-        <IncludeSymbols>true</IncludeSymbols>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)' == 'Debug-DrawingCompat' Or '$(Configuration)' == 'Release-DrawingCompat'">
 		<PackageId>Majorsilence.Reporting.RdlEngine.SkiaSharp</PackageId>

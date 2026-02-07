@@ -4,7 +4,6 @@
 		<UseWindowsForms>true</UseWindowsForms>
 		<ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
 		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-        <IncludeSymbols>true</IncludeSymbols>
 		<AssemblyTitle>EncryptionProvider</AssemblyTitle>
 		<PackageId>Majorsilence.Reporting.EncryptionProvider</PackageId>
 		<Configurations>Debug;Release;Debug-DrawingCompat</Configurations>

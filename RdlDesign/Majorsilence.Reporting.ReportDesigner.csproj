@@ -10,7 +10,6 @@
 		<UseWindowsForms>true</UseWindowsForms>
 		<ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
 		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-        <IncludeSymbols>true</IncludeSymbols>
 		<AssemblyTitle>RDL Designer</AssemblyTitle>
 		<DelaySign>false</DelaySign>
 		<PackageId>Majorsilence.Reporting.ReportDesigner</PackageId>

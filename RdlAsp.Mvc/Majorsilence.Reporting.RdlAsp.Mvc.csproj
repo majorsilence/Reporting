@@ -15,7 +15,6 @@
     <PackageId>Majorsilence.Reporting.RdlAsp.Mvc</PackageId>
 	<Configurations>Debug;Release;Debug-DrawingCompat;Release-DrawingCompat</Configurations>
 	<TargetFrameworks>net8.0;net10.0</TargetFrameworks>
-    <IncludeSymbols>true</IncludeSymbols>
 	<WarningsAsErrors>4014</WarningsAsErrors>
 	<Platforms>AnyCPU</Platforms>
   </PropertyGroup>
