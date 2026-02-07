@@ -1,0 +1,467 @@
+<?xml version='1.0' encoding='utf-8'?>
+<root xmlns:ns1="urn:schemas-microsoft-com:xml-msdata" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  
+  <xs:schema id="root">
+    <xs:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xs:element name="root" ns1:IsDataSet="true">
+      <xs:complexType>
+        <xs:choice maxOccurs="unbounded">
+          <xs:element name="metadata">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="value" type="xsd:string" minOccurs="0" />
+              </xs:sequence>
+              <xs:attribute name="name" use="required" type="xsd:string" />
+              <xs:attribute name="type" type="xsd:string" />
+              <xs:attribute name="mimetype" type="xsd:string" />
+              <xs:attribute ref="xml:space" />
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="assembly">
+            <xs:complexType>
+              <xs:attribute name="alias" type="xsd:string" />
+              <xs:attribute name="name" type="xsd:string" />
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="data">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="value" type="xsd:string" minOccurs="0" ns1:Ordinal="1" />
+                <xs:element name="comment" type="xsd:string" minOccurs="0" ns1:Ordinal="2" />
+              </xs:sequence>
+              <xs:attribute name="name" type="xsd:string" use="required" ns1:Ordinal="1" />
+              <xs:attribute name="type" type="xsd:string" ns1:Ordinal="3" />
+              <xs:attribute name="mimetype" type="xsd:string" ns1:Ordinal="4" />
+              <xs:attribute ref="xml:space" />
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="resheader">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="value" type="xsd:string" minOccurs="0" ns1:Ordinal="1" />
+              </xs:sequence>
+              <xs:attribute name="name" type="xsd:string" use="required" />
+            </xs:complexType>
+          </xs:element>
+        </xs:choice>
+      </xs:complexType>
+    </xs:element>
+  </xs:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Appearance_Color" xml:space="preserve">
+    <value>Text color</value>
+  </data>
+  <data name="Appearance_Direction" xml:space="preserve">
+    <value>Text is either written left-to-right (LTR) or right-to-left (RTL).</value>
+  </data>
+  <data name="Appearance_FontFamily" xml:space="preserve">
+    <value>FontFamily is the name of the font family.  Not all renderers support all fonts.</value>
+  </data>
+  <data name="Appearance_FontSize" xml:space="preserve">
+    <value>Font size controls the text size.</value>
+  </data>
+  <data name="Appearance_FontStyle" xml:space="preserve">
+    <value>FontStyle determines if font is italicized.</value>
+  </data>
+  <data name="Appearance_FontWeight" xml:space="preserve">
+    <value>FontWeight controls the boldness of the font.</value>
+  </data>
+  <data name="Appearance_Format" xml:space="preserve">
+    <value>Depending on type the value can be formatted.</value>
+  </data>
+  <data name="Appearance_TextAlign" xml:space="preserve">
+    <value>Alineación horizontal</value>
+  </data>
+  <data name="Appearance_TextDecoration" xml:space="preserve">
+    <value>TextDecoration controls underline, overline, and linethrough.  Not all renderers support all options.</value>
+  </data>
+  <data name="Appearance_VerticalAlign" xml:space="preserve">
+    <value>Alineación vertical</value>
+  </data>
+  <data name="Appearance_WritingMode" xml:space="preserve">
+    <value>Text is either written horizontally (lr-tb) or vertically (tb-rl).</value>
+  </data>
+  <data name="BackgroundImage_MIMEType" xml:space="preserve">
+    <value>When Source is Database MIMEType describes the type of image.</value>
+  </data>
+  <data name="BackgroundImage_Repeat" xml:space="preserve">
+    <value>Controls repeating of the background image to fill space.</value>
+  </data>
+  <data name="BackgroundImage_Source" xml:space="preserve">
+    <value>Background Image Source: None, External, Embedded, Database.</value>
+  </data>
+  <data name="BackgroundImage_Value" xml:space="preserve">
+    <value>El valor depende del origen de la imagen.</value>
+  </data>
+  <data name="Background_Color" xml:space="preserve">
+    <value>Background color.</value>
+  </data>
+  <data name="Background_EndColor" xml:space="preserve">
+    <value>End color when gradient type is not None.</value>
+  </data>
+  <data name="Background_GradientType" xml:space="preserve">
+    <value>Type of background gradient.</value>
+  </data>
+  <data name="Background_Image" xml:space="preserve">
+    <value>Image to place in the background of the report item</value>
+  </data>
+  <data name="Base_Action" xml:space="preserve">
+    <value>Defines a hyperlink, bookmark link, or drillthrough action for the report item.</value>
+  </data>
+  <data name="Base_Background" xml:space="preserve">
+    <value>Controls the background expressions.</value>
+  </data>
+  <data name="Base_Bookmark" xml:space="preserve">
+    <value>In PDFs, bookmarks are created for each instance of the report item.  For example, putting a bookmark on a report item in a group header will generate a list of the groups in the report.</value>
+  </data>
+  <data name="Base_Border" xml:space="preserve">
+    <value>Defines the border of the report item.</value>
+  </data>
+  <data name="Base_ColumnSpan" xml:space="preserve">
+    <value>Report item can span multiple columns.</value>
+  </data>
+  <data name="Base_DataElementName" xml:space="preserve">
+    <value>The name to use for the element or attribute when exporting to XML.</value>
+  </data>
+  <data name="Base_DataElementOutput" xml:space="preserve">
+    <value>When rendering XML determines how or whether the item appears in the XML.</value>
+  </data>
+  <data name="Base_Location" xml:space="preserve">
+    <value>Location of the report item.</value>
+  </data>
+  <data name="Base_Matrix" xml:space="preserve">
+    <value>Matrix report item properties.</value>
+  </data>
+  <data name="Base_Name" xml:space="preserve">
+    <value>The unique name of the report item.</value>
+  </data>
+  <data name="Base_Padding" xml:space="preserve">
+    <value>Controls the padding expressions.</value>
+  </data>
+  <data name="Base_Size" xml:space="preserve">
+    <value>Height and width of the report item.</value>
+  </data>
+  <data name="Base_Table" xml:space="preserve">
+    <value>Table report item properties.</value>
+  </data>
+  <data name="Base_ToolTip" xml:space="preserve">
+    <value>A ToolTip provides a label that can be used by a renderer.  For example, the Viewer and PDF renderers use this to popup the specified text when the mouse is over the report item.</value>
+  </data>
+  <data name="Base_Visibility" xml:space="preserve">
+    <value>Defines the visibility of the item.</value>
+  </data>
+  <data name="Base_ZIndex" xml:space="preserve">
+    <value>Drawing order of the report item.</value>
+  </data>
+  <data name="ChartAxis" xml:space="preserve">
+    <value>Properties controlling the display of an axis.</value>
+  </data>
+  <data name="ChartAxis_Appearance" xml:space="preserve">
+    <value>Font, color, alignment, ... of the axis.</value>
+  </data>
+  <data name="ChartAxis_Background" xml:space="preserve">
+    <value>Background of the axis.</value>
+  </data>
+  <data name="ChartAxis_Border" xml:space="preserve">
+    <value>Border properties of the axis.</value>
+  </data>
+  <data name="ChartAxis_CrossAt" xml:space="preserve">
+    <value>Value at which to cross the other axis.</value>
+  </data>
+  <data name="ChartAxis_Interlaced" xml:space="preserve">
+    <value>When true strip lines are drawn every other grid line.</value>
+  </data>
+  <data name="ChartAxis_LogScale" xml:space="preserve">
+    <value>Escala logarítmica</value>
+  </data>
+  <data name="ChartAxis_MajorGridLines" xml:space="preserve">
+    <value>Major Grid Lines properties</value>
+  </data>
+  <data name="ChartAxis_MajorInterval" xml:space="preserve">
+    <value>Unit for major gridlines and tickmarks; omit for autodivision.</value>
+  </data>
+  <data name="ChartAxis_MajorTickMarks" xml:space="preserve">
+    <value>Major tick marks.</value>
+  </data>
+  <data name="ChartAxis_Margin" xml:space="preserve">
+    <value>Is there axis margin?</value>
+  </data>
+  <data name="ChartAxis_Max" xml:space="preserve">
+    <value>Maximum value for the axis.  When omitted axis autoscales.</value>
+  </data>
+  <data name="ChartAxis_Min" xml:space="preserve">
+    <value>Minimum value for the axis.  When omitted axis autoscales.</value>
+  </data>
+  <data name="ChartAxis_MinorGridLines" xml:space="preserve">
+    <value>Minor Grid Lines properties</value>
+  </data>
+  <data name="ChartAxis_MinorInterval" xml:space="preserve">
+    <value>Unit for minor gridlines and tickmarks; omit for autodivision.</value>
+  </data>
+  <data name="ChartAxis_MinorTickMarks" xml:space="preserve">
+    <value>Minor tick marks.</value>
+  </data>
+  <data name="ChartAxis_Padding" xml:space="preserve">
+    <value>Padding properties of the axis.</value>
+  </data>
+  <data name="ChartAxis_Reverse" xml:space="preserve">
+    <value>Should axis be plotted normally (false) or should the direction be reversed?</value>
+  </data>
+  <data name="ChartAxis_Scalar" xml:space="preserve">
+    <value>Escalar</value>
+  </data>
+  <data name="ChartAxis_Title" xml:space="preserve">
+    <value>Title for the axis</value>
+  </data>
+  <data name="ChartAxis_Visible" xml:space="preserve">
+    <value>Is the axis visible?</value>
+  </data>
+  <data name="ChartData" xml:space="preserve">
+    <value>Properties controlling the display of the chart data.</value>
+  </data>
+  <data name="ChartData_DataValue" xml:space="preserve">
+    <value>Expression that is to be charted.</value>
+  </data>
+  <data name="ChartData_DataValue2" xml:space="preserve">
+    <value>Coordenada Y para gráficos de dispersión y burbujas.</value>
+  </data>
+  <data name="ChartData_DataValue3" xml:space="preserve">
+    <value>Bubble size in Bubble charts.</value>
+  </data>
+  <data name="ChartData_LabelAppearance" xml:space="preserve">
+    <value>Appearance of the label when visible.</value>
+  </data>
+  <data name="ChartData_LabelVisible" xml:space="preserve">
+    <value>Should data label be displayed?</value>
+  </data>
+  <data name="ChartGridLines_Color" xml:space="preserve">
+    <value>Line color</value>
+  </data>
+  <data name="ChartGridLines_LineStyle" xml:space="preserve">
+    <value>Line style: Dotted, Dashed or Solid</value>
+  </data>
+  <data name="ChartGridLines_ShowGridLines" xml:space="preserve">
+    <value>Determines if grid lines are shown.</value>
+  </data>
+  <data name="ChartGridLines_Width" xml:space="preserve">
+    <value>Width of line</value>
+  </data>
+  <data name="ChartLegend" xml:space="preserve">
+    <value>Properties controlling the display of the chart legend.</value>
+  </data>
+  <data name="ChartLegend_Appearance" xml:space="preserve">
+    <value>Font, color, alignment, ... of the legend.</value>
+  </data>
+  <data name="ChartLegend_Background" xml:space="preserve">
+    <value>Background of the legend.</value>
+  </data>
+  <data name="ChartLegend_Border" xml:space="preserve">
+    <value>Border properties of the legend.</value>
+  </data>
+  <data name="ChartLegend_InsidePlotArea" xml:space="preserve">
+    <value>Draw legend inside the plot area when true, otherwise outside.</value>
+  </data>
+  <data name="ChartLegend_Layout" xml:space="preserve">
+    <value>Layout of the legend.</value>
+  </data>
+  <data name="ChartLegend_Padding" xml:space="preserve">
+    <value>Padding properties of the legend.</value>
+  </data>
+  <data name="ChartLegend_Position" xml:space="preserve">
+    <value>Position of the legend.</value>
+  </data>
+  <data name="ChartLegend_Visible" xml:space="preserve">
+    <value>Is the legend visible?</value>
+  </data>
+  <data name="ChartTitle" xml:space="preserve">
+    <value>Properties controlling the display of the chart title.</value>
+  </data>
+  <data name="ChartTitle_Appearance" xml:space="preserve">
+    <value>Font, color, alignment, ... of the caption.</value>
+  </data>
+  <data name="ChartTitle_Background" xml:space="preserve">
+    <value>Background of the caption.</value>
+  </data>
+  <data name="ChartTitle_Border" xml:space="preserve">
+    <value>Border properties of the caption.</value>
+  </data>
+  <data name="ChartTitle_Caption" xml:space="preserve">
+    <value>The text of the title.</value>
+  </data>
+  <data name="ChartTitle_Padding" xml:space="preserve">
+    <value>Padding properties of the caption.</value>
+  </data>
+  <data name="Chart_CategoryAxis" xml:space="preserve">
+    <value>CategoryAxis defines the category (X) axis.</value>
+  </data>
+  <data name="Chart_ChartData" xml:space="preserve">
+    <value>Properties controlling the display of the chart data.</value>
+  </data>
+  <data name="Chart_Legend" xml:space="preserve">
+    <value>Chart Legend.</value>
+  </data>
+  <data name="Chart_Palette" xml:space="preserve">
+    <value>Color palette for the chart.</value>
+  </data>
+  <data name="Chart_PointWidth" xml:space="preserve">
+    <value>Percentage width for bars and columns.</value>
+  </data>
+  <data name="Chart_Title" xml:space="preserve">
+    <value>Chart Title.</value>
+  </data>
+  <data name="Chart_Type" xml:space="preserve">
+    <value>Type of the chart.</value>
+  </data>
+  <data name="Chart_ValueAxis" xml:space="preserve">
+    <value>ValueAxis defines the data (Y) axis.</value>
+  </data>
+  <data name="DataRegion_Appearance" xml:space="preserve">
+    <value>Font, color, alignment, ... of NoRows text.</value>
+  </data>
+  <data name="DataRegion_DataSetName" xml:space="preserve">
+    <value>Specifies which data set to use.</value>
+  </data>
+  <data name="DataRegion_Filters" xml:space="preserve">
+    <value>Filters to apply to each row of data in data region.</value>
+  </data>
+  <data name="DataRegion_KeepTogether" xml:space="preserve">
+    <value>Keep data region on one page if possible.</value>
+  </data>
+  <data name="DataRegion_NoRows" xml:space="preserve">
+    <value>Message to display if no rows available.</value>
+  </data>
+  <data name="DataRegion_PageBreakAtEnd" xml:space="preserve">
+    <value>Cause a page break after rendering.</value>
+  </data>
+  <data name="DataRegion_PageBreakAtStart" xml:space="preserve">
+    <value>Cause a page break before rendering.</value>
+  </data>
+  <data name="ImageI_MIMEType" xml:space="preserve">
+    <value>When Source is Database MIMEType describes the type of image.</value>
+  </data>
+  <data name="ImageI_Sizing" xml:space="preserve">
+    <value>Defines how image is sized when image doesn't match specified size.</value>
+  </data>
+  <data name="ImageI_Source" xml:space="preserve">
+    <value>Image Source:External, Embedded, Database.</value>
+  </data>
+  <data name="ImageI_Value" xml:space="preserve">
+    <value>El valor depende del origen de la imagen.</value>
+  </data>
+  <data name="Image_Image" xml:space="preserve">
+    <value>The image properties.</value>
+  </data>
+  <data name="List_DataInstanceElementOutput" xml:space="preserve">
+    <value>Determines whether list instances appear in the XML.</value>
+  </data>
+  <data name="List_DataInstanceName" xml:space="preserve">
+    <value>The name to use for the data element for each instance of this list when exporting to XML.</value>
+  </data>
+  <data name="List_Grouping" xml:space="preserve">
+    <value>Grouping data allows each repeated list region to represent a summarization of the rows in the group.</value>
+  </data>
+  <data name="List_Sorting" xml:space="preserve">
+    <value>Sorting controls the order of the repeated list regions.</value>
+  </data>
+  <data name="Rectangle_PageBreakAtEnd" xml:space="preserve">
+    <value>Determines if report will start a new page after the bottom of the rectangle.</value>
+  </data>
+  <data name="Rectangle_PageBreakAtStart" xml:space="preserve">
+    <value>Determines if report will start a new page at the top of the rectangle.</value>
+  </data>
+  <data name="Report_Author" xml:space="preserve">
+    <value>Autor del informe.</value>
+  </data>
+  <data name="Report_BodyColumns" xml:space="preserve">
+    <value>Number of columns in the body region.</value>
+  </data>
+  <data name="Report_BodyColumnSpacing" xml:space="preserve">
+    <value>Spacing between columns.</value>
+  </data>
+  <data name="Report_BodyHeight" xml:space="preserve">
+    <value>Height of the body region.</value>
+  </data>
+  <data name="Report_Code" xml:space="preserve">
+    <value>Funciones básicas definidas para usar en el informe.</value>
+  </data>
+  <data name="Report_DataElementName" xml:space="preserve">
+    <value>The top level element name used when rendering XML.</value>
+  </data>
+  <data name="Report_DataElementStyle" xml:space="preserve">
+    <value>Element style is either Attribute or Element.</value>
+  </data>
+  <data name="Report_DataSchema" xml:space="preserve">
+    <value>The schema or namespace to specify when rendering XML.</value>
+  </data>
+  <data name="Report_DataTransform" xml:space="preserve">
+    <value>Archivo XSL para transformar en XML después del renderizado.</value>
+  </data>
+  <data name="Report_Description" xml:space="preserve">
+    <value>The description of the report</value>
+  </data>
+  <data name="Report_Margins" xml:space="preserve">
+    <value>Page margins for the report.</value>
+  </data>
+  <data name="Report_ModulesClasses" xml:space="preserve">
+    <value>Modules and instances of classes for use in the report.</value>
+  </data>
+  <data name="Report_PageFooter" xml:space="preserve">
+    <value>PageFooter options for the report.</value>
+  </data>
+  <data name="Report_PageHeader" xml:space="preserve">
+    <value>PageHeader options for the report.</value>
+  </data>
+  <data name="Report_PageHeight" xml:space="preserve">
+    <value>The height of the page.</value>
+  </data>
+  <data name="Report_PageWidth" xml:space="preserve">
+    <value>The width of the page.</value>
+  </data>
+  <data name="Report_Parameters" xml:space="preserve">
+    <value>Parameters defined in the report.</value>
+  </data>
+  <data name="Report_Width" xml:space="preserve">
+    <value>The width of the report.</value>
+  </data>
+  <data name="Subreport_MergeTransactions" xml:space="preserve">
+    <value>When true DataSource connections in subreport will reuse parent report connections when possible.</value>
+  </data>
+  <data name="Subreport_NoRows" xml:space="preserve">
+    <value>The name of the subreport either a full path or a relative path.</value>
+  </data>
+  <data name="Subreport_Parameters" xml:space="preserve">
+    <value>The subreport parameter expressions.</value>
+  </data>
+  <data name="Subreport_ReportName" xml:space="preserve">
+    <value>The name of the subreport either a full path or a relative path.</value>
+  </data>
+  <data name="Textbox_Appearance" xml:space="preserve">
+    <value>Font, color, alignment, ... of text.</value>
+  </data>
+  <data name="Textbox_CanGrow" xml:space="preserve">
+    <value>CanGrow indicates the height of the Textbox can increase depending on its contents.</value>
+  </data>
+  <data name="Textbox_CanShrink" xml:space="preserve">
+    <value>CanShrink indicates the height of the Textbox can decrease depending on its contents.</value>
+  </data>
+  <data name="Textbox_DataElementStyle" xml:space="preserve">
+    <value>Specifies whether Textbox renders as an Attribute or an Element.</value>
+  </data>
+  <data name="Textbox_HideDuplicates" xml:space="preserve">
+    <value>To HideDuplicate values provide the scope (dataset or group) over which you want to hide the Textbox.</value>
+  </data>
+  <data name="Textbox_Value" xml:space="preserve">
+    <value>The value of the textbox.</value>
+  </data>
+</root>
