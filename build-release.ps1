@@ -158,3 +158,8 @@ cd "$CURRENTPATH"
 # ************* Nuget ************************************************
 Get-ChildItem -Recurse -Exclude "$CURRENTPATH\Release-Builds\build-output" .\*.nupkg | Copy-Item -Destination "$CURRENTPATH\Release-Builds\build-output" -Force -ErrorAction SilentlyContinue
 Get-ChildItem -Recurse -Exclude "$CURRENTPATH\Release-Builds\build-output" .\*.snupkg | Copy-Item -Destination "$CURRENTPATH\Release-Builds\build-output" -Force -ErrorAction SilentlyContinue
+
+
+Write-Output "Publish nuget packages with commands"
+Write-Output "dotnet nuget push $CURRENTPATH\Release-Builds\build-output\*.nupkg -k YOUR_API_KEY -s https://api.nuget.org/v3/index.json --skip-duplicate"
+Write-Output "dotnet nuget push $CURRENTPATH\Release-Builds\build-output\*.snupkg -k YOUR_API_KEY -s https://api.nuget.org/v3/index.json --skip-duplicate"
