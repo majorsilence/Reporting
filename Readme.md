@@ -49,6 +49,8 @@ You are now ready to create and generate reports.
 
 See [Database Providers](https://github.com/majorsilence/My-FyiReporting/wiki/Database-Providers-Howto).
 
+For **Microsoft Access** database support, see [MS Access Database Support](docs/MS-Access-Database-Support.md).
+
 ```cs
 using Majorsilence.Reporting.RdlCreator;
 
