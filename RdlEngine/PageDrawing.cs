@@ -526,10 +526,10 @@ namespace fyiReporting.RdlPrint
             float tmpW = w;
             if (g.PageUnit == GraphicsUnit.Pixel)
                 tmpW = (tmpW * g.DpiX) / 72;
-            Pen p = new Pen(c, tmpW);
+            Pen p = null;
             try
             {
-                p = new Pen(c, w);
+                p = new Pen(c, tmpW);
                 switch (bs)
                 {
                     case BorderStyleEnum.Dashed:
@@ -566,10 +566,13 @@ namespace fyiReporting.RdlPrint
             if (bs == BorderStyleEnum.None || c.IsEmpty || w <= 0)	// nothing to draw
                 return;
 
+            float tmpW = w;
+            if (g.PageUnit == GraphicsUnit.Pixel)
+                tmpW = (tmpW * g.DpiX) / 72;
             Pen p = null;
             try
             {
-                p = new Pen(c, w);
+                p = new Pen(c, tmpW);
                 switch (bs)
                 {
                     case BorderStyleEnum.Dashed:
