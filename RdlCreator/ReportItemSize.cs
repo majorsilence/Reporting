@@ -17,27 +17,47 @@ namespace Majorsilence.Reporting.RdlCreator
             if (sizeString.EndsWith("in", StringComparison.OrdinalIgnoreCase))
             {
                 size.Unit = SizeUnit.Inches;
+#if NET6_0_OR_GREATER
                 size.Value = float.Parse(sizeString.Replace("in", "", StringComparison.OrdinalIgnoreCase));
+#else
+                size.Value = float.Parse(sizeString.Replace("in", ""));
+#endif
             }
             else if (sizeString.EndsWith("cm", StringComparison.OrdinalIgnoreCase))
             {
                 size.Unit = SizeUnit.Centimeters;
+#if NET6_0_OR_GREATER
                 size.Value = float.Parse(sizeString.Replace("cm", "", StringComparison.OrdinalIgnoreCase));
+#else
+                size.Value = float.Parse(sizeString.Replace("cm", ""));
+#endif
             }
             else if (sizeString.EndsWith("pt", StringComparison.OrdinalIgnoreCase))
             {
                 size.Unit = SizeUnit.Points;
+#if NET6_0_OR_GREATER
                 size.Value = float.Parse(sizeString.Replace("pt", "", StringComparison.OrdinalIgnoreCase));
+#else
+                size.Value = float.Parse(sizeString.Replace("pt", ""));
+#endif
             }
             else if (sizeString.EndsWith("pc", StringComparison.OrdinalIgnoreCase))
             {
                 size.Unit = SizeUnit.Picas;
+#if NET6_0_OR_GREATER
                 size.Value = float.Parse(sizeString.Replace("pc", "", StringComparison.OrdinalIgnoreCase));
+#else
+                size.Value = float.Parse(sizeString.Replace("pc", ""));
+#endif
             }
             else if (sizeString.EndsWith("mm", StringComparison.OrdinalIgnoreCase))
             {
                 size.Unit = SizeUnit.Millimeters;
+#if NET6_0_OR_GREATER
                 size.Value = float.Parse(sizeString.Replace("mm", "", StringComparison.OrdinalIgnoreCase));
+#else
+                size.Value = float.Parse(sizeString.Replace("mm", ""));
+#endif
             }
             else
             {

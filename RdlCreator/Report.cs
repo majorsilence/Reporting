@@ -1,8 +1,6 @@
 ﻿using Majorsilence.Reporting.Rdl;
 using System;
 using System.Collections.Generic;
-using System.Reflection.Metadata;
-using System.Reflection.Metadata.Ecma335;
 using System.Xml.Serialization;
 
 namespace Majorsilence.Reporting.RdlCreator

@@ -18,11 +18,20 @@ namespace Majorsilence.Reporting.RdlCreator
         {
             var serializer = new XmlSerializer(typeof(Report));
             string xml;
+            
+            #if NET6_OR_GREATER
             await using (var writer = new Utf8StringWriter())
             {
                 serializer.Serialize(writer, report);
                 xml = writer.ToString();
             }
+            #else
+            using (var writer = new Utf8StringWriter())
+            {
+                serializer.Serialize(writer, report);
+                xml = writer.ToString();
+            }
+#endif
 
             var rdlp = new RDLParser(xml);
             var fyiReport = await rdlp.Parse();

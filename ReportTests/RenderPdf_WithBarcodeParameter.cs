@@ -74,7 +74,13 @@ namespace ReportTests.Utils
 
                 foreach (var image in images)
                 {
-                    var reader = new BarcodeReader();
+#if DRAWINGCOMPAT
+                    var writer = new ZXing.SkiaSharp.BarcodeReader();
+#elif NET6_0_OR_GREATER
+                    var reader = new ZXing.Windows.Compatibility.BarcodeReader();
+#else
+                    var reader = new ZXing.BarcodeReader();
+#endif
                     using var ms = new MemoryStream(image.RawBytes.ToArray());
                     using var barcodeBitmap = new Bitmap(ms);
                     var result = reader.Decode(barcodeBitmap);
