@@ -43,8 +43,6 @@
         }
 
         #endregion
-
-        private Majorsilence.Reporting.RdlViewer.RdlViewer rdlViewer1;
     }
 }
 
