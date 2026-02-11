@@ -24,7 +24,8 @@ namespace SampleApp2_SetData
         private async void Form1_Load(object sender, EventArgs e)
         {
             // TODO: You must change this connection string to match where your database is
-            string sqlFile = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\", @"..\", @"..\", @"..\", @"..\", "northwindEF.db");
+            string sqlFile = System.IO.Path.Combine(AppContext.BaseDirectory, @"..\", @"..\", @"..\",
+                @"..\", @"..\", "northwindEF.db");
             string connectionString = $"Data Source={sqlFile}";
 
             using SqliteConnection cn = new SqliteConnection(connectionString);
@@ -34,28 +35,43 @@ namespace SampleApp2_SetData
             cmd.Connection = cn;
             DataTable dt = await GetTable(cmd);
 
-            string filepath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "SampleApp2-TestReport.rdl");
+            string filepath =
+                System.IO.Path.Combine(AppContext.BaseDirectory, "SampleApp2-TestReport.rdl");
+           
+            await ExampleViaSourceRdlNoLoad(filepath, dt);
+            //await ExampleViaSetSourceFile(filepath, dt)
+        }
+
+        private async Task ExampleViaSourceRdlNoLoad(string filepath, DataTable dt)
+        {
+            rdlViewer1.SourceRdlNoLoad = await System.IO.File.ReadAllTextAsync(filepath);
+            rdlViewer1.Parameters = "";
+            var rpt = await rdlViewer1.Report();
+            await rpt.DataSets["Data"].SetData(dt);
+            await rdlViewer1.Rebuild();
+        }
+        
+        private async Task ExampleViaSetSourceFile(string filepath, DataTable dt)
+        {
             await rdlViewer1.SetSourceFile(new Uri(filepath));
-            await (await rdlViewer1.Report()).DataSets["Data"].SetData(dt);
+            var rpt = await rdlViewer1.Report();
+            await rpt.DataSets["Data"].SetData(dt);
             await rdlViewer1.Rebuild();
         }
 
 
-        public async Task<DataTable> GetTable(SqliteCommand cmd)
+        private async Task<DataTable> GetTable(SqliteCommand cmd)
         {
             System.Data.ConnectionState original = cmd.Connection.State;
             if (cmd.Connection.State == ConnectionState.Closed)
             {
-                cmd.Connection.Open();
+                await cmd.Connection.OpenAsync();
             }
 
             DataTable dt = new DataTable();
-            SqliteDataReader dr;
-
-            dr = await cmd.ExecuteReaderAsync();
+            await using var dr = await cmd.ExecuteReaderAsync();
             dt.Load(dr);
             dr.Close();
-            dr.Dispose();
 
             if (original == ConnectionState.Closed)
             {
@@ -64,6 +80,5 @@ namespace SampleApp2_SetData
 
             return dt;
         }
-
     }
 }
