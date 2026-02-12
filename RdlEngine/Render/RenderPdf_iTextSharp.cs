@@ -783,10 +783,25 @@ namespace Majorsilence.Reporting.Rdl
                     }
                     else
                     {
-                        //Not checked
-                        double rads = -283.0 / 180.0;
-                        double radsCos = Math.Cos(rads);
-                        double radsSin = Math.Sin(rads);
+                        // Handle rotated text
+                        double angleRadians;
+                        switch (si.WritingMode)
+                        {
+                            case WritingModeEnum.tb_rl:
+                                angleRadians = -Math.PI / 2; // -90 degrees
+                                break;
+                            case WritingModeEnum.rl_bt:
+                                angleRadians = Math.PI; // 180 degrees
+                                break;
+                            case WritingModeEnum.tb_lr:
+                                angleRadians = Math.PI / 2; // 90 degrees
+                                break;
+                            default:
+                                angleRadians = 0;
+                                break;
+                        }
+                        double radsCos = Math.Cos(angleRadians);
+                        double radsSin = Math.Sin(angleRadians);
                         _contentByte.BeginText();
                         _contentByte.SetFontAndSize(bf, si.FontSize);
                         _contentByte.SetTextMatrix((float)radsCos, (float)radsSin, (float)-radsSin, (float)radsCos,

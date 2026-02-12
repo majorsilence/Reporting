@@ -474,6 +474,30 @@ namespace Majorsilence.Reporting.Rdl
                                                r.Height - si.PaddingTop - si.PaddingBottom);
 
                 drawBrush = new Draw2.SolidBrush(si.Color);
+                
+                // Handle rotation for non-standard writing modes
+                Draw2.Drawing2D.GraphicsState graphicsState = null;
+                if (si.WritingMode == WritingModeEnum.rl_bt || si.WritingMode == WritingModeEnum.tb_lr)
+                {
+                    graphicsState = g.Save();
+                    
+                    // Calculate rotation based on writing mode
+                    if (si.WritingMode == WritingModeEnum.rl_bt)
+                    {
+                        // 180 degree rotation
+                        g.TranslateTransform(r.Left + r.Width / 2, r.Top + r.Height / 2);
+                        g.RotateTransform(180);
+                        g.TranslateTransform(-(r.Left + r.Width / 2), -(r.Top + r.Height / 2));
+                    }
+                    else if (si.WritingMode == WritingModeEnum.tb_lr)
+                    {
+                        // 270 degree rotation (90 counter-clockwise)
+                        g.TranslateTransform(r.Left, r.Top);
+                        g.RotateTransform(270);
+                        g.TranslateTransform(-r.Left, -r.Top);
+                    }
+                }
+                
                 if (pt.NoClip)   // request not to clip text 
                 {
                     g.DrawString(pt.Text, drawFont, drawBrush, new Draw2.PointF(r.Left, r.Top), drawFormat);
@@ -483,6 +507,12 @@ namespace Majorsilence.Reporting.Rdl
                 {
                     g.DrawString(pt.Text, drawFont, drawBrush, r2, drawFormat);
                     //HighlightString(g, pt, r2, drawFont, drawFormat); 
+                }
+                
+                // Restore graphics state if we applied rotation
+                if (graphicsState != null)
+                {
+                    g.Restore(graphicsState);
                 }
 
             }

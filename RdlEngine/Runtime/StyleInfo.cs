@@ -505,6 +505,10 @@ namespace Majorsilence.Reporting.Rdl
                 { 
                     v = "tb_lr";
                 }
+                else if (v == "rl-bt")
+                {
+                    v = "rl_bt";
+                }
                 w = (WritingModeEnum)Enum.Parse(typeof(WritingModeEnum), v);
             }
             catch
@@ -833,9 +837,10 @@ namespace Majorsilence.Reporting.Rdl
 
 	public enum WritingModeEnum
 	{
-		lr_tb,				// left right - top bottom
-		tb_rl,				// top bottom - right left
-		tb_lr				// top bottom - left right
+		lr_tb,				// left right - top bottom (0 degrees)
+		tb_rl,				// top bottom - right left (90 degrees)
+		rl_bt,				// right left - bottom top (180 degrees)
+		tb_lr				// top bottom - left right (270 degrees)
 	}
 
 	public enum UnicodeBiDirectionalEnum

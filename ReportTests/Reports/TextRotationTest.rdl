@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Report xmlns="http://schemas.microsoft.com/sqlserver/reporting/2005/01/reportdefinition" xmlns:rd="http://schemas.microsoft.com/SQLServer/reporting/reportdesigner">
+  <Description>Test report for text rotation - demonstrating 0, 90, 180, and 270 degree rotations</Description>
+  <Author>GitHub Copilot</Author>
+  <PageHeight>11in</PageHeight>
+  <PageWidth>8.5in</PageWidth>
+  <Width>7.5in</Width>
+  <TopMargin>.5in</TopMargin>
+  <LeftMargin>.5in</LeftMargin>
+  <RightMargin>.5in</RightMargin>
+  <BottomMargin>.5in</BottomMargin>
+  <Body>
+    <ReportItems>
+      <Textbox Name="Title">
+        <Top>0.25in</Top>
+        <Left>0.5in</Left>
+        <Width>6in</Width>
+        <Height>0.5in</Height>
+        <Value>Text Rotation Test - 0, 90, 180, 270 Degrees</Value>
+        <Style>
+          <FontSize>16pt</FontSize>
+          <FontWeight>Bold</FontWeight>
+          <TextAlign>Center</TextAlign>
+          <BorderStyle>
+            <Bottom>Solid</Bottom>
+          </BorderStyle>
+        </Style>
+      </Textbox>
+      
+      <Textbox Name="Rotation0">
+        <Top>1.25in</Top>
+        <Left>0.5in</Left>
+        <Width>3in</Width>
+        <Height>0.5in</Height>
+        <Value>0 Degrees (lr-tb)</Value>
+        <Style>
+          <FontSize>12pt</FontSize>
+          <FontWeight>Bold</FontWeight>
+          <BackgroundColor>LightBlue</BackgroundColor>
+          <BorderStyle>
+            <Default>Solid</Default>
+          </BorderStyle>
+          <BorderColor>
+            <Default>Navy</Default>
+          </BorderColor>
+          <TextAlign>Center</TextAlign>
+          <VerticalAlign>Middle</VerticalAlign>
+          <WritingMode>lr-tb</WritingMode>
+        </Style>
+      </Textbox>
+      
+      <Textbox Name="Rotation90">
+        <Top>2.0in</Top>
+        <Left>0.5in</Left>
+        <Width>0.5in</Width>
+        <Height>3in</Height>
+        <Value>90 Degrees (tb-rl)</Value>
+        <Style>
+          <FontSize>12pt</FontSize>
+          <FontWeight>Bold</FontWeight>
+          <BackgroundColor>LightGreen</BackgroundColor>
+          <BorderStyle>
+            <Default>Solid</Default>
+          </BorderStyle>
+          <BorderColor>
+            <Default>Green</Default>
+          </BorderColor>
+          <TextAlign>Center</TextAlign>
+          <VerticalAlign>Middle</VerticalAlign>
+          <WritingMode>tb-rl</WritingMode>
+        </Style>
+      </Textbox>
+      
+      <Textbox Name="Rotation180">
+        <Top>5.5in</Top>
+        <Left>1.5in</Left>
+        <Width>3in</Width>
+        <Height>0.5in</Height>
+        <Value>180 Degrees (rl-bt)</Value>
+        <Style>
+          <FontSize>12pt</FontSize>
+          <FontWeight>Bold</FontWeight>
+          <BackgroundColor>LightCoral</BackgroundColor>
+          <BorderStyle>
+            <Default>Solid</Default>
+          </BorderStyle>
+          <BorderColor>
+            <Default>Red</Default>
+          </BorderColor>
+          <TextAlign>Center</TextAlign>
+          <VerticalAlign>Middle</VerticalAlign>
+          <WritingMode>rl-bt</WritingMode>
+        </Style>
+      </Textbox>
+      
+      <Textbox Name="Rotation270">
+        <Top>2.0in</Top>
+        <Left>5.0in</Left>
+        <Width>0.5in</Width>
+        <Height>3in</Height>
+        <Value>270 Degrees (tb-lr)</Value>
+        <Style>
+          <FontSize>12pt</FontSize>
+          <FontWeight>Bold</FontWeight>
+          <BackgroundColor>LightYellow</BackgroundColor>
+          <BorderStyle>
+            <Default>Solid</Default>
+          </BorderStyle>
+          <BorderColor>
+            <Default>Orange</Default>
+          </BorderColor>
+          <TextAlign>Center</TextAlign>
+          <VerticalAlign>Middle</VerticalAlign>
+          <WritingMode>tb-lr</WritingMode>
+        </Style>
+      </Textbox>
+      
+      <Textbox Name="Description">
+        <Top>6.5in</Top>
+        <Left>0.5in</Left>
+        <Width>6in</Width>
+        <Height>1in</Height>
+        <Value>This report demonstrates all four text rotation modes supported:
+- lr-tb: left-right, top-bottom (0 degrees - normal)
+- tb-rl: top-bottom, right-left (90 degrees clockwise)
+- rl-bt: right-left, bottom-top (180 degrees)
+- tb-lr: top-bottom, left-right (270 degrees / 90 degrees counter-clockwise)</Value>
+        <Style>
+          <FontSize>9pt</FontSize>
+          <BorderStyle>
+            <Top>Solid</Top>
+          </BorderStyle>
+          <PaddingTop>5pt</PaddingTop>
+        </Style>
+      </Textbox>
+    </ReportItems>
+    <Height>8in</Height>
+  </Body>
+</Report>
