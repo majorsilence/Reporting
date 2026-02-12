@@ -127,55 +127,77 @@ namespace Majorsilence.Reporting.Cri
         {
             string barPattern = this.GetEncoding(upcode);
             using Draw2.Graphics g = Draw2.Graphics.FromImage(bm);
+            
+            // Set graphics quality for crisp bars
+            g.InterpolationMode = Draw2.Drawing2D.InterpolationMode.NearestNeighbor;
+            g.SmoothingMode = Draw2.Drawing2D.SmoothingMode.None;
+            g.PixelOffsetMode = Draw2.Drawing2D.PixelOffsetMode.Half;
+            
             float mag = PixelConversions.GetMagnification(g, bm.Width, bm.Height, OptimalHeight, OptimalWidth);
 
-            float barWidth = ModuleWidth * mag;
-            float barHeight = OptimalHeight * mag;
-            float fontHeight = FontHeight * mag;
-            float fontHeightMM = fontHeight / 72.27f * 25.4f;
-
-            g.PageUnit = Draw2.GraphicsUnit.Millimeter;
-
+            // Convert to pixel units for crisp rendering
+            g.PageUnit = Draw2.GraphicsUnit.Pixel;
+            
+            // Calculate dimensions in pixels (not millimeters) for sharp rendering
+            float barWidthMM = ModuleWidth * mag;
+            float barHeightMM = OptimalHeight * mag;
+            float fontHeightMM = FontHeight * mag;
+            
+            // Convert MM to pixels for precise rendering
+            float barWidthPixels = PixelConversions.PixelXFromMm(g, barWidthMM);
+            float barHeightPixels = PixelConversions.PixelYFromMm(g, barHeightMM);
+            float fontHeightPixels = PixelConversions.PixelYFromMm(g, fontHeightMM);
+            
+            // Ensure minimum readable font size (at least 8 pixels)
+            fontHeightPixels = Math.Max(fontHeightPixels, 8.0f);
+            
             // Fill in the background with white
             g.FillRectangle(Draw2.Brushes.White, 0, 0, bm.Width, bm.Height);
 
-            // Draw the bars
+            // Draw the bars - round positions to whole pixels for crisp edges
             int barCount = LeftQuietZoneModules;
             foreach (char bar in barPattern)
             {
                 if (bar == '1')
                 {
+                    float barHeightForDigits = barHeightPixels - fontHeightPixels;
                     float bh = ((barCount > ModulesToManufacturingStart && barCount < ModulesToManufacturingEnd) ||
                                 (barCount > ModulesToProductStart && barCount < ModulesToProductEnd))
-                        ? barHeight - fontHeightMM
-                        : barHeight;
+                        ? barHeightForDigits
+                        : barHeightPixels;
 
-                    g.FillRectangle(Draw2.Brushes.Black, barWidth * barCount, 0, barWidth, bh);
+                    // Round to whole pixels for crisp bars
+                    float x = (float)Math.Round(barWidthPixels * barCount);
+                    float width = (float)Math.Round(barWidthPixels);
+                    
+                    g.FillRectangle(Draw2.Brushes.Black, x, 0, width, bh);
                 }
 
                 barCount++;
             }
 
-            // Draw the human readable portion of the barcode
-            using var f = new Draw2.Font("Arial", fontHeight);
+            // Draw the human readable portion of the barcode with anti-aliasing for text
+            g.TextRenderingHint = Draw2.Text.TextRenderingHint.AntiAlias;
+            using var f = new Draw2.Font("Arial", fontHeightPixels, Draw2.GraphicsUnit.Pixel);
 
-            // Draw the left guard text (i.e. 2nd digit of the NumberSystem)
+            // Draw the left guard text (i.e. 1st digit of the NumberSystem)
             string wc = upcode.Substring(0, 1);
+            float textY = barHeightPixels - fontHeightPixels;
             g.DrawString(wc, f, Draw2.Brushes.Black,
-                new Draw2.PointF(barWidth * LeftQuietZoneModules - g.MeasureString(wc, f).Width,
-                    barHeight - fontHeightMM));
+                new Draw2.PointF((float)Math.Round(barWidthPixels * LeftQuietZoneModules - g.MeasureString(wc, f).Width),
+                    textY));
 
             // Draw the manufacturing digits
             wc = upcode.Substring(1, 6);
             g.DrawString(wc, f, Draw2.Brushes.Black,
-                new Draw2.PointF(barWidth * ModulesToManufacturingEnd - g.MeasureString(wc, f).Width,
-                    barHeight - fontHeightMM));
+                new Draw2.PointF((float)Math.Round(barWidthPixels * ModulesToManufacturingEnd - g.MeasureString(wc, f).Width),
+                    textY));
 
             // Draw the product code + the checksum digit
             wc = upcode.Substring(7, 5) + CheckSum(upcode).ToString();
             g.DrawString(wc, f, Draw2.Brushes.Black,
-                new Draw2.PointF(barWidth * ModulesToProductEnd - g.MeasureString(wc, f).Width,
-                    barHeight - fontHeightMM));
+                new Draw2.PointF((float)Math.Round(barWidthPixels * ModulesToProductEnd - g.MeasureString(wc, f).Width),
+                    textY));
         }
 
         /// <summary>
