@@ -52,7 +52,15 @@ namespace Majorsilence.Reporting.Cri
  
             var img = Image.FromStream(v.Encode().AsStream());
 
-            bm = new Bitmap(img);
+            // Draw the barcode aligned to the left instead of replacing the bitmap
+            using (var g = Graphics.FromImage(bm))
+            {
+                // Fill background with white
+                g.FillRectangle(Brushes.White, 0, 0, bm.Width, bm.Height);
+                
+                // Draw the barcode aligned to the left (top-left corner at 0, 0)
+                g.DrawImage(img, 0, 0);
+            }
         }
 
         public string GetCustomReportItemXml()
