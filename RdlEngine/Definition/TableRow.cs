@@ -26,7 +26,9 @@ namespace Majorsilence.Reporting.Rdl
 		RSize _Height;				// Height of the row
 		Visibility _Visibility;		// Indicates if the row should be hidden		
 		bool _CanGrow;			// indicates that row height can increase in size
+		bool _CanShrink;		// indicates that row height can decrease in size
 		List<Textbox> _GrowList;	// list of TextBox's that need to be checked for growth
+		List<Textbox> _ShrinkList;	// list of TextBox's that need to be checked for shrinking
 
 		internal TableRow(ReportDefn r, ReportLink p, XmlNode xNode) : base(r, p)
 		{
@@ -34,7 +36,9 @@ namespace Majorsilence.Reporting.Rdl
 			_Height=null;
 			_Visibility=null;
 			_CanGrow = false;
+			_CanShrink = false;
 			_GrowList = null;
+			_ShrinkList = null;
 
 			// Loop thru all the child nodes
 			foreach(XmlNode xNodeLoop in xNode.ChildNodes)
@@ -83,10 +87,19 @@ namespace Majorsilence.Reporting.Rdl
 					_GrowList.Add(tb);
 					_CanGrow = true;
 				}
+				if (tb.CanShrink)
+				{
+					if (this._ShrinkList == null)
+						_ShrinkList = new List<Textbox>();
+					_ShrinkList.Add(tb);
+					_CanShrink = true;
+				}
 			}
 
 			if (_CanGrow)				// shrink down the resulting list
                 _GrowList.TrimExcess();
+			if (_CanShrink)
+				_ShrinkList.TrimExcess();
 
 			return;
 		}
@@ -139,7 +152,9 @@ namespace Majorsilence.Reporting.Rdl
 			}
 
 			float defnHeight = _Height.Points;
-			if (!_CanGrow)
+			
+			// If neither CanGrow nor CanShrink, use defined height
+			if (!_CanGrow && !_CanShrink)
 			{
 				wc.CalcHeight = defnHeight;
 				return defnHeight;
@@ -147,14 +162,63 @@ namespace Majorsilence.Reporting.Rdl
 
             TableColumns tcs= this.Table.TableColumns;
 			float height=0;
-			foreach (Textbox tb in this._GrowList)
+			
+			// Calculate height for CanGrow textboxes
+			if (_CanGrow)
 			{
-                int ci = tb.TC.ColIndex;
-                if (await tcs[ci].IsHidden(rpt, r))    // if column is hidden don't use in calculation
-                    continue;
-				height = Math.Max(height, await tb.RunTextCalcHeight(rpt, g, r));
+				foreach (Textbox tb in this._GrowList)
+				{
+					int ci = tb.TC.ColIndex;
+					if (await tcs[ci].IsHidden(rpt, r))    // if column is hidden don't use in calculation
+						continue;
+					height = Math.Max(height, await tb.RunTextCalcHeight(rpt, g, r));
+				}
 			}
-			wc.CalcHeight = Math.Max(height, defnHeight);
+			
+			// Calculate height for CanShrink textboxes
+			if (_CanShrink)
+			{
+				float minHeight = defnHeight;  // Start with defined height as maximum
+				foreach (Textbox tb in this._ShrinkList)
+				{
+					int ci = tb.TC.ColIndex;
+					if (await tcs[ci].IsHidden(rpt, r))    // if column is hidden don't use in calculation
+						continue;
+					float calcHeight = await tb.RunTextCalcHeight(rpt, g, r);
+					// For shrink, we want the minimum of calculated heights
+					minHeight = Math.Min(minHeight, calcHeight);
+				}
+				
+				// If we have both CanGrow and CanShrink textboxes
+				if (_CanGrow)
+				{
+					// Use the calculated height from grow, but allow shrinking below defined height
+					height = Math.Max(height, minHeight);
+				}
+				else
+				{
+					// Only CanShrink - use the minimum
+					height = minHeight;
+				}
+			}
+			
+			// Apply the final height calculation
+			if (_CanGrow && !_CanShrink)
+			{
+				// Only CanGrow: height can be larger than defined but not smaller
+				wc.CalcHeight = Math.Max(height, defnHeight);
+			}
+			else if (_CanShrink && !_CanGrow)
+			{
+				// Only CanShrink: height can be smaller than defined but not larger
+				wc.CalcHeight = Math.Min(height, defnHeight);
+			}
+			else
+			{
+				// Both CanGrow and CanShrink: height can be either larger or smaller
+				wc.CalcHeight = height;
+			}
+			
 			return wc.CalcHeight;
 		}
 

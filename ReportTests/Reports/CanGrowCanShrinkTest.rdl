@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Report xmlns="http://schemas.microsoft.com/sqlserver/reporting/2005/01/reportdefinition">
+  <Description>Test report for CanGrow and CanShrink functionality</Description>
+  <Author>Test</Author>
+  <PageWidth>8.5in</PageWidth>
+  <PageHeight>11in</PageHeight>
+  <LeftMargin>0.5in</LeftMargin>
+  <RightMargin>0.5in</RightMargin>
+  <TopMargin>0.5in</TopMargin>
+  <BottomMargin>0.5in</BottomMargin>
+  <DataSources>
+    <DataSource Name="DS1">
+      <ConnectionProperties>
+        <DataProvider>XML</DataProvider>
+        <ConnectString></ConnectString>
+      </ConnectionProperties>
+    </DataSource>
+  </DataSources>
+  <DataSets>
+    <DataSet Name="TestData">
+      <Query>
+        <DataSourceName>DS1</DataSourceName>
+        <CommandText><![CDATA[
+<TestData>
+  <Row>
+    <ShortText>Short</ShortText>
+    <LongText>This is a very long text that should cause the textbox to grow beyond its defined height when CanGrow is true. This text is intentionally long to test the CanGrow functionality.</LongText>
+    <EmptyText></EmptyText>
+  </Row>
+  <Row>
+    <ShortText>Short 2</ShortText>
+    <LongText>Another long text for testing. This should also cause growth when CanGrow is enabled.</LongText>
+    <EmptyText></EmptyText>
+  </Row>
+</TestData>
+        ]]></CommandText>
+      </Query>
+      <Fields>
+        <Field Name="ShortText">
+          <DataField>ShortText</DataField>
+          <TypeName>String</TypeName>
+        </Field>
+        <Field Name="LongText">
+          <DataField>LongText</DataField>
+          <TypeName>String</TypeName>
+        </Field>
+        <Field Name="EmptyText">
+          <DataField>EmptyText</DataField>
+          <TypeName>String</TypeName>
+        </Field>
+      </Fields>
+    </DataSet>
+  </DataSets>
+  <Body>
+    <Height>10in</Height>
+    <ReportItems>
+      <Table Name="TestTable">
+        <DataSetName>TestData</DataSetName>
+        <Top>0.25in</Top>
+        <Left>0.25in</Left>
+        <Width>7in</Width>
+        <TableColumns>
+          <TableColumn>
+            <Width>2in</Width>
+          </TableColumn>
+          <TableColumn>
+            <Width>3in</Width>
+          </TableColumn>
+          <TableColumn>
+            <Width>2in</Width>
+          </TableColumn>
+        </TableColumns>
+        <Header>
+          <TableRows>
+            <TableRow>
+              <Height>0.25in</Height>
+              <TableCells>
+                <TableCell>
+                  <ReportItems>
+                    <Textbox Name="HeaderShort">
+                      <Value>Short Text</Value>
+                      <Style>
+                        <FontWeight>Bold</FontWeight>
+                        <BorderStyle>
+                          <Default>Solid</Default>
+                        </BorderStyle>
+                      </Style>
+                    </Textbox>
+                  </ReportItems>
+                </TableCell>
+                <TableCell>
+                  <ReportItems>
+                    <Textbox Name="HeaderLong">
+                      <Value>Long Text (CanGrow)</Value>
+                      <Style>
+                        <FontWeight>Bold</FontWeight>
+                        <BorderStyle>
+                          <Default>Solid</Default>
+                        </BorderStyle>
+                      </Style>
+                    </Textbox>
+                  </ReportItems>
+                </TableCell>
+                <TableCell>
+                  <ReportItems>
+                    <Textbox Name="HeaderEmpty">
+                      <Value>Empty (CanShrink)</Value>
+                      <Style>
+                        <FontWeight>Bold</FontWeight>
+                        <BorderStyle>
+                          <Default>Solid</Default>
+                        </BorderStyle>
+                      </Style>
+                    </Textbox>
+                  </ReportItems>
+                </TableCell>
+              </TableCells>
+            </TableRow>
+          </TableRows>
+        </Header>
+        <Details>
+          <TableRows>
+            <TableRow>
+              <Height>0.5in</Height>
+              <TableCells>
+                <TableCell>
+                  <ReportItems>
+                    <Textbox Name="ShortTextBox">
+                      <Value>=Fields!ShortText.Value</Value>
+                      <Style>
+                        <BorderStyle>
+                          <Default>Solid</Default>
+                        </BorderStyle>
+                      </Style>
+                    </Textbox>
+                  </ReportItems>
+                </TableCell>
+                <TableCell>
+                  <ReportItems>
+                    <Textbox Name="LongTextBox">
+                      <Value>=Fields!LongText.Value</Value>
+                      <CanGrow>true</CanGrow>
+                      <Style>
+                        <BorderStyle>
+                          <Default>Solid</Default>
+                        </BorderStyle>
+                      </Style>
+                    </Textbox>
+                  </ReportItems>
+                </TableCell>
+                <TableCell>
+                  <ReportItems>
+                    <Textbox Name="EmptyTextBox">
+                      <Value>=Fields!EmptyText.Value</Value>
+                      <CanShrink>true</CanShrink>
+                      <Style>
+                        <BorderStyle>
+                          <Default>Solid</Default>
+                        </BorderStyle>
+                      </Style>
+                    </Textbox>
+                  </ReportItems>
+                </TableCell>
+              </TableCells>
+            </TableRow>
+          </TableRows>
+        </Details>
+      </Table>
+      
+      <!-- Test textbox outside table -->
+      <Textbox Name="StandaloneGrow">
+        <Top>3in</Top>
+        <Left>0.25in</Left>
+        <Width>3in</Width>
+        <Height>0.5in</Height>
+        <Value>This is a standalone textbox with CanGrow=true. It should expand if the text is too long to fit in the defined height.</Value>
+        <CanGrow>true</CanGrow>
+        <Style>
+          <BorderStyle>
+            <Default>Solid</Default>
+          </BorderStyle>
+        </Style>
+      </Textbox>
+      
+      <Textbox Name="StandaloneShrink">
+        <Top>4in</Top>
+        <Left>0.25in</Left>
+        <Width>3in</Width>
+        <Height>1in</Height>
+        <Value>Short</Value>
+        <CanShrink>true</CanShrink>
+        <Style>
+          <BorderStyle>
+            <Default>Solid</Default>
+          </BorderStyle>
+        </Style>
+      </Textbox>
+      
+      <Textbox Name="BelowShrinkTest">
+        <Top>5in</Top>
+        <Left>0.25in</Left>
+        <Width>3in</Width>
+        <Height>0.25in</Height>
+        <Value>This should move up if CanShrink works</Value>
+        <Style>
+          <BorderStyle>
+            <Default>Solid</Default>
+          </BorderStyle>
+          <BackgroundColor>LightYellow</BackgroundColor>
+        </Style>
+      </Textbox>
+    </ReportItems>
+  </Body>
+</Report>
