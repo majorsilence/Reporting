@@ -1488,6 +1488,8 @@ namespace Majorsilence.Reporting.RdlViewer
                 Dictionary<string, object> runtimeParams = new Dictionary<string, object>();
                 foreach (UserReportParameter urp in _Report.UserReportParameters)
                 {
+                    // Skip null values as they would use the parameter's default value anyway
+                    // and we want to let the report engine handle defaults properly
                     if (urp.Value != null)
                     {
                         runtimeParams[urp.Name] = urp.Value;
