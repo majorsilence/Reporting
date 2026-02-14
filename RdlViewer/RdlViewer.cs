@@ -1481,6 +1481,32 @@ namespace Majorsilence.Reporting.RdlViewer
 
         private IDictionary GetParameters()
         {
+            // If we have a loaded report with user parameters, use those runtime values
+            // instead of the _Parameters dictionary which may be stale
+            if (_Report != null && _Report.UserReportParameters != null && _Report.UserReportParameters.Count > 0)
+            {
+                Dictionary<string, object> runtimeParams = new Dictionary<string, object>();
+                foreach (UserReportParameter urp in _Report.UserReportParameters)
+                {
+                    if (urp.Value != null)
+                    {
+                        runtimeParams[urp.Name] = urp.Value;
+                    }
+                }
+                // Merge with any parameters from _Parameters that aren't in UserReportParameters
+                if (_Parameters != null)
+                {
+                    foreach (DictionaryEntry kvp in _Parameters)
+                    {
+                        string key = kvp.Key.ToString();
+                        if (!runtimeParams.ContainsKey(key))
+                        {
+                            runtimeParams[key] = kvp.Value;
+                        }
+                    }
+                }
+                return runtimeParams;
+            }
             return _Parameters;
         }
 
