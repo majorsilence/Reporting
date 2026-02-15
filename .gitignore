@@ -244,3 +244,6 @@ obj/
 /LanguageWrappers/python/Examples/output
 /LanguageWrappers/ruby/Examples/output
 /LanguageWrappers/php/Examples/output
+
+# Example output files
+/Examples/DirectExportExample/DirectExportExample/Output/
