@@ -27,6 +27,10 @@ Majorsilence Reporting is a powerful, open-source .NET reporting framework desig
 
 **The core of Majorsilence Reporting supports Linux and macOS for server-side application report generation. Only the WinForms-based designer and viewer are Windows-only.**
 
+## Internationalization
+
+Majorsilence Reporting supports multiple languages including English, Russian, French, and Spanish. See [INTERNATIONALIZATION.md](INTERNATIONALIZATION.md) for details on supported languages and how to configure or contribute translations.
+
 # Quick start
 
 Add these nuget packages to your project.

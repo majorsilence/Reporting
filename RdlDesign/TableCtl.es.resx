@@ -1,0 +1,205 @@
+<?xml version='1.0' encoding='utf-8'?>
+<root xmlns:ns1="urn:schemas-microsoft-com:xml-msdata" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  
+  <xs:schema id="root">
+    <xs:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xs:element name="root" ns1:IsDataSet="true">
+      <xs:complexType>
+        <xs:choice maxOccurs="unbounded">
+          <xs:element name="metadata">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="value" type="xsd:string" minOccurs="0" />
+              </xs:sequence>
+              <xs:attribute name="name" use="required" type="xsd:string" />
+              <xs:attribute name="type" type="xsd:string" />
+              <xs:attribute name="mimetype" type="xsd:string" />
+              <xs:attribute ref="xml:space" />
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="assembly">
+            <xs:complexType>
+              <xs:attribute name="alias" type="xsd:string" />
+              <xs:attribute name="name" type="xsd:string" />
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="data">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="value" type="xsd:string" minOccurs="0" ns1:Ordinal="1" />
+                <xs:element name="comment" type="xsd:string" minOccurs="0" ns1:Ordinal="2" />
+              </xs:sequence>
+              <xs:attribute name="name" type="xsd:string" use="required" ns1:Ordinal="1" />
+              <xs:attribute name="type" type="xsd:string" ns1:Ordinal="3" />
+              <xs:attribute name="mimetype" type="xsd:string" ns1:Ordinal="4" />
+              <xs:attribute ref="xml:space" />
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="resheader">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="value" type="xsd:string" minOccurs="0" ns1:Ordinal="1" />
+              </xs:sequence>
+              <xs:attribute name="name" type="xsd:string" use="required" />
+            </xs:complexType>
+          </xs:element>
+        </xs:choice>
+      </xs:complexType>
+    </xs:element>
+  </xs:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <assembly alias="mscorlib" name="mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
+  <data name="label2.AutoSize" type="System.Boolean, mscorlib">
+    <value>True</value>
+  </data>
+  <assembly alias="System.Drawing" name="System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+  <data name="label2.Size" type="System.Drawing.Size, System.Drawing">
+    <value>79, 13</value>
+  </data>
+  <data name="label2.Text" xml:space="preserve">
+    <value>Conjunto de datos</value>
+  </data>
+  <data name="cbDataSet.Location" type="System.Drawing.Point, System.Drawing">
+    <value>182, 16</value>
+  </data>
+  <data name="cbDataSet.Size" type="System.Drawing.Size, System.Drawing">
+    <value>274, 21</value>
+  </data>
+  <data name="chkPBAfter.AutoSize" type="System.Boolean, mscorlib">
+    <value>True</value>
+  </data>
+  <data name="chkPBAfter.Location" type="System.Drawing.Point, System.Drawing">
+    <value>192, 20</value>
+  </data>
+  <data name="chkPBAfter.Size" type="System.Drawing.Size, System.Drawing">
+    <value>158, 17</value>
+  </data>
+  <data name="chkPBAfter.Text" xml:space="preserve">
+    <value>Insert after Table</value>
+  </data>
+  <data name="chkPBBefore.AutoSize" type="System.Boolean, mscorlib">
+    <value>True</value>
+  </data>
+  <data name="chkPBBefore.Location" type="System.Drawing.Point, System.Drawing">
+    <value>16, 20</value>
+  </data>
+  <data name="chkPBBefore.Size" type="System.Drawing.Size, System.Drawing">
+    <value>162, 17</value>
+  </data>
+  <data name="chkPBBefore.Text" xml:space="preserve">
+    <value>Insert before Table</value>
+  </data>
+  <data name="groupBox1.Size" type="System.Drawing.Size, System.Drawing">
+    <value>432, 48</value>
+  </data>
+  <data name="groupBox1.Text" xml:space="preserve">
+    <value>Saltos de página</value>
+  </data>
+  <data name="label1.AutoSize" type="System.Boolean, mscorlib">
+    <value>True</value>
+  </data>
+  <data name="label1.Size" type="System.Drawing.Size, System.Drawing">
+    <value>152, 13</value>
+  </data>
+  <data name="label1.Text" xml:space="preserve">
+    <value>Mensaje cuando no hay filas</value>
+  </data>
+  <data name="tbNoRows.Location" type="System.Drawing.Point, System.Drawing">
+    <value>182, 40</value>
+  </data>
+  <data name="tbNoRows.Size" type="System.Drawing.Size, System.Drawing">
+    <value>274, 20</value>
+  </data>
+  <data name="tbDetailCollectionName.Size" type="System.Drawing.Size, System.Drawing">
+    <value>266, 20</value>
+  </data>
+  <data name="tbDetailElementName.Size" type="System.Drawing.Size, System.Drawing">
+    <value>266, 20</value>
+  </data>
+  <data name="chkRenderDetails.Text" xml:space="preserve">
+    <value>Render Details in Output</value>
+  </data>
+  <data name="label4.AutoSize" type="System.Boolean, mscorlib">
+    <value>True</value>
+  </data>
+  <data name="label4.Size" type="System.Drawing.Size, System.Drawing">
+    <value>140, 13</value>
+  </data>
+  <data name="label4.Text" xml:space="preserve">
+    <value>Detail Collection Name</value>
+  </data>
+  <data name="label3.AutoSize" type="System.Boolean, mscorlib">
+    <value>True</value>
+  </data>
+  <data name="label3.Size" type="System.Drawing.Size, System.Drawing">
+    <value>135, 13</value>
+  </data>
+  <data name="label3.Text" xml:space="preserve">
+    <value>Detail Element Name</value>
+  </data>
+  <data name="groupBox2.Location" type="System.Drawing.Point, System.Drawing">
+    <value>24, 192</value>
+  </data>
+  <data name="groupBox2.Size" type="System.Drawing.Size, System.Drawing">
+    <value>432, 92</value>
+  </data>
+  <data name="chkFooterRepeat.Location" type="System.Drawing.Point, System.Drawing">
+    <value>285, 34</value>
+  </data>
+  <data name="chkFooterRepeat.Size" type="System.Drawing.Size, System.Drawing">
+    <value>141, 30</value>
+  </data>
+  <data name="chkFooterRepeat.Text" xml:space="preserve">
+    <value>Repetir pie en nueva página</value>
+  </data>
+  <data name="chkHeaderRepeat.Location" type="System.Drawing.Point, System.Drawing">
+    <value>134, 34</value>
+  </data>
+  <data name="chkHeaderRepeat.Size" type="System.Drawing.Size, System.Drawing">
+    <value>145, 30</value>
+  </data>
+  <data name="chkHeaderRepeat.Text" xml:space="preserve">
+    <value>Repetir encabezado en nueva página</value>
+  </data>
+  <data name="chkFooterRows.Location" type="System.Drawing.Point, System.Drawing">
+    <value>285, 13</value>
+  </data>
+  <data name="chkFooterRows.Size" type="System.Drawing.Size, System.Drawing">
+    <value>122, 24</value>
+  </data>
+  <data name="chkFooterRows.Text" xml:space="preserve">
+    <value>Filas de pie</value>
+  </data>
+  <data name="chkHeaderRows.Location" type="System.Drawing.Point, System.Drawing">
+    <value>134, 13</value>
+  </data>
+  <data name="chkHeaderRows.Size" type="System.Drawing.Size, System.Drawing">
+    <value>122, 24</value>
+  </data>
+  <data name="chkHeaderRows.Text" xml:space="preserve">
+    <value>Filas de encabezado</value>
+  </data>
+  <data name="chkDetails.Text" xml:space="preserve">
+    <value>Filas de cuerpo</value>
+  </data>
+  <data name="groupBox3.Size" type="System.Drawing.Size, System.Drawing">
+    <value>432, 66</value>
+  </data>
+  <data name="groupBox3.Text" xml:space="preserve">
+    <value>Include Table Rows</value>
+  </data>
+  <data name="$this.Size" type="System.Drawing.Size, System.Drawing">
+    <value>480, 290</value>
+  </data>
+</root>

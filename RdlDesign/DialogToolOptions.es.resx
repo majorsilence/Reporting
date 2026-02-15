@@ -1,0 +1,252 @@
+<?xml version='1.0' encoding='utf-8'?>
+<root xmlns:ns1="urn:schemas-microsoft-com:xml-msdata" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  
+  <xs:schema id="root">
+    <xs:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xs:element name="root" ns1:IsDataSet="true">
+      <xs:complexType>
+        <xs:choice maxOccurs="unbounded">
+          <xs:element name="metadata">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="value" type="xsd:string" minOccurs="0" />
+              </xs:sequence>
+              <xs:attribute name="name" use="required" type="xsd:string" />
+              <xs:attribute name="type" type="xsd:string" />
+              <xs:attribute name="mimetype" type="xsd:string" />
+              <xs:attribute ref="xml:space" />
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="assembly">
+            <xs:complexType>
+              <xs:attribute name="alias" type="xsd:string" />
+              <xs:attribute name="name" type="xsd:string" />
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="data">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="value" type="xsd:string" minOccurs="0" ns1:Ordinal="1" />
+                <xs:element name="comment" type="xsd:string" minOccurs="0" ns1:Ordinal="2" />
+              </xs:sequence>
+              <xs:attribute name="name" type="xsd:string" use="required" ns1:Ordinal="1" />
+              <xs:attribute name="type" type="xsd:string" ns1:Ordinal="3" />
+              <xs:attribute name="mimetype" type="xsd:string" ns1:Ordinal="4" />
+              <xs:attribute ref="xml:space" />
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="resheader">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="value" type="xsd:string" minOccurs="0" ns1:Ordinal="1" />
+              </xs:sequence>
+              <xs:attribute name="name" type="xsd:string" use="required" />
+            </xs:complexType>
+          </xs:element>
+        </xs:choice>
+      </xs:complexType>
+    </xs:element>
+  </xs:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="bCancel.Text" xml:space="preserve">
+    <value>Cancelar</value>
+  </data>
+  <data name="tpGeneral.Text" xml:space="preserve">
+    <value>General</value>
+  </data>
+  <assembly alias="System.Drawing" name="System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+  <data name="label11.Size" type="System.Drawing.Size, System.Drawing">
+    <value>35, 13</value>
+  </data>
+  <data name="label11.Text" xml:space="preserve">
+    <value>Language</value>
+  </data>
+  <data name="tbLanguage.Location" type="System.Drawing.Point, System.Drawing">
+    <value>56, 177</value>
+  </data>
+  <data name="cbShowReportWaitDialog.Size" type="System.Drawing.Size, System.Drawing">
+    <value>353, 17</value>
+  </data>
+  <data name="cbShowReportWaitDialog.Text" xml:space="preserve">
+    <value>Show Rendering Report Dialog on Preview</value>
+  </data>
+  <data name="gbPropLoc.Text" xml:space="preserve">
+    <value>Properties Window</value>
+  </data>
+  <data name="chkPBAutoHide.Size" type="System.Drawing.Size, System.Drawing">
+    <value>156, 17</value>
+  </data>
+  <data name="chkPBAutoHide.Text" xml:space="preserve">
+    <value>Ocultar automáticamente</value>
+  </data>
+  <data name="rbPBBottom.Size" type="System.Drawing.Size, System.Drawing">
+    <value>55, 17</value>
+  </data>
+  <data name="rbPBBottom.Text" xml:space="preserve">
+    <value>Abajo</value>
+  </data>
+  <data name="rbPBTop.Size" type="System.Drawing.Size, System.Drawing">
+    <value>60, 17</value>
+  </data>
+  <data name="rbPBTop.Text" xml:space="preserve">
+    <value>Arriba</value>
+  </data>
+  <data name="rbPBLeft.Size" type="System.Drawing.Size, System.Drawing">
+    <value>56, 17</value>
+  </data>
+  <data name="rbPBLeft.Text" xml:space="preserve">
+    <value>Izquierda</value>
+  </data>
+  <data name="rbPBRight.Size" type="System.Drawing.Size, System.Drawing">
+    <value>62, 17</value>
+  </data>
+  <data name="rbPBRight.Text" xml:space="preserve">
+    <value>Derecha</value>
+  </data>
+  <data name="cbTabInterface.Size" type="System.Drawing.Size, System.Drawing">
+    <value>215, 17</value>
+  </data>
+  <data name="cbTabInterface.Text" xml:space="preserve">
+    <value>Show tabbed interface</value>
+  </data>
+  <data name="cbOutline.Size" type="System.Drawing.Size, System.Drawing">
+    <value>286, 17</value>
+  </data>
+  <data name="cbOutline.Text" xml:space="preserve">
+    <value>Outline report items in Designer</value>
+  </data>
+  <data name="cbEditLines.Size" type="System.Drawing.Size, System.Drawing">
+    <value>254, 17</value>
+  </data>
+  <data name="cbEditLines.Text" xml:space="preserve">
+    <value>Show line numbers in RDL Text</value>
+  </data>
+  <data name="tbHelpUrl.Location" type="System.Drawing.Point, System.Drawing">
+    <value>14, 62</value>
+  </data>
+  <data name="tbHelpUrl.Size" type="System.Drawing.Size, System.Drawing">
+    <value>417, 20</value>
+  </data>
+  <data name="label3.Location" type="System.Drawing.Point, System.Drawing">
+    <value>11, 33</value>
+  </data>
+  <data name="label3.Size" type="System.Drawing.Size, System.Drawing">
+    <value>420, 28</value>
+  </data>
+  <data name="label3.Text" xml:space="preserve">
+    <value>Help System URL  (Empty string means use default help url.)</value>
+  </data>
+  <data name="label2.Location" type="System.Drawing.Point, System.Drawing">
+    <value>131, 12</value>
+  </data>
+  <data name="label2.Size" type="System.Drawing.Size, System.Drawing">
+    <value>266, 23</value>
+  </data>
+  <data name="label2.Text" xml:space="preserve">
+    <value>items in most recently used lists.</value>
+  </data>
+  <data name="tbRecentFilesMax.Location" type="System.Drawing.Point, System.Drawing">
+    <value>94, 12</value>
+  </data>
+  <data name="label1.Location" type="System.Drawing.Point, System.Drawing">
+    <value>11, 12</value>
+  </data>
+  <data name="label1.Size" type="System.Drawing.Size, System.Drawing">
+    <value>77, 23</value>
+  </data>
+  <data name="label1.Text" xml:space="preserve">
+    <value>Display</value>
+  </data>
+  <data name="tpToolbar.Size" type="System.Drawing.Size, System.Drawing">
+    <value>458, 273</value>
+  </data>
+  <data name="tpToolbar.Text" xml:space="preserve">
+    <value>Toolbar</value>
+  </data>
+  <data name="bReset.Size" type="System.Drawing.Size, System.Drawing">
+    <value>73, 23</value>
+  </data>
+  <data name="bReset.Text" xml:space="preserve">
+    <value>Reset</value>
+  </data>
+  <data name="bDown.Size" type="System.Drawing.Size, System.Drawing">
+    <value>73, 23</value>
+  </data>
+  <data name="bDown.Text" xml:space="preserve">
+    <value>Abajo</value>
+  </data>
+  <data name="bUp.Size" type="System.Drawing.Size, System.Drawing">
+    <value>73, 23</value>
+  </data>
+  <data name="bUp.Text" xml:space="preserve">
+    <value>Arriba</value>
+  </data>
+  <data name="label5.Text" xml:space="preserve">
+    <value>Toolbar Layout</value>
+  </data>
+  <data name="label4.Text" xml:space="preserve">
+    <value>ToolBar Operations</value>
+  </data>
+  <data name="tpDesktop.Size" type="System.Drawing.Size, System.Drawing">
+    <value>458, 273</value>
+  </data>
+  <data name="tpDesktop.Text" xml:space="preserve">
+    <value>Servidor</value>
+  </data>
+  <data name="label9.Text" xml:space="preserve">
+    <value>Directory:</value>
+  </data>
+  <data name="label8.Text" xml:space="preserve">
+    <value>Importante: el servidor no está diseñado para usarse como servidor web.</value>
+  </data>
+  <data name="label7.Text" xml:space="preserve">
+    <value>Changing configuration settings here affect the Desktop server whether it is started as part of the designer or whether it is started standalone.  When started as part of the designer changes made here will stop the Desktop process.  If started standalone then the Desktop server should be manually restarted.</value>
+  </data>
+  <data name="ckLocal.Size" type="System.Drawing.Size, System.Drawing">
+    <value>242, 24</value>
+  </data>
+  <data name="ckLocal.Text" xml:space="preserve">
+    <value>Restrict access to local machine</value>
+  </data>
+  <data name="tbPort.Location" type="System.Drawing.Point, System.Drawing">
+    <value>68, 65</value>
+  </data>
+  <data name="label6.Text" xml:space="preserve">
+    <value>Port</value>
+  </data>
+  <data name="tabPage1.Size" type="System.Drawing.Size, System.Drawing">
+    <value>458, 273</value>
+  </data>
+  <data name="tabPage1.Text" xml:space="preserve">
+    <value>Maps</value>
+  </data>
+  <data name="label10.Text" xml:space="preserve">
+    <value>Maps are XML files that can be specified as the subtype of a chart with type Map.   Map files contain a description of the map in terms of text, lines, polygons and keys.  Map files should be located in the same directory as the reporting engine library.</value>
+  </data>
+  <data name="bRemoveMap.Text" xml:space="preserve">
+    <value>Eliminar</value>
+  </data>
+  <data name="bAddMap.Text" xml:space="preserve">
+    <value>Add...</value>
+  </data>
+  <data name="bApply.Text" xml:space="preserve">
+    <value>Aplicar</value>
+  </data>
+  <data name="$this.Text" xml:space="preserve">
+    <value>Configuración</value>
+  </data>
+  <data name="label12.Text" xml:space="preserve">
+    <value>XML Line ending</value>
+  </data>
+</root>

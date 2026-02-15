@@ -1,0 +1,126 @@
+<?xml version='1.0' encoding='utf-8'?>
+<root xmlns:ns1="urn:schemas-microsoft-com:xml-msdata" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  
+  <xs:schema id="root">
+    <xs:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xs:element name="root" ns1:IsDataSet="true">
+      <xs:complexType>
+        <xs:choice maxOccurs="unbounded">
+          <xs:element name="metadata">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="value" type="xsd:string" minOccurs="0" />
+              </xs:sequence>
+              <xs:attribute name="name" use="required" type="xsd:string" />
+              <xs:attribute name="type" type="xsd:string" />
+              <xs:attribute name="mimetype" type="xsd:string" />
+              <xs:attribute ref="xml:space" />
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="assembly">
+            <xs:complexType>
+              <xs:attribute name="alias" type="xsd:string" />
+              <xs:attribute name="name" type="xsd:string" />
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="data">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="value" type="xsd:string" minOccurs="0" ns1:Ordinal="1" />
+                <xs:element name="comment" type="xsd:string" minOccurs="0" ns1:Ordinal="2" />
+              </xs:sequence>
+              <xs:attribute name="name" type="xsd:string" use="required" ns1:Ordinal="1" />
+              <xs:attribute name="type" type="xsd:string" ns1:Ordinal="3" />
+              <xs:attribute name="mimetype" type="xsd:string" ns1:Ordinal="4" />
+              <xs:attribute ref="xml:space" />
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="resheader">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="value" type="xsd:string" minOccurs="0" ns1:Ordinal="1" />
+              </xs:sequence>
+              <xs:attribute name="name" type="xsd:string" use="required" />
+            </xs:complexType>
+          </xs:element>
+        </xs:choice>
+      </xs:complexType>
+    </xs:element>
+  </xs:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="label3.Text" xml:space="preserve">
+    <value>Timeout</value>
+  </data>
+  <assembly alias="System.Drawing" name="System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+  <data name="bRefresh.Location" type="System.Drawing.Point, System.Drawing">
+    <value>405, 77</value>
+  </data>
+  <data name="bRefresh.Size" type="System.Drawing.Size, System.Drawing">
+    <value>70, 34</value>
+  </data>
+  <data name="bRefresh.Text" xml:space="preserve">
+    <value>Refresh Fields</value>
+  </data>
+  <data name="bEditSQL.Location" type="System.Drawing.Point, System.Drawing">
+    <value>405, 46</value>
+  </data>
+  <data name="bEditSQL.Size" type="System.Drawing.Size, System.Drawing">
+    <value>70, 23</value>
+  </data>
+  <data name="label1.Text" xml:space="preserve">
+    <value>Consulta SQL</value>
+  </data>
+  <data name="lDataSource.Text" xml:space="preserve">
+    <value>Origen de datos</value>
+  </data>
+  <data name="lDataSetName.Text" xml:space="preserve">
+    <value>Nombre</value>
+  </data>
+  <data name="bDeleteField.Location" type="System.Drawing.Point, System.Drawing">
+    <value>405, 16</value>
+  </data>
+  <data name="bDeleteField.Size" type="System.Drawing.Size, System.Drawing">
+    <value>70, 23</value>
+  </data>
+  <data name="bDeleteField.Text" xml:space="preserve">
+    <value>Eliminar</value>
+  </data>
+  <data name="dgtbName.HeaderText" xml:space="preserve">
+    <value>Nombre</value>
+  </data>
+  <data name="dgtbQueryName.HeaderText" xml:space="preserve">
+    <value>Query Column Name</value>
+  </data>
+  <data name="dgtbValue.HeaderText" xml:space="preserve">
+    <value>Valor</value>
+  </data>
+  <data name="dgtbTypeName.HeaderText" xml:space="preserve">
+    <value>Tipo</value>
+  </data>
+  <data name="dgFields.Location" type="System.Drawing.Point, System.Drawing">
+    <value>7, 23</value>
+  </data>
+  <data name="dgFields.Size" type="System.Drawing.Size, System.Drawing">
+    <value>392, 121</value>
+  </data>
+  <data name="label2.Location" type="System.Drawing.Point, System.Drawing">
+    <value>9, 8</value>
+  </data>
+  <data name="label2.Text" xml:space="preserve">
+    <value>Campos</value>
+  </data>
+  <data name="$this.Size" type="System.Drawing.Size, System.Drawing">
+    <value>480, 300</value>
+  </data>
+</root>

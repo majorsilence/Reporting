@@ -1,0 +1,762 @@
+<?xml version='1.0' encoding='utf-8'?>
+<root xmlns:ns1="urn:schemas-microsoft-com:xml-msdata" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  
+  <xs:schema id="root">
+    <xs:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xs:element name="root" ns1:IsDataSet="true">
+      <xs:complexType>
+        <xs:choice maxOccurs="unbounded">
+          <xs:element name="metadata">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="value" type="xsd:string" minOccurs="0" />
+              </xs:sequence>
+              <xs:attribute name="name" use="required" type="xsd:string" />
+              <xs:attribute name="type" type="xsd:string" />
+              <xs:attribute name="mimetype" type="xsd:string" />
+              <xs:attribute ref="xml:space" />
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="assembly">
+            <xs:complexType>
+              <xs:attribute name="alias" type="xsd:string" />
+              <xs:attribute name="name" type="xsd:string" />
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="data">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="value" type="xsd:string" minOccurs="0" ns1:Ordinal="1" />
+                <xs:element name="comment" type="xsd:string" minOccurs="0" ns1:Ordinal="2" />
+              </xs:sequence>
+              <xs:attribute name="name" type="xsd:string" use="required" ns1:Ordinal="1" />
+              <xs:attribute name="type" type="xsd:string" ns1:Ordinal="3" />
+              <xs:attribute name="mimetype" type="xsd:string" ns1:Ordinal="4" />
+              <xs:attribute ref="xml:space" />
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="resheader">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="value" type="xsd:string" minOccurs="0" ns1:Ordinal="1" />
+              </xs:sequence>
+              <xs:attribute name="name" type="xsd:string" use="required" />
+            </xs:complexType>
+          </xs:element>
+        </xs:choice>
+      </xs:complexType>
+    </xs:element>
+  </xs:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <assembly alias="System.Drawing" name="System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+  <data name="MenuDefaultProperties.Size" type="System.Drawing.Size, System.Drawing">
+    <value>142, 22</value>
+  </data>
+  <data name="MenuDefaultProperties.Text" xml:space="preserve">
+    <value>Propiedades</value>
+  </data>
+  <data name="toolStripMenuItem1.Size" type="System.Drawing.Size, System.Drawing">
+    <value>139, 6</value>
+  </data>
+  <data name="MenuDefaultCopy.Size" type="System.Drawing.Size, System.Drawing">
+    <value>142, 22</value>
+  </data>
+  <data name="MenuDefaultCopy.Text" xml:space="preserve">
+    <value>Copiar</value>
+  </data>
+  <data name="MenuDefaultPaste.Size" type="System.Drawing.Size, System.Drawing">
+    <value>142, 22</value>
+  </data>
+  <data name="MenuDefaultPaste.Text" xml:space="preserve">
+    <value>Pegar</value>
+  </data>
+  <data name="MenuDefaultDelete.Size" type="System.Drawing.Size, System.Drawing">
+    <value>142, 22</value>
+  </data>
+  <data name="MenuDefaultDelete.Text" xml:space="preserve">
+    <value>Eliminar</value>
+  </data>
+  <data name="toolStripMenuItem2.Size" type="System.Drawing.Size, System.Drawing">
+    <value>139, 6</value>
+  </data>
+  <data name="MenuDefaultSelectAll.Size" type="System.Drawing.Size, System.Drawing">
+    <value>142, 22</value>
+  </data>
+  <data name="MenuDefaultSelectAll.Text" xml:space="preserve">
+    <value>Seleccionar todo</value>
+  </data>
+  <data name="toolStripMenuItem3.Size" type="System.Drawing.Size, System.Drawing">
+    <value>139, 6</value>
+  </data>
+  <data name="MenuInsertChart.Size" type="System.Drawing.Size, System.Drawing">
+    <value>163, 22</value>
+  </data>
+  <data name="MenuInsertChart.Text" xml:space="preserve">
+    <value>Gráfico...</value>
+  </data>
+  <data name="MenuInsertGrid.Size" type="System.Drawing.Size, System.Drawing">
+    <value>163, 22</value>
+  </data>
+  <data name="MenuInsertGrid.Text" xml:space="preserve">
+    <value>Cuadrícula</value>
+  </data>
+  <data name="MenuInsertImage.Size" type="System.Drawing.Size, System.Drawing">
+    <value>163, 22</value>
+  </data>
+  <data name="MenuInsertImage.Text" xml:space="preserve">
+    <value>Imagen</value>
+  </data>
+  <data name="MenuInsertLine.Size" type="System.Drawing.Size, System.Drawing">
+    <value>163, 22</value>
+  </data>
+  <data name="MenuInsertLine.Text" xml:space="preserve">
+    <value>Línea</value>
+  </data>
+  <data name="MenuInsertList.Size" type="System.Drawing.Size, System.Drawing">
+    <value>163, 22</value>
+  </data>
+  <data name="MenuInsertList.Text" xml:space="preserve">
+    <value>Lista</value>
+  </data>
+  <data name="MenuInsertMatrix.Size" type="System.Drawing.Size, System.Drawing">
+    <value>163, 22</value>
+  </data>
+  <data name="MenuInsertMatrix.Text" xml:space="preserve">
+    <value>Matriz...</value>
+  </data>
+  <data name="MenuInsertRectangle.Size" type="System.Drawing.Size, System.Drawing">
+    <value>163, 22</value>
+  </data>
+  <data name="MenuInsertRectangle.Text" xml:space="preserve">
+    <value>Rectángulo</value>
+  </data>
+  <data name="MenuInsertSubreport.Size" type="System.Drawing.Size, System.Drawing">
+    <value>163, 22</value>
+  </data>
+  <data name="MenuInsertSubreport.Text" xml:space="preserve">
+    <value>Subinforme</value>
+  </data>
+  <data name="MenuInsertTable.Size" type="System.Drawing.Size, System.Drawing">
+    <value>163, 22</value>
+  </data>
+  <data name="MenuInsertTable.Text" xml:space="preserve">
+    <value>Tabla...</value>
+  </data>
+  <data name="MenuInsertTextbox.Size" type="System.Drawing.Size, System.Drawing">
+    <value>163, 22</value>
+  </data>
+  <data name="MenuInsertTextbox.Text" xml:space="preserve">
+    <value>Cuadro de texto</value>
+  </data>
+  <data name="MenuDefaultInsert.Size" type="System.Drawing.Size, System.Drawing">
+    <value>142, 22</value>
+  </data>
+  <data name="MenuDefaultInsert.Text" xml:space="preserve">
+    <value>Crear</value>
+  </data>
+  <data name="ContextMenuDefault.Size" type="System.Drawing.Size, System.Drawing">
+    <value>143, 154</value>
+  </data>
+  <data name="MenuChartProperties.Size" type="System.Drawing.Size, System.Drawing">
+    <value>276, 22</value>
+  </data>
+  <data name="MenuChartProperties.Text" xml:space="preserve">
+    <value>Propiedades...</value>
+  </data>
+  <data name="MenuChartLegend.Size" type="System.Drawing.Size, System.Drawing">
+    <value>276, 22</value>
+  </data>
+  <data name="MenuChartLegend.Text" xml:space="preserve">
+    <value>Legend...</value>
+  </data>
+  <data name="MenuChartTitle.Size" type="System.Drawing.Size, System.Drawing">
+    <value>276, 22</value>
+  </data>
+  <data name="MenuChartTitle.Text" xml:space="preserve">
+    <value>Title...</value>
+  </data>
+  <data name="toolStripMenuItem4.Size" type="System.Drawing.Size, System.Drawing">
+    <value>273, 6</value>
+  </data>
+  <data name="MenuChartInsertCategoryGrouping.Size" type="System.Drawing.Size, System.Drawing">
+    <value>276, 22</value>
+  </data>
+  <data name="MenuChartInsertCategoryGrouping.Text" xml:space="preserve">
+    <value>Insert Category Grouping...</value>
+  </data>
+  <data name="MenuChartEditCategoryGrouping.Size" type="System.Drawing.Size, System.Drawing">
+    <value>276, 22</value>
+  </data>
+  <data name="MenuChartEditCategoryGrouping.Text" xml:space="preserve">
+    <value>Edit Category Grouping</value>
+  </data>
+  <data name="MenuChartDeleteCategoryGrouping.Size" type="System.Drawing.Size, System.Drawing">
+    <value>276, 22</value>
+  </data>
+  <data name="MenuChartDeleteCategoryGrouping.Text" xml:space="preserve">
+    <value>Delete Category Grouping</value>
+  </data>
+  <data name="toolStripMenuItem5.Size" type="System.Drawing.Size, System.Drawing">
+    <value>273, 6</value>
+  </data>
+  <data name="MenuChartCategoryAxis.Size" type="System.Drawing.Size, System.Drawing">
+    <value>276, 22</value>
+  </data>
+  <data name="MenuChartCategoryAxis.Text" xml:space="preserve">
+    <value>Category (X) Axis...</value>
+  </data>
+  <data name="MenuChartCategoryAxisTitle.Size" type="System.Drawing.Size, System.Drawing">
+    <value>276, 22</value>
+  </data>
+  <data name="MenuChartCategoryAxisTitle.Text" xml:space="preserve">
+    <value>Category (X) Axis Title...</value>
+  </data>
+  <data name="toolStripMenuItem6.Size" type="System.Drawing.Size, System.Drawing">
+    <value>273, 6</value>
+  </data>
+  <data name="MenuChartInsertSeriesGrouping.Size" type="System.Drawing.Size, System.Drawing">
+    <value>276, 22</value>
+  </data>
+  <data name="MenuChartInsertSeriesGrouping.Text" xml:space="preserve">
+    <value>Insert Series Grouping...</value>
+  </data>
+  <data name="MenuChartEditSeriesGrouping.Size" type="System.Drawing.Size, System.Drawing">
+    <value>276, 22</value>
+  </data>
+  <data name="MenuChartEditSeriesGrouping.Text" xml:space="preserve">
+    <value>Edit Series Grouping</value>
+  </data>
+  <data name="MenuChartDeleteSeriesGrouping.Size" type="System.Drawing.Size, System.Drawing">
+    <value>276, 22</value>
+  </data>
+  <data name="MenuChartDeleteSeriesGrouping.Text" xml:space="preserve">
+    <value>Delete Series Grouping</value>
+  </data>
+  <data name="toolStripMenuItem7.Size" type="System.Drawing.Size, System.Drawing">
+    <value>273, 6</value>
+  </data>
+  <data name="MenuChartValueAxis.Size" type="System.Drawing.Size, System.Drawing">
+    <value>276, 22</value>
+  </data>
+  <data name="MenuChartValueAxis.Text" xml:space="preserve">
+    <value>Value (Y) Axis...</value>
+  </data>
+  <data name="MenuChartValueAxisTitle.Size" type="System.Drawing.Size, System.Drawing">
+    <value>276, 22</value>
+  </data>
+  <data name="MenuChartValueAxisTitle.Text" xml:space="preserve">
+    <value>Value (Y) Axis Title...</value>
+  </data>
+  <data name="MenuChartValueAxisRightTitle.Size" type="System.Drawing.Size, System.Drawing">
+    <value>276, 22</value>
+  </data>
+  <data name="MenuChartValueAxisRightTitle.Text" xml:space="preserve">
+    <value>Value (Y) Axis (Right) Title...</value>
+  </data>
+  <data name="toolStripMenuItem8.Size" type="System.Drawing.Size, System.Drawing">
+    <value>273, 6</value>
+  </data>
+  <data name="MenuChartCopy.Size" type="System.Drawing.Size, System.Drawing">
+    <value>276, 22</value>
+  </data>
+  <data name="MenuChartCopy.Text" xml:space="preserve">
+    <value>Copiar</value>
+  </data>
+  <data name="MenuChartPaste.Size" type="System.Drawing.Size, System.Drawing">
+    <value>276, 22</value>
+  </data>
+  <data name="MenuChartPaste.Text" xml:space="preserve">
+    <value>Pegar</value>
+  </data>
+  <data name="MenuChartDelete.Size" type="System.Drawing.Size, System.Drawing">
+    <value>276, 22</value>
+  </data>
+  <data name="MenuChartDelete.Text" xml:space="preserve">
+    <value>Eliminar</value>
+  </data>
+  <data name="toolStripMenuItem9.Size" type="System.Drawing.Size, System.Drawing">
+    <value>273, 6</value>
+  </data>
+  <data name="MenuChartSelectAll.Size" type="System.Drawing.Size, System.Drawing">
+    <value>276, 22</value>
+  </data>
+  <data name="MenuChartSelectAll.Text" xml:space="preserve">
+    <value>Seleccionar todo</value>
+  </data>
+  <data name="ContextMenuChart.Size" type="System.Drawing.Size, System.Drawing">
+    <value>277, 436</value>
+  </data>
+  <data name="MenuMatrixProperties.Size" type="System.Drawing.Size, System.Drawing">
+    <value>260, 22</value>
+  </data>
+  <data name="MenuMatrixProperties.Text" xml:space="preserve">
+    <value>Propiedades...</value>
+  </data>
+  <data name="MenuMatrixMatrixProperties.Size" type="System.Drawing.Size, System.Drawing">
+    <value>260, 22</value>
+  </data>
+  <data name="MenuMatrixMatrixProperties.Text" xml:space="preserve">
+    <value>Matrix Properties...</value>
+  </data>
+  <data name="toolStripMenuItem10.Size" type="System.Drawing.Size, System.Drawing">
+    <value>257, 6</value>
+  </data>
+  <data name="MenuMatrixInsertColumnGroup.Size" type="System.Drawing.Size, System.Drawing">
+    <value>260, 22</value>
+  </data>
+  <data name="MenuMatrixInsertColumnGroup.Text" xml:space="preserve">
+    <value>Insert Column Group...</value>
+  </data>
+  <data name="MenuMatrixEditColumnGroup.Size" type="System.Drawing.Size, System.Drawing">
+    <value>260, 22</value>
+  </data>
+  <data name="MenuMatrixEditColumnGroup.Text" xml:space="preserve">
+    <value>Edit Column Group</value>
+  </data>
+  <data name="MenuMatrixDeleteColumnGroup.Size" type="System.Drawing.Size, System.Drawing">
+    <value>260, 22</value>
+  </data>
+  <data name="MenuMatrixDeleteColumnGroup.Text" xml:space="preserve">
+    <value>Delete Column Group</value>
+  </data>
+  <data name="toolStripMenuItem11.Size" type="System.Drawing.Size, System.Drawing">
+    <value>257, 6</value>
+  </data>
+  <data name="MenuMatrixInsertRowGroup.Size" type="System.Drawing.Size, System.Drawing">
+    <value>260, 22</value>
+  </data>
+  <data name="MenuMatrixInsertRowGroup.Text" xml:space="preserve">
+    <value>Insert Row Group...</value>
+  </data>
+  <data name="MenuMatrixEditRowGroup.Size" type="System.Drawing.Size, System.Drawing">
+    <value>260, 22</value>
+  </data>
+  <data name="MenuMatrixEditRowGroup.Text" xml:space="preserve">
+    <value>Edit Row Group</value>
+  </data>
+  <data name="MenuMatrixDeleteRowGroup.Size" type="System.Drawing.Size, System.Drawing">
+    <value>260, 22</value>
+  </data>
+  <data name="MenuMatrixDeleteRowGroup.Text" xml:space="preserve">
+    <value>Delete Row Group</value>
+  </data>
+  <data name="toolStripMenuItem12.Size" type="System.Drawing.Size, System.Drawing">
+    <value>257, 6</value>
+  </data>
+  <data name="MenuMatrixDeleteMatrix.Size" type="System.Drawing.Size, System.Drawing">
+    <value>260, 22</value>
+  </data>
+  <data name="MenuMatrixDeleteMatrix.Text" xml:space="preserve">
+    <value>Delete Matrix</value>
+  </data>
+  <data name="toolStripMenuItem13.Size" type="System.Drawing.Size, System.Drawing">
+    <value>257, 6</value>
+  </data>
+  <data name="MenuMatrixCopy.Size" type="System.Drawing.Size, System.Drawing">
+    <value>260, 22</value>
+  </data>
+  <data name="MenuMatrixCopy.Text" xml:space="preserve">
+    <value>Copiar</value>
+  </data>
+  <data name="MenuMatrixPaste.Size" type="System.Drawing.Size, System.Drawing">
+    <value>260, 22</value>
+  </data>
+  <data name="MenuMatrixPaste.Text" xml:space="preserve">
+    <value>Pegar</value>
+  </data>
+  <data name="MenuMatrixDelete.Size" type="System.Drawing.Size, System.Drawing">
+    <value>260, 22</value>
+  </data>
+  <data name="MenuMatrixDelete.Text" xml:space="preserve">
+    <value>Eliminar</value>
+  </data>
+  <data name="toolStripMenuItem14.Size" type="System.Drawing.Size, System.Drawing">
+    <value>257, 6</value>
+  </data>
+  <data name="MenuMatrixSelectAll.Size" type="System.Drawing.Size, System.Drawing">
+    <value>260, 22</value>
+  </data>
+  <data name="MenuMatrixSelectAll.Text" xml:space="preserve">
+    <value>Seleccionar todo</value>
+  </data>
+  <data name="ContextMenuMatrix.Size" type="System.Drawing.Size, System.Drawing">
+    <value>261, 320</value>
+  </data>
+  <data name="MenuSubreportProperties.Size" type="System.Drawing.Size, System.Drawing">
+    <value>174, 22</value>
+  </data>
+  <data name="MenuSubreportProperties.Text" xml:space="preserve">
+    <value>Propiedades...</value>
+  </data>
+  <data name="MenuSubreportOpen.Size" type="System.Drawing.Size, System.Drawing">
+    <value>174, 22</value>
+  </data>
+  <data name="MenuSubreportOpen.Text" xml:space="preserve">
+    <value>Open Subreport</value>
+  </data>
+  <data name="toolStripMenuItem15.Size" type="System.Drawing.Size, System.Drawing">
+    <value>171, 6</value>
+  </data>
+  <data name="MenuSubreportCopy.Size" type="System.Drawing.Size, System.Drawing">
+    <value>174, 22</value>
+  </data>
+  <data name="MenuSubreportCopy.Text" xml:space="preserve">
+    <value>Copiar</value>
+  </data>
+  <data name="MenuSubreportPaste.Size" type="System.Drawing.Size, System.Drawing">
+    <value>174, 22</value>
+  </data>
+  <data name="MenuSubreportPaste.Text" xml:space="preserve">
+    <value>Pegar</value>
+  </data>
+  <data name="MenuSubreportDelete.Size" type="System.Drawing.Size, System.Drawing">
+    <value>174, 22</value>
+  </data>
+  <data name="MenuSubreportDelete.Text" xml:space="preserve">
+    <value>Eliminar</value>
+  </data>
+  <data name="toolStripMenuItem16.Size" type="System.Drawing.Size, System.Drawing">
+    <value>171, 6</value>
+  </data>
+  <data name="MenuSubreportSelectAll.Size" type="System.Drawing.Size, System.Drawing">
+    <value>174, 22</value>
+  </data>
+  <data name="MenuSubreportSelectAll.Text" xml:space="preserve">
+    <value>Seleccionar todo</value>
+  </data>
+  <data name="ContextMenuSubreport.Size" type="System.Drawing.Size, System.Drawing">
+    <value>175, 148</value>
+  </data>
+  <data name="MenuGridProperties.Size" type="System.Drawing.Size, System.Drawing">
+    <value>206, 22</value>
+  </data>
+  <data name="MenuGridProperties.Text" xml:space="preserve">
+    <value>Propiedades...</value>
+  </data>
+  <data name="MenuGridGridProperties.Size" type="System.Drawing.Size, System.Drawing">
+    <value>206, 22</value>
+  </data>
+  <data name="MenuGridGridProperties.Text" xml:space="preserve">
+    <value>Grid Properties...</value>
+  </data>
+  <data name="MenuGridReplaceCellChart.Size" type="System.Drawing.Size, System.Drawing">
+    <value>163, 22</value>
+  </data>
+  <data name="MenuGridReplaceCellChart.Text" xml:space="preserve">
+    <value>Gráfico...</value>
+  </data>
+  <data name="MenuGridReplaceCellImage.Size" type="System.Drawing.Size, System.Drawing">
+    <value>163, 22</value>
+  </data>
+  <data name="MenuGridReplaceCellImage.Text" xml:space="preserve">
+    <value>Imagen</value>
+  </data>
+  <data name="MenuGridReplaceCellList.Size" type="System.Drawing.Size, System.Drawing">
+    <value>163, 22</value>
+  </data>
+  <data name="MenuGridReplaceCellList.Text" xml:space="preserve">
+    <value>Lista</value>
+  </data>
+  <data name="MenuGridReplaceCellMatrix.Size" type="System.Drawing.Size, System.Drawing">
+    <value>163, 22</value>
+  </data>
+  <data name="MenuGridReplaceCellMatrix.Text" xml:space="preserve">
+    <value>Matriz...</value>
+  </data>
+  <data name="MenuGridReplaceCellRectangle.Size" type="System.Drawing.Size, System.Drawing">
+    <value>163, 22</value>
+  </data>
+  <data name="MenuGridReplaceCellRectangle.Text" xml:space="preserve">
+    <value>Rectángulo</value>
+  </data>
+  <data name="MenuGridReplaceCellSubreport.Size" type="System.Drawing.Size, System.Drawing">
+    <value>163, 22</value>
+  </data>
+  <data name="MenuGridReplaceCellSubreport.Text" xml:space="preserve">
+    <value>Subinforme</value>
+  </data>
+  <data name="MenuGridReplaceCellTable.Size" type="System.Drawing.Size, System.Drawing">
+    <value>163, 22</value>
+  </data>
+  <data name="MenuGridReplaceCellTable.Text" xml:space="preserve">
+    <value>Ta&amp;ble...</value>
+  </data>
+  <data name="MenuGridReplaceCellTextbox.Size" type="System.Drawing.Size, System.Drawing">
+    <value>163, 22</value>
+  </data>
+  <data name="MenuGridReplaceCellTextbox.Text" xml:space="preserve">
+    <value>Cuadro de texto</value>
+  </data>
+  <data name="MenuGridReplaceCell.Size" type="System.Drawing.Size, System.Drawing">
+    <value>206, 22</value>
+  </data>
+  <data name="MenuGridReplaceCell.Text" xml:space="preserve">
+    <value>Reemplazar celda con</value>
+  </data>
+  <data name="toolStripMenuItem17.Size" type="System.Drawing.Size, System.Drawing">
+    <value>203, 6</value>
+  </data>
+  <data name="MenuGridInsertColumnBefore.Size" type="System.Drawing.Size, System.Drawing">
+    <value>206, 22</value>
+  </data>
+  <data name="MenuGridInsertColumnBefore.Text" xml:space="preserve">
+    <value>Insertar columna antes</value>
+  </data>
+  <data name="MenuGridInsertColumnAfter.Size" type="System.Drawing.Size, System.Drawing">
+    <value>206, 22</value>
+  </data>
+  <data name="MenuGridInsertColumnAfter.Text" xml:space="preserve">
+    <value>Insertar columna después</value>
+  </data>
+  <data name="toolStripMenuItem18.Size" type="System.Drawing.Size, System.Drawing">
+    <value>203, 6</value>
+  </data>
+  <data name="MenuGridInsertRowBefore.Size" type="System.Drawing.Size, System.Drawing">
+    <value>206, 22</value>
+  </data>
+  <data name="MenuGridInsertRowBefore.Text" xml:space="preserve">
+    <value>Insertar fila antes</value>
+  </data>
+  <data name="MenuGridInsertRowAfter.Size" type="System.Drawing.Size, System.Drawing">
+    <value>206, 22</value>
+  </data>
+  <data name="MenuGridInsertRowAfter.Text" xml:space="preserve">
+    <value>Insertar fila después</value>
+  </data>
+  <data name="toolStripMenuItem19.Size" type="System.Drawing.Size, System.Drawing">
+    <value>203, 6</value>
+  </data>
+  <data name="MenuGridDeleteColumn.Size" type="System.Drawing.Size, System.Drawing">
+    <value>206, 22</value>
+  </data>
+  <data name="MenuGridDeleteColumn.Text" xml:space="preserve">
+    <value>Delete Grid Column</value>
+  </data>
+  <data name="MenuGridDeleteRow.Size" type="System.Drawing.Size, System.Drawing">
+    <value>206, 22</value>
+  </data>
+  <data name="MenuGridDeleteRow.Text" xml:space="preserve">
+    <value>Delete Grid Row</value>
+  </data>
+  <data name="MenuGridDeleteGrid.Size" type="System.Drawing.Size, System.Drawing">
+    <value>206, 22</value>
+  </data>
+  <data name="MenuGridDeleteGrid.Text" xml:space="preserve">
+    <value>Delete Grid</value>
+  </data>
+  <data name="toolStripMenuItem20.Size" type="System.Drawing.Size, System.Drawing">
+    <value>203, 6</value>
+  </data>
+  <data name="MenuGridCopy.Size" type="System.Drawing.Size, System.Drawing">
+    <value>206, 22</value>
+  </data>
+  <data name="MenuGridCopy.Text" xml:space="preserve">
+    <value>Copiar</value>
+  </data>
+  <data name="MenuGridPaste.Size" type="System.Drawing.Size, System.Drawing">
+    <value>206, 22</value>
+  </data>
+  <data name="MenuGridPaste.Text" xml:space="preserve">
+    <value>Pegar</value>
+  </data>
+  <data name="MenuGridDelete.Size" type="System.Drawing.Size, System.Drawing">
+    <value>206, 22</value>
+  </data>
+  <data name="MenuGridDelete.Text" xml:space="preserve">
+    <value>Eliminar</value>
+  </data>
+  <data name="toolStripMenuItem21.Size" type="System.Drawing.Size, System.Drawing">
+    <value>203, 6</value>
+  </data>
+  <data name="MenuGridSelectAll.Size" type="System.Drawing.Size, System.Drawing">
+    <value>206, 22</value>
+  </data>
+  <data name="MenuGridSelectAll.Text" xml:space="preserve">
+    <value>Seleccionar todo</value>
+  </data>
+  <data name="ContextMenuGrid.Size" type="System.Drawing.Size, System.Drawing">
+    <value>207, 342</value>
+  </data>
+  <data name="MenuTableProperties.Size" type="System.Drawing.Size, System.Drawing">
+    <value>206, 22</value>
+  </data>
+  <data name="MenuTableProperties.Text" xml:space="preserve">
+    <value>Propiedades...</value>
+  </data>
+  <data name="MenuTableTableProperties.Size" type="System.Drawing.Size, System.Drawing">
+    <value>206, 22</value>
+  </data>
+  <data name="MenuTableTableProperties.Text" xml:space="preserve">
+    <value>Table Properties...</value>
+  </data>
+  <data name="MenuTableReplaceCellChart.Size" type="System.Drawing.Size, System.Drawing">
+    <value>163, 22</value>
+  </data>
+  <data name="MenuTableReplaceCellChart.Text" xml:space="preserve">
+    <value>Gráfico...</value>
+  </data>
+  <data name="MenuTableReplaceCellImage.Size" type="System.Drawing.Size, System.Drawing">
+    <value>163, 22</value>
+  </data>
+  <data name="MenuTableReplaceCellImage.Text" xml:space="preserve">
+    <value>Imagen</value>
+  </data>
+  <data name="MenuTableReplaceCellList.Size" type="System.Drawing.Size, System.Drawing">
+    <value>163, 22</value>
+  </data>
+  <data name="MenuTableReplaceCellList.Text" xml:space="preserve">
+    <value>Lista</value>
+  </data>
+  <data name="MenuTableReplaceCellMatrix.Size" type="System.Drawing.Size, System.Drawing">
+    <value>163, 22</value>
+  </data>
+  <data name="MenuTableReplaceCellMatrix.Text" xml:space="preserve">
+    <value>Matriz...</value>
+  </data>
+  <data name="MenuTableReplaceCellRectangle.Size" type="System.Drawing.Size, System.Drawing">
+    <value>163, 22</value>
+  </data>
+  <data name="MenuTableReplaceCellRectangle.Text" xml:space="preserve">
+    <value>Rectángulo</value>
+  </data>
+  <data name="MenuTableReplaceCellSubreport.Size" type="System.Drawing.Size, System.Drawing">
+    <value>163, 22</value>
+  </data>
+  <data name="MenuTableReplaceCellSubreport.Text" xml:space="preserve">
+    <value>Subinforme</value>
+  </data>
+  <data name="MenuTableReplaceCellTable.Size" type="System.Drawing.Size, System.Drawing">
+    <value>163, 22</value>
+  </data>
+  <data name="MenuTableReplaceCellTable.Text" xml:space="preserve">
+    <value>Tabla...</value>
+  </data>
+  <data name="MenuTableReplaceCellTextbox.Size" type="System.Drawing.Size, System.Drawing">
+    <value>163, 22</value>
+  </data>
+  <data name="MenuTableReplaceCellTextbox.Text" xml:space="preserve">
+    <value>Cuadro de texto</value>
+  </data>
+  <data name="MenuTableReplaceCell.Size" type="System.Drawing.Size, System.Drawing">
+    <value>206, 22</value>
+  </data>
+  <data name="MenuTableReplaceCell.Text" xml:space="preserve">
+    <value>Reemplazar celda con</value>
+  </data>
+  <data name="toolStripMenuItem22.Size" type="System.Drawing.Size, System.Drawing">
+    <value>203, 6</value>
+  </data>
+  <data name="MenuTableInsertColumnBefore.Size" type="System.Drawing.Size, System.Drawing">
+    <value>206, 22</value>
+  </data>
+  <data name="MenuTableInsertColumnBefore.Text" xml:space="preserve">
+    <value>Insertar columna antes</value>
+  </data>
+  <data name="MenuTableInsertColumnAfter.Size" type="System.Drawing.Size, System.Drawing">
+    <value>206, 22</value>
+  </data>
+  <data name="MenuTableInsertColumnAfter.Text" xml:space="preserve">
+    <value>Insertar columna después</value>
+  </data>
+  <data name="toolStripMenuItem23.Size" type="System.Drawing.Size, System.Drawing">
+    <value>203, 6</value>
+  </data>
+  <data name="MenuTableInsertRowBefore.Size" type="System.Drawing.Size, System.Drawing">
+    <value>206, 22</value>
+  </data>
+  <data name="MenuTableInsertRowBefore.Text" xml:space="preserve">
+    <value>Insertar fila antes</value>
+  </data>
+  <data name="MenuTableInsertRowAfter.Size" type="System.Drawing.Size, System.Drawing">
+    <value>206, 22</value>
+  </data>
+  <data name="MenuTableInsertRowAfter.Text" xml:space="preserve">
+    <value>Insertar fila después</value>
+  </data>
+  <data name="toolStripMenuItem24.Size" type="System.Drawing.Size, System.Drawing">
+    <value>203, 6</value>
+  </data>
+  <data name="MenuTableInsertGroup.Size" type="System.Drawing.Size, System.Drawing">
+    <value>206, 22</value>
+  </data>
+  <data name="MenuTableInsertGroup.Text" xml:space="preserve">
+    <value>Insert Table Group...</value>
+  </data>
+  <data name="MenuTableEditGroup.Size" type="System.Drawing.Size, System.Drawing">
+    <value>206, 22</value>
+  </data>
+  <data name="MenuTableEditGroup.Text" xml:space="preserve">
+    <value>Edit Group</value>
+  </data>
+  <data name="MenuTableDeleteGroup.Size" type="System.Drawing.Size, System.Drawing">
+    <value>206, 22</value>
+  </data>
+  <data name="MenuTableDeleteGroup.Text" xml:space="preserve">
+    <value>Delete Group</value>
+  </data>
+  <data name="toolStripMenuItem25.Size" type="System.Drawing.Size, System.Drawing">
+    <value>203, 6</value>
+  </data>
+  <data name="MenuTableDeleteColumn.Size" type="System.Drawing.Size, System.Drawing">
+    <value>206, 22</value>
+  </data>
+  <data name="MenuTableDeleteColumn.Text" xml:space="preserve">
+    <value>Delete Table Column</value>
+  </data>
+  <data name="MenuTableDeleteRow.Size" type="System.Drawing.Size, System.Drawing">
+    <value>206, 22</value>
+  </data>
+  <data name="MenuTableDeleteRow.Text" xml:space="preserve">
+    <value>Delete Table Row</value>
+  </data>
+  <data name="MenuTableDeleteTable.Size" type="System.Drawing.Size, System.Drawing">
+    <value>206, 22</value>
+  </data>
+  <data name="MenuTableDeleteTable.Text" xml:space="preserve">
+    <value>Delete Table</value>
+  </data>
+  <data name="toolStripMenuItem26.Size" type="System.Drawing.Size, System.Drawing">
+    <value>203, 6</value>
+  </data>
+  <data name="MenuTableCopy.Size" type="System.Drawing.Size, System.Drawing">
+    <value>206, 22</value>
+  </data>
+  <data name="MenuTableCopy.Text" xml:space="preserve">
+    <value>Copiar</value>
+  </data>
+  <data name="MenuTablePaste.Size" type="System.Drawing.Size, System.Drawing">
+    <value>206, 22</value>
+  </data>
+  <data name="MenuTablePaste.Text" xml:space="preserve">
+    <value>Pegar</value>
+  </data>
+  <data name="MenuTableDelete.Size" type="System.Drawing.Size, System.Drawing">
+    <value>206, 22</value>
+  </data>
+  <data name="MenuTableDelete.Text" xml:space="preserve">
+    <value>Eliminar</value>
+  </data>
+  <data name="toolStripMenuItem27.Size" type="System.Drawing.Size, System.Drawing">
+    <value>203, 6</value>
+  </data>
+  <data name="MenuTableSelectAll.Size" type="System.Drawing.Size, System.Drawing">
+    <value>206, 22</value>
+  </data>
+  <data name="MenuTableSelectAll.Text" xml:space="preserve">
+    <value>Seleccionar todo</value>
+  </data>
+  <data name="ContextMenuTable.Size" type="System.Drawing.Size, System.Drawing">
+    <value>207, 414</value>
+  </data>
+</root>

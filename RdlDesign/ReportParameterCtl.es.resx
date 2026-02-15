@@ -1,0 +1,204 @@
+<?xml version='1.0' encoding='utf-8'?>
+<root xmlns:ns1="urn:schemas-microsoft-com:xml-msdata" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  
+  <xs:schema id="root">
+    <xs:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xs:element name="root" ns1:IsDataSet="true">
+      <xs:complexType>
+        <xs:choice maxOccurs="unbounded">
+          <xs:element name="metadata">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="value" type="xsd:string" minOccurs="0" />
+              </xs:sequence>
+              <xs:attribute name="name" use="required" type="xsd:string" />
+              <xs:attribute name="type" type="xsd:string" />
+              <xs:attribute name="mimetype" type="xsd:string" />
+              <xs:attribute ref="xml:space" />
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="assembly">
+            <xs:complexType>
+              <xs:attribute name="alias" type="xsd:string" />
+              <xs:attribute name="name" type="xsd:string" />
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="data">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="value" type="xsd:string" minOccurs="0" ns1:Ordinal="1" />
+                <xs:element name="comment" type="xsd:string" minOccurs="0" ns1:Ordinal="2" />
+              </xs:sequence>
+              <xs:attribute name="name" type="xsd:string" use="required" ns1:Ordinal="1" />
+              <xs:attribute name="type" type="xsd:string" ns1:Ordinal="3" />
+              <xs:attribute name="mimetype" type="xsd:string" ns1:Ordinal="4" />
+              <xs:attribute ref="xml:space" />
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="resheader">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="value" type="xsd:string" minOccurs="0" ns1:Ordinal="1" />
+              </xs:sequence>
+              <xs:attribute name="name" type="xsd:string" use="required" />
+            </xs:complexType>
+          </xs:element>
+        </xs:choice>
+      </xs:complexType>
+    </xs:element>
+  </xs:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <assembly alias="System.Drawing" name="System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+  <data name="bAdd.Size" type="System.Drawing.Size, System.Drawing">
+    <value>67, 23</value>
+  </data>
+  <data name="bAdd.Text" xml:space="preserve">
+    <value>Agregar</value>
+  </data>
+  <data name="bRemove.Text" xml:space="preserve">
+    <value>Eliminar</value>
+  </data>
+  <data name="ckbParmMultiValue.Location" type="System.Drawing.Point, System.Drawing">
+    <value>277, 63</value>
+  </data>
+  <data name="ckbParmMultiValue.Size" type="System.Drawing.Size, System.Drawing">
+    <value>135, 24</value>
+  </data>
+  <data name="ckbParmMultiValue.Text" xml:space="preserve">
+    <value>MultiValue</value>
+  </data>
+  <data name="cbValidDisplayField.Location" type="System.Drawing.Point, System.Drawing">
+    <value>311, 83</value>
+  </data>
+  <data name="cbValidDisplayField.Size" type="System.Drawing.Size, System.Drawing">
+    <value>114, 21</value>
+  </data>
+  <data name="cbValidFields.Location" type="System.Drawing.Point, System.Drawing">
+    <value>311, 46</value>
+  </data>
+  <data name="cbValidFields.Size" type="System.Drawing.Size, System.Drawing">
+    <value>114, 21</value>
+  </data>
+  <data name="lDisplayField.Location" type="System.Drawing.Point, System.Drawing">
+    <value>199, 86</value>
+  </data>
+  <data name="lDisplayField.Size" type="System.Drawing.Size, System.Drawing">
+    <value>115, 16</value>
+  </data>
+  <data name="lDisplayField.Text" xml:space="preserve">
+    <value>Display Field</value>
+  </data>
+  <data name="lValidValuesField.Size" type="System.Drawing.Size, System.Drawing">
+    <value>93, 18</value>
+  </data>
+  <data name="lValidValuesField.Text" xml:space="preserve">
+    <value>Campo de valor</value>
+  </data>
+  <data name="rbValues.Size" type="System.Drawing.Size, System.Drawing">
+    <value>77, 20</value>
+  </data>
+  <data name="rbValues.Text" xml:space="preserve">
+    <value>Valores</value>
+  </data>
+  <data name="rbDataSet.Text" xml:space="preserve">
+    <value>Conjunto de datos</value>
+  </data>
+  <data name="tbParmValidValues.Location" type="System.Drawing.Point, System.Drawing">
+    <value>108, 19</value>
+  </data>
+  <data name="tbParmValidValues.Size" type="System.Drawing.Size, System.Drawing">
+    <value>281, 20</value>
+  </data>
+  <data name="gbValidValues.Text" xml:space="preserve">
+    <value>Valid Values</value>
+  </data>
+  <data name="ckbParmAllowBlank.Location" type="System.Drawing.Point, System.Drawing">
+    <value>167, 63</value>
+  </data>
+  <data name="ckbParmAllowBlank.Size" type="System.Drawing.Size, System.Drawing">
+    <value>104, 24</value>
+  </data>
+  <data name="ckbParmAllowBlank.Text" xml:space="preserve">
+    <value>Allow blank (strings only)</value>
+  </data>
+  <data name="ckbParmAllowNull.Size" type="System.Drawing.Size, System.Drawing">
+    <value>158, 24</value>
+  </data>
+  <data name="ckbParmAllowNull.Text" xml:space="preserve">
+    <value>Allow null</value>
+  </data>
+  <data name="tbParmPrompt.Location" type="System.Drawing.Point, System.Drawing">
+    <value>74, 37</value>
+  </data>
+  <data name="tbParmPrompt.Size" type="System.Drawing.Size, System.Drawing">
+    <value>249, 20</value>
+  </data>
+  <data name="lParmPrompt.Size" type="System.Drawing.Size, System.Drawing">
+    <value>64, 19</value>
+  </data>
+  <data name="lParmPrompt.Text" xml:space="preserve">
+    <value>Sugerencia</value>
+  </data>
+  <data name="cbParmType.Location" type="System.Drawing.Point, System.Drawing">
+    <value>236, 10</value>
+  </data>
+  <data name="lParmType.Size" type="System.Drawing.Size, System.Drawing">
+    <value>73, 21</value>
+  </data>
+  <data name="lParmType.Text" xml:space="preserve">
+    <value>Datatype</value>
+  </data>
+  <data name="tbParmName.Location" type="System.Drawing.Point, System.Drawing">
+    <value>74, 12</value>
+  </data>
+  <data name="tbParmName.Size" type="System.Drawing.Size, System.Drawing">
+    <value>88, 20</value>
+  </data>
+  <data name="lParmName.Size" type="System.Drawing.Size, System.Drawing">
+    <value>70, 19</value>
+  </data>
+  <data name="lParmName.Text" xml:space="preserve">
+    <value>Nombre</value>
+  </data>
+  <data name="cbDefaultValueField.Location" type="System.Drawing.Point, System.Drawing">
+    <value>311, 46</value>
+  </data>
+  <data name="cbDefaultValueField.Size" type="System.Drawing.Size, System.Drawing">
+    <value>114, 21</value>
+  </data>
+  <data name="tbParmDefaultValue.Location" type="System.Drawing.Point, System.Drawing">
+    <value>108, 19</value>
+  </data>
+  <data name="tbParmDefaultValue.Size" type="System.Drawing.Size, System.Drawing">
+    <value>281, 20</value>
+  </data>
+  <data name="lDefaultValueFields.Size" type="System.Drawing.Size, System.Drawing">
+    <value>93, 21</value>
+  </data>
+  <data name="lDefaultValueFields.Text" xml:space="preserve">
+    <value>Campo de valor</value>
+  </data>
+  <data name="rbDefaultValues.Size" type="System.Drawing.Size, System.Drawing">
+    <value>77, 20</value>
+  </data>
+  <data name="rbDefaultValues.Text" xml:space="preserve">
+    <value>Valores</value>
+  </data>
+  <data name="rbDefaultDataSetName.Text" xml:space="preserve">
+    <value>Conjunto de datos</value>
+  </data>
+  <data name="gbDefaultValues.Text" xml:space="preserve">
+    <value>Valores predeterminados</value>
+  </data>
+</root>

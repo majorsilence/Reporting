@@ -1,0 +1,246 @@
+<?xml version='1.0' encoding='utf-8'?>
+<root xmlns:ns1="urn:schemas-microsoft-com:xml-msdata" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  
+  <xs:schema id="root">
+    <xs:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xs:element name="root" ns1:IsDataSet="true">
+      <xs:complexType>
+        <xs:choice maxOccurs="unbounded">
+          <xs:element name="metadata">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="value" type="xsd:string" minOccurs="0" />
+              </xs:sequence>
+              <xs:attribute name="name" use="required" type="xsd:string" />
+              <xs:attribute name="type" type="xsd:string" />
+              <xs:attribute name="mimetype" type="xsd:string" />
+              <xs:attribute ref="xml:space" />
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="assembly">
+            <xs:complexType>
+              <xs:attribute name="alias" type="xsd:string" />
+              <xs:attribute name="name" type="xsd:string" />
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="data">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="value" type="xsd:string" minOccurs="0" ns1:Ordinal="1" />
+                <xs:element name="comment" type="xsd:string" minOccurs="0" ns1:Ordinal="2" />
+              </xs:sequence>
+              <xs:attribute name="name" type="xsd:string" use="required" ns1:Ordinal="1" />
+              <xs:attribute name="type" type="xsd:string" ns1:Ordinal="3" />
+              <xs:attribute name="mimetype" type="xsd:string" ns1:Ordinal="4" />
+              <xs:attribute ref="xml:space" />
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="resheader">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="value" type="xsd:string" minOccurs="0" ns1:Ordinal="1" />
+              </xs:sequence>
+              <xs:attribute name="name" type="xsd:string" use="required" />
+            </xs:complexType>
+          </xs:element>
+        </xs:choice>
+      </xs:complexType>
+    </xs:element>
+  </xs:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="ReportType.Text" xml:space="preserve">
+    <value>Report Info</value>
+  </data>
+  <data name="groupBox2.Text" xml:space="preserve">
+    <value>RDL Schema</value>
+  </data>
+  <assembly alias="System.Drawing" name="System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+  <data name="rbSchema2005.Size" type="System.Drawing.Size, System.Drawing">
+    <value>104, 18</value>
+  </data>
+  <data name="rbSchema2003.Size" type="System.Drawing.Size, System.Drawing">
+    <value>104, 18</value>
+  </data>
+  <data name="rbSchemaNo.Size" type="System.Drawing.Size, System.Drawing">
+    <value>104, 18</value>
+  </data>
+  <data name="rbSchemaNo.Text" xml:space="preserve">
+    <value>Ausente</value>
+  </data>
+  <data name="label6.Size" type="System.Drawing.Size, System.Drawing">
+    <value>74, 23</value>
+  </data>
+  <data name="label6.Text" xml:space="preserve">
+    <value>Orientation:</value>
+  </data>
+  <data name="label3.Text" xml:space="preserve">
+    <value>Autor:</value>
+  </data>
+  <data name="label2.Text" xml:space="preserve">
+    <value>Descripción:</value>
+  </data>
+  <data name="label1.Text" xml:space="preserve">
+    <value>Name:</value>
+  </data>
+  <data name="groupBox1.Text" xml:space="preserve">
+    <value>Report Type</value>
+  </data>
+  <data name="rbChart.Text" xml:space="preserve">
+    <value>Gráfico</value>
+  </data>
+  <data name="rbMatrix.Text" xml:space="preserve">
+    <value>Matriz</value>
+  </data>
+  <data name="rbList.Text" xml:space="preserve">
+    <value>Lista</value>
+  </data>
+  <data name="rbTable.Text" xml:space="preserve">
+    <value>Tabla</value>
+  </data>
+  <data name="DBConnection.Text" xml:space="preserve">
+    <value>Conexión</value>
+  </data>
+  <data name="textBoxSqlPassword.Size" type="System.Drawing.Size, System.Drawing">
+    <value>202, 20</value>
+  </data>
+  <data name="label11.Text" xml:space="preserve">
+    <value>password:</value>
+  </data>
+  <data name="textBoxSqlUser.Location" type="System.Drawing.Point, System.Drawing">
+    <value>98, 63</value>
+  </data>
+  <data name="textBoxSqlUser.Size" type="System.Drawing.Size, System.Drawing">
+    <value>139, 20</value>
+  </data>
+  <data name="label10.Size" type="System.Drawing.Size, System.Drawing">
+    <value>90, 23</value>
+  </data>
+  <data name="label10.Text" xml:space="preserve">
+    <value>Username:</value>
+  </data>
+  <data name="label8.Size" type="System.Drawing.Size, System.Drawing">
+    <value>47, 13</value>
+  </data>
+  <data name="label8.Text" xml:space="preserve">
+    <value>Server:</value>
+  </data>
+  <data name="buttonDatabaseSearch.Text" xml:space="preserve">
+    <value>Search for Databases</value>
+  </data>
+  <data name="comboServerList.Location" type="System.Drawing.Point, System.Drawing">
+    <value>98, 21</value>
+  </data>
+  <data name="comboServerList.Size" type="System.Drawing.Size, System.Drawing">
+    <value>268, 21</value>
+  </data>
+  <data name="label9.Size" type="System.Drawing.Size, System.Drawing">
+    <value>75, 13</value>
+  </data>
+  <data name="label9.Text" xml:space="preserve">
+    <value>Base de datos:</value>
+  </data>
+  <data name="buttonSearchSqlServers.Text" xml:space="preserve">
+    <value>Search for Servers</value>
+  </data>
+  <data name="comboDatabaseList.Location" type="System.Drawing.Point, System.Drawing">
+    <value>98, 92</value>
+  </data>
+  <data name="comboDatabaseList.Size" type="System.Drawing.Size, System.Drawing">
+    <value>268, 21</value>
+  </data>
+  <data name="buttonSqliteSelectDatabase.Location" type="System.Drawing.Point, System.Drawing">
+    <value>309, 104</value>
+  </data>
+  <data name="buttonSqliteSelectDatabase.Size" type="System.Drawing.Size, System.Drawing">
+    <value>203, 23</value>
+  </data>
+  <data name="buttonSqliteSelectDatabase.Text" xml:space="preserve">
+    <value>Select SQLite Database File</value>
+  </data>
+  <data name="bShared.Location" type="System.Drawing.Point, System.Drawing">
+    <value>216, 53</value>
+  </data>
+  <data name="bTestConnection.Size" type="System.Drawing.Size, System.Drawing">
+    <value>138, 23</value>
+  </data>
+  <data name="bTestConnection.Text" xml:space="preserve">
+    <value>Probar conexión</value>
+  </data>
+  <data name="cbOdbcNames.Location" type="System.Drawing.Point, System.Drawing">
+    <value>360, 16</value>
+  </data>
+  <data name="lODBC.Location" type="System.Drawing.Point, System.Drawing">
+    <value>246, 16</value>
+  </data>
+  <data name="lODBC.Text" xml:space="preserve">
+    <value>Origen ODBC</value>
+  </data>
+  <data name="lODBC.TextAlign" type="System.Drawing.ContentAlignment, System.Drawing">
+    <value>MiddleRight</value>
+  </data>
+  <data name="lConnection.Location" type="System.Drawing.Point, System.Drawing">
+    <value>16, 53</value>
+  </data>
+  <data name="lConnection.Text" xml:space="preserve">
+    <value>Connection:</value>
+  </data>
+  <data name="label7.Size" type="System.Drawing.Size, System.Drawing">
+    <value>90, 23</value>
+  </data>
+  <data name="label7.Text" xml:space="preserve">
+    <value>Connection Type:</value>
+  </data>
+  <data name="label7.TextAlign" type="System.Drawing.ContentAlignment, System.Drawing">
+    <value>MiddleRight</value>
+  </data>
+  <data name="tbConnection.Size" type="System.Drawing.Size, System.Drawing">
+    <value>496, 20</value>
+  </data>
+  <data name="ReportParameters.Text" xml:space="preserve">
+    <value>Parámetros</value>
+  </data>
+  <data name="TabularGroup.Text" xml:space="preserve">
+    <value>Grouping</value>
+  </data>
+  <data name="clbSubtotal.Location" type="System.Drawing.Point, System.Drawing">
+    <value>235, 42</value>
+  </data>
+  <data name="ckbGrandTotal.Text" xml:space="preserve">
+    <value>Calcular totales generales</value>
+  </data>
+  <data name="label5.Text" xml:space="preserve">
+    <value>Check columns you want to subtotal</value>
+  </data>
+  <data name="label4.Size" type="System.Drawing.Size, System.Drawing">
+    <value>200, 32</value>
+  </data>
+  <data name="label4.Text" xml:space="preserve">
+    <value>Pick a column to group (create hierarchy)</value>
+  </data>
+  <data name="cbColumnList.Location" type="System.Drawing.Point, System.Drawing">
+    <value>16, 51</value>
+  </data>
+  <data name="ReportSyntax.Text" xml:space="preserve">
+    <value>Código</value>
+  </data>
+  <data name="ReportPreview.Text" xml:space="preserve">
+    <value>Vista</value>
+  </data>
+  <data name="btnCancel.Text" xml:space="preserve">
+    <value>Cancelar</value>
+  </data>
+  <data name="$this.Text" xml:space="preserve">
+    <value>New Report from Database</value>
+  </data>
+</root>

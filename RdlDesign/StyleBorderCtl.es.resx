@@ -1,0 +1,253 @@
+<?xml version='1.0' encoding='utf-8'?>
+<root xmlns:ns1="urn:schemas-microsoft-com:xml-msdata" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  
+  <xs:schema id="root">
+    <xs:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xs:element name="root" ns1:IsDataSet="true">
+      <xs:complexType>
+        <xs:choice maxOccurs="unbounded">
+          <xs:element name="metadata">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="value" type="xsd:string" minOccurs="0" />
+              </xs:sequence>
+              <xs:attribute name="name" use="required" type="xsd:string" />
+              <xs:attribute name="type" type="xsd:string" />
+              <xs:attribute name="mimetype" type="xsd:string" />
+              <xs:attribute ref="xml:space" />
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="assembly">
+            <xs:complexType>
+              <xs:attribute name="alias" type="xsd:string" />
+              <xs:attribute name="name" type="xsd:string" />
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="data">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="value" type="xsd:string" minOccurs="0" ns1:Ordinal="1" />
+                <xs:element name="comment" type="xsd:string" minOccurs="0" ns1:Ordinal="2" />
+              </xs:sequence>
+              <xs:attribute name="name" type="xsd:string" use="required" ns1:Ordinal="1" />
+              <xs:attribute name="type" type="xsd:string" ns1:Ordinal="3" />
+              <xs:attribute name="mimetype" type="xsd:string" ns1:Ordinal="4" />
+              <xs:attribute ref="xml:space" />
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="resheader">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="value" type="xsd:string" minOccurs="0" ns1:Ordinal="1" />
+              </xs:sequence>
+              <xs:attribute name="name" type="xsd:string" use="required" />
+            </xs:complexType>
+          </xs:element>
+        </xs:choice>
+      </xs:complexType>
+    </xs:element>
+  </xs:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <assembly alias="mscorlib" name="mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
+  <data name="lLeft.AutoSize" type="System.Boolean, mscorlib">
+    <value>True</value>
+  </data>
+  <assembly alias="System.Drawing" name="System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+  <data name="lLeft.Size" type="System.Drawing.Size, System.Drawing">
+    <value>38, 13</value>
+  </data>
+  <data name="lLeft.Text" xml:space="preserve">
+    <value>Izquierda</value>
+  </data>
+  <data name="lBottom.AutoSize" type="System.Boolean, mscorlib">
+    <value>True</value>
+  </data>
+  <data name="lBottom.Size" type="System.Drawing.Size, System.Drawing">
+    <value>37, 13</value>
+  </data>
+  <data name="lBottom.Text" xml:space="preserve">
+    <value>Abajo</value>
+  </data>
+  <data name="lTop.AutoSize" type="System.Boolean, mscorlib">
+    <value>True</value>
+  </data>
+  <data name="lTop.Size" type="System.Drawing.Size, System.Drawing">
+    <value>42, 13</value>
+  </data>
+  <data name="lTop.Text" xml:space="preserve">
+    <value>Arriba</value>
+  </data>
+  <data name="lRight.AutoSize" type="System.Boolean, mscorlib">
+    <value>True</value>
+  </data>
+  <data name="lRight.Size" type="System.Drawing.Size, System.Drawing">
+    <value>44, 13</value>
+  </data>
+  <data name="lRight.Text" xml:space="preserve">
+    <value>Derecha</value>
+  </data>
+  <data name="label2.AutoSize" type="System.Boolean, mscorlib">
+    <value>True</value>
+  </data>
+  <data name="label2.Location" type="System.Drawing.Point, System.Drawing">
+    <value>98, 19</value>
+  </data>
+  <data name="label2.Size" type="System.Drawing.Size, System.Drawing">
+    <value>37, 13</value>
+  </data>
+  <data name="label2.Text" xml:space="preserve">
+    <value>Estilo</value>
+  </data>
+  <data name="label6.AutoSize" type="System.Boolean, mscorlib">
+    <value>True</value>
+  </data>
+  <data name="label6.Location" type="System.Drawing.Point, System.Drawing">
+    <value>369, 19</value>
+  </data>
+  <data name="label6.Size" type="System.Drawing.Size, System.Drawing">
+    <value>46, 13</value>
+  </data>
+  <data name="label6.Text" xml:space="preserve">
+    <value>Ancho</value>
+  </data>
+  <data name="label7.AutoSize" type="System.Boolean, mscorlib">
+    <value>True</value>
+  </data>
+  <data name="label7.Location" type="System.Drawing.Point, System.Drawing">
+    <value>218, 19</value>
+  </data>
+  <data name="label7.Size" type="System.Drawing.Size, System.Drawing">
+    <value>32, 13</value>
+  </data>
+  <data name="label7.Text" xml:space="preserve">
+    <value>Color</value>
+  </data>
+  <data name="cbStyleLeft.Location" type="System.Drawing.Point, System.Drawing">
+    <value>95, 70</value>
+  </data>
+  <data name="cbStyleBottom.Location" type="System.Drawing.Point, System.Drawing">
+    <value>95, 166</value>
+  </data>
+  <data name="cbStyleTop.Location" type="System.Drawing.Point, System.Drawing">
+    <value>95, 134</value>
+  </data>
+  <data name="cbStyleRight.Location" type="System.Drawing.Point, System.Drawing">
+    <value>95, 102</value>
+  </data>
+  <data name="bColorLeft.Location" type="System.Drawing.Point, System.Drawing">
+    <value>345, 72</value>
+  </data>
+  <data name="cbColorLeft.Location" type="System.Drawing.Point, System.Drawing">
+    <value>215, 70</value>
+  </data>
+  <data name="bColorRight.Location" type="System.Drawing.Point, System.Drawing">
+    <value>345, 104</value>
+  </data>
+  <data name="cbColorRight.Location" type="System.Drawing.Point, System.Drawing">
+    <value>215, 102</value>
+  </data>
+  <data name="bColorTop.Location" type="System.Drawing.Point, System.Drawing">
+    <value>345, 136</value>
+  </data>
+  <data name="cbColorTop.Location" type="System.Drawing.Point, System.Drawing">
+    <value>215, 134</value>
+  </data>
+  <data name="bColorBottom.Location" type="System.Drawing.Point, System.Drawing">
+    <value>345, 168</value>
+  </data>
+  <data name="cbColorBottom.Location" type="System.Drawing.Point, System.Drawing">
+    <value>215, 166</value>
+  </data>
+  <data name="tbWidthLeft.Location" type="System.Drawing.Point, System.Drawing">
+    <value>373, 70</value>
+  </data>
+  <data name="tbWidthRight.Location" type="System.Drawing.Point, System.Drawing">
+    <value>373, 102</value>
+  </data>
+  <data name="tbWidthTop.Location" type="System.Drawing.Point, System.Drawing">
+    <value>373, 134</value>
+  </data>
+  <data name="tbWidthBottom.Location" type="System.Drawing.Point, System.Drawing">
+    <value>373, 166</value>
+  </data>
+  <data name="tbWidthDefault.Location" type="System.Drawing.Point, System.Drawing">
+    <value>373, 38</value>
+  </data>
+  <data name="bColorDefault.Location" type="System.Drawing.Point, System.Drawing">
+    <value>345, 40</value>
+  </data>
+  <data name="cbColorDefault.Location" type="System.Drawing.Point, System.Drawing">
+    <value>215, 38</value>
+  </data>
+  <data name="cbStyleDefault.Location" type="System.Drawing.Point, System.Drawing">
+    <value>95, 38</value>
+  </data>
+  <data name="label8.AutoSize" type="System.Boolean, mscorlib">
+    <value>True</value>
+  </data>
+  <data name="label8.Size" type="System.Drawing.Size, System.Drawing">
+    <value>80, 13</value>
+  </data>
+  <data name="label8.Text" xml:space="preserve">
+    <value>Default</value>
+  </data>
+  <data name="bSD.Location" type="System.Drawing.Point, System.Drawing">
+    <value>187, 40</value>
+  </data>
+  <data name="bSL.Location" type="System.Drawing.Point, System.Drawing">
+    <value>187, 73</value>
+  </data>
+  <data name="bSR.Location" type="System.Drawing.Point, System.Drawing">
+    <value>187, 106</value>
+  </data>
+  <data name="bST.Location" type="System.Drawing.Point, System.Drawing">
+    <value>187, 137</value>
+  </data>
+  <data name="bSB.Location" type="System.Drawing.Point, System.Drawing">
+    <value>187, 169</value>
+  </data>
+  <data name="bCD.Location" type="System.Drawing.Point, System.Drawing">
+    <value>315, 40</value>
+  </data>
+  <data name="bCT.Location" type="System.Drawing.Point, System.Drawing">
+    <value>315, 138</value>
+  </data>
+  <data name="bCB.Location" type="System.Drawing.Point, System.Drawing">
+    <value>315, 169</value>
+  </data>
+  <data name="bWB.Location" type="System.Drawing.Point, System.Drawing">
+    <value>442, 168</value>
+  </data>
+  <data name="bWT.Location" type="System.Drawing.Point, System.Drawing">
+    <value>442, 136</value>
+  </data>
+  <data name="bWR.Location" type="System.Drawing.Point, System.Drawing">
+    <value>442, 105</value>
+  </data>
+  <data name="bCR.Location" type="System.Drawing.Point, System.Drawing">
+    <value>315, 106</value>
+  </data>
+  <data name="bWL.Location" type="System.Drawing.Point, System.Drawing">
+    <value>442, 71</value>
+  </data>
+  <data name="bWD.Location" type="System.Drawing.Point, System.Drawing">
+    <value>442, 42</value>
+  </data>
+  <data name="bCL.Location" type="System.Drawing.Point, System.Drawing">
+    <value>315, 73</value>
+  </data>
+  <data name="$this.Size" type="System.Drawing.Size, System.Drawing">
+    <value>480, 312</value>
+  </data>
+</root>

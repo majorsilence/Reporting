@@ -1,0 +1,123 @@
+<?xml version='1.0' encoding='utf-8'?>
+<root xmlns:ns1="urn:schemas-microsoft-com:xml-msdata" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  
+  <xs:schema id="root">
+    <xs:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xs:element name="root" ns1:IsDataSet="true">
+      <xs:complexType>
+        <xs:choice maxOccurs="unbounded">
+          <xs:element name="metadata">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="value" type="xsd:string" minOccurs="0" />
+              </xs:sequence>
+              <xs:attribute name="name" use="required" type="xsd:string" />
+              <xs:attribute name="type" type="xsd:string" />
+              <xs:attribute name="mimetype" type="xsd:string" />
+              <xs:attribute ref="xml:space" />
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="assembly">
+            <xs:complexType>
+              <xs:attribute name="alias" type="xsd:string" />
+              <xs:attribute name="name" type="xsd:string" />
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="data">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="value" type="xsd:string" minOccurs="0" ns1:Ordinal="1" />
+                <xs:element name="comment" type="xsd:string" minOccurs="0" ns1:Ordinal="2" />
+              </xs:sequence>
+              <xs:attribute name="name" type="xsd:string" use="required" ns1:Ordinal="1" />
+              <xs:attribute name="type" type="xsd:string" ns1:Ordinal="3" />
+              <xs:attribute name="mimetype" type="xsd:string" ns1:Ordinal="4" />
+              <xs:attribute ref="xml:space" />
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="resheader">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="value" type="xsd:string" minOccurs="0" ns1:Ordinal="1" />
+              </xs:sequence>
+              <xs:attribute name="name" type="xsd:string" use="required" />
+            </xs:complexType>
+          </xs:element>
+        </xs:choice>
+      </xs:complexType>
+    </xs:element>
+  </xs:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="DialogAbout_About" xml:space="preserve">
+    <value>RDL Reader displays reports defined using the Report Definition Language Specification.
+Copyright (C) 2004-2008  fyiReporting Software, LLC
+Copyright (C) 2012 Peter Gill &lt;peter@majorsilence.com&gt;
+
+This file is part of the My-FyiReporting RDL project.
+	
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+For additional information, email peter@majorsilence.com or visit
+the website https://github.com/majorsilence/My-FyiReporting.</value>
+  </data>
+  <data name="DialogAbout_ShowD_Exception" xml:space="preserve">
+    <value>Error</value>
+  </data>
+  <data name="DialogAbout_Version" xml:space="preserve">
+    <value>Versión {0}</value>
+  </data>
+  <data name="RdlReader_menuFileOpen_Click_Filter" xml:space="preserve">
+    <value>RDL files (*.rdl)|*.rdl|Encrypted RDL files (*.encrypted)|*.encrypted|All files (*.*)|*.*</value>
+  </data>
+  <data name="RdlReader_SaveG_NotValidFileType" xml:space="preserve">
+    <value>{0} is not a valid file type.  File extension must be PDF, XML, HTML, CSV, MHT, RTF, TIF, XLSX.</value>
+  </data>
+  <data name="RdlReader_SaveG_SaveAsError" xml:space="preserve">
+    <value>Save As Error</value>
+  </data>
+  <data name="RdlReader_ShowC_PrintError" xml:space="preserve">
+    <value>Print error: </value>
+  </data>
+  <data name="RdlReader_ShowC_PrintOneFile" xml:space="preserve">
+    <value>Solo se puede imprimir un archivo a la vez.</value>
+  </data>
+  <data name="RdlReader_ShowD_ReportNotLoaded" xml:space="preserve">
+    <value>The specified report [ {0} ] could not be loaded.</value>
+  </data>
+  <data name="RdlReader_ShowF_Export" xml:space="preserve">
+    <value>Exportar</value>
+  </data>
+  <data name="RdlReader_ShowF_WantSaveColorsInTIF" xml:space="preserve">
+    <value>Do you want to save colors in TIF file?</value>
+  </data>
+  <data name="RdlReader_Show_MyFyiReporting" xml:space="preserve">
+    <value>Editor de informes</value>
+  </data>
+  <data name="ZoomTo_ShowI_MagnificationLevelInvalid" xml:space="preserve">
+    <value>Magnification level is an invalid number.</value>
+  </data>
+  <data name="RdlReader_menuFileSaveAs_Click_FilesFilter" xml:space="preserve">
+    <value>PDF files (*.pdf)|*.pdf|XML files (*.xml)|*.xml|HTML files (*.html)|*.html|CSV files (*.csv)|*.csv|RTF files (*.rtf)|*.rtf|TIF files (*.tif)|*.tif|Excel 2007 Table Only (*.xlsx)|*.xlsx|Excel 2007 (*.xlsx)|*.xlsx|MHT files (*.mht)|*.mht</value>
+  </data>
+</root>
