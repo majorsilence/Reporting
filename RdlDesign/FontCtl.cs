@@ -226,7 +226,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			bLineHeight.Click += new System.EventHandler(this.bExpr_Click);
 
 			// Expand the control to fit the new row
-			this.Size = new System.Drawing.Size(this.Width, 260);
+			this.Size = new System.Drawing.Size(this.Width, this.Height + 26);
 
 			this.Controls.Add(lblLineHeight);
 			this.Controls.Add(cbLineHeight);

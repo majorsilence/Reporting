@@ -661,7 +661,7 @@ namespace Majorsilence.Reporting.Rdl
                 float textwidth = bf.GetWidthPoint(text, si.FontSize);
                 // Use LineHeight for line spacing if specified, otherwise use FontSize
                 float lineSpacing = si.LineHeight > 0 ? si.LineHeight : si.FontSize;
-                // Calculate the x positino
+                // Calculate the x position
                 float startX = x + si.PaddingLeft; // TODO: handle tb_rl
                 float startY = y + si.PaddingTop + (i * lineSpacing); // TODO: handle tb_rl
                 int align = 0;
