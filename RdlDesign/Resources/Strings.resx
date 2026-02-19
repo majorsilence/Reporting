@@ -580,6 +580,9 @@ XML in error:
   <data name="FontCtl_Show_InvalidFontSize" xml:space="preserve">
     <value>Invalid Font Size</value>
   </data>
+  <data name="FontCtl_Show_InvalidLineHeight" xml:space="preserve">
+    <value>Invalid Line Height</value>
+  </data>
   <data name="GridCtl_Show_Grid" xml:space="preserve">
     <value>Grid</value>
   </data>

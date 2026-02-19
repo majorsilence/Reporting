@@ -20,7 +20,7 @@ namespace Majorsilence.Reporting.RdlDesign
         private List<XmlNode> _ReportItems;
 		private DesignXmlDraw _Draw;
 		private bool fHorzAlign, fFormat, fDirection, fWritingMode, fTextDecoration;
-		private bool fColor, fVerticalAlign, fFontStyle, fFontWeight, fFontSize, fFontFamily;
+		private bool fColor, fVerticalAlign, fFontStyle, fFontWeight, fFontSize, fFontFamily, fLineHeight;
 		private System.Windows.Forms.Label label4;
 		private System.Windows.Forms.Label label5;
 		private System.Windows.Forms.Label label6;
@@ -57,6 +57,9 @@ namespace Majorsilence.Reporting.RdlDesign
 		private System.Windows.Forms.Button bVertical;
 		private System.Windows.Forms.Button bWrtMode;
 		private System.Windows.Forms.Button bFormat;
+		private System.Windows.Forms.Label lblLineHeight;
+		private System.Windows.Forms.ComboBox cbLineHeight;
+		private System.Windows.Forms.Button bLineHeight;
 		/// <summary> 
 		/// Required designer variable.
 		/// </summary>
@@ -70,6 +73,9 @@ namespace Majorsilence.Reporting.RdlDesign
             _names = names;
 			// This call is required by the Windows.Forms Form Designer.
 			InitializeComponent();
+
+			// Add line height controls programmatically
+			InitLineHeightControls();
 
 			// Initialize form using the style node values
 			InitTextStyles();
@@ -100,6 +106,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			string sFormat="";
 			string sDirection="LTR";
 			string sWritingMode="lr-tb";
+			string sLineHeight="";
 			foreach (XmlNode lNode in sNode)
 			{
 				if (lNode.NodeType != XmlNodeType.Element)
@@ -139,6 +146,9 @@ namespace Majorsilence.Reporting.RdlDesign
 					case "WritingMode":
 						sWritingMode = lNode.InnerText;
 						break;
+					case "LineHeight":
+						sLineHeight = lNode.InnerText;
+						break;
 				}
 			}
 
@@ -159,9 +169,10 @@ namespace Majorsilence.Reporting.RdlDesign
 			this.cbFormat.Text = sFormat;
 			this.cbDirection.Text = sDirection;
 			this.cbWritingMode.Text = sWritingMode;
+			this.cbLineHeight.Text = sLineHeight;
 
             fHorzAlign = fFormat = fDirection = fWritingMode = fTextDecoration =
-                fColor = fVerticalAlign = fFontStyle = fFontWeight = fFontSize = fFontFamily = false;
+                fColor = fVerticalAlign = fFontStyle = fFontWeight = fFontSize = fFontFamily = fLineHeight = false;
 
 			return;
 		}
@@ -179,6 +190,47 @@ namespace Majorsilence.Reporting.RdlDesign
 				}
 			}
 			base.Dispose( disposing );
+		}
+
+		private void InitLineHeightControls()
+		{
+			// Line Height label
+			lblLineHeight = new System.Windows.Forms.Label();
+			lblLineHeight.Text = "Line Height";
+			lblLineHeight.Location = new System.Drawing.Point(16, 222);
+			lblLineHeight.Size = new System.Drawing.Size(80, 16);
+			lblLineHeight.TabIndex = 30;
+			lblLineHeight.Name = "lblLineHeight";
+
+			// Line Height combo box
+			cbLineHeight = new System.Windows.Forms.ComboBox();
+			cbLineHeight.Location = new System.Drawing.Point(104, 219);
+			cbLineHeight.Size = new System.Drawing.Size(272, 21);
+			cbLineHeight.TabIndex = 31;
+			cbLineHeight.Name = "cbLineHeight";
+			cbLineHeight.Items.AddRange(new object[] {
+				"", "8pt", "9pt", "10pt", "11pt", "12pt", "14pt", "16pt", "18pt",
+				"20pt", "22pt", "24pt", "26pt", "28pt", "36pt", "48pt", "72pt"});
+			cbLineHeight.TextChanged += new System.EventHandler(this.cbLineHeight_TextChanged);
+
+			// Line Height expression button
+			bLineHeight = new System.Windows.Forms.Button();
+			bLineHeight.Location = new System.Drawing.Point(384, 222);
+			bLineHeight.Size = new System.Drawing.Size(22, 16);
+			bLineHeight.TabIndex = 32;
+			bLineHeight.Name = "bLineHeight";
+			bLineHeight.Tag = "lineheight";
+			bLineHeight.Text = "fx";
+			bLineHeight.Font = new System.Drawing.Font("Arial", 8.25f, System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic);
+			bLineHeight.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+			bLineHeight.Click += new System.EventHandler(this.bExpr_Click);
+
+			// Expand the control to fit the new row
+			this.Size = new System.Drawing.Size(this.Width, 260);
+
+			this.Controls.Add(lblLineHeight);
+			this.Controls.Add(cbLineHeight);
+			this.Controls.Add(bLineHeight);
 		}
 
 		#region Component Designer generated code
@@ -573,6 +625,19 @@ namespace Majorsilence.Reporting.RdlDesign
 				}
 
 			}
+			if (fLineHeight && cbLineHeight.Text.Trim().Length > 0)
+			{
+				try
+				{
+					if (!this.cbLineHeight.Text.Trim().StartsWith("="))
+						DesignerUtility.ValidateSize(this.cbLineHeight.Text, false, false);
+				}
+				catch (Exception e)
+				{
+					MessageBox.Show(e.Message, Strings.FontCtl_Show_InvalidLineHeight);
+					return false;
+				}
+			}
 			return true;
 		}
 
@@ -587,7 +652,7 @@ namespace Majorsilence.Reporting.RdlDesign
 				ApplyChanges(riNode);
 
 			fHorzAlign = fFormat = fDirection = fWritingMode = fTextDecoration =
-				fColor = fVerticalAlign = fFontStyle = fFontWeight = fFontSize = fFontFamily = false;
+				fColor = fVerticalAlign = fFontStyle = fFontWeight = fFontSize = fFontFamily = fLineHeight = false;
 		}
 
 		public void ApplyChanges(XmlNode node)
@@ -639,6 +704,24 @@ namespace Majorsilence.Reporting.RdlDesign
 				_Draw.SetElement(sNode, "Direction", cbDirection.Text);
 			if (fWritingMode)
 				_Draw.SetElement(sNode, "WritingMode", cbWritingMode.Text);
+			if (fLineHeight)
+			{
+				if (cbLineHeight.Text.Trim().Length == 0)
+					_Draw.RemoveElement(sNode, "LineHeight");
+				else
+				{
+					float lh = DesignXmlDraw.GetSize(cbLineHeight.Text);
+					if (lh <= 0)
+						lh = DesignXmlDraw.GetSize(cbLineHeight.Text + "pt");	// Try assuming pt
+					if (lh > 0)
+					{
+						string rs = string.Format(NumberFormatInfo.InvariantInfo, "{0:0.#}pt", lh);
+						_Draw.SetElement(sNode, "LineHeight", rs);
+					}
+					else
+						_Draw.SetElement(sNode, "LineHeight", cbLineHeight.Text);	// expression
+				}
+			}
 			
 			return;
 		}
@@ -797,6 +880,11 @@ namespace Majorsilence.Reporting.RdlDesign
 			fFormat = true;
 		}
 
+		private void cbLineHeight_TextChanged(object sender, System.EventArgs e)
+		{
+			fLineHeight = true;
+		}
+
 		private void bExpr_Click(object sender, System.EventArgs e)
 		{
 			Button b = sender as Button;
@@ -839,6 +927,9 @@ namespace Majorsilence.Reporting.RdlDesign
 					break;
 				case "format":
 					c = cbFormat;
+					break;
+				case "lineheight":
+					c = cbLineHeight;
 					break;
 			}
 
