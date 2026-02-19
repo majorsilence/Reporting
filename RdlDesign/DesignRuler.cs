@@ -94,7 +94,7 @@ namespace Majorsilence.Reporting.RdlDesign
 		private void DesignRulerPaint(object sender, System.Windows.Forms.PaintEventArgs e)
         {
 
-            _IsMetric = RdlDesign.RdlDesigner.MeasureUnits == "cm" ? true : false;
+            _IsMetric = (RdlDesign.RdlDesigner.MeasureUnits == "cm" || RdlDesign.RdlDesigner.MeasureUnits == "mm") ? true : false;
             _Intervals = _IsMetric ? 4 : 8;
             if (_Vertical)
                 Ruler_DrawVert(e.Graphics);
@@ -138,7 +138,9 @@ namespace Majorsilence.Reporting.RdlDesign
                 float mod;
                 yoff = this.Height/2 -2;
                 mod = g.DpiX;
-                if (_IsMetric)
+                if (RdlDesign.RdlDesigner.MeasureUnits == "mm")
+                    mod = mod / 25.4f;
+                else if (_IsMetric)
                     mod = mod / 2.54f;
                 mod *= _Design.SCALEX;
                 xinc = mod / (_Intervals * _Design.SCALEX);
@@ -326,7 +328,9 @@ namespace Majorsilence.Reporting.RdlDesign
 
             xoff = Design.PointsX(this.Width / 2 - 2);
             mod = Design.PointsY(g.DpiY);
-            if (_IsMetric)
+            if (RdlDesign.RdlDesigner.MeasureUnits == "mm")
+                mod = Design.PointsY(g.DpiY / 25.4f);
+            else if (_IsMetric)
                 mod = Design.PointsY(g.DpiY / 2.54f);
             mod *= _Design.SCALEY;
 

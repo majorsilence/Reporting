@@ -132,6 +132,9 @@
   <data name="RdlDesigner_Status_cm" xml:space="preserve">
     <value>cm</value>
   </data>
+  <data name="RdlDesigner_Status_mm" xml:space="preserve">
+    <value>mm</value>
+  </data>
   <data name="RdlDesigner_Status_in" xml:space="preserve">
     <value>"</value>
   </data>
