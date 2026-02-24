@@ -178,7 +178,7 @@ namespace Majorsilence.Reporting.Cri
 
             // Draw the human readable portion of the barcode with anti-aliasing for text
             g.TextRenderingHint = Draw2.Text.TextRenderingHint.AntiAlias;
-            using var f = new Draw2.Font("Arial", fontHeightPixels, Draw2.GraphicsUnit.Pixel);
+            using var f = new Draw2.Font("Arial", fontHeightPixels);
 
             // Draw the left guard text (i.e. 1st digit of the NumberSystem)
             string wc = upcode.Substring(0, 1);
