@@ -139,14 +139,14 @@ namespace Majorsilence.Reporting.Cri
             // Fill in the background with white
             g.FillRectangle(Draw2.Brushes.White, 0, 0, bm.Width, bm.Height);
 
-            // Draw the bars
-            int barCount = LeftQuietZoneModules;
+            // Draw the bars - start from 0 to align left
+            int barCount = 0;
             foreach (char bar in barPattern)
             {
                 if (bar == '1')
                 {
-                    float bh = ((barCount > ModulesToManufacturingStart && barCount < ModulesToManufacturingEnd) ||
-                                (barCount > ModulesToProductStart && barCount < ModulesToProductEnd))
+                    float bh = ((barCount > GuardModules && barCount < GuardModules + ManufacturingModules) ||
+                                (barCount > GuardModules + ManufacturingModules + CenterBarModules && barCount < GuardModules + ManufacturingModules + CenterBarModules + ProductModules))
                         ? barHeight - fontHeightMM
                         : barHeight;
 
@@ -159,22 +159,22 @@ namespace Majorsilence.Reporting.Cri
             // Draw the human readable portion of the barcode
             using var f = new Draw2.Font("Arial", fontHeight);
 
-            // Draw the left guard text (i.e. 2nd digit of the NumberSystem)
+            // Draw the left guard text (i.e. 1st digit of the NumberSystem)
             string wc = upcode.Substring(0, 1);
             g.DrawString(wc, f, Draw2.Brushes.Black,
-                new Draw2.PointF(barWidth * LeftQuietZoneModules - g.MeasureString(wc, f).Width,
+                new Draw2.PointF(0,
                     barHeight - fontHeightMM));
 
             // Draw the manufacturing digits
             wc = upcode.Substring(1, 6);
             g.DrawString(wc, f, Draw2.Brushes.Black,
-                new Draw2.PointF(barWidth * ModulesToManufacturingEnd - g.MeasureString(wc, f).Width,
+                new Draw2.PointF(barWidth * (GuardModules + ManufacturingModules) - g.MeasureString(wc, f).Width,
                     barHeight - fontHeightMM));
 
             // Draw the product code + the checksum digit
             wc = upcode.Substring(7, 5) + CheckSum(upcode).ToString();
             g.DrawString(wc, f, Draw2.Brushes.Black,
-                new Draw2.PointF(barWidth * ModulesToProductEnd - g.MeasureString(wc, f).Width,
+                new Draw2.PointF(barWidth * (GuardModules + ManufacturingModules + CenterBarModules + ProductModules) - g.MeasureString(wc, f).Width,
                     barHeight - fontHeightMM));
         }
 
