@@ -5,21 +5,29 @@ on:
     types: [created]
   pull_request_review_comment:
     types: [created]
-  issues:
-    types: [opened, assigned]
   pull_request_review:
     types: [submitted]
+  issues:
+    types: [opened]
 
 jobs:
   claude:
+    # SECURITY: this is the primary gate. The job (and therefore the action,
+    # which has write access + secrets) only runs when YOU are the actor on
+    # the triggering event. A malicious issue/PR opened by someone else,
+    # even one containing "@claude", does nothing on its own.
     if: |
       github.actor == 'majorsilence' && (
-         (github.event_name == 'issue_comment' && contains(github.event.comment.body, '@claude')) ||
-         (github.event_name == 'pull_request_review_comment' && contains(github.event.comment.body, '@claude')) ||
-         (github.event_name == 'pull_request_review' && contains(github.event.review.body, '@claude')) ||
-         (github.event_name == 'issues' && (contains(github.event.issue.body, '@claude') || contains(github.event.issue.title, '@claude')))
-       )
+        (github.event_name == 'issue_comment' && contains(github.event.comment.body, '@claude')) ||
+        (github.event_name == 'pull_request_review_comment' && contains(github.event.comment.body, '@claude')) ||
+        (github.event_name == 'pull_request_review' && contains(github.event.review.body, '@claude')) ||
+        (github.event_name == 'issues' && (contains(github.event.issue.body, '@claude') || contains(github.event.issue.title, '@claude')))
+      )
     runs-on: ubuntu-latest
+    # SECURITY: keep this permission set minimal. Notably:
+    # - no "actions: write" (an injected prompt could otherwise modify workflows)
+    # - no "id-token: write" beyond what's needed for the GitHub App's
+    #   short-lived token exchange (this is required by the action itself)
     permissions:
       contents: write
       pull-requests: write
@@ -36,15 +44,26 @@ jobs:
         id: claude
         uses: anthropics/claude-code-action@v1
         with:
+          # SECURITY: this OAuth token is short-lived and scoped to this repo
+          # only. Never replace it with a personal access token (PATs are
+          # static and don't rotate, making them a much better prize for a
+          # prompt-injection attack to try to recover).
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-          include_comments_by_actor: "majorsilence"
-          claude_args: "--permission-mode plan"
-          
-          # Optional: Customize trigger phrase (default: @claude)
-          # trigger_phrase: "/claude"
-          
-          # Optional: Configure model and behavior
-          # claude_args: |
-          #   --model claude-opus-4-1-20250805
-          #   --max-turns 10
-          #   --allowedTools "Bash(npm install),Bash(npm run build)"   
+
+          # SECURITY: deliberately NOT set:
+          #   allowed_non_write_users: '*'   <- would let anyone trigger Claude
+          #   allowed_bots: '*'               <- would let bot accounts trigger it
+          #   show_full_output / display_report <- would leak tool output to logs
+          #
+          # SECURITY: deliberately NOT broadening claude_args/--allowedTools.
+          # The action's default tool set already lets Claude read the repo,
+          # edit files, commit, and push a new branch — enough to "plan and
+          # open a PR." It won't auto-create the PR (it posts a link instead),
+          # which is a feature: you get a final human checkpoint before a PR
+          # even exists. Every extra Bash permission you add is one more
+          # thing a hostile PR/issue body could try to trick Claude into running.
+
+          # Optional: only treat your own comments/reviews as instructions.
+          # Leave this out if you want Claude to also read context from
+          # other collaborators (or its own earlier bot comments).
+          # include_comments_by_actor: "majorsilence"
