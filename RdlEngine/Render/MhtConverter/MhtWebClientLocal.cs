@@ -227,7 +227,11 @@ namespace Majorsilence.Reporting.Rdl
 
             // HttpClient does not support file:// URIs on non-Windows platforms.
             // Read local files directly to avoid the platform limitation.
+#if NET48
+            _ResponseBytes =  File.ReadAllBytes(localPath);
+#else
             _ResponseBytes = await File.ReadAllBytesAsync(localPath);
+#endif
             _ContentLocation = "";
 
                 // if we have string content, determine encoding type
@@ -268,6 +272,10 @@ namespace Majorsilence.Reporting.Rdl
                     _DetectedEncoding = null;
                 else if (_ForcedEncoding == null)
                     _DetectedEncoding = DetectEncoding(_DetectedContentType, _ResponseBytes);
+                
+#if NET48
+                return Task.CompletedTask;
+#endif
         }
 
 		#endregion Public methods
