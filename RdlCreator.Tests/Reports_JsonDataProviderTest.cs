@@ -24,7 +24,7 @@ namespace Majorsilence.Reporting.RdlCreator.Tests
             {
                 yield return "file=TestData.json";
                 yield return "url=TestData.json;auth=Basic: PLACEHOLDER";
-                yield return "url=https://raw.githubusercontent.com/majorsilence/My-FyiReporting/refs/heads/master/RdlCreator.Tests/TestData.json;auth=basic: Placeholder";
+                yield return "url=https://raw.githubusercontent.com/majorsilence/Reporting/refs/heads/main/RdlCreator.Tests/TestData.json;auth=basic: Placeholder";
             }
         }
         
@@ -34,7 +34,7 @@ namespace Majorsilence.Reporting.RdlCreator.Tests
             {
                 yield return "file=NestedJsonData.json";
                 yield return "url=NestedJsonData.json;auth=Basic: PLACEHOLDER";
-                yield return "url=https://raw.githubusercontent.com/majorsilence/My-FyiReporting/refs/heads/master/RdlCreator.Tests/NestedJsonData.json;auth=basic: Placeholder";
+                yield return "url=https://raw.githubusercontent.com/majorsilence/Reporting/refs/heads/main/RdlCreator.Tests/NestedJsonData.json;auth=basic: Placeholder";
             }
         }
 
