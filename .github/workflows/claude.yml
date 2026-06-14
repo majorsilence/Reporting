@@ -66,4 +66,4 @@ jobs:
           # Optional: only treat your own comments/reviews as instructions.
           # Leave this out if you want Claude to also read context from
           # other collaborators (or its own earlier bot comments).
-          # include_comments_by_actor: "majorsilence"
+          include_comments_by_actor: "majorsilence,claude"
