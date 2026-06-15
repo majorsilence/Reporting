@@ -127,7 +127,7 @@
     <value>Exception</value>
   </data>
   <data name="RdlReader_Show_MyFyiReporting" xml:space="preserve">
-    <value>My-FyiReporting</value>
+    <value>Reporting</value>
   </data>
   <data name="RdlReader_ShowD_ReportNotLoaded" xml:space="preserve">
     <value>The specified report [ {0} ] could not be loaded.</value>
@@ -152,7 +152,7 @@
 Copyright (C) 2004-2008  fyiReporting Software, LLC
 Copyright (C) 2012 Peter Gill &lt;peter@majorsilence.com&gt;
 
-This file is part of the My-FyiReporting RDL project.
+This file is part of the Majorsilence Reporting RDL project.
 	
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -167,7 +167,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 For additional information, email peter@majorsilence.com or visit
-the website https://github.com/majorsilence/My-FyiReporting.</value>
+the website https://github.com/majorsilence/Reporting.</value>
   </data>
   <data name="DialogAbout_Version" xml:space="preserve">
     <value>Version {0}</value>

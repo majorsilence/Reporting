@@ -88,7 +88,7 @@ namespace Majorsilence.Reporting.Cri
         /// <param name="bm"></param>
         void ICustomReportItem.DrawDesignerImage(ref Draw2.Bitmap bm)
         {
-            DrawImage(ref bm, "https://github.com/majorsilence/My-FyiReporting");
+            DrawImage(ref bm, "https://github.com/majorsilence/Reporting");
         }
 
         private string _code = "";

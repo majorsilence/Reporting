@@ -24,7 +24,7 @@ namespace Majorsilence.Reporting.Data
         /// <example>
         /// <code>
         /// var conn1 = new JsonConnection("file=TestData.json");
-        /// var conn2 = new JsonConnection("url=https://raw.githubusercontent.com/majorsilence/My-FyiReporting/refs/heads/master/RdlCreator.Tests/TestData.json");
+        /// var conn2 = new JsonConnection("url=https://raw.githubusercontent.com/majorsilence/Reporting/refs/heads/main/RdlCreator.Tests/TestData.json");
         /// var conn3 = new JsonConnection("url=https://example.com/path/to/json/TestData.json;auth=Basic: <credentials>");
         /// var conn4 = new JsonConnection("url=https://example.com/path/to/json/TestData.json;auth=Bearer: <Token>");
         /// </code>

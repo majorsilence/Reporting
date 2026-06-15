@@ -259,7 +259,7 @@
     <value>CenterParent</value>
   </data>
   <data name="linkLabel3.Text" xml:space="preserve">
-    <value>https://github.com/majorsilence/My-FyiReporting/discussions</value>
+    <value>https://github.com/majorsilence/Reporting/discussions</value>
   </data>
   <data name="tbLicense.Size" type="System.Drawing.Size, System.Drawing">
     <value>448, 136</value>
@@ -346,7 +346,7 @@
     <value>15</value>
   </data>
   <data name="linkLabel4.Text" xml:space="preserve">
-    <value>https://github.com/majorsilence/My-FyiReporting</value>
+    <value>https://github.com/majorsilence/Reporting</value>
   </data>
   <data name="&gt;&gt;bOK.Name" xml:space="preserve">
     <value>bOK</value>

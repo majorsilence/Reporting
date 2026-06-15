@@ -48,8 +48,8 @@ namespace Majorsilence.Reporting.RdlDesign
 		private Rdl.NeedPassword _GetPassword;
 		private string _DataSourceReferencePassword = null;
 		private bool bGotPassword = false;
-		private readonly string DefaultHelpUrl = "https://github.com/majorsilence/My-FyiReporting/wiki/_pages";
-		private readonly string DefaultSupportUrl = "https://github.com/majorsilence/My-FyiReporting/discussions";
+		private readonly string DefaultHelpUrl = "https://github.com/majorsilence/Reporting/wiki/_pages";
+		private readonly string DefaultSupportUrl = "https://github.com/majorsilence/Reporting/discussions";
 		private string _HelpUrl;
 		private string _SupportUrl;
 		static private string[] _MapSubtypes = new string[] { "usa_map" };

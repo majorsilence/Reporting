@@ -8,7 +8,7 @@
 //  Copyright (c) 2012 Peter Gill
 // 
 // This file is part of the NReports project
-// This file is part of the My-FyiReporting project 
+// This file is part of the Majorsilence Reporting project 
 //	
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
