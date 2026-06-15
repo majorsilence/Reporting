@@ -1,3 +1,4 @@
+#if NET8_0_OR_GREATER
 using Majorsilence.Reporting.Rdl;
 using NUnit.Framework;
 using ReportTests.Utils;
@@ -170,3 +171,4 @@ namespace ReportTests
         }
     }
 }
+#endif

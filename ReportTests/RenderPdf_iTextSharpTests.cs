@@ -100,7 +100,7 @@ namespace ReportTests.Utils
             await rap.RunRender(sg, OutputPresentationType.RenderPdf_iTextSharp);
 
             Assert.That(File.Exists(fullOutputPath), "PDF output file was not created");
-            var bytes = await File.ReadAllBytesAsync(fullOutputPath);
+            var bytes =  File.ReadAllBytes(fullOutputPath);
             Assert.That(bytes.Length, Is.GreaterThan(100), "PDF output is suspiciously small");
             Assert.That(bytes[0], Is.EqualTo((byte)'%'), "PDF must start with '%'");
             Assert.That(bytes[1], Is.EqualTo((byte)'P'), "PDF must start with '%P'");
