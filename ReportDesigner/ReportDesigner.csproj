@@ -31,7 +31,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="..\jekyll_site\schemas\reporting\2025\12\reportdefinition\ReportDefinition.xsd">
+    <Content Include="..\schemas\reporting\2025\12\reportdefinition\ReportDefinition.xsd">
       <Link>ReportDefinition.xsd</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
