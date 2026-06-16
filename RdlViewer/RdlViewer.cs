@@ -1257,6 +1257,7 @@ namespace Majorsilence.Reporting.RdlViewer
         // Obtain the Pages by running the report
         private async Task<Report> GetReport()
         {
+            await Task.Yield();   // release UI thread before data fetch + layout
             string prog;
 
             // Obtain the source
@@ -1463,6 +1464,7 @@ namespace Majorsilence.Reporting.RdlViewer
 
         private async Task<Pages> GetPages(Report report)
         {
+            await Task.Yield();   // release UI thread before data fetch + layout
             Pages pgs = null;
 
             var ld = await GetParameters();        // split parms into dictionary
