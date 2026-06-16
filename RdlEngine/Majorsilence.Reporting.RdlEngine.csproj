@@ -82,7 +82,6 @@
 	</ItemGroup>
 	<ItemGroup>
 		<PackageReference Include="iTextSharp.LGPLv2.Core" />
-		<PackageReference Include="NPOI" />
 		<PackageReference Include="SharpZipLib" />
 		<PackageReference Include="SkiaSharp" />
 
@@ -90,6 +89,7 @@
 		<PackageReference Include="System.Data.OleDb" />
 		<PackageReference Include="System.CodeDom" />
 		<PackageReference Condition="'$(DefineConstants.Contains(DRAWINGCOMPAT))' == False" Include="System.Drawing.Common" />
+		<PackageReference Include="System.Security.Cryptography.Xml" />
 	</ItemGroup>
 	<ItemGroup>
 		<Compile Remove="PageDrawing.cs" />
@@ -101,5 +101,6 @@
 	</ItemGroup>
     <ItemGroup Condition="'$(TargetFramework)' == 'net48'">
         <Reference Include="System.Net.Http" />
+        <Reference Include="System.IO.Compression" />
     </ItemGroup>
 </Project>
