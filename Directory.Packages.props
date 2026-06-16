@@ -5,7 +5,7 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageVersion Include="Avalonia.Themes.Fluent" Version="12.0.4" />
-    <PackageVersion Include="BenchmarkDotNet" Version="0.15.2" />
+    <PackageVersion Include="BenchmarkDotNet" Version="0.15.8" />
     <PackageVersion Include="DocumentFormat.OpenXml" Version="3.2.0" />
     <PackageVersion Include="dotConnect.Express.for.PostgreSQL" Version="8.3.10" />
     <PackageVersion Include="iTextSharp.LGPLv2.Core" Version="3.7.4" />
@@ -15,14 +15,14 @@
     <PackageVersion Include="Majorsilence.Reporting.ReportDesigner" Version="5.0.18" />
     <PackageVersion Include="Microsoft.CSharp" Version="4.5.0" />
     <PackageVersion Include="Microsoft.Data.Edm" Version="5.8.5" />
-    <PackageVersion Include="Microsoft.Data.OData" Version="5.8.5" />
+    <PackageVersion Include="Microsoft.Data.OData" Version="5.8.4" />
     <PackageVersion Include="Microsoft.Data.Services.Client" Version="5.8.5" />
     <PackageVersion Include="Microsoft.Data.Sqlite" Version="8.0.4" />
     <PackageVersion Include="Microsoft.Data.SqlClient" Version="5.2.2" />
     <PackageVersion Include="Microsoft.WindowsAzure.ConfigurationManager" Version="1.8.0" />
     <PackageVersion Include="MySql.Data" Version="9.2.0" />
     <PackageVersion Include="Npgsql" Version="8.0.7" />
-    <PackageVersion Include="NUnit" Version="4.4.0" />
+    <PackageVersion Include="NUnit" Version="4.6.1" />
     <PackageVersion Include="NUnit3TestAdapter" Version="5.1.0" />
     <PackageVersion Include="PdfPig" Version="0.1.11" />
     <PackageVersion Include="SharpZipLib" Version="1.4.2" />
@@ -35,7 +35,7 @@
     <PackageVersion Include="WindowsAzure.Storage" Version="4.3.0" />
     <PackageVersion Include="ZXing.Net" Version="0.16.10" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.13.0" />
-    <PackageVersion Include="coverlet.collector" Version="6.0.4">
+    <PackageVersion Include="coverlet.collector" Version="10.0.1">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageVersion>
