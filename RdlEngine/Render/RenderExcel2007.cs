@@ -25,7 +25,6 @@ namespace Majorsilence.Reporting.Rdl
 		ExcelCellsBuilder excelBuilder = new ExcelCellsBuilder();
 		XSSFWorkbook workbook = new XSSFWorkbook();
 		XSSFSheet worksheet;
-		ColumnHelper columnHelper;
 		double k = 5.637142013; //points per excel character width
 
 		List<XSSFCellStyle> styles;
@@ -48,7 +47,6 @@ namespace Majorsilence.Reporting.Rdl
 			worksheet.SetMargin(MarginType.RightMargin, rep.RightMarginPoints / 72);
 			worksheet.SetMargin(MarginType.BottomMargin, rep.BottomMarginPoints / 72);
 
-			columnHelper = worksheet.GetColumnHelper();
 		}
 
 		// Added to expose data to Excel2003 file generation
@@ -82,7 +80,7 @@ namespace Majorsilence.Reporting.Rdl
 				if(i + 1 < excelBuilder.Columns.Count) {
 					var widthInPoints = excelBuilder.Columns[i + 1].XPosition - excelBuilder.Columns[i].XPosition;
 					var widthInSymbols = widthInPoints / k;
-					columnHelper.SetColWidth(i, widthInSymbols);
+					worksheet.SetColumnWidth(i, (int)(widthInSymbols * 256));
 				}
 			}
 
@@ -147,13 +145,13 @@ namespace Majorsilence.Reporting.Rdl
 																				colIndex + rightAttach);
 							worksheet.AddMergedRegion(mergeRegion);
 
-							RegionUtil.SetBorderTop((int)xssfStyle.BorderTop, mergeRegion, worksheet);
+							RegionUtil.SetBorderTop(xssfStyle.BorderTop, mergeRegion, worksheet);
 							RegionUtil.SetTopBorderColor(xssfStyle.TopBorderColor, mergeRegion, worksheet);
-							RegionUtil.SetBorderRight((int)xssfStyle.BorderRight, mergeRegion, worksheet);
+							RegionUtil.SetBorderRight(xssfStyle.BorderRight, mergeRegion, worksheet);
 							RegionUtil.SetRightBorderColor(xssfStyle.RightBorderColor, mergeRegion, worksheet);
-							RegionUtil.SetBorderBottom((int)xssfStyle.BorderBottom, mergeRegion, worksheet);
+							RegionUtil.SetBorderBottom(xssfStyle.BorderBottom, mergeRegion, worksheet);
 							RegionUtil.SetBottomBorderColor(xssfStyle.BottomBorderColor, mergeRegion, worksheet);
-							RegionUtil.SetBorderLeft((int)xssfStyle.BorderLeft, mergeRegion, worksheet);
+							RegionUtil.SetBorderLeft(xssfStyle.BorderLeft, mergeRegion, worksheet);
 							RegionUtil.SetLeftBorderColor(xssfStyle.LeftBorderColor, mergeRegion, worksheet);
 						}
 

@@ -1898,7 +1898,7 @@ namespace Majorsilence.Reporting.RdlViewer
             return;
         }
 
-        private void HorizontalScroll(object sender, System.Windows.Forms.ScrollEventArgs e)
+        private new void HorizontalScroll(object sender, System.Windows.Forms.ScrollEventArgs e)
         {
             if (_hScroll.IsDisposed)
                 return;
@@ -1909,7 +1909,7 @@ namespace Majorsilence.Reporting.RdlViewer
             _DrawPanel.Invalidate();
         }
 
-        private void VerticalScroll(object sender, System.Windows.Forms.ScrollEventArgs e)
+        private new void VerticalScroll(object sender, System.Windows.Forms.ScrollEventArgs e)
         {
             if (_vScroll.IsDisposed)
                 return;

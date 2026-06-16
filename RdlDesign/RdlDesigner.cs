@@ -189,7 +189,7 @@ namespace Majorsilence.Reporting.RdlDesign
             Application.AddMessageFilter(this);
 
             this.MdiChildActivate += new EventHandler(RdlDesigner_MdiChildActivate);
-            this.Closing += new System.ComponentModel.CancelEventHandler(this.RdlDesigner_Closing);
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.RdlDesigner_Closing);
             _GetPassword = new Rdl.NeedPassword(this.GetPassword);
 
             InitToolbar();
@@ -2344,7 +2344,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			await CreateMDIChildAsync(file, null, true);
 		}
 
-		private void RdlDesigner_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+		private void RdlDesigner_Closing(object sender, System.Windows.Forms.FormClosingEventArgs e)
 		{
 			SaveStartupState();
 			menuToolsCloseProcess(false);
@@ -4000,7 +4000,6 @@ namespace Majorsilence.Reporting.RdlDesign
 			_commands = value;
 		}
 
-        [Obsolete]
         public override object InitializeLifetimeService()
 		{
 			return null;

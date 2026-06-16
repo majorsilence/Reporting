@@ -22,7 +22,9 @@ namespace Majorsilence.Reporting.RdlGtk3
             this.DefaultHeight = 200;
 
             // Create the main vbox for content
+#pragma warning disable CS0612
             vbox = new VBox(false, 6);
+#pragma warning restore CS0612
             vbox.BorderWidth = 12;
 
             // Create label
@@ -35,7 +37,9 @@ namespace Majorsilence.Reporting.RdlGtk3
             vbox.PackStart(TextBoxParameters, false, false, 0);
 
             // Create button box
+#pragma warning disable CS0612
             hbox3 = new HBox(true, 6);
+#pragma warning restore CS0612
             
             Button cancelButton = new Button("Cancel");
             cancelButton.Clicked += (sender, e) => this.Respond(ResponseType.Cancel);

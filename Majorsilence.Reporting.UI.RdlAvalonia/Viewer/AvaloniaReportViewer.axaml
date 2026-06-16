@@ -136,7 +136,7 @@
       <StackPanel Orientation="Horizontal" Spacing="8" Margin="8,6,8,8">
         <TextBox x:Name="ParametersTextBox"
                  Width="420"
-                 Watermark="name=value&amp;name2=value2"
+                 PlaceholderText="name=value&amp;name2=value2"
                  VerticalContentAlignment="Center"/>
         <Button x:Name="ApplyParametersButton" Classes="accent" Content="Apply"/>
       </StackPanel>

@@ -211,7 +211,7 @@ namespace Majorsilence.Reporting.Rdl
                         break;
                 }
             }
-            if (val != null && location != null)
+            if (val != null)
             {
                 MapText mt = new MapText(val, location);
                 mt.FontFamily = family;

@@ -11,7 +11,7 @@
     <DataSource Name="DS1">
       <ConnectionProperties>
         <DataProvider>Microsoft.Data.Sqlite</DataProvider>
-        <ConnectString>Data Source=C:\Users\peter\source\repos\My-FyiReporting\Examples\SqliteExamples\sqlitetestdb2.db</ConnectString>
+        <ConnectString>Data Source=C:\Users\peter\source\repos\Reporting\Examples\SqliteExamples\sqlitetestdb2.db</ConnectString>
       </ConnectionProperties>
     </DataSource>
   </DataSources>

@@ -12,7 +12,7 @@ namespace ReportDesigner
         [STAThread]
         static void Main()
         {
-            string version = typeof(Program).Assembly.GetName().Version.ToString().Replace(".", "");
+            string version = (typeof(Program).Assembly.GetName().Version?.ToString() ?? "0").Replace(".", "");
 
             string ipcChannelPortName = string.Format("RdlProject{0}", version);
             // Determine if an instance is already running?
