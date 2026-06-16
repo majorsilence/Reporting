@@ -44,11 +44,13 @@ namespace Majorsilence.Reporting.Cri
             writer.Options.Height = Math.Max(1, bm.Height);
             writer.Options.Hints[EncodeHintType.CHARACTER_SET] = "UTF-8";
 
+#if NET8_0_OR_GREATER
             try
             {
                 System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
             }
             catch (InvalidOperationException) { }
+#endif
 
             bm = writer.Write(value);
         }

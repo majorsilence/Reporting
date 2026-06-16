@@ -40,8 +40,9 @@ namespace Majorsilence.Reporting.Rdl
         {
             // Register legacy code-page encodings (e.g. Windows-1252) so MHTML
             // conversion works on non-Windows platforms.
+#if NET8_0_OR_GREATER
             System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
-
+#endif
             string d1, d2;
             d1 = AppDomain.CurrentDomain.BaseDirectory;
             d2 = AppDomain.CurrentDomain.RelativeSearchPath;
