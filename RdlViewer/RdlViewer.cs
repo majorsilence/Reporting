@@ -1501,16 +1501,22 @@ namespace Majorsilence.Reporting.RdlViewer
 
         private async Task<IDictionary> GetParameters()
         {
-            // If we have a loaded report with user parameters, use those runtime values
-            // instead of the _Parameters dictionary which may be stale
             if (_Report != null && _Report.UserReportParameters != null && _Report.UserReportParameters.Count > 0)
             {
                 Dictionary<string, object> runtimeParams = new Dictionary<string, object>();
                 foreach (UserReportParameter urp in _Report.UserReportParameters)
                 {
-                    // Always include user parameters, even when the value is null, so that
-                    // stale values from _Parameters cannot override user-visible parameters.
-                    runtimeParams[urp.Name] = await urp.GetValueAsync();
+                    // Prefer explicitly-set _Parameters values over the runtime cache.
+                    // _Parameters is populated programmatically and by UI interaction handlers,
+                    // so it always reflects the most recent intended value.
+                    if (_Parameters != null && _Parameters.Contains(urp.Name))
+                    {
+                        runtimeParams[urp.Name] = _Parameters[urp.Name];
+                    }
+                    else
+                    {
+                        runtimeParams[urp.Name] = await urp.GetValueAsync();
+                    }
                 }
                 // Merge with any parameters from _Parameters that aren't in UserReportParameters
                 if (_Parameters != null)
@@ -1531,6 +1537,8 @@ namespace Majorsilence.Reporting.RdlViewer
 
         private void SetParameterValue(String key, String value)
         {
+            if (_Parameters == null)
+                _Parameters = new Dictionary<string, string>();
             if (_Parameters.Contains(key))
                 _Parameters[key] = value;
             else
@@ -1686,7 +1694,11 @@ namespace Majorsilence.Reporting.RdlViewer
                 v.Parent = _ParameterPanel;
                 v.Width = width;
                 v.Location = new Point(label.Location.X + label.Width + 5, yPos);
-                if (rp.DefaultValue != null)
+                if (_Parameters != null && _Parameters.Contains(rp.Name))
+                {
+                    v.Text = _Parameters[rp.Name]?.ToString() ?? string.Empty;
+                }
+                else if (rp.DefaultValue != null)
                 {
                     StringBuilder sb = new StringBuilder();
                     for (int i = 0; i < rp.DefaultValue.Length; i++)
@@ -1718,6 +1730,7 @@ namespace Majorsilence.Reporting.RdlViewer
             try
             {
                 rp.Value = cb.Text;
+                SetParameterValue(rp.Name, cb.Text);
             }
             catch (ArgumentException ae)
             {
@@ -1738,6 +1751,7 @@ namespace Majorsilence.Reporting.RdlViewer
             try
             {
                 rp.Value = tb.Text;
+                SetParameterValue(rp.Name, tb.Text);
             }
             catch (ArgumentException ae)
             {
