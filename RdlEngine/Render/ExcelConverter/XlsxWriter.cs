@@ -349,14 +349,7 @@ namespace RdlEngine.Render.ExcelConverter
             sb.Append("<worksheet xmlns=\"http://schemas.openxmlformats.org/spreadsheetml/2006/main\" " +
                       "xmlns:r=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships\">");
 
-            // Page setup
-            string orient = _landscape ? "landscape" : "portrait";
-            sb.Append($"<pageSetup paperSize=\"{_paperSize}\" orientation=\"{orient}\"/>");
-            sb.Append($"<pageMargins left=\"{FormatDouble(_leftMarginInches)}\" right=\"{FormatDouble(_rightMarginInches)}\" " +
-                      $"top=\"{FormatDouble(_topMarginInches)}\" bottom=\"{FormatDouble(_bottomMarginInches)}\" " +
-                      "header=\"0.5\" footer=\"0.5\"/>");
-
-            // Column widths
+            // Column widths (must come before sheetData per OOXML ordering)
             if (_columnWidths.Count > 0)
             {
                 sb.Append("<cols>");
@@ -412,6 +405,13 @@ namespace RdlEngine.Render.ExcelConverter
                 }
                 sb.Append("</mergeCells>");
             }
+
+            // Page setup (must follow mergeCells and precede drawing per OOXML ordering)
+            sb.Append($"<pageMargins left=\"{FormatDouble(_leftMarginInches)}\" right=\"{FormatDouble(_rightMarginInches)}\" " +
+                      $"top=\"{FormatDouble(_topMarginInches)}\" bottom=\"{FormatDouble(_bottomMarginInches)}\" " +
+                      "header=\"0.5\" footer=\"0.5\"/>");
+            string orient = _landscape ? "landscape" : "portrait";
+            sb.Append($"<pageSetup paperSize=\"{_paperSize}\" orientation=\"{orient}\"/>");
 
             if (hasDrawings)
                 sb.Append("<drawing r:id=\"rId1\"/>");
