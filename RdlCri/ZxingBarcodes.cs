@@ -69,6 +69,7 @@ namespace Majorsilence.Reporting.Cri
             writer.Options.Height = Math.Max(1, bm.Height);
             writer.Options.Width = Math.Max(1, bm.Width);
 
+#if NET5_0_OR_GREATER
             try
             {
                 System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
@@ -77,6 +78,7 @@ namespace Majorsilence.Reporting.Cri
             {
                 // The provider has already been registered.
             }
+#endif
 
             bm = writer.Write(qrcode);
         }
