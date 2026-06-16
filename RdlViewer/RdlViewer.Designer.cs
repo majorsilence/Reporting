@@ -44,13 +44,13 @@ private void InitializeComponent()
 			// 
 			resources.ApplyResources(this._hScroll, "_hScroll");
 			this._hScroll.Name = "_hScroll";
-			this._hScroll.Scroll += new System.Windows.Forms.ScrollEventHandler(this.HorizontalScroll);
+			this._hScroll.Scroll += new System.Windows.Forms.ScrollEventHandler(this.OnHScroll);
 			// 
 			// _vScroll
 			// 
 			resources.ApplyResources(this._vScroll, "_vScroll");
 			this._vScroll.Name = "_vScroll";
-			this._vScroll.Scroll += new System.Windows.Forms.ScrollEventHandler(this.VerticalScroll);
+			this._vScroll.Scroll += new System.Windows.Forms.ScrollEventHandler(this.OnVScroll);
 			// 
 			// _DrawPanel
 			// 
