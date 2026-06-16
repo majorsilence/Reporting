@@ -62,7 +62,7 @@ namespace Majorsilence.Reporting.RdlViewer
         /// <summary>
         /// Parameters to run the report
         /// </summary>
-        private IDictionary _Parameters = new Dictionary<string, string>();
+        private Dictionary<string, string> _Parameters;
         /// <summary>
         /// The Report
         /// </summary>
@@ -663,7 +663,7 @@ namespace Majorsilence.Reporting.RdlViewer
                 // Check for zero to working form designer
                 if (_Parameters != null)
                 {
-                    foreach (DictionaryEntry kvp in _Parameters)
+                    foreach (KeyValuePair<string, string> kvp in _Parameters)
                     {
                         result += String.Format("{0:s}={1:s};", kvp.Key, kvp.Value);
                     }
@@ -680,7 +680,7 @@ namespace Majorsilence.Reporting.RdlViewer
         #region Parameter setting methods
         public void SetReportParametersAmpersandSeparated(string parameterString)
         {
-            _Parameters = new Dictionary<string, string>();
+            _Parameters = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             if (String.IsNullOrEmpty(parameterString))
                 return;
             String[] prms = parameterString.TrimEnd(';').Split('&');
@@ -704,11 +704,11 @@ namespace Majorsilence.Reporting.RdlViewer
         
         public void SetReportParameters(IDictionary<string, string> parameters)
         {
-            _Parameters = new Dictionary<string, string>();
+            _Parameters = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
             foreach (var parameter in parameters)
             {
-                _Parameters.Add(parameter.Key, parameter.Value);
+                _Parameters[parameter.Key] = parameter.Value;
             }
         }
         #endregion
@@ -1501,27 +1501,25 @@ namespace Majorsilence.Reporting.RdlViewer
 
         private async Task<IDictionary> GetParameters()
         {
-            // If we have a loaded report with user parameters, use those runtime values
-            // instead of the _Parameters dictionary which may be stale
             if (_Report != null && _Report.UserReportParameters != null && _Report.UserReportParameters.Count > 0)
             {
-                Dictionary<string, object> runtimeParams = new Dictionary<string, object>();
+                Dictionary<string, object> runtimeParams = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
                 foreach (UserReportParameter urp in _Report.UserReportParameters)
                 {
-                    // Always include user parameters, even when the value is null, so that
-                    // stale values from _Parameters cannot override user-visible parameters.
-                    runtimeParams[urp.Name] = await urp.GetValueAsync();
+                    // Honor programmatically-set parameters over runtime/default values.
+                    // Case-insensitive lookup so callers don't need to match RDL casing exactly.
+                    if (_Parameters != null && _Parameters.ContainsKey(urp.Name))
+                        runtimeParams[urp.Name] = _Parameters[urp.Name];
+                    else
+                        runtimeParams[urp.Name] = await urp.GetValueAsync();
                 }
-                // Merge with any parameters from _Parameters that aren't in UserReportParameters
+                // Merge any extra _Parameters entries not covered by UserReportParameters
                 if (_Parameters != null)
                 {
-                    foreach (DictionaryEntry kvp in _Parameters)
+                    foreach (KeyValuePair<string, string> kvp in _Parameters)
                     {
-                        string key = kvp.Key.ToString();
-                        if (!runtimeParams.ContainsKey(key))
-                        {
-                            runtimeParams[key] = kvp.Value;
-                        }
+                        if (!runtimeParams.ContainsKey(kvp.Key))
+                            runtimeParams[kvp.Key] = kvp.Value;
                     }
                 }
                 return runtimeParams;
@@ -1531,10 +1529,9 @@ namespace Majorsilence.Reporting.RdlViewer
 
         private void SetParameterValue(String key, String value)
         {
-            if (_Parameters.Contains(key))
-                _Parameters[key] = value;
-            else
-                _Parameters.Add(key, value);
+            if (_Parameters == null)
+                _Parameters = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            _Parameters[key] = value;
         }
 
         private string GetRdlSource()
@@ -1686,7 +1683,11 @@ namespace Majorsilence.Reporting.RdlViewer
                 v.Parent = _ParameterPanel;
                 v.Width = width;
                 v.Location = new Point(label.Location.X + label.Width + 5, yPos);
-                if (rp.DefaultValue != null)
+                if (_Parameters != null && _Parameters.ContainsKey(rp.Name))
+                {
+                    v.Text = _Parameters[rp.Name];
+                }
+                else if (rp.DefaultValue != null)
                 {
                     StringBuilder sb = new StringBuilder();
                     for (int i = 0; i < rp.DefaultValue.Length; i++)
@@ -1718,6 +1719,7 @@ namespace Majorsilence.Reporting.RdlViewer
             try
             {
                 rp.Value = cb.Text;
+                SetParameterValue(rp.Name, cb.Text);
             }
             catch (ArgumentException ae)
             {
@@ -1738,6 +1740,7 @@ namespace Majorsilence.Reporting.RdlViewer
             try
             {
                 rp.Value = tb.Text;
+                SetParameterValue(rp.Name, tb.Text);
             }
             catch (ArgumentException ae)
             {
