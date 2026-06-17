@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Library</OutputType>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <AssemblyTitle>Majorsilence PDF</AssemblyTitle>
+    <PackageId>Majorsilence.Pdf</PackageId>
+    <Description>Zero-dependency PDF generation library. Writes PDF 1.4 with embedded TrueType fonts, JPEG and raster images, vector graphics, and hyperlink annotations.</Description>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <IsPackable>true</IsPackable>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="SharpZipLib" />
+  </ItemGroup>
+</Project>

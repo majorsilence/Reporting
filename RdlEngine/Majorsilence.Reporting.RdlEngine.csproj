@@ -50,6 +50,7 @@
 	</ItemGroup>
 	<ItemGroup>
 		<ProjectReference Include="..\DataProviders\Majorsilence.Reporting.DataProviders.csproj" />
+		<ProjectReference Include="..\Majorsilence.Pdf\Majorsilence.Pdf.csproj" />
 	</ItemGroup>
 	<ItemGroup Condition="'$(DefineConstants.Contains(DRAWINGCOMPAT))' == True">
 		<ProjectReference Include="..\Majorsilence.Drawing.Common\Majorsilence.Drawing.Common.csproj" />

@@ -26,7 +26,7 @@ using Draw2 = System.Drawing;
 using Imaging = System.Drawing.Imaging;
 #endif
 using System.Text;
-using Majorsilence.Reporting.Rdl.Pdf;
+using Majorsilence.Pdf;
 using Majorsilence.Reporting.Rdl.Utility;
 
 namespace Majorsilence.Reporting.Rdl

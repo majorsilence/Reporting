@@ -20,13 +20,13 @@ using System.IO;
 using System.Linq;
 using System.Text;
 
-namespace Majorsilence.Reporting.Rdl.Pdf
+namespace Majorsilence.Pdf
 {
     // Minimal TrueType/OpenType font parser.
     // Extracts only what is needed for embedding a CIDFont Type2 in a PDF:
     //   PostScript name, metrics (UPM, ascender, descender, bounding box),
     //   per-glyph advance widths, and the Unicode → glyph-ID mapping.
-    internal sealed class TrueTypeFont
+    public sealed class TrueTypeFont
     {
         private readonly byte[] _data;
         private int _unitsPerEm;
@@ -34,25 +34,25 @@ namespace Majorsilence.Reporting.Rdl.Pdf
         private short _descender;
         private int _numGlyphs;
         private int _numberOfHMetrics;
-        private ushort[] _advanceWidths;
-        private Dictionary<int, ushort> _charToGlyph;
-        private string _postScriptName;
+        private ushort[]? _advanceWidths;
+        private Dictionary<int, ushort> _charToGlyph = new Dictionary<int, ushort>();
+        private string? _postScriptName;
         private short _xMin, _yMin, _xMax, _yMax;
 
-        internal int UnitsPerEm => _unitsPerEm;
-        internal short Ascender => _ascender;
-        internal short Descender => _descender;
-        internal int NumGlyphs => _numGlyphs;
-        internal string PostScriptName => _postScriptName ?? "UnknownFont";
-        internal short XMin => _xMin;
-        internal short YMin => _yMin;
-        internal short XMax => _xMax;
-        internal short YMax => _yMax;
-        internal byte[] Data => _data;
+        public int UnitsPerEm => _unitsPerEm;
+        public short Ascender => _ascender;
+        public short Descender => _descender;
+        public int NumGlyphs => _numGlyphs;
+        public string PostScriptName => _postScriptName ?? "UnknownFont";
+        public short XMin => _xMin;
+        public short YMin => _yMin;
+        public short XMax => _xMax;
+        public short YMax => _yMax;
+        public byte[] Data => _data;
 
-        internal TrueTypeFont(string path) : this(File.ReadAllBytes(path)) { }
+        public TrueTypeFont(string path) : this(File.ReadAllBytes(path)) { }
 
-        internal TrueTypeFont(byte[] data)
+        public TrueTypeFont(byte[] data)
         {
             _data = data;
             Parse();
@@ -63,8 +63,6 @@ namespace Majorsilence.Reporting.Rdl.Pdf
         private static ushort U16(byte[] b, int o) => (ushort)((b[o] << 8) | b[o + 1]);
         private static short  S16(byte[] b, int o) => (short)((b[o] << 8) | b[o + 1]);
         private static int    S32(byte[] b, int o) => (b[o] << 24) | (b[o+1] << 16) | (b[o+2] << 8) | b[o+3];
-        private static uint   U32(byte[] b, int o) =>
-            ((uint)b[o] << 24) | ((uint)b[o+1] << 16) | ((uint)b[o+2] << 8) | b[o+3];
 
         // ── parsing ──────────────────────────────────────────────────────────
 
@@ -104,9 +102,9 @@ namespace Majorsilence.Reporting.Rdl.Pdf
         {
             if (!t.TryGetValue("hhea", out var e)) return;
             int o = e.offset;
-            _ascender          = S16(_data, o + 4);
-            _descender         = S16(_data, o + 6);
-            _numberOfHMetrics  = U16(_data, o + 34);
+            _ascender         = S16(_data, o + 4);
+            _descender        = S16(_data, o + 6);
+            _numberOfHMetrics = U16(_data, o + 34);
         }
 
         private void ParseMaxp(Dictionary<string, (int offset, int length)> t)
@@ -160,16 +158,15 @@ namespace Majorsilence.Reporting.Rdl.Pdf
 
         private void ParseCmapFormat4(int o)
         {
-            int segCount       = U16(_data, o + 6) / 2;
-            int endCodesOff    = o + 14;
-            int startCodesOff  = endCodesOff + 2 + segCount * 2;
-            int idDeltaOff     = startCodesOff + segCount * 2;
-            int idRangeOffOff  = idDeltaOff + segCount * 2;
-            int glyphIdArrOff  = idRangeOffOff + segCount * 2;
+            int segCount      = U16(_data, o + 6) / 2;
+            int endCodesOff   = o + 14;
+            int startCodesOff = endCodesOff + 2 + segCount * 2;
+            int idDeltaOff    = startCodesOff + segCount * 2;
+            int idRangeOffOff = idDeltaOff + segCount * 2;
 
             for (int i = 0; i < segCount; i++)
             {
-                int endCode   = U16(_data, endCodesOff + i * 2);
+                int endCode = U16(_data, endCodesOff + i * 2);
                 if (endCode == 0xFFFF) break;
                 int startCode = U16(_data, startCodesOff + i * 2);
                 int delta     = S16(_data, idDeltaOff + i * 2);
@@ -202,7 +199,7 @@ namespace Majorsilence.Reporting.Rdl.Pdf
             int numGroups = S32(_data, o + 12);
             for (int i = 0; i < numGroups; i++)
             {
-                int e2 = o + 16 + i * 12;
+                int e2    = o + 16 + i * 12;
                 int start = S32(_data, e2);
                 int end   = S32(_data, e2 + 4);
                 int glyph = S32(_data, e2 + 8);
@@ -215,38 +212,38 @@ namespace Majorsilence.Reporting.Rdl.Pdf
         {
             if (!t.TryGetValue("name", out var e)) return;
             int o = e.offset;
-            int count    = U16(_data, o + 2);
-            int strBase  = o + U16(_data, o + 4);
-            string latinName = null, unicodeName = null;
+            int count   = U16(_data, o + 2);
+            int strBase = o + U16(_data, o + 4);
+            string? latinName = null, unicodeName = null;
             for (int i = 0; i < count; i++)
             {
-                int r  = o + 6 + i * 12;
+                int r   = o + 6 + i * 12;
                 int pid = U16(_data, r);
                 int nid = U16(_data, r + 6);
                 int len = U16(_data, r + 8);
                 int off = U16(_data, r + 10);
                 if (nid != 6) continue;
                 if (pid == 3) unicodeName = Encoding.BigEndianUnicode.GetString(_data, strBase + off, len);
-                else          latinName  = Encoding.ASCII.GetString(_data, strBase + off, len);
+                else          latinName   = Encoding.ASCII.GetString(_data, strBase + off, len);
             }
             _postScriptName = unicodeName ?? latinName;
         }
 
         // ── public API ───────────────────────────────────────────────────────
 
-        internal ushort GetGlyphId(int codePoint)
+        public ushort GetGlyphId(int codePoint)
         {
             _charToGlyph.TryGetValue(codePoint, out var gid);
             return gid;
         }
 
-        internal ushort GetAdvanceWidth(ushort glyphId)
+        public ushort GetAdvanceWidth(ushort glyphId)
         {
             if (_advanceWidths == null || glyphId >= _advanceWidths.Length) return 0;
             return _advanceWidths[glyphId];
         }
 
-        internal float GetWidthPoint(string text, float fontSize)
+        public float GetWidthPoint(string text, float fontSize)
         {
             if (_unitsPerEm == 0 || _advanceWidths == null || text == null) return 0f;
             float total = 0f;
@@ -256,7 +253,7 @@ namespace Majorsilence.Reporting.Rdl.Pdf
         }
 
         // Returns all Unicode code-point → glyph-ID pairs present in the font.
-        internal IEnumerable<(int codePoint, ushort glyphId)> GetCharGlyphMappings()
+        public IEnumerable<(int codePoint, ushort glyphId)> GetCharGlyphMappings()
             => _charToGlyph.Select(kv => (kv.Key, kv.Value));
     }
 }
