@@ -434,7 +434,7 @@ namespace Majorsilence.Reporting.RdlMapFile
         {
             try
             {
-                System.Diagnostics.Process.Start("https://github.com/majorsilence/My-FyiReporting/discussions");
+                System.Diagnostics.Process.Start("https://github.com/majorsilence/Reporting/discussions");
             }
             catch (Exception ex)
             {
@@ -447,7 +447,7 @@ namespace Majorsilence.Reporting.RdlMapFile
         {
             try
             {
-                System.Diagnostics.Process.Start("https://github.com/majorsilence/My-FyiReporting/discussions");
+                System.Diagnostics.Process.Start("https://github.com/majorsilence/Reporting/discussions");
             }
             catch (Exception ex)
             {

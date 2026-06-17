@@ -69,6 +69,7 @@ namespace Majorsilence.Reporting.Cri
             writer.Options.Height = Math.Max(1, bm.Height);
             writer.Options.Width = Math.Max(1, bm.Width);
 
+#if NET5_0_OR_GREATER
             try
             {
                 System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
@@ -77,6 +78,7 @@ namespace Majorsilence.Reporting.Cri
             {
                 // The provider has already been registered.
             }
+#endif
 
             bm = writer.Write(qrcode);
         }
@@ -88,7 +90,7 @@ namespace Majorsilence.Reporting.Cri
         /// <param name="bm"></param>
         void ICustomReportItem.DrawDesignerImage(ref Draw2.Bitmap bm)
         {
-            DrawImage(ref bm, "https://github.com/majorsilence/My-FyiReporting");
+            DrawImage(ref bm, "https://github.com/majorsilence/Reporting");
         }
 
         private string _code = "";

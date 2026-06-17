@@ -533,7 +533,7 @@ namespace Majorsilence.Reporting.RdlDesign
             return true;
         }
 
-        private void PropertyDialog_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        private void PropertyDialog_Closing(object sender, System.Windows.Forms.FormClosingEventArgs e)
         {
             if (_Type == PropertyTypeEnum.Grouping)
             {	// Need to check if grouping value is still required

@@ -84,7 +84,7 @@ private System.ComponentModel.Container components = null;
             this.Name = "PropertyDialog";
             this.ShowIcon = false;
             this.ShowInTaskbar = false;
-            this.Closing += new System.ComponentModel.CancelEventHandler(this.PropertyDialog_Closing);
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.PropertyDialog_Closing);
             this.panel1.ResumeLayout(false);
             this.ResumeLayout(false);
 

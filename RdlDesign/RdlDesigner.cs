@@ -48,8 +48,8 @@ namespace Majorsilence.Reporting.RdlDesign
 		private Rdl.NeedPassword _GetPassword;
 		private string _DataSourceReferencePassword = null;
 		private bool bGotPassword = false;
-		private readonly string DefaultHelpUrl = "https://github.com/majorsilence/My-FyiReporting/wiki/_pages";
-		private readonly string DefaultSupportUrl = "https://github.com/majorsilence/My-FyiReporting/discussions";
+		private readonly string DefaultHelpUrl = "https://github.com/majorsilence/Reporting/wiki/_pages";
+		private readonly string DefaultSupportUrl = "https://github.com/majorsilence/Reporting/discussions";
 		private string _HelpUrl;
 		private string _SupportUrl;
 		static private string[] _MapSubtypes = new string[] { "usa_map" };
@@ -189,7 +189,7 @@ namespace Majorsilence.Reporting.RdlDesign
             Application.AddMessageFilter(this);
 
             this.MdiChildActivate += new EventHandler(RdlDesigner_MdiChildActivate);
-            this.Closing += new System.ComponentModel.CancelEventHandler(this.RdlDesigner_Closing);
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.RdlDesigner_Closing);
             _GetPassword = new Rdl.NeedPassword(this.GetPassword);
 
             InitToolbar();
@@ -2344,7 +2344,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			await CreateMDIChildAsync(file, null, true);
 		}
 
-		private void RdlDesigner_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+		private void RdlDesigner_Closing(object sender, System.Windows.Forms.FormClosingEventArgs e)
 		{
 			SaveStartupState();
 			menuToolsCloseProcess(false);
@@ -4000,7 +4000,6 @@ namespace Majorsilence.Reporting.RdlDesign
 			_commands = value;
 		}
 
-        [Obsolete]
         public override object InitializeLifetimeService()
 		{
 			return null;

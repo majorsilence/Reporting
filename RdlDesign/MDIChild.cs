@@ -55,7 +55,7 @@ namespace Majorsilence.Reporting.RdlDesign
 
             this.Name = "";
             this.Text = "";
-            this.Closing += new System.ComponentModel.CancelEventHandler(this.MDIChild_Closing);
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MDIChild_Closing);
 
             this.ResumeLayout(false);
         }
@@ -529,7 +529,7 @@ namespace Majorsilence.Reporting.RdlDesign
             await rdlDesigner.SaveAs(filename, type);
         }
 
-        private void MDIChild_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        private void MDIChild_Closing(object sender, System.Windows.Forms.FormClosingEventArgs e)
         {
             if (!OkToClose())
             {

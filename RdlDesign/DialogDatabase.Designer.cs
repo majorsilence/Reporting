@@ -570,7 +570,7 @@ namespace Majorsilence.Reporting.RdlDesign
             this.MinimizeBox = false;
             this.Name = "DialogDatabase";
             this.ShowInTaskbar = false;
-            this.Closed += new System.EventHandler(this.DialogDatabase_Closed);
+            this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.DialogDatabase_Closed);
             this.splitContainer1.Panel1.ResumeLayout(false);
             this.splitContainer1.Panel2.ResumeLayout(false);
             this.splitContainer1.Panel2.PerformLayout();

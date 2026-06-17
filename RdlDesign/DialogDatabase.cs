@@ -1047,7 +1047,7 @@ namespace Majorsilence.Reporting.RdlDesign
         }
 
 
-        private void DialogDatabase_Closed(object sender, System.EventArgs e)
+        private void DialogDatabase_Closed(object sender, System.Windows.Forms.FormClosedEventArgs e)
         {
             if (_TempFileName != null)
                 File.Delete(_TempFileName);

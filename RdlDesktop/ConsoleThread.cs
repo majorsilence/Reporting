@@ -78,7 +78,7 @@ namespace Majorsilence.Reporting.RdlDesktop
 						Console.WriteLine("");
 
 						Console.WriteLine("For additional information visit");
-						Console.WriteLine("the website https://github.com/majorsilence/My-FyiReporting.");
+						Console.WriteLine("the website https://github.com/majorsilence/Reporting.");
 						Console.Write(">");
 						break;
 					case "threads":

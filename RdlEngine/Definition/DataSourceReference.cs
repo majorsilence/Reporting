@@ -34,8 +34,12 @@ namespace Majorsilence.Reporting.Rdl
             #endif
 
             // create the key from the password phrase
+#if NET6_0_OR_GREATER
+            byte[] key = Rfc2898DeriveBytes.Pbkdf2(pswd, salt, 10000, HashAlgorithmName.SHA256, KEY_SIZE);
+#else
             var pdb = new Rfc2898DeriveBytes(pswd, salt, 10000, HashAlgorithmName.SHA256);
             byte[] key = pdb.GetBytes(KEY_SIZE);
+#endif
 
             // Create an instance of the Aes class
             using (Aes aes = Aes.Create())
@@ -71,14 +75,24 @@ namespace Majorsilence.Reporting.Rdl
 
             using (FileStream fs = File.OpenRead(filename))
             {
+#if NET7_0_OR_GREATER
+                fs.ReadExactly(salt, 0, salt.Length);
+                enc = new byte[fs.Length - salt.Length];
+                fs.ReadExactly(enc, 0, enc.Length);
+#else
                 fs.Read(salt, 0, salt.Length);
                 enc = new byte[fs.Length - salt.Length];
                 fs.Read(enc, 0, enc.Length);
+#endif
             }
 
             // create the key from the password phrase
+#if NET6_0_OR_GREATER
+            byte[] key = Rfc2898DeriveBytes.Pbkdf2(pswd, salt, 10000, HashAlgorithmName.SHA256, KEY_SIZE);
+#else
             var pdb = new Rfc2898DeriveBytes(pswd, salt, 10000, HashAlgorithmName.SHA256);
             byte[] key = pdb.GetBytes(KEY_SIZE);
+#endif
 
             // Create an instance of the Aes class
             using (Aes aes = Aes.Create())

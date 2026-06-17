@@ -1102,7 +1102,7 @@ namespace Majorsilence.Reporting.RdlViewer
                 _vScroll.Value = Math.Min(Math.Max(scroll, _vScroll.Minimum), Math.Min(maxScroll, _vScroll.Maximum));
                 SetScrollControlsV();
                 ScrollEventArgs sa = new ScrollEventArgs(ScrollEventType.ThumbPosition, _vScroll.Maximum + 1); // position is intentionally wrong
-                VerticalScroll(_vScroll, sa);
+                OnVScroll(_vScroll, sa);
             }
 
             // set the horizontal scroll
@@ -1115,7 +1115,7 @@ namespace Majorsilence.Reporting.RdlViewer
                 _hScroll.Value = Math.Min(Math.Max(scroll, _hScroll.Minimum), Math.Min(maxScroll, _hScroll.Maximum));
                 SetScrollControlsH();
                 ScrollEventArgs sa = new ScrollEventArgs(ScrollEventType.ThumbPosition, _hScroll.Maximum + 1); // position is intentionally wrong
-                HorizontalScroll(_hScroll, sa);
+                OnHScroll(_hScroll, sa);
             }
         }
 
@@ -1257,6 +1257,7 @@ namespace Majorsilence.Reporting.RdlViewer
         // Obtain the Pages by running the report
         private async Task<Report> GetReport()
         {
+            await Task.Yield();   // release UI thread before data fetch + layout
             string prog;
 
             // Obtain the source
@@ -1463,6 +1464,7 @@ namespace Majorsilence.Reporting.RdlViewer
 
         private async Task<Pages> GetPages(Report report)
         {
+            await Task.Yield();   // release UI thread before data fetch + layout
             Pages pgs = null;
 
             var ld = await GetParameters();        // split parms into dictionary
@@ -1901,7 +1903,7 @@ namespace Majorsilence.Reporting.RdlViewer
             return;
         }
 
-        private void HorizontalScroll(object sender, System.Windows.Forms.ScrollEventArgs e)
+        private void OnHScroll(object sender, System.Windows.Forms.ScrollEventArgs e)
         {
             if (_hScroll.IsDisposed)
                 return;
@@ -1912,7 +1914,7 @@ namespace Majorsilence.Reporting.RdlViewer
             _DrawPanel.Invalidate();
         }
 
-        private void VerticalScroll(object sender, System.Windows.Forms.ScrollEventArgs e)
+        private void OnVScroll(object sender, System.Windows.Forms.ScrollEventArgs e)
         {
             if (_vScroll.IsDisposed)
                 return;

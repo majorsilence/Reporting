@@ -1272,7 +1272,11 @@ function findObject(id) {
                 if (ioin.CanSeek)       // ioin.Length requires Seek support
                 {
                     byte[] ba = new byte[ioin.Length];
+#if NET7_0_OR_GREATER
+                    ioin.ReadExactly(ba, 0, ba.Length);
+#else
                     ioin.Read(ba, 0, ba.Length);
+#endif
                     io.Write(ba, 0, ba.Length);
                 }
                 else

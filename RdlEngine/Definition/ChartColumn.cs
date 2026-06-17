@@ -317,7 +317,6 @@ namespace Majorsilence.Reporting.Rdl
                                         Draw2.Point pt = (Draw2.Point)LastPoints[iCol];
                                         Points[1] = new Draw2.Point(pt.X - 1, pt.Y);
                                         // 05052008AJM - Allowing for breaking lines in chart
-                                        if (Points[1] != null)
                                         {
                                             String LineSize = getLineSize(rpt, iCol, 1);
                                             int intLineSize = 1;

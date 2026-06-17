@@ -151,7 +151,7 @@ namespace Majorsilence.Reporting.RdlDesign
             this.Close();
         }
 
-        private void DialogValidateRdl_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        private void DialogValidateRdl_Closing(object sender, System.Windows.Forms.FormClosingEventArgs e)
         {
             this._RdlDesigner.ValidateSchemaClosing();
         }

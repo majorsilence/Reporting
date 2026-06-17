@@ -47,6 +47,9 @@ namespace ReportTests.Utils
         };
 
         [Test, TestCaseSource(nameof(BarCodeTypes))]
+#if NET6_0_OR_GREATER
+        [System.Runtime.Versioning.SupportedOSPlatform("windows")]
+#endif
         public async Task RenderPdf_BarcodeTypesViaParameter(string barcodeType)
         {
             Uri fileRdlUri = new Uri(_reportFolder, "barcode.rdl");

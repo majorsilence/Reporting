@@ -43,9 +43,9 @@ namespace RdlEngine.Render.ExcelConverter
 			Lines = new List<ExcelLine>();
 		}
 
-		public void AddImage(Majorsilence.Reporting.Rdl.Image image, int pictureIndex)
+		public void AddImage(Majorsilence.Reporting.Rdl.Image image, byte[] data)
 		{
-			var img = new ExcelImage(image, pictureIndex);
+			var img = new ExcelImage(image, data);
 			float top = image.Top.Points;
 			float left = image.Left.Points;
 			FillAbsolutePosition(image, ref top, ref left);

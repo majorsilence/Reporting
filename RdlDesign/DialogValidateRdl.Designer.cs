@@ -64,7 +64,7 @@ private System.ComponentModel.Container components = null;
 			this.Name = "DialogValidateRdl";
 			this.ShowInTaskbar = false;
 			this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Show;
-			this.Closing += new System.ComponentModel.CancelEventHandler(this.DialogValidateRdl_Closing);
+			this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.DialogValidateRdl_Closing);
 			this.ResumeLayout(false);
 
 		}

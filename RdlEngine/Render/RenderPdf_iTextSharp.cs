@@ -359,7 +359,9 @@ namespace Majorsilence.Reporting.Rdl
                 ["Noto Sans"] = "NotoSans",
             };
 
+#nullable enable
         private static string? GetEmbeddedFontFilename(string family, bool bold, bool italic)
+#nullable restore
         {
             if (!_embeddedFontMap.TryGetValue(family, out var baseName))
                 return null;

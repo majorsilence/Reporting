@@ -32,19 +32,14 @@ namespace Majorsilence.Reporting.RdlReader
         private Rdl.NeedPassword _GetPassword;
         private string _DataSourceReferencePassword = null;
 
-        public RdlReader() : this(false)
-        {
-        }
-        
-        [Obsolete("This constructor was only for Mono compatibility, use RdlReader() instead.")]
-        public RdlReader(bool mono)
+        public RdlReader()
         {
             GetStartupState();
 
             InitializeComponent();
 
             BuildMenus();
-            // CustomReportItem load 
+            // CustomReportItem load
             RdlEngineConfig.GetCustomReportTypes();
 
             Application.AddMessageFilter(this);
@@ -53,6 +48,11 @@ namespace Majorsilence.Reporting.RdlReader
             _GetPassword = new Rdl.NeedPassword(this.GetPassword);
 
             this.Load += RdlReader_Load;
+        }
+
+        [Obsolete("This constructor was only for Mono compatibility, use RdlReader() instead.")]
+        public RdlReader(bool mono) : this()
+        {
         }
 
         public async void RdlReader_Load(object sender, EventArgs e) 
