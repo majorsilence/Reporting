@@ -162,7 +162,7 @@ namespace Majorsilence.Reporting.Rdl
                     ip = new RenderPdf_iTextSharp(this, sg);
                     await _Report.Run(ip);
                     break;
-                case OutputPresentationType.RenderPdf_Raw:
+                case OutputPresentationType.RenderPdf_Majorsilence:
                     ip = new RenderPdf_Raw(this, sg);
                     await _Report.Run(ip);
                     break;

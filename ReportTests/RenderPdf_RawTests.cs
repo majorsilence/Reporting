@@ -57,7 +57,7 @@ namespace ReportTests.Utils
                 $"{file2test}_{cultureName}_RenderPdf_Raw{Ext}");
 
             using var sg = new OneFileStreamGen(outFile, true);
-            await rap.RunRender(sg, OutputPresentationType.RenderPdf_Raw);
+            await rap.RunRender(sg, OutputPresentationType.RenderPdf_Majorsilence);
 
             Assert.That(File.Exists(outFile), "PDF output file was not created");
             var bytes = File.ReadAllBytes(outFile);
