@@ -39,12 +39,14 @@ namespace Majorsilence.Reporting.Rdl
         // ── state ─────────────────────────────────────────────────────────────
 
         private PdfDocument _doc;
-        private PdfCanvas _currentPage;
+        private PdfCanvas   _currentPage;
+        private FontRegistry _fontRegistry;
 
         private readonly int _osPlatform = (int)Environment.OSVersion.Platform;
         private bool _dejavuFonts;
         private bool _liberationFonts;
 
+        // RDL face names that map to a metric-compatible bundled family
         private static readonly Dictionary<string, string> _embeddedFontMap =
             new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
             {
@@ -53,6 +55,7 @@ namespace Majorsilence.Reporting.Rdl
                 ["Cambria"]   = "Caladea",
                 ["Caladea"]   = "Caladea",
                 ["Noto Sans"] = "NotoSans",
+                ["NotoSans"]  = "NotoSans",
             };
 
         // ── construction ──────────────────────────────────────────────────────
@@ -63,18 +66,18 @@ namespace Majorsilence.Reporting.Rdl
 
         protected internal override void CreateDocument()
         {
+            _fontRegistry = BuildFontRegistry();
+
             Report r = base.Report();
             _doc = PdfDocument.Create()
                 .WithAuthor(r.Author ?? "")
                 .WithTitle(r.Name   ?? "")
                 .WithSubject(r.Description ?? "")
-                .WithCreator("Majorsilence Reporting - RenderPdf_Raw");
+                .WithCreator("Majorsilence Reporting - RenderPdf_Raw")
+                .WithFontRegistry(_fontRegistry);
         }
 
-        protected internal override void EndDocument(Stream sg)
-        {
-            _doc.Save(sg);
-        }
+        protected internal override void EndDocument(Stream sg) => _doc.Save(sg);
 
         protected internal override void CreatePage()
         {
@@ -82,7 +85,6 @@ namespace Majorsilence.Reporting.Rdl
         }
 
         protected internal override void AfterProcessPage() { }
-
         protected internal override void AddBookmark(PageText pt) { }
 
         // ── lines ─────────────────────────────────────────────────────────────
@@ -91,11 +93,11 @@ namespace Majorsilence.Reporting.Rdl
             float width, Draw2.Color c, BorderStyleEnum ls)
         {
             if (width <= 0) return;
-            var style = StrokeStyle.Default
-                .WithWidth(width)
-                .WithColor(PdfColor.FromRgb(c.R, c.G, c.B))
-                .WithLineStyle(ConvertLineStyle(ls));
-            _currentPage.DrawLine(x, y, x2, y2, style);
+            _currentPage.DrawLine(x, y, x2, y2,
+                StrokeStyle.Default
+                    .WithWidth(width)
+                    .WithColor(PdfColor.FromRgb(c.R, c.G, c.B))
+                    .WithLineStyle(ConvertLineStyle(ls)));
         }
 
         // ── images ────────────────────────────────────────────────────────────
@@ -108,16 +110,10 @@ namespace Majorsilence.Reporting.Rdl
             if (im == null || im.Length == 0) return;
 
             bool isJpeg = im.Length > 3 && im[0] == 0xFF && im[1] == 0xD8 && im[2] == 0xFF;
-            byte[] imgData = im;
-
-            if (!isJpeg)
-            {
-                imgData = DecodeToRgb(im, ref samplesW, ref samplesH);
-                if (imgData == null) return;
-            }
+            byte[] imgData = isJpeg ? im : DecodeToRgb(im, ref samplesW, ref samplesH);
+            if (imgData == null) return;
 
             _currentPage.DrawImage(imgData, samplesW, samplesH, isJpeg, x, y, width, height);
-
             AddAnnotations(x, y, height, width, url, tooltip);
             iAddBorder(si, x, y, height, width);
         }
@@ -128,10 +124,10 @@ namespace Majorsilence.Reporting.Rdl
         {
             if (si.BackgroundColor.IsEmpty || pts.Length < 2) return;
             var c = si.BackgroundColor;
-            var style = ShapeStyle.Filled(PdfColor.FromRgb(c.R, c.G, c.B));
             var points = new List<(float x, float y)>(pts.Length);
             foreach (var p in pts) points.Add((p.X, p.Y));
-            _currentPage.DrawPolygon(points, style);
+            _currentPage.DrawPolygon(points,
+                ShapeStyle.Filled(PdfColor.FromRgb(c.R, c.G, c.B)));
         }
 
         protected internal override void AddRectangle(float x, float y, float height, float width,
@@ -139,7 +135,6 @@ namespace Majorsilence.Reporting.Rdl
         {
             if (height > 0 && width > 0 && !si.BackgroundColor.IsEmpty)
                 iAddFillRect(x, y, width, height, si.BackgroundColor);
-
             iAddBorder(si, x, y, height, width);
             AddAnnotations(x, y, height, width, url, tooltip);
         }
@@ -149,32 +144,27 @@ namespace Majorsilence.Reporting.Rdl
         {
             if (height > 0 && width > 0 && !si.BackgroundColor.IsEmpty)
                 iAddFillRect(x, y, width, height, si.BackgroundColor);
-
             iAddBorder(si, x, y, height, width);
             AddAnnotations(x, y, height, width, url, tooltip);
         }
 
         protected internal override void AddCurve(Draw2.PointF[] pts, StyleInfo si)
         {
-            if (pts.Length >= 2)
-            {
-                var style = StrokeStyle.Default
+            if (pts.Length < 2) return;
+            var points = new List<(float x, float y)>(pts.Length);
+            foreach (var p in pts) points.Add((p.X, p.Y));
+            _currentPage.DrawCurve(points,
+                StrokeStyle.Default
                     .WithColor(si.BStyleTop != BorderStyleEnum.None
                         ? PdfColor.FromRgb(si.BColorTop.R, si.BColorTop.G, si.BColorTop.B)
                         : PdfColor.Black)
-                    .WithLineStyle(ConvertLineStyle(si.BStyleTop));
-
-                var points = new List<(float x, float y)>(pts.Length);
-                foreach (var p in pts) points.Add((p.X, p.Y));
-                _currentPage.DrawCurve(points, style);
-            }
+                    .WithLineStyle(ConvertLineStyle(si.BStyleTop)));
         }
 
         protected internal override void AddEllipse(float x, float y, float height, float width,
             StyleInfo si, string url)
         {
-            var style = BuildShapeStyle(si);
-            _currentPage.DrawEllipse(x, y, width, height, style);
+            _currentPage.DrawEllipse(x, y, width, height, BuildShapeStyle(si));
         }
 
         // ── text ──────────────────────────────────────────────────────────────
@@ -195,7 +185,6 @@ namespace Majorsilence.Reporting.Rdl
                 if (string.IsNullOrEmpty(text)) continue;
 
                 float textwidth = _currentPage.MeasureTextWidth(text, baseStyle);
-
                 float startX = x + si.PaddingLeft;
                 float startY = y + si.PaddingTop + i * si.FontSize;
 
@@ -205,7 +194,9 @@ namespace Majorsilence.Reporting.Rdl
                     {
                         case TextAlignEnum.Center:
                             if (width > 0)
-                                startX = x + si.PaddingLeft + (width - si.PaddingLeft - si.PaddingRight) / 2f - textwidth / 2f;
+                                startX = x + si.PaddingLeft
+                                       + (width - si.PaddingLeft - si.PaddingRight) / 2f
+                                       - textwidth / 2f;
                             break;
                         case TextAlignEnum.Right:
                             if (width > 0)
@@ -218,7 +209,9 @@ namespace Majorsilence.Reporting.Rdl
                         case VerticalAlignEnum.Middle:
                             if (height > 0)
                             {
-                                startY = y + si.PaddingTop + (height - si.PaddingTop - si.PaddingBottom) / 2f - si.FontSize / 2f;
+                                startY = y + si.PaddingTop
+                                       + (height - si.PaddingTop - si.PaddingBottom) / 2f
+                                       - si.FontSize / 2f;
                                 if (sa.Length > 1)
                                     startY += sa.Length % 2 == 0
                                         ? -(((sa.Length / 2) - i) * si.FontSize) + si.FontSize / 2f
@@ -231,40 +224,49 @@ namespace Majorsilence.Reporting.Rdl
                             break;
                     }
 
-                    // DrawText baseline is at startY + FontSize in top-left coordinates
                     _currentPage.DrawText(text, startX, startY + si.FontSize, baseStyle);
 
-                    float maxX = width > 0 ? Math.Min(x + width, startX + textwidth) : startX + textwidth;
+                    float maxX = width > 0
+                        ? Math.Min(x + width, startX + textwidth)
+                        : startX + textwidth;
+
                     switch (si.TextDecoration)
                     {
                         case TextDecorationEnum.Underline:
-                            AddLine(startX, startY + si.FontSize + 1, maxX, startY + si.FontSize + 1, 1, si.Color, BorderStyleEnum.Solid);
+                            AddLine(startX, startY + si.FontSize + 1,
+                                    maxX,   startY + si.FontSize + 1,
+                                    1, si.Color, BorderStyleEnum.Solid);
                             break;
                         case TextDecorationEnum.LineThrough:
-                            AddLine(startX, startY + si.FontSize / 2f + 1, maxX, startY + si.FontSize / 2f + 1, 1, si.Color, BorderStyleEnum.Solid);
+                            AddLine(startX, startY + si.FontSize / 2f + 1,
+                                    maxX,   startY + si.FontSize / 2f + 1,
+                                    1, si.Color, BorderStyleEnum.Solid);
                             break;
                         case TextDecorationEnum.Overline:
-                            AddLine(startX, startY + 1, maxX, startY + 1, 1, si.Color, BorderStyleEnum.Solid);
+                            AddLine(startX, startY + 1,
+                                    maxX,   startY + 1,
+                                    1, si.Color, BorderStyleEnum.Solid);
                             break;
                     }
                 }
                 else
                 {
-                    // Vertical text: render rotated
                     startX += si.FontSize / 4f;
                     switch (si.TextAlign)
                     {
                         case TextAlignEnum.Center:
                             if (height > 0)
-                                startY = y + si.PaddingLeft + (height - si.PaddingLeft - si.PaddingRight) / 2f - textwidth / 2f;
+                                startY = y + si.PaddingLeft
+                                       + (height - si.PaddingLeft - si.PaddingRight) / 2f
+                                       - textwidth / 2f;
                             break;
                         case TextAlignEnum.Right:
                             if (width > 0)
                                 startY = y + height - textwidth - si.PaddingRight;
                             break;
                     }
-
-                    _currentPage.DrawText(text, startX, startY + si.FontSize, baseStyle.WithVertical());
+                    _currentPage.DrawText(text, startX, startY + si.FontSize,
+                        baseStyle.WithVertical());
                 }
             }
 
@@ -272,40 +274,116 @@ namespace Majorsilence.Reporting.Rdl
             iAddBorder(si, x, y, height, width);
         }
 
-        // ── private: font resolution ──────────────────────────────────────────
+        // ── font registry construction ────────────────────────────────────────
 
-        private string FontFolder
+        private FontRegistry BuildFontRegistry()
         {
-            get
-            {
-                bool isOSX = System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(
-                    System.Runtime.InteropServices.OSPlatform.OSX);
+            // FontFolder sets _liberationFonts / _dejavuFonts as a side-effect
+            string sysFolder = FontFolder;
+            var reg = new FontRegistry();
 
-                if (isOSX) return "/System/Library/Fonts/Supplemental";
-
-                if (_osPlatform == (int)PlatformID.Unix)
-                {
-                    if (Directory.Exists("/usr/share/fonts/truetype/msttcorefonts"))
-                        return "/usr/share/fonts/truetype/msttcorefonts";
-                    if (Directory.Exists("/usr/share/fonts/truetype/liberation"))
-                    { _liberationFonts = true; return "/usr/share/fonts/truetype/liberation"; }
-                    if (Directory.Exists("/usr/share/fonts/truetype/dejavu"))
-                    { _dejavuFonts = true; return "/usr/share/fonts/truetype/dejavu"; }
-                    _liberationFonts = true;
+            // ── bundled fonts (always available via Majorsilence.Drawing.Common) ──
 #if DRAWINGCOMPAT
-                    return Majorsilence.Drawing.FontResourceLoader.GetFontDirectory();
-#else
-                    return "/usr/share/fonts";
+            string embDir = Majorsilence.Drawing.FontResourceLoader.GetFontDirectory();
+            if (Directory.Exists(embDir))
+                reg.AddDirectory(embDir);
 #endif
-                }
 
-                DirectoryInfo winDir = Directory.GetParent(Environment.GetFolderPath(Environment.SpecialFolder.System));
-                return Path.Combine(winDir.FullName, "Fonts");
+            // ── system fonts — explicit registrations for known naming schemes ──
+
+            if (IsOSX)
+            {
+                // macOS: "Arial.ttf", "Arial Bold.ttf", etc. (spaces in names)
+                TryAddFamily(reg, sysFolder, "Arial",
+                    r: "Arial.ttf", b: "Arial Bold.ttf",
+                    i: "Arial Italic.ttf", bi: "Arial Bold Italic.ttf");
+                TryAddFamily(reg, sysFolder, "Times New Roman",
+                    r: "Times New Roman.ttf", b: "Times New Roman Bold.ttf",
+                    i: "Times New Roman Italic.ttf", bi: "Times New Roman Bold Italic.ttf");
+                TryAddFamily(reg, sysFolder, "Courier New",
+                    r: "Courier New.ttf", b: "Courier New Bold.ttf",
+                    i: "Courier New Italic.ttf", bi: "Courier New Bold Italic.ttf");
+                TryAddFamily(reg, sysFolder, "Georgia",
+                    r: "Georgia.ttf", b: "Georgia Bold.ttf",
+                    i: "Georgia Italic.ttf", bi: "Georgia Bold Italic.ttf");
             }
+            else if (_osPlatform == (int)PlatformID.Unix)
+            {
+                // Liberation fonts follow FamilyName-Variant.ttf — AddDirectory handles them
+                if (_liberationFonts || _dejavuFonts)
+                    reg.AddDirectory(sysFolder);
+
+                // Additional common Linux locations
+                foreach (string dir in new[]
+                {
+                    "/usr/share/fonts/truetype/liberation",
+                    "/usr/share/fonts/truetype/dejavu",
+                    "/usr/share/fonts/truetype/noto",
+                    "/usr/share/fonts/noto",
+                    "/usr/share/fonts/opentype/noto",
+                })
+                {
+                    if (Directory.Exists(dir) && dir != sysFolder)
+                        reg.AddDirectory(dir);
+                }
+            }
+            else
+            {
+                // Windows: abbreviated filenames (arial.ttf, arialbd.ttf, etc.)
+                TryAddFamily(reg, sysFolder, "Arial",
+                    r: "arial.ttf", b: "arialbd.ttf",
+                    i: "ariali.ttf", bi: "arialbi.ttf");
+                TryAddFamily(reg, sysFolder, "Times New Roman",
+                    r: "times.ttf", b: "timesbd.ttf",
+                    i: "timesi.ttf", bi: "timesbi.ttf");
+                TryAddFamily(reg, sysFolder, "Courier New",
+                    r: "cour.ttf", b: "courbd.ttf",
+                    i: "couri.ttf", bi: "courbi.ttf");
+                TryAddFamily(reg, sysFolder, "Calibri",
+                    r: "calibri.ttf", b: "calibrib.ttf",
+                    i: "calibrii.ttf", bi: "calibriz.ttf");
+                TryAddFamily(reg, sysFolder, "Cambria",
+                    r: "cambria.ttc", b: "cambriab.ttf",
+                    i: "cambriai.ttf", bi: "cambriaz.ttf");
+                TryAddFamily(reg, sysFolder, "Georgia",
+                    r: "georgia.ttf", b: "georgiab.ttf",
+                    i: "georgiai.ttf", bi: "georgiaz.ttf");
+                TryAddFamily(reg, sysFolder, "Verdana",
+                    r: "verdana.ttf", b: "verdanab.ttf",
+                    i: "verdanai.ttf", bi: "verdanaz.ttf");
+                TryAddFamily(reg, sysFolder, "Tahoma",
+                    r: "tahoma.ttf", b: "tahomabd.ttf",
+                    i: null, bi: null);
+                TryAddFamily(reg, sysFolder, "Trebuchet MS",
+                    r: "trebuc.ttf", b: "trebucbd.ttf",
+                    i: "trebucit.ttf", bi: "trebucbi.ttf");
+            }
+
+            // ── fallback chain ────────────────────────────────────────────────
+            // Prefer wide-coverage fonts; first match wins
+            foreach (string fb in new[]
+                { "NotoSans", "LiberationSans", "DejaVuSans", "Arial", "Verdana" })
+            {
+                if (reg.Contains(fb)) { reg.AddFallback(fb); break; }
+            }
+
+            return reg;
         }
 
-        private bool IsOSX => System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(
-            System.Runtime.InteropServices.OSPlatform.OSX);
+        // Register a font family only if at least one variant file exists.
+        private static void TryAddFamily(FontRegistry reg, string folder,
+            string family, string r, string b, string i, string bi)
+        {
+            string rPath  = r  != null && File.Exists(Path.Combine(folder, r))  ? Path.Combine(folder, r)  : null;
+            string bPath  = b  != null && File.Exists(Path.Combine(folder, b))  ? Path.Combine(folder, b)  : null;
+            string iPath  = i  != null && File.Exists(Path.Combine(folder, i))  ? Path.Combine(folder, i)  : null;
+            string biPath = bi != null && File.Exists(Path.Combine(folder, bi)) ? Path.Combine(folder, bi) : null;
+
+            if (rPath != null || bPath != null || iPath != null || biPath != null)
+                reg.AddFamily(family, rPath, bPath, iPath, biPath);
+        }
+
+        // ── font resolution ───────────────────────────────────────────────────
 
         private static string NormalizeFace(string face)
         {
@@ -314,17 +392,52 @@ namespace Majorsilence.Reporting.Rdl
                 case "times": case "times-roman": case "times roman":
                 case "timesnewroman": case "times new roman":
                 case "timesnewromanps": case "timesnewromanpsmt": case "serif":
-                    return "Times-Roman";
+                    return "Times New Roman";
 
                 case "courier": case "couriernew": case "courier new":
                 case "couriernewpsmt": case "monospace":
                     return "Courier New";
 
-                case "symbol":    return "Symbol";
+                case "symbol":                               return "Symbol";
                 case "zapfdingbats": case "wingdings": case "wingding":
                     return "ZapfDingbats";
 
                 default: return face;
+            }
+        }
+
+        private string MapFaceToRegistryFamily(string face)
+        {
+            switch (face)
+            {
+                case "Times New Roman":
+                    // Prefer metric-compatible bundled fonts, then system
+                    if (_fontRegistry.Contains("LiberationSerif"))  return "LiberationSerif";
+                    if (_fontRegistry.Contains("Times New Roman"))  return "Times New Roman";
+                    return null;
+
+                case "Courier New":
+                    if (_fontRegistry.Contains("LiberationMono"))   return "LiberationMono";
+                    if (_fontRegistry.Contains("Courier New"))      return "Courier New";
+                    return null;
+
+                case "Symbol":
+                case "ZapfDingbats":
+                    return null; // handled as standard Type-1 below
+
+                default:
+                    // Check metric-compatible substitution table (Calibri→Carlito etc.)
+                    if (_embeddedFontMap.TryGetValue(face, out string mapped)
+                        && _fontRegistry.Contains(mapped))
+                        return mapped;
+
+                    // Try exact name
+                    if (_fontRegistry.Contains(face)) return face;
+
+                    // Helvetica/Arial treated as sans-serif default
+                    if (_fontRegistry.Contains("LiberationSans")) return "LiberationSans";
+                    if (_fontRegistry.Contains("Arial"))          return "Arial";
+                    return null;
             }
         }
 
@@ -333,103 +446,31 @@ namespace Majorsilence.Reporting.Rdl
             bool bold   = si.IsFontBold();
             bool italic = si.FontStyle == FontStyleEnum.Italic;
             string face = NormalizeFace(si.FontFamily);
-            string folder = FontFolder; // also sets _liberationFonts / _dejavuFonts
 
-            var color = PdfColor.FromRgb(si.Color.R, si.Color.G, si.Color.B);
             var baseStyle = TextStyle.Default
                 .WithSize(si.FontSize)
-                .WithColor(color)
+                .WithColor(PdfColor.FromRgb(si.Color.R, si.Color.G, si.Color.B))
                 .WithBold(bold)
                 .WithItalic(italic);
 
-            // ── standard Type1 fonts (no embedding needed) ───────────────────
-            if (face == "Times-Roman")
-            {
-                string std, ttfFile;
-                if (bold && italic)
-                {
-                    std     = IsOSX ? "TimesNewRomanPS-BoldItalicMT"  : (_liberationFonts ? "Liberation Serif Bold Italic"  : _dejavuFonts ? "DejaVu Serif Condensed Bold Italic"  : "Times-BoldItalic");
-                    ttfFile = IsOSX ? "Times New Roman Bold Italic.ttf": (_liberationFonts ? "LiberationSerif-BoldItalic.ttf" : _dejavuFonts ? "DejaVuSerifCondensed-BoldItalic.ttf" : "timesbi.ttf");
-                }
-                else if (bold)
-                {
-                    std     = IsOSX ? "TimesNewRomanPS-BoldMT"         : (_liberationFonts ? "Liberation Serif Bold"          : _dejavuFonts ? "DejaVu Serif Condensed Bold"          : "Times-Bold");
-                    ttfFile = IsOSX ? "Times New Roman Bold.ttf"        : (_liberationFonts ? "LiberationSerif-Bold.ttf"        : _dejavuFonts ? "DejaVuSerifCondensed-Bold.ttf"        : "timesbd.ttf");
-                }
-                else if (italic)
-                {
-                    std     = IsOSX ? "TimesNewRomanPS-ItalicMT"        : (_liberationFonts ? "Liberation Serif Italic"         : _dejavuFonts ? "DejaVu Serif Condensed Italic"         : "Times-Italic");
-                    ttfFile = IsOSX ? "Times New Roman Italic.ttf"       : (_liberationFonts ? "LiberationSerif-Italic.ttf"       : _dejavuFonts ? "DejaVuSerifCondensed-Italic.ttf"       : "timesi.ttf");
-                }
-                else
-                {
-                    std     = IsOSX ? "TimesNewRomanPSMT"                : (_liberationFonts ? "Liberation Serif"                 : _dejavuFonts ? "DejaVu Serif Condensed"                 : "Times-Roman");
-                    ttfFile = IsOSX ? "Times New Roman.ttf"               : (_liberationFonts ? "LiberationSerif-Regular.ttf"       : _dejavuFonts ? "DejaVuSerifCondensed.ttf"               : "times.ttf");
-                }
-                string path = Path.Combine(folder, ttfFile);
-                if (File.Exists(path)) return baseStyle.WithFontFile(path);
-                return baseStyle.WithFamily(std);
-            }
+            // Try the registry first — handles embedding, variants, and fallback automatically
+            string registryFamily = MapFaceToRegistryFamily(face);
+            if (registryFamily != null)
+                return baseStyle.WithFamily(registryFamily);
 
+            // Symbol and ZapfDingbats have no TTF equivalent — use standard Type-1
             if (face == "Symbol")       return baseStyle.WithFamily("Symbol");
             if (face == "ZapfDingbats") return baseStyle.WithFamily("ZapfDingbats");
 
-            if (face == "Courier New")
-            {
-                string ttfFile;
-                if      (bold && italic) ttfFile = IsOSX ? "Courier New Bold Italic.ttf" : (_liberationFonts ? "LiberationMono-BoldItalic.ttf"  : _dejavuFonts ? "DejaVuSansMono-BoldOblique.ttf" : "courbi.ttf");
-                else if (bold)           ttfFile = IsOSX ? "Courier New Bold.ttf"        : (_liberationFonts ? "LiberationMono-Bold.ttf"          : _dejavuFonts ? "DejaVuSansMono-Bold.ttf"        : "courbd.ttf");
-                else if (italic)         ttfFile = IsOSX ? "Courier New Italic.ttf"      : (_liberationFonts ? "LiberationMono-Italic.ttf"        : _dejavuFonts ? "DejaVuSansMono-Oblique.ttf"     : "couri.ttf");
-                else                     ttfFile = IsOSX ? "Courier New.ttf"             : (_liberationFonts ? "LiberationMono-Regular.ttf"       : _dejavuFonts ? "DejaVuSansMono.ttf"             : "cour.ttf");
-
-                string path = Path.Combine(folder, ttfFile);
-                if (File.Exists(path)) return baseStyle.WithFontFile(path);
-                string stdName = bold && italic ? "Courier-BoldOblique" : bold ? "Courier-Bold" : italic ? "Courier-Oblique" : "Courier";
-                return baseStyle.WithFamily(stdName);
-            }
-
-            // ── Arial / Helvetica and user-specified faces ────────────────────
-            {
-                string ttfFile;
-                if      (bold && italic) ttfFile = IsOSX ? "Arial Bold Italic.ttf" : (_liberationFonts ? "LiberationSans-BoldItalic.ttf"  : _dejavuFonts ? "DejaVuSansCondensed-BoldOblique.ttf" : "arialbi.ttf");
-                else if (bold)           ttfFile = IsOSX ? "Arial Bold.ttf"        : (_liberationFonts ? "LiberationSans-Bold.ttf"          : _dejavuFonts ? "DejaVuSansCondensed-Bold.ttf"        : "arialbd.ttf");
-                else if (italic)         ttfFile = IsOSX ? "Arial Italic.ttf"      : (_liberationFonts ? "LiberationSans-Italic.ttf"        : _dejavuFonts ? "DejaVuSansCondensed-Oblique.ttf"     : "ariali.ttf");
-                else                     ttfFile = IsOSX ? "Arial.ttf"             : (_liberationFonts ? "LiberationSans-Regular.ttf"       : _dejavuFonts ? "DejaVuSansCondensed.ttf"             : "arial.ttf");
-
-                if (face != "Arial" && face != "Helvetica")
-                {
-                    if (_embeddedFontMap.TryGetValue(face, out string baseName))
-                    {
-                        string suffix = bold && italic ? "BoldItalic" : bold ? "Bold" : italic ? "Italic" : "Regular";
-                        string embFile = $"{baseName}-{suffix}.ttf";
-#if DRAWINGCOMPAT
-                        string embFolder = Majorsilence.Drawing.FontResourceLoader.GetFontDirectory();
-#else
-                        string embFolder = folder;
-#endif
-                        string embPath = Path.Combine(embFolder, embFile);
-                        if (File.Exists(embPath)) return baseStyle.WithFontFile(embPath);
-                    }
-
-                    string[] candidates = new[]
-                    {
-                        Path.Combine(folder, face + ".ttf"),
-                        Path.Combine(folder, face.Replace(" ", "") + ".ttf"),
-                        Path.Combine(folder, face.ToLowerInvariant() + ".ttf"),
-                    };
-                    foreach (string c in candidates)
-                        if (File.Exists(c)) return baseStyle.WithFontFile(c);
-                }
-
-                string arialPath = Path.Combine(folder, ttfFile);
-                if (File.Exists(arialPath)) return baseStyle.WithFontFile(arialPath);
-
-                string helvName = bold && italic ? "Helvetica-BoldOblique" : bold ? "Helvetica-Bold" : italic ? "Helvetica-Oblique" : "Helvetica";
-                return baseStyle.WithFamily(helvName);
-            }
+            // Final fallback: standard Helvetica Type-1 (no embedding, WinAnsi only)
+            string helvName = bold && italic ? "Helvetica-BoldOblique"
+                            : bold           ? "Helvetica-Bold"
+                            : italic         ? "Helvetica-Oblique"
+                                             : "Helvetica";
+            return baseStyle.WithFamily(helvName);
         }
 
-        // ── private: drawing helpers ──────────────────────────────────────────
+        // ── private drawing helpers ───────────────────────────────────────────
 
         private void iAddFillRect(float x, float y, float width, float height, Draw2.Color c)
         {
@@ -464,7 +505,8 @@ namespace Majorsilence.Reporting.Rdl
             if (si.BStyleBottom != BorderStyleEnum.None && si.BWidthBottom > 0) AddLine(x,  yb, xr, yb, si.BWidthBottom, si.BColorBottom, si.BStyleBottom);
         }
 
-        private void AddAnnotations(float x, float y, float height, float width, string url, string tooltip)
+        private void AddAnnotations(float x, float y, float height, float width,
+            string url, string tooltip)
         {
             if (!string.IsNullOrEmpty(url))
                 _currentPage.AddLink(x, y, width, height, url);
@@ -482,7 +524,40 @@ namespace Majorsilence.Reporting.Rdl
             }
         }
 
-        // ── private: image decoding ────────────────────────────────────────────
+        // ── OS helpers ────────────────────────────────────────────────────────
+
+        private bool IsOSX => System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(
+            System.Runtime.InteropServices.OSPlatform.OSX);
+
+        private string FontFolder
+        {
+            get
+            {
+                if (IsOSX) return "/System/Library/Fonts/Supplemental";
+
+                if (_osPlatform == (int)PlatformID.Unix)
+                {
+                    if (Directory.Exists("/usr/share/fonts/truetype/msttcorefonts"))
+                        return "/usr/share/fonts/truetype/msttcorefonts";
+                    if (Directory.Exists("/usr/share/fonts/truetype/liberation"))
+                    { _liberationFonts = true; return "/usr/share/fonts/truetype/liberation"; }
+                    if (Directory.Exists("/usr/share/fonts/truetype/dejavu"))
+                    { _dejavuFonts = true; return "/usr/share/fonts/truetype/dejavu"; }
+                    _liberationFonts = true;
+#if DRAWINGCOMPAT
+                    return Majorsilence.Drawing.FontResourceLoader.GetFontDirectory();
+#else
+                    return "/usr/share/fonts";
+#endif
+                }
+
+                DirectoryInfo winDir = Directory.GetParent(
+                    Environment.GetFolderPath(Environment.SpecialFolder.System));
+                return Path.Combine(winDir.FullName, "Fonts");
+            }
+        }
+
+        // ── image decoding ────────────────────────────────────────────────────
 
         private static byte[] DecodeToRgb(byte[] data, ref int samplesW, ref int samplesH)
         {
@@ -499,7 +574,6 @@ namespace Majorsilence.Reporting.Rdl
                 var rgb = new byte[samplesW * samplesH * 3];
                 int idx = 0;
                 for (int row = 0; row < samplesH; row++)
-                {
                     for (int col = 0; col < samplesW; col++)
                     {
                         var px = img.GetPixel(col, row);
@@ -507,7 +581,6 @@ namespace Majorsilence.Reporting.Rdl
                         rgb[idx++] = px.G;
                         rgb[idx++] = px.B;
                     }
-                }
                 return rgb;
             }
             catch
