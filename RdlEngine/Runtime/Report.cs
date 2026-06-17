@@ -159,9 +159,13 @@ namespace Majorsilence.Reporting.Rdl
                 case OutputPresentationType.PDF:
                 case OutputPresentationType.RenderPdf_iTextSharp:
                 case OutputPresentationType.PDFOldStyle:
-                    ip =new RenderPdf_iTextSharp(this, sg);
+                    ip = new RenderPdf_iTextSharp(this, sg);
                     await _Report.Run(ip);
-                    break;          
+                    break;
+                case OutputPresentationType.RenderPdf_Raw:
+                    ip = new RenderPdf_Raw(this, sg);
+                    await _Report.Run(ip);
+                    break;
 				case OutputPresentationType.TIF:
                     ip = new RenderTif(this, sg);
                     await _Report.Run(ip);
