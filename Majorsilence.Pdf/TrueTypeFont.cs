@@ -247,8 +247,20 @@ namespace Majorsilence.Pdf
         {
             if (_unitsPerEm == 0 || _advanceWidths == null || text == null) return 0f;
             float total = 0f;
-            foreach (char ch in text)
-                total += GetAdvanceWidth(GetGlyphId(ch));
+            for (int i = 0; i < text.Length; i++)
+            {
+                int cp;
+                if (char.IsHighSurrogate(text[i]) && i + 1 < text.Length && char.IsLowSurrogate(text[i + 1]))
+                {
+                    cp = char.ConvertToUtf32(text[i], text[i + 1]);
+                    i++;
+                }
+                else
+                {
+                    cp = text[i];
+                }
+                total += GetAdvanceWidth(GetGlyphId(cp));
+            }
             return total / _unitsPerEm * fontSize;
         }
 
