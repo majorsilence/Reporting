@@ -36,10 +36,10 @@ namespace Majorsilence.Pdf
 
         internal PdfCanvas(PageData page, PdfSerializer ser, FontCache fontCache, FontRegistry? registry = null)
         {
-            _page      = page;
-            _ser       = ser;
+            _page = page;
+            _ser = ser;
             _fontCache = fontCache;
-            _registry  = registry;
+            _registry = registry;
         }
 
         // ── coordinate helper ─────────────────────────────────────────────────
@@ -59,6 +59,13 @@ namespace Majorsilence.Pdf
         {
             if (string.IsNullOrEmpty(text)) return this;
             style ??= TextStyle.Default;
+
+            if (style.Alignment != TextAlignment.Left)
+            {
+                float w = MeasureTextWidth(text, style);
+                if (style.Alignment == TextAlignment.Right) x -= w;
+                else x -= w / 2f;
+            }
 
             float pdfY = PdfY(y);
             float r = style.Color.Rf, g = style.Color.Gf, b = style.Color.Bf;
@@ -149,10 +156,10 @@ namespace Majorsilence.Pdf
                 float lineY;
                 switch (style.Decoration)
                 {
-                    case TextDecoration.Underline:     lineY = pdfY - style.FontSize * 0.1f; break;
+                    case TextDecoration.Underline: lineY = pdfY - style.FontSize * 0.1f; break;
                     case TextDecoration.Strikethrough: lineY = pdfY + style.FontSize * 0.3f; break;
-                    case TextDecoration.Overline:      lineY = pdfY + style.FontSize * 0.9f; break;
-                    default:                           lineY = pdfY; break;
+                    case TextDecoration.Overline: lineY = pdfY + style.FontSize * 0.9f; break;
+                    default: lineY = pdfY; break;
                 }
                 sb.Append($"{F(r)} {F(g)} {F(b)} RG\n");
                 sb.Append("0.5 w\n");
@@ -266,19 +273,19 @@ namespace Majorsilence.Pdf
             style ??= ShapeStyle.Stroked(PdfColor.Black);
             AppendShapeState(style);
 
-            float cx = x + width  / 2f;
+            float cx = x + width / 2f;
             float cy = PdfY(y + height / 2f);
-            float rx = width  / 2f;
+            float rx = width / 2f;
             float ry = height / 2f;
 
             // Approximate circle with 4 cubic Bézier segments (κ ≈ 0.5523)
             const float k = 0.5523f;
             var sb = Content;
             sb.Append($"{F(cx)}        {F(cy + ry)}  m\n");
-            sb.Append($"{F(cx + k*rx)} {F(cy + ry)}  {F(cx + rx)} {F(cy + k*ry)} {F(cx + rx)} {F(cy)} c\n");
-            sb.Append($"{F(cx + rx)}   {F(cy - k*ry)} {F(cx + k*rx)} {F(cy - ry)} {F(cx)} {F(cy - ry)} c\n");
-            sb.Append($"{F(cx - k*rx)} {F(cy - ry)}  {F(cx - rx)} {F(cy - k*ry)} {F(cx - rx)} {F(cy)} c\n");
-            sb.Append($"{F(cx - rx)}   {F(cy + k*ry)} {F(cx - k*rx)} {F(cy + ry)} {F(cx)} {F(cy + ry)} c\n");
+            sb.Append($"{F(cx + k * rx)} {F(cy + ry)}  {F(cx + rx)} {F(cy + k * ry)} {F(cx + rx)} {F(cy)} c\n");
+            sb.Append($"{F(cx + rx)}   {F(cy - k * ry)} {F(cx + k * rx)} {F(cy - ry)} {F(cx)} {F(cy - ry)} c\n");
+            sb.Append($"{F(cx - k * rx)} {F(cy - ry)}  {F(cx - rx)} {F(cy - k * ry)} {F(cx - rx)} {F(cy)} c\n");
+            sb.Append($"{F(cx - rx)}   {F(cy + k * ry)} {F(cx - k * rx)} {F(cy + ry)} {F(cx)} {F(cy + ry)} c\n");
             AppendPaintOp(style);
             ResetDash();
             return this;
@@ -427,8 +434,8 @@ namespace Majorsilence.Pdf
             // Times
             if (family == "Times-Roman" || family == "Times")
                 return (bold && italic) ? TimesBoldItalicWidths
-                     : bold             ? TimesBoldWidths
-                     : italic           ? TimesItalicWidths
+                     : bold ? TimesBoldWidths
+                     : italic ? TimesItalicWidths
                                         : TimesRomanWidths;
 
             // Courier is monospaced — every glyph is 600
@@ -502,9 +509,9 @@ namespace Majorsilence.Pdf
             return w;
         }
 
-        private static readonly int[] TimesRomanWidths   = BuildTimesWidths(false, false);
-        private static readonly int[] TimesBoldWidths     = BuildTimesWidths(true,  false);
-        private static readonly int[] TimesItalicWidths   = BuildTimesWidths(false, true);
+        private static readonly int[] TimesRomanWidths = BuildTimesWidths(false, false);
+        private static readonly int[] TimesBoldWidths = BuildTimesWidths(true, false);
+        private static readonly int[] TimesItalicWidths = BuildTimesWidths(false, true);
         private static readonly int[] TimesBoldItalicWidths = BuildTimesWidths(true, true);
 
         private static int[] BuildTimesWidths(bool bold, bool italic)
@@ -594,7 +601,7 @@ namespace Majorsilence.Pdf
             {
                 case LineStyle.Dashed: Content.Append("[6 3] 0 d\n"); break;
                 case LineStyle.Dotted: Content.Append("[1 3] 0 d\n"); break;
-                default:               Content.Append("[] 0 d\n");    break;
+                default: Content.Append("[] 0 d\n"); break;
             }
         }
 
@@ -619,15 +626,15 @@ namespace Majorsilence.Pdf
                 case "times":
                 case "times new roman":
                     if (bold && italic) return "Times-BoldItalic";
-                    if (bold)           return "Times-Bold";
-                    if (italic)         return "Times-Italic";
+                    if (bold) return "Times-Bold";
+                    if (italic) return "Times-Italic";
                     return "Times-Roman";
 
                 case "courier":
                 case "courier new":
                     if (bold && italic) return "Courier-BoldOblique";
-                    if (bold)           return "Courier-Bold";
-                    if (italic)         return "Courier-Oblique";
+                    if (bold) return "Courier-Bold";
+                    if (italic) return "Courier-Oblique";
                     return "Courier";
 
                 case "symbol":
@@ -639,8 +646,8 @@ namespace Majorsilence.Pdf
 
                 default: // Helvetica / Arial / anything else
                     if (bold && italic) return "Helvetica-BoldOblique";
-                    if (bold)           return "Helvetica-Bold";
-                    if (italic)         return "Helvetica-Oblique";
+                    if (bold) return "Helvetica-Bold";
+                    if (italic) return "Helvetica-Oblique";
                     return "Helvetica";
             }
         }

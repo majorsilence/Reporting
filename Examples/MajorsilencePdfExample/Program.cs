@@ -562,7 +562,7 @@ static void InvoiceExample(string name, FontRegistry fonts)
             TotalRow("Tax:", taxTotal.ToString("C"));
             canvas.DrawLine(cols[3] - 80, y, pw - margin, y,
                 StrokeStyle.Default.WithWidth(1).WithColor(accent));
-            y += 4;
+            y += 14;
             TotalRow("Total Due:", (subtotal + taxTotal).ToString("C"), isBold: true);
 
             // Payment info
