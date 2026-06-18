@@ -1,5 +1,5 @@
-// Copyright (C) 2025 Peter Gill <peter@majorsilence.com>
-// Licensed under the Apache License, Version 2.0.
+// SPDX-License-Identifier: MIT OR Apache-2.0 OR BSD-3-Clause
+// Copyright (C) 2026 Peter Gill <peter@majorsilence.com>
 
 using System;
 using System.Globalization;
