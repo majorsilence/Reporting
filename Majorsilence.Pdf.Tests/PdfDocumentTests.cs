@@ -779,5 +779,124 @@ namespace Majorsilence.Pdf.Tests
             Assert.Throws<ArgumentNullException>(() =>
                 PdfDocument.Create().AddPage(PageSizes.A4, (Action<PdfCanvas>)null!));
         }
+
+        // ── PDF version ───────────────────────────────────────────────────────
+
+        [Test]
+        public void DefaultVersion_IsPdf14()
+        {
+            var bytes = GenerateBytes(doc => doc.AddPage(PageSizes.A4, _ => { }));
+            string header = Encoding.ASCII.GetString(bytes, 0, 9);
+            Assert.That(header, Is.EqualTo("%PDF-1.4\n"));
+        }
+
+        [Test]
+        public void WithVersion_Pdf14_WritesPdf14Header()
+        {
+            var bytes = GenerateBytes(doc =>
+            {
+                doc.WithVersion(PdfVersion.Pdf14)
+                   .AddPage(PageSizes.A4, _ => { });
+            });
+            string header = Encoding.ASCII.GetString(bytes, 0, 9);
+            Assert.That(header, Is.EqualTo("%PDF-1.4\n"));
+        }
+
+        [Test]
+        public void WithVersion_Pdf14_HasTraditionalXrefTable()
+        {
+            var bytes = GenerateBytes(doc =>
+            {
+                doc.WithVersion(PdfVersion.Pdf14)
+                   .AddPage(PageSizes.A4, _ => { });
+            });
+            string content = Encoding.Latin1.GetString(bytes);
+            Assert.That(content, Does.Contain("xref\n"), "Expected traditional xref table");
+            Assert.That(content, Does.Contain("0000000000 65535 f"), "Expected free-entry line");
+            Assert.That(content, Does.Contain("trailer\n"), "Expected trailer dictionary");
+        }
+
+        [Test]
+        public void WithVersion_Pdf20_WritesPdf20Header()
+        {
+            var bytes = GenerateBytes(doc =>
+            {
+                doc.WithVersion(PdfVersion.Pdf20)
+                   .AddPage(PageSizes.A4, _ => { });
+            });
+            string header = Encoding.ASCII.GetString(bytes, 0, 9);
+            Assert.That(header, Is.EqualTo("%PDF-2.0\n"));
+        }
+
+        [Test]
+        public void WithVersion_Pdf20_HasXmpMetadataStream()
+        {
+            var bytes = GenerateBytes(doc =>
+            {
+                doc.WithVersion(PdfVersion.Pdf20)
+                   .WithTitle("Test Title")
+                   .WithAuthor("Test Author")
+                   .AddPage(PageSizes.A4, _ => { });
+            });
+            string content = Encoding.Latin1.GetString(bytes);
+            Assert.That(content, Does.Contain("/Type /Metadata"), "Expected XMP metadata object");
+            Assert.That(content, Does.Contain("/Subtype /XML"), "Expected XML subtype");
+            Assert.That(content, Does.Contain("x:xmpmeta"), "Expected XMP namespace");
+            Assert.That(content, Does.Contain("Test Title"), "Expected title in XMP");
+            Assert.That(content, Does.Contain("Test Author"), "Expected author in XMP");
+        }
+
+        [Test]
+        public void WithVersion_Pdf20_CatalogReferencesMetadata()
+        {
+            var bytes = GenerateBytes(doc =>
+            {
+                doc.WithVersion(PdfVersion.Pdf20)
+                   .AddPage(PageSizes.A4, _ => { });
+            });
+            string content = Encoding.Latin1.GetString(bytes);
+            Assert.That(content, Does.Contain("/Metadata"), "Expected /Metadata in catalog");
+        }
+
+        [Test]
+        public void WithVersion_Pdf20_HasXrefStream()
+        {
+            var bytes = GenerateBytes(doc =>
+            {
+                doc.WithVersion(PdfVersion.Pdf20)
+                   .AddPage(PageSizes.A4, _ => { });
+            });
+            string content = Encoding.Latin1.GetString(bytes);
+            Assert.That(content, Does.Contain("/Type /XRef"), "Expected xref stream object");
+            Assert.That(content, Does.Contain("/W [1 4 2]"), "Expected xref stream W field");
+            Assert.That(content, Does.Not.Contain("0000000000 65535 f"),
+                "PDF 2.0 xref stream should not contain traditional free-entry line");
+        }
+
+        [Test]
+        public void WithVersion_Pdf20_IsReadableByPdfPig()
+        {
+            var bytes = GenerateBytes(doc =>
+            {
+                doc.WithVersion(PdfVersion.Pdf20)
+                   .AddPage(PageSizes.A4, canvas =>
+                       canvas.DrawText("PDF 2.0 text",
+                           72, 100, TextStyle.Default.WithSize(12)));
+            });
+            // PdfPig should be able to open and parse the PDF 2.0 output
+            Assert.DoesNotThrow(() =>
+            {
+                using var pdf = PdfPig.Open(bytes);
+                Assert.That(pdf.NumberOfPages, Is.EqualTo(1));
+            });
+        }
+
+        [Test]
+        public void WithVersion_Pdf20_ReturnsDocumentForChaining()
+        {
+            var doc = PdfDocument.Create();
+            var result = doc.WithVersion(PdfVersion.Pdf20);
+            Assert.That(result, Is.SameAs(doc));
+        }
     }
 }

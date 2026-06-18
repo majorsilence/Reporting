@@ -82,13 +82,16 @@ namespace Majorsilence.Pdf.Internal
         private string _title   = "";
         private string _subject = "";
         private string _creator = "Majorsilence.Pdf";
+        private PdfVersion _version = PdfVersion.Pdf14;
 
-        // ── metadata ─────────────────────────────────────────────────────────
+        // ── metadata / version ────────────────────────────────────────────────
 
         internal void SetMetadata(string author, string title, string subject, string creator)
         {
             _author = author; _title = title; _subject = subject; _creator = creator;
         }
+
+        internal void SetVersion(PdfVersion version) { _version = version; }
 
         // ── page management ──────────────────────────────────────────────────
 
@@ -162,18 +165,28 @@ namespace Majorsilence.Pdf.Internal
         private void WriteToMemory(MemoryStream ms)
         {
             var w = new PdfWriter(ms);
+            bool isPdf20 = _version == PdfVersion.Pdf20;
 
-            // Header
-            w.WriteLine("%PDF-1.4");
+            // Header — binary comment (bytes > 127) signals binary content to tools
+            w.WriteLine(isPdf20 ? "%PDF-2.0" : "%PDF-1.4");
             w.WriteRaw(new byte[] { (byte)'%', 0xE2, 0xE3, 0xCF, 0xD3, (byte)'\n' });
 
             // Object numbering (1-based):
-            //   1 = Catalog        (objects[0])
-            //   2 = Pages          (objects[1])
-            //   3+ = fonts, images, page streams, page dicts, annotations, info
+            //   1 = Catalog  (objects[0])
+            //   2 = Pages    (objects[1])
+            //   3 = XMP metadata stream (PDF 2.0 only, objects[2])
+            //   3+ / 4+ = fonts, images, page streams, page dicts, annotations, info
 
             // Reserve slots 0 and 1 for Catalog and Pages — filled in later.
             var objects = new List<byte[]> { null!, null! };
+
+            // ── XMP metadata stream (PDF 2.0 only) ────────────────────────────
+            int xmpObjNum = -1;
+            if (isPdf20)
+            {
+                xmpObjNum = objects.Count + 1; // 1-based PDF object number
+                objects.Add(BuildXmpMetadataObj());
+            }
 
             // ── font objects ──────────────────────────────────────────────────
             var fontObjStart = new int[_fonts.Count];
@@ -266,7 +279,7 @@ namespace Majorsilence.Pdf.Internal
                     objects.Add(BuildAnnotationObj(ann));
             }
 
-            // ── info dict ─────────────────────────────────────────────────────
+            // ── info dict (retained in both versions for reader compatibility) ─
             int infoObjIdx = objects.Count;
             objects.Add(Latin1.GetBytes(
                 $"<< /Producer (Majorsilence.Pdf) /Author {PdfTextString(_author)} " +
@@ -274,7 +287,11 @@ namespace Majorsilence.Pdf.Internal
                 $"/Creator {PdfTextString(_creator)} >>"));
 
             // ── catalog (slot 0 = object 1) ───────────────────────────────────
-            objects[0] = Latin1.GetBytes("<< /Type /Catalog /Pages 2 0 R >>");
+            string catalog = "<< /Type /Catalog /Pages 2 0 R";
+            if (xmpObjNum > 0)
+                catalog += $" /Metadata {xmpObjNum} 0 R";
+            catalog += " >>";
+            objects[0] = Latin1.GetBytes(catalog);
 
             // ── pages (slot 1 = object 2) ─────────────────────────────────────
             var kids = new StringBuilder("/Kids [ ");
@@ -295,19 +312,83 @@ namespace Majorsilence.Pdf.Internal
                 w.WriteLine("endobj");
             }
 
-            // ── xref + trailer ────────────────────────────────────────────────
-            long xrefPos = ms.Position;
-            w.WriteLine("xref");
-            w.WriteLine($"0 {totalObjs + 1}");
-            w.WriteLine("0000000000 65535 f ");
-            foreach (long off in xrefOffsets)
-                w.WriteLine(off.ToString("D10") + " 00000 n ");
+            if (isPdf20)
+            {
+                // ── PDF 2.0: compressed cross-reference stream ────────────────
+                // The xref stream object is numbered totalObjs+1 and written here.
+                long xrefStreamStart = ms.Position;
+                WriteXrefStream(w, ms, xrefOffsets, totalObjs, infoObjIdx + 1, xrefStreamStart);
+                w.WriteLine("startxref");
+                w.WriteLine(xrefStreamStart.ToString());
+                w.Write("%%EOF");
+            }
+            else
+            {
+                // ── PDF 1.4: traditional xref table + trailer ─────────────────
+                long xrefPos = ms.Position;
+                w.WriteLine("xref");
+                w.WriteLine($"0 {totalObjs + 1}");
+                w.WriteLine("0000000000 65535 f ");
+                foreach (long off in xrefOffsets)
+                    w.WriteLine(off.ToString("D10") + " 00000 n ");
 
-            w.WriteLine("trailer");
-            w.WriteLine($"<< /Size {totalObjs + 1} /Root 1 0 R /Info {infoObjIdx + 1} 0 R >>");
-            w.WriteLine("startxref");
-            w.WriteLine(xrefPos.ToString());
-            w.Write("%%EOF");
+                w.WriteLine("trailer");
+                w.WriteLine($"<< /Size {totalObjs + 1} /Root 1 0 R /Info {infoObjIdx + 1} 0 R >>");
+                w.WriteLine("startxref");
+                w.WriteLine(xrefPos.ToString());
+                w.Write("%%EOF");
+            }
+        }
+
+        // Writes a PDF 2.0 compressed cross-reference stream object.
+        // W = [1 4 2]: type(1) + offset(4) + generation(2), 7 bytes per entry.
+        // The xref stream itself (object totalObjs+1) is included in its own entry list.
+        private static void WriteXrefStream(PdfWriter w, MemoryStream ms,
+            long[] xrefOffsets, int totalObjs, int infoObjNum, long xrefStreamStart)
+        {
+            int xrefObjNum = totalObjs + 1;
+            int size       = totalObjs + 2; // entries: obj 0 (free) + objs 1..totalObjs + xref obj
+
+            // Build raw entry bytes: 7 bytes per entry, W=[1,4,2]
+            var entries = new byte[size * 7];
+
+            // Entry 0: free head (type=0, next=0, gen=65535)
+            entries[5] = 0xFF;
+            entries[6] = 0xFF;
+
+            // Entries 1..totalObjs: normal objects
+            for (int i = 0; i < totalObjs; i++)
+            {
+                int b = (i + 1) * 7;
+                long off = xrefOffsets[i];
+                entries[b]     = 0x01;
+                entries[b + 1] = (byte)(off >> 24);
+                entries[b + 2] = (byte)(off >> 16);
+                entries[b + 3] = (byte)(off >> 8);
+                entries[b + 4] = (byte)off;
+                // gen = 0 (entries[b+5], entries[b+6] default to 0)
+            }
+
+            // Last entry: the xref stream object itself
+            int last = (totalObjs + 1) * 7;
+            entries[last]     = 0x01;
+            entries[last + 1] = (byte)(xrefStreamStart >> 24);
+            entries[last + 2] = (byte)(xrefStreamStart >> 16);
+            entries[last + 3] = (byte)(xrefStreamStart >> 8);
+            entries[last + 4] = (byte)xrefStreamStart;
+
+            byte[] compressed = Compress(entries);
+
+            w.WriteLine($"{xrefObjNum} 0 obj");
+            w.WriteLine($"<< /Type /XRef /Size {size} /W [1 4 2]");
+            w.WriteLine($"   /Root 1 0 R /Info {infoObjNum} 0 R");
+            w.WriteLine($"   /Filter /FlateDecode /Length {compressed.Length} >>");
+            w.WriteLine("stream");
+            w.WriteBytes(compressed);
+            // Per PDF spec the stream keyword must be followed by either CRLF or LF before data,
+            // and endstream must be preceded by a newline. The data is binary so we write it raw.
+            w.WriteLine("\nendstream");
+            w.WriteLine("endobj");
         }
 
         // ── object builders ──────────────────────────────────────────────────
@@ -478,6 +559,56 @@ namespace Majorsilence.Pdf.Internal
                 $"/ColorSpace /DeviceGray /BitsPerComponent 8 /Filter /FlateDecode /Length {compressed.Length} >>\nstream\n";
             return Concat(Latin1.GetBytes(hdr), compressed, Latin1.GetBytes("\nendstream"));
         }
+
+        // XMP metadata stream — UTF-8, uncompressed so external tools can extract it.
+        private byte[] BuildXmpMetadataObj()
+        {
+            var x = new StringBuilder();
+            x.Append("<?xpacket begin=\"﻿\" id=\"W5M0MpCehiHzreSzNTczkc9d\"?>\n");
+            x.Append("<x:xmpmeta xmlns:x=\"adobe:ns:meta/\">\n");
+            x.Append("  <rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\">\n");
+            x.Append("    <rdf:Description rdf:about=\"\"\n");
+            x.Append("      xmlns:dc=\"http://purl.org/dc/elements/1.1/\"\n");
+            x.Append("      xmlns:xmp=\"http://ns.adobe.com/xap/1.0/\"\n");
+            x.Append("      xmlns:pdf=\"http://ns.adobe.com/pdf/1.3/\">\n");
+            if (!string.IsNullOrEmpty(_title))
+            {
+                x.Append("      <dc:title><rdf:Alt><rdf:li xml:lang=\"x-default\">");
+                x.Append(XmlEscape(_title));
+                x.Append("</rdf:li></rdf:Alt></dc:title>\n");
+            }
+            if (!string.IsNullOrEmpty(_author))
+            {
+                x.Append("      <dc:creator><rdf:Seq><rdf:li>");
+                x.Append(XmlEscape(_author));
+                x.Append("</rdf:li></rdf:Seq></dc:creator>\n");
+            }
+            if (!string.IsNullOrEmpty(_subject))
+            {
+                x.Append("      <dc:description><rdf:Alt><rdf:li xml:lang=\"x-default\">");
+                x.Append(XmlEscape(_subject));
+                x.Append("</rdf:li></rdf:Alt></dc:description>\n");
+            }
+            x.Append("      <pdf:Producer>Majorsilence.Pdf</pdf:Producer>\n");
+            if (!string.IsNullOrEmpty(_creator))
+            {
+                x.Append("      <xmp:CreatorTool>");
+                x.Append(XmlEscape(_creator));
+                x.Append("</xmp:CreatorTool>\n");
+            }
+            x.Append("    </rdf:Description>\n");
+            x.Append("  </rdf:RDF>\n");
+            x.Append("</x:xmpmeta>\n");
+            x.Append("<?xpacket end=\"w\"?>");
+
+            byte[] xmpUtf8 = System.Text.Encoding.UTF8.GetBytes(x.ToString());
+            string hdr = $"<< /Type /Metadata /Subtype /XML /Length {xmpUtf8.Length} >>\nstream\n";
+            return Concat(Latin1.GetBytes(hdr), xmpUtf8, Latin1.GetBytes("\nendstream"));
+        }
+
+        private static string XmlEscape(string s) =>
+            s.Replace("&", "&amp;").Replace("<", "&lt;").Replace(">", "&gt;")
+             .Replace("\"", "&quot;").Replace("'", "&apos;");
 
         private static byte[] BuildAnnotationObj(PageAnnotation ann)
         {

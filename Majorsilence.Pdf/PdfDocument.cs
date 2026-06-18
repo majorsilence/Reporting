@@ -35,12 +35,20 @@ namespace Majorsilence.Pdf
         private readonly FontCache _fontCache = new FontCache();
         private FontRegistry? _fontRegistry;
 
+        private PdfVersion _version = PdfVersion.Pdf14;
+
         private PdfDocument() { }
 
         // ── factory ──────────────────────────────────────────────────────────
 
         /// <summary>Create a new, empty PDF document.</summary>
         public static PdfDocument Create() => new PdfDocument();
+
+        /// <summary>
+        /// Set the PDF specification version written to the output file.
+        /// Defaults to <see cref="PdfVersion.Pdf14"/> for broadest compatibility.
+        /// </summary>
+        public PdfDocument WithVersion(PdfVersion version) { _version = version; return this; }
 
         // ── font registry ─────────────────────────────────────────────────────
 
@@ -103,6 +111,7 @@ namespace Majorsilence.Pdf
         {
             if (stream == null) throw new ArgumentNullException(nameof(stream));
             _ser.SetMetadata(_author, _title, _subject, _creator);
+            _ser.SetVersion(_version);
             _ser.Write(stream);
         }
 
