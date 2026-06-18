@@ -6,8 +6,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Text;
-using ICSharpCode.SharpZipLib.Zip.Compression;
-using ICSharpCode.SharpZipLib.Zip.Compression.Streams;
+using System.IO.Compression;
 
 namespace Majorsilence.Pdf.Internal
 {
@@ -483,15 +482,43 @@ namespace Majorsilence.Pdf.Internal
 
         private static byte[] Compress(byte[] data)
         {
+#if NET6_0_OR_GREATER
+            // ZLibStream handles the zlib header + Adler-32 footer automatically
+            // and SmallestSize maps to zlib level 9 for best compression.
             using (var ms = new MemoryStream())
             {
-                using (var ds = new DeflaterOutputStream(ms, new Deflater(Deflater.DEFAULT_COMPRESSION, false)))
-                {
-                    ds.Write(data, 0, data.Length);
-                }
+                using (var zs = new ZLibStream(ms, CompressionLevel.SmallestSize, leaveOpen: true))
+                    zs.Write(data, 0, data.Length);
                 return ms.ToArray();
             }
+#else
+            // netstandard2.0: manually wrap raw deflate output in the zlib envelope (RFC 1950).
+            // 0x78 0x9C = CM=8 (deflate) + CINFO=7 (32K window) + FCHECK so header % 31 == 0.
+            using (var ms = new MemoryStream())
+            {
+                ms.WriteByte(0x78);
+                ms.WriteByte(0x9C);
+                using (var ds = new DeflateStream(ms, CompressionLevel.Optimal, leaveOpen: true))
+                    ds.Write(data, 0, data.Length);
+                uint adler = Adler32(data);
+                ms.WriteByte((byte)(adler >> 24));
+                ms.WriteByte((byte)(adler >> 16));
+                ms.WriteByte((byte)(adler >>  8));
+                ms.WriteByte((byte) adler);
+                return ms.ToArray();
+            }
+#endif
         }
+
+#if !NET6_0_OR_GREATER
+        private static uint Adler32(byte[] data)
+        {
+            const uint MOD = 65521;
+            uint s1 = 1, s2 = 0;
+            foreach (byte b in data) { s1 = (s1 + b) % MOD; s2 = (s2 + s1) % MOD; }
+            return (s2 << 16) | s1;
+        }
+#endif
 
         private static byte[] Concat(byte[] a, byte[] b, byte[] c)
         {
