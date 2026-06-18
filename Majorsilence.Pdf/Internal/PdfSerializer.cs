@@ -17,6 +17,7 @@ namespace Majorsilence.Pdf.Internal
         internal readonly string PdfName;          // e.g. "F1"
         internal readonly string? StandardName;    // set for Type-1 standard fonts
         internal readonly TrueTypeFont? Ttf;       // set for embedded TTF fonts
+        internal readonly HashSet<ushort>? UsedGlyphs; // glyph IDs drawn so far (TTF only)
         internal FontResource(string pdfName, string standardName)
         {
             PdfName = pdfName; StandardName = standardName;
@@ -24,6 +25,7 @@ namespace Majorsilence.Pdf.Internal
         internal FontResource(string pdfName, TrueTypeFont ttf)
         {
             PdfName = pdfName; Ttf = ttf;
+            UsedGlyphs = new HashSet<ushort>();
         }
         internal bool IsStandard => StandardName != null;
     }
@@ -312,8 +314,16 @@ namespace Majorsilence.Pdf.Internal
             int cidFontObjNum    = totalObjs + 4;
             int type0ObjNum      = totalObjs + 5;
 
-            // ── ToUnicode CMap ────────────────────────────────────────────────
-            var mappings = ttf.GetCharGlyphMappings();
+            // Glyph IDs actually used on the page (may be empty if subsetting skipped)
+            var used = font.UsedGlyphs;
+
+            // ── ToUnicode CMap (filtered to used glyphs only) ─────────────────
+            var allMappings = ttf.GetCharGlyphMappings();
+            var mapList = new List<(int codePoint, ushort glyphId)>();
+            foreach (var m in allMappings)
+                if (used == null || used.Contains(m.glyphId))
+                    mapList.Add(m);
+
             var cmap = new StringBuilder();
             cmap.Append("/CIDInit /ProcSet findresource begin\n");
             cmap.Append("12 dict begin\n");
@@ -325,16 +335,12 @@ namespace Majorsilence.Pdf.Internal
             cmap.Append("<0000> <FFFF>\n");
             cmap.Append("endcodespacerange\n");
 
-            var mapList = new List<(int codePoint, ushort glyphId)>(mappings);
             for (int i = 0; i < mapList.Count; i += 100)
             {
                 int chunk = Math.Min(100, mapList.Count - i);
                 cmap.Append($"{chunk} beginbfchar\n");
                 for (int j = i; j < i + chunk; j++)
-                {
-                    var kv = mapList[j];
-                    cmap.Append($"<{kv.glyphId:X4}> <{kv.codePoint:X4}>\n");
-                }
+                    cmap.Append($"<{mapList[j].glyphId:X4}> <{mapList[j].codePoint:X4}>\n");
                 cmap.Append("endbfchar\n");
             }
             cmap.Append("endcmap\n");
@@ -348,10 +354,9 @@ namespace Majorsilence.Pdf.Internal
             var cmapObj = Concat(Latin1.GetBytes(cmapStream), cmapCompressed, Latin1.GetBytes("\nendstream"));
             objects.Add(cmapObj);
 
-            // ── /W array (glyph widths in 1000ths of em) ─────────────────────
-            // Sorted by glyph ID for compact representation
+            // ── /W array (widths for used glyphs only, in 1000ths of em) ──────
             var glyphWidths = new SortedDictionary<ushort, int>();
-            foreach (var m in mappings)
+            foreach (var m in mapList)
             {
                 ushort gid = m.glyphId;
                 int w1000 = (int)Math.Round(ttf.GetAdvanceWidth(gid) * 1000.0 / ttf.UnitsPerEm);
@@ -379,10 +384,11 @@ namespace Majorsilence.Pdf.Internal
                 $"/CapHeight {ascender} /StemV 80 /FontFile2 {fontFileObjNum} 0 R >>";
             objects.Add(Latin1.GetBytes(descriptor));
 
-            // ── FontFile2 stream ──────────────────────────────────────────────
-            byte[] fontCompressed = Compress(ttf.Data);
+            // ── FontFile2 stream (subset font binary) ─────────────────────────
+            byte[] fontData = (used != null && used.Count > 0) ? ttf.Subset(used) : ttf.Data;
+            byte[] fontCompressed = Compress(fontData);
             string ffHeader =
-                $"<< /Filter /FlateDecode /Length {fontCompressed.Length} /Length1 {ttf.Data.Length} >>\nstream\n";
+                $"<< /Filter /FlateDecode /Length {fontCompressed.Length} /Length1 {fontData.Length} >>\nstream\n";
             var ffObj = Concat(Latin1.GetBytes(ffHeader), fontCompressed, Latin1.GetBytes("\nendstream"));
             objects.Add(ffObj);
 
@@ -458,7 +464,8 @@ namespace Majorsilence.Pdf.Internal
             return s.Replace("\\", "\\\\").Replace("(", "\\(").Replace(")", "\\)");
         }
 
-        internal static string EncodeGlyphIds(string text, TrueTypeFont ttf)
+        internal static string EncodeGlyphIds(string text, TrueTypeFont ttf,
+            HashSet<ushort>? usedGlyphs = null)
         {
             var sb = new StringBuilder("<");
             for (int i = 0; i < text.Length; i++)
@@ -467,13 +474,14 @@ namespace Majorsilence.Pdf.Internal
                 if (char.IsHighSurrogate(text[i]) && i + 1 < text.Length && char.IsLowSurrogate(text[i + 1]))
                 {
                     codePoint = char.ConvertToUtf32(text[i], text[i + 1]);
-                    i++; // consume low surrogate
+                    i++;
                 }
                 else
                 {
                     codePoint = text[i];
                 }
                 ushort gid = ttf.GetGlyphId(codePoint);
+                usedGlyphs?.Add(gid);
                 sb.Append(gid.ToString("X4"));
             }
             sb.Append(">");

@@ -267,5 +267,189 @@ namespace Majorsilence.Pdf
         // Returns all Unicode code-point → glyph-ID pairs present in the font.
         public IEnumerable<(int codePoint, ushort glyphId)> GetCharGlyphMappings()
             => _charToGlyph.Select(kv => (kv.Key, kv.Value));
+
+        // ── font subsetting ──────────────────────────────────────────────────
+
+        // Returns a new font binary containing only the glyphs in usedGlyphIds
+        // (plus glyph 0 / .notdef and any composite components).
+        // All other glyph slots are present in loca/glyf as zero-length entries
+        // so original glyph IDs remain valid — no re-encoding needed.
+        public byte[] Subset(HashSet<ushort> usedGlyphIds)
+        {
+            // Parse table directory
+            int numTables = U16(_data, 4);
+            var tables = new Dictionary<string, (int offset, int length)>(numTables, StringComparer.Ordinal);
+            for (int i = 0; i < numTables; i++)
+            {
+                int e = 12 + i * 16;
+                string tag = Encoding.ASCII.GetString(_data, e, 4);
+                tables[tag] = (S32(_data, e + 8), S32(_data, e + 12));
+            }
+
+            if (!tables.TryGetValue("loca", out var locaEntry) ||
+                !tables.TryGetValue("glyf", out var glyfEntry) ||
+                !tables.TryGetValue("head", out var headEntry))
+                return _data; // can't subset without these tables
+
+            int locFormat = S16(_data, headEntry.offset + 50); // 0=short, 1=long
+
+            // Read loca — build array of (offset, length) per glyph
+            var glyphOffsets = new int[_numGlyphs + 1];
+            if (locFormat == 0)
+                for (int i = 0; i <= _numGlyphs; i++)
+                    glyphOffsets[i] = U16(_data, locaEntry.offset + i * 2) * 2;
+            else
+                for (int i = 0; i <= _numGlyphs; i++)
+                    glyphOffsets[i] = (int)(uint)S32(_data, locaEntry.offset + i * 4);
+
+            // Expand to include glyph 0 and composite components
+            var needed = new HashSet<ushort>(usedGlyphIds) { 0 };
+            var queue = new Queue<ushort>(needed);
+            while (queue.Count > 0)
+            {
+                ushort gid = queue.Dequeue();
+                if (gid >= _numGlyphs) continue;
+                int gLen = glyphOffsets[gid + 1] - glyphOffsets[gid];
+                if (gLen < 10) continue;
+                int gOff = glyfEntry.offset + glyphOffsets[gid];
+                if (S16(_data, gOff) >= 0) continue; // simple glyph, no components
+
+                // Composite glyph — walk component records
+                int pos = gOff + 10;
+                while (pos + 4 <= _data.Length)
+                {
+                    ushort flags = U16(_data, pos);
+                    ushort compGid = U16(_data, pos + 2);
+                    pos += 4;
+                    pos += (flags & 0x0001) != 0 ? 4 : 2; // ARG_1_AND_2_ARE_WORDS
+                    if      ((flags & 0x0080) != 0) pos += 8; // WE_HAVE_A_TWO_BY_TWO
+                    else if ((flags & 0x0040) != 0) pos += 4; // WE_HAVE_AN_X_AND_Y_SCALE
+                    else if ((flags & 0x0008) != 0) pos += 2; // WE_HAVE_A_SCALE
+                    if (needed.Add(compGid)) queue.Enqueue(compGid);
+                    if ((flags & 0x0020) == 0) break;         // MORE_COMPONENTS
+                }
+            }
+
+            // Build new glyf — only include outline data for needed glyphs
+            var newGlyf = new MemoryStream();
+            var newLocaOff = new int[_numGlyphs + 1];
+            for (int gid = 0; gid < _numGlyphs; gid++)
+            {
+                newLocaOff[gid] = (int)newGlyf.Position;
+                if (needed.Contains((ushort)gid))
+                {
+                    int srcOff = glyfEntry.offset + glyphOffsets[gid];
+                    int srcLen = glyphOffsets[gid + 1] - glyphOffsets[gid];
+                    if (srcLen > 0)
+                        newGlyf.Write(_data, srcOff, srcLen);
+                }
+                // else: loca[gid]==loca[gid+1] → zero-length / empty glyph
+            }
+            newLocaOff[_numGlyphs] = (int)newGlyf.Position;
+            byte[] newGlyfData = newGlyf.ToArray();
+
+            // Build new loca (always long format to keep it simple)
+            byte[] newLocaData = new byte[(_numGlyphs + 1) * 4];
+            for (int i = 0; i <= _numGlyphs; i++)
+                WriteU32(newLocaData, i * 4, (uint)newLocaOff[i]);
+
+            // Patch head.indexToLocFormat = 1 (long)
+            byte[] newHead = new byte[headEntry.length];
+            Buffer.BlockCopy(_data, headEntry.offset, newHead, 0, headEntry.length);
+            newHead[50] = 0; newHead[51] = 1;
+
+            // Assemble all tables: keep everything, replace glyf / loca / head
+            var tagList = new List<string>(tables.Keys);
+            tagList.Sort(StringComparer.Ordinal);
+            int nT = tagList.Count;
+
+            // First pass: compute table data bytes
+            var tableData = new Dictionary<string, byte[]>(nT, StringComparer.Ordinal);
+            foreach (var tag in tagList)
+            {
+                if      (tag == "glyf") tableData[tag] = newGlyfData;
+                else if (tag == "loca") tableData[tag] = newLocaData;
+                else if (tag == "head") tableData[tag] = newHead;
+                else
+                {
+                    var (off, len) = tables[tag];
+                    var td = new byte[len];
+                    Buffer.BlockCopy(_data, off, td, 0, len);
+                    tableData[tag] = td;
+                }
+            }
+
+            // Second pass: lay out table offsets (each table padded to 4 bytes)
+            int headerBytes = 12 + nT * 16;
+            var tableOffset = new Dictionary<string, int>(nT, StringComparer.Ordinal);
+            int cursor = headerBytes;
+            foreach (var tag in tagList)
+            {
+                tableOffset[tag] = cursor;
+                cursor += tableData[tag].Length;
+                if (cursor % 4 != 0) cursor += 4 - cursor % 4;
+            }
+
+            // Third pass: write font bytes
+            byte[] output = new byte[cursor];
+
+            // Offset table (sfVersion, numTables, searchRange, entrySelector, rangeShift)
+            int sfVer = S32(_data, 0);
+            WriteU32(output, 0, (uint)sfVer);
+            WriteU16(output, 4, (ushort)nT);
+            int p2 = 1; while (p2 * 2 <= nT) p2 *= 2;
+            WriteU16(output, 6, (ushort)(p2 * 16));
+            int es = 0; int tmp = p2; while (tmp > 1) { tmp >>= 1; es++; }
+            WriteU16(output, 8,  (ushort)es);
+            WriteU16(output, 10, (ushort)((nT - p2) * 16));
+
+            // Table directory + data
+            int dirBase = 12;
+            foreach (var tag in tagList)
+            {
+                byte[] td   = tableData[tag];
+                int    toff = tableOffset[tag];
+                uint   tcs  = TableChecksum(td);
+                Encoding.ASCII.GetBytes(tag.PadRight(4), 0, 4, output, dirBase);
+                WriteU32(output, dirBase + 4,  tcs);
+                WriteU32(output, dirBase + 8,  (uint)toff);
+                WriteU32(output, dirBase + 12, (uint)td.Length);
+                dirBase += 16;
+                Buffer.BlockCopy(td, 0, output, toff, td.Length);
+            }
+
+            // Fix head.checkSumAdjustment (bytes 8-11 of the head table in output)
+            int headOutOff = tableOffset["head"];
+            output[headOutOff + 8] = output[headOutOff + 9] =
+            output[headOutOff + 10] = output[headOutOff + 11] = 0;
+            uint whole = TableChecksum(output);
+            WriteU32(output, headOutOff + 8, 0xB1B0AFBA - whole);
+
+            return output;
+        }
+
+        // ── binary write helpers ─────────────────────────────────────────────
+
+        private static void WriteU16(byte[] b, int o, ushort v)
+            { b[o] = (byte)(v >> 8); b[o + 1] = (byte)v; }
+
+        private static void WriteU32(byte[] b, int o, uint v)
+            { b[o] = (byte)(v >> 24); b[o+1] = (byte)(v >> 16); b[o+2] = (byte)(v >> 8); b[o+3] = (byte)v; }
+
+        private static uint TableChecksum(byte[] data)
+        {
+            uint sum = 0;
+            int i = 0;
+            for (; i + 3 < data.Length; i += 4)
+                sum += ((uint)data[i] << 24) | ((uint)data[i+1] << 16) | ((uint)data[i+2] << 8) | data[i+3];
+            if (i < data.Length)
+            {
+                uint tail = 0;
+                for (int j = i; j < data.Length; j++)
+                    tail |= (uint)data[j] << ((3 - (j - i)) * 8);
+                sum += tail;
+            }
+            return sum;
+        }
     }
 }
