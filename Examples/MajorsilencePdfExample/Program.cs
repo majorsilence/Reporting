@@ -1,4 +1,4 @@
-// Majorsilence.Pdf — example program
+﻿// Majorsilence.Pdf — example program
 // Demonstrates the key features of the library using the FontRegistry with
 // bundled Liberation / Caladea / Carlito / NotoSans TrueType fonts.
 
@@ -45,6 +45,7 @@ RunExample("08_annotations",        Annotations);
 RunExample("09_invoice",            InvoiceExample);
 RunExample("10_dashboard",          DashboardExample);
 RunExample("11_font_registry",      FontRegistryExample);
+RunExample("12_unicode",            UnicodeExample);
 
 Console.WriteLine($"\nAll PDFs written to: {outputDir}");
 
@@ -799,14 +800,126 @@ static void FontRegistryExample(string name, FontRegistry fonts)
             y += step;
             canvas.DrawText("  Latin + accented: café résumé naïve", 72, y, body);
             y += step;
-            canvas.DrawText("  Typographic: — – ‘ ’ “ ” • …", 72, y, body);
-            y += step;
+            canvas.DrawText("  Typographic: — – ‘ ’ “ ” • …", 72, y, body);            y += step;
 
             // Measurement
             string sample = "Hello, World!";
             float w = canvas.MeasureTextWidth(sample, body);
             canvas.DrawText($"MeasureTextWidth(\"{sample}\", LiberationSans 12pt) = {w:F1} pt",
                 72, y, body.WithColor(PdfColor.DarkGray));
+        })
+        .Save(Out(name));
+}
+
+// ── example 12: unicode / utf-8 text ─────────────────────────────────────────
+// Demonstrates rendering of Latin Extended, Greek, Cyrillic, Emoji, and CJK text.
+// Characters not supported by a font render as .notdef boxes — no exception is thrown.
+
+static void UnicodeExample(string name, FontRegistry fonts)
+{
+    // Optional system fonts for emoji and CJK
+    string? emojiFont = FindFont(
+        @"C:\Windows\Fonts\seguiemj.ttf",
+        "/usr/share/fonts/truetype/noto/NotoEmoji-Regular.ttf");
+
+    string? cjkFont = FindFont(
+        @"C:\Windows\Fonts\malgun.ttf",
+        @"C:\Windows\Fonts\Deng.ttf",
+        "/usr/share/fonts/truetype/droid/DroidSansFallbackFull.ttf");
+
+    // Extend the shared registry with optional system fonts
+    FontRegistry reg = fonts;
+    if (emojiFont != null)
+        reg = new FontRegistry().AddDirectory(
+                Path.GetFullPath(Path.Combine(AppContext.BaseDirectory,
+                    "..", "..", "..", "..", "..",
+                    "Majorsilence.Drawing.Common", "Fonts")))
+            .AddFamily("Emoji", regular: emojiFont)
+            .AddFallback("NotoSans")
+            .AddFallback("Emoji");
+
+    PdfDocument.Create()
+        .WithTitle("Unicode / UTF-8 Text Showcase")
+        .WithFontRegistry(reg)
+        .AddPage(PageSizes.A4, canvas =>
+        {
+            float y = 50;
+            const float gap = 20f;
+
+            var heading = TextStyle.Default.WithFamily("LiberationSans").WithSize(16).WithBold();
+            var body    = TextStyle.Default.WithFamily("NotoSans").WithSize(12);
+            var small   = TextStyle.Default.WithFamily("NotoSans").WithSize(10)
+                              .WithColor(PdfColor.Gray).WithItalic();
+            var mono    = TextStyle.Default.WithFamily("LiberationMono").WithSize(11);
+
+            void Section(string title)
+            {
+                y += 8;
+                canvas.DrawLine(72, y, PageSizes.A4.Width - 72, y,
+                    StrokeStyle.Default.WithWidth(0.3f).WithColor(PdfColor.LightGray));
+                y += 14;
+                canvas.DrawText(title, 72, y, heading);
+                y += gap + 2;
+            }
+
+            // ── Latin Extended ───────────────────────────────────────────────
+            Section("Latin Extended (LiberationSans)");
+            canvas.DrawText("café résumé naïve Ångström fiancée Üniversität", 72, y,
+                TextStyle.Default.WithFamily("LiberationSans").WithSize(12)); y += gap;
+            canvas.DrawText("— em-dash  – en-dash  ' ' \u201C \u201D  …  •  © ® ™", 72, y,
+                TextStyle.Default.WithFamily("LiberationSans").WithSize(12)); y += gap;
+
+            // ── Greek ────────────────────────────────────────────────────────
+            Section("Greek (NotoSans)");
+            canvas.DrawText("αβγδεζηθι  ΑΒΓΔΕΖΗΘΙ  Ω π φ ψ", 72, y, body); y += gap;
+            canvas.DrawText("Ελληνικά  αλφάβητο  φιλοσοφία", 72, y, body); y += gap;
+
+            // ── Cyrillic ─────────────────────────────────────────────────────
+            Section("Cyrillic / Russian (NotoSans)");
+            canvas.DrawText("АБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ", 72, y, body); y += gap;
+            canvas.DrawText("Привет мир  Москва  Санкт-Петербург", 72, y, body); y += gap;
+
+            // ── Mixed scripts ────────────────────────────────────────────────
+            Section("Mixed scripts — fallback segmentation (LiberationSans + NotoSans)");
+            canvas.DrawText("Hello κόσμε мир — Latin + Greek + Cyrillic in one call", 72, y,
+                TextStyle.Default.WithFamily("LiberationSans").WithSize(12)); y += gap;
+
+            // ── Emoji ────────────────────────────────────────────────────────
+            Section("Emoji (surrogate pairs — U+1F600 range)");
+            if (emojiFont != null)
+            {
+                canvas.DrawText("😀 🎉 👍 ❤️ 🌍 🎵", 72, y,
+                    TextStyle.Default.WithFamily("Emoji").WithSize(18)); y += gap + 4;
+            }
+            else
+            {
+                canvas.DrawText("😀 🎉 👍 ❤️  (renders as .notdef — no emoji font found)", 72, y, body); y += gap;
+                canvas.DrawText("Install a system emoji font to see glyphs.", 72, y, small); y += gap;
+            }
+
+            // ── CJK ──────────────────────────────────────────────────────────
+            Section("CJK — Chinese / Japanese / Korean");
+            if (cjkFont != null)
+            {
+                // CJK font was added to reg above; use it directly via WithFontFile
+                canvas.DrawText("你好世界  こんにちは  안녕하세요", 72, y,
+                    TextStyle.Default.WithFontFile(cjkFont).WithSize(18)); y += gap + 4;
+            }
+            else
+            {
+                canvas.DrawText("你好世界 こんにちは 안녕하세요", 72, y, body); y += gap;
+                canvas.DrawText("(renders as .notdef — no CJK font found on this machine)", 72, y, small); y += gap;
+            }
+
+            // ── Encoding note ────────────────────────────────────────────────
+            y += 6;
+            canvas.DrawLine(72, y, PageSizes.A4.Width - 72, y,
+                StrokeStyle.Default.WithWidth(0.3f).WithColor(PdfColor.LightGray));
+            y += 16;
+            canvas.DrawText("Note: characters without a glyph in any registered font render as",
+                72, y, small); y += 16;
+            canvas.DrawText("empty boxes (.notdef). Arabic / Hebrew shaping (RTL) is not yet supported.",
+                72, y, small);
         })
         .Save(Out(name));
 }
