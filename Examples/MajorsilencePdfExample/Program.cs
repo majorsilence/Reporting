@@ -1,6 +1,7 @@
-﻿// Majorsilence.Pdf — example program
+// Majorsilence.Pdf — example program
 // Demonstrates the key features of the library using the FontRegistry with
 // bundled Liberation / Caladea / Carlito / NotoSans TrueType fonts.
+// Each example is written twice: once as PDF 1.4 and once as PDF 2.0.
 
 using System;
 using System.Collections.Generic;
@@ -51,18 +52,24 @@ Console.WriteLine($"\nAll PDFs written to: {outputDir}");
 
 // ── runner ────────────────────────────────────────────────────────────────────
 
-void RunExample(string name, Action<string, FontRegistry> example)
+// Runs each example once for PDF 1.4 and once for PDF 2.0.
+void RunExample(string name, Action<string, FontRegistry, PdfVersion> example)
 {
-    Console.Write($"  {name} ... ");
-    try   { example(name, registry); Console.WriteLine("OK"); }
-    catch (Exception ex) { Console.WriteLine($"SKIPPED ({ex.Message})"); }
+    foreach (var version in new[] { PdfVersion.Pdf14, PdfVersion.Pdf20 })
+    {
+        string label = version == PdfVersion.Pdf20 ? "v2.0" : "v1.4";
+        Console.Write($"  {name}_{label} ... ");
+        try   { example(name, registry, version); Console.WriteLine("OK"); }
+        catch (Exception ex) { Console.WriteLine($"SKIPPED ({ex.Message})"); }
+    }
 }
 
 // ── example 01: hello world ──────────────────────────────────────────────────
 
-static void HelloWorld(string name, FontRegistry fonts)
+static void HelloWorld(string name, FontRegistry fonts, PdfVersion version)
 {
     PdfDocument.Create()
+        .WithVersion(version)
         .WithTitle("Hello World")
         .WithAuthor("Majorsilence.Pdf")
         .WithFontRegistry(fonts)
@@ -76,14 +83,15 @@ static void HelloWorld(string name, FontRegistry fonts)
                 "Generated with Majorsilence.Pdf — a zero-dependency PDF library.",
                 72, 155, body);
         })
-        .Save(Out(name));
+        .Save(Out(name, version));
 }
 
 // ── example 02: text styles ──────────────────────────────────────────────────
 
-static void TextStyles(string name, FontRegistry fonts)
+static void TextStyles(string name, FontRegistry fonts, PdfVersion version)
 {
     PdfDocument.Create()
+        .WithVersion(version)
         .WithTitle("Text Style Showcase")
         .WithFontRegistry(fonts)
         .AddPage(PageSizes.A4, canvas =>
@@ -130,16 +138,17 @@ static void TextStyles(string name, FontRegistry fonts)
                 TextStyle.Default.WithFamily("LiberationSans").WithSize(48).WithBold()
                     .WithColor(PdfColor.DarkGray));
         })
-        .Save(Out(name));
+        .Save(Out(name, version));
 }
 
 // ── example 03: shapes ───────────────────────────────────────────────────────
 
-static void Shapes(string name, FontRegistry fonts)
+static void Shapes(string name, FontRegistry fonts, PdfVersion version)
 {
     var label = TextStyle.Default.WithFamily("LiberationSans").WithSize(10);
 
     PdfDocument.Create()
+        .WithVersion(version)
         .WithTitle("Shape Showcase")
         .WithFontRegistry(fonts)
         .AddPage(PageSizes.A4, canvas =>
@@ -197,16 +206,17 @@ static void Shapes(string name, FontRegistry fonts)
                 StrokeStyle.Default.WithWidth(1.5f).WithColor(PdfColor.Red).Dashed());
             canvas.DrawText("Dashed curve", 50, 665, label);
         })
-        .Save(Out(name));
+        .Save(Out(name, version));
 }
 
 // ── example 04: lines and strokes ────────────────────────────────────────────
 
-static void LinesAndStrokes(string name, FontRegistry fonts)
+static void LinesAndStrokes(string name, FontRegistry fonts, PdfVersion version)
 {
     var label = TextStyle.Default.WithFamily("LiberationSans").WithSize(10);
 
     PdfDocument.Create()
+        .WithVersion(version)
         .WithTitle("Lines and Strokes")
         .WithFontRegistry(fonts)
         .AddPage(PageSizes.A4, canvas =>
@@ -246,14 +256,15 @@ static void LinesAndStrokes(string name, FontRegistry fonts)
                                .WithColor(PdfColor.FromHex($"#{(i * 30):X2}6080")));
             }
         })
-        .Save(Out(name));
+        .Save(Out(name, version));
 }
 
 // ── example 05: multi-page document ─────────────────────────────────────────
 
-static void MultiPage(string name, FontRegistry fonts)
+static void MultiPage(string name, FontRegistry fonts, PdfVersion version)
 {
     var doc = PdfDocument.Create()
+        .WithVersion(version)
         .WithTitle("Multi-Page Document")
         .WithAuthor("Example Author")
         .WithFontRegistry(fonts);
@@ -297,14 +308,14 @@ static void MultiPage(string name, FontRegistry fonts)
         });
     }
 
-    doc.Save(Out(name));
+    doc.Save(Out(name, version));
 }
 
 // ── example 06: custom font file (WithFontFile) ──────────────────────────────
 // Demonstrates embedding a user-supplied TTF directly via TextStyle.WithFontFile().
 // Falls back to a system font for portability.
 
-static void CustomFont(string name, FontRegistry fonts)
+static void CustomFont(string name, FontRegistry fonts, PdfVersion version)
 {
     // Look for a font the user might have; system fonts are fine for demonstration.
     string? customPath =
@@ -324,6 +335,7 @@ static void CustomFont(string name, FontRegistry fonts)
     var reg    = TextStyle.Default.WithFamily("LiberationSans").WithSize(12);
 
     PdfDocument.Create()
+        .WithVersion(version)
         .WithTitle("Custom Font File")
         .WithFontRegistry(fonts)   // registry still used for reg/bold/italic body styles
         .AddPage(PageSizes.A4, canvas =>
@@ -353,12 +365,12 @@ static void CustomFont(string name, FontRegistry fonts)
                 y += sz + 6;
             }
         })
-        .Save(Out(name));
+        .Save(Out(name, version));
 }
 
 // ── example 07: image ────────────────────────────────────────────────────────
 
-static void ImageExample(string name, FontRegistry fonts)
+static void ImageExample(string name, FontRegistry fonts, PdfVersion version)
 {
     var label = TextStyle.Default.WithFamily("LiberationSans").WithSize(11);
 
@@ -384,6 +396,7 @@ static void ImageExample(string name, FontRegistry fonts)
         }
 
     PdfDocument.Create()
+        .WithVersion(version)
         .WithTitle("Image Example")
         .WithFontRegistry(fonts)
         .AddPage(PageSizes.A4, canvas =>
@@ -402,14 +415,15 @@ static void ImageExample(string name, FontRegistry fonts)
             canvas.DrawImage(rgb, W, H, isJpeg: false, x: 145, y: 285, width: 120, height: 90);
             canvas.DrawImage(rgb, W, H, isJpeg: false, x: 280, y: 285, width: 240, height: 180);
         })
-        .Save(Out(name));
+        .Save(Out(name, version));
 }
 
 // ── example 08: annotations ──────────────────────────────────────────────────
 
-static void Annotations(string name, FontRegistry fonts)
+static void Annotations(string name, FontRegistry fonts, PdfVersion version)
 {
     PdfDocument.Create()
+        .WithVersion(version)
         .WithTitle("Annotations Example")
         .WithFontRegistry(fonts)
         .AddPage(PageSizes.A4, canvas =>
@@ -443,12 +457,12 @@ static void Annotations(string name, FontRegistry fonts)
 
             canvas.DrawText("Note: open this PDF in a viewer that supports annotations", 72, 350, small);
         })
-        .Save(Out(name));
+        .Save(Out(name, version));
 }
 
 // ── example 09: invoice ──────────────────────────────────────────────────────
 
-static void InvoiceExample(string name, FontRegistry fonts)
+static void InvoiceExample(string name, FontRegistry fonts, PdfVersion version)
 {
     float pw = PageSizes.Letter.Width;
     float ph = PageSizes.Letter.Height;
@@ -456,6 +470,7 @@ static void InvoiceExample(string name, FontRegistry fonts)
     var accent = PdfColor.FromHex("#1A56A0");
 
     PdfDocument.Create()
+        .WithVersion(version)
         .WithTitle("Invoice #INV-2025-0042")
         .WithAuthor("Majorsilence Corp")
         .WithFontRegistry(fonts)
@@ -587,14 +602,15 @@ static void InvoiceExample(string name, FontRegistry fonts)
                 "Majorsilence Corp  ·  majorsilence.com  ·  Generated by Majorsilence.Pdf",
                 pw / 2 - 160, fy, small);
         })
-        .Save(Out(name));
+        .Save(Out(name, version));
 }
 
 // ── example 10: dashboard / data visualization ───────────────────────────────
 
-static void DashboardExample(string name, FontRegistry fonts)
+static void DashboardExample(string name, FontRegistry fonts, PdfVersion version)
 {
     PdfDocument.Create()
+        .WithVersion(version)
         .WithTitle("Sales Dashboard")
         .WithFontRegistry(fonts)
         .AddPage(PageSizes.Letter.Landscape(), canvas =>
@@ -741,17 +757,18 @@ static void DashboardExample(string name, FontRegistry fonts)
                 ty += 14;
             }
         })
-        .Save(Out(name));
+        .Save(Out(name, version));
 }
 
 // ── example 11: font registry showcase ───────────────────────────────────────
 
-static void FontRegistryExample(string name, FontRegistry fonts)
+static void FontRegistryExample(string name, FontRegistry fonts, PdfVersion version)
 {
     var body    = TextStyle.Default.WithFamily("LiberationSans").WithSize(12);
     var heading = TextStyle.Default.WithFamily("LiberationSans").WithSize(20).WithBold();
 
     PdfDocument.Create()
+        .WithVersion(version)
         .WithTitle("Font Registry Showcase")
         .WithFontRegistry(fonts)
         .AddPage(PageSizes.A4, canvas =>
@@ -800,7 +817,8 @@ static void FontRegistryExample(string name, FontRegistry fonts)
             y += step;
             canvas.DrawText("  Latin + accented: café résumé naïve", 72, y, body);
             y += step;
-            canvas.DrawText("  Typographic: — – ‘ ’ “ ” • …", 72, y, body);            y += step;
+            canvas.DrawText("  Typographic: — – ‘ ’ “ ” • …", 72, y, body);
+            y += step;
 
             // Measurement
             string sample = "Hello, World!";
@@ -808,14 +826,14 @@ static void FontRegistryExample(string name, FontRegistry fonts)
             canvas.DrawText($"MeasureTextWidth(\"{sample}\", LiberationSans 12pt) = {w:F1} pt",
                 72, y, body.WithColor(PdfColor.DarkGray));
         })
-        .Save(Out(name));
+        .Save(Out(name, version));
 }
 
 // ── example 12: unicode / utf-8 text ─────────────────────────────────────────
 // Demonstrates rendering of Latin Extended, Greek, Cyrillic, Emoji, and CJK text.
 // Characters not supported by a font render as .notdef boxes — no exception is thrown.
 
-static void UnicodeExample(string name, FontRegistry fonts)
+static void UnicodeExample(string name, FontRegistry fonts, PdfVersion version)
 {
     // Optional system fonts for emoji and CJK
     string? emojiFont = FindFont(
@@ -840,6 +858,7 @@ static void UnicodeExample(string name, FontRegistry fonts)
             .AddFallback("Emoji");
 
     PdfDocument.Create()
+        .WithVersion(version)
         .WithTitle("Unicode / UTF-8 Text Showcase")
         .WithFontRegistry(reg)
         .AddPage(PageSizes.A4, canvas =>
@@ -867,7 +886,7 @@ static void UnicodeExample(string name, FontRegistry fonts)
             Section("Latin Extended (LiberationSans)");
             canvas.DrawText("café résumé naïve Ångström fiancée Üniversität", 72, y,
                 TextStyle.Default.WithFamily("LiberationSans").WithSize(12)); y += gap;
-            canvas.DrawText("— em-dash  – en-dash  ' ' \u201C \u201D  …  •  © ® ™", 72, y,
+            canvas.DrawText("— em-dash  – en-dash  ' ' “ ”  …  •  © ® ™", 72, y,
                 TextStyle.Default.WithFamily("LiberationSans").WithSize(12)); y += gap;
 
             // ── Greek ────────────────────────────────────────────────────────
@@ -922,7 +941,7 @@ static void UnicodeExample(string name, FontRegistry fonts)
             canvas.DrawText("empty boxes (.notdef). Arabic / Hebrew shaping (RTL) is not yet supported.",
                 72, y, small);
         })
-        .Save(Out(name));
+        .Save(Out(name, version));
 }
 
 // ── geometry helpers ─────────────────────────────────────────────────────────
@@ -964,8 +983,11 @@ static void DrawPieSlice(PdfCanvas canvas, float cx, float cy, float r,
 
 // ── utility ───────────────────────────────────────────────────────────────────
 
-static string Out(string name) =>
-    Path.Combine(AppContext.BaseDirectory, "output", $"{name}.pdf");
+static string Out(string name, PdfVersion version)
+{
+    string vLabel = version == PdfVersion.Pdf20 ? "v2.0" : "v1.4";
+    return Path.Combine(AppContext.BaseDirectory, "output", $"{name}_{vLabel}.pdf");
+}
 
 static string? FindFont(params string[] paths)
 {
