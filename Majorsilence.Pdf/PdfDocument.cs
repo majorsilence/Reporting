@@ -50,6 +50,22 @@ namespace Majorsilence.Pdf
         /// </summary>
         public PdfDocument WithVersion(PdfVersion version) { _version = version; return this; }
 
+        // ── security hooks (called by Majorsilence.Pdf.Security extension methods) ─
+
+        /// <summary>
+        /// Attach a stream encryptor supplied by an optional companion library.
+        /// Calling code should use the extension methods from Majorsilence.Pdf.Security
+        /// rather than calling this directly.
+        /// </summary>
+        internal void SetStreamEncryptor(Internal.IStreamEncryptor? encryptor)
+            => _ser.SetEncryptor(encryptor);
+
+        /// <summary>
+        /// Attach a digital-signature handler supplied by an optional companion library.
+        /// </summary>
+        internal void SetSignatureHandler(Internal.ISignatureHandler? handler)
+            => _ser.SetSignatureHandler(handler);
+
         // ── font registry ─────────────────────────────────────────────────────
 
         /// <summary>
