@@ -33,12 +33,13 @@ namespace Majorsilence.Pdf.Internal
     internal sealed class ImageResource
     {
         internal readonly string PdfName;          // e.g. "Im1"
-        internal readonly byte[] Data;             // raw bytes (JPEG) or compressed RGB
+        internal readonly byte[] Data;             // raw bytes (JPEG) or raw RGB or raw RGBA
         internal readonly int Width, Height;
         internal readonly bool IsJpeg;
-        internal ImageResource(string pdfName, byte[] data, int w, int h, bool isJpeg)
+        internal readonly bool IsRgba;             // true → Data is RGBA; split into RGB + SMask on serialization
+        internal ImageResource(string pdfName, byte[] data, int w, int h, bool isJpeg, bool isRgba = false)
         {
-            PdfName = pdfName; Data = data; Width = w; Height = h; IsJpeg = isJpeg;
+            PdfName = pdfName; Data = data; Width = w; Height = h; IsJpeg = isJpeg; IsRgba = isRgba;
         }
     }
 
@@ -133,6 +134,19 @@ namespace Majorsilence.Pdf.Internal
             return ir;
         }
 
+        internal ImageResource? FindImage(string key) =>
+            _imageMap.TryGetValue(key, out var ir) ? ir : null;
+
+        internal ImageResource GetOrAddRgbaImage(string key, byte[] rgba, int width, int height)
+        {
+            if (_imageMap.TryGetValue(key, out var ir)) return ir;
+            string pdfName = "Im" + (_images.Count + 1);
+            ir = new ImageResource(pdfName, rgba, width, height, isJpeg: false, isRgba: true);
+            _images.Add(ir);
+            _imageMap[key] = ir;
+            return ir;
+        }
+
         // ── serialization ────────────────────────────────────────────────────
 
         internal void Write(Stream stream)
@@ -177,7 +191,18 @@ namespace Majorsilence.Pdf.Internal
             for (int ii = 0; ii < _images.Count; ii++)
             {
                 imageObjIdx[ii] = objects.Count;
-                objects.Add(BuildImageObj(_images[ii]));
+                if (_images[ii].IsRgba)
+                {
+                    // RGBA images require two PDF objects: main image + alpha SMask.
+                    // Main image is at imageObjIdx[ii]; SMask is the very next object.
+                    int sMaskPdfObjNum = objects.Count + 2; // 1-based
+                    objects.Add(BuildRgbaMainImageObj(_images[ii], sMaskPdfObjNum));
+                    objects.Add(BuildAlphaMaskObj(_images[ii]));
+                }
+                else
+                {
+                    objects.Add(BuildImageObj(_images[ii]));
+                }
             }
 
             // Font and image resource strings (object numbers are list-index + 1)
@@ -416,6 +441,42 @@ namespace Majorsilence.Pdf.Internal
                 $"<< /Type /XObject /Subtype /Image /Width {img.Width} /Height {img.Height} " +
                 $"/ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter {filter} /Length {data.Length} >>\nstream\n";
             return Concat(Latin1.GetBytes(hdr), data, Latin1.GetBytes("\nendstream"));
+        }
+
+        // Main RGB image that references the alpha SMask object.
+        private static byte[] BuildRgbaMainImageObj(ImageResource img, int sMaskPdfObjNum)
+        {
+            // Extract RGB channels from interleaved RGBA.
+            byte[] rgba = img.Data;
+            int pixels  = img.Width * img.Height;
+            byte[] rgb  = new byte[pixels * 3];
+            for (int i = 0; i < pixels; i++)
+            {
+                rgb[i * 3]     = rgba[i * 4];
+                rgb[i * 3 + 1] = rgba[i * 4 + 1];
+                rgb[i * 3 + 2] = rgba[i * 4 + 2];
+            }
+            byte[] compressed = Compress(rgb);
+            string hdr =
+                $"<< /Type /XObject /Subtype /Image /Width {img.Width} /Height {img.Height} " +
+                $"/ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /FlateDecode " +
+                $"/SMask {sMaskPdfObjNum} 0 R /Length {compressed.Length} >>\nstream\n";
+            return Concat(Latin1.GetBytes(hdr), compressed, Latin1.GetBytes("\nendstream"));
+        }
+
+        // Grayscale alpha channel image used as an SMask.
+        private static byte[] BuildAlphaMaskObj(ImageResource img)
+        {
+            byte[] rgba  = img.Data;
+            int pixels   = img.Width * img.Height;
+            byte[] alpha = new byte[pixels];
+            for (int i = 0; i < pixels; i++)
+                alpha[i] = rgba[i * 4 + 3];
+            byte[] compressed = Compress(alpha);
+            string hdr =
+                $"<< /Type /XObject /Subtype /Image /Width {img.Width} /Height {img.Height} " +
+                $"/ColorSpace /DeviceGray /BitsPerComponent 8 /Filter /FlateDecode /Length {compressed.Length} >>\nstream\n";
+            return Concat(Latin1.GetBytes(hdr), compressed, Latin1.GetBytes("\nendstream"));
         }
 
         private static byte[] BuildAnnotationObj(PageAnnotation ann)

@@ -820,6 +820,7 @@ static void UnicodeExample(string name, FontRegistry fonts)
     // Optional system fonts for emoji and CJK
     string? emojiFont = FindFont(
         @"C:\Windows\Fonts\seguiemj.ttf",
+        "/usr/share/fonts/truetype/noto/NotoColorEmoji.ttf",
         "/usr/share/fonts/truetype/noto/NotoEmoji-Regular.ttf");
 
     string? cjkFont = FindFont(

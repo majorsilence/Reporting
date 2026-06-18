@@ -39,6 +39,13 @@ namespace Majorsilence.Pdf
         private string? _postScriptName;
         private short _xMin, _yMin, _xMax, _yMax;
 
+        // Color bitmap (CBDT/CBLC) fields — populated only when no outline glyf table is present.
+        private bool _isColorBitmapOnly;
+        private int _cbdtPpem;
+        // Maps glyph ID → (absolute byte offset in _data, record length)
+        private readonly Dictionary<ushort, (int offset, int length)> _cbdtGlyphs =
+            new Dictionary<ushort, (int, int)>();
+
         public int UnitsPerEm => _unitsPerEm;
         public short Ascender => _ascender;
         public short Descender => _descender;
@@ -49,6 +56,12 @@ namespace Majorsilence.Pdf
         public short XMax => _xMax;
         public short YMax => _yMax;
         public byte[] Data => _data;
+
+        // True when the font contains only color bitmap glyphs (CBDT/CBLC) and no outlines.
+        public bool IsColorBitmapOnly => _isColorBitmapOnly;
+
+        // Pixels per em for the color bitmap strike (e.g. 109 for NotoColorEmoji).
+        public int ColorBitmapPpem => _cbdtPpem;
 
         public TrueTypeFont(string path) : this(File.ReadAllBytes(path)) { }
 
@@ -85,6 +98,11 @@ namespace Majorsilence.Pdf
             ParseHmtx(tables);
             ParseCmap(tables);
             ParseName(tables);
+            if (!tables.ContainsKey("glyf") && tables.ContainsKey("CBDT") && tables.ContainsKey("CBLC"))
+            {
+                _isColorBitmapOnly = true;
+                ParseColorBitmaps(tables);
+            }
         }
 
         private void ParseHead(Dictionary<string, (int offset, int length)> t)
@@ -227,6 +245,105 @@ namespace Majorsilence.Pdf
                 else          latinName   = Encoding.ASCII.GetString(_data, strBase + off, len);
             }
             _postScriptName = unicodeName ?? latinName;
+        }
+
+        // ── CBDT / CBLC color bitmap parsing ────────────────────────────────
+
+        // Parses the CBLC index and maps every glyph ID to its record position in CBDT.
+        // Supports IndexSubTable formats 1 (uint32 offsets) and 3 (uint16 offsets).
+        // Images are expected to be CBDT format 17: SmallGlyphMetrics(5) + uint32 length + PNG.
+        private void ParseColorBitmaps(Dictionary<string, (int offset, int length)> tables)
+        {
+            if (!tables.TryGetValue("CBLC", out var cblcEntry) ||
+                !tables.TryGetValue("CBDT", out var cbdtEntry)) return;
+
+            int cblc = cblcEntry.offset;
+            int cbdt = cbdtEntry.offset;
+
+            int numSizes = S32(_data, cblc + 4);
+            if (numSizes <= 0) return;
+
+            // Pick the size table with the largest ppem (best quality).
+            int bestPpem = -1, bestBst = -1;
+            for (int si = 0; si < numSizes; si++)
+            {
+                int bst = cblc + 8 + si * 48;
+                int ppem = _data[bst + 44]; // ppemX
+                if (ppem > bestPpem) { bestPpem = ppem; bestBst = bst; }
+            }
+            if (bestBst < 0) return;
+            _cbdtPpem = bestPpem;
+
+            int idxArrOff = S32(_data, bestBst);      // offset within CBLC
+            int numSubTables = S32(_data, bestBst + 8);
+            int istaBase = cblc + idxArrOff;
+
+            for (int sti = 0; sti < numSubTables; sti++)
+            {
+                int entry = istaBase + sti * 8;
+                int firstGlyph = U16(_data, entry);
+                int lastGlyph  = U16(_data, entry + 2);
+                int addlOff    = S32(_data, entry + 4); // from istaBase
+                int ist = istaBase + addlOff;           // IndexSubTable header
+
+                int idxFmt     = U16(_data, ist);
+                // imageFormat at ist+2 (not needed — we always parse as format 17)
+                int imgDataOff = S32(_data, ist + 4);   // offset from CBDT start
+
+                if (idxFmt == 1)
+                {
+                    // uint32 offsets
+                    for (int gi = firstGlyph; gi <= lastGlyph; gi++)
+                    {
+                        int idx = gi - firstGlyph;
+                        int o0 = S32(_data, ist + 8 + idx * 4);
+                        int o1 = S32(_data, ist + 8 + (idx + 1) * 4);
+                        if (o1 <= o0) continue;
+                        _cbdtGlyphs[(ushort)gi] = (cbdt + imgDataOff + o0, o1 - o0);
+                    }
+                }
+                else if (idxFmt == 3)
+                {
+                    // uint16 offsets
+                    for (int gi = firstGlyph; gi <= lastGlyph; gi++)
+                    {
+                        int idx = gi - firstGlyph;
+                        int o0 = U16(_data, ist + 8 + idx * 2);
+                        int o1 = U16(_data, ist + 8 + (idx + 1) * 2);
+                        if (o1 <= o0) continue;
+                        _cbdtGlyphs[(ushort)gi] = (cbdt + imgDataOff + o0, o1 - o0);
+                    }
+                }
+            }
+        }
+
+        // Extracts the raw PNG bytes for a color bitmap glyph and returns its pixel metrics.
+        // The record layout is: SmallGlyphMetrics(5 bytes) + uint32 pngLength + PNG data.
+        public bool TryGetGlyphPng(ushort glyphId,
+            out byte[] pngData,
+            out byte pixelWidth, out byte pixelHeight,
+            out sbyte bearingX, out sbyte bearingY)
+        {
+            pngData = Array.Empty<byte>();
+            pixelWidth = pixelHeight = 0;
+            bearingX = bearingY = 0;
+
+            if (!_cbdtGlyphs.TryGetValue(glyphId, out var rec)) return false;
+            int o = rec.offset;
+            if (o + 9 > _data.Length) return false;
+
+            pixelHeight = _data[o];
+            pixelWidth  = _data[o + 1];
+            bearingX    = (sbyte)_data[o + 2];
+            bearingY    = (sbyte)_data[o + 3];
+            // advance at _data[o + 4] — use hmtx instead
+
+            int pngLen = S32(_data, o + 5);
+            if (pngLen <= 0 || o + 9 + pngLen > _data.Length) return false;
+
+            pngData = new byte[pngLen];
+            Buffer.BlockCopy(_data, o + 9, pngData, 0, pngLen);
+            return true;
         }
 
         // ── public API ───────────────────────────────────────────────────────

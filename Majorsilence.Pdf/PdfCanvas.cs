@@ -108,22 +108,89 @@ namespace Majorsilence.Pdf
                 // Segment text so each run uses the first font that has every glyph.
                 var segments = SegmentByFont(text, primaryTtf, primarySource, fallbacks);
 
-                sb.Append("BT\n");
-                if (style.IsVertical)
-                    sb.Append($"{F(0)} {F(style.FontSize)} Td\n");
-                else
-                    sb.Append($"{F(x)} {F(pdfY)} Td\n");
-
                 totalWidth = 0f;
+                float cursorX = x;
+                bool inBt = false;
+
                 foreach (var (segText, segTtf, segSrc) in segments)
                 {
-                    var font = _ser.GetOrAddTtfFont(segSrc.CacheKey, segTtf);
-                    sb.Append($"/{font.PdfName} {F(style.FontSize)} Tf\n");
-                    sb.Append($"{PdfSerializer.EncodeGlyphIds(segText, segTtf, font.UsedGlyphs)} Tj\n");
-                    totalWidth += segTtf.GetWidthPoint(segText, style.FontSize);
+                    if (segTtf.IsColorBitmapOnly && !style.IsVertical)
+                    {
+                        // Close any open BT block before emitting image XObjects.
+                        if (inBt) { sb.Append("ET\n"); inBt = false; }
+
+                        float ptPerPx = style.FontSize / (float)segTtf.ColorBitmapPpem;
+
+                        for (int si = 0; si < segText.Length; )
+                        {
+                            int cp;
+                            int consumed = 1;
+                            if (char.IsHighSurrogate(segText[si]) && si + 1 < segText.Length
+                                && char.IsLowSurrogate(segText[si + 1]))
+                            {
+                                cp = char.ConvertToUtf32(segText[si], segText[si + 1]);
+                                consumed = 2;
+                            }
+                            else cp = segText[si];
+                            si += consumed;
+
+                            ushort gid = segTtf.GetGlyphId(cp);
+                            float advPt = segTtf.GetAdvanceWidth(gid) / (float)segTtf.UnitsPerEm * style.FontSize;
+
+                            string imgKey = segSrc.CacheKey + ":glyph:" + gid;
+                            var img = _ser.FindImage(imgKey);
+                            if (img == null
+                                && segTtf.TryGetGlyphPng(gid, out var pngBytes,
+                                    out byte gw, out byte gh, out sbyte bx, out sbyte by))
+                            {
+                                if (PngDecoder.TryDecode(pngBytes, out var rgba, out int pw, out int ph))
+                                    img = _ser.GetOrAddRgbaImage(imgKey, rgba, pw, ph);
+                            }
+
+                            if (img != null)
+                            {
+                                byte gw2, gh2; sbyte bx2, by2;
+                                segTtf.TryGetGlyphPng(gid, out _, out gw2, out gh2, out bx2, out by2);
+
+                                float imgW = gw2 * ptPerPx;
+                                float imgH = gh2 * ptPerPx;
+                                float imgX = cursorX + bx2 * ptPerPx;
+                                // PDF bottom-left of image: baseline is pdfY, top of image is (pdfY + by2*ptPerPx)
+                                float imgPdfBottom = pdfY + (by2 * ptPerPx) - imgH;
+
+                                sb.Append("q\n");
+                                sb.Append($"{F(imgW)} 0 0 {F(imgH)} {F(imgX)} {F(imgPdfBottom)} cm\n");
+                                sb.Append($"/{img.PdfName} Do\n");
+                                sb.Append("Q\n");
+                            }
+
+                            cursorX   += advPt;
+                            totalWidth += advPt;
+                        }
+                    }
+                    else
+                    {
+                        // Normal outline-font path.
+                        if (!inBt)
+                        {
+                            sb.Append("BT\n");
+                            if (style.IsVertical)
+                                sb.Append($"{F(0)} {F(style.FontSize)} Td\n");
+                            else
+                                sb.Append($"{F(cursorX)} {F(pdfY)} Td\n");
+                            inBt = true;
+                        }
+
+                        var font = _ser.GetOrAddTtfFont(segSrc.CacheKey, segTtf);
+                        sb.Append($"/{font.PdfName} {F(style.FontSize)} Tf\n");
+                        sb.Append($"{PdfSerializer.EncodeGlyphIds(segText, segTtf, font.UsedGlyphs)} Tj\n");
+                        float segW = segTtf.GetWidthPoint(segText, style.FontSize);
+                        cursorX   += segW;
+                        totalWidth += segW;
+                    }
                 }
 
-                sb.Append("ET\n");
+                if (inBt) sb.Append("ET\n");
             }
             else
             {
