@@ -64,6 +64,12 @@ namespace Majorsilence.Drawing
             return i._skBitmap;
         }
 
+        public Color GetPixel(int x, int y)
+        {
+            var px = _skBitmap.GetPixel(x, y);
+            return Color.FromArgb(px.Alpha, px.Red, px.Green, px.Blue);
+        }
+
         public static implicit operator Bitmap(SKBitmap i)
         {
             return new Bitmap(i);
