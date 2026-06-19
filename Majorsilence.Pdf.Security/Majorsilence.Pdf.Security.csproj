@@ -8,7 +8,7 @@
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <IsPackable>true</IsPackable>
     <Nullable>enable</Nullable>
-    <PackageLicenseExpression>SPDX-License-Identifier: MIT OR Apache-2.0 OR BSD-3-Clause</PackageLicenseExpression>
+    <PackageLicenseExpression>MIT OR Apache-2.0 OR BSD-3-Clause</PackageLicenseExpression>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\Majorsilence.Pdf\Majorsilence.Pdf.csproj" />
