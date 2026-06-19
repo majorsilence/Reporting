@@ -103,10 +103,12 @@ namespace Majorsilence.Pdf.Security.Internal
             md5.TransformBlock(oEntry, 0, 32, null, 0);
             byte[] pb = BitConverter.GetBytes(p);
             md5.TransformBlock(pb, 0, 4, null, 0);
-            md5.TransformBlock(fileId, 0, fileId.Length, null, 0);
-            // Rev 4, EncryptMetadata=true: append 0xFFFFFFFF
-            byte[] ffff = { 0xFF, 0xFF, 0xFF, 0xFF };
-            md5.TransformFinalBlock(ffff, 0, 4);
+            // PDF spec §7.6.3.3 Algorithm 2 step f: only append 0xFFFFFFFF when
+            // /EncryptMetadata false is present in the /Encrypt dict.  We omit
+            // /EncryptMetadata (defaulting to true) for maximum viewer compatibility —
+            // many viewers (including Flatpak/Snap-bundled builds of Evince) do not
+            // honour that flag and always skip the 0xFFFFFFFF step.
+            md5.TransformFinalBlock(fileId, 0, fileId.Length);
             byte[] hash = md5.Hash!;
             for (int i = 0; i < 50; i++) hash = Md5(hash, 0, 16);
             var key = new byte[16];

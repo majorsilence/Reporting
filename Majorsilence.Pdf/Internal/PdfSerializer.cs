@@ -496,7 +496,7 @@ namespace Majorsilence.Pdf.Internal
             // ── CIDFont ───────────────────────────────────────────────────────
             objects.Add(Latin1.GetBytes(
                 $"<< /Type /Font /Subtype /CIDFontType2 /BaseFont /{psName} " +
-                $"/CIDSystemInfo << /Registry (Adobe) /Ordering (Identity) /Supplement 0 >> " +
+                $"/CIDSystemInfo << /Registry {EncLitStr(cidFontObjNum, "Adobe")} /Ordering {EncLitStr(cidFontObjNum, "Identity")} /Supplement 0 >> " +
                 $"/FontDescriptor {descriptorObjNum} 0 R /DW 1000 {wArray} >>"));
 
             // ── Type0 Font ────────────────────────────────────────────────────
@@ -619,15 +619,24 @@ namespace Majorsilence.Pdf.Internal
 
         // ── string helpers ────────────────────────────────────────────────────
 
+        // Encrypts a plain ASCII/Latin-1 string literal: returns <hex> when
+        // encrypted, or (...) parenthetical form otherwise.  Use for dict values
+        // whose encoding must stay as-is (e.g. /CIDSystemInfo /Registry).
+        private string EncLitStr(int objNum, string asciiText)
+        {
+            if (_encryptor != null) return _encryptor.EncryptPdfString(objNum, 0, Latin1.GetBytes(asciiText));
+            return "(" + asciiText + ")";
+        }
+
         // Returns an encrypted hex literal when encryption is active,
         // otherwise a UTF-16BE hex literal.
         private string EncStr(int objNum, string text)
         {
-            if (string.IsNullOrEmpty(text)) return "<FEFF>";
             var raw = new System.Collections.Generic.List<byte> { 0xFE, 0xFF };
-            foreach (char c in text) { raw.Add((byte)((int)c >> 8)); raw.Add((byte)((int)c & 0xFF)); }
+            foreach (char c in text ?? "") { raw.Add((byte)((int)c >> 8)); raw.Add((byte)((int)c & 0xFF)); }
             byte[] bytes = raw.ToArray();
             if (_encryptor != null) return _encryptor.EncryptPdfString(objNum, 0, bytes);
+            if (bytes.Length == 2) return "<FEFF>";
             var hex = new StringBuilder("<");
             foreach (byte b in bytes) hex.Append(b.ToString("X2"));
             hex.Append('>');
