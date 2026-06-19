@@ -16,6 +16,7 @@ namespace Majorsilence.Pdf
     public sealed class TrueTypeFont
     {
         private readonly byte[] _data;
+        private readonly int _fontOffset; // 0 for plain TTF/OTF; >0 when font lives inside a TTC collection
         private int _unitsPerEm;
         private short _ascender;
         private short _descender;
@@ -55,7 +56,26 @@ namespace Majorsilence.Pdf
         public TrueTypeFont(byte[] data)
         {
             _data = data;
+            _fontOffset = DetectFontOffset();
             Parse();
+        }
+
+        // Returns the byte offset of the sfnt OffsetTable within _data.
+        // For a plain TTF/OTF this is 0; for a TTC we jump to the first font entry.
+        private int DetectFontOffset()
+        {
+            if (_data.Length < 4) return 0;
+            // TTC magic: 't','t','c','f'
+            if (_data[0] == 0x74 && _data[1] == 0x74 && _data[2] == 0x63 && _data[3] == 0x66)
+            {
+                // numFonts at offset 8; first font's OffsetTable offset at offset 12
+                if (_data.Length >= 16)
+                {
+                    int off = S32(_data, 12);
+                    if (off > 0 && off < _data.Length - 12) return off;
+                }
+            }
+            return 0;
         }
 
         // ── binary helpers (big-endian) ──────────────────────────────────────
@@ -68,11 +88,11 @@ namespace Majorsilence.Pdf
 
         private void Parse()
         {
-            int numTables = U16(_data, 4);
+            int numTables = U16(_data, _fontOffset + 4);
             var tables = new Dictionary<string, (int offset, int length)>(numTables, StringComparer.Ordinal);
             for (int i = 0; i < numTables; i++)
             {
-                int e = 12 + i * 16;
+                int e = _fontOffset + 12 + i * 16;
                 string tag = Encoding.ASCII.GetString(_data, e, 4);
                 int off = S32(_data, e + 8);
                 int len = S32(_data, e + 12);
@@ -380,12 +400,12 @@ namespace Majorsilence.Pdf
         // so original glyph IDs remain valid — no re-encoding needed.
         public byte[] Subset(HashSet<ushort> usedGlyphIds)
         {
-            // Parse table directory
-            int numTables = U16(_data, 4);
+            // Parse table directory (honoring TTC offset when applicable)
+            int numTables = U16(_data, _fontOffset + 4);
             var tables = new Dictionary<string, (int offset, int length)>(numTables, StringComparer.Ordinal);
             for (int i = 0; i < numTables; i++)
             {
-                int e = 12 + i * 16;
+                int e = _fontOffset + 12 + i * 16;
                 string tag = Encoding.ASCII.GetString(_data, e, 4);
                 tables[tag] = (S32(_data, e + 8), S32(_data, e + 12));
             }
@@ -498,7 +518,7 @@ namespace Majorsilence.Pdf
             byte[] output = new byte[cursor];
 
             // Offset table (sfVersion, numTables, searchRange, entrySelector, rangeShift)
-            int sfVer = S32(_data, 0);
+            int sfVer = S32(_data, _fontOffset); // for TTC _fontOffset points to the actual OffsetTable
             WriteU32(output, 0, (uint)sfVer);
             WriteU16(output, 4, (ushort)nT);
             int p2 = 1; while (p2 * 2 <= nT) p2 *= 2;
