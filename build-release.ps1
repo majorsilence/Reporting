@@ -1,5 +1,6 @@
 #!/usr/bin/env pwsh
 $ErrorActionPreference = "Stop"
+$PSNativeCommandErrorActionPreference = 'Stop'
 $CURRENTPATH=$pwd.Path
 
 # /p:Configuration="Debug", "Debug-DrawingCompat", "Release", "Release-DrawingCompat"

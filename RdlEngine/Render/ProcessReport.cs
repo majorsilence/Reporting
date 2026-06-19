@@ -31,7 +31,8 @@ namespace Majorsilence.Reporting.Rdl
 		Excel2007DataOnly,
         TIF,
         TIFBW,                   // black and white tif
-        Excel2003
+        Excel2003,
+        RenderPdf_Majorsilence
     }
 
 	[Serializable]
