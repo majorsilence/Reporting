@@ -6,7 +6,10 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
 using Majorsilence.Pdf;
+using Majorsilence.Pdf.Security;
 
 string outputDir = Path.Combine(AppContext.BaseDirectory, "output");
 Directory.CreateDirectory(outputDir);
@@ -47,6 +50,8 @@ RunExample("09_invoice",            InvoiceExample);
 RunExample("10_dashboard",          DashboardExample);
 RunExample("11_font_registry",      FontRegistryExample);
 RunExample("12_unicode",            UnicodeExample);
+RunExample("13_password_protected", PasswordProtectedExample);
+RunExample("14_signed",            SignedExample);
 
 Console.WriteLine($"\nAll PDFs written to: {outputDir}");
 
@@ -942,6 +947,107 @@ static void UnicodeExample(string name, FontRegistry fonts, PdfVersion version)
                 72, y, small);
         })
         .Save(Out(name, version));
+}
+
+// ── example 13: password-protected ───────────────────────────────────────────
+// Encryption: Standard Security Handler Rev 4, AES-128-CBC (V=4, R=4).
+// This is the algorithm defined in PDF 1.5–1.7 and is supported by every major
+// viewer. PDF 2.0 formally specifies Rev 6 / AES-256, but that algorithm
+// requires significantly more complex implementation (O_E / U_E / Perms entries,
+// hash rounds). AES-128 Rev 4 is widely accepted and remains secure for most
+// document-protection use cases.
+
+static void PasswordProtectedExample(string name, FontRegistry fonts, PdfVersion version)
+{
+    var security = PdfSecurity.Protect(userPassword: "open123", ownerPassword: "owner456")
+        .WithPermissions(PdfPermissions.Print | PdfPermissions.CopyText);
+
+    var heading = TextStyle.Default.WithSize(18).WithBold(true);
+    var body    = TextStyle.Default.WithSize(12);
+    var small   = TextStyle.Default.WithSize(9).WithItalic(true);
+    var mono    = TextStyle.Default.WithFamily("LiberationMono").WithSize(10);
+
+    PdfDocument.Create()
+        .WithVersion(version)
+        .WithFontRegistry(fonts)
+        .WithTitle("Password-Protected Example")
+        .WithSecurity(security)
+        .AddPage(PageSizes.A4, canvas =>
+        {
+            float y = 72;
+            const float gap = 20;
+
+            canvas.DrawText("Password-Protected PDF", 72, y, heading); y += gap + 6;
+            canvas.DrawText("This document is encrypted with AES-128 (Standard Security Handler Rev 4).", 72, y, body); y += gap;
+            canvas.DrawText("Open password: open123     Owner password: owner456", 72, y, body); y += gap;
+            canvas.DrawText("Permissions granted: Print, CopyText", 72, y, body); y += gap * 2;
+
+            canvas.DrawText("Encryption details:", 72, y, TextStyle.Default.WithSize(12).WithBold(true)); y += gap;
+            canvas.DrawText("/Filter /Standard  /V 4  /R 4  /Length 128  /StmF /StdCF  /StrF /StdCF", 72, y, mono); y += gap;
+            canvas.DrawText("/CFM /AESV2  (AES-128-CBC, per-object key derived with MD5 + sAlT suffix)", 72, y, mono); y += gap * 2;
+
+            canvas.DrawText("Note: PDF 2.0 specifies AES-256 (Rev 6) but AES-128 (Rev 4) is", 72, y, small); y += 14;
+            canvas.DrawText("universally supported and remains appropriate for most use cases.", 72, y, small);
+        })
+        .Save(Out(name, version));
+}
+
+// ── example 14: digitally signed ─────────────────────────────────────────────
+// Creates a self-signed RSA-2048 certificate on the fly and embeds a
+// PKCS#7 detached signature (adbe.pkcs7.detached) using SHA-256.
+// In production supply a real certificate issued by a trusted CA.
+
+static void SignedExample(string name, FontRegistry fonts, PdfVersion version)
+{
+    using var cert = CreateSelfSignedCert();
+    var sigOpts = new PdfSignatureOptions(cert)
+        .WithReason("Example approval")
+        .WithSignerName("Majorsilence Example")
+        .WithLocation("Toronto, ON");
+
+    var heading = TextStyle.Default.WithSize(18).WithBold(true);
+    var body    = TextStyle.Default.WithSize(12);
+    var small   = TextStyle.Default.WithSize(9).WithItalic(true);
+
+    PdfDocument.Create()
+        .WithVersion(version)
+        .WithFontRegistry(fonts)
+        .WithTitle("Digitally-Signed Example")
+        .WithSignature(sigOpts)
+        .AddPage(PageSizes.A4, canvas =>
+        {
+            float y = 72;
+            const float gap = 20;
+
+            canvas.DrawText("Digitally-Signed PDF", 72, y, heading); y += gap + 6;
+            canvas.DrawText("This document contains an embedded PKCS#7 detached digital signature.", 72, y, body); y += gap;
+            canvas.DrawText("SubFilter: adbe.pkcs7.detached    Digest: SHA-256", 72, y, body); y += gap;
+            canvas.DrawText("Signer: Majorsilence Example    Location: Toronto, ON", 72, y, body); y += gap;
+            canvas.DrawText("Reason: Example approval", 72, y, body); y += gap * 2;
+
+            canvas.DrawText("The certificate used here is self-signed (generated at runtime).", 72, y, small); y += 14;
+            canvas.DrawText("Open in Adobe Acrobat or similar to verify the signature panel.", 72, y, small);
+        })
+        .Save(Out(name, version));
+}
+
+static X509Certificate2 CreateSelfSignedCert()
+{
+    using var rsa = RSA.Create(2048);
+    var req = new CertificateRequest(
+        "CN=Majorsilence Example Signer",
+        rsa,
+        HashAlgorithmName.SHA256,
+        RSASignaturePadding.Pkcs1);
+    req.CertificateExtensions.Add(new X509BasicConstraintsExtension(false, false, 0, false));
+    req.CertificateExtensions.Add(new X509KeyUsageExtension(X509KeyUsageFlags.DigitalSignature, false));
+    var notBefore = DateTimeOffset.UtcNow.AddMinutes(-5);
+    var notAfter  = notBefore.AddYears(1);
+    var cert = req.CreateSelfSigned(notBefore, notAfter);
+    // Export and re-import so the private key is exportable on all platforms
+    var pfxBytes = cert.Export(X509ContentType.Pfx);
+    return X509CertificateLoader.LoadPkcs12(pfxBytes, (string?)null,
+        X509KeyStorageFlags.Exportable | X509KeyStorageFlags.PersistKeySet);
 }
 
 // ── geometry helpers ─────────────────────────────────────────────────────────
