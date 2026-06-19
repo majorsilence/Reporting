@@ -52,6 +52,7 @@ RunExample("11_font_registry",      FontRegistryExample);
 RunExample("12_unicode",            UnicodeExample);
 RunExample("13_password_protected", PasswordProtectedExample);
 RunExample("14_signed",            SignedExample);
+RunExample("15_rtl_text",          RightToLeftExample);
 
 Console.WriteLine($"\nAll PDFs written to: {outputDir}");
 
@@ -943,7 +944,7 @@ static void UnicodeExample(string name, FontRegistry fonts, PdfVersion version)
             y += 16;
             canvas.DrawText("Note: characters without a glyph in any registered font render as",
                 72, y, small); y += 16;
-            canvas.DrawText("empty boxes (.notdef). Arabic / Hebrew shaping (RTL) is not yet supported.",
+            canvas.DrawText("empty boxes (.notdef). See example 15 for right-to-left (RTL) text.",
                 72, y, small);
         })
         .Save(Out(name, version));
@@ -1048,6 +1049,83 @@ static X509Certificate2 CreateSelfSignedCert()
     var pfxBytes = cert.Export(X509ContentType.Pfx);
     return X509CertificateLoader.LoadPkcs12(pfxBytes, (string?)null,
         X509KeyStorageFlags.Exportable | X509KeyStorageFlags.PersistKeySet);
+}
+
+// ── example 15: right-to-left text ───────────────────────────────────────────
+// IsRightToLeft reverses the Unicode code-point order for visual RTL rendering.
+// Hebrew works correctly without a shaping engine (letters have no contextual forms).
+// Arabic requires an external shaper (e.g. Harfbuzz) to produce correct ligature
+// forms; this example shows visual reversal only.
+// Combine WithRightToLeft() with TextAlignment.Right so x is the right anchor.
+
+static void RightToLeftExample(string name, FontRegistry fonts, PdfVersion version)
+{
+    float pageWidth   = PageSizes.A4.Width;
+    float rightMargin = pageWidth - 72;
+
+    var heading = TextStyle.Default.WithFamily("LiberationSans").WithSize(18).WithBold();
+    var label   = TextStyle.Default.WithFamily("LiberationSans").WithSize(10).WithColor(PdfColor.Gray);
+    var note    = TextStyle.Default.WithFamily("LiberationSans").WithSize(9)
+                      .WithColor(PdfColor.Gray).WithItalic();
+
+    // NotoSans ships with Hebrew and basic Arabic glyphs.
+    var rtl = TextStyle.Default.WithFamily("NotoSans").WithSize(16)
+                  .WithRightToLeft().WithAlignment(TextAlignment.Right);
+
+    PdfDocument.Create()
+        .WithVersion(version)
+        .WithTitle("Right-to-Left Text")
+        .WithFontRegistry(fonts)
+        .AddPage(PageSizes.A4, canvas =>
+        {
+            float y = 60;
+            const float sectionGap = 12f;
+
+            canvas.DrawText("Right-to-Left (RTL) Text", 72, y, heading); y += 36;
+
+            // ── Hebrew ────────────────────────────────────────────────────────
+            canvas.DrawText("Hebrew (עברית) — IsRightToLeft + TextAlignment.Right:", 72, y, label); y += 20;
+
+            canvas.DrawText("שלום עולם", rightMargin, y, rtl.WithSize(24).WithBold()); y += 32;
+            canvas.DrawText("ספר, ישראל, שלום, אהבה", rightMargin, y, rtl); y += 26;
+            canvas.DrawText("האות הראשונה של האלפבית היא אלף", rightMargin, y, rtl.WithSize(13)); y += 28;
+
+            canvas.DrawLine(72, y, rightMargin, y,
+                StrokeStyle.Default.WithWidth(0.3f).WithColor(PdfColor.LightGray));
+            y += sectionGap + 4;
+
+            // ── Arabic (visual reversal only) ─────────────────────────────────
+            canvas.DrawText("Arabic (العربية) — visual reversal (no ligature shaping):", 72, y, label); y += 20;
+
+            canvas.DrawText("مرحبا بالعالم", rightMargin, y, rtl.WithSize(24).WithBold()); y += 32;
+            canvas.DrawText("كتاب, قلم, ورقة", rightMargin, y, rtl); y += 26;
+
+            canvas.DrawLine(72, y, rightMargin, y,
+                StrokeStyle.Default.WithWidth(0.3f).WithColor(PdfColor.LightGray));
+            y += sectionGap + 4;
+
+            // ── Mixed LTR + RTL side-by-side ─────────────────────────────────
+            canvas.DrawText("Mixed — LTR on left, RTL on right:", 72, y, label); y += 20;
+
+            var ltr = TextStyle.Default.WithFamily("NotoSans").WithSize(14);
+            canvas.DrawText("Hello, World!", 72, y, ltr);
+            canvas.DrawText("!שלום, עולם", rightMargin, y, ltr.WithRightToLeft().WithAlignment(TextAlignment.Right));
+            y += 28;
+
+            canvas.DrawText("Left-to-right →", 72, y, ltr.WithSize(11).WithColor(PdfColor.Blue));
+            canvas.DrawText("← ימינה לשמאל", rightMargin, y,
+                ltr.WithSize(11).WithColor(PdfColor.Red).WithRightToLeft().WithAlignment(TextAlignment.Right));
+            y += 36;
+
+            // ── Note ─────────────────────────────────────────────────────────
+            canvas.DrawLine(72, y, rightMargin, y,
+                StrokeStyle.Default.WithWidth(0.3f).WithColor(PdfColor.LightGray));
+            y += 12;
+            canvas.DrawText("How it works: TextStyle.WithRightToLeft() reverses Unicode code-point order before", 72, y, note); y += 13;
+            canvas.DrawText("rendering. Hebrew renders correctly without a shaper. Arabic requires an external", 72, y, note); y += 13;
+            canvas.DrawText("shaping engine (e.g. HarfBuzz) to produce correct contextual ligature forms.", 72, y, note);
+        })
+        .Save(Out(name, version));
 }
 
 // ── geometry helpers ─────────────────────────────────────────────────────────

@@ -61,6 +61,14 @@ namespace Majorsilence.Pdf
         /// </summary>
         public bool IsVertical { get; private set; }
 
+        /// <summary>
+        /// When <c>true</c> the Unicode code points in the text string are reversed before
+        /// rendering, producing visual right-to-left output (suitable for Hebrew and pre-shaped
+        /// Arabic).  Combine with <see cref="TextAlignment.Right"/> so that <c>x</c> is treated
+        /// as the right edge of the text run.
+        /// </summary>
+        public bool IsRightToLeft { get; private set; }
+
         // ── construction ──────────────────────────────────────────────────────
 
         private TextStyle() { }
@@ -123,6 +131,16 @@ namespace Majorsilence.Pdf
         public TextStyle WithVertical(bool vertical = true)
         {
             var s = Clone(); s.IsVertical = vertical; return s;
+        }
+
+        /// <summary>
+        /// Reverse the code-point order of the text for visual right-to-left rendering.
+        /// Use together with <see cref="TextAlignment.Right"/> when <c>x</c> should be
+        /// the right edge of the text run.
+        /// </summary>
+        public TextStyle WithRightToLeft(bool rtl = true)
+        {
+            var s = Clone(); s.IsRightToLeft = rtl; return s;
         }
     }
 }

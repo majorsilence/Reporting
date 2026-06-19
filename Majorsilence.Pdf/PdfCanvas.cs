@@ -60,6 +60,11 @@ namespace Majorsilence.Pdf
             if (string.IsNullOrEmpty(text)) return this;
             style ??= TextStyle.Default;
 
+            // RTL: reverse the visual order of Unicode code points before any rendering.
+            // Callers should combine this with TextAlignment.Right so that x is the right edge.
+            if (style.IsRightToLeft)
+                text = ReverseCodePoints(text);
+
             if (style.Alignment != TextAlignment.Left)
             {
                 float w = MeasureTextWidth(text, style);
@@ -235,6 +240,27 @@ namespace Majorsilence.Pdf
 
             sb.Append("Q\n");
             return this;
+        }
+
+        // Reverse Unicode code points (not UTF-16 chars) so surrogate pairs stay intact.
+        private static string ReverseCodePoints(string text)
+        {
+            var points = new List<string>(text.Length);
+            for (int i = 0; i < text.Length; )
+            {
+                if (char.IsHighSurrogate(text[i]) && i + 1 < text.Length && char.IsLowSurrogate(text[i + 1]))
+                {
+                    points.Add(text.Substring(i, 2));
+                    i += 2;
+                }
+                else
+                {
+                    points.Add(text[i].ToString());
+                    i++;
+                }
+            }
+            points.Reverse();
+            return string.Concat(points);
         }
 
         // Segment text into runs where each run uses the same font.
