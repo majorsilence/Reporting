@@ -75,3 +75,35 @@ Source: https://github.com/googlefonts/noto-fonts
 License: SIL Open Font License 1.1 (see OFL-1.1.txt)
 
 Noto Sans provides broad Unicode script coverage as a final fallback.
+
+---
+
+## Noto Sans Hebrew
+
+Files: `NotoSansHebrew-*.ttf`
+
+```
+Copyright (c) 2010, 2012-2020, Google Inc.
+Copyright (c) 2015-2020, Google LLC.
+```
+
+Source: https://github.com/googlefonts/noto-fonts
+License: SIL Open Font License 1.1 (see OFL-1.1.txt)
+
+Noto Sans Hebrew covers the Hebrew Unicode block (U+0590–U+05FF).
+
+---
+
+## Noto Sans Arabic
+
+Files: `NotoSansArabic-*.ttf`
+
+```
+Copyright (c) 2010, 2012-2020, Google Inc.
+Copyright (c) 2015-2020, Google LLC.
+```
+
+Source: https://github.com/googlefonts/noto-fonts
+License: SIL Open Font License 1.1 (see OFL-1.1.txt)
+
+Noto Sans Arabic covers the Arabic Unicode block (U+0600–U+06FF).
