@@ -625,7 +625,7 @@ namespace Majorsilence.Reporting.Rdl
             {
                 using var ms  = new MemoryStream(data);
 #if DRAWINGCOMPAT
-                using var img = (Majorsilence.Drawing.Bitmap)Majorsilence.Drawing.Image.FromStream(ms);
+                using var img = new Majorsilence.Drawing.Bitmap(ms);
 #else
                 using var img = new Draw2.Bitmap(Draw2.Image.FromStream(ms));
 #endif
