@@ -54,6 +54,7 @@ RunExample("13_password_protected", PasswordProtectedExample);
 RunExample("14_signed",            SignedExample);
 RunExample("15_rtl_text",          RightToLeftExample);
 RunExample("16_pdf_merge",         PdfMergeExample);
+RunExample("17_images_from_disk",  ImagesFromDiskExample);
 
 Console.WriteLine($"\nAll PDFs written to: {outputDir}");
 
@@ -1272,6 +1273,189 @@ static void PdfMergeExample(string name, FontRegistry fonts, PdfVersion version)
 
     // PdfMerger output is always PDF 1.4; name the file by source version.
     File.WriteAllBytes(Out(name, version), merged);
+}
+
+// ── example 17: images from disk (JPEG + PNG) ────────────────────────────────
+// sample_photo.jpg and sample_logo.png sit alongside Program.cs in the source
+// tree and are copied to the output directory at build time via the .csproj.
+
+static void ImagesFromDiskExample(string name, FontRegistry fonts, PdfVersion version)
+{
+    string baseDir  = AppContext.BaseDirectory;
+    string jpegPath = Path.Combine(baseDir, "sample_photo.jpg");
+    string pngPath  = Path.Combine(baseDir, "sample_logo.png");
+
+    if (!File.Exists(jpegPath) || !File.Exists(pngPath))
+        throw new FileNotFoundException(
+            $"Sample images not found. Expected:\n  {jpegPath}\n  {pngPath}");
+
+    var heading = TextStyle.Default.WithFamily("LiberationSans").WithSize(18).WithBold();
+    var label   = TextStyle.Default.WithFamily("LiberationSans").WithSize(10);
+    var caption = TextStyle.Default.WithFamily("LiberationSans").WithSize(9)
+                      .WithColor(new PdfColor(80, 80, 80));
+
+    // Load JPEG — pass raw bytes directly; PDF readers decompress natively.
+    var (jpegBytes, jpegW, jpegH) = LoadJpeg(jpegPath);
+
+    // Load PNG — decode to raw RGB24 bytes; PdfCanvas FlateDecode-compresses them.
+    var (pngRgb, pngW, pngH) = LoadPngAsRgb(pngPath);
+
+    PdfDocument.Create()
+        .WithVersion(version)
+        .WithTitle("Images from Disk")
+        .WithFontRegistry(fonts)
+        .AddPage(PageSizes.A4, canvas =>
+        {
+            canvas.DrawText("Embedding images loaded from disk", 72, 50, heading);
+
+            // ── JPEG ─────────────────────────────────────────────────────────
+            canvas.DrawText("JPEG — raw bytes embedded, no re-encoding:", 72, 90, label);
+            float jpegDrawW = 200f;
+            float jpegDrawH = jpegDrawW * jpegH / jpegW;
+            canvas.DrawImage(jpegBytes, jpegW, jpegH, isJpeg: true,
+                x: 72, y: 105, width: jpegDrawW, height: jpegDrawH);
+            canvas.DrawText(Path.GetFileName(jpegPath), 72, 105 + jpegDrawH + 8, caption);
+
+            // ── PNG ──────────────────────────────────────────────────────────
+            float pngTop = 105 + jpegDrawH + 30;
+            canvas.DrawText("PNG — decoded to raw RGB24, FlateDecode compressed:", 72, pngTop, label);
+            float pngDrawW = 200f;
+            float pngDrawH = pngDrawW * pngH / pngW;
+            canvas.DrawImage(pngRgb, pngW, pngH, isJpeg: false,
+                x: 72, y: pngTop + 15, width: pngDrawW, height: pngDrawH);
+            canvas.DrawText(Path.GetFileName(pngPath), 72, pngTop + 15 + pngDrawH + 8, caption);
+
+            // ── side-by-side at fixed size ────────────────────────────────────
+            float sxTop = pngTop + 15 + pngDrawH + 30;
+            canvas.DrawText("Both images scaled to 120 × 80 pt, side-by-side:", 72, sxTop, label);
+            canvas.DrawImage(jpegBytes, jpegW, jpegH, isJpeg: true,
+                x: 72,  y: sxTop + 15, width: 120, height: 80);
+            canvas.DrawImage(pngRgb,   pngW,  pngH,  isJpeg: false,
+                x: 210, y: sxTop + 15, width: 120, height: 80);
+        })
+        .Save(Out(name, version));
+}
+
+// Load a JPEG file — raw bytes go straight into the PDF; scan SOF marker for dimensions.
+static (byte[] data, int width, int height) LoadJpeg(string path)
+{
+    byte[] data = File.ReadAllBytes(path);
+    for (int i = 0; i < data.Length - 8; i++)
+    {
+        if (data[i] == 0xFF && (data[i + 1] == 0xC0 || data[i + 1] == 0xC2))
+        {
+            int h = (data[i + 5] << 8) | data[i + 6];
+            int w = (data[i + 7] << 8) | data[i + 8];
+            return (data, w, h);
+        }
+    }
+    throw new InvalidDataException($"JPEG SOF marker not found in {path}");
+}
+
+// Decode a PNG file to raw RGB24 bytes using the built-in .NET PNG decoder.
+// PdfCanvas.DrawImage(isJpeg: false) accepts raw RGB24 and compresses with FlateDecode.
+static (byte[] rgb, int width, int height) LoadPngAsRgb(string path)
+{
+    // System.Drawing is available in net6+ via System.Drawing.Common on Windows,
+    // or via Majorsilence.Drawing.Common (SkiaSharp-backed) on Linux/macOS.
+    // Here we parse the PNG ourselves to stay zero-dependency in this example.
+    byte[] png = File.ReadAllBytes(path);
+
+    // Read IHDR: width at byte 16, height at byte 20
+    if (png.Length < 33 || png[1] != 'P' || png[2] != 'N' || png[3] != 'G')
+        throw new InvalidDataException("Not a valid PNG file");
+    int w = (png[16] << 24) | (png[17] << 16) | (png[18] << 8) | png[19];
+    int h = (png[20] << 24) | (png[21] << 16) | (png[22] << 8) | png[23];
+    int bitDepth  = png[24];
+    int colorType = png[25]; // 2=RGB, 6=RGBA
+    if (bitDepth != 8 || (colorType != 2 && colorType != 6))
+        throw new NotSupportedException($"Only 8-bit RGB/RGBA PNG supported (got bitDepth={bitDepth} colorType={colorType})");
+
+    // Collect IDAT chunks
+    var idat = new System.Collections.Generic.List<byte>();
+    int pos = 8;
+    while (pos + 12 <= png.Length)
+    {
+        int len  = (png[pos] << 24) | (png[pos+1] << 16) | (png[pos+2] << 8) | png[pos+3];
+        string ct = System.Text.Encoding.ASCII.GetString(png, pos + 4, 4);
+        if (ct == "IDAT") idat.AddRange(new ArraySegment<byte>(png, pos + 8, len));
+        if (ct == "IEND") break;
+        pos += 12 + len;
+    }
+
+    // Decompress and unfilter
+    byte[] compressed = idat.ToArray();
+    byte[] raw = DecompressZlib(compressed);
+    int stride = colorType == 6 ? w * 4 : w * 3;
+    var rgb = new byte[w * h * 3];
+    var prev = new byte[stride];
+    int outIdx = 0;
+    for (int row = 0; row < h; row++)
+    {
+        int rowStart = row * (stride + 1);
+        byte filter = raw[rowStart];
+        var cur = new byte[stride];
+        Array.Copy(raw, rowStart + 1, cur, 0, stride);
+        ApplyPngFilter(filter, cur, prev, colorType == 6 ? 4 : 3);
+        int channels = colorType == 6 ? 4 : 3;
+        for (int x = 0; x < w; x++)
+        {
+            rgb[outIdx++] = cur[x * channels];
+            rgb[outIdx++] = cur[x * channels + 1];
+            rgb[outIdx++] = cur[x * channels + 2];
+        }
+        prev = cur;
+    }
+    return (rgb, w, h);
+}
+
+static byte[] DecompressZlib(byte[] data)
+{
+    // skip 2-byte zlib header
+    using var ms  = new MemoryStream(data, 2, data.Length - 2);
+    using var ds  = new System.IO.Compression.DeflateStream(ms, System.IO.Compression.CompressionMode.Decompress);
+    using var out_ = new MemoryStream();
+    ds.CopyTo(out_);
+    return out_.ToArray();
+}
+
+static void ApplyPngFilter(byte filter, byte[] cur, byte[] prev, int bpp)
+{
+    switch (filter)
+    {
+        case 1: // Sub
+            for (int i = bpp; i < cur.Length; i++)
+                cur[i] = (byte)(cur[i] + cur[i - bpp]);
+            break;
+        case 2: // Up
+            for (int i = 0; i < cur.Length; i++)
+                cur[i] = (byte)(cur[i] + prev[i]);
+            break;
+        case 3: // Average
+            for (int i = 0; i < cur.Length; i++)
+            {
+                byte a = i >= bpp ? cur[i - bpp] : (byte)0;
+                cur[i] = (byte)(cur[i] + (a + prev[i]) / 2);
+            }
+            break;
+        case 4: // Paeth
+            for (int i = 0; i < cur.Length; i++)
+            {
+                byte a = i >= bpp ? cur[i - bpp] : (byte)0;
+                byte b = prev[i];
+                byte c = i >= bpp ? prev[i - bpp] : (byte)0;
+                cur[i] = (byte)(cur[i] + PaethPredictor(a, b, c));
+            }
+            break;
+        // case 0: None — no change
+    }
+}
+
+static byte PaethPredictor(byte a, byte b, byte c)
+{
+    int p = a + b - c;
+    int pa = Math.Abs(p - a), pb = Math.Abs(p - b), pc = Math.Abs(p - c);
+    return pa <= pb && pa <= pc ? a : pb <= pc ? b : c;
 }
 
 // ── utility ───────────────────────────────────────────────────────────────────
