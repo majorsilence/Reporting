@@ -56,9 +56,10 @@ namespace Majorsilence.Pdf.Tests
         public void PdfSecurity_Protect_DefaultsToAllPermissions()
         {
             var sec = PdfSecurity.Protect("user123");
-            Assert.That(sec.UserPassword,  Is.EqualTo("user123"));
-            Assert.That(sec.OwnerPassword, Is.EqualTo("user123")); // owner defaults to user
-            Assert.That(sec.Permissions,   Is.EqualTo(PdfPermissions.All));
+            Assert.That(sec.UserPassword,      Is.EqualTo("user123"));
+            Assert.That(sec.OwnerPassword,     Is.EqualTo("user123")); // owner defaults to user
+            Assert.That(sec.Permissions,       Is.EqualTo(PdfPermissions.All));
+            Assert.That(sec.EncryptionVersion, Is.EqualTo(PdfEncryptionVersion.AES256));
         }
 
         [Test]
@@ -89,7 +90,7 @@ namespace Majorsilence.Pdf.Tests
         // ── encrypted PDF structure ───────────────────────────────────────────
 
         [Test]
-        public void WithSecurity_Pdf14_ContainsEncryptDict()
+        public void WithSecurity_Default_UsesAES256()
         {
             byte[] pdf = MakePdf(doc =>
                 doc.WithSecurity(PdfSecurity.Protect("test")));
@@ -98,7 +99,27 @@ namespace Majorsilence.Pdf.Tests
             Assert.That(text, Does.Contain("/Encrypt"));
             Assert.That(text, Does.Contain("/Standard"));
             Assert.That(text, Does.Contain("/StmF"));
+            Assert.That(text, Does.Contain("/AESV3"));
+            Assert.That(text, Does.Contain("/R 6"));
+            Assert.That(text, Does.Contain("/V 5"));
+            Assert.That(text, Does.Contain("/OE <"));
+            Assert.That(text, Does.Contain("/UE <"));
+            Assert.That(text, Does.Contain("/Perms <"));
+        }
+
+        [Test]
+        public void WithSecurity_AES128_UsesRevision4()
+        {
+            byte[] pdf = MakePdf(doc =>
+                doc.WithSecurity(PdfSecurity.Protect("test")
+                                            .WithEncryptionVersion(PdfEncryptionVersion.AES128)));
+
+            string text = Encoding.Latin1.GetString(pdf);
             Assert.That(text, Does.Contain("/AESV2"));
+            Assert.That(text, Does.Contain("/R 4"));
+            Assert.That(text, Does.Contain("/V 4"));
+            Assert.That(text, Does.Not.Contain("/OE"));
+            Assert.That(text, Does.Not.Contain("/UE"));
         }
 
         [Test]

@@ -4,7 +4,7 @@
     <TargetFrameworks>netstandard2.0;net6.0;net8.0;net10.0</TargetFrameworks>
     <AssemblyTitle>Majorsilence PDF Security</AssemblyTitle>
     <PackageId>Majorsilence.Pdf.Security</PackageId>
-    <Description>Optional security extension for Majorsilence.Pdf. Adds AES-128 password protection, permission flags, and PKCS#7 digital signatures.</Description>
+    <Description>Optional security extension for Majorsilence.Pdf. Adds AES-256 (PDF 2.0, R=6) and AES-128 (R=4) password protection, permission flags, and PKCS#7 digital signatures.</Description>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <IsPackable>true</IsPackable>
     <Nullable>enable</Nullable>

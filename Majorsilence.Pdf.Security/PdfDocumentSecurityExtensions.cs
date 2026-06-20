@@ -15,7 +15,10 @@ namespace Majorsilence.Pdf.Security
     public static class PdfDocumentSecurityExtensions
     {
         /// <summary>
-        /// Encrypt the document with AES-128 (Standard Security Handler Revision 4).
+        /// Encrypt the document.  Defaults to AES-256 (PDF 2.0, Revision 6); call
+        /// <see cref="PdfSecurity.WithEncryptionVersion"/> with
+        /// <see cref="PdfEncryptionVersion.AES128"/> to select AES-128 (Revision 4)
+        /// for broader viewer compatibility.
         /// Pass <c>null</c> to remove any previously configured encryption.
         /// </summary>
         public static PdfDocument WithSecurity(this PdfDocument doc, PdfSecurity? security)
@@ -36,28 +39,35 @@ namespace Majorsilence.Pdf.Security
 
         // ── bridge implementations ────────────────────────────────────────────
 
-        // Adapts PdfEncryption to IStreamEncryptor.
         private sealed class EncryptionProvider : IStreamEncryptor
         {
             private readonly PdfSecurity _security;
-            private PdfEncryption?       _enc;
+            private PdfEncryption?   _enc4;
+            private PdfEncryptionR6? _enc6;
 
             internal EncryptionProvider(PdfSecurity security) { _security = security; }
 
-            public void Initialize(byte[] fileId) =>
-                _enc = PdfEncryption.Create(_security, fileId);
+            public void Initialize(byte[] fileId)
+            {
+                if (_security.EncryptionVersion == PdfEncryptionVersion.AES256)
+                    _enc6 = PdfEncryptionR6.Create(_security);
+                else
+                    _enc4 = PdfEncryption.Create(_security, fileId);
+            }
 
             public byte[] EncryptStream(int objNum, int genNum, byte[] data) =>
-                _enc!.EncryptStream(objNum, genNum, data);
+                _enc6 != null ? _enc6.EncryptStream(objNum, genNum, data)
+                              : _enc4!.EncryptStream(objNum, genNum, data);
 
             public string EncryptPdfString(int objNum, int genNum, byte[] rawBytes) =>
-                _enc!.EncryptPdfString(objNum, genNum, rawBytes);
+                _enc6 != null ? _enc6.EncryptPdfString(objNum, genNum, rawBytes)
+                              : _enc4!.EncryptPdfString(objNum, genNum, rawBytes);
 
             public byte[] BuildEncryptDict() =>
-                _enc!.BuildEncryptDict();
+                _enc6 != null ? _enc6.BuildEncryptDict()
+                              : _enc4!.BuildEncryptDict();
         }
 
-        // Adapts PdfSigner to ISignatureHandler.
         private sealed class SignatureHandlerAdapter : ISignatureHandler
         {
             private readonly PdfSignatureOptions _opts;
