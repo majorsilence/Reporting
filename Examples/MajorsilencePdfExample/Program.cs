@@ -53,6 +53,7 @@ RunExample("12_unicode",            UnicodeExample);
 RunExample("13_password_protected", PasswordProtectedExample);
 RunExample("14_signed",            SignedExample);
 RunExample("15_rtl_text",          RightToLeftExample);
+RunExample("16_pdf_merge",         PdfMergeExample);
 
 Console.WriteLine($"\nAll PDFs written to: {outputDir}");
 
@@ -1190,6 +1191,87 @@ static void DrawPieSlice(PdfCanvas canvas, float cx, float cy, float r,
         pts.Add(((float)(cx + r * Math.Cos(a)), (float)(cy + r * Math.Sin(a))));
     }
     canvas.DrawPolygon(pts, ShapeStyle.Filled(color).WithStroke(PdfColor.White, 0.5f));
+}
+
+// ── example 16: PDF merge ────────────────────────────────────────────────────
+
+static void PdfMergeExample(string name, FontRegistry fonts, PdfVersion version)
+{
+    var title  = TextStyle.Default.WithFamily("LiberationSans").WithSize(28).WithBold();
+    var sub    = TextStyle.Default.WithFamily("LiberationSans").WithSize(14);
+    var body   = TextStyle.Default.WithFamily("LiberationSans").WithSize(11);
+    var pageNr = TextStyle.Default.WithFamily("LiberationSans").WithSize(9)
+                     .WithColor(new PdfColor(120, 120, 120))
+                     .WithAlignment(TextAlignment.Right);
+
+    // ── source A: cover + intro (2 pages) ────────────────────────────────────
+    byte[] sourceA = PdfDocument.Create()
+        .WithVersion(version)
+        .WithFontRegistry(fonts)
+        .AddPage(PageSizes.A4, canvas =>
+        {
+            canvas.DrawRectangle(0, 0, 595, 842,
+                ShapeStyle.Filled(new PdfColor(30, 80, 160)));
+            canvas.DrawText("Quarterly Report",        72, 280, title.WithColor(PdfColor.White).WithSize(36));
+            canvas.DrawText("Q2 2026  —  Example Corp", 72, 330, sub.WithColor(new PdfColor(200, 220, 255)));
+        })
+        .AddPage(PageSizes.A4, canvas =>
+        {
+            canvas.DrawText("Introduction", 72, 72, title.WithSize(22));
+            canvas.DrawLine(72, 98, 523, 98, StrokeStyle.Default.WithColor(new PdfColor(30, 80, 160)).WithWidth(1.5f));
+            canvas.DrawText("This document was assembled by PdfMerger from two independently", 72, 120, body);
+            canvas.DrawText("generated source PDFs, each produced with PdfDocument.", 72, 138, body);
+            canvas.DrawText("Source A · Page 2", 523, 800, pageNr);
+        })
+        .ToBytes();
+
+    // ── source B: two content pages ──────────────────────────────────────────
+    byte[] sourceB = PdfDocument.Create()
+        .WithVersion(version)
+        .WithFontRegistry(fonts)
+        .AddPage(PageSizes.A4, canvas =>
+        {
+            canvas.DrawText("Financial Summary", 72, 72, title.WithSize(22));
+            canvas.DrawLine(72, 98, 523, 98, StrokeStyle.Default.WithColor(new PdfColor(30, 80, 160)).WithWidth(1.5f));
+
+            float y = 130;
+            void Row(string label, string value, bool highlight = false)
+            {
+                var c = highlight ? new PdfColor(30, 80, 160) : PdfColor.Black;
+                canvas.DrawText(label, 72,  y, body.WithColor(c));
+                canvas.DrawText(value, 450, y, body.WithAlignment(TextAlignment.Right).WithColor(c));
+                y += 22;
+            }
+
+            Row("Revenue",             "$4 200 000");
+            Row("Cost of Goods Sold",  "$1 800 000");
+            Row("Gross Profit",        "$2 400 000", highlight: true);
+            Row("Operating Expenses",  "$  900 000");
+            Row("Net Income",          "$1 500 000", highlight: true);
+            canvas.DrawText("Source B · Page 1", 523, 800, pageNr);
+        })
+        .AddPage(PageSizes.A4, canvas =>
+        {
+            canvas.DrawText("Notes", 72, 72, title.WithSize(22));
+            canvas.DrawLine(72, 98, 523, 98, StrokeStyle.Default.WithColor(new PdfColor(30, 80, 160)).WithWidth(1.5f));
+            canvas.DrawText("• Figures are illustrative only.", 72, 130, body);
+            canvas.DrawText("• Assembled with Majorsilence.Pdf PdfMerger.", 72, 154, body);
+            canvas.DrawText("Source B · Page 2", 523, 800, pageNr);
+        })
+        .ToBytes();
+
+    // ── merge A + B into a single 4-page document ─────────────────────────────
+    byte[] merged = new PdfMerger()
+        .Add(sourceA)
+        .Add(sourceB)
+        .WithTitle("Quarterly Report Q2 2026")
+        .WithAuthor("Example Corp")
+        .WithSubject("Financial Summary")
+        .WithCreator("Majorsilence.Pdf PdfMerger")
+        .Merge();
+
+    // PdfMerger output is always PDF 1.4; name the file by source version.
+    File.WriteAllBytes(Out(name, version), merged);
 }
 
 // ── utility ───────────────────────────────────────────────────────────────────
