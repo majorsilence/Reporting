@@ -21,5 +21,13 @@ namespace Majorsilence.Pdf.Internal
         // sigPlaceholderBytes  – the byte[] previously returned by BuildPlaceholder()
         // sigBodyOffset        – position in ms where those bytes begin
         void Fixup(MemoryStream ms, byte[] sigPlaceholderBytes, long sigBodyOffset);
+
+        // Optional visible signature appearance.
+        // When null  → invisible widget (/Rect [0 0 0 0], no /AP).
+        // When set   → visible widget with /Rect and an appearance Form XObject.
+        //   X, Y     – top-left origin coordinates (PdfCanvas convention)
+        //   Width, Height – size of the appearance box in points
+        //   SignerName – optional text to show inside the appearance box
+        (float X, float Y, float Width, float Height, string? SignerName)? VisibleAppearance { get; }
     }
 }

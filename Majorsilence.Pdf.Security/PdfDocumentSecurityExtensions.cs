@@ -12,7 +12,7 @@ namespace Majorsilence.Pdf.Security
     /// Extension methods that add password protection and digital-signature support
     /// to <see cref="PdfDocument"/>.  Requires a reference to Majorsilence.Pdf.Security.
     /// </summary>
-    public static class PdfDocumentSecurityExtensions
+    public static partial class PdfDocumentSecurityExtensions
     {
         /// <summary>
         /// Encrypt the document.  Defaults to AES-256 (PDF 2.0, Revision 6) and
@@ -83,6 +83,13 @@ namespace Majorsilence.Pdf.Security
 
             public void Fixup(MemoryStream ms, byte[] placeholderBytes, long bodyOffset) =>
                 PdfSigner.Fixup(ms, placeholderBytes, bodyOffset, _opts);
+
+            public (float X, float Y, float Width, float Height, string? SignerName)? VisibleAppearance =>
+                _opts.AppearanceRect.HasValue
+                    ? (_opts.AppearanceRect.Value.X, _opts.AppearanceRect.Value.Y,
+                       _opts.AppearanceRect.Value.Width, _opts.AppearanceRect.Value.Height,
+                       _opts.SignerName)
+                    : ((float, float, float, float, string?)?)null;
         }
     }
 }

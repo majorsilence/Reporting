@@ -26,10 +26,14 @@ namespace Majorsilence.Pdf
     /// </example>
     public sealed class ShapeStyle
     {
-        public PdfColor? FillColor   { get; private set; }
-        public PdfColor? StrokeColor { get; private set; }
-        public float     StrokeWidth { get; private set; } = 1f;
-        public LineStyle LineStyle   { get; private set; } = LineStyle.Solid;
+        public PdfColor? FillColor    { get; private set; }
+        public PdfColor? StrokeColor  { get; private set; }
+        public float     StrokeWidth  { get; private set; } = 1f;
+        public LineStyle LineStyle    { get; private set; } = LineStyle.Solid;
+        /// <summary>Fill opacity: 0.0 = fully transparent, 1.0 = fully opaque (default).</summary>
+        public float     FillOpacity   { get; private set; } = 1f;
+        /// <summary>Stroke opacity: 0.0 = fully transparent, 1.0 = fully opaque (default).</summary>
+        public float     StrokeOpacity { get; private set; } = 1f;
 
         private ShapeStyle() { }
 
@@ -65,6 +69,14 @@ namespace Majorsilence.Pdf
         public ShapeStyle WithLineStyle(LineStyle style) { var s = Clone(); s.LineStyle   = style;           return s; }
         public ShapeStyle Dashed()  => WithLineStyle(LineStyle.Dashed);
         public ShapeStyle Dotted()  => WithLineStyle(LineStyle.Dotted);
+        /// <summary>Set the fill opacity (0 = transparent, 1 = opaque).</summary>
+        public ShapeStyle WithFillOpacity(float opacity)
+        { var s = Clone(); s.FillOpacity   = opacity < 0f ? 0f : opacity > 1f ? 1f : opacity; return s; }
+        /// <summary>Set the stroke opacity (0 = transparent, 1 = opaque).</summary>
+        public ShapeStyle WithStrokeOpacity(float opacity)
+        { var s = Clone(); s.StrokeOpacity = opacity < 0f ? 0f : opacity > 1f ? 1f : opacity; return s; }
+        /// <summary>Set both fill and stroke opacity to the same value.</summary>
+        public ShapeStyle WithOpacity(float opacity) => WithFillOpacity(opacity).WithStrokeOpacity(opacity);
 
         // ── queries ───────────────────────────────────────────────────────────
 

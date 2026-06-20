@@ -242,6 +242,101 @@ namespace Majorsilence.Pdf
             return this;
         }
 
+        // ── text box (multi-line wrapping) ────────────────────────────────────
+
+        /// <summary>
+        /// Draw <paramref name="text"/> wrapped inside a box whose top-left corner is
+        /// (<paramref name="x"/>, <paramref name="y"/>), limited to <paramref name="width"/> and
+        /// <paramref name="height"/> in points.  Lines are broken at word boundaries; explicit '\n'
+        /// characters force a new line.  The method respects <see cref="TextStyle.Alignment"/>.
+        /// </summary>
+        /// <param name="lineSpacing">
+        /// Line-height multiplier relative to font size (default 1.2 = 20 % leading).
+        /// </param>
+        /// <returns>
+        /// The index of the first character of <paramref name="text"/> that did not fit, or
+        /// <c>text.Length</c> when all text was rendered.  Use this to paginate overflow.
+        /// </returns>
+        public int DrawTextBox(string text, float x, float y, float width, float height,
+                               TextStyle? style = null, float lineSpacing = 1.2f)
+        {
+            if (string.IsNullOrEmpty(text)) return 0;
+            style ??= TextStyle.Default;
+
+            float lineHeight = style.FontSize * lineSpacing;
+            float curY       = y + style.FontSize; // first baseline = top + ascent
+            int   pos        = 0;
+
+            while (pos < text.Length)
+            {
+                if (curY > y + height) break; // next baseline would be outside the box
+
+                int lineEnd = BreakTextLine(text, pos, width, style);
+
+                // Text to draw: strip trailing spaces (but not embedded newlines)
+                int drawEnd = lineEnd;
+                if (drawEnd > pos && text[drawEnd - 1] == '\n') drawEnd--;
+                string line = text.Substring(pos, drawEnd - pos).TrimEnd(' ');
+
+                if (line.Length > 0)
+                {
+                    float drawX = style.Alignment == TextAlignment.Right  ? x + width
+                                : style.Alignment == TextAlignment.Center ? x + width / 2f
+                                : x;
+                    DrawText(line, drawX, curY, style);
+                }
+
+                pos   = lineEnd;
+                curY += lineHeight;
+            }
+
+            return pos;
+        }
+
+        /// <summary>
+        /// Returns the approximate height in points needed to render <paramref name="text"/>
+        /// in a box of the given <paramref name="width"/> with the given style.
+        /// </summary>
+        public float MeasureTextBoxHeight(string text, float width, TextStyle? style = null,
+                                          float lineSpacing = 1.2f)
+        {
+            if (string.IsNullOrEmpty(text)) return 0;
+            style ??= TextStyle.Default;
+            float lineHeight = style.FontSize * lineSpacing;
+            int lines = 0;
+            int pos   = 0;
+            while (pos < text.Length)
+            {
+                pos = BreakTextLine(text, pos, width, style);
+                lines++;
+            }
+            return lines == 0 ? 0 : style.FontSize + (lines - 1) * lineHeight;
+        }
+
+        // Returns the exclusive end index of the first line of text starting at `start`
+        // that fits within `maxWidth` points.  Hard '\n' characters always terminate a line.
+        private int BreakTextLine(string text, int start, float maxWidth, TextStyle style)
+        {
+            int   pos       = start;
+            int   lastBreak = -1; // position after last whitespace break
+            float lineW     = 0f;
+
+            while (pos < text.Length)
+            {
+                char c = text[pos];
+                if (c == '\n') { pos++; break; } // consume the newline and stop
+
+                float cw = MeasureTextWidth(c.ToString(), style);
+                if (lineW + cw > maxWidth && pos > start)
+                    return lastBreak >= start ? lastBreak : pos; // word-break or char-break
+
+                lineW += cw;
+                pos++;
+                if (c == ' ') lastBreak = pos; // break opportunity is AFTER the space
+            }
+            return pos;
+        }
+
         // Reverse Unicode code points (not UTF-16 chars) so surrogate pairs stay intact.
         private static string ReverseCodePoints(string text)
         {
@@ -338,9 +433,12 @@ namespace Majorsilence.Pdf
         public PdfCanvas DrawLine(float x1, float y1, float x2, float y2, StrokeStyle? style = null)
         {
             style ??= StrokeStyle.Default;
+            bool wrap = NeedsWrap(style);
+            if (wrap) Content.Append("q\n");
             AppendStrokeState(style);
             Content.Append($"{F(x1)} {F(PdfY(y1))} m {F(x2)} {F(PdfY(y2))} l S\n");
             ResetDash();
+            if (wrap) Content.Append("Q\n");
             return this;
         }
 
@@ -350,11 +448,14 @@ namespace Majorsilence.Pdf
         public PdfCanvas DrawRectangle(float x, float y, float width, float height, ShapeStyle? style = null)
         {
             style ??= ShapeStyle.Stroked(PdfColor.Black);
+            bool wrap = NeedsWrap(style);
+            if (wrap) Content.Append("q\n");
             AppendShapeState(style);
             float pdfY = PdfY(y + height); // bottom edge in PDF coords
             Content.Append($"{F(x)} {F(pdfY)} {F(width)} {F(height)} re\n");
             AppendPaintOp(style);
             ResetDash();
+            if (wrap) Content.Append("Q\n");
             return this;
         }
 
@@ -364,6 +465,8 @@ namespace Majorsilence.Pdf
         public PdfCanvas DrawEllipse(float x, float y, float width, float height, ShapeStyle? style = null)
         {
             style ??= ShapeStyle.Stroked(PdfColor.Black);
+            bool wrap = NeedsWrap(style);
+            if (wrap) Content.Append("q\n");
             AppendShapeState(style);
 
             float cx = x + width / 2f;
@@ -381,6 +484,7 @@ namespace Majorsilence.Pdf
             sb.Append($"{F(cx - rx)}   {F(cy + k * ry)} {F(cx - k * rx)} {F(cy + ry)} {F(cx)} {F(cy + ry)} c\n");
             AppendPaintOp(style);
             ResetDash();
+            if (wrap) Content.Append("Q\n");
             return this;
         }
 
@@ -391,6 +495,8 @@ namespace Majorsilence.Pdf
         {
             if (points == null || points.Count < 2) return this;
             style ??= ShapeStyle.Stroked(PdfColor.Black);
+            bool wrap = NeedsWrap(style);
+            if (wrap) Content.Append("q\n");
             AppendShapeState(style);
             var sb = Content;
             sb.Append($"{F(points[0].x)} {F(PdfY(points[0].y))} m\n");
@@ -399,6 +505,7 @@ namespace Majorsilence.Pdf
             sb.Append("h\n");
             AppendPaintOp(style);
             ResetDash();
+            if (wrap) Content.Append("Q\n");
             return this;
         }
 
@@ -411,6 +518,8 @@ namespace Majorsilence.Pdf
         {
             if (points == null || points.Count < 2) return this;
             style ??= StrokeStyle.Default;
+            bool wrap = NeedsWrap(style);
+            if (wrap) Content.Append("q\n");
             AppendStrokeState(style);
             var sb = Content;
             sb.Append($"{F(points[0].x)} {F(PdfY(points[0].y))} m\n");
@@ -438,6 +547,7 @@ namespace Majorsilence.Pdf
             }
             sb.Append("S\n");
             ResetDash();
+            if (wrap) Content.Append("Q\n");
             return this;
         }
 
@@ -458,6 +568,102 @@ namespace Majorsilence.Pdf
             sb.Append($"/{img.PdfName} Do\n");
             sb.Append("Q\n");
             return this;
+        }
+
+        // ── table ─────────────────────────────────────────────────────────────
+
+        /// <summary>
+        /// Render a <see cref="PdfTable"/> with its top-left corner at (<paramref name="x"/>,
+        /// <paramref name="y"/>).  Each cell's text is word-wrapped to fit its column.
+        /// </summary>
+        /// <param name="table">Table to render.</param>
+        /// <param name="x">Left edge in points.</param>
+        /// <param name="y">Top edge in points.</param>
+        /// <param name="tableHeight">
+        /// Output: actual rendered height in points (sum of all row heights + borders).
+        /// </param>
+        /// <returns>This canvas for fluent chaining.</returns>
+        public PdfCanvas DrawTable(PdfTable table, float x, float y, out float tableHeight)
+        {
+            if (table == null) throw new ArgumentNullException(nameof(table));
+
+            float pad = table.CellPadding;
+            float bw  = table.BorderColor.HasValue ? table.BorderWidth : 0f;
+
+            // Pre-compute row heights: max wrapped-text height across all cells in each row.
+            var rowHeights = new float[table.Rows.Count];
+            for (int ri = 0; ri < table.Rows.Count; ri++)
+            {
+                var row  = table.Rows[ri];
+                bool isHeader = ri == 0 && table.HeaderBackground.HasValue;
+                float maxH = 0f;
+                for (int ci = 0; ci < table.ColumnWidths.Length; ci++)
+                {
+                    var cell    = ci < row.Cells.Count ? row.Cells[ci] : null;
+                    string text = cell?.Text ?? "";
+                    var style   = cell?.Style ?? (isHeader ? table.HeaderTextStyle : table.CellTextStyle);
+                    float colW  = table.ColumnWidths[ci] - 2 * pad;
+                    if (colW <= 0) continue;
+                    float h = MeasureTextBoxHeight(text, colW, style);
+                    if (h < style.FontSize) h = style.FontSize; // minimum one line height
+                    if (h > maxH) maxH = h;
+                }
+                rowHeights[ri] = maxH + 2 * pad;
+            }
+
+            // Render rows top-to-bottom.
+            var borderStyle = table.BorderColor.HasValue
+                ? StrokeStyle.Default.WithColor(table.BorderColor.Value).WithWidth(bw)
+                : null;
+            float curY = y;
+
+            for (int ri = 0; ri < table.Rows.Count; ri++)
+            {
+                var   row      = table.Rows[ri];
+                bool  isHeader = ri == 0 && table.HeaderBackground.HasValue;
+                float rh       = rowHeights[ri];
+                float colX     = x;
+
+                for (int ci = 0; ci < table.ColumnWidths.Length; ci++)
+                {
+                    float cw   = table.ColumnWidths[ci];
+                    var   cell = ci < row.Cells.Count ? row.Cells[ci] : null;
+
+                    // Cell background
+                    PdfColor? bg = cell?.BackgroundColor
+                        ?? row.BackgroundColor
+                        ?? (isHeader ? table.HeaderBackground
+                            : (ri % 2 == 1 ? table.AlternateRowBackground : (PdfColor?)null));
+
+                    if (bg.HasValue)
+                        DrawRectangle(colX, curY, cw, rh, ShapeStyle.Filled(bg.Value));
+
+                    // Cell border
+                    if (borderStyle != null)
+                        DrawRectangle(colX, curY, cw, rh, ShapeStyle.Stroked(table.BorderColor!.Value, bw));
+
+                    // Cell text
+                    string txt  = cell?.Text ?? "";
+                    var    ts   = cell?.Style ?? (isHeader ? table.HeaderTextStyle : table.CellTextStyle);
+                    DrawTextBox(txt, colX + pad, curY + pad, cw - 2 * pad, rh - 2 * pad, ts);
+
+                    colX += cw;
+                }
+
+                curY += rh;
+            }
+
+            tableHeight = curY - y;
+            return this;
+        }
+
+        /// <summary>
+        /// Render a <see cref="PdfTable"/> with its top-left corner at (<paramref name="x"/>,
+        /// <paramref name="y"/>).  Fluent overload (discards the rendered height).
+        /// </summary>
+        public PdfCanvas DrawTable(PdfTable table, float x, float y)
+        {
+            float _; return DrawTable(table, x, y, out _);
         }
 
         // ── links and tooltips ────────────────────────────────────────────────
@@ -666,6 +872,11 @@ namespace Majorsilence.Pdf
         private void AppendStrokeState(StrokeStyle style)
         {
             var sb = Content;
+            if (style.Opacity < 0.9999f)
+            {
+                string gsName = _ser.GetOrAddExtGState(1f, style.Opacity);
+                sb.Append($"/{gsName} gs\n");
+            }
             sb.Append($"{F(style.Color.Rf)} {F(style.Color.Gf)} {F(style.Color.Bf)} RG\n");
             sb.Append($"{F(style.Width)} w\n");
             AppendDash(style.LineStyle);
@@ -674,6 +885,15 @@ namespace Majorsilence.Pdf
         private void AppendShapeState(ShapeStyle style)
         {
             var sb = Content;
+            bool hasFillOp   = style.HasFill   && style.FillOpacity   < 0.9999f;
+            bool hasStrokeOp = style.HasStroke && style.StrokeOpacity < 0.9999f;
+            if (hasFillOp || hasStrokeOp)
+            {
+                float fa = style.HasFill   ? style.FillOpacity   : 1f;
+                float sa = style.HasStroke ? style.StrokeOpacity : 1f;
+                string gsName = _ser.GetOrAddExtGState(fa, sa);
+                sb.Append($"/{gsName} gs\n");
+            }
             if (style.HasFill)
             {
                 var c = style.FillColor!.Value;
@@ -687,6 +907,12 @@ namespace Majorsilence.Pdf
                 AppendDash(style.LineStyle);
             }
         }
+
+        private static bool NeedsWrap(ShapeStyle style) =>
+            (style.HasFill && style.FillOpacity < 0.9999f) ||
+            (style.HasStroke && style.StrokeOpacity < 0.9999f);
+
+        private static bool NeedsWrap(StrokeStyle style) => style.Opacity < 0.9999f;
 
         private void AppendDash(LineStyle ls)
         {

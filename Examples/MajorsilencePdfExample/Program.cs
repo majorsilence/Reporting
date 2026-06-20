@@ -55,6 +55,12 @@ RunExample("14_signed",            SignedExample);
 RunExample("15_rtl_text",          RightToLeftExample);
 RunExample("16_pdf_merge",         PdfMergeExample);
 RunExample("17_images_from_disk",  ImagesFromDiskExample);
+RunExample("18_opacity",           OpacityExample);
+RunExample("19_text_wrapping",     TextWrappingExample);
+RunExample("20_table",             TableExample);
+RunExample("21_pdfa",              PdfAExample);
+RunExample("22_visible_signature", VisibleSignatureExample);
+RunExample("23_pubkey_encryption", PublicKeyEncryptionExample);
 
 Console.WriteLine($"\nAll PDFs written to: {outputDir}");
 
@@ -1456,6 +1462,441 @@ static byte PaethPredictor(byte a, byte b, byte c)
     int p = a + b - c;
     int pa = Math.Abs(p - a), pb = Math.Abs(p - b), pc = Math.Abs(p - c);
     return pa <= pb && pa <= pc ? a : pb <= pc ? b : c;
+}
+
+// ── example 18: opacity / transparency ──────────────────────────────────────
+
+static void OpacityExample(string name, FontRegistry fonts, PdfVersion version)
+{
+    var label = TextStyle.Default.WithFamily("LiberationSans").WithSize(10);
+    var heading = TextStyle.Default.WithFamily("LiberationSans").WithSize(18).WithBold();
+
+    PdfDocument.Create()
+        .WithVersion(version)
+        .WithTitle("Opacity / Transparency")
+        .WithFontRegistry(fonts)
+        .AddPage(PageSizes.A4, canvas =>
+        {
+            canvas.DrawText("Opacity & Transparency", 72, 50, heading);
+
+            // Fill opacity ramp
+            canvas.DrawText("Fill opacity: 1.0  →  0.1", 72, 90, label);
+            for (int i = 0; i < 10; i++)
+            {
+                float opacity = 1f - i * 0.09f;
+                canvas.DrawRectangle(72 + i * 46, 105, 40, 40,
+                    ShapeStyle.Filled(PdfColor.Blue).WithFillOpacity(opacity));
+            }
+
+            // Stroke opacity ramp
+            canvas.DrawText("Stroke opacity: 1.0  →  0.1", 72, 165, label);
+            for (int i = 0; i < 10; i++)
+            {
+                float opacity = 1f - i * 0.09f;
+                canvas.DrawRectangle(72 + i * 46, 180, 40, 40,
+                    ShapeStyle.Stroked(PdfColor.Red, 3f).WithStrokeOpacity(opacity));
+            }
+
+            // Overlapping shapes — fill transparency lets background show through
+            canvas.DrawText("Overlapping shapes with transparency:", 72, 245, label);
+            canvas.DrawRectangle(80, 260, 150, 100, ShapeStyle.Filled(PdfColor.Red));
+            canvas.DrawRectangle(155, 285, 150, 100,
+                ShapeStyle.Filled(PdfColor.Blue).WithFillOpacity(0.5f));
+            canvas.DrawEllipse(115, 320, 150, 80,
+                ShapeStyle.Filled(PdfColor.Green).WithFillOpacity(0.4f));
+
+            // Semi-transparent stroke over a filled background
+            canvas.DrawText("Semi-transparent stroke (50%) over solid fill:", 72, 395, label);
+            canvas.DrawRectangle(72, 410, 200, 60, ShapeStyle.Filled(PdfColor.Yellow));
+            canvas.DrawRectangle(72, 410, 200, 60,
+                ShapeStyle.Stroked(PdfColor.DarkGray, 6f).WithStrokeOpacity(0.5f));
+
+            // StrokeStyle opacity on lines
+            canvas.DrawText("Line opacity: StrokeStyle.WithOpacity()", 72, 500, label);
+            for (int i = 0; i < 10; i++)
+            {
+                float opacity = 1f - i * 0.09f;
+                canvas.DrawLine(72, 518 + i * 16, 450, 518 + i * 16,
+                    StrokeStyle.Default.WithWidth(4).WithColor(PdfColor.DarkGray)
+                                .WithOpacity(opacity));
+            }
+        })
+        .Save(Out(name, version));
+}
+
+// ── example 19: multi-line text wrapping ────────────────────────────────────
+
+static void TextWrappingExample(string name, FontRegistry fonts, PdfVersion version)
+{
+    const string loremIpsum =
+        "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor " +
+        "incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud " +
+        "exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure " +
+        "dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. " +
+        "Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt " +
+        "mollit anim id est laborum. " +
+        "Curabitur pretium tincidunt lacus. Nulla gravida orci a odio. Nullam varius, turpis " +
+        "molestie pretium placerat, arcu ante aliquet magna, sed tempus erat felis nec urna.\n\n" +
+        "Second paragraph: hard newlines (\\n) force a line break at any point, while words " +
+        "are always kept intact across soft wraps. The overflow index returned by DrawTextBox " +
+        "lets you continue the text on the next page.";
+
+    var heading = TextStyle.Default.WithFamily("LiberationSans").WithSize(14).WithBold();
+    var body    = TextStyle.Default.WithFamily("LiberationSans").WithSize(11);
+    var caption = TextStyle.Default.WithFamily("LiberationSans").WithSize(9)
+                      .WithColor(PdfColor.Gray).WithItalic();
+
+    PdfDocument.Create()
+        .WithVersion(version)
+        .WithTitle("Multi-Line Text Wrapping")
+        .WithFontRegistry(fonts)
+        .AddPage(PageSizes.A4, canvas =>
+        {
+            float y = 50;
+
+            // Left-aligned box
+            canvas.DrawText("Left-aligned (400 pt wide, 160 pt tall):", 72, y, heading);
+            y += 20;
+            canvas.DrawRectangle(72, y, 400, 160,
+                ShapeStyle.Stroked(PdfColor.LightGray, 0.5f));
+            int overflow = canvas.DrawTextBox(loremIpsum, 72, y, 400, 160, body);
+            y += 168;
+
+            if (overflow < loremIpsum.Length)
+            {
+                canvas.DrawText($"(text overflowed at index {overflow} — continues below)",
+                    72, y, caption);
+                y += 16;
+
+                // Continue the overflow in a second box
+                canvas.DrawText("Continued text (overflow):", 72, y, heading);
+                y += 20;
+                canvas.DrawRectangle(72, y, 400, 120,
+                    ShapeStyle.Stroked(PdfColor.LightGray, 0.5f));
+                canvas.DrawTextBox(loremIpsum.Substring(overflow), 72, y, 400, 120, body);
+                y += 128;
+            }
+
+            // Centre-aligned
+            y += 10;
+            canvas.DrawText("Centre-aligned (300 pt wide):", 72, y, heading);
+            y += 18;
+            canvas.DrawRectangle(72, y, 300, 80,
+                ShapeStyle.Stroked(PdfColor.LightGray, 0.5f));
+            canvas.DrawTextBox("Centre-aligned text box.\nSecond line is also centred.",
+                72, y, 300, 80,
+                body.WithAlignment(TextAlignment.Center));
+            y += 88;
+
+            // Right-aligned
+            canvas.DrawText("Right-aligned (300 pt wide):", 72, y, heading);
+            y += 18;
+            canvas.DrawRectangle(72, y, 300, 80,
+                ShapeStyle.Stroked(PdfColor.LightGray, 0.5f));
+            canvas.DrawTextBox("Right-aligned text box.\nAll lines snap to right edge.",
+                72, y, 300, 80,
+                body.WithAlignment(TextAlignment.Right));
+        })
+        .Save(Out(name, version));
+}
+
+// ── example 20: tables ───────────────────────────────────────────────────────
+
+static void TableExample(string name, FontRegistry fonts, PdfVersion version)
+{
+    var heading = TextStyle.Default.WithFamily("LiberationSans").WithSize(18).WithBold();
+    var caption = TextStyle.Default.WithFamily("LiberationSans").WithSize(9)
+                      .WithColor(PdfColor.Gray).WithItalic();
+
+    PdfDocument.Create()
+        .WithVersion(version)
+        .WithTitle("Table Example")
+        .WithFontRegistry(fonts)
+        .AddPage(PageSizes.A4, canvas =>
+        {
+            canvas.DrawText("Table Layout", 72, 40, heading);
+
+            // ── basic table ───────────────────────────────────────────────────
+            canvas.DrawText("Basic table with header and alternating rows:", 72, 76,
+                TextStyle.Default.WithFamily("LiberationSans").WithSize(10));
+
+            var productTable = new PdfTable(new float[] { 180, 80, 90, 90 })
+                .WithHeaderBackground(new PdfColor(26, 86, 160))
+                .WithAlternateRowBackground(new PdfColor(240, 245, 252))
+                .WithBorder(new PdfColor(200, 200, 200), 0.5f)
+                .WithCellPadding(5f)
+                .WithCellTextStyle(TextStyle.Default.WithFamily("LiberationSans").WithSize(10))
+                .WithHeaderTextStyle(
+                    TextStyle.Default.WithFamily("LiberationSans").WithSize(10)
+                                     .WithBold().WithColor(PdfColor.White));
+
+            productTable.AddRow("Product",          "Qty",    "Unit Price", "Total");
+            productTable.AddRow("PDF Library Pro",   "3",     "$400.00",   "$1 200.00");
+            productTable.AddRow("Report Designer",   "1",     "$250.00",   "$250.00");
+            productTable.AddRow("Integration Pack",  "2",     "$180.00",   "$360.00");
+            productTable.AddRow("Support (12 mo.)",  "1",     "$500.00",   "$500.00");
+            productTable.AddRow("",                   "",     "Total:",    "$2 310.00");
+
+            canvas.DrawTable(productTable, 72, 92, out float tableBottom);
+
+            // ── no-border table ───────────────────────────────────────────────
+            float y2 = 92 + tableBottom + 28;
+            canvas.DrawText("Table without borders (report style):", 72, y2,
+                TextStyle.Default.WithFamily("LiberationSans").WithSize(10));
+            y2 += 16;
+
+            var reportTable = new PdfTable(new float[] { 200, 100, 100 })
+                .WithNoBorder()
+                .WithHeaderBackground(new PdfColor(245, 245, 245))
+                .WithCellPadding(4f)
+                .WithCellTextStyle(TextStyle.Default.WithFamily("LiberationSans").WithSize(10))
+                .WithHeaderTextStyle(
+                    TextStyle.Default.WithFamily("LiberationSans").WithSize(10).WithBold());
+
+            reportTable.AddRow("Category",         "Revenue",  "Growth");
+            reportTable.AddRow("North America",     "$1.24M",   "+12%");
+            reportTable.AddRow("Europe",            "$0.89M",   "+8%");
+            reportTable.AddRow("Asia Pacific",      "$0.45M",   "+18%");
+            reportTable.AddRow("Other",             "$0.12M",   "+3%");
+
+            canvas.DrawTable(reportTable, 72, y2, out float table2Bottom);
+
+            // ── wrapped-cell table ────────────────────────────────────────────
+            float y3 = y2 + table2Bottom + 28;
+            canvas.DrawText("Table with wrapping cell text:", 72, y3,
+                TextStyle.Default.WithFamily("LiberationSans").WithSize(10));
+            y3 += 16;
+
+            var wrapTable = new PdfTable(new float[] { 120, 250, 70 })
+                .WithHeaderBackground(new PdfColor(80, 120, 180))
+                .WithBorder(new PdfColor(180, 180, 180), 0.5f)
+                .WithCellPadding(5f)
+                .WithCellTextStyle(TextStyle.Default.WithFamily("LiberationSans").WithSize(9))
+                .WithHeaderTextStyle(
+                    TextStyle.Default.WithFamily("LiberationSans").WithSize(9)
+                                     .WithBold().WithColor(PdfColor.White));
+
+            wrapTable.AddRow("Feature",      "Description",                                   "Status");
+            wrapTable.AddRow("DrawTextBox",  "Word-wrapped multi-line text with overflow index for pagination.", "Done");
+            wrapTable.AddRow("DrawTable",    "Table layout with header, alternating rows, and per-cell styles.", "Done");
+            wrapTable.AddRow("Opacity",      "ShapeStyle and StrokeStyle opacity via ExtGState /ca and /CA.",   "Done");
+            wrapTable.AddRow("PDF/A",        "XMP conformance claim + embedded ICC sRGB output intent.",         "Done");
+
+            canvas.DrawTable(wrapTable, 72, y3);
+        })
+        .Save(Out(name, version));
+}
+
+// ── example 21: PDF/A conformance ───────────────────────────────────────────
+// PDF/A documents cannot use standard Type1 fonts (Helvetica, Times, Courier).
+// All text must use embedded TrueType fonts from the FontRegistry.
+
+static void PdfAExample(string name, FontRegistry fonts, PdfVersion version)
+{
+    // PDF/A-2b requires embedded fonts — skip if registry has none.
+    if (!fonts.Contains("LiberationSans"))
+        throw new InvalidOperationException("LiberationSans not found — PDF/A requires embedded fonts");
+
+    var heading = TextStyle.Default.WithFamily("LiberationSans").WithSize(18).WithBold();
+    var body    = TextStyle.Default.WithFamily("LiberationSans").WithSize(11);
+    var mono    = TextStyle.Default.WithFamily("LiberationMono").WithSize(10);
+    var small   = TextStyle.Default.WithFamily("LiberationSans").WithSize(9)
+                      .WithColor(PdfColor.Gray).WithItalic();
+
+    // PDF/A-2b: based on PDF 1.7, Level B visual reproducibility.
+    // WithConformance() automatically sets version to PDF 1.7.
+    PdfDocument.Create()
+        .WithConformance(PdfConformance.PdfA2b)
+        .WithFontRegistry(fonts)
+        .WithTitle("PDF/A-2b Conformance Example")
+        .WithAuthor("Majorsilence.Pdf")
+        .WithSubject("PDF/A archival conformance demonstration")
+        .AddPage(PageSizes.A4, canvas =>
+        {
+            float y = 60;
+
+            canvas.DrawText("PDF/A-2b Conformance", 72, y, heading); y += 32;
+            canvas.DrawRectangle(72, y, PageSizes.A4.Width - 144, 2,
+                ShapeStyle.Filled(new PdfColor(26, 86, 160))); y += 16;
+
+            canvas.DrawText("This document claims PDF/A-2b (ISO 19005-2, Level B) conformance.", 72, y, body); y += 20;
+            canvas.DrawText("The output includes:", 72, y, body); y += 20;
+
+            void Bullet(string text)
+            {
+                canvas.DrawText("•  " + text, 88, y, body);
+                y += 18;
+            }
+
+            Bullet("XMP metadata stream with pdfaid:part=2 / pdfaid:conformance=B");
+            Bullet("Embedded sRGB ICC output intent (/GTS_PDFA1 subtype)");
+            Bullet("PDF 1.7 header (%PDF-1.7) — automatically set by WithConformance()");
+            Bullet("Embedded TrueType fonts — standard Type1 fonts are not permitted");
+            Bullet("No encryption — PDF/A and encryption are mutually exclusive");
+            y += 10;
+
+            canvas.DrawText("Conformance level variants:", 72, y, body.WithBold()); y += 20;
+
+            var levels = new[]
+            {
+                ("PdfA1b", "Based on PDF 1.4",  "Max compat; no transparency; widespread archival use"),
+                ("PdfA2b", "Based on PDF 1.7",  "Allows transparency; recommended for new archives"),
+                ("PdfA3b", "Based on PDF 1.7",  "Same as PDF/A-2b + supports embedded file attachments"),
+            };
+
+            foreach (var (level, basis, desc) in levels)
+            {
+                canvas.DrawText(level, 88, y, mono.WithBold());
+                canvas.DrawText(basis, 185, y, mono);
+                canvas.DrawText(desc,  290, y, TextStyle.Default.WithFamily("LiberationSans").WithSize(9));
+                y += 16;
+            }
+
+            y += 12;
+            canvas.DrawText("Usage:", 72, y, body.WithBold()); y += 18;
+            canvas.DrawText("PdfDocument.Create()", 88, y, mono); y += 14;
+            canvas.DrawText("    .WithConformance(PdfConformance.PdfA2b)", 88, y, mono); y += 14;
+            canvas.DrawText("    .WithFontRegistry(registry)  // embedded fonts required", 88, y, mono); y += 14;
+            canvas.DrawText("    .AddPage(...)", 88, y, mono); y += 14;
+            canvas.DrawText("    .Save(\"archive.pdf\");", 88, y, mono); y += 22;
+
+            canvas.DrawText("Note: use a PDF/A validator (e.g. veraPDF) to confirm full conformance.", 72, y, small);
+        })
+        .Save(Out(name, version));
+}
+
+// ── example 22: visible signature appearance ─────────────────────────────────
+
+static void VisibleSignatureExample(string name, FontRegistry fonts, PdfVersion version)
+{
+    using var cert = CreateSelfSignedCert();
+
+    var sigOpts = new PdfSignatureOptions(cert)
+        .WithReason("Document approved")
+        .WithSignerName("Jane Smith")
+        .WithLocation("Toronto, ON")
+        .WithAppearance(x: 72, y: 690, width: 220, height: 60);
+
+    var heading = TextStyle.Default.WithFamily("LiberationSans").WithSize(18).WithBold();
+    var body    = TextStyle.Default.WithFamily("LiberationSans").WithSize(11);
+    var small   = TextStyle.Default.WithFamily("LiberationSans").WithSize(9)
+                      .WithColor(PdfColor.Gray).WithItalic();
+
+    PdfDocument.Create()
+        .WithVersion(version)
+        .WithFontRegistry(fonts)
+        .WithTitle("Visible Signature Appearance")
+        .WithSignature(sigOpts)
+        .AddPage(PageSizes.A4, canvas =>
+        {
+            float y = 60;
+
+            canvas.DrawText("Visible Digital Signature", 72, y, heading); y += 32;
+            canvas.DrawText("This document contains a PKCS#7 digital signature with a visible", 72, y, body); y += 18;
+            canvas.DrawText("appearance box rendered at the bottom of the page.", 72, y, body); y += 18;
+            canvas.DrawText("The signature box shows a border, 'Digitally Signed', and the signer name.", 72, y, body); y += 30;
+
+            canvas.DrawText("Signature properties:", 72, y, body.WithBold()); y += 18;
+            canvas.DrawText("Signer:    Jane Smith",         88, y, body); y += 16;
+            canvas.DrawText("Reason:    Document approved",  88, y, body); y += 16;
+            canvas.DrawText("Location:  Toronto, ON",        88, y, body); y += 16;
+            canvas.DrawText("Algorithm: PKCS#7 / SHA-256 / adbe.pkcs7.detached", 88, y, body); y += 30;
+
+            canvas.DrawText("WithAppearance() usage:", 72, y, body.WithBold()); y += 18;
+            var mono = TextStyle.Default.WithFamily("LiberationMono").WithSize(10);
+            canvas.DrawText("new PdfSignatureOptions(cert)", 88, y, mono); y += 14;
+            canvas.DrawText("    .WithSignerName(\"Jane Smith\")", 88, y, mono); y += 14;
+            canvas.DrawText("    .WithReason(\"Document approved\")", 88, y, mono); y += 14;
+            canvas.DrawText("    .WithAppearance(x: 72, y: 690, width: 220, height: 60)", 88, y, mono); y += 28;
+
+            canvas.DrawText("The visible appearance box is placed below this text.", 72, y, body); y += 16;
+            canvas.DrawText("Open in a PDF viewer to see the signature panel.", 72, y, body);
+
+            // Draw a label arrow pointing to where the sig box will appear
+            canvas.DrawText("↓  Signature box appears here  ↓", 72, 670,
+                TextStyle.Default.WithFamily("LiberationSans").WithSize(10)
+                                 .WithColor(new PdfColor(26, 86, 160)));
+            canvas.DrawLine(72, 680, 292, 680,
+                StrokeStyle.Default.WithWidth(0.5f).WithColor(new PdfColor(26, 86, 160)).Dashed());
+        })
+        .Save(Out(name, version));
+}
+
+// ── example 23: certificate-based (public-key) encryption ───────────────────
+// Encrypts the PDF so only holders of the recipient X.509 certificate private
+// key can open it.  /Filter /Adobe.PubSec, V=4, AES-128.
+
+static void PublicKeyEncryptionExample(string name, FontRegistry fonts, PdfVersion version)
+{
+    // Use the same self-signed cert as both the signer and the sole recipient
+    // so the example can be run without an external key store.
+    // In production, supply your recipients' real public-key certificates.
+    using var recipientCert = CreateSelfSignedCertForEncryption();
+
+    var heading = TextStyle.Default.WithFamily("LiberationSans").WithSize(18).WithBold();
+    var body    = TextStyle.Default.WithFamily("LiberationSans").WithSize(11);
+    var mono    = TextStyle.Default.WithFamily("LiberationMono").WithSize(10);
+    var small   = TextStyle.Default.WithFamily("LiberationSans").WithSize(9)
+                      .WithColor(PdfColor.Gray).WithItalic();
+
+    var security = PdfPublicKeySecurity.ForRecipients(recipientCert)
+        .WithPermissions(PdfPermissions.Print | PdfPermissions.CopyText);
+
+    PdfDocument.Create()
+        .WithVersion(version)
+        .WithFontRegistry(fonts)
+        .WithTitle("Public-Key Encrypted PDF")
+        .WithPublicKeySecurity(security)
+        .AddPage(PageSizes.A4, canvas =>
+        {
+            float y = 60;
+
+            canvas.DrawText("Certificate-Based Encryption", 72, y, heading); y += 32;
+            canvas.DrawText("This document is encrypted with /Filter /Adobe.PubSec (V=4, AES-128).", 72, y, body); y += 20;
+            canvas.DrawText("Only holders of the designated recipient certificate's private key can open it.", 72, y, body); y += 30;
+
+            canvas.DrawText("How it works:", 72, y, body.WithBold()); y += 18;
+            void Bullet(string text) { canvas.DrawText("•  " + text, 88, y, body); y += 18; }
+
+            Bullet("A 20-byte random seed is generated per document");
+            Bullet("The seed is encrypted to each recipient via CMS EnvelopedData (RSA)");
+            Bullet("The file encryption key (FEK) = first 16 bytes of SHA-1(seed ∥ all blobs)");
+            Bullet("All streams and strings are AES-128-CBC encrypted with per-object keys");
+            y += 10;
+
+            canvas.DrawText("Usage:", 72, y, body.WithBold()); y += 18;
+            canvas.DrawText("var cert = new X509Certificate2(\"recipient.cer\");", 88, y, mono); y += 14;
+            canvas.DrawText("PdfDocument.Create()", 88, y, mono); y += 14;
+            canvas.DrawText("    .WithPublicKeySecurity(", 88, y, mono); y += 14;
+            canvas.DrawText("        PdfPublicKeySecurity.ForRecipients(cert))", 88, y, mono); y += 14;
+            canvas.DrawText("    .AddPage(...)", 88, y, mono); y += 14;
+            canvas.DrawText("    .Save(\"encrypted.pdf\");", 88, y, mono); y += 22;
+
+            canvas.DrawText("Multiple recipients are supported:", 72, y, body); y += 18;
+            canvas.DrawText("PdfPublicKeySecurity.ForRecipients(cert1, cert2, cert3)", 88, y, mono); y += 22;
+
+            canvas.DrawText("Note: this example uses a self-signed certificate generated at runtime.", 72, y, small); y += 14;
+            canvas.DrawText("In production supply real certificates from a trusted CA.", 72, y, small);
+        })
+        .Save(Out(name, version));
+}
+
+static X509Certificate2 CreateSelfSignedCertForEncryption()
+{
+    using var rsa = RSA.Create(2048);
+    var req = new CertificateRequest(
+        "CN=Majorsilence Example Recipient",
+        rsa,
+        HashAlgorithmName.SHA256,
+        RSASignaturePadding.Pkcs1);
+    req.CertificateExtensions.Add(new X509BasicConstraintsExtension(false, false, 0, false));
+    req.CertificateExtensions.Add(new X509KeyUsageExtension(
+        X509KeyUsageFlags.KeyEncipherment | X509KeyUsageFlags.DataEncipherment, false));
+    var cert = req.CreateSelfSigned(DateTimeOffset.UtcNow.AddMinutes(-5),
+        DateTimeOffset.UtcNow.AddYears(1));
+    var pfx = cert.Export(X509ContentType.Pfx);
+    return X509CertificateLoader.LoadPkcs12(pfx, (string?)null,
+        X509KeyStorageFlags.Exportable | X509KeyStorageFlags.PersistKeySet);
 }
 
 // ── utility ───────────────────────────────────────────────────────────────────
