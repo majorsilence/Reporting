@@ -143,13 +143,31 @@ namespace Majorsilence.Pdf.Security.Internal
 
         private static byte[] PreparePassword(string pw)
         {
-            // PDF 2.0 §7.6.4.3.3: UTF-8, max 127 bytes.
-            // Full SASLprep normalization (RFC 4013) is omitted; pure-ASCII passwords
-            // are unaffected by normalization.
-            byte[] bytes = Encoding.UTF8.GetBytes(pw ?? "");
+            if (string.IsNullOrEmpty(pw)) return new byte[0];
+
+            // PDF 2.0 §7.6.4.3.3: passwords are UTF-8, max 127 bytes.
+            // Apply NFKC normalization — the common-case subset of SASLprep (RFC 4013)
+            // that maps ligatures, fullwidth, and composed forms to canonical equivalents.
+            string normalized = pw.Normalize(NormalizationForm.FormKC);
+            byte[] bytes      = Encoding.UTF8.GetBytes(normalized);
             if (bytes.Length <= 127) return bytes;
-            var trimmed = new byte[127];
-            Buffer.BlockCopy(bytes, 0, trimmed, 0, 127);
+
+            // Scan forward to find the largest prefix ≤ 127 bytes that does not cut
+            // a multi-byte UTF-8 sequence mid-character.
+            int pos = 0;
+            while (pos < bytes.Length)
+            {
+                byte b = bytes[pos];
+                int seqLen = (b & 0x80) == 0x00 ? 1
+                           : (b & 0xE0) == 0xC0 ? 2
+                           : (b & 0xF0) == 0xE0 ? 3
+                           :                       4;
+                if (pos + seqLen > 127) break;
+                pos += seqLen;
+            }
+
+            var trimmed = new byte[pos];
+            Buffer.BlockCopy(bytes, 0, trimmed, 0, pos);
             return trimmed;
         }
 

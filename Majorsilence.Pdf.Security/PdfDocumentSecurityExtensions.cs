@@ -15,14 +15,18 @@ namespace Majorsilence.Pdf.Security
     public static class PdfDocumentSecurityExtensions
     {
         /// <summary>
-        /// Encrypt the document.  Defaults to AES-256 (PDF 2.0, Revision 6); call
+        /// Encrypt the document.  Defaults to AES-256 (PDF 2.0, Revision 6) and
+        /// automatically upgrades the document version to <see cref="PdfVersion.Pdf20"/>
+        /// so the output is spec-conformant; use
         /// <see cref="PdfSecurity.WithEncryptionVersion"/> with
         /// <see cref="PdfEncryptionVersion.AES128"/> to select AES-128 (Revision 4)
-        /// for broader viewer compatibility.
+        /// for broader viewer compatibility without changing the PDF version.
         /// Pass <c>null</c> to remove any previously configured encryption.
         /// </summary>
         public static PdfDocument WithSecurity(this PdfDocument doc, PdfSecurity? security)
         {
+            if (security?.EncryptionVersion == PdfEncryptionVersion.AES256)
+                doc.WithVersion(PdfVersion.Pdf20);
             doc.SetStreamEncryptor(security != null ? new EncryptionProvider(security) : null);
             return doc;
         }
