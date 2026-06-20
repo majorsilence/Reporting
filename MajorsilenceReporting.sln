@@ -68,10 +68,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Majorsilence.Reporting.UI.R
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebDesigner", "WebDesigner\WebDesigner.csproj", "{0D742DFC-A73D-474E-A373-EC11279E050B}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "RdlCri", "RdlCri", "{555B9B6A-312B-1E89-50E3-AA37F0A49AC6}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "RdlEngine", "RdlEngine", "{CFA7EE07-0BD9-C2E8-4BF1-99C79E990257}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Majorsilence.Pdf", "Majorsilence.Pdf\Majorsilence.Pdf.csproj", "{84166F72-B8BD-43EA-AE1D-1591211572C1}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Majorsilence.Pdf.Tests", "Majorsilence.Pdf.Tests\Majorsilence.Pdf.Tests.csproj", "{AF116EF6-496E-4F20-8F2D-B2195AD2130A}"

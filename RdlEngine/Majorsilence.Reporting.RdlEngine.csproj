@@ -82,7 +82,6 @@
 		</EmbeddedResource>
 	</ItemGroup>
 	<ItemGroup>
-		<PackageReference Include="iTextSharp.LGPLv2.Core" />
 		<PackageReference Include="SharpZipLib" />
 		<PackageReference Include="SkiaSharp" />
 

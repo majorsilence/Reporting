@@ -9,4 +9,8 @@
     <ProjectReference Include="..\..\Majorsilence.Pdf\Majorsilence.Pdf.csproj" />
     <ProjectReference Include="..\..\Majorsilence.Pdf.Security\Majorsilence.Pdf.Security.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <Content Include="sample_photo.jpg" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="sample_logo.png"  CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
 </Project>

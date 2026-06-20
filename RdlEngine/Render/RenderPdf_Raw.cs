@@ -176,6 +176,13 @@ namespace Majorsilence.Reporting.Rdl
 
             TextStyle baseStyle = ResolveFont(si);
 
+            // RenderBase.MeasureString wraps text using System.Drawing/SkiaSharp metrics, which
+            // can differ from Majorsilence.Pdf's embedded TrueType metrics.  Re-wrap here using
+            // the actual PDF font metrics so that text fits within cell boundaries.
+            float availableW = width - si.PaddingLeft - si.PaddingRight;
+            if (!bNoClip && availableW > 0)
+                sa = RewrapLines(sa, baseStyle, availableW);
+
             if (!si.BackgroundColor.IsEmpty && height > 0 && width > 0)
                 iAddFillRect(x, y, width, height, si.BackgroundColor);
 
@@ -272,6 +279,59 @@ namespace Majorsilence.Reporting.Rdl
 
             AddAnnotations(x, y, height, width, url, tooltip);
             iAddBorder(si, x, y, height, width);
+        }
+
+        // ── PDF-accurate text re-wrapping ─────────────────────────────────────
+
+        // RenderBase wraps text with System.Drawing metrics; we re-check each
+        // line against the actual PDF font metrics and split further if needed.
+        private string[] RewrapLines(string[] lines, TextStyle style, float maxWidth)
+        {
+            var result = new List<string>(lines.Length);
+            foreach (string line in lines)
+            {
+                if (string.IsNullOrEmpty(line))
+                {
+                    result.Add(line);
+                    continue;
+                }
+                if (_currentPage.MeasureTextWidth(line, style) <= maxWidth)
+                    result.Add(line);
+                else
+                    WrapLine(line, style, maxWidth, result);
+            }
+            return result.ToArray();
+        }
+
+        private void WrapLine(string text, TextStyle style, float maxWidth, List<string> output)
+        {
+            string[] words = text.Split(' ');
+            var current = new System.Text.StringBuilder();
+
+            foreach (string word in words)
+            {
+                if (current.Length == 0)
+                {
+                    current.Append(word);
+                }
+                else
+                {
+                    string candidate = current + " " + word;
+                    if (_currentPage.MeasureTextWidth(candidate, style) <= maxWidth)
+                    {
+                        current.Clear();
+                        current.Append(candidate);
+                    }
+                    else
+                    {
+                        output.Add(current.ToString());
+                        current.Clear();
+                        current.Append(word);
+                    }
+                }
+            }
+            if (current.Length > 0)
+                output.Add(current.ToString());
         }
 
         // ── font registry construction ────────────────────────────────────────
@@ -565,7 +625,7 @@ namespace Majorsilence.Reporting.Rdl
             {
                 using var ms  = new MemoryStream(data);
 #if DRAWINGCOMPAT
-                using var img = (Majorsilence.Drawing.Bitmap)Majorsilence.Drawing.Image.FromStream(ms);
+                using var img = new Majorsilence.Drawing.Bitmap(ms);
 #else
                 using var img = new Draw2.Bitmap(Draw2.Image.FromStream(ms));
 #endif
