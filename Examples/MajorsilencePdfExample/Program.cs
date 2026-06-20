@@ -1076,23 +1076,22 @@ static void RightToLeftExample(string name, FontRegistry fonts, PdfVersion versi
             "..", "..", "..", "..", "..",
             "Majorsilence.Drawing.Common", "Fonts"));
 
-    string? hebrewR = FindFont(Path.Combine(fontsDir, "NotoSansHebrew-Regular.ttf"),
-                                "/usr/share/fonts/truetype/noto/NotoSansHebrew-Regular.ttf");
-    string? hebrewB = FindFont(Path.Combine(fontsDir, "NotoSansHebrew-Bold.ttf"),
-                                "/usr/share/fonts/truetype/noto/NotoSansHebrew-Bold.ttf");
-    string? arabicR = FindFont(Path.Combine(fontsDir, "NotoSansArabic-Regular.ttf"),
-                                "/usr/share/fonts/truetype/noto/NotoSansArabic-Regular.ttf");
-    string? arabicB = FindFont(Path.Combine(fontsDir, "NotoSansArabic-Bold.ttf"),
-                                "/usr/share/fonts/truetype/noto/NotoSansArabic-Bold.ttf");
-
+    // Build a local registry from the bundled fonts dir.
+    // NotoSansHebrew / NotoSansArabic / NotoSansSymbols are all picked up by
+    // AddDirectory and then listed as fallbacks so glyphs missed by any primary
+    // font (including arrows in NotoSansHebrew and Arabic in LiberationSans labels)
+    // are covered automatically.
     var reg = new FontRegistry()
         .AddDirectory(fontsDir)
-        .AddFallback("NotoSans");
-    if (hebrewR != null) reg.AddFamily("NotoSansHebrew", regular: hebrewR, bold: hebrewB);
-    if (arabicR != null) reg.AddFamily("NotoSansArabic", regular: arabicR, bold: arabicB);
+        .AddFallback("NotoSans")
+        .AddFallback("NotoSansHebrew")
+        .AddFallback("NotoSansArabic")
+        .AddFallback("NotoSansSymbols");
 
-    string hebrewFamily = hebrewR != null ? "NotoSansHebrew" : "NotoSans";
-    string arabicFamily = arabicR != null ? "NotoSansArabic" : "NotoSans";
+    bool hasHebrew = reg.Contains("NotoSansHebrew");
+    bool hasArabic = reg.Contains("NotoSansArabic");
+    string hebrewFamily = hasHebrew ? "NotoSansHebrew" : "NotoSans";
+    string arabicFamily = hasArabic ? "NotoSansArabic" : "NotoSans";
 
     var rtlHebrew = TextStyle.Default.WithFamily(hebrewFamily).WithSize(16)
                         .WithRightToLeft().WithAlignment(TextAlignment.Right);

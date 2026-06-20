@@ -107,3 +107,19 @@ Source: https://github.com/googlefonts/noto-fonts
 License: SIL Open Font License 1.1 (see OFL-1.1.txt)
 
 Noto Sans Arabic covers the Arabic Unicode block (U+0600–U+06FF).
+
+---
+
+## Noto Sans Symbols
+
+Files: `NotoSansSymbols-*.ttf`
+
+```
+Copyright (c) 2010, 2012-2020, Google Inc.
+Copyright (c) 2015-2020, Google LLC.
+```
+
+Source: https://github.com/googlefonts/noto-fonts
+License: SIL Open Font License 1.1 (see OFL-1.1.txt)
+
+Noto Sans Symbols covers miscellaneous symbols, arrows, and other non-script Unicode blocks.
