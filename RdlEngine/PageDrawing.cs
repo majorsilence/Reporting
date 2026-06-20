@@ -808,13 +808,14 @@ namespace fyiReporting.RdlPrint
                 else if (pt.NoClip)	// request not to clip text
                 {
                     g.DrawString(pt.Text, drawFont, drawBrush, new PointF(r.Left, r.Top), drawFormat);
-                    //HighlightString(g, pt, new RectangleF(r.Left, r.Top, float.MaxValue, float.MaxValue),
-                    //    drawFont, drawFormat);
+                }
+                else if (si.LineHeight > 0)
+                {
+                    DrawStringWithLineHeight(g, pt.Text, drawFont, drawBrush, r2, drawFormat, si);
                 }
                 else
                 {
                     g.DrawString(pt.Text, drawFont, drawBrush, r2, drawFormat);
-                    //HighlightString(g, pt, r2, drawFont, drawFormat);
                 }
                 //if (SelectTool)
                 //{
@@ -831,6 +832,111 @@ namespace fyiReporting.RdlPrint
                 if (drawBrush != null)
                     drawBrush.Dispose();
             }
+        }
+
+		private void DrawStringWithLineHeight(Graphics g, string text, Font font, Brush brush, RectangleF r, StringFormat sf, StyleInfo si)
+        {
+            // Convert line height from points to current graphics units
+            float lineHeightUnits;
+            if (g.PageUnit == GraphicsUnit.Pixel)
+                lineHeightUnits = (si.LineHeight * g.DpiY) / 72f;
+            else
+                lineHeightUnits = si.LineHeight;
+
+            var wrappedLines = GetWrappedLines(g, text, font, r.Width);
+
+            // Calculate starting Y for vertical alignment
+            float totalHeight = wrappedLines.Count * lineHeightUnits;
+            float startY = r.Top;
+            switch (si.VerticalAlign)
+            {
+                case VerticalAlignEnum.Middle:
+                    startY = r.Top + (r.Height - totalHeight) / 2f;
+                    break;
+                case VerticalAlignEnum.Bottom:
+                    startY = r.Top + r.Height - totalHeight;
+                    break;
+                default:
+                    break;
+            }
+
+            StringFormat lineFormat = null;
+            try
+            {
+                lineFormat = (StringFormat)sf.Clone();
+                lineFormat.LineAlignment = StringAlignment.Near;
+                lineFormat.FormatFlags |= StringFormatFlags.NoWrap;
+
+                foreach (var line in wrappedLines)
+                {
+                    if (startY >= r.Bottom)
+                        break;
+                    var lineRect = new RectangleF(r.Left, startY, r.Width, lineHeightUnits);
+                    g.DrawString(line, font, brush, lineRect, lineFormat);
+                    startY += lineHeightUnits;
+                }
+            }
+            finally
+            {
+                if (lineFormat != null)
+                    lineFormat.Dispose();
+            }
+        }
+
+        private System.Collections.Generic.List<string> GetWrappedLines(Graphics g, string text, Font font, float width)
+        {
+            var result = new System.Collections.Generic.List<string>();
+            if (string.IsNullOrEmpty(text))
+                return result;
+
+            // Split by explicit newlines first
+            var paragraphs = text.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None);
+
+            StringFormat measureFormat = null;
+            try
+            {
+                measureFormat = new StringFormat(StringFormatFlags.NoWrap | StringFormatFlags.MeasureTrailingSpaces);
+
+                foreach (var para in paragraphs)
+                {
+                    if (para.Length == 0)
+                    {
+                        result.Add("");
+                        continue;
+                    }
+
+                    string[] words = para.Split(' ');
+                    var currentLine = new System.Text.StringBuilder();
+
+                    foreach (string word in words)
+                    {
+                        string candidate = currentLine.Length == 0 ? word : currentLine + " " + word;
+                        SizeF size = g.MeasureString(candidate, font, int.MaxValue, measureFormat);
+
+                        if (size.Width > width && currentLine.Length > 0)
+                        {
+                            result.Add(currentLine.ToString());
+                            currentLine.Clear();
+                            currentLine.Append(word);
+                        }
+                        else
+                        {
+                            if (currentLine.Length > 0)
+                                currentLine.Append(" ");
+                            currentLine.Append(word);
+                        }
+                    }
+
+                    if (currentLine.Length > 0)
+                        result.Add(currentLine.ToString());
+                }
+            }
+            finally
+            {
+                if (measureFormat != null)
+                    measureFormat.Dispose();
+            }
+            return result;
         }
 
     }

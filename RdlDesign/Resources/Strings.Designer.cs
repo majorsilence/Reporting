@@ -1260,6 +1260,15 @@ namespace Majorsilence.Reporting.RdlDesign.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Invalid Line Height.
+        /// </summary>
+        internal static string FontCtl_Show_InvalidLineHeight {
+            get {
+                return ResourceManager.GetString("FontCtl_Show_InvalidLineHeight", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Grid.
         /// </summary>
         internal static string GridCtl_Show_Grid {

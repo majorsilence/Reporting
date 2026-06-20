@@ -703,9 +703,11 @@ namespace Majorsilence.Reporting.Rdl
             {
                 string text = sa[i];
                 float textwidth = bf.GetWidthPoint(text, si.FontSize);
-                // Calculate the x positino
+                // Use LineHeight for line spacing if specified, otherwise use FontSize
+                float lineSpacing = si.LineHeight > 0 ? si.LineHeight : si.FontSize;
+                // Calculate the x position
                 float startX = x + si.PaddingLeft; // TODO: handle tb_rl
-                float startY = y + si.PaddingTop + (i * si.FontSize); // TODO: handle tb_rl
+                float startY = y + si.PaddingTop + (i * lineSpacing); // TODO: handle tb_rl
                 int align = 0;
                 if (si.WritingMode == WritingModeEnum.lr_tb)
                 {
@@ -744,17 +746,17 @@ namespace Majorsilence.Reporting.Rdl
 
                             // calculate the middle of the region
                             startY = y + si.PaddingTop + ((height - si.PaddingTop - si.PaddingBottom) / 2) -
-                                     (si.FontSize / 2);
+                                     (lineSpacing / 2);
                             // now go up or down depending on which line
                             if (sa.Length == 1)
                                 break;
                             if (sa.Length % 2 == 0) // even number
                             {
-                                startY = startY - (((sa.Length / 2) - i) * si.FontSize) + (si.FontSize / 2);
+                                startY = startY - (((sa.Length / 2) - i) * lineSpacing) + (lineSpacing / 2);
                             }
                             else
                             {
-                                startY = startY - (((sa.Length / 2) - i) * si.FontSize);
+                                startY = startY - (((sa.Length / 2) - i) * lineSpacing);
                             }
 
                             break;
@@ -762,7 +764,7 @@ namespace Majorsilence.Reporting.Rdl
                             if (height <= 0)
                                 break;
 
-                            startY = y + height - si.PaddingBottom - (si.FontSize * (sa.Length - i));
+                            startY = y + height - si.PaddingBottom - (lineSpacing * (sa.Length - i));
                             break;
                         case VerticalAlignEnum.Top:
                         default:
