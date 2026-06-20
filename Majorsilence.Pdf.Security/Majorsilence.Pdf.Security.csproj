@@ -10,6 +10,9 @@
     <Nullable>enable</Nullable>
     <PackageLicenseExpression>MIT OR Apache-2.0 OR BSD-3-Clause</PackageLicenseExpression>
   </PropertyGroup>
+  <PropertyGroup Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net6.0'))">
+    <IsAotCompatible>true</IsAotCompatible>
+  </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\Majorsilence.Pdf\Majorsilence.Pdf.csproj" />
     <PackageReference Include="System.Security.Cryptography.Pkcs" />
