@@ -1,18 +1,19 @@
-﻿using iTextSharp.text.pdf;
+// SPDX-License-Identifier: LGPL-2.1-or-later
+// Copyright (C) 2026 Peter Gill <peter@majorsilence.com>
+
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
+using Majorsilence.Pdf;
 
 namespace Majorsilence.Reporting.RdlCreator
 {
     /// <summary>
-    /// Programmatically create PDFs.
+    /// Programmatically creates multi-page PDF documents by composing RDL report pages
+    /// and merging the rendered PDFs using <see cref="PdfMerger"/>.
     /// </summary>
-    /// <remarks>Internally it is a combination of RDL and https://github.com/VahidN/iTextSharp.LGPLv2.Core</remarks>
     [XmlRoot(ElementName = "Report", Namespace = "http://schemas.microsoft.com/sqlserver/reporting/2005/01/reportdefinition")]
     public class Document
     {
@@ -36,9 +37,6 @@ namespace Majorsilence.Reporting.RdlCreator
         [XmlElement(ElementName = "DataSources")]
         public DataSources DataSources { get; set; }
 
-        //[XmlElement(ElementName = "Width")]
-        //public string Width { get; set; }
-
         [XmlElement(ElementName = "TopMargin")]
         public ReportItemSize TopMargin { get; set; }
 
@@ -51,67 +49,19 @@ namespace Majorsilence.Reporting.RdlCreator
         [XmlElement(ElementName = "BottomMargin")]
         public ReportItemSize BottomMargin { get; set; }
 
-
         public PageFooter PageFooter { get; set; }
 
-        public Document WithDescription(string description)
-        {
-            Description = description;
-            return this;
-        }
-        public Document WithAuthor(string author)
-        {
-            Author = author;
-            return this;
-        }
+        // ── fluent builder ────────────────────────────────────────────────────
 
-        public Document WithName(string name)
-        {
-            Name = name;
-            return this;
-        }
-
-        public Document WithPageHeight(string pageHeight)
-        {
-            PageHeight = pageHeight;
-            return this;
-        }
-
-        public Document WithPageWidth(string pageWidth)
-        {
-            PageWidth = pageWidth;
-            return this;
-        }
-
-        //public Document WithWidth(string width)
-        //{
-        //    Width = width;
-        //    return this;
-        //}
-
-        public Document WithTopMargin(string topMargin)
-        {
-            TopMargin = topMargin;
-            return this;
-        }
-
-        public Document WithLeftMargin(string leftMargin)
-        {
-            LeftMargin = leftMargin;
-            return this;
-        }
-
-        public Document WithRightMargin(string rightMargin)
-        {
-            RightMargin = rightMargin;
-            return this;
-        }
-
-        public Document WithBottomMargin(string bottomMargin)
-        {
-            BottomMargin = bottomMargin;
-            return this;
-        }
+        public Document WithDescription(string description) { Description = description; return this; }
+        public Document WithAuthor(string author)           { Author = author;           return this; }
+        public Document WithName(string name)               { Name = name;               return this; }
+        public Document WithPageHeight(string pageHeight)   { PageHeight = pageHeight;   return this; }
+        public Document WithPageWidth(string pageWidth)     { PageWidth = pageWidth;     return this; }
+        public Document WithTopMargin(string topMargin)     { TopMargin = topMargin;     return this; }
+        public Document WithLeftMargin(string leftMargin)   { LeftMargin = leftMargin;   return this; }
+        public Document WithRightMargin(string rightMargin) { RightMargin = rightMargin; return this; }
+        public Document WithBottomMargin(string botMargin)  { BottomMargin = botMargin;  return this; }
 
         public Document WithPage(Page page)
         {
@@ -127,24 +77,29 @@ namespace Majorsilence.Reporting.RdlCreator
             return this;
         }
 
-        public async Task<byte[]>Create()
+        // ── rendering ─────────────────────────────────────────────────────────
+
+        /// <summary>Renders all pages and returns the merged PDF as a byte array.</summary>
+        public async Task<byte[]> Create()
         {
             using var ms = new MemoryStream();
             await Create(ms);
             return ms.ToArray();
         }
 
+        /// <summary>Renders all pages and writes the merged PDF to <paramref name="output"/>.</summary>
         public async Task Create(Stream output)
         {
-            using var itextDocument = new iTextSharp.text.Document();
-            using var iTextCopy = new PdfCopy(itextDocument, output);
-            itextDocument.Open();
+            var merger = new PdfMerger()
+                .WithAuthor(Author)
+                .WithTitle(Name)
+                .WithSubject(Description)
+                .WithCreator("Majorsilence Reporting - RdlCreator");
 
             foreach (var page in Pages)
             {
-                var report = new Report();
-                report
-                    //.WithWidth(Width)
+                // Build the RDL report model for this page
+                var report = new Report()
                     .WithTopMargin(TopMargin)
                     .WithLeftMargin(LeftMargin)
                     .WithRightMargin(RightMargin)
@@ -153,31 +108,21 @@ namespace Majorsilence.Reporting.RdlCreator
                     .WithPageFooter(page.PageFooter)
                     .WithBody(page.Body);
 
-                var create = new RdlCreator.Create();
+                // Render via the RDL engine to a PDF byte stream
+                var create    = new RdlCreator.Create();
                 var fyiReport = await create.GenerateRdl(report);
-                using var ms = new Majorsilence.Reporting.Rdl.MemoryStreamGen();
+                using var ms  = new Majorsilence.Reporting.Rdl.MemoryStreamGen();
                 await fyiReport.RunGetData();
                 await fyiReport.RunRender(ms, Majorsilence.Reporting.Rdl.OutputPresentationType.PDF);
+
                 var pdf = ms.GetStream();
                 pdf.Position = 0;
-
-                using var reader = new PdfReader(pdf);
-                for (int i = 1; i <= reader.NumberOfPages; i++)
-                {
-                    iTextCopy.AddPage(iTextCopy.GetImportedPage(reader, i));
-                }
-                iTextCopy.FreeReader(reader);
-                reader.Close();
+                using var pagePdf = new MemoryStream();
+                await pdf.CopyToAsync(pagePdf);
+                merger.Add(pagePdf.ToArray());
             }
 
-            itextDocument.AddAuthor(Author);
-            itextDocument.AddCreationDate();
-            itextDocument.AddCreator("Majorsilence Reporting - RenderPdf_iTextSharp");
-            itextDocument.AddSubject(Description);
-            itextDocument.AddTitle(Name);
-            itextDocument.Close();
+            merger.Merge(output);
         }
-
-
     }
 }

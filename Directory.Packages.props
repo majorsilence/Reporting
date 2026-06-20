@@ -8,7 +8,6 @@
     <PackageVersion Include="BenchmarkDotNet" Version="0.15.8" />
     <PackageVersion Include="DocumentFormat.OpenXml" Version="3.2.0" />
     <PackageVersion Include="dotConnect.Express.for.PostgreSQL" Version="8.3.10" />
-    <PackageVersion Include="iTextSharp.LGPLv2.Core" Version="3.7.4" />
     <PackageVersion Include="Majorsilence.Reporting.RdlViewer" Version="5.0.18" />
     <PackageVersion Include="Majorsilence.Reporting.RdlEngine" Version="5.0.18" />
     <PackageVersion Include="Majorsilence.Reporting.RdlCri" Version="5.0.18" />

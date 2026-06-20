@@ -159,9 +159,6 @@ namespace Majorsilence.Reporting.Rdl
                 case OutputPresentationType.PDF:
                 case OutputPresentationType.RenderPdf_iTextSharp:
                 case OutputPresentationType.PDFOldStyle:
-                    ip = new RenderPdf_iTextSharp(this, sg);
-                    await _Report.Run(ip);
-                    break;
                 case OutputPresentationType.RenderPdf_Majorsilence:
                     ip = new RenderPdf_Raw(this, sg);
                     await _Report.Run(ip);
@@ -294,7 +291,7 @@ namespace Majorsilence.Reporting.Rdl
 			PageNumber = 1;		// reset page numbers
 			TotalPages = 1;
 
-            IPresent ip = new RenderPdf_iTextSharp(this, sg);
+            IPresent ip = new RenderPdf_Raw(this, sg);
          
 			try
 			{

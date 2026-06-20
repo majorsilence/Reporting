@@ -97,7 +97,7 @@ namespace Majorsilence.Reporting.RdlCreator.Tests
                 Assert.That(pdfDocument.Information.Author, Is.EqualTo("Test Author"));
                 Assert.That(pdfDocument.Information.Title, Is.EqualTo("Test Name"));
                 Assert.That(pdfDocument.Information.Subject, Is.EqualTo("Test Description"));
-                Assert.That(pdfDocument.Information.Creator, Is.EqualTo("Majorsilence Reporting - RenderPdf_iTextSharp"));
+                Assert.That(pdfDocument.Information.Creator, Is.EqualTo("Majorsilence Reporting - RdlCreator"));
                 Assert.That(text, Is.Not.Null);
                 Assert.That(pdfDocument.NumberOfPages, Is.EqualTo(2));
             });
