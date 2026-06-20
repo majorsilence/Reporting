@@ -7,6 +7,7 @@ namespace Majorsilence.Pdf.Security
 {
     /// <summary>
     /// Options for an invisible PKCS#7 detached digital signature embedded in the PDF.
+    /// All <c>With*</c> methods return a new instance (immutable builder pattern).
     /// </summary>
     /// <example>
     /// <code>
@@ -18,7 +19,8 @@ namespace Majorsilence.Pdf.Security
     /// PdfDocument.Create()
     ///     .WithSignature(new PdfSignatureOptions(cert)
     ///                        .WithReason("Approved")
-    ///                        .WithLocation("Toronto"))
+    ///                        .WithLocation("Toronto")
+    ///                        .WithTimestampAuthority("http://timestamp.digicert.com"))
     ///     .AddPage(PageSizes.A4, c => c.DrawText("Signed!", 72, 100))
     ///     .Save("signed.pdf");
     /// </code>
@@ -28,20 +30,75 @@ namespace Majorsilence.Pdf.Security
         /// <summary>Certificate (with private key) used to sign the document.</summary>
         public X509Certificate2 Certificate { get; }
         /// <summary>Reason for signing shown in viewer signature panel.</summary>
-        public string? Reason { get; private set; }
+        public string? Reason { get; }
         /// <summary>Signer name shown in viewer signature panel.</summary>
-        public string? SignerName { get; private set; }
+        public string? SignerName { get; }
         /// <summary>Signing location shown in viewer signature panel.</summary>
-        public string? Location { get; private set; }
+        public string? Location { get; }
+        /// <summary>
+        /// RFC 3161 timestamp authority URL.  When set, an authenticated timestamp
+        /// is embedded in the signature so it remains verifiable after the signing
+        /// certificate expires.  Null (default) skips timestamping.
+        /// </summary>
+        public string? TimestampAuthorityUrl { get; }
+
+        /// <summary>
+        /// Optional visible signature appearance rectangle in top-left coordinates
+        /// (matching PdfCanvas convention): (x, y, width, height) in points.
+        /// When null (the default) the widget is invisible (/Rect [0 0 0 0]).
+        /// Use <see cref="WithAppearance"/> to set.
+        /// </summary>
+        public (float X, float Y, float Width, float Height)? AppearanceRect { get; }
 
         public PdfSignatureOptions(X509Certificate2 certificate)
+            : this(certificate, null, null, null, null, null) { }
+
+        private PdfSignatureOptions(
+            X509Certificate2 certificate,
+            string? reason,
+            string? signerName,
+            string? location,
+            string? timestampAuthorityUrl,
+            (float X, float Y, float Width, float Height)? appearanceRect)
         {
-            Certificate = certificate
-                ?? throw new System.ArgumentNullException(nameof(certificate));
+            Certificate           = certificate ?? throw new System.ArgumentNullException(nameof(certificate));
+            Reason                = reason;
+            SignerName            = signerName;
+            Location              = location;
+            TimestampAuthorityUrl = timestampAuthorityUrl;
+            AppearanceRect        = appearanceRect;
         }
 
-        public PdfSignatureOptions WithReason(string reason)     { Reason     = reason;   return this; }
-        public PdfSignatureOptions WithSignerName(string name)   { SignerName = name;     return this; }
-        public PdfSignatureOptions WithLocation(string location) { Location   = location; return this; }
+        /// <summary>Return a copy with the given signing reason.</summary>
+        public PdfSignatureOptions WithReason(string reason)
+            => new PdfSignatureOptions(Certificate, reason, SignerName, Location, TimestampAuthorityUrl, AppearanceRect);
+
+        /// <summary>Return a copy with the given signer name.</summary>
+        public PdfSignatureOptions WithSignerName(string name)
+            => new PdfSignatureOptions(Certificate, Reason, name, Location, TimestampAuthorityUrl, AppearanceRect);
+
+        /// <summary>Return a copy with the given signing location.</summary>
+        public PdfSignatureOptions WithLocation(string location)
+            => new PdfSignatureOptions(Certificate, Reason, SignerName, location, TimestampAuthorityUrl, AppearanceRect);
+
+        /// <summary>
+        /// Return a copy that will request an RFC 3161 timestamp from <paramref name="url"/>
+        /// and embed it in the signature as an <c>id-aa-signatureTimeStampToken</c>
+        /// unsigned attribute.
+        /// </summary>
+        public PdfSignatureOptions WithTimestampAuthority(string url)
+            => new PdfSignatureOptions(Certificate, Reason, SignerName, Location, url, AppearanceRect);
+
+        /// <summary>
+        /// Return a copy with a visible signature appearance box.
+        /// Coordinates use top-left origin (same as PdfCanvas drawing methods).
+        /// </summary>
+        /// <param name="x">Left edge of the appearance box in points.</param>
+        /// <param name="y">Top edge of the appearance box in points.</param>
+        /// <param name="width">Width of the appearance box in points.</param>
+        /// <param name="height">Height of the appearance box in points.</param>
+        public PdfSignatureOptions WithAppearance(float x, float y, float width, float height)
+            => new PdfSignatureOptions(Certificate, Reason, SignerName, Location, TimestampAuthorityUrl,
+                (x, y, width, height));
     }
 }

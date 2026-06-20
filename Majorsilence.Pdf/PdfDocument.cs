@@ -35,7 +35,8 @@ namespace Majorsilence.Pdf
         private readonly FontCache _fontCache = new FontCache();
         private FontRegistry? _fontRegistry;
 
-        private PdfVersion _version = PdfVersion.Pdf14;
+        private PdfVersion    _version    = PdfVersion.Pdf14;
+        private PdfConformance _conformance = PdfConformance.None;
 
         private PdfDocument() { }
 
@@ -49,6 +50,27 @@ namespace Majorsilence.Pdf
         /// Defaults to <see cref="PdfVersion.Pdf14"/> for broadest compatibility.
         /// </summary>
         public PdfDocument WithVersion(PdfVersion version) { _version = version; return this; }
+
+        /// <summary>
+        /// Request PDF/A output conformance.  Setting any level other than
+        /// <see cref="PdfConformance.None"/> automatically upgrades the document version to
+        /// PDF 1.7 (for PDF/A-2b and PDF/A-3b) or PDF 1.4 (for PDF/A-1b), embeds an sRGB
+        /// ICC output intent, and extends the XMP metadata with the PDF/A conformance claim.
+        /// Only TrueType (embedded) fonts may be used; standard 14 fonts (Helvetica, Times,
+        /// Courier …) will raise an error when you attempt to draw text.
+        /// </summary>
+        public PdfDocument WithConformance(PdfConformance conformance)
+        {
+            _conformance = conformance;
+            // PDF/A-1b must not exceed PDF 1.4; PDF/A-2b and -3b require at least PDF 1.7.
+            if (conformance == PdfConformance.PdfA1b && _version > PdfVersion.Pdf14)
+                _version = PdfVersion.Pdf14;
+            else if (conformance == PdfConformance.PdfA2b || conformance == PdfConformance.PdfA3b)
+            {
+                if (_version < PdfVersion.Pdf17) _version = PdfVersion.Pdf17;
+            }
+            return this;
+        }
 
         // ── security hooks (called by Majorsilence.Pdf.Security extension methods) ─
 
@@ -128,6 +150,7 @@ namespace Majorsilence.Pdf
             if (stream == null) throw new ArgumentNullException(nameof(stream));
             _ser.SetMetadata(_author, _title, _subject, _creator);
             _ser.SetVersion(_version);
+            _ser.SetConformance(_conformance);
             _ser.Write(stream);
         }
 

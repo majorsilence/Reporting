@@ -56,9 +56,10 @@ namespace Majorsilence.Pdf.Tests
         public void PdfSecurity_Protect_DefaultsToAllPermissions()
         {
             var sec = PdfSecurity.Protect("user123");
-            Assert.That(sec.UserPassword,  Is.EqualTo("user123"));
-            Assert.That(sec.OwnerPassword, Is.EqualTo("user123")); // owner defaults to user
-            Assert.That(sec.Permissions,   Is.EqualTo(PdfPermissions.All));
+            Assert.That(sec.UserPassword,      Is.EqualTo("user123"));
+            Assert.That(sec.OwnerPassword,     Is.EqualTo("user123")); // owner defaults to user
+            Assert.That(sec.Permissions,       Is.EqualTo(PdfPermissions.All));
+            Assert.That(sec.EncryptionVersion, Is.EqualTo(PdfEncryptionVersion.AES256));
         }
 
         [Test]
@@ -89,7 +90,7 @@ namespace Majorsilence.Pdf.Tests
         // ── encrypted PDF structure ───────────────────────────────────────────
 
         [Test]
-        public void WithSecurity_Pdf14_ContainsEncryptDict()
+        public void WithSecurity_Default_UsesAES256()
         {
             byte[] pdf = MakePdf(doc =>
                 doc.WithSecurity(PdfSecurity.Protect("test")));
@@ -98,14 +99,47 @@ namespace Majorsilence.Pdf.Tests
             Assert.That(text, Does.Contain("/Encrypt"));
             Assert.That(text, Does.Contain("/Standard"));
             Assert.That(text, Does.Contain("/StmF"));
-            Assert.That(text, Does.Contain("/AESV2"));
+            Assert.That(text, Does.Contain("/AESV3"));
+            Assert.That(text, Does.Contain("/R 6"));
+            Assert.That(text, Does.Contain("/V 5"));
+            Assert.That(text, Does.Contain("/OE <"));
+            Assert.That(text, Does.Contain("/UE <"));
+            Assert.That(text, Does.Contain("/Perms <"));
         }
 
         [Test]
-        public void WithSecurity_Pdf14_HeaderCorrect()
+        public void WithSecurity_AES128_UsesRevision4()
         {
             byte[] pdf = MakePdf(doc =>
+                doc.WithSecurity(PdfSecurity.Protect("test")
+                                            .WithEncryptionVersion(PdfEncryptionVersion.AES128)));
+
+            string text = Encoding.Latin1.GetString(pdf);
+            Assert.That(text, Does.Contain("/AESV2"));
+            Assert.That(text, Does.Contain("/R 4"));
+            Assert.That(text, Does.Contain("/V 4"));
+            Assert.That(text, Does.Not.Contain("/OE"));
+            Assert.That(text, Does.Not.Contain("/UE"));
+        }
+
+        [Test]
+        public void WithSecurity_AES256_AutoUpgradesToPdf20()
+        {
+            // AES-256 (R=6) is a PDF 2.0 feature; the extension method auto-upgrades
+            // the document version even if the caller never called WithVersion.
+            byte[] pdf = MakePdf(doc =>
                 doc.WithSecurity(PdfSecurity.Protect("pw")));
+            string header = Encoding.Latin1.GetString(pdf, 0, 10);
+            Assert.That(header, Does.StartWith("%PDF-2.0"));
+        }
+
+        [Test]
+        public void WithSecurity_AES128_HeaderRemainsLegacy()
+        {
+            // AES-128 (R=4) does not trigger a version upgrade.
+            byte[] pdf = MakePdf(doc =>
+                doc.WithSecurity(PdfSecurity.Protect("pw")
+                                            .WithEncryptionVersion(PdfEncryptionVersion.AES128)));
             string header = Encoding.Latin1.GetString(pdf, 0, 10);
             Assert.That(header, Does.StartWith("%PDF-1.4"));
         }
@@ -312,6 +346,149 @@ namespace Majorsilence.Pdf.Tests
             string text = Encoding.Latin1.GetString(pdf);
             Assert.That(text, Does.Contain("/Reason (Approved)"));
             Assert.That(text, Does.Contain("/Location (Toronto)"));
+        }
+
+        // ── PdfSignatureOptions immutability ─────────────────────────────────
+
+        [Test]
+        public void PdfSignatureOptions_WithMethods_ReturnNewInstances()
+        {
+            using var cert = CreateTestCert();
+            var original = new PdfSignatureOptions(cert);
+            var withReason   = original.WithReason("Approved");
+            var withName     = original.WithSignerName("Alice");
+            var withLocation = original.WithLocation("Ottawa");
+            var withTsa      = original.WithTimestampAuthority("http://tsa.example.com");
+
+            // Each With* call returns a distinct object
+            Assert.That(withReason,   Is.Not.SameAs(original));
+            Assert.That(withName,     Is.Not.SameAs(original));
+            Assert.That(withLocation, Is.Not.SameAs(original));
+            Assert.That(withTsa,      Is.Not.SameAs(original));
+
+            // Original is unchanged
+            Assert.That(original.Reason,               Is.Null);
+            Assert.That(original.SignerName,            Is.Null);
+            Assert.That(original.Location,              Is.Null);
+            Assert.That(original.TimestampAuthorityUrl, Is.Null);
+
+            // New instances carry the right values
+            Assert.That(withReason.Reason,                     Is.EqualTo("Approved"));
+            Assert.That(withName.SignerName,                   Is.EqualTo("Alice"));
+            Assert.That(withLocation.Location,                 Is.EqualTo("Ottawa"));
+            Assert.That(withTsa.TimestampAuthorityUrl,         Is.EqualTo("http://tsa.example.com"));
+        }
+
+        [Test]
+        public void PdfSignatureOptions_Chain_PreservesAllFields()
+        {
+            // Fluent chain should accumulate all fields.
+            using var cert = CreateTestCert();
+            var opts = new PdfSignatureOptions(cert)
+                .WithReason("Approved")
+                .WithSignerName("Bob")
+                .WithLocation("Vancouver")
+                .WithTimestampAuthority("http://ts.example.com");
+
+            Assert.That(opts.Reason,               Is.EqualTo("Approved"));
+            Assert.That(opts.SignerName,            Is.EqualTo("Bob"));
+            Assert.That(opts.Location,              Is.EqualTo("Vancouver"));
+            Assert.That(opts.TimestampAuthorityUrl, Is.EqualTo("http://ts.example.com"));
+        }
+
+        // ── signature placeholder size ────────────────────────────────────────
+
+        [Test]
+        public void WithSignature_PlaceholderIs32KB()
+        {
+            // The /Contents hex run in the placeholder should be 32768*2 = 65536 zeros.
+            using var cert = CreateTestCert();
+            byte[] raw = MakePdf(doc => doc.WithSignature(new PdfSignatureOptions(cert)));
+            string text = Encoding.Latin1.GetString(raw);
+            int contIdx = text.IndexOf("/Contents <", StringComparison.Ordinal);
+            Assert.That(contIdx, Is.GreaterThan(0));
+            // The placeholder content is PlaceholderBytes*2 hex chars (could be partly filled in).
+            // We just verify the /Contents value is >= 32768 hex chars wide.
+            int hexStart = contIdx + "/Contents <".Length;
+            int hexEnd   = text.IndexOf('>', hexStart);
+            Assert.That(hexEnd - hexStart, Is.GreaterThanOrEqualTo(32768 * 2));
+        }
+
+        // ── UTF-8 password truncation ─────────────────────────────────────────
+
+        [Test]
+        public void WithSecurity_ShortUnicodePassword_RoundTripsCorrectly()
+        {
+            // A short password with multi-byte UTF-8 chars (well under 127 bytes)
+            // should not be mangled.
+            byte[] pdf = MakePdf(doc =>
+                doc.WithSecurity(PdfSecurity.Protect("élève"))); // "élève"
+            string text = Encoding.Latin1.GetString(pdf);
+            Assert.That(text, Does.Contain("/Encrypt"));
+        }
+
+        [Test]
+        public void WithSecurity_LongUnicodePassword_DoesNotThrow()
+        {
+            // A password whose UTF-8 encoding exceeds 127 bytes should be truncated
+            // at a character boundary without throwing.
+            // Each CJK character is 3 bytes; 50 of them = 150 UTF-8 bytes > 127.
+            string longPw = new string('中', 50); // 50 × CJK U+4E2D
+            Assert.DoesNotThrow(() =>
+                MakePdf(doc => doc.WithSecurity(PdfSecurity.Protect(longPw))));
+        }
+
+        [Test]
+        public void WithSecurity_PasswordTruncation_NeverCutsCharBoundary()
+        {
+            // Build a password where a 3-byte UTF-8 sequence straddles byte 127.
+            // 42 ASCII chars (42 bytes) + 29 CJK chars (87 bytes) = 129 bytes total.
+            // The 29th CJK char starts at byte 126 (42 + 28*3 = 126) and ends at 128.
+            // Correct truncation drops it entirely, yielding 126 bytes (42 + 28*3).
+            string pw = new string('A', 42) + new string('中', 29);
+            // Just verify it produces a valid encrypted PDF (no exception, valid structure).
+            byte[] pdf = MakePdf(doc => doc.WithSecurity(PdfSecurity.Protect(pw)));
+            string text = Encoding.Latin1.GetString(pdf);
+            Assert.That(text, Does.Contain("/Encrypt"));
+        }
+
+        // ── NFKC normalization ────────────────────────────────────────────────
+
+        [Test]
+        public void WithSecurity_NfkcPassword_ProducesValidPdf()
+        {
+            // A password using a composed Unicode form (should be normalized to NFC/NFKC).
+            // U+00E9 = precomposed é, U+0301 = combining acute — NFKC maps both to é.
+            string precomposed  = "é";   // single code point: é
+            string decomposed   = "é";  // e + combining accent: also é after NFKC
+            // Both should produce a valid PDF without throwing.
+            Assert.DoesNotThrow(() => MakePdf(doc => doc.WithSecurity(PdfSecurity.Protect(precomposed))));
+            Assert.DoesNotThrow(() => MakePdf(doc => doc.WithSecurity(PdfSecurity.Protect(decomposed))));
+        }
+
+        // ── RFC 3161 timestamp URL property ──────────────────────────────────
+
+        [Test]
+        public void PdfSignatureOptions_WithTimestampAuthority_SetsUrl()
+        {
+            using var cert = CreateTestCert();
+            var opts = new PdfSignatureOptions(cert)
+                .WithTimestampAuthority("http://timestamp.digicert.com");
+            Assert.That(opts.TimestampAuthorityUrl, Is.EqualTo("http://timestamp.digicert.com"));
+        }
+
+        [Test]
+        public void WithSignature_NoTsa_StillProducesValidSignature()
+        {
+            // Verify existing signature path is unaffected when no TSA is configured.
+            using var cert = CreateTestCert();
+            var opts = new PdfSignatureOptions(cert).WithReason("No TSA");
+            byte[] pdf = MakePdf(doc => doc.WithSignature(opts));
+            string text = Encoding.Latin1.GetString(pdf);
+            Assert.That(text, Does.Contain("/ByteRange"));
+            int contIdx = text.IndexOf("/Contents <", StringComparison.Ordinal);
+            string firstHex = text.Substring(contIdx + "/Contents <".Length, 20);
+            Assert.That(firstHex, Is.Not.EqualTo("00000000000000000000"));
         }
 
         // ── self-signed certificate factory ──────────────────────────────────

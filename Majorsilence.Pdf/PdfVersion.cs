@@ -9,6 +9,9 @@ namespace Majorsilence.Pdf
         /// <summary>PDF 1.4 — widest reader compatibility. Default.</summary>
         Pdf14 = 14,
 
+        /// <summary>PDF 1.7 (ISO 32000-1) — required for PDF/A-2b and PDF/A-3b conformance.</summary>
+        Pdf17 = 17,
+
         /// <summary>
         /// PDF 2.0 (ISO 32000-2).
         /// Differences from 1.4: <c>%PDF-2.0</c> header, an XMP metadata stream

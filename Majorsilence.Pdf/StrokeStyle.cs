@@ -19,6 +19,8 @@ namespace Majorsilence.Pdf
         public float     Width     { get; private set; } = 1f;
         public PdfColor  Color     { get; private set; } = PdfColor.Black;
         public LineStyle LineStyle { get; private set; } = LineStyle.Solid;
+        /// <summary>Stroke opacity: 0.0 = fully transparent, 1.0 = fully opaque (default).</summary>
+        public float     Opacity   { get; private set; } = 1f;
 
         private StrokeStyle() { }
 
@@ -33,5 +35,8 @@ namespace Majorsilence.Pdf
         public StrokeStyle Solid()                       { var s = Clone(); s.LineStyle = Pdf.LineStyle.Solid;  return s; }
         public StrokeStyle Dashed()                      { var s = Clone(); s.LineStyle = Pdf.LineStyle.Dashed; return s; }
         public StrokeStyle Dotted()                      { var s = Clone(); s.LineStyle = Pdf.LineStyle.Dotted; return s; }
+        /// <summary>Set stroke opacity (0 = transparent, 1 = opaque).</summary>
+        public StrokeStyle WithOpacity(float opacity)
+        { var s = Clone(); s.Opacity = opacity < 0f ? 0f : opacity > 1f ? 1f : opacity; return s; }
     }
 }

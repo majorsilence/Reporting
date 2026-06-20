@@ -70,12 +70,19 @@ namespace Majorsilence.Pdf.Internal
         private readonly Dictionary<string, ImageResource> _imageMap =
             new Dictionary<string, ImageResource>();
 
+        // ExtGState entries for opacity; key = "fillAlpha:strokeAlpha"
+        private readonly List<(string name, float fillAlpha, float strokeAlpha)> _extGStates =
+            new List<(string, float, float)>();
+        private readonly Dictionary<string, string> _extGStateMap =
+            new Dictionary<string, string>(StringComparer.Ordinal);
+
         private string _author  = "";
         private string _title   = "";
         private string _subject = "";
         private string _creator = "Majorsilence.Pdf";
 
-        private PdfVersion         _version   = PdfVersion.Pdf14;
+        private PdfVersion         _version     = PdfVersion.Pdf14;
+        private PdfConformance     _conformance = PdfConformance.None;
         private IStreamEncryptor?  _encryptor;
         private ISignatureHandler? _sigHandler;
 
@@ -85,6 +92,7 @@ namespace Majorsilence.Pdf.Internal
         { _author = author; _title = title; _subject = subject; _creator = creator; }
 
         internal void SetVersion(PdfVersion version) => _version = version;
+        internal void SetConformance(PdfConformance conformance) => _conformance = conformance;
         internal void SetEncryptor(IStreamEncryptor? enc) => _encryptor = enc;
         internal void SetSignatureHandler(ISignatureHandler? sig) => _sigHandler = sig;
 
@@ -141,6 +149,18 @@ namespace Majorsilence.Pdf.Internal
             return ir;
         }
 
+        // ── ExtGState management (opacity) ────────────────────────────────────
+
+        internal string GetOrAddExtGState(float fillAlpha, float strokeAlpha)
+        {
+            string key = fillAlpha.ToString("F4") + ":" + strokeAlpha.ToString("F4");
+            if (_extGStateMap.TryGetValue(key, out var name)) return name;
+            name = "GS" + (_extGStates.Count + 1);
+            _extGStates.Add((name, fillAlpha, strokeAlpha));
+            _extGStateMap[key] = name;
+            return name;
+        }
+
         // ── serialization ────────────────────────────────────────────────────
 
         internal void Write(Stream stream)
@@ -171,12 +191,24 @@ namespace Majorsilence.Pdf.Internal
         private void WriteToMemory(MemoryStream ms, byte[] fileId,
             ref byte[]? sigPlaceholderBytes, ref long sigBodyOffset)
         {
-            var  w       = new PdfWriter(ms);
-            bool isPdf20 = _version == PdfVersion.Pdf20;
-            bool hasEnc  = _encryptor != null;
-            bool hasSig  = _sigHandler != null;
+            var  w            = new PdfWriter(ms);
+            bool isPdf20      = _version == PdfVersion.Pdf20;
+            bool isPdfA       = _conformance != PdfConformance.None;
+            bool hasEnc       = _encryptor != null;
+            bool hasSig       = _sigHandler != null;
 
-            w.WriteLine(isPdf20 ? "%PDF-2.0" : "%PDF-1.4");
+            // PDF/A must not be encrypted (standard prohibits it).
+            if (isPdfA && hasEnc)
+                throw new InvalidOperationException(
+                    "PDF/A documents cannot be encrypted. Remove WithSecurity() or set conformance to None.");
+
+            string versionStr = _version switch
+            {
+                PdfVersion.Pdf20 => "%PDF-2.0",
+                PdfVersion.Pdf17 => "%PDF-1.7",
+                _                => "%PDF-1.4",
+            };
+            w.WriteLine(versionStr);
             w.WriteRaw(new byte[] { (byte)'%', 0xE2, 0xE3, 0xCF, 0xD3, (byte)'\n' });
 
             // Object numbering: list index i → PDF object number i+1.
@@ -190,12 +222,22 @@ namespace Majorsilence.Pdf.Internal
                 objects.Add(_encryptor!.BuildEncryptDict());
             }
 
-            // ── XMP metadata (PDF 2.0, never encrypted per spec) ──────────────
+            // ── XMP metadata (PDF 2.0 and PDF/A, never encrypted per spec) ──────
             int xmpObjNum = -1;
-            if (isPdf20)
+            if (isPdf20 || isPdfA)
             {
                 xmpObjNum = objects.Count + 1;
-                objects.Add(BuildXmpMetadataObj());
+                objects.Add(BuildXmpMetadataObj(_conformance));
+            }
+
+            // ── OutputIntents for PDF/A (sRGB ICC profile) ────────────────────
+            int outputIntentsObjNum = -1;
+            if (isPdfA)
+            {
+                int iccObjNum = objects.Count + 1;
+                objects.Add(BuildIccProfileObj(iccObjNum));
+                outputIntentsObjNum = objects.Count + 1;
+                objects.Add(BuildOutputIntentsObj(outputIntentsObjNum, iccObjNum));
             }
 
             // ── font objects ──────────────────────────────────────────────────
@@ -238,6 +280,11 @@ namespace Majorsilence.Pdf.Internal
             for (int ii = 0; ii < _images.Count; ii++)
                 imageResEntries.Append($"/{_images[ii].PdfName} {imageObjIdx[ii] + 1} 0 R ");
 
+            // ExtGState inline dicts (for opacity)
+            var extGStateStr = new StringBuilder();
+            foreach (var (gsName, fa, sa) in _extGStates)
+                extGStateStr.Append($"/{gsName} << /Type /ExtGState /ca {Fmt(fa)} /CA {Fmt(sa)} >> ");
+
             // ── page content streams + page dicts ─────────────────────────────
             var pageContentIdx = new int[_pages.Count];
             var pageDictIdx    = new int[_pages.Count];
@@ -257,11 +304,13 @@ namespace Majorsilence.Pdf.Internal
                 objects.Add(Concat(Latin1.GetBytes(hdrStr), streamData, Latin1.GetBytes("\nendstream")));
 
                 pageDictIdx[pi]   = objects.Count;
+                string extGStatePart = extGStateStr.Length > 0
+                    ? $" /ExtGState << {extGStateStr} >>" : "";
                 string pageDict =
                     $"<< /Type /Page /Parent 2 0 R\n" +
                     $"   /MediaBox [0 0 {Fmt(page.Width)} {Fmt(page.Height)}]\n" +
                     $"   /Contents {contentObjNum} 0 R\n" +
-                    $"   /Resources << /Font << {fontResEntries} >> /XObject << {imageResEntries} >> >>\n";
+                    $"   /Resources << /Font << {fontResEntries} >> /XObject << {imageResEntries} >>{extGStatePart} >>\n";
 
                 if (page.Annotations.Count > 0)
                 {
@@ -294,14 +343,27 @@ namespace Majorsilence.Pdf.Internal
                 sigPlaceholderBytes = spb;
                 objects.Add(spb);
 
-                sigWidgetObjNum = objects.Count + 1;
-                objects.Add(BuildSigWidgetObj(sigWidgetObjNum, sObjNum,
-                    _pages.Count > 0 ? pageDictIdx[0] + 1 : 1));
+                int pageObjNum = _pages.Count > 0 ? pageDictIdx[0] + 1 : 1;
+                var appearance = _sigHandler!.VisibleAppearance;
+                if (appearance.HasValue)
+                {
+                    int apObjNum = objects.Count + 1;
+                    objects.Add(BuildSigAppearanceObj(apObjNum, appearance.Value));
+                    sigWidgetObjNum = objects.Count + 1;
+                    objects.Add(BuildSigWidgetObjVisible(sigWidgetObjNum, sObjNum, pageObjNum,
+                        apObjNum, appearance.Value));
+                }
+                else
+                {
+                    sigWidgetObjNum = objects.Count + 1;
+                    objects.Add(BuildSigWidgetObj(sigWidgetObjNum, sObjNum, pageObjNum));
+                }
             }
 
             // ── catalog ───────────────────────────────────────────────────────
             string catalog = "<< /Type /Catalog /Pages 2 0 R";
             if (xmpObjNum > 0) catalog += $" /Metadata {xmpObjNum} 0 R";
+            if (outputIntentsObjNum > 0) catalog += $" /OutputIntents [{outputIntentsObjNum} 0 R]";
             if (hasSig) catalog += $" /AcroForm << /Fields [{sigWidgetObjNum} 0 R] /SigFlags 3 >>";
             catalog += " >>";
             objects[0] = Latin1.GetBytes(catalog);
@@ -551,7 +613,7 @@ namespace Majorsilence.Pdf.Internal
             return Concat(Latin1.GetBytes(hdr), data, Latin1.GetBytes("\nendstream"));
         }
 
-        private byte[] BuildXmpMetadataObj()
+        private byte[] BuildXmpMetadataObj(PdfConformance conformance = PdfConformance.None)
         {
             var x = new StringBuilder();
             x.Append("<?xpacket begin=\"\xEF\xBB\xBF\" id=\"W5M0MpCehiHzreSzNTczkc9d\"?>\n");
@@ -582,12 +644,162 @@ namespace Majorsilence.Pdf.Internal
                 x.Append("      <xmp:CreatorTool>");
                 x.Append(XmlEscape(_creator)); x.Append("</xmp:CreatorTool>\n");
             }
-            x.Append("    </rdf:Description>\n  </rdf:RDF>\n</x:xmpmeta>\n<?xpacket end=\"w\"?>");
+            x.Append("    </rdf:Description>\n");
+
+            // PDF/A conformance claim required by ISO 19005.
+            if (conformance != PdfConformance.None)
+            {
+                int part = conformance == PdfConformance.PdfA1b ? 1
+                         : conformance == PdfConformance.PdfA2b ? 2
+                         :                                        3;
+                x.Append("    <rdf:Description rdf:about=\"\"\n");
+                x.Append("      xmlns:pdfaid=\"http://www.aiim.org/pdfa/ns/id/\">\n");
+                x.Append($"      <pdfaid:part>{part}</pdfaid:part>\n");
+                x.Append("      <pdfaid:conformance>B</pdfaid:conformance>\n");
+                x.Append("    </rdf:Description>\n");
+            }
+
+            x.Append("  </rdf:RDF>\n</x:xmpmeta>\n<?xpacket end=\"w\"?>");
 
             // XMP is always unencrypted so external tools can read metadata.
             byte[] xmpUtf8 = System.Text.Encoding.UTF8.GetBytes(x.ToString());
             string hdr     = $"<< /Type /Metadata /Subtype /XML /Length {xmpUtf8.Length} >>\nstream\n";
             return Concat(Latin1.GetBytes(hdr), xmpUtf8, Latin1.GetBytes("\nendstream"));
+        }
+
+        // ── PDF/A ICC profile helpers ─────────────────────────────────────────
+
+        // Minimal sRGB ICC v2.1 display profile used for PDF/A OutputIntents.
+        // Values from IEC 61966-2-1 (HP/MS sRGB colour space).
+        private static byte[] BuildMinimalSrgbIccProfile()
+        {
+            // Profile layout: header(128) + tagCount(4) + tagDir(9×12) + data
+            const int tagCount = 9;
+            const int dataStart = 128 + 4 + tagCount * 12; // = 240
+
+            // Build tag data blobs
+            byte[] wtptData  = IccXyzTag(0x0000F6D6, 0x00010000, 0x0000D32D); // D50
+            byte[] rXyzData  = IccXyzTag(0x00006FA2, 0x000038F5, 0x00000248);
+            byte[] gXyzData  = IccXyzTag(0x000062F2, 0x0000B7CB, 0x000018CB);
+            byte[] bXyzData  = IccXyzTag(0x000024A0, 0x00000F75, 0x0000B7C9);
+            byte[] gammaData = new byte[] {
+                0x63,0x75,0x72,0x76, 0,0,0,0, 0,0,0,1, 0x02,0x33  // 'curv' + reserved + count=1 + 2.20 u8.8
+            };
+            byte[] descData  = IccDescTag("sRGB IEC61966-2.1");
+            byte[] cprtData  = IccTextTag("Public Domain");
+
+            // TRC tags share gammaData so they all point to the same offset
+            int wtptOff  = dataStart;
+            int rXyzOff  = wtptOff  + wtptData.Length;
+            int gXyzOff  = rXyzOff  + rXyzData.Length;
+            int bXyzOff  = gXyzOff  + gXyzData.Length;
+            int gammaOff = bXyzOff  + bXyzData.Length;
+            int descOff  = gammaOff + gammaData.Length;
+            int cprtOff  = descOff  + descData.Length;
+            int totalSize = cprtOff + cprtData.Length;
+
+            var buf = new byte[totalSize];
+
+            // Header
+            IccWI32(buf, 0, totalSize);
+            buf[4]=0x6C;buf[5]=0x63;buf[6]=0x6D;buf[7]=0x73;             // 'lcms'
+            IccWI32(buf, 8,  0x02100000);                                  // version 2.1.0
+            buf[12]=0x6D;buf[13]=0x6E;buf[14]=0x74;buf[15]=0x72;          // 'mntr'
+            buf[16]=0x52;buf[17]=0x47;buf[18]=0x42;buf[19]=0x20;          // 'RGB '
+            buf[20]=0x58;buf[21]=0x59;buf[22]=0x5A;buf[23]=0x20;          // 'XYZ '
+            IccWI16(buf, 24, 2026); IccWI16(buf, 26, 1); IccWI16(buf, 28, 1); // date
+            buf[36]=0x61;buf[37]=0x63;buf[38]=0x73;buf[39]=0x70;          // 'acsp'
+            IccWI32(buf, 64, 0);                                            // rendering intent: perceptual
+            IccWI32(buf, 68, 0x0000F6D6); IccWI32(buf, 72, 0x00010000); IccWI32(buf, 76, 0x0000D32D); // D50
+
+            // Tag count
+            IccWI32(buf, 128, tagCount);
+
+            // Tag directory entries
+            static void Dir(byte[] b, int off, int a, int b1, int b2, int b3, int dataOff, int dataLen)
+            {
+                b[off]=(byte)a; b[off+1]=(byte)b1; b[off+2]=(byte)b2; b[off+3]=(byte)b3;
+                IccWI32(b, off+4, dataOff); IccWI32(b, off+8, dataLen);
+            }
+            int d = 132;
+            Dir(buf, d,0x77,0x74,0x70,0x74, wtptOff,  wtptData.Length); d+=12; // wtpt
+            Dir(buf, d,0x72,0x58,0x59,0x5A, rXyzOff,  rXyzData.Length); d+=12; // rXYZ
+            Dir(buf, d,0x67,0x58,0x59,0x5A, gXyzOff,  gXyzData.Length); d+=12; // gXYZ
+            Dir(buf, d,0x62,0x58,0x59,0x5A, bXyzOff,  bXyzData.Length); d+=12; // bXYZ
+            Dir(buf, d,0x72,0x54,0x52,0x43, gammaOff, gammaData.Length); d+=12; // rTRC
+            Dir(buf, d,0x67,0x54,0x52,0x43, gammaOff, gammaData.Length); d+=12; // gTRC (shares data)
+            Dir(buf, d,0x62,0x54,0x52,0x43, gammaOff, gammaData.Length); d+=12; // bTRC (shares data)
+            Dir(buf, d,0x64,0x65,0x73,0x63, descOff,  descData.Length);  d+=12; // desc
+            Dir(buf, d,0x63,0x70,0x72,0x74, cprtOff,  cprtData.Length);         // cprt
+
+            // Tag data
+            Buffer.BlockCopy(wtptData,  0, buf, wtptOff,  wtptData.Length);
+            Buffer.BlockCopy(rXyzData,  0, buf, rXyzOff,  rXyzData.Length);
+            Buffer.BlockCopy(gXyzData,  0, buf, gXyzOff,  gXyzData.Length);
+            Buffer.BlockCopy(bXyzData,  0, buf, bXyzOff,  bXyzData.Length);
+            Buffer.BlockCopy(gammaData, 0, buf, gammaOff, gammaData.Length);
+            Buffer.BlockCopy(descData,  0, buf, descOff,  descData.Length);
+            Buffer.BlockCopy(cprtData,  0, buf, cprtOff,  cprtData.Length);
+
+            return buf;
+        }
+
+        private static byte[] IccXyzTag(int x, int y, int z)
+        {
+            // 'XYZ ' type: 4 sig + 4 reserved + 3×s15Fixed16
+            var b = new byte[20];
+            b[0]=0x58;b[1]=0x59;b[2]=0x5A;b[3]=0x20;
+            IccWI32(b, 8, x); IccWI32(b, 12, y); IccWI32(b, 16, z);
+            return b;
+        }
+
+        private static byte[] IccDescTag(string text)
+        {
+            // ICC v2 textDescriptionType
+            byte[] ascii = Encoding.ASCII.GetBytes(text + "\0");
+            int len = 8 + 4 + ascii.Length + 4 + 4 + 2 + 1 + 67;
+            var b = new byte[len];
+            b[0]=0x64;b[1]=0x65;b[2]=0x73;b[3]=0x63; // 'desc'
+            IccWI32(b, 8, ascii.Length);
+            Buffer.BlockCopy(ascii, 0, b, 12, ascii.Length);
+            // rest zero (Unicode count=0, Mac count=0, padding)
+            return b;
+        }
+
+        private static byte[] IccTextTag(string text)
+        {
+            // ICC v2 textType: 'text' + reserved + ASCII
+            byte[] ascii = Encoding.ASCII.GetBytes(text + "\0");
+            var b = new byte[8 + ascii.Length];
+            b[0]=0x74;b[1]=0x65;b[2]=0x78;b[3]=0x74; // 'text'
+            Buffer.BlockCopy(ascii, 0, b, 8, ascii.Length);
+            return b;
+        }
+
+        private static void IccWI32(byte[] buf, int off, int v)
+        {
+            buf[off]=(byte)(v>>24); buf[off+1]=(byte)(v>>16);
+            buf[off+2]=(byte)(v>>8); buf[off+3]=(byte)v;
+        }
+        private static void IccWI16(byte[] buf, int off, int v)
+        { buf[off]=(byte)(v>>8); buf[off+1]=(byte)v; }
+
+        private byte[] BuildIccProfileObj(int objNum)
+        {
+            byte[] iccBytes = BuildMinimalSrgbIccProfile();
+            string hdr = $"<< /N 3 /Alternate /DeviceRGB /Length {iccBytes.Length} >>\nstream\n";
+            return Concat(Latin1.GetBytes(hdr), iccBytes, Latin1.GetBytes("\nendstream"));
+        }
+
+        private static byte[] BuildOutputIntentsObj(int objNum, int iccObjNum)
+        {
+            string dict =
+                $"<< /Type /OutputIntent /S /GTS_PDFA1\n" +
+                $"   /OutputConditionIdentifier (sRGB IEC61966-2.1)\n" +
+                $"   /Info (sRGB IEC61966-2.1)\n" +
+                $"   /DestOutputProfile {iccObjNum} 0 R\n" +
+                $">>";
+            return Latin1.GetBytes(dict);
         }
 
         private byte[] BuildAnnotationObj(PageAnnotation ann, int objNum)
@@ -616,6 +828,63 @@ namespace Majorsilence.Pdf.Internal
                 $"<< /Type /Annot /Subtype /Widget /FT /Sig " +
                 $"/T (Signature) /V {sigObjNum} 0 R " +
                 $"/Rect [0 0 0 0] /P {pageObjNum} 0 R /F 4 >>");
+
+        private static byte[] BuildSigWidgetObjVisible(
+            int objNum, int sigObjNum, int pageObjNum, int apObjNum,
+            (float X, float Y, float Width, float Height, string? SignerName) app)
+        {
+            // Convert top-left origin to PDF bottom-left; use A4 height as default.
+            const float defaultPageH = 841.89f;
+            float x1 = app.X;
+            float y1 = defaultPageH - app.Y - app.Height;
+            float x2 = app.X + app.Width;
+            float y2 = defaultPageH - app.Y;
+
+            return Latin1.GetBytes(
+                $"<< /Type /Annot /Subtype /Widget /FT /Sig " +
+                $"/T (Signature) /V {sigObjNum} 0 R " +
+                $"/Rect [{Fmt(x1)} {Fmt(y1)} {Fmt(x2)} {Fmt(y2)}] " +
+                $"/P {pageObjNum} 0 R /F 4 " +
+                $"/AP << /N {apObjNum} 0 R >> >>");
+        }
+
+        private static byte[] BuildSigAppearanceObj(
+            int objNum,
+            (float X, float Y, float Width, float Height, string? SignerName) app)
+        {
+            float w = app.Width;
+            float h = app.Height;
+            string name = EscapePdfLiteral(app.SignerName ?? "");
+
+            var content = new StringBuilder();
+            content.Append("q\n");
+            content.Append("0.8 w\n");
+            content.Append($"0 0 {Fmt(w)} {Fmt(h)} re S\n");
+            content.Append("BT\n");
+            content.Append("/Helv 8 Tf\n");
+            content.Append($"2 {Fmt(h - 10)} Td\n");
+            content.Append("(Digitally Signed) Tj\n");
+            if (!string.IsNullOrEmpty(name))
+            {
+                content.Append($"0 -10 Td\n");
+                content.Append($"({name}) Tj\n");
+            }
+            content.Append("ET\n");
+            content.Append("Q\n");
+
+            byte[] streamBytes = Latin1.GetBytes(content.ToString());
+            string resources =
+                "<< /Font << /Helv << /Type /Font /Subtype /Type1 /BaseFont /Helvetica >> >> >>";
+            string hdr =
+                $"<< /Type /XObject /Subtype /Form /FormType 1 " +
+                $"/BBox [0 0 {Fmt(w)} {Fmt(h)}] " +
+                $"/Resources {resources} " +
+                $"/Length {streamBytes.Length} >>\nstream\n";
+            return Concat(Latin1.GetBytes(hdr), streamBytes, Latin1.GetBytes("\nendstream"));
+        }
+
+        private static string EscapePdfLiteral(string s) =>
+            s.Replace("\\", "\\\\").Replace("(", "\\(").Replace(")", "\\)");
 
         // ── string helpers ────────────────────────────────────────────────────
 
