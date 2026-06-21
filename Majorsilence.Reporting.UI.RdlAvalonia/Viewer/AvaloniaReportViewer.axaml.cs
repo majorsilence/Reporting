@@ -535,13 +535,16 @@ namespace Majorsilence.Reporting.UI.RdlAvalonia.Viewer
                 return;
             }
 
+            // PageWidth/Height are in points; convert to logical pixels with 96/72 factor
+            const double ptsToLogical = 96.0 / 72.0;
             switch (_zoomMode)
             {
                 case ZoomMode.FitPage:
-                    _zoom = Math.Min(viewportWidth / pageWidth, viewportHeight / pageHeight);
+                    _zoom = Math.Min(viewportWidth  / (pageWidth  * ptsToLogical),
+                                     viewportHeight / (pageHeight * ptsToLogical));
                     break;
                 case ZoomMode.FitWidth:
-                    _zoom = viewportWidth / pageWidth;
+                    _zoom = viewportWidth / (pageWidth * ptsToLogical);
                     break;
                 case ZoomMode.ActualSize:
                     _zoom = 1.0;

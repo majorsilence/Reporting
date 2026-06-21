@@ -443,60 +443,55 @@ namespace Majorsilence.Reporting.UI.RdlAvalonia.Viewer
                 PageUnit = Majorsilence.Drawing.GraphicsUnit.Pixel
             };
 
-            var renderer = new SkiaPageDrawing(_pages, (float)_zoom);
+            // Items are in points; scale to physical pixels: points * (dpi/72) * zoom
+            var effectiveZoom = (float)(_zoom * dpi / 72.0);
+            var renderer = new SkiaPageDrawing(_pages, effectiveZoom);
             renderer.Draw(g, pageIndex);
 
             // Build hit list for selection
-            BuildHitList(pageIndex, dpi);
+            BuildHitList(pageIndex);
 
             surface.Flush();
             _needsRender = false;
         }
 
-        private void BuildHitList(int pageIndex, double dpi)
+        private void BuildHitList(int pageIndex)
         {
             _hitList.Clear();
-            
+
             if (_pages == null || pageIndex < 0 || pageIndex >= _pages.PageCount)
                 return;
 
             var page = _pages[pageIndex];
-            // The renderer (SkiaPageDrawing) draws at coordinates: points * zoom
-            // The bitmap is displayed at logical size: pixelSize * 96 / dpi
-            // So a rendered pixel at (x * zoom) maps to logical position: x * zoom * 96 / dpi
-            var scale = dpi / 96.0;
-            BuildHitListFromPage(page, scale);
+            BuildHitListFromPage(page);
         }
 
-        private void BuildHitListFromPage(Majorsilence.Reporting.Rdl.Page page, double scale)
+        private void BuildHitListFromPage(Majorsilence.Reporting.Rdl.Page page)
         {
             foreach (var item in page)
             {
                 if (item is not PageItem pi)
                     continue;
 
-                // Match the renderer's coordinate conversion: points * zoom
-                // Then convert from physical pixels to logical pixels: / scale
                 var rect = new Rect(
-                    PointsToLogical(pi.X, scale),
-                    PointsToLogical(pi.Y, scale),
-                    PointsToLogical(pi.W, scale),
-                    PointsToLogical(pi.H, scale)
+                    PointsToLogical(pi.X),
+                    PointsToLogical(pi.Y),
+                    PointsToLogical(pi.W),
+                    PointsToLogical(pi.H)
                 );
 
                 if (pi is PageTextHtml pth)
                 {
                     _hitList.Add(new HitListEntry(rect, pi));
-                    // Also add child items
                     foreach (PageItem child in pth)
                     {
                         if (child is PageText)
                         {
                             var childRect = new Rect(
-                                PointsToLogical(child.X, scale),
-                                PointsToLogical(child.Y, scale),
-                                PointsToLogical(child.W, scale),
-                                PointsToLogical(child.H, scale)
+                                PointsToLogical(child.X),
+                                PointsToLogical(child.Y),
+                                PointsToLogical(child.W),
+                                PointsToLogical(child.H)
                             );
                             _hitList.Add(new HitListEntry(childRect, child));
                         }
@@ -509,17 +504,12 @@ namespace Majorsilence.Reporting.UI.RdlAvalonia.Viewer
             }
         }
 
-        /// <summary>
-        /// Converts points to logical (device-independent) pixel coordinates,
-        /// matching the renderer's coordinate system (points * zoom) then
-        /// accounting for display scaling (physical pixels to logical pixels).
-        /// </summary>
-        private double PointsToLogical(float points, double scale)
+        // Renderer places items at points * effectiveZoom physical pixels,
+        // where effectiveZoom = _zoom * dpi/72 and dpi = 96 * renderScaling.
+        // Logical position = physical / renderScaling = points * _zoom * 96/72.
+        private double PointsToLogical(float points)
         {
-            // Renderer draws at: points * zoom (in physical pixels on the SKSurface)
-            // Bitmap logical size = physical size / scale
-            // So logical coordinate = points * zoom / scale
-            return points * _zoom / scale;
+            return points * _zoom * (96.0 / 72.0);
         }
     }
 }

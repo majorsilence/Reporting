@@ -233,10 +233,28 @@ namespace Majorsilence.Reporting.UI.RdlAvalonia.Viewer
             if (font != null && brush != null)
             {
                 var stringFormat = GetStringFormat(pt);
-                g.DrawString(pt.Text, font, brush, rect, stringFormat);
+                var textRect = ApplyPadding(rect, pt.SI);
+                g.DrawString(pt.Text, font, brush, textRect, stringFormat);
                 font.Dispose();
                 brush.Dispose();
             }
+        }
+
+        private Drawing.Rectangle ApplyPadding(Drawing.Rectangle rect, StyleInfo? si)
+        {
+            if (si == null)
+                return rect;
+
+            int left   = (int)ConvertXtoPixels(si.PaddingLeft);
+            int top    = (int)ConvertYtoPixels(si.PaddingTop);
+            int right  = (int)ConvertXtoPixels(si.PaddingRight);
+            int bottom = (int)ConvertYtoPixels(si.PaddingBottom);
+
+            return new Drawing.Rectangle(
+                rect.X + left,
+                rect.Y + top,
+                Math.Max(0, rect.Width  - left - right),
+                Math.Max(0, rect.Height - top  - bottom));
         }
 
         private void DrawImage(PageImage? pi, Drawing.Graphics g, Drawing.Rectangle rect)
@@ -386,19 +404,20 @@ namespace Majorsilence.Reporting.UI.RdlAvalonia.Viewer
             float penWidth = width > 0 ? width : 1f;
 
             var pen = new Drawing.Pen(color, penWidth);
-            
-            // Apply line style
-            var styleStr = style?.ToString()?.ToLower() ?? "solid";
-            switch (styleStr)
+
+            switch (style)
             {
-                case "dashed":
-                    break;  // Default dash style
-                case "dotted":
+                case BorderStyleEnum.Dashed:
+                    pen.DashStyle = Drawing.Drawing2D.DashStyle.Dash;
                     break;
-                case "dashdot":
+                case BorderStyleEnum.Dotted:
+                    pen.DashStyle = Drawing.Drawing2D.DashStyle.Dot;
                     break;
-                case "solid":
+                case BorderStyleEnum.Double:
+                    pen.DashStyle = Drawing.Drawing2D.DashStyle.DashDot;
+                    break;
                 default:
+                    pen.DashStyle = Drawing.Drawing2D.DashStyle.Solid;
                     break;
             }
 
@@ -434,6 +453,16 @@ namespace Majorsilence.Reporting.UI.RdlAvalonia.Viewer
             if (pt.SI.FontStyle == FontStyleEnum.Italic)
             {
                 fontStyle |= Drawing.FontStyle.Italic;
+            }
+
+            switch (pt.SI.TextDecoration)
+            {
+                case TextDecorationEnum.Underline:
+                    fontStyle |= Drawing.FontStyle.Underline;
+                    break;
+                case TextDecorationEnum.LineThrough:
+                    fontStyle |= Drawing.FontStyle.Strikeout;
+                    break;
             }
 
             return new Drawing.Font(fontFamily, fontSize, fontStyle);
