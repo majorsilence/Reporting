@@ -132,21 +132,25 @@ Copy-Item (Join-Path $CURRENTPATH "RdlCmd" "bin" $pConfigurationCompat $pTargetF
 Copy-Item (Join-Path $CURRENTPATH "RdlReader" "bin" $pConfiguration $pTargetFramework) -Destination "$buildoutputpath_reader\" -Recurse
 Copy-Item (Join-Path $CURRENTPATH "RdlMapFile" "bin" $pConfiguration $pTargetFramework) -Destination "$buildoutputpath_mapfile\" -Recurse
 
+# Exclude debug symbols from all release zips
+$7zaExclude = "-xr!*.pdb", "-xr!*.dbg"
+
 cd Release-Builds
 cd build-output
-..\7za.exe a -tzip $Version-majorsilence-reporting-designer-$pTargetFramework-anycpu.zip majorsilence-reporting-designer-$pTargetFramework-anycpu\
-..\7za.exe a -tzip $Version-majorsilence-reporting-desktop-$pTargetFrameworkGeneric-anycpu.zip majorsilence-reporting-desktop-$pTargetFrameworkGeneric-anycpu\
-..\7za.exe a -tzip $Version-majorsilence-reporting-mapfile-$pTargetFrameworkGeneric-anycpu.zip majorsilence-reporting-mapfile-$pTargetFrameworkGeneric-anycpu\
+..\7za.exe a -tzip $Version-majorsilence-reporting-designer-$pTargetFramework-anycpu.zip @7zaExclude majorsilence-reporting-designer-$pTargetFramework-anycpu\
+..\7za.exe a -tzip $Version-majorsilence-reporting-desktop-$pTargetFrameworkGeneric-anycpu.zip @7zaExclude majorsilence-reporting-desktop-$pTargetFrameworkGeneric-anycpu\
+..\7za.exe a -tzip $Version-majorsilence-reporting-mapfile-$pTargetFrameworkGeneric-anycpu.zip @7zaExclude majorsilence-reporting-mapfile-$pTargetFrameworkGeneric-anycpu\
 
 ..\7za.exe a -tzip "$Version-majorsilence-reporting-rdlcmd-$pTargetFrameworkGeneric-anycpu.zip" `
   -x!"majorsilence-reporting-rdlcmd-$pTargetFrameworkGeneric-anycpu\$pTargetFrameworkGeneric\win-arm64\" `
   -x!"majorsilence-reporting-rdlcmd-$pTargetFrameworkGeneric-anycpu\$pTargetFrameworkGeneric\win-x64\" `
+  @7zaExclude `
   "majorsilence-reporting-rdlcmd-$pTargetFrameworkGeneric-anycpu\"
 
 
-..\7za.exe a -tzip $Version-majorsilence-reporting-reader-$pTargetFramework-anycpu.zip majorsilence-reporting-reader-$pTargetFramework-anycpu\
-..\7za.exe a -tzip $Version-majorsilence-reporting-rdlcmd-self-contained.zip majorsilence-reporting-rdlcmd-self-contained\
-..\7za.exe a -tzip $Version-majorsilence-reporting-rdlcmd-aot.zip majorsilence-reporting-rdlcmd-aot\
+..\7za.exe a -tzip $Version-majorsilence-reporting-reader-$pTargetFramework-anycpu.zip @7zaExclude majorsilence-reporting-reader-$pTargetFramework-anycpu\
+..\7za.exe a -tzip $Version-majorsilence-reporting-rdlcmd-self-contained.zip @7zaExclude majorsilence-reporting-rdlcmd-self-contained\
+..\7za.exe a -tzip $Version-majorsilence-reporting-rdlcmd-aot.zip @7zaExclude majorsilence-reporting-rdlcmd-aot\
 cd "$CURRENTPATH"
 
 
