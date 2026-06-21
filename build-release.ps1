@@ -163,6 +163,7 @@ delete_files "$buildoutputpath_php"
 mkdir "$buildoutputpath_php"
 
 Copy-Item ".\LanguageWrappers\php\report.php" "$buildoutputpath_php\report.php"
+Copy-Item ".\LanguageWrappers\php\report_aot.php" "$buildoutputpath_php\report_aot.php"
 
 cd Release-Builds
 cd build-output
@@ -179,6 +180,7 @@ delete_files "$buildoutputpath_python"
 mkdir "$buildoutputpath_python"
 
 Copy-Item ".\LanguageWrappers\python\report.py" "$buildoutputpath_python\report.py"
+Copy-Item ".\LanguageWrappers\python\report_aot.py" "$buildoutputpath_python\report_aot.py"
 
 cd Release-Builds
 cd build-output
@@ -193,6 +195,7 @@ delete_files "$buildoutputpath_ruby"
 mkdir "$buildoutputpath_ruby"
 
 Copy-Item ".\LanguageWrappers\ruby\report.rb" "$buildoutputpath_ruby\report.rb"
+Copy-Item ".\LanguageWrappers\ruby\report_aot.rb" "$buildoutputpath_ruby\report_aot.rb"
 
 cd Release-Builds
 cd build-output
