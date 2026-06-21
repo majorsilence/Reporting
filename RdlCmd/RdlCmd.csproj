@@ -11,6 +11,16 @@
 		<TargetFrameworks>net48;net8.0;net10.0</TargetFrameworks>
         <TargetFrameworks Condition="'$(OS)' == 'Unix'">net8.0;net10.0</TargetFrameworks>
 		<WarningsAsErrors>4014</WarningsAsErrors>
+		<Nullable>enable</Nullable>
+	</PropertyGroup>
+	<!-- AOT and trim-analysis for .NET 8+ -->
+	<PropertyGroup Condition="'$(TargetFramework)' != 'net48'">
+		<IsAotCompatible>true</IsAotCompatible>
+		<EnableTrimAnalyzer>true</EnableTrimAnalyzer>
+	</PropertyGroup>
+	<!-- Use the SkiaSharp-based drawing compat layer on non-Windows -->
+	<PropertyGroup Condition="'$(OS)' != 'Windows_NT'">
+		<DefineConstants>DRAWINGCOMPAT</DefineConstants>
 	</PropertyGroup>
 	<ItemGroup>
 		<Reference Update="System">
@@ -36,6 +46,13 @@
 		<ProjectReference Include="..\DataProviders\Majorsilence.Reporting.DataProviders.csproj" />
 		<ProjectReference Include="..\RdlCri\Majorsilence.Reporting.RdlCri.csproj" />
 		<ProjectReference Include="..\RdlEngine\Majorsilence.Reporting.RdlEngine.csproj" />
+	</ItemGroup>
+	<ItemGroup>
+		<!-- Required for System.Drawing on Linux when DRAWINGCOMPAT is not active; must be in the
+		     project file (not runtimeconfig.template.json) to work correctly under PublishAot. -->
+		<RuntimeHostConfigurationOption Include="System.Drawing.EnableUnixSupport"
+		                                Value="true"
+		                                Trim="true" />
 	</ItemGroup>
 	<PropertyGroup />
 </Project>

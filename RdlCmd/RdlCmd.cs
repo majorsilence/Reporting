@@ -27,12 +27,12 @@ namespace Majorsilence.Reporting.RdlCmd
 		/// <summary>
 		/// RdlCmd takes a report definition and renders it in the specified formats.
 		/// </summary>
-		/// 
+		///
 		private int returnCode=0;				// return code
-		private string _DataSourcePassword;
+		private string? _DataSourcePassword;
         private bool _ShowStats = false;        // show statistics
-		private string _StampInfo=null;	// PDF stamping information
-        private string _user = null; // Allow the user to be set via a command line param GJL AJM 12062008
+		private string? _StampInfo;	// PDF stamping information
+        private string? _user; // Allow the user to be set via a command line param GJL AJM 12062008
 
 		[STAThread]
 		static public async Task<int> Main(string[] args)
@@ -47,9 +47,9 @@ namespace Majorsilence.Reporting.RdlCmd
 			RdlCmd rc = new RdlCmd();
 
 			char[] breakChars = new char[] {'+'};
-			string[] files=null;
-			string[] types=null;
-			string dir=null;
+			string[]? files=null;
+			string[]? types=null;
+			string? dir=null;
 			int returnCode=0;
             string connectionStringOverwrite = string.Empty;
 			foreach(string s in args)
@@ -129,23 +129,21 @@ namespace Majorsilence.Reporting.RdlCmd
 
 			rc.returnCode = returnCode;
 
-            await rc.DoRender(dir, files, types, connectionStringOverwrite);				
+			RdlEngineConfig.RdlEngineConfigInit();
+            await rc.DoRender(dir, files, types, connectionStringOverwrite);
 
 			return rc.returnCode;
 		}
 
-		private string GetPassword()
-		{
-			return this._DataSourcePassword;
-		}
+		private string GetPassword() => _DataSourcePassword ?? string.Empty;
 
 		// Render the report files with the requested types
 		private async Task DoRender(string dir, string[] files, string[] types, string connectionStringOverwrite)
 		{
-			string source;
-			Report report;
+			string? source;
+			Report? report;
 			int index;
-			ListDictionary ld;
+			ListDictionary? ld;
 			string file;
 
             DateTime start = DateTime.Now;
@@ -180,7 +178,7 @@ namespace Majorsilence.Reporting.RdlCmd
 
 				// Compile the report
 				report = await this.GetReport(source, file, connectionStringOverwrite);
-                report.UserID = _user; //Set the user of the report based on the parameter passed in GJL AJM 12062008
+                report!.UserID = _user!; //Set the user of the report based on the parameter passed in GJL AJM 12062008
                 if (this._ShowStats)
                 {
                     DateTime temp = DateTime.Now;
@@ -192,7 +190,7 @@ namespace Majorsilence.Reporting.RdlCmd
                     continue;					// error: process the rest of the files
 
 				// Obtain the data
-				string fileNoExt=null;
+				string? fileNoExt=null;
 				if (ld != null)
 				{
 					fileNoExt = ld["rc:ofile"] as string;
@@ -200,7 +198,7 @@ namespace Majorsilence.Reporting.RdlCmd
 						ld.Remove("rc:ofile");	// don't pass this as an argument to the report
 				}
 
-                await report.RunGetData(ld);
+                await report.RunGetData(ld!);
                 if (this._ShowStats)
                 {
                     DateTime temp = DateTime.Now;
@@ -223,7 +221,7 @@ namespace Majorsilence.Reporting.RdlCmd
                         Console.WriteLine("Render {0}: {1}", stype, temp - startF);
                         startF = DateTime.Now;
                     }
-                }	
+                }
 			}	// end foreach files
             if (this._ShowStats)
             {
@@ -255,10 +253,10 @@ namespace Majorsilence.Reporting.RdlCmd
 			return ld;
 		}
 
-		private string GetSource(string file)
+		private string? GetSource(string file)
 		{
-			StreamReader fs=null;
-			string prog=null;
+			StreamReader? fs=null;
+			string? prog=null;
 			try
 			{
 				fs = new StreamReader(file);
@@ -278,15 +276,15 @@ namespace Majorsilence.Reporting.RdlCmd
 			return prog;
 		}
 
-		private async Task<Report> GetReport(string prog, string file, string connectionStringOverwrite)
+		private async Task<Report?> GetReport(string prog, string file, string connectionStringOverwrite)
 		{
 			// Now parse the file
 			RDLParser rdlp;
-			Report r;
+			Report? r;
 			try
 			{
 				rdlp =  new RDLParser(prog);
-				string folder = Path.GetDirectoryName(file);
+				string folder = Path.GetDirectoryName(file) ?? Environment.CurrentDirectory;
 				if (folder == "")
 					folder = Environment.CurrentDirectory;
 				rdlp.Folder = folder;
@@ -295,12 +293,12 @@ namespace Majorsilence.Reporting.RdlCmd
                 {
                     rdlp.OverwriteConnectionString = connectionStringOverwrite;
                 }
-                
+
 
 				r = await rdlp.Parse();
-				if (r.ErrorMaxSeverity > 0) 
+				if (r.ErrorMaxSeverity > 0)
 				{
-					// have errors fill out the msgs 
+					// have errors fill out the msgs
 					Console.WriteLine("{0} has the following errors:", file);
 					foreach (string emsg in r.ErrorItems)
 					{
@@ -339,7 +337,7 @@ namespace Majorsilence.Reporting.RdlCmd
 		private async Task SaveAs(Report report, string FileName, string type)
 		{
 			string ext = type.ToLower();
-			OneFileStreamGen sg=null;
+			OneFileStreamGen? sg=null;
 			try
 			{
 				bool isOldPdf = false;
@@ -349,7 +347,7 @@ namespace Majorsilence.Reporting.RdlCmd
                     {
 						isOldPdf = true;
                     }
-                   
+
                 }
 
 
@@ -359,7 +357,7 @@ namespace Majorsilence.Reporting.RdlCmd
 				sg = new OneFileStreamGen(FileName, true);	// overwrite with this name
 				switch(ext)
 				{
-					case "pdf":	
+					case "pdf":
 						if (this._StampInfo == null)
 						{
 							if (isOldPdf)
@@ -370,17 +368,17 @@ namespace Majorsilence.Reporting.RdlCmd
 							{
                                 await report.RunRender(sg, OutputPresentationType.PDF);
 							}
-								
+
 						}
 						else
                             await SaveAsPdf(report, sg);
 						break;
 					case "xml":
                         await report.RunRender(sg, OutputPresentationType.XML);
-						break;																  
+						break;
 					case "mht":
                         await report.RunRender(sg, OutputPresentationType.MHTML);
-						break;																  
+						break;
 					case "html": case "htm":
                         await report.RunRender(sg, OutputPresentationType.HTML);
 						break;
@@ -421,9 +419,9 @@ namespace Majorsilence.Reporting.RdlCmd
 				}
 			}
 
-			if (report.ErrorMaxSeverity > 0) 
+			if (report.ErrorMaxSeverity > 0)
 			{
-				// have errors fill out the msgs 
+				// have errors fill out the msgs
 				Console.WriteLine("{0} has the following runtime errors:", FileName);
 				foreach (string emsg in report.ErrorItems)
 				{
@@ -437,16 +435,16 @@ namespace Majorsilence.Reporting.RdlCmd
 		private async Task SaveAsPdf(Report report, OneFileStreamGen sg)
 		{
 			Pages pgs = await report.BuildPages();
-			FileStream strm=null;
-			Draw2.Image im=null;
+			FileStream? strm=null;
+			Draw2.Image? im=null;
 
 			// Handle any parameters
 			float x = 0;		// x position of image
 			float y = 0;		// y position of image
 			float h = 0;		// height of image
 			float w = 0;		// width position of image
-			string fname=null;
-			int index = _StampInfo.LastIndexOf('?');
+			string? fname=null;
+			int index = _StampInfo!.LastIndexOf('?');
 			bool bClip=false;	// we force clip if either height or width not specified
 
 			if (index >= 0)
@@ -454,18 +452,18 @@ namespace Majorsilence.Reporting.RdlCmd
 				// Get all the arguments for sizing the image
 				ListDictionary ld = this.GetParameters(_StampInfo.Substring(index+1));
 				fname = _StampInfo.Substring(0, index);
-				string ws = (string)ld["x"];
+				string? ws = ld["x"] as string;
 				x = Size(ws);
-				ws = (string)ld["y"];
+				ws = ld["y"] as string;
 				y = Size(ws);
-				ws = (string)ld["h"];
+				ws = ld["h"] as string;
 				if (ws == null)
 				{
 					bClip = true;
-					ws = "12in";	// just give it a big value	
+					ws = "12in";	// just give it a big value
 				}
 				h = Size(ws);
-				ws = (string)ld["w"];
+				ws = ld["w"] as string;
 				if (ws == null)
 				{
 					bClip = true;
@@ -485,15 +483,15 @@ namespace Majorsilence.Reporting.RdlCmd
 			// Stamp the first page
 			foreach (Page p in pgs)		// we loop then break after obtaining one
 			{
-				try 
+				try
 				{
-					strm = new FileStream(fname, System.IO.FileMode.Open, FileAccess.Read);		
+					strm = new FileStream(fname, System.IO.FileMode.Open, FileAccess.Read);
 					im = Draw2.Image.FromStream(strm);
 					int height = im.Height;
 					int width = im.Width;
 					MemoryStream ostrm = new MemoryStream();
-					
-                    /* Replaced with high quality JPEG encoder 
+
+                    /* Replaced with high quality JPEG encoder
                       * 06122007AJM */
  					ImageFormat imf = ImageFormat.Jpeg;
  					//im.Save(ostrm, imf);
@@ -502,7 +500,7 @@ namespace Majorsilence.Reporting.RdlCmd
                     EncoderParameters encoderParameters;
                     encoderParameters = new EncoderParameters(1);
                     encoderParameters.Param[0] = new EncoderParameter(Encoder.Quality, 100L);
-                    Draw2.Imaging.ImageCodecInfo codec = null;
+                    Draw2.Imaging.ImageCodecInfo? codec = null;
                     for (int i = 0; i < info.Length; i++)
                     {
                         if (info[i].FormatDescription == "JPEG")
@@ -511,7 +509,7 @@ namespace Majorsilence.Reporting.RdlCmd
                             break;
                         }
                     }
-                    im.Save(ostrm, codec, encoderParameters);
+                    im.Save(ostrm, codec!, encoderParameters);
                     // end change
                     byte[] ba = ostrm.ToArray();
 					ostrm.Close();
@@ -527,7 +525,7 @@ namespace Majorsilence.Reporting.RdlCmd
 					p.InsertObject(pi);
 				}
 				catch (Exception e)
-				{	
+				{
 					// image failed to load, continue processing
 					Console.WriteLine("Stamping image failed.  {0}", e.Message);
 				}
@@ -545,7 +543,7 @@ namespace Majorsilence.Reporting.RdlCmd
 			await report.RunRenderPdf(sg, pgs);
 		}
 
-		private float Size(string t)
+		private float Size(string? t)
 		{
 			if (t == null)
 				return 0;
@@ -558,7 +556,7 @@ namespace Majorsilence.Reporting.RdlCmd
 			// pc -> Picas (1 pica = 12 points)
 			int size=0;
 			t = t.Trim();
-			int space = t.LastIndexOf(' '); 
+			int space = t.LastIndexOf(' ');
 			string n;						// number string
 			string u;						// unit string
 			decimal d;						// initial number
@@ -588,7 +586,7 @@ namespace Majorsilence.Reporting.RdlCmd
 				else
 					d = Convert.ToDecimal(n, NumberFormatInfo.InvariantInfo);		// initial number
 			}
-			catch (Exception ex) 
+			catch (Exception ex)
 			{
 				// Illegal unit
 				Console.WriteLine("Illegal size '" + t + "' specified, assuming 0 length.\r\n"+ex.Message);
@@ -612,7 +610,7 @@ namespace Majorsilence.Reporting.RdlCmd
 				case "pc":
 					size = (int) (d * (2540m / 72.27m * 12m));
 					break;
-				default:	 
+				default:
 					// Illegal unit
 					Console.WriteLine("Unknown sizing unit '" + u + "' specified, assuming inches.");
 					size = (int) (d * 2540m);
@@ -653,7 +651,7 @@ namespace Majorsilence.Reporting.RdlCmd
 		static private void WriteLicense()
 		{
 			Console.WriteLine(string.Format("RdlCmd Version {0}, Copyright (C) 2004-2008 fyiReporting Software, LLC",
-							Assembly.GetExecutingAssembly().GetName().Version.ToString()));
+							Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "unknown"));
 			Console.WriteLine("");
 			Console.WriteLine("RdlCmd comes with ABSOLUTELY NO WARRANTY.  This is free software,");
 			Console.WriteLine("and you are welcome to redistribute it under certain conditions.");
