@@ -94,6 +94,12 @@
             <TextBlock Text="Select All" VerticalAlignment="Center"/>
           </StackPanel>
         </Button>
+        <Button x:Name="CopyImageButton" Classes="toolbar" ToolTip.Tip="Save current page as PNG image">
+          <StackPanel Orientation="Horizontal" Spacing="5">
+            <TextBlock Text="🖼" FontSize="14" VerticalAlignment="Center"/>
+            <TextBlock Text="Save PNG" VerticalAlignment="Center"/>
+          </StackPanel>
+        </Button>
 
         <!-- Vertical divider -->
         <Separator Width="1" Height="18" Margin="4,0"
@@ -134,6 +140,14 @@
         <!-- Vertical divider -->
         <Separator Width="1" Height="18" Margin="4,0"
                    Background="{DynamicResource SystemControlForegroundBaseLowBrush}"/>
+
+        <!-- Thumbnails toggle -->
+        <ToggleButton x:Name="ThumbnailsButton" Classes="toolbar" ToolTip.Tip="Toggle page thumbnails panel">
+          <StackPanel Orientation="Horizontal" Spacing="5">
+            <TextBlock Text="☰" FontSize="14" VerticalAlignment="Center"/>
+            <TextBlock Text="Pages" VerticalAlignment="Center"/>
+          </StackPanel>
+        </ToggleButton>
 
         <!-- Find button -->
         <Button x:Name="FindButton" Classes="toolbar" ToolTip.Tip="Find text (Ctrl+F)">
@@ -187,21 +201,31 @@
     </Border>
 
     <!-- ── Parameters bar ────────────────────────────────────────── -->
-    <Expander DockPanel.Dock="Top"
+    <Expander x:Name="ParametersExpander"
+              DockPanel.Dock="Top"
               BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}"
               BorderThickness="0,0,0,1"
               Padding="0"
-              IsExpanded="False">
+              IsExpanded="False"
+              IsVisible="False">
       <Expander.Header>
         <TextBlock Text="Parameters" FontSize="12" Opacity="0.7" VerticalAlignment="Center"/>
       </Expander.Header>
-      <StackPanel Orientation="Horizontal" Spacing="8" Margin="8,6,8,8">
-        <TextBox x:Name="ParametersTextBox"
-                 Width="420"
-                 PlaceholderText="name=value&amp;name2=value2"
-                 VerticalContentAlignment="Center"/>
-        <Button x:Name="ApplyParametersButton" Classes="accent" Content="Apply"/>
-      </StackPanel>
+      <ScrollViewer HorizontalScrollBarVisibility="Auto"
+                    VerticalScrollBarVisibility="Disabled"
+                    MaxHeight="100">
+        <StackPanel Orientation="Horizontal" Spacing="12" Margin="8,6,8,8">
+          <ItemsControl x:Name="ParameterItemsControl">
+            <ItemsControl.ItemsPanel>
+              <ItemsPanelTemplate>
+                <StackPanel Orientation="Horizontal" Spacing="12"/>
+              </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+          </ItemsControl>
+          <Button x:Name="ApplyParametersButton" Classes="accent" Content="Apply"
+                  VerticalAlignment="Bottom" Margin="0,0,0,4"/>
+        </StackPanel>
+      </ScrollViewer>
     </Expander>
 
     <!-- ── Status bar ─────────────────────────────────────────────── -->
@@ -234,12 +258,29 @@
     <!-- ── Main content area ──────────────────────────────────────── -->
     <Grid>
       <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="Auto"/>
         <ColumnDefinition Width="*"/>
         <ColumnDefinition Width="Auto"/>
       </Grid.ColumnDefinitions>
 
+      <!-- Thumbnail sidebar (col 0) -->
+      <Border x:Name="ThumbnailPanel"
+              Grid.Column="0"
+              IsVisible="False"
+              Width="140"
+              BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}"
+              BorderThickness="0,0,1,0">
+        <ScrollViewer x:Name="ThumbnailScrollViewer"
+                      HorizontalScrollBarVisibility="Disabled"
+                      VerticalScrollBarVisibility="Auto"
+                      Background="#F8F8F8">
+          <StackPanel x:Name="ThumbnailStack" Spacing="6" Margin="6"/>
+        </ScrollViewer>
+      </Border>
+
+      <!-- Report canvas area (col 1) -->
       <ScrollViewer x:Name="ReportScrollViewer"
-                    Grid.Column="0"
+                    Grid.Column="1"
                     Background="#F0F0F0"
                     HorizontalScrollBarVisibility="Auto"
                     VerticalScrollBarVisibility="Auto">
@@ -254,8 +295,9 @@
         </Border>
       </ScrollViewer>
 
-      <!-- Empty state (sits in column 0 on top of the ScrollViewer) -->
+      <!-- Empty state (col 1 overlay) -->
       <Border x:Name="EmptyStatePanel"
+              Grid.Column="1"
               IsVisible="True"
               IsHitTestVisible="False">
         <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="10">
@@ -267,8 +309,9 @@
         </StackPanel>
       </Border>
 
-      <!-- Loading overlay (column 0, topmost) -->
+      <!-- Loading overlay (col 1, topmost) -->
       <Border x:Name="LoadingOverlay"
+              Grid.Column="1"
               Background="#F0F0F0"
               IsVisible="False"
               IsHitTestVisible="False">
@@ -279,8 +322,9 @@
                    Opacity="0.6"/>
       </Border>
 
+      <!-- Errors panel (col 2) -->
       <Border x:Name="ErrorsPanel"
-              Grid.Column="1"
+              Grid.Column="2"
               IsVisible="False"
               Width="300"
               BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}"

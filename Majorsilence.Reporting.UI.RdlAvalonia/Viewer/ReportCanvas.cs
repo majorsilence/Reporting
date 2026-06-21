@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
@@ -305,8 +306,13 @@ namespace Majorsilence.Reporting.UI.RdlAvalonia.Viewer
 
             if (!_isSelecting)
             {
-                var hasLink = _hitList.Any(h => h.Contains(pos) && !string.IsNullOrEmpty(h.PageItem.HyperLink));
-                Cursor = hasLink ? new Cursor(StandardCursorType.Hand) : new Cursor(StandardCursorType.Ibeam);
+                var hoverEntry = _hitList.FirstOrDefault(h => h.Contains(pos));
+                Cursor = !string.IsNullOrEmpty(hoverEntry?.PageItem.HyperLink)
+                    ? new Cursor(StandardCursorType.Hand)
+                    : new Cursor(StandardCursorType.Ibeam);
+
+                var tip = hoverEntry?.PageItem.Tooltip;
+                ToolTip.SetTip(this, string.IsNullOrEmpty(tip) ? null : tip);
             }
 
             if (!_selectToolEnabled || !_isSelecting)
@@ -582,6 +588,58 @@ namespace Majorsilence.Reporting.UI.RdlAvalonia.Viewer
                     _hitList.Add(new HitListEntry(rect, pi));
                 }
             }
+        }
+
+        public async Task SavePageAsPngAsync()
+        {
+            if (_bitmap == null) return;
+            var topLevel = TopLevel.GetTopLevel(this);
+            if (topLevel == null) return;
+
+            var file = await topLevel.StorageProvider.SaveFilePickerAsync(
+                new Avalonia.Platform.Storage.FilePickerSaveOptions
+                {
+                    Title = "Save Page as PNG",
+                    SuggestedFileName = "page.png",
+                    FileTypeChoices = new[]
+                    {
+                        new Avalonia.Platform.Storage.FilePickerFileType("PNG Image")
+                        { Patterns = new[] { "*.png" } }
+                    }
+                });
+
+            if (file == null) return;
+            using var stream = await file.OpenWriteAsync();
+            _bitmap.Save(stream);
+        }
+
+        public static Bitmap? RenderPageThumbnail(Pages pages, int pageIndex, double thumbWidthPx, double dpi = 96.0)
+        {
+            if (pages == null || pageIndex < 0 || pageIndex >= pages.PageCount)
+                return null;
+
+            var zoom = thumbWidthPx / (pages.PageWidth * dpi / 72.0);
+            var pixelWidth  = Math.Max(1, (int)Math.Ceiling(pages.PageWidth  * dpi / 72.0 * zoom));
+            var pixelHeight = Math.Max(1, (int)Math.Ceiling(pages.PageHeight * dpi / 72.0 * zoom));
+
+            var info = new SKImageInfo(pixelWidth, pixelHeight, SKColorType.Bgra8888, SKAlphaType.Premul);
+            using var surface = SKSurface.Create(info);
+            if (surface == null) return null;
+
+            surface.Canvas.Clear(SKColors.White);
+            using var g = new Majorsilence.Drawing.Graphics(surface.Canvas)
+            {
+                DpiX = (float)dpi,
+                DpiY = (float)dpi
+            };
+            var effectiveZoom = (float)(zoom * dpi / 72.0);
+            new SkiaPageDrawing(pages, effectiveZoom).Draw(g, pageIndex);
+            surface.Flush();
+
+            using var img  = surface.Snapshot();
+            using var data = img.Encode(SKEncodedImageFormat.Png, 80);
+            using var bms  = new System.IO.MemoryStream(data.ToArray());
+            return new Bitmap(bms);
         }
 
         // Renderer places items at points * effectiveZoom physical pixels,
