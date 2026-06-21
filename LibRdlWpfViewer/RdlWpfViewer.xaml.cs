@@ -12,6 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using Majorsilence.Pdf.Security;
 
 namespace LibRdlWpfViewer
 {
@@ -30,9 +31,12 @@ namespace LibRdlWpfViewer
             await this.reportViewer.Rebuild();
         }
 
-        public async Task SaveAs(string FileName, Majorsilence.Reporting.Rdl.OutputPresentationType type)
+        /// <param name="security">Optional PDF encryption settings. Ignored for non-PDF output.</param>
+        /// <param name="signature">Optional PKCS#7 digital signature. Ignored for non-PDF output.</param>
+        public async Task SaveAs(string FileName, Majorsilence.Reporting.Rdl.OutputPresentationType type,
+            PdfSecurity? security = null, PdfSignatureOptions? signature = null)
         {
-            await this.reportViewer.SaveAs(FileName, type);
+            await this.reportViewer.SaveAs(FileName, type, security, signature);
         }
 
         public Uri SourceFile

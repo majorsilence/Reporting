@@ -11,6 +11,7 @@
     </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\RdlEngine\Majorsilence.Reporting.RdlEngine.csproj" />
+    <ProjectReference Include="..\..\Majorsilence.Pdf.Security\Majorsilence.Pdf.Security.csproj" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\RdlEngine\RdlEngineConfig.xml" Link="RdlEngineConfig.xml">

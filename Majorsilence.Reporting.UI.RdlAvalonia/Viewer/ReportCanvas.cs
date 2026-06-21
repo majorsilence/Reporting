@@ -590,6 +590,13 @@ namespace Majorsilence.Reporting.UI.RdlAvalonia.Viewer
             }
         }
 
+        public void SaveCurrentPageAsPng(string filePath)
+        {
+            if (_bitmap == null) return;
+            using var stream = System.IO.File.Create(filePath);
+            _bitmap.Save(stream);
+        }
+
         public async Task SavePageAsPngAsync()
         {
             if (_bitmap == null) return;

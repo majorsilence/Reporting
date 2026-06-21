@@ -94,13 +94,6 @@
             <TextBlock Text="Select All" VerticalAlignment="Center"/>
           </StackPanel>
         </Button>
-        <Button x:Name="CopyImageButton" Classes="toolbar" ToolTip.Tip="Save current page as PNG image">
-          <StackPanel Orientation="Horizontal" Spacing="5">
-            <TextBlock Text="🖼" FontSize="14" VerticalAlignment="Center"/>
-            <TextBlock Text="Save PNG" VerticalAlignment="Center"/>
-          </StackPanel>
-        </Button>
-
         <!-- Vertical divider -->
         <Separator Width="1" Height="18" Margin="4,0"
                    Background="{DynamicResource SystemControlForegroundBaseLowBrush}"/>

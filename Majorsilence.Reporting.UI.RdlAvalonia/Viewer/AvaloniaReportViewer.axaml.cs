@@ -13,6 +13,7 @@ using Avalonia.Interactivity;
 using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
+using Majorsilence.Pdf.Security;
 using Majorsilence.Reporting.Rdl;
 using Majorsilence.Reporting.RdlEngine;
 
@@ -67,6 +68,18 @@ namespace Majorsilence.Reporting.UI.RdlAvalonia.Viewer
         public bool OverwriteSubreportConnection { get; private set; }
 
         public string? WorkingDirectory { get; set; }
+
+        /// <summary>
+        /// Optional PDF encryption/permissions to apply when exporting to PDF.
+        /// Leave null for an unprotected document.
+        /// </summary>
+        public PdfSecurity? PdfSecurity { get; set; }
+
+        /// <summary>
+        /// Optional PKCS#7 digital signature to embed when exporting to PDF.
+        /// Leave null to export without a signature.
+        /// </summary>
+        public PdfSignatureOptions? PdfSignatureOptions { get; set; }
 
         public async Task SetSourceFileAsync(Uri fileUri)
         {
@@ -221,7 +234,6 @@ namespace Majorsilence.Reporting.UI.RdlAvalonia.Viewer
             ReloadButton.Click += async (_, _) => await RebuildAsync();
             CopyButton.Click += (_, _) => ReportCanvas.CopySelection();
             SelectAllButton.Click += (_, _) => ReportCanvas.SelectAll();
-            CopyImageButton.Click += async (_, _) => await ReportCanvas.SavePageAsPngAsync();
             FirstPageButton.Click += (_, _) => SetPage(1);
             PreviousPageButton.Click += (_, _) => SetPage(_pageCurrent - 1);
             NextPageButton.Click += (_, _) => SetPage(_pageCurrent + 1);
@@ -354,9 +366,7 @@ namespace Majorsilence.Reporting.UI.RdlAvalonia.Viewer
         private async void SaveButtonOnClick(object? sender, RoutedEventArgs e)
         {
             if (_report == null)
-            {
                 return;
-            }
 
             var topLevel = TopLevel.GetTopLevel(this);
             if (topLevel == null)
@@ -367,65 +377,61 @@ namespace Majorsilence.Reporting.UI.RdlAvalonia.Viewer
                 Title = "Save Report",
                 FileTypeChoices = new[]
                 {
-                    new Avalonia.Platform.Storage.FilePickerFileType("PDF") { Patterns = new[] { "*.pdf" } },
-                    new Avalonia.Platform.Storage.FilePickerFileType("HTML") { Patterns = new[] { "*.html", "*.htm" } },
-                    new Avalonia.Platform.Storage.FilePickerFileType("XML") { Patterns = new[] { "*.xml" } },
-                    new Avalonia.Platform.Storage.FilePickerFileType("CSV") { Patterns = new[] { "*.csv" } },
-                    new Avalonia.Platform.Storage.FilePickerFileType("MHTML") { Patterns = new[] { "*.mhtml", "*.mht" } },
-                    new Avalonia.Platform.Storage.FilePickerFileType("RTF") { Patterns = new[] { "*.rtf" } },
-                    new Avalonia.Platform.Storage.FilePickerFileType("Excel") { Patterns = new[] { "*.xlsx" } },
-                    new Avalonia.Platform.Storage.FilePickerFileType("TIFF") { Patterns = new[] { "*.tif", "*.tiff" } }
+                    new Avalonia.Platform.Storage.FilePickerFileType("PDF")             { Patterns = new[] { "*.pdf" } },
+                    new Avalonia.Platform.Storage.FilePickerFileType("PNG (current page)") { Patterns = new[] { "*.png" } },
+                    new Avalonia.Platform.Storage.FilePickerFileType("HTML")            { Patterns = new[] { "*.html", "*.htm" } },
+                    new Avalonia.Platform.Storage.FilePickerFileType("XML")             { Patterns = new[] { "*.xml" } },
+                    new Avalonia.Platform.Storage.FilePickerFileType("CSV")             { Patterns = new[] { "*.csv" } },
+                    new Avalonia.Platform.Storage.FilePickerFileType("MHTML")           { Patterns = new[] { "*.mhtml", "*.mht" } },
+                    new Avalonia.Platform.Storage.FilePickerFileType("RTF")             { Patterns = new[] { "*.rtf" } },
+                    new Avalonia.Platform.Storage.FilePickerFileType("Excel")           { Patterns = new[] { "*.xlsx" } },
+                    new Avalonia.Platform.Storage.FilePickerFileType("TIFF")            { Patterns = new[] { "*.tif", "*.tiff" } }
                 }
             });
 
             if (file == null)
+                return;
+
+            var filePath = file.Path.LocalPath;
+            var ext = Path.GetExtension(filePath).Trim('.').ToLowerInvariant();
+
+            // PNG is a canvas-only export — no report re-render needed
+            if (ext == "png")
             {
+                ReportCanvas.SaveCurrentPageAsPng(filePath);
                 return;
             }
 
-            var filePath = file.Path.LocalPath;
             var outputType = OutputPresentationType.Internal;
-            var ext = Path.GetExtension(filePath).Trim('.').ToLowerInvariant();
             switch (ext)
             {
-                case "pdf":
-                    outputType = OutputPresentationType.PDF;
-                    break;
-                case "xml":
-                    outputType = OutputPresentationType.XML;
-                    break;
+                case "pdf":   outputType = OutputPresentationType.PDF;        break;
+                case "xml":   outputType = OutputPresentationType.XML;        break;
                 case "html":
-                case "htm":
-                    outputType = OutputPresentationType.HTML;
-                    break;
-                case "csv":
-                    outputType = OutputPresentationType.CSV;
-                    break;
+                case "htm":   outputType = OutputPresentationType.HTML;       break;
+                case "csv":   outputType = OutputPresentationType.CSV;        break;
                 case "mht":
-                case "mhtml":
-                    outputType = OutputPresentationType.MHTML;
-                    break;
-                case "rtf":
-                    outputType = OutputPresentationType.RTF;
-                    break;
-                case "xlsx":
-                    outputType = OutputPresentationType.Excel2007;
-                    break;
+                case "mhtml": outputType = OutputPresentationType.MHTML;      break;
+                case "rtf":   outputType = OutputPresentationType.RTF;        break;
+                case "xlsx":  outputType = OutputPresentationType.Excel2007;  break;
                 case "tif":
-                case "tiff":
-                    outputType = OutputPresentationType.TIF;
-                    break;
+                case "tiff":  outputType = OutputPresentationType.TIF;        break;
             }
 
-            await SaveAsAsync(filePath, outputType);
+            PdfSecurity? security = null;
+            if (outputType == OutputPresentationType.PDF)
+            {
+                var dialog = new PdfSecurityDialog(PdfSecurity);
+                security = await dialog.ShowDialog<PdfSecurity?>(topLevel as Window);
+            }
+
+            await SaveAsAsync(filePath, outputType, security);
         }
 
         private async void PrintButtonOnClick(object? sender, RoutedEventArgs e)
         {
             if (_report == null)
-            {
                 return;
-            }
 
             // Avalonia does not expose a cross-platform print API yet; export to PDF for now.
             var topLevel = TopLevel.GetTopLevel(this);
@@ -442,15 +448,17 @@ namespace Majorsilence.Reporting.UI.RdlAvalonia.Viewer
             });
 
             if (file == null)
-            {
                 return;
-            }
+
+            var dialog = new PdfSecurityDialog(PdfSecurity);
+            var security = await dialog.ShowDialog<PdfSecurity?>(topLevel as Window);
 
             var filePath = file.Path.LocalPath;
-            await SaveAsAsync(filePath, OutputPresentationType.PDF);
+            await SaveAsAsync(filePath, OutputPresentationType.PDF, security);
         }
 
-        private async Task SaveAsAsync(string filePath, OutputPresentationType outputType)
+        private async Task SaveAsAsync(string filePath, OutputPresentationType outputType,
+            PdfSecurity? security = null, PdfSignatureOptions? signature = null)
         {
             if (_report == null || _pages == null)
                 return;
@@ -465,7 +473,10 @@ namespace Majorsilence.Reporting.UI.RdlAvalonia.Viewer
                 switch (outputType)
                 {
                     case OutputPresentationType.PDF:
-                        await _report.RunRender(sg, OutputPresentationType.PDF);
+                        // Prefer caller-supplied security; fall back to the programmatic property.
+                        var effectiveSecurity   = security   ?? PdfSecurity;
+                        var effectiveSignature  = signature  ?? PdfSignatureOptions;
+                        await _report.RunRender(sg, OutputPresentationType.PDF, effectiveSecurity, effectiveSignature);
                         break;
                     case OutputPresentationType.CSV:
                         await _report.RunRender(sg, OutputPresentationType.CSV);

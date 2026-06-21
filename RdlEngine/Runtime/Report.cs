@@ -7,6 +7,7 @@ using System.IO;
 using System.Globalization;
 using System.Data;
 using System.Data.SqlClient;
+using Majorsilence.Pdf.Security;
 using Majorsilence.Reporting.Rdl;
 using System.Threading.Tasks;
 using System.Collections.Concurrent;
@@ -137,6 +138,39 @@ namespace Majorsilence.Reporting.Rdl
 		{
             await RunRender(sg, type, "");
 		}
+
+        /// <summary>
+        /// Renders the report to a stream. For PDF output the optional
+        /// <paramref name="security"/> and <paramref name="signature"/> settings
+        /// are applied; they are ignored for all other output types.
+        /// </summary>
+        public async Task RunRender(IStreamGen sg, OutputPresentationType type,
+            PdfSecurity? security, PdfSignatureOptions? signature = null)
+        {
+            if (security == null && signature == null)
+            {
+                await RunRender(sg, type);
+                return;
+            }
+
+            switch (type)
+            {
+                case OutputPresentationType.PDF:
+                case OutputPresentationType.RenderPdf_iTextSharp:
+                case OutputPresentationType.PDFOldStyle:
+                case OutputPresentationType.RenderPdf_Majorsilence:
+                    if (sg == null)
+                        throw new ArgumentException("IStreamGen cannot be null.", nameof(sg));
+                    PageNumber = 1;
+                    TotalPages = 1;
+                    IPresent ip = new RenderPdf_Raw(this, sg, security, signature);
+                    await _Report.Run(ip);
+                    break;
+                default:
+                    await RunRender(sg, type);
+                    break;
+            }
+        }
 
 		/// <summary>
 		/// Renders the report using the requested presentation type.
@@ -286,12 +320,13 @@ namespace Majorsilence.Reporting.Rdl
 		/// </summary>
 		/// <param name="sg"></param>
 		/// <param name="pgs"></param>
-		public async Task RunRenderPdf(IStreamGen sg, Pages pgs)
+		public async Task RunRenderPdf(IStreamGen sg, Pages pgs,
+            PdfSecurity? security = null, PdfSignatureOptions? signature = null)
 		{
 			PageNumber = 1;		// reset page numbers
 			TotalPages = 1;
 
-            IPresent ip = new RenderPdf_Raw(this, sg);
+            IPresent ip = new RenderPdf_Raw(this, sg, security, signature);
          
 			try
 			{

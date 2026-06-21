@@ -26,6 +26,7 @@ using Draw2 = System.Drawing;
 using Imaging = System.Drawing.Imaging;
 #endif
 using Majorsilence.Pdf;
+using Majorsilence.Pdf.Security;
 using Majorsilence.Reporting.Rdl.Utility;
 
 namespace Majorsilence.Reporting.Rdl
@@ -41,6 +42,8 @@ namespace Majorsilence.Reporting.Rdl
         private PdfDocument _doc;
         private PdfCanvas   _currentPage;
         private FontRegistry _fontRegistry;
+        private readonly PdfSecurity? _security;
+        private readonly PdfSignatureOptions? _signature;
 
         private readonly int _osPlatform = (int)Environment.OSVersion.Platform;
         private bool _dejavuFonts;
@@ -60,7 +63,14 @@ namespace Majorsilence.Reporting.Rdl
 
         // ── construction ──────────────────────────────────────────────────────
 
-        public RenderPdf_Raw(Report report, IStreamGen sg) : base(report, sg) { }
+        public RenderPdf_Raw(Report report, IStreamGen sg,
+            PdfSecurity? security = null,
+            PdfSignatureOptions? signature = null)
+            : base(report, sg)
+        {
+            _security  = security;
+            _signature = signature;
+        }
 
         // ── RenderBase abstract implementations ───────────────────────────────
 
@@ -75,6 +85,9 @@ namespace Majorsilence.Reporting.Rdl
                 .WithSubject(r.Description ?? "")
                 .WithCreator("Majorsilence Reporting - RenderPdf_Raw")
                 .WithFontRegistry(_fontRegistry);
+
+            if (_security  != null) _doc.WithSecurity(_security);
+            if (_signature != null) _doc.WithSignature(_signature);
         }
 
         protected internal override void EndDocument(Stream sg) => _doc.Save(sg);
