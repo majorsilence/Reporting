@@ -1,165 +1,73 @@
 
 using System;
-using System.Xml;
-using System.Collections;
-using System.Reflection;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using System.Reflection;
 using System.Text;
-using Majorsilence.Reporting.Rdl;
+using ICSharpCode.SharpZipLib.Zip;
 
 namespace Majorsilence.Reporting.Rdl
 {
     /// <summary>
-    /// ZipWrap loads the SharpZipLib dll and facilitates the wrapping of ZipOutputStream and ZipEntry 
+    /// Thin wrapper over ICSharpCode.SharpZipLib.Zip for use by the Excel renderer.
+    /// Previously loaded SharpZipLib dynamically; it is now a direct NuGet reference.
     /// </summary>
     public class ZipWrap
     {
-        // 	public static void Main(string[] args)
-        // 	{
-        // 		string[] filenames = Directory.GetFiles(args[0]);
-        // 		byte[] buffer = new byte[4096];
-        // 		
-        // 		using ( ZipOutputStream s = new ZipOutputStream(File.Create(args[1])) ) {
-        // 		
-        // 			s.SetLevel(9); // 0 - store only to 9 - means best compression
-        // 		
-        //if (e.Name != sourceDirectory_) {
-        //    ZipEntry entry = entryFactory_.MakeDirectoryEntry(e.Name);
-        //    outputStream_.PutNextEntry(entry);
-        // 			foreach (string file in filenames) {
-        // 				ZipEntry entry = new ZipEntry(file);
-        // 				s.PutNextEntry(entry);
-        //
-        // 				using (FileStream fs = File.OpenRead(file)) {
-        //						StreamUtils.Copy(fs, s, buffer);
-        // 				}
-        // 			}
-        // 		}
-        // 	}
+        public static void Init() { } // retained for API compatibility
 
-        static readonly string ZIPNAME = "ICSharpCode.SharpZipLib.dll";
-        static string _ZipError = "Call ZipWrap.Init() before instantiating this class";
-        static Assembly _Assembly = null;
+        public static string ZipError => string.Empty;
 
-        static public void Init()
+        [RequiresUnreferencedCode("PropertySettingByEnum uses reflection to set enum properties by name")]
+        public static void PropertySettingByEnum(object classInstance, Type classType, string propertyName, string desiredValue)
         {
-            if (_Assembly != null)
-                return;
-            lock (typeof(ZipWrap))
+            PropertyInfo? pi = classType.GetProperty(propertyName);
+            if (pi != null)
             {
-                try
-                {
-                    _Assembly = XmlUtil.AssemblyLoadFrom(ZIPNAME);
-                    _ZipError = string.Empty;
-                }
-                catch (Exception ex)
-                {
-                    _ZipError = ex.Message;      // record error for later
-                }
+                object value2change = Enum.Parse(pi.PropertyType, desiredValue);
+                pi.SetValue(classInstance, value2change, null);
             }
-        }
-        static public Assembly ZipAssembly
-        {
-            get { return _Assembly; }
-        }
-        static public string ZipError
-        {
-            get { return _ZipError; }
-        }
-        static public void PropertySettingByEnum(object classInstance,Type classType,string propertyName,string desiredValue)
-        {
-            PropertyInfo dstPropertyInfo = classType.GetProperty(propertyName);
-            Type enumType = dstPropertyInfo.PropertyType;
-            object value2change = Enum.Parse(enumType, desiredValue);
-            dstPropertyInfo.SetValue(classInstance, value2change, null);
         }
     }
 
     public class ZipOutputStream
     {
-        object _ZipOutputStream;
-        MethodInfo _PutNextEntry;
-        MethodInfo _Write;
-        MethodInfo _Finish;
-        MethodInfo _Close;
+        private readonly ICSharpCode.SharpZipLib.Zip.ZipOutputStream _inner;
 
         public ZipOutputStream(Stream baseOutputStream)
         {
-            if (ZipWrap.ZipAssembly == null)
-                throw new ArgumentNullException(ZipWrap.ZipError);
+            _inner = new ICSharpCode.SharpZipLib.Zip.ZipOutputStream(baseOutputStream);
+            _inner.UseZip64 = UseZip64.Off;
+        }
 
-            object[] args = new object[] { baseOutputStream };
+        public Stream ZipStream => _inner;
 
-            _ZipOutputStream = ZipWrap.ZipAssembly.CreateInstance("ICSharpCode.SharpZipLib.Zip.ZipOutputStream", false,
-                BindingFlags.CreateInstance, null, args, null, null);
-            
-            Type theClassType= _ZipOutputStream.GetType();
-            ZipWrap.PropertySettingByEnum(_ZipOutputStream, theClassType, "UseZip64","Off");
-            this._PutNextEntry = theClassType.GetMethod("PutNextEntry");
-            Type[] types = new Type[3];
-            types[0] = typeof(byte[]);
-            types[1] = typeof(int);
-            types[2] = typeof(int);
-            this._Write = theClassType.GetMethod("Write", types);
-            types = new Type[0];
-            this._Finish = theClassType.GetMethod("Finish", types);
-            this._Close = theClassType.GetMethod("Close", types);
-        }
-        
-        public Stream ZipStream
-        {
-            get { return _ZipOutputStream as Stream; }
-        }
-        public void PutNextEntry(ZipEntry ze)
-        {
-            object[] args = new object[] { ze.Value };
-            _PutNextEntry.Invoke(_ZipOutputStream, args);
-        }
+        public void PutNextEntry(ZipEntry ze) => _inner.PutNextEntry(ze.Inner);
 
         public void Write(string str)
         {
             byte[] ubuf = Encoding.Unicode.GetBytes(str);
-            Encoding enc = Encoding.GetEncoding(65001); // utf-8
-            byte[] abuf = Encoding.Convert(Encoding.Unicode, enc, ubuf);
-
+            byte[] abuf = Encoding.Convert(Encoding.Unicode, Encoding.UTF8, ubuf);
             Write(abuf, 0, abuf.Length);
         }
 
-        public void Write(byte[] buffer, int offset, int count)
-        {
-            object[] args = new object[] { buffer, offset, count };
-            _Write.Invoke(_ZipOutputStream, args);
-        }
+        public void Write(byte[] buffer, int offset, int count) =>
+            _inner.Write(buffer, offset, count);
 
-        public void Finish()
-        {
-            _Finish.Invoke(_ZipOutputStream, null);
-        }
+        public void Finish() => _inner.Finish();
 
-        public void Close()
-        {
-            _Close.Invoke(_ZipOutputStream, null);
-        }
+        public void Close() => _inner.Close();
     }
 
     public class ZipEntry
     {
-        object _ZipEntry;
+        internal readonly ICSharpCode.SharpZipLib.Zip.ZipEntry Inner;
 
         public ZipEntry(string name)
         {
-            if (ZipWrap.ZipAssembly == null)
-                throw new ArgumentNullException(ZipWrap.ZipError);
-
-            object[] args = new object[] { name };
-
-            _ZipEntry = ZipWrap.ZipAssembly.CreateInstance("ICSharpCode.SharpZipLib.Zip.ZipEntry", false,
-                BindingFlags.CreateInstance, null, args, null, null);
+            Inner = new ICSharpCode.SharpZipLib.Zip.ZipEntry(name);
         }
 
-        public object Value
-        {
-            get { return _ZipEntry; }
-        }
+        public object Value => Inner;
     }
 }

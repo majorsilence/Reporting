@@ -1052,33 +1052,18 @@ namespace Majorsilence.Reporting.Rdl
 					cType= idLookup.LookupType(rc.ClassName);	// yes, use the classname of the ReportClass
 				}
 			}
-			string syscls=null;
+			string syscls = null;
 
 			if (cType == null)
 			{	// ok try for some of the system functions
-
-				switch(cls)
+				(cType, syscls) = cls switch
 				{
-					case "Math":
-						syscls = "System.Math";
-						break;
-					case "String":
-						syscls = "System.String";
-						break;
-					case "Convert":
-						syscls = "System.Convert";
-						break;
-					case "Financial":
-						syscls = "Majorsilence.Reporting.Rdl.Financial";
-						break;
-					default:
-						syscls = "Majorsilence.Reporting.Rdl.VBFunctions";
-						break;
-				}
-				if (syscls != null)
-				{
-					cType = Type.GetType(syscls, false, true);
-				}
+					"Math"      => (typeof(System.Math),    "System.Math"),
+					"String"    => (typeof(string),          "System.String"),
+					"Convert"   => (typeof(System.Convert),  "System.Convert"),
+					"Financial" => (typeof(Financial),       "Majorsilence.Reporting.Rdl.Financial"),
+					_           => (typeof(VBFunctions),     "Majorsilence.Reporting.Rdl.VBFunctions"),
+				};
 			}
 
 			if (cType == null)

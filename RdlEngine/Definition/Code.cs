@@ -3,6 +3,8 @@
 
 
 using System;
+using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 using System.Xml;
 using System.Reflection;
 using System.CodeDom;
@@ -38,8 +40,14 @@ namespace Majorsilence.Reporting.Rdl
 			return Task.CompletedTask;
 		}
 
+		[RequiresDynamicCode("Compiles and loads VB source at runtime via VBCodeProvider; not AOT-compatible")]
 		private Assembly GetAssembly()
 		{
+			if (!RuntimeFeature.IsDynamicCodeSupported)
+				throw new PlatformNotSupportedException(
+					"The <Code> element in RDL reports requires dynamic code compilation (VBCodeProvider) " +
+					"which is not supported under Native AOT. Remove the <Code> element or use a pre-compiled CodeModule instead.");
+
 			// Generate the proxy source code
             List<string> lines = new List<string>();		// hold lines in array in case of error
 

@@ -9,6 +9,10 @@
 		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
         <IsPackable>true</IsPackable>
 	</PropertyGroup>
+	<PropertyGroup Condition="'$(TargetFramework)' != 'net48'">
+		<IsAotCompatible>true</IsAotCompatible>
+		<EnableTrimAnalyzer>true</EnableTrimAnalyzer>
+	</PropertyGroup>
 
 	<ItemGroup>
 		<PackageReference Include="SkiaSharp" />

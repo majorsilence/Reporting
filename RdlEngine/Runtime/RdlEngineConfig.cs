@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Xml;
 using System.Collections;
 using System.Collections.Generic;
@@ -691,8 +692,7 @@ namespace Majorsilence.Reporting.Rdl
                     Assembly[] allLoadedAss = AppDomain.CurrentDomain.GetAssemblies();
                     foreach (Assembly ass in allLoadedAss)
                     {
-                        var type = ass.GetType();
-                        if (type.GetMethod("Location") != null)
+                        try
                         {
                             if (ass.Location.Equals(codemodule, StringComparison.CurrentCultureIgnoreCase))
                             {
@@ -700,6 +700,7 @@ namespace Majorsilence.Reporting.Rdl
                                 break;
                             }
                         }
+                        catch { }
                     }
 
                     if (la == null)     // not previously loaded? 
@@ -720,6 +721,8 @@ namespace Majorsilence.Reporting.Rdl
             }
         }
 
+        [RequiresDynamicCode("Custom report items are instantiated via Activator.CreateInstance at runtime")]
+        [RequiresUnreferencedCode("Custom report item types are resolved from config at runtime and may be trimmed")]
         public static ICustomReportItem CreateCustomReportItem(string friendlyTypeName)
         {
             CustomReportItemEntry crie = null;
@@ -904,6 +907,8 @@ namespace Majorsilence.Reporting.Rdl
             get { return _ErrorMsg; }
         }
 
+        [RequiresDynamicCode("Loads compression assemblies at runtime; not AOT-compatible")]
+        [RequiresUnreferencedCode("Compression types are resolved from config at runtime and may be trimmed")]
         void Init()
         {
             lock (this)

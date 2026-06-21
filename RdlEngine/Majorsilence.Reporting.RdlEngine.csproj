@@ -13,6 +13,14 @@
         <TargetFrameworks Condition="'$(OS)' == 'Unix'">net8.0;net10.0</TargetFrameworks>
 		<WarningsAsErrors>4014</WarningsAsErrors>
         <IsPackable>true</IsPackable>
+        <Nullable>enable</Nullable>
+	</PropertyGroup>
+	<!-- AOT/trim analysis enabled for modern TFMs. Note: VBCodeProvider (<Code> element),
+	     Assembly.Load plug-ins, and custom compression still require dynamic code at runtime;
+	     those paths are guarded with [RequiresDynamicCode] / RuntimeFeature.IsDynamicCodeSupported. -->
+	<PropertyGroup Condition="'$(TargetFramework)' != 'net48'">
+		<IsAotCompatible>true</IsAotCompatible>
+		<EnableTrimAnalyzer>true</EnableTrimAnalyzer>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)' == 'Debug-DrawingCompat' Or '$(Configuration)' == 'Release-DrawingCompat'">
 		<PackageId>Majorsilence.Reporting.RdlEngine.SkiaSharp</PackageId>
@@ -87,7 +95,9 @@
 		<PackageReference Include="SkiaSharp" />
 
 		<PackageReference Include="System.Data.Odbc" />
+		<!-- OleDB is COM-based and not AOT-compatible; kept for compilation but throws at AOT runtime -->
 		<PackageReference Include="System.Data.OleDb" />
+		<!-- CodeDom/VBCodeProvider usage is guarded with RuntimeFeature.IsDynamicCodeSupported -->
 		<PackageReference Include="System.CodeDom" />
 		<PackageReference Condition="'$(DefineConstants.Contains(DRAWINGCOMPAT))' == False" Include="System.Drawing.Common" />
 		<PackageReference Include="System.Security.Cryptography.Xml" />
