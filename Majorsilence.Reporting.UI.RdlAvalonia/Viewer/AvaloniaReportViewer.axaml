@@ -24,6 +24,22 @@
       <Setter Property="FontSize" Value="13"/>
     </Style>
 
+    <Style Selector="Button.toolbar:pointerover">
+      <Setter Property="Background" Value="#18808080"/>
+    </Style>
+    <Style Selector="Button.toolbar:pressed">
+      <Setter Property="Background" Value="#30808080"/>
+    </Style>
+    <Style Selector="ToggleButton.toolbar:pointerover">
+      <Setter Property="Background" Value="#18808080"/>
+    </Style>
+    <Style Selector="ToggleButton.toolbar:checked">
+      <Setter Property="Background" Value="#22336699"/>
+    </Style>
+    <Style Selector="ToggleButton.toolbar:checked:pointerover">
+      <Setter Property="Background" Value="#33336699"/>
+    </Style>
+
   </UserControl.Styles>
 
   <DockPanel>
@@ -52,6 +68,12 @@
           <StackPanel Orientation="Horizontal" Spacing="5">
             <TextBlock Text="🖨" FontSize="14" VerticalAlignment="Center"/>
             <TextBlock Text="Print" VerticalAlignment="Center"/>
+          </StackPanel>
+        </Button>
+        <Button x:Name="ReloadButton" Classes="toolbar" ToolTip.Tip="Reload current report (F5)">
+          <StackPanel Orientation="Horizontal" Spacing="5">
+            <TextBlock Text="↺" FontSize="16" VerticalAlignment="Center"/>
+            <TextBlock Text="Reload" VerticalAlignment="Center"/>
           </StackPanel>
         </Button>
 
@@ -109,17 +131,17 @@
                   VerticalContentAlignment="Center"
                   FontSize="13"/>
 
-        <!-- Vertical divider -->
-        <Separator Width="1" Height="18" Margin="4,0"
-                   Background="{DynamicResource SystemControlForegroundBaseLowBrush}"/>
-
-        <!-- Errors toggle -->
-        <ToggleButton x:Name="ErrorsToggleButton" Classes="toolbar" ToolTip.Tip="Toggle errors panel">
-          <StackPanel Orientation="Horizontal" Spacing="5">
-            <TextBlock Text="⚠" FontSize="14" VerticalAlignment="Center"/>
-            <TextBlock Text="Errors" VerticalAlignment="Center"/>
-          </StackPanel>
-        </ToggleButton>
+        <!-- Errors toggle (separator + button hidden together when no errors) -->
+        <StackPanel x:Name="ErrorsToggleGroup" Orientation="Horizontal" IsVisible="False">
+          <Separator Width="1" Height="18" Margin="4,0"
+                     Background="{DynamicResource SystemControlForegroundBaseLowBrush}"/>
+          <ToggleButton x:Name="ErrorsToggleButton" Classes="toolbar" ToolTip.Tip="Toggle errors panel">
+            <StackPanel Orientation="Horizontal" Spacing="5">
+              <TextBlock x:Name="ErrorsIconText" Text="⚠" FontSize="14" VerticalAlignment="Center"/>
+              <TextBlock x:Name="ErrorsButtonText" Text="Errors" VerticalAlignment="Center"/>
+            </StackPanel>
+          </ToggleButton>
+        </StackPanel>
 
       </WrapPanel>
     </Border>
@@ -178,10 +200,44 @@
 
       <ScrollViewer x:Name="ReportScrollViewer"
                     Grid.Column="0"
+                    Background="#F0F0F0"
                     HorizontalScrollBarVisibility="Auto"
                     VerticalScrollBarVisibility="Auto">
-        <viewer:ReportCanvas x:Name="ReportCanvas" Margin="16"/>
+        <Border x:Name="PageBorder"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Top"
+                Margin="20"
+                IsVisible="False"
+                BoxShadow="0 2 12 0 #38000000"
+                Background="White">
+          <viewer:ReportCanvas x:Name="ReportCanvas"/>
+        </Border>
       </ScrollViewer>
+
+      <!-- Empty state (sits in column 0 on top of the ScrollViewer) -->
+      <Border x:Name="EmptyStatePanel"
+              IsVisible="True"
+              IsHitTestVisible="False">
+        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="10">
+          <TextBlock Text="📄" FontSize="52" HorizontalAlignment="Center" Opacity="0.2"/>
+          <TextBlock Text="Open a report to get started"
+                     HorizontalAlignment="Center"
+                     Opacity="0.4"
+                     FontSize="14"/>
+        </StackPanel>
+      </Border>
+
+      <!-- Loading overlay (column 0, topmost) -->
+      <Border x:Name="LoadingOverlay"
+              Background="#F0F0F0"
+              IsVisible="False"
+              IsHitTestVisible="False">
+        <TextBlock Text="Loading report…"
+                   HorizontalAlignment="Center"
+                   VerticalAlignment="Center"
+                   FontSize="14"
+                   Opacity="0.6"/>
+      </Border>
 
       <Border x:Name="ErrorsPanel"
               Grid.Column="1"

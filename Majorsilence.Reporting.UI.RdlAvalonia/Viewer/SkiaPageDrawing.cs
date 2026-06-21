@@ -83,24 +83,24 @@ namespace Majorsilence.Reporting.UI.RdlAvalonia.Viewer
                     (int)ConvertYtoPixels(pi.H)
                 );
 
-                if (pi.SI?.BackgroundImage != null)
-                {
-                    DrawImage(pi.SI.BackgroundImage, g, rect);
-                }
-
                 if (pi is PageText)
                 {
                     var pt = pi as PageText;
+                    DrawRectBackground(pi.SI, g, rect);
                     DrawString(pt, g, rect);
+                    DrawItemBorders(pi.SI, g, rect);
                 }
                 else if (pi is PageImage)
                 {
                     var i = pi as PageImage;
+                    DrawRectBackground(pi.SI, g, rect);
                     DrawImage(i, g, rect);
+                    DrawItemBorders(pi.SI, g, rect);
                 }
                 else if (pi is PageRectangle)
                 {
-                    DrawBackground(g, rect, pi.SI);
+                    DrawRectBackground(pi.SI, g, rect);
+                    DrawItemBorders(pi.SI, g, rect);
                 }
                 else if (pi is PageEllipse)
                 {
@@ -122,6 +122,53 @@ namespace Majorsilence.Reporting.UI.RdlAvalonia.Viewer
                     var pc = pi as PageCurve;
                     DrawCurve(pc, g, rect);
                 }
+            }
+        }
+
+        private void DrawRectBackground(StyleInfo? si, Drawing.Graphics g, Drawing.Rectangle rect)
+        {
+            if (si == null)
+                return;
+
+            var bgColor = ToDrawingColor(si.BackgroundColor);
+            if (bgColor != Drawing.Color.Empty)
+            {
+                using var brush = new Drawing.SolidBrush(bgColor);
+                g.FillRectangle(brush, rect);
+            }
+
+            if (si.BackgroundImage != null)
+                DrawImage(si.BackgroundImage, g, rect);
+        }
+
+        private void DrawItemBorders(StyleInfo? si, Drawing.Graphics g, Drawing.Rectangle rect)
+        {
+            if (si == null)
+                return;
+
+            DrawBorderLine(g, si.BStyleLeft,   ToDrawingColor(si.BColorLeft),   si.BWidthLeft,
+                new Drawing.Point(rect.Left,  rect.Top),    new Drawing.Point(rect.Left,  rect.Bottom));
+            DrawBorderLine(g, si.BStyleRight,  ToDrawingColor(si.BColorRight),  si.BWidthRight,
+                new Drawing.Point(rect.Right, rect.Top),    new Drawing.Point(rect.Right, rect.Bottom));
+            DrawBorderLine(g, si.BStyleTop,    ToDrawingColor(si.BColorTop),    si.BWidthTop,
+                new Drawing.Point(rect.Left,  rect.Top),    new Drawing.Point(rect.Right, rect.Top));
+            DrawBorderLine(g, si.BStyleBottom, ToDrawingColor(si.BColorBottom), si.BWidthBottom,
+                new Drawing.Point(rect.Left,  rect.Bottom), new Drawing.Point(rect.Right, rect.Bottom));
+        }
+
+        private void DrawBorderLine(Drawing.Graphics g, BorderStyleEnum style, Drawing.Color color,
+            float width, Drawing.Point from, Drawing.Point to)
+        {
+            if (style == BorderStyleEnum.None)
+                return;
+
+            // Default to black when the RDL omits an explicit border colour
+            var effectiveColor = (color == Drawing.Color.Empty) ? Drawing.Color.Black : color;
+            var pen = CreatePen(effectiveColor, style, width);
+            if (pen != null)
+            {
+                g.DrawLine(pen, from, to);
+                pen.Dispose();
             }
         }
 
@@ -216,29 +263,6 @@ namespace Majorsilence.Reporting.UI.RdlAvalonia.Viewer
             catch
             {
                 // Silently ignore image drawing errors
-            }
-        }
-
-        private void DrawBackground(Drawing.Graphics g, Drawing.Rectangle rect, StyleInfo? si)
-        {
-            if (si == null)
-            {
-                return;
-            }
-
-            var brush = GetBrush(ToDrawingColor(si.BackgroundColor));
-            if (brush != null)
-            {
-                g.FillRectangle(brush, rect);
-                brush.Dispose();
-            }
-
-            // Draw border
-            var pen = CreatePen(ToDrawingColor(si.BColorLeft), si.BStyleLeft, si.BWidthLeft);
-            if (pen != null)
-            {
-                g.DrawRectangle(pen, rect.X, rect.Y, rect.Width, rect.Height);
-                pen.Dispose();
             }
         }
 

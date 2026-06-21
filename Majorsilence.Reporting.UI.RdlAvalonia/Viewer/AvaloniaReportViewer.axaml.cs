@@ -83,6 +83,10 @@ namespace Majorsilence.Reporting.UI.RdlAvalonia.Viewer
                 return;
             }
 
+            LoadingOverlay.IsVisible = true;
+            EmptyStatePanel.IsVisible = false;
+            PageBorder.IsVisible = false;
+
             try
             {
                 _report = await GetReportAsync();
@@ -108,6 +112,10 @@ namespace Majorsilence.Reporting.UI.RdlAvalonia.Viewer
                 UpdatePageUi();
                 UpdateErrorsUi();
                 await ShowErrorAsync($"Failed to load report:\n\n{ex.Message}");
+            }
+            finally
+            {
+                LoadingOverlay.IsVisible = false;
             }
         }
 
@@ -168,6 +176,7 @@ namespace Majorsilence.Reporting.UI.RdlAvalonia.Viewer
             OpenButton.Click += OpenButtonOnClick;
             SaveButton.Click += SaveButtonOnClick;
             PrintButton.Click += PrintButtonOnClick;
+            ReloadButton.Click += async (_, _) => await RebuildAsync();
             CopyButton.Click += (_, _) => ReportCanvas.CopySelection();
             SelectAllButton.Click += (_, _) => ReportCanvas.SelectAll();
             FirstPageButton.Click += (_, _) => SetPage(1);
@@ -183,6 +192,16 @@ namespace Majorsilence.Reporting.UI.RdlAvalonia.Viewer
 
             ReportScrollViewer.SizeChanged += (_, _) => ApplyZoomMode();
             ReportScrollViewer.AddHandler(PointerWheelChangedEvent, OnScrollViewerPointerWheelChanged, handledEventsToo: false);
+            AddHandler(KeyDownEvent, OnViewerKeyDown, handledEventsToo: false);
+        }
+
+        private async void OnViewerKeyDown(object? sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.F5)
+            {
+                await RebuildAsync();
+                e.Handled = true;
+            }
         }
 
         private void OnScrollViewerPointerWheelChanged(object? sender, PointerWheelEventArgs e)
@@ -423,6 +442,10 @@ namespace Majorsilence.Reporting.UI.RdlAvalonia.Viewer
 
         private void UpdatePageUi()
         {
+            var hasReport = _pages != null && _pages.PageCount > 0;
+            PageBorder.IsVisible = hasReport;
+            EmptyStatePanel.IsVisible = !hasReport;
+
             if (_pages == null)
             {
                 PageTextBox.Text = "0";
@@ -444,13 +467,21 @@ namespace Majorsilence.Reporting.UI.RdlAvalonia.Viewer
 
         private void UpdateErrorsUi()
         {
-            if (_errorMessages == null)
+            ErrorsListBox.Items.Clear();
+
+            var hasErrors = _errorMessages != null && _errorMessages.Count > 0;
+            ErrorsToggleGroup.IsVisible = hasErrors;
+
+            if (!hasErrors)
             {
-                ErrorsListBox.Items.Clear();
+                ErrorsPanel.IsVisible = false;
+                ErrorsToggleButton.IsChecked = false;
                 return;
             }
 
-            ErrorsListBox.Items.Clear();
+            ErrorsButtonText.Text = $"Errors ({_errorMessages!.Count})";
+            ErrorsIconText.Foreground = new SolidColorBrush(Color.FromRgb(210, 105, 30));
+
             foreach (var message in _errorMessages)
             {
                 ErrorsListBox.Items.Add(message);
