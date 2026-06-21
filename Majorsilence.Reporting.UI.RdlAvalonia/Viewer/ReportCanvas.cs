@@ -50,10 +50,39 @@ namespace Majorsilence.Reporting.UI.RdlAvalonia.Viewer
         private readonly Color _selectionColor = Color.FromArgb(80, 51, 153, 255);
         private readonly Color _selectedItemColor = Color.FromArgb(100, 100, 149, 237);
 
+        // Search highlighting
+        private readonly List<PageItem> _searchPageItems = new();
+        private PageItem? _currentSearchItem;
+        private readonly Color _searchHighlightColor = Color.FromArgb(110, 255, 210, 0);
+        private readonly Color _currentSearchHighlightColor = Color.FromArgb(200, 255, 140, 0);
+
         public ReportCanvas()
         {
             Focusable = true;
             Cursor = new Cursor(StandardCursorType.Ibeam);
+
+            var copyItem = new MenuItem { Header = "Copy" };
+            copyItem.Click += (_, _) => CopySelection();
+            var selectAllItem = new MenuItem { Header = "Select All" };
+            selectAllItem.Click += (_, _) => SelectAll();
+            ContextMenu = new ContextMenu();
+            ContextMenu.Items.Add(copyItem);
+            ContextMenu.Items.Add(selectAllItem);
+        }
+
+        public void SetSearch(IEnumerable<PageItem> pageItems, PageItem? current)
+        {
+            _searchPageItems.Clear();
+            _searchPageItems.AddRange(pageItems);
+            _currentSearchItem = current;
+            InvalidateVisual();
+        }
+
+        public void ClearSearch()
+        {
+            _searchPageItems.Clear();
+            _currentSearchItem = null;
+            InvalidateVisual();
         }
 
         /// <summary>
@@ -271,32 +300,67 @@ namespace Majorsilence.Reporting.UI.RdlAvalonia.Viewer
         protected override void OnPointerMoved(PointerEventArgs e)
         {
             base.OnPointerMoved(e);
-            
+
+            var pos = e.GetPosition(this);
+
+            if (!_isSelecting)
+            {
+                var hasLink = _hitList.Any(h => h.Contains(pos) && !string.IsNullOrEmpty(h.PageItem.HyperLink));
+                Cursor = hasLink ? new Cursor(StandardCursorType.Hand) : new Cursor(StandardCursorType.Ibeam);
+            }
+
             if (!_selectToolEnabled || !_isSelecting)
                 return;
 
-            _selectionEnd = e.GetPosition(this);
+            _selectionEnd = pos;
             InvalidateVisual();
         }
 
         protected override void OnPointerReleased(PointerReleasedEventArgs e)
         {
             base.OnPointerReleased(e);
-            
+
             if (!_selectToolEnabled || !_isSelecting)
                 return;
 
             _isSelecting = false;
             _selectionEnd = e.GetPosition(this);
-            
-            // Create selection from rectangle
+
+            var dragDelta = _selectionEnd - _selectionStart;
+            bool isClick = Math.Abs(dragDelta.X) < 4 && Math.Abs(dragDelta.Y) < 4;
+
+            if (isClick)
+            {
+                var linkEntry = _hitList.FirstOrDefault(
+                    h => h.Contains(_selectionEnd) && !string.IsNullOrEmpty(h.PageItem.HyperLink));
+                if (linkEntry != null)
+                {
+                    LaunchHyperLink(linkEntry.PageItem.HyperLink!);
+                    return;
+                }
+            }
+
             var selectionRect = CreateRect(_selectionStart, _selectionEnd);
             bool ctrlPressed = e.KeyModifiers.HasFlag(KeyModifiers.Control);
-            
+
             UpdateSelectionFromRect(selectionRect, ctrlPressed);
-            
+
             SelectionChanged?.Invoke(this, EventArgs.Empty);
             InvalidateVisual();
+        }
+
+        private async void LaunchHyperLink(string url)
+        {
+            try
+            {
+                if (Uri.TryCreate(url, UriKind.Absolute, out var uri))
+                {
+                    var topLevel = TopLevel.GetTopLevel(this);
+                    if (topLevel != null)
+                        await topLevel.Launcher.LaunchUriAsync(uri);
+                }
+            }
+            catch { }
         }
 
         protected override void OnKeyDown(KeyEventArgs e)
@@ -374,7 +438,7 @@ namespace Majorsilence.Reporting.UI.RdlAvalonia.Viewer
                 context.DrawImage(_bitmap, new Rect(0, 0, _bitmap.Size.Width, _bitmap.Size.Height));
             }
 
-            // Draw selection highlights
+            DrawSearchHighlights(context);
             DrawSelectionHighlights(context);
             
             // Draw selection rectangle while dragging
@@ -384,6 +448,22 @@ namespace Majorsilence.Reporting.UI.RdlAvalonia.Viewer
                 var brush = new SolidColorBrush(_selectionColor);
                 var pen = new Pen(new SolidColorBrush(Color.FromRgb(51, 153, 255)));
                 context.DrawRectangle(brush, pen, selectionRect);
+            }
+        }
+
+        private void DrawSearchHighlights(DrawingContext context)
+        {
+            if (_searchPageItems.Count == 0)
+                return;
+
+            var highlightBrush = new SolidColorBrush(_searchHighlightColor);
+            var currentBrush = new SolidColorBrush(_currentSearchHighlightColor);
+            foreach (var entry in _hitList)
+            {
+                if (entry.PageItem == _currentSearchItem)
+                    context.DrawRectangle(currentBrush, null, entry.Rect);
+                else if (_searchPageItems.Contains(entry.PageItem))
+                    context.DrawRectangle(highlightBrush, null, entry.Rect);
             }
         }
 

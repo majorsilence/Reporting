@@ -131,6 +131,18 @@
                   VerticalContentAlignment="Center"
                   FontSize="13"/>
 
+        <!-- Vertical divider -->
+        <Separator Width="1" Height="18" Margin="4,0"
+                   Background="{DynamicResource SystemControlForegroundBaseLowBrush}"/>
+
+        <!-- Find button -->
+        <Button x:Name="FindButton" Classes="toolbar" ToolTip.Tip="Find text (Ctrl+F)">
+          <StackPanel Orientation="Horizontal" Spacing="5">
+            <TextBlock Text="🔍" FontSize="13" VerticalAlignment="Center"/>
+            <TextBlock Text="Find" VerticalAlignment="Center"/>
+          </StackPanel>
+        </Button>
+
         <!-- Errors toggle (separator + button hidden together when no errors) -->
         <StackPanel x:Name="ErrorsToggleGroup" Orientation="Horizontal" IsVisible="False">
           <Separator Width="1" Height="18" Margin="4,0"
@@ -144,6 +156,34 @@
         </StackPanel>
 
       </WrapPanel>
+    </Border>
+
+    <!-- ── Find bar ──────────────────────────────────────────────── -->
+    <Border x:Name="FindBar"
+            DockPanel.Dock="Top"
+            IsVisible="False"
+            BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}"
+            BorderThickness="0,0,0,1"
+            Padding="8,5">
+      <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+        <TextBlock Text="Find:" VerticalAlignment="Center" FontSize="13" Opacity="0.7"/>
+        <TextBox x:Name="FindTextBox"
+                 Width="240" Height="26"
+                 PlaceholderText="Search…"
+                 VerticalContentAlignment="Center"
+                 FontSize="13"/>
+        <Button x:Name="FindPrevButton" Classes="toolbar" Content="◀" FontSize="12"
+                ToolTip.Tip="Previous match (Shift+Enter)"/>
+        <Button x:Name="FindNextButton" Classes="toolbar" Content="▶" FontSize="12"
+                ToolTip.Tip="Next match (Enter)"/>
+        <TextBlock x:Name="FindStatusText"
+                   VerticalAlignment="Center"
+                   FontSize="12"
+                   Opacity="0.55"
+                   MinWidth="80"/>
+        <Button x:Name="FindCloseButton" Classes="toolbar" Content="✕" FontSize="12"
+                ToolTip.Tip="Close search (Escape)"/>
+      </StackPanel>
     </Border>
 
     <!-- ── Parameters bar ────────────────────────────────────────── -->

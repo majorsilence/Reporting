@@ -2,7 +2,9 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
@@ -24,6 +26,16 @@ namespace Majorsilence.Reporting.UI.RdlAvalonia.Viewer
         private int _pageCurrent = 1;
         private double _zoom = 1.0;
         private ZoomMode _zoomMode = ZoomMode.FitWidth;
+
+        // Panning
+        private bool _isPanning;
+        private Point _panStart;
+
+        // Search
+        private record SearchMatch(int PageIndex, PageItem Item);
+        private readonly List<SearchMatch> _searchResults = new();
+        private int _searchIndex = -1;
+        private string _lastSearchText = string.Empty;
 
         public AvaloniaReportViewer()
         {
@@ -187,8 +199,23 @@ namespace Majorsilence.Reporting.UI.RdlAvalonia.Viewer
             ZoomOutButton.Click += (_, _) => SetZoom(Math.Max(0.25, _zoom - 0.25));
             ZoomModeComboBox.SelectionChanged += ZoomModeComboBoxOnSelectionChanged;
             PageTextBox.LostFocus += PageTextBoxOnLostFocus;
+            PageTextBox.KeyDown += PageTextBoxOnKeyDown;
             ApplyParametersButton.Click += ApplyParametersButtonOnClick;
             ErrorsToggleButton.IsCheckedChanged += ErrorsToggleOnChanged;
+
+            // Find bar
+            FindButton.Click += (_, _) => OpenFindBar();
+            FindTextBox.KeyDown += FindTextBoxOnKeyDown;
+            FindTextBox.TextChanged += (_, _) => ExecuteSearch(FindTextBox.Text ?? string.Empty);
+            FindNextButton.Click += (_, _) => FindNavigate(+1);
+            FindPrevButton.Click += (_, _) => FindNavigate(-1);
+            FindCloseButton.Click += (_, _) => CloseFindBar();
+
+            // Panning (middle-mouse drag)
+            ReportScrollViewer.AddHandler(PointerPressedEvent, OnScrollViewerPointerPressed, handledEventsToo: false);
+            ReportScrollViewer.AddHandler(PointerMovedEvent, OnScrollViewerPointerMoved, handledEventsToo: true);
+            ReportScrollViewer.AddHandler(PointerReleasedEvent, OnScrollViewerPointerReleased, handledEventsToo: true);
+            ReportScrollViewer.AddHandler(PointerCaptureLostEvent, OnScrollViewerPointerCaptureLost, handledEventsToo: true);
 
             ReportScrollViewer.SizeChanged += (_, _) => ApplyZoomMode();
             ReportScrollViewer.AddHandler(PointerWheelChangedEvent, OnScrollViewerPointerWheelChanged, handledEventsToo: false);
@@ -200,6 +227,31 @@ namespace Majorsilence.Reporting.UI.RdlAvalonia.Viewer
             if (e.Key == Key.F5)
             {
                 await RebuildAsync();
+                e.Handled = true;
+            }
+            else if (e.Key == Key.PageDown)
+            {
+                SetPage(_pageCurrent + 1);
+                e.Handled = true;
+            }
+            else if (e.Key == Key.PageUp)
+            {
+                SetPage(_pageCurrent - 1);
+                e.Handled = true;
+            }
+            else if (e.KeyModifiers.HasFlag(KeyModifiers.Control) && e.Key == Key.F)
+            {
+                OpenFindBar();
+                e.Handled = true;
+            }
+        }
+
+        private void PageTextBoxOnKeyDown(object? sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+            {
+                if (int.TryParse(PageTextBox.Text, out var page))
+                    SetPage(page);
                 e.Handled = true;
             }
         }
@@ -342,15 +394,14 @@ namespace Majorsilence.Reporting.UI.RdlAvalonia.Viewer
         private async Task SaveAsAsync(string filePath, OutputPresentationType outputType)
         {
             if (_report == null || _pages == null)
-            {
                 return;
-            }
 
-            await _report.RunGetData(_parameters);
-
+            SetExportingUi(true);
             OneFileStreamGen? sg = null;
             try
             {
+                await _report.RunGetData(_parameters);
+
                 sg = new OneFileStreamGen(filePath, true);
                 switch (outputType)
                 {
@@ -385,7 +436,17 @@ namespace Majorsilence.Reporting.UI.RdlAvalonia.Viewer
             finally
             {
                 sg?.CloseMainStream();
+                SetExportingUi(false);
             }
+        }
+
+        private void SetExportingUi(bool exporting)
+        {
+            LoadingOverlay.IsVisible = exporting;
+            SaveButton.IsEnabled = !exporting;
+            PrintButton.IsEnabled = !exporting;
+            OpenButton.IsEnabled = !exporting;
+            StatusMessageTextBlock.Text = exporting ? "Exporting…" : string.Empty;
         }
 
         private async Task<Report?> GetReportAsync()
@@ -581,6 +642,148 @@ namespace Majorsilence.Reporting.UI.RdlAvalonia.Viewer
         private void ErrorsToggleOnChanged(object? sender, RoutedEventArgs e)
         {
             ErrorsPanel.IsVisible = ErrorsToggleButton.IsChecked == true;
+        }
+
+        // ── Panning (middle-mouse drag) ──────────────────────────────
+
+        private void OnScrollViewerPointerPressed(object? sender, PointerPressedEventArgs e)
+        {
+            var point = e.GetCurrentPoint(ReportScrollViewer);
+            if (point.Properties.IsMiddleButtonPressed)
+            {
+                _isPanning = true;
+                _panStart = point.Position;
+                e.Pointer.Capture(ReportScrollViewer);
+                e.Handled = true;
+            }
+        }
+
+        private void OnScrollViewerPointerMoved(object? sender, PointerEventArgs e)
+        {
+            if (!_isPanning) return;
+            var pos = e.GetCurrentPoint(ReportScrollViewer).Position;
+            var delta = _panStart - pos;
+            _panStart = pos;
+            ReportScrollViewer.Offset += delta;
+            e.Handled = true;
+        }
+
+        private void OnScrollViewerPointerReleased(object? sender, PointerReleasedEventArgs e)
+        {
+            if (_isPanning && e.InitialPressMouseButton == MouseButton.Middle)
+            {
+                _isPanning = false;
+                e.Pointer.Capture(null);
+            }
+        }
+
+        private void OnScrollViewerPointerCaptureLost(object? sender, PointerCaptureLostEventArgs e)
+        {
+            _isPanning = false;
+        }
+
+        // ── Find / search ────────────────────────────────────────────
+
+        private void OpenFindBar()
+        {
+            FindBar.IsVisible = true;
+            FindTextBox.Focus();
+            FindTextBox.SelectAll();
+        }
+
+        private void CloseFindBar()
+        {
+            FindBar.IsVisible = false;
+            ReportCanvas.ClearSearch();
+            _searchResults.Clear();
+            _searchIndex = -1;
+            _lastSearchText = string.Empty;
+            FindStatusText.Text = string.Empty;
+            FindTextBox.Text = string.Empty;
+        }
+
+        private void FindTextBoxOnKeyDown(object? sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+            {
+                FindNavigate(e.KeyModifiers.HasFlag(KeyModifiers.Shift) ? -1 : +1);
+                e.Handled = true;
+            }
+            else if (e.Key == Key.Escape)
+            {
+                CloseFindBar();
+                e.Handled = true;
+            }
+        }
+
+        private void ExecuteSearch(string text)
+        {
+            if (text == _lastSearchText) return;
+            _lastSearchText = text;
+            _searchResults.Clear();
+            _searchIndex = -1;
+
+            if (string.IsNullOrEmpty(text) || _pages == null)
+            {
+                ReportCanvas.ClearSearch();
+                FindStatusText.Text = string.Empty;
+                return;
+            }
+
+            for (int i = 0; i < _pages.PageCount; i++)
+            {
+                var page = _pages[i];
+                foreach (var obj in page)
+                {
+                    if (obj is PageText pt &&
+                        pt.Text?.Contains(text, StringComparison.OrdinalIgnoreCase) == true)
+                    {
+                        _searchResults.Add(new SearchMatch(i, pt));
+                    }
+                }
+            }
+
+            if (_searchResults.Count > 0)
+            {
+                _searchIndex = 0;
+                ApplySearchMatch();
+            }
+            else
+            {
+                ReportCanvas.ClearSearch();
+                FindStatusText.Text = "No matches";
+            }
+        }
+
+        private void FindNavigate(int direction)
+        {
+            if (_searchResults.Count == 0)
+            {
+                ExecuteSearch(FindTextBox.Text ?? string.Empty);
+                return;
+            }
+
+            _searchIndex = (_searchIndex + direction + _searchResults.Count) % _searchResults.Count;
+            ApplySearchMatch();
+        }
+
+        private void ApplySearchMatch()
+        {
+            if (_searchIndex < 0 || _searchIndex >= _searchResults.Count)
+                return;
+
+            var match = _searchResults[_searchIndex];
+
+            if (_pageCurrent - 1 != match.PageIndex)
+                SetPage(match.PageIndex + 1);
+
+            var pageItems = _searchResults
+                .Where(r => r.PageIndex == match.PageIndex)
+                .Select(r => r.Item);
+
+            ReportCanvas.SetSearch(pageItems, match.Item);
+
+            FindStatusText.Text = $"{_searchIndex + 1} of {_searchResults.Count}";
         }
     }
 }

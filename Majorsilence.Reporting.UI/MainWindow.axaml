@@ -10,5 +10,5 @@
         MinHeight="480"
         Width="1024"
         Height="700">
-    <viewer1:AvaloniaReportViewer />
+    <viewer1:AvaloniaReportViewer x:Name="ReportViewer"/>
 </Window>

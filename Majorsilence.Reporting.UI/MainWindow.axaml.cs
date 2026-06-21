@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using Avalonia.Controls;
 
 namespace Majorsilence.Reporting.UI
@@ -7,6 +8,11 @@ namespace Majorsilence.Reporting.UI
         public MainWindow()
         {
             InitializeComponent();
+        }
+
+        public Task OpenFileAsync(string path)
+        {
+            return ReportViewer.SetSourceFileAsync(new System.Uri(path));
         }
     }
 }
