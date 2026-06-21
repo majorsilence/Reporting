@@ -1035,7 +1035,12 @@ namespace Majorsilence.Reporting.Rdl
 						bCodeFunction = true;
 				}
 				if (cls != "" && !bCodeFunction)
+				{
+					// AOT registered-provider path: no compiled class to inspect at parse time
+					if (cls.ToLower() == "code" && RdlEngineConfig.CodeProviderFactory != null)
+						return new FunctionCode(method, args, TypeCode.Object);
 					throw new ParserException(string.Format(Strings.Parser_ErrorP_NotCodeMethod, method));
+				}
 			}
 
 			// See if this is a function within the instance classes

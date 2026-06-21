@@ -28,11 +28,19 @@ namespace Majorsilence.Reporting.Rdl
 		string _Source;			// The source code
 		string _Classname;		// Class name of generated class
 		Assembly _Assembly;		// the compiled assembly
-	
+		bool _HasRegisteredProvider;	// true when an RdlCodeFunctions factory is registered (AOT path)
+
 		internal Code(ReportDefn r, ReportLink p, XmlNode xNode) : base(r, p)
 		{
-			_Source=xNode.InnerText;
-			_Assembly = GetAssembly();
+			_Source = xNode.InnerText;
+			if (RdlEngineConfig.CodeProviderFactory != null)
+			{
+				_HasRegisteredProvider = true;
+			}
+			else
+			{
+				_Assembly = GetAssembly();
+			}
 		}
 		
 		override internal Task FinalPass()
@@ -164,18 +172,22 @@ namespace Majorsilence.Reporting.Rdl
 
 		internal Type CodeType()
 		{
+			// The RdlCodeFunctions path doesn't need a Type — FunctionCode dispatches by name
+			if (_HasRegisteredProvider)
+				return null;
+
 			if (_Assembly == null)
 				return null;
 
 			Type t=null;
 			try
 			{
-				object instance = _Assembly.CreateInstance("Majorsilence.Reporting.vbgen." + this._Classname, false); 
+				object instance = _Assembly.CreateInstance("Majorsilence.Reporting.vbgen." + this._Classname, false);
 				t = instance.GetType();
 			}
 			catch (Exception e)
 			{
-				OwnerReport.rl.LogError(4, 
+				OwnerReport.rl.LogError(4,
 					string.Format("Unable to load instance of Code\r\n{0}", e.Message));
 			}
 			return t;
@@ -189,6 +201,15 @@ namespace Majorsilence.Reporting.Rdl
 
 			if (wc.Instance != null)	// Already loaded
 				return wc.Instance;
+
+			// AOT path: use the registered RdlCodeFunctions factory instead of VBCodeProvider
+			if (_HasRegisteredProvider)
+			{
+				var rcf = RdlEngineConfig.CodeProviderFactory!(rpt);
+				rcf.Report = new CodeReport(rpt);
+				wc.Instance = rcf;
+				return rcf;
+			}
 
 			if (_Assembly == null)
 			{
