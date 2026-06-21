@@ -1,0 +1,34 @@
+<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<OutputType>Library</OutputType>
+		<AssemblyName>rdlnative</AssemblyName>
+		<RootNamespace>Majorsilence.Reporting.RdlNative</RootNamespace>
+		<TargetFrameworks>net8.0;net10.0</TargetFrameworks>
+		<Configurations>Debug;Release;Debug-DrawingCompat;Release-DrawingCompat</Configurations>
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+		<IsAotCompatible>true</IsAotCompatible>
+		<EnableTrimAnalyzer>true</EnableTrimAnalyzer>
+		<Nullable>enable</Nullable>
+	</PropertyGroup>
+	<!-- Use the SkiaSharp-based drawing compat layer on non-Windows -->
+	<PropertyGroup Condition="'$(OS)' != 'Windows_NT'">
+		<DefineConstants>DRAWINGCOMPAT</DefineConstants>
+	</PropertyGroup>
+	<ItemGroup>
+		<PackageReference Include="Microsoft.Data.SqlClient" />
+		<PackageReference Include="Microsoft.Data.Sqlite" />
+		<PackageReference Include="MySql.Data" />
+		<PackageReference Include="Npgsql" />
+	</ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\DataProviders\Majorsilence.Reporting.DataProviders.csproj" />
+		<ProjectReference Include="..\RdlCri\Majorsilence.Reporting.RdlCri.csproj" />
+		<ProjectReference Include="..\RdlEngine\Majorsilence.Reporting.RdlEngine.csproj" />
+	</ItemGroup>
+	<ItemGroup>
+		<!-- Required for System.Drawing on Linux when DRAWINGCOMPAT is not active -->
+		<RuntimeHostConfigurationOption Include="System.Drawing.EnableUnixSupport"
+		                                Value="true"
+		                                Trim="true" />
+	</ItemGroup>
+</Project>

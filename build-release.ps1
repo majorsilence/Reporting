@@ -59,11 +59,20 @@ dotnet publish RdlCmd -c Release-DrawingCompat -r osx-arm64   -f $pTargetFramewo
 dotnet publish RdlCmd -c Release               -r win-x64     -f $pTargetFrameworkGeneric --self-contained true -p:PublishAot=true -p:GeneratePackageOnBuild=false -o "RdlCmd\bin\$pConfiguration\$pTargetFrameworkGeneric\win-x64-aot\publish"
 dotnet publish RdlCmd -c Release               -r win-arm64   -f $pTargetFrameworkGeneric --self-contained true -p:PublishAot=true -p:GeneratePackageOnBuild=false -o "RdlCmd\bin\$pConfiguration\$pTargetFrameworkGeneric\win-arm64-aot\publish"
 
+# AOT native shared library builds for FFI use (Python/ctypes, PHP/FFI, Ruby/Fiddle)
+dotnet publish RdlNative -c Release-DrawingCompat -r linux-x64   -f $pTargetFrameworkGeneric --self-contained true -p:PublishAot=true -p:GeneratePackageOnBuild=false -o "RdlNative\bin\$pConfigurationCompat\$pTargetFrameworkGeneric\linux-x64-aot\publish"
+dotnet publish RdlNative -c Release-DrawingCompat -r linux-arm64 -f $pTargetFrameworkGeneric --self-contained true -p:PublishAot=true -p:GeneratePackageOnBuild=false -o "RdlNative\bin\$pConfigurationCompat\$pTargetFrameworkGeneric\linux-arm64-aot\publish"
+dotnet publish RdlNative -c Release-DrawingCompat -r osx-x64     -f $pTargetFrameworkGeneric --self-contained true -p:PublishAot=true -p:GeneratePackageOnBuild=false -o "RdlNative\bin\$pConfigurationCompat\$pTargetFrameworkGeneric\osx-x64-aot\publish"
+dotnet publish RdlNative -c Release-DrawingCompat -r osx-arm64   -f $pTargetFrameworkGeneric --self-contained true -p:PublishAot=true -p:GeneratePackageOnBuild=false -o "RdlNative\bin\$pConfigurationCompat\$pTargetFrameworkGeneric\osx-arm64-aot\publish"
+dotnet publish RdlNative -c Release               -r win-x64     -f $pTargetFrameworkGeneric --self-contained true -p:PublishAot=true -p:GeneratePackageOnBuild=false -o "RdlNative\bin\$pConfiguration\$pTargetFrameworkGeneric\win-x64-aot\publish"
+dotnet publish RdlNative -c Release               -r win-arm64   -f $pTargetFrameworkGeneric --self-contained true -p:PublishAot=true -p:GeneratePackageOnBuild=false -o "RdlNative\bin\$pConfiguration\$pTargetFrameworkGeneric\win-arm64-aot\publish"
+
 $buildoutputpath_designer="$CURRENTPATH\Release-Builds\build-output\majorsilence-reporting-designer-$pTargetFramework-anycpu"
 $buildoutputpath_desktop="$CURRENTPATH\Release-Builds\build-output\majorsilence-reporting-desktop-$pTargetFrameworkGeneric-anycpu"
 $buildoutputpath_rdlcmd="$CURRENTPATH\Release-Builds\build-output\majorsilence-reporting-rdlcmd-$pTargetFrameworkGeneric-anycpu"
 $buildoutputpath_rdlcmd_selfcontained="$CURRENTPATH\Release-Builds\build-output\majorsilence-reporting-rdlcmd-self-contained"
 $buildoutputpath_rdlcmd_aot="$CURRENTPATH\Release-Builds\build-output\majorsilence-reporting-rdlcmd-aot"
+$buildoutputpath_rdlnative="$CURRENTPATH\Release-Builds\build-output\majorsilence-reporting-rdlnative"
 $buildoutputpath_reader="$CURRENTPATH\Release-Builds\build-output\majorsilence-reporting-reader-$pTargetFramework-anycpu"
 $buildoutputpath_mapfile="$CURRENTPATH\Release-Builds\build-output\majorsilence-reporting-mapfile-$pTargetFramework-anycpu"
 
@@ -77,6 +86,8 @@ Remove-Item "$buildoutputpath_rdlcmd_selfcontained" -Recurse -ErrorAction Ignore
 mkdir "$buildoutputpath_rdlcmd_selfcontained"
 Remove-Item "$buildoutputpath_rdlcmd_aot" -Recurse -ErrorAction Ignore
 mkdir "$buildoutputpath_rdlcmd_aot"
+Remove-Item "$buildoutputpath_rdlnative" -Recurse -ErrorAction Ignore
+mkdir "$buildoutputpath_rdlnative"
 Remove-Item "$buildoutputpath_reader" -Recurse -ErrorAction Ignore
 mkdir "$buildoutputpath_reader"
 Remove-Item "$buildoutputpath_mapfile" -Recurse -ErrorAction Ignore
@@ -129,6 +140,33 @@ Copy-Item (Join-Path $CURRENTPATH "RdlCmd" "bin" $pConfigurationCompat $pTargetF
 Copy-Item (Join-Path $CURRENTPATH "RdlCmd" "bin" $pConfigurationCompat $pTargetFrameworkGeneric "osx-x64-aot" "publish") -Destination "$rdlcmd_osx_aot" -Recurse
 Copy-Item (Join-Path $CURRENTPATH "RdlCmd" "bin" $pConfigurationCompat $pTargetFrameworkGeneric "osx-arm64-aot" "publish") -Destination "$rdlcmd_osx_arm64_aot" -Recurse
 
+# Native shared library (FFI) — one per platform sub-directory
+$rdlnative_linux_x64    ="$buildoutputpath_rdlnative\linux-x64"
+$rdlnative_linux_arm64  ="$buildoutputpath_rdlnative\linux-arm64"
+$rdlnative_osx_x64      ="$buildoutputpath_rdlnative\osx-x64"
+$rdlnative_osx_arm64    ="$buildoutputpath_rdlnative\osx-arm64"
+$rdlnative_win_x64      ="$buildoutputpath_rdlnative\win-x64"
+$rdlnative_win_arm64    ="$buildoutputpath_rdlnative\win-arm64"
+mkdir "$rdlnative_linux_x64"
+mkdir "$rdlnative_linux_arm64"
+mkdir "$rdlnative_osx_x64"
+mkdir "$rdlnative_osx_arm64"
+mkdir "$rdlnative_win_x64"
+mkdir "$rdlnative_win_arm64"
+
+Copy-Item (Join-Path $CURRENTPATH "RdlNative" "bin" $pConfiguration $pTargetFrameworkGeneric "win-x64-aot" "publish") -Destination "$rdlnative_win_x64" -Recurse
+Copy-Item (Join-Path $CURRENTPATH "RdlNative" "bin" $pConfiguration $pTargetFrameworkGeneric "win-arm64-aot" "publish") -Destination "$rdlnative_win_arm64" -Recurse
+Copy-Item (Join-Path $CURRENTPATH "RdlNative" "bin" $pConfigurationCompat $pTargetFrameworkGeneric "linux-x64-aot" "publish") -Destination "$rdlnative_linux_x64" -Recurse
+Copy-Item (Join-Path $CURRENTPATH "RdlNative" "bin" $pConfigurationCompat $pTargetFrameworkGeneric "linux-arm64-aot" "publish") -Destination "$rdlnative_linux_arm64" -Recurse
+Copy-Item (Join-Path $CURRENTPATH "RdlNative" "bin" $pConfigurationCompat $pTargetFrameworkGeneric "osx-x64-aot" "publish") -Destination "$rdlnative_osx_x64" -Recurse
+Copy-Item (Join-Path $CURRENTPATH "RdlNative" "bin" $pConfigurationCompat $pTargetFrameworkGeneric "osx-arm64-aot" "publish") -Destination "$rdlnative_osx_arm64" -Recurse
+
+# C header and language wrappers at the root of the native package
+Copy-Item ".\RdlNative\rdlnative.h"                          "$buildoutputpath_rdlnative\rdlnative.h"
+Copy-Item ".\LanguageWrappers\python\report_native.py"        "$buildoutputpath_rdlnative\report_native.py"
+Copy-Item ".\LanguageWrappers\php\report_native.php"          "$buildoutputpath_rdlnative\report_native.php"
+Copy-Item ".\LanguageWrappers\ruby\report_native.rb"          "$buildoutputpath_rdlnative\report_native.rb"
+
 Copy-Item (Join-Path $CURRENTPATH "RdlReader" "bin" $pConfiguration $pTargetFramework) -Destination "$buildoutputpath_reader\" -Recurse
 Copy-Item (Join-Path $CURRENTPATH "RdlMapFile" "bin" $pConfiguration $pTargetFramework) -Destination "$buildoutputpath_mapfile\" -Recurse
 
@@ -151,6 +189,7 @@ cd build-output
 ..\7za.exe a -tzip $Version-majorsilence-reporting-reader-$pTargetFramework-anycpu.zip @7zaExclude majorsilence-reporting-reader-$pTargetFramework-anycpu\
 ..\7za.exe a -tzip $Version-majorsilence-reporting-rdlcmd-self-contained.zip @7zaExclude majorsilence-reporting-rdlcmd-self-contained\
 ..\7za.exe a -tzip $Version-majorsilence-reporting-rdlcmd-aot.zip @7zaExclude majorsilence-reporting-rdlcmd-aot\
+..\7za.exe a -tzip $Version-majorsilence-reporting-rdlnative.zip @7zaExclude majorsilence-reporting-rdlnative\
 cd "$CURRENTPATH"
 
 
@@ -162,8 +201,9 @@ $buildoutputpath_php="$CURRENTPATH\Release-Builds\build-output\majorsilence-repo
 delete_files "$buildoutputpath_php"
 mkdir "$buildoutputpath_php"
 
-Copy-Item ".\LanguageWrappers\php\report.php" "$buildoutputpath_php\report.php"
-Copy-Item ".\LanguageWrappers\php\report_aot.php" "$buildoutputpath_php\report_aot.php"
+Copy-Item ".\LanguageWrappers\php\report.php"        "$buildoutputpath_php\report.php"
+Copy-Item ".\LanguageWrappers\php\report_aot.php"    "$buildoutputpath_php\report_aot.php"
+Copy-Item ".\LanguageWrappers\php\report_native.php" "$buildoutputpath_php\report_native.php"
 
 cd Release-Builds
 cd build-output
@@ -179,8 +219,9 @@ $buildoutputpath_python="$CURRENTPATH\Release-Builds\build-output\majorsilence-r
 delete_files "$buildoutputpath_python"
 mkdir "$buildoutputpath_python"
 
-Copy-Item ".\LanguageWrappers\python\report.py" "$buildoutputpath_python\report.py"
-Copy-Item ".\LanguageWrappers\python\report_aot.py" "$buildoutputpath_python\report_aot.py"
+Copy-Item ".\LanguageWrappers\python\report.py"        "$buildoutputpath_python\report.py"
+Copy-Item ".\LanguageWrappers\python\report_aot.py"    "$buildoutputpath_python\report_aot.py"
+Copy-Item ".\LanguageWrappers\python\report_native.py" "$buildoutputpath_python\report_native.py"
 
 cd Release-Builds
 cd build-output
@@ -194,8 +235,9 @@ $buildoutputpath_ruby="$CURRENTPATH\Release-Builds\build-output\majorsilence-rep
 delete_files "$buildoutputpath_ruby"
 mkdir "$buildoutputpath_ruby"
 
-Copy-Item ".\LanguageWrappers\ruby\report.rb" "$buildoutputpath_ruby\report.rb"
-Copy-Item ".\LanguageWrappers\ruby\report_aot.rb" "$buildoutputpath_ruby\report_aot.rb"
+Copy-Item ".\LanguageWrappers\ruby\report.rb"        "$buildoutputpath_ruby\report.rb"
+Copy-Item ".\LanguageWrappers\ruby\report_aot.rb"    "$buildoutputpath_ruby\report_aot.rb"
+Copy-Item ".\LanguageWrappers\ruby\report_native.rb" "$buildoutputpath_ruby\report_native.rb"
 
 cd Release-Builds
 cd build-output
