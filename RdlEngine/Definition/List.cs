@@ -33,7 +33,9 @@ namespace Majorsilence.Reporting.Rdl
 							// appear in a data rendering. Ignored if there is
 							// a grouping for the list.  Default: output
 		bool _CanGrow;			// indicates that row height can increase in size
+		bool _CanShrink;		// indicates that row height can decrease in size
 		List<Textbox> _GrowList;	// list of TextBox's that need to be checked for growth
+		List<Textbox> _ShrinkList;	// list of TextBox's that need to be checked for shrinking
 
 		internal List(ReportDefn r, ReportLink p, XmlNode xNode):base(r,p,xNode)
 		{
@@ -103,10 +105,19 @@ namespace Majorsilence.Reporting.Rdl
 					_GrowList.Add(tb);
 					_CanGrow = true;
 				}
+				if (tb.CanShrink)
+				{
+					if (this._ShrinkList == null)
+						_ShrinkList = new List<Textbox>();
+					_ShrinkList.Add(tb);
+					_CanShrink = true;
+				}
 			}
 
 			if (_CanGrow)				// shrink down the resulting list
                 _GrowList.TrimExcess();
+			if (_CanShrink)
+				_ShrinkList.TrimExcess();
 
 			return;
 		}
@@ -463,20 +474,70 @@ namespace Majorsilence.Reporting.Rdl
 			WorkClass wc = GetValue(rpt);
 
 			float defnHeight = this.HeightOrOwnerHeight;
-			if (!_CanGrow)
+			
+			// If neither CanGrow nor CanShrink, use defined height
+			if (!_CanGrow && !_CanShrink)
 				return defnHeight;
 
-			float height;
-			foreach (Textbox tb in this._GrowList)
+			float height = defnHeight;
+			
+			// Calculate height for CanGrow textboxes
+			if (_CanGrow)
 			{
-				float top = (float) (tb.Top == null? 0.0 : tb.Top.Points);
-				height = top + await tb.RunTextCalcHeight(rpt, g, r);
-				if (tb.Style != null)
-					height += (await tb.Style.EvalPaddingBottom(rpt, r) + await tb.Style.EvalPaddingTop(rpt, r));
-				defnHeight = Math.Max(height, defnHeight);
+				foreach (Textbox tb in this._GrowList)
+				{
+					float top = (float) (tb.Top == null? 0.0 : tb.Top.Points);
+					float calcHeight = top + await tb.RunTextCalcHeight(rpt, g, r);
+					if (tb.Style != null)
+						calcHeight += (await tb.Style.EvalPaddingBottom(rpt, r) + await tb.Style.EvalPaddingTop(rpt, r));
+					height = Math.Max(height, calcHeight);
+				}
 			}
-			wc.CalcHeight = defnHeight;
-			return defnHeight;
+			
+			// Calculate height for CanShrink textboxes
+			if (_CanShrink)
+			{
+				float minHeight = defnHeight;  // Start with defined height
+				foreach (Textbox tb in this._ShrinkList)
+				{
+					float top = (float) (tb.Top == null? 0.0 : tb.Top.Points);
+					float calcHeight = top + await tb.RunTextCalcHeight(rpt, g, r);
+					if (tb.Style != null)
+						calcHeight += (await tb.Style.EvalPaddingBottom(rpt, r) + await tb.Style.EvalPaddingTop(rpt, r));
+					minHeight = Math.Min(minHeight, calcHeight);
+				}
+				
+				// If we have both CanGrow and CanShrink textboxes
+				if (_CanGrow)
+				{
+					// Allow both growing and shrinking
+					height = Math.Max(height, minHeight);
+				}
+				else
+				{
+					// Only CanShrink
+					height = minHeight;
+				}
+			}
+			
+			// Apply the final height calculation
+			if (_CanGrow && !_CanShrink)
+			{
+				// Only CanGrow: height can be larger than defined but not smaller
+				wc.CalcHeight = Math.Max(height, defnHeight);
+			}
+			else if (_CanShrink && !_CanGrow)
+			{
+				// Only CanShrink: height can be smaller than defined but not larger
+				wc.CalcHeight = Math.Min(height, defnHeight);
+			}
+			else
+			{
+				// Both CanGrow and CanShrink: height can be either larger or smaller
+				wc.CalcHeight = height;
+			}
+			
+			return wc.CalcHeight;
 		}
 
 		internal Sorting Sorting

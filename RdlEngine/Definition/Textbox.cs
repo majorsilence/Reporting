@@ -257,11 +257,24 @@ namespace Majorsilence.Reporting.Rdl
 			else
 				pt = new PageText(t);
             await SetPagePositionAndStyle(r, pt, row);
-			if (this.CanGrow && tbr.RunHeight == 0)	// when textbox is in a DataRegion this will already be called
+			if ((this.CanGrow || this.CanShrink) && tbr.RunHeight == 0)	// when textbox is in a DataRegion this will already be called
 			{
                 await this.RunTextCalcHeight(r, pgs.G, row, pt as PageTextHtml);
 			}
-			pt.H = Math.Max(pt.H, tbr.RunHeight);		// reset height
+			
+			// Apply CanGrow and CanShrink logic
+			if (this.CanShrink && tbr.RunHeight > 0 && tbr.RunHeight < pt.H)
+			{
+				// CanShrink: use the smaller calculated height
+				pt.H = tbr.RunHeight;
+			}
+			else if (this.CanGrow && tbr.RunHeight > pt.H)
+			{
+				// CanGrow: use the larger calculated height
+				pt.H = tbr.RunHeight;
+			}
+			// else: use the default height (pt.H remains as defined)
+			
 			if (pt.SI.BackgroundImage != null)
 				pt.SI.BackgroundImage.H = pt.H;		//   and in the background image
 			pt.CanGrow = this.CanGrow;
