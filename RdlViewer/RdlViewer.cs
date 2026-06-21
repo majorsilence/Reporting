@@ -2176,12 +2176,16 @@ namespace Majorsilence.Reporting.RdlViewer
 
         public void HideRunButton()
         {
+            _ShowParameters = false;
             _RunButton.Visible = false;
+            RdlViewer_Layout(this, null);
         }
 
         public void ShowRunButton()
         {
+            _ShowParameters = true;
             _RunButton.Visible = true;
+            RdlViewer_Layout(this, null);
         }
     }
 
