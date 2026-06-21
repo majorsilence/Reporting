@@ -564,6 +564,11 @@ namespace Majorsilence.Reporting.Rdl
 				int level = 0;
 				bool nextScope = false;
 				Token scopeToken = null;
+				// For RunningValue, the scope is the third parameter (after expression and aggregate function)
+				// So we need to skip the first comma and look for the second comma
+				bool isRunningValue = method.ToLower() == "runningvalue";
+				int commaCount = 0;
+				
 				foreach(Token tok in tokens)
 				{
 					if(nextScope)
@@ -574,6 +579,13 @@ namespace Majorsilence.Reporting.Rdl
 					
 					if(level == 0 && tok.Type == TokenTypes.COMMA)
 					{
+						commaCount++;
+						// For RunningValue, skip the first comma (between expression and aggregate function)
+						// Only set nextScope when we reach the second comma (between aggregate function and scope)
+						if (isRunningValue && commaCount == 1)
+						{
+							continue;
+						}
 						nextScope = true;
 						continue;
 					}
@@ -583,7 +595,10 @@ namespace Majorsilence.Reporting.Rdl
 						level++;
 				}
 
-				if (scopeToken != null)
+				// For RunningValue, skip the DataSet scope validation as the scope parameter
+				// typically refers to a group name, not a DataSet. The proper scope validation
+				// happens later in ResolveAggrScope.
+				if (scopeToken != null && !isRunningValue)
 				{
 					if (scopeToken.Type != TokenTypes.QUOTE)
 						throw new ParserException(string.Format(Strings.Parser_ErrorP_ScopeMustConstant, scopeToken.Value));
