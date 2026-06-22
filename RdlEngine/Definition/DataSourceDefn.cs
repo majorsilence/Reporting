@@ -83,7 +83,8 @@ namespace Majorsilence.Reporting.Rdl
 			if (_ConnectionProperties != null)
                 await _ConnectionProperties.FinalPass();
 
-            await ConnectDataSource(null);
+			if (!OwnerReport.SkipDatabaseSchemaValidation)
+                await ConnectDataSource(null);
 			return;
 		}
 
@@ -157,6 +158,9 @@ namespace Majorsilence.Reporting.Rdl
 
         async internal Task<bool> ConnectDataSourceAsync(Report rpt)
         {
+            if (OwnerReport.SkipDatabaseSchemaValidation)
+                return false;
+
             IDbConnection cn = GetConnection(rpt);
             if (cn != null)
             {

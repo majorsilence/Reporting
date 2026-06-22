@@ -1,17 +1,16 @@
-// SetDataFromCode — feed a List<T> directly into a report with no database query at runtime.
+// SetDataFromCode — feed a List<T> directly into a report with no database at all.
 //
 // Run:  dotnet run
 // Output: sales-report.pdf in the output directory
 //
 // Key patterns shown:
+//   - SkipDatabaseSchemaValidation = true eliminates the parse-time DB requirement
 //   - DataSets["Data"].SetData(IEnumerable<T>) injects data from any .NET collection
 //   - The public property names of T must exactly match the field names in the RDL
-//   - The database connection in the RDL is used only at parse time for schema
-//     validation; at runtime SetData bypasses it entirely
 //   - RunGetData(null) is still required — it resolves parameters and sub-reports
 //
 // This pattern is useful when your data comes from an API, a service layer,
-// a LINQ query, or any in-memory source.
+// a LINQ query, or any in-memory source and you have no database available.
 
 using Majorsilence.Reporting.Rdl;
 
@@ -19,15 +18,16 @@ RdlEngineConfig.RdlEngineConfigInit();
 
 var baseDir = AppContext.BaseDirectory;
 var rdlPath = Path.Combine(baseDir, "SalesReport.rdl");
-var dbPath  = Path.Combine(baseDir, "sqlitetestdb2.db");
 var outPath = Path.Combine(baseDir, "sales-report.pdf");
 
-// The RDL uses sqlitetestdb2.db only for parse-time schema validation.
-// At runtime, SetData below provides all the data — the query never runs.
-var rdlXml = (await File.ReadAllTextAsync(rdlPath))
-    .Replace("sqlitetestdb2.db", dbPath);
-
-var rdlp = new RDLParser(rdlXml) { Folder = baseDir };
+// SkipDatabaseSchemaValidation = true: no DB connection is opened at parse time
+// or runtime. The connection string in the RDL is ignored entirely.
+var rdlXml = await File.ReadAllTextAsync(rdlPath);
+var rdlp = new RDLParser(rdlXml)
+{
+    Folder = baseDir,
+    SkipDatabaseSchemaValidation = true
+};
 using var report = await rdlp.Parse();
 
 if (report.ErrorMaxSeverity > 4)
