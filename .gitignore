@@ -244,3 +244,8 @@ obj/
 /LanguageWrappers/python/Examples/output
 /LanguageWrappers/ruby/Examples/output
 /LanguageWrappers/php/Examples/output
+/Majorsilence.Pdf.Security/out/Majorsilence.Pdf.dll
+/Majorsilence.Pdf.Security/out/Majorsilence.Pdf.Security.dll
+/Majorsilence.Pdf.Security/out/Majorsilence.Pdf.Security.deps.json
+/Majorsilence.Pdf/out/Majorsilence.Pdf.deps.json
+/Majorsilence.Pdf/out/Majorsilence.Pdf.dll

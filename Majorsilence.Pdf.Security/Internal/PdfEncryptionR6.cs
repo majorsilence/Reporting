@@ -126,9 +126,10 @@ namespace Majorsilence.Pdf.Security.Internal
                 for (int i = 0; i < 16; i++) sum += E[i];
                 int r = sum % 3;
 
-                if (r == 0)      K = Sha256(K1);
-                else if (r == 1) K = Sha384(K1);
-                else             K = Sha512(K1);
+                // Step (d): hash E (the AES output) — NOT K1, the AES input.
+                if (r == 0)      K = Sha256(E);
+                else if (r == 1) K = Sha384(E);
+                else             K = Sha512(E);
 
                 if (round >= 64 && ((lastE[lastE.Length - 1] & 0xFF) + 32) <= round)
                     break;
