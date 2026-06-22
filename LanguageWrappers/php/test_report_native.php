@@ -28,11 +28,17 @@ use MajorsilenceReporting\ReportNative;
 
 // ─── Setup ────────────────────────────────────────────────────────────────────
 
-$LIB_PATH  = (string)getenv('RDLNATIVE_LIB');
-$REPO_ROOT = dirname(__DIR__, 2);
-$RDL_PATH  = $REPO_ROOT . '/Examples/SqliteExamples/SimpleTest1.rdl';
-$DB_PATH   = $REPO_ROOT . '/Examples/northwindEF.db';
-$DB_CS     = "Data Source={$DB_PATH}";
+$LIB_PATH      = (string)getenv('RDLNATIVE_LIB');
+$REPO_ROOT     = dirname(__DIR__, 2);
+$RDL_PATH      = $REPO_ROOT . '/Examples/SqliteExamples/SimpleTest1.rdl';
+$DB_PATH       = $REPO_ROOT . '/Examples/northwindEF.db';
+$DB_CS         = "Data Source={$DB_PATH}";
+$SALES_RDL     = $REPO_ROOT . '/Examples/SetDataFromCode/SalesReport.rdl';
+$SALES_DATA    = [
+    ['Product' => 'Chai',  'Region' => 'North America', 'Amount' => '1250.00', 'Quantity' => '50'],
+    ['Product' => 'Chang', 'Region' => 'Europe',         'Amount' =>  '980.50', 'Quantity' => '42'],
+    ['Product' => 'Tofu',  'Region' => 'Asia Pacific',   'Amount' =>  '560.00', 'Quantity' => '40'],
+];
 
 function skip_if_unavailable(string $lib, string $rdl, string $db): void
 {
@@ -198,6 +204,79 @@ run_test('test_invalid_rdl_path_raises', function () {
 run_test('test_unknown_format_defaults_to_pdf', function () {
     $data = make_report()->export_to_memory('not_a_format');
     assert_true(substr($data, 0, 4) === '%PDF', 'Unknown format should default to PDF');
+});
+
+// ─── Tests: add_data (in-memory dataset injection) ───────────────────────────
+
+function make_sales_report(): ReportNative
+{
+    global $SALES_RDL, $SALES_DATA;
+    $rpt = new ReportNative(get_ffi(), $SALES_RDL);
+    $rpt->add_data('Data', $SALES_DATA);
+    return $rpt;
+}
+
+run_test('test_add_data_pdf_returns_valid_pdf', function () use ($SALES_RDL) {
+    if (!is_file($SALES_RDL)) {
+        throw new \RuntimeException("SalesReport.rdl not found at {$SALES_RDL}");
+    }
+    $data = make_sales_report()->export_to_memory('pdf');
+    assert_greater(strlen($data), 1000);
+    assert_true(substr($data, 0, 4) === '%PDF', 'Expected PDF magic bytes');
+});
+
+run_test('test_add_data_csv_contains_injected_rows', function () use ($SALES_RDL) {
+    if (!is_file($SALES_RDL)) {
+        throw new \RuntimeException("SalesReport.rdl not found at {$SALES_RDL}");
+    }
+    $data = make_sales_report()->export_to_memory('csv');
+    assert_contains('Chai',  $data);
+    assert_contains('Chang', $data);
+    assert_contains('Tofu',  $data);
+});
+
+run_test('test_add_data_export_to_file', function () use ($SALES_RDL) {
+    if (!is_file($SALES_RDL)) {
+        throw new \RuntimeException("SalesReport.rdl not found at {$SALES_RDL}");
+    }
+    $path = tempnam(sys_get_temp_dir(), 'rdlnative_') . '.pdf';
+    try {
+        make_sales_report()->export('pdf', $path);
+        assert_greater((int)filesize($path), 1000);
+    } finally {
+        if (file_exists($path)) unlink($path);
+    }
+});
+
+run_test('test_add_data_no_connection_string_needed', function () use ($SALES_RDL, $SALES_DATA) {
+    if (!is_file($SALES_RDL)) {
+        throw new \RuntimeException("SalesReport.rdl not found at {$SALES_RDL}");
+    }
+    // add_data bypasses the DB entirely — no set_connection_string call needed
+    $rpt = new ReportNative(get_ffi(), $SALES_RDL);
+    $rpt->add_data('Data', $SALES_DATA);
+    $data = $rpt->export_to_memory('csv');
+    assert_greater(strlen($data), 0);
+});
+
+run_test('test_add_data_all_rows_present', function () use ($SALES_RDL, $SALES_DATA) {
+    if (!is_file($SALES_RDL)) {
+        throw new \RuntimeException("SalesReport.rdl not found at {$SALES_RDL}");
+    }
+    $data = make_sales_report()->export_to_memory('csv');
+    foreach ($SALES_DATA as $row) {
+        assert_contains($row['Product'], $data);
+    }
+});
+
+run_test('test_add_data_empty_dataset_does_not_crash', function () use ($SALES_RDL) {
+    if (!is_file($SALES_RDL)) {
+        throw new \RuntimeException("SalesReport.rdl not found at {$SALES_RDL}");
+    }
+    $rpt = new ReportNative(get_ffi(), $SALES_RDL);
+    $rpt->add_data('Data', []);
+    $data = $rpt->export_to_memory('pdf');
+    assert_true(substr($data, 0, 4) === '%PDF', 'Expected PDF magic bytes');
 });
 
 // ─── Summary ──────────────────────────────────────────────────────────────────

@@ -76,6 +76,12 @@ def load_library(lib_path: str) -> ctypes.CDLL:
     lib.rdl_report_set_param.restype = ctypes.c_int
     lib.rdl_report_set_param.argtypes = [ctypes.c_void_p, ctypes.c_char_p, ctypes.c_char_p]
 
+    lib.rdl_dataset_set_field.restype = ctypes.c_int
+    lib.rdl_dataset_set_field.argtypes = [ctypes.c_void_p, ctypes.c_char_p, ctypes.c_char_p, ctypes.c_char_p]
+
+    lib.rdl_dataset_commit_row.restype = ctypes.c_int
+    lib.rdl_dataset_commit_row.argtypes = [ctypes.c_void_p, ctypes.c_char_p]
+
     lib.rdl_report_render_file.restype = ctypes.c_int
     lib.rdl_report_render_file.argtypes = [ctypes.c_void_p, ctypes.c_char_p, ctypes.c_char_p]
 
@@ -126,6 +132,7 @@ class Report:
         self._report_path = report_path
         self._connection_string: str | None = None
         self._parameters: dict[str, str] = {}
+        self._data_sets: dict[str, list[dict[str, str]]] = {}
 
     def set_parameter(self, name: str, value: str) -> None:
         """
@@ -138,6 +145,28 @@ class Report:
     def set_connection_string(self, connection_string: str) -> None:
         """Override the connection string defined in the RDL."""
         self._connection_string = connection_string
+
+    def add_data(self, dataset_name: str, rows: list[dict[str, str]]) -> None:
+        """
+        Supply in-memory data for a named dataset, bypassing any database query.
+
+        Parameters
+        ----------
+        dataset_name : name of the DataSet element in the RDL (e.g. "Data")
+        rows         : list of dicts mapping field name → value (all values as strings).
+                       Field names must match the <Field Name="..."> values in the RDL.
+
+        SkipDatabaseSchemaValidation is set automatically when any dataset rows are
+        present, so no DB connection is needed at parse or render time.
+
+        Example::
+
+            rpt.add_data("Data", [
+                {"Product": "Chai",  "Region": "North America", "Amount": "1250.00", "Quantity": "50"},
+                {"Product": "Chang", "Region": "North America", "Amount":  "980.50", "Quantity": "42"},
+            ])
+        """
+        self._data_sets[dataset_name] = list(rows)
 
     def export(self, type: str, export_path: str) -> None:
         """
@@ -190,6 +219,18 @@ class Report:
                 )
                 if ret != 0:
                     self._raise("rdl_report_set_param")
+            for ds_name, rows in self._data_sets.items():
+                ds_enc = ds_name.encode("utf-8")
+                for row in rows:
+                    for field, value in row.items():
+                        ret = self._lib.rdl_dataset_set_field(
+                            h, ds_enc, field.encode("utf-8"), str(value).encode("utf-8")
+                        )
+                        if ret != 0:
+                            self._raise("rdl_dataset_set_field")
+                    ret = self._lib.rdl_dataset_commit_row(h, ds_enc)
+                    if ret != 0:
+                        self._raise("rdl_dataset_commit_row")
             yield ctypes.c_void_p(h)
         finally:
             self._lib.rdl_report_close(h)

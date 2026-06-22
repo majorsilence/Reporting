@@ -41,6 +41,8 @@ class RdlLibrary
 		int         rdl_init(void);
 		void*       rdl_report_open(const char* rdl_path, const char* connection_string);
 		int         rdl_report_set_param(void* handle, const char* name, const char* value);
+		int         rdl_dataset_set_field(void* handle, const char* dataset_name, const char* field_name, const char* field_value);
+		int         rdl_dataset_commit_row(void* handle, const char* dataset_name);
 		int         rdl_report_render_file(void* handle, const char* output_path, const char* format);
 		void        rdl_free(void* ptr);
 		void        rdl_report_close(void* handle);
@@ -73,6 +75,7 @@ class ReportNative
 	private string $report_path;
 	private string $connection_string = '';
 	private array  $parameters        = [];
+	private array  $data_sets         = [];
 
 	private const VALID_TYPES = ['pdf', 'csv', 'xlsx', 'xlsx_table', 'xml', 'rtf', 'tif', 'tifb', 'html', 'mht'];
 
@@ -102,6 +105,27 @@ class ReportNative
 	public function set_connection_string(string $connection_string): void
 	{
 		$this->connection_string = $connection_string;
+	}
+
+	/**
+	 * Supply in-memory data for a named dataset, bypassing any database query.
+	 *
+	 * @param string  $dataset_name Name of the DataSet element in the RDL (e.g. "Data")
+	 * @param array[] $rows         Array of associative arrays mapping field name => value.
+	 *                              Field names must match the <Field Name="..."> values in the RDL.
+	 *
+	 * SkipDatabaseSchemaValidation is set automatically when dataset rows are present,
+	 * so no DB connection is needed at parse or render time.
+	 *
+	 * Example:
+	 *   $rpt->add_data('Data', [
+	 *     ['Product' => 'Chai',  'Region' => 'North America', 'Amount' => '1250.00', 'Quantity' => '50'],
+	 *     ['Product' => 'Chang', 'Region' => 'North America', 'Amount' =>  '980.50', 'Quantity' => '42'],
+	 *   ]);
+	 */
+	public function add_data(string $dataset_name, array $rows): void
+	{
+		$this->data_sets[$dataset_name] = $rows;
 	}
 
 	/**
@@ -147,7 +171,7 @@ class ReportNative
 
 	// ─── Internal helpers ─────────────────────────────────────────────────
 
-	/** Open a handle, apply stored parameters, and return it. Caller must close. */
+	/** Open a handle, apply stored parameters and dataset rows, and return it. Caller must close. */
 	private function open_handle(): mixed
 	{
 		$cs     = $this->connection_string !== '' ? $this->connection_string : null;
@@ -160,6 +184,22 @@ class ReportNative
 			if ($ret !== 0) {
 				$this->ffi->rdl_report_close($handle);
 				$this->throw_last_error('rdl_report_set_param');
+			}
+		}
+		foreach ($this->data_sets as $ds_name => $rows) {
+			foreach ($rows as $row) {
+				foreach ($row as $field => $value) {
+					$ret = $this->ffi->rdl_dataset_set_field($handle, $ds_name, (string)$field, (string)$value);
+					if ($ret !== 0) {
+						$this->ffi->rdl_report_close($handle);
+						$this->throw_last_error('rdl_dataset_set_field');
+					}
+				}
+				$ret = $this->ffi->rdl_dataset_commit_row($handle, $ds_name);
+				if ($ret !== 0) {
+					$this->ffi->rdl_report_close($handle);
+					$this->throw_last_error('rdl_dataset_commit_row');
+				}
 			}
 		}
 		return $handle;

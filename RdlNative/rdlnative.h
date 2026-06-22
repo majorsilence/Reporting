@@ -58,6 +58,25 @@ void* rdl_report_open(const char* rdl_path, const char* connection_string);
 int rdl_report_set_param(void* handle, const char* name, const char* value);
 
 /*
+ * Set one field value in the currently staged row for a dataset.
+ * Call rdl_dataset_commit_row() once all fields for the row are set.
+ * Returns 0 on success, -1 on error.
+ */
+int rdl_dataset_set_field(void*       handle,
+                           const char* dataset_name,
+                           const char* field_name,
+                           const char* field_value);
+
+/*
+ * Commit the staged row to the dataset and begin a new empty row.
+ * Repeat rdl_dataset_set_field / rdl_dataset_commit_row for every row.
+ * The dataset is injected automatically at render time with
+ * SkipDatabaseSchemaValidation = true (no DB connection is needed).
+ * Returns 0 on success, -1 on error.
+ */
+int rdl_dataset_commit_row(void* handle, const char* dataset_name);
+
+/*
  * Render the report to a file.
  * Returns 0 on success, -1 on error.
  */

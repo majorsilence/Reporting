@@ -68,6 +68,16 @@ module RdlLibrary
         [Fiddle::TYPE_VOIDP, Fiddle::TYPE_VOIDP, Fiddle::TYPE_VOIDP],
         Fiddle::TYPE_INT
       ),
+      rdl_dataset_set_field: Fiddle::Function.new(
+        handle['rdl_dataset_set_field'],
+        [Fiddle::TYPE_VOIDP, Fiddle::TYPE_VOIDP, Fiddle::TYPE_VOIDP, Fiddle::TYPE_VOIDP],
+        Fiddle::TYPE_INT
+      ),
+      rdl_dataset_commit_row: Fiddle::Function.new(
+        handle['rdl_dataset_commit_row'],
+        [Fiddle::TYPE_VOIDP, Fiddle::TYPE_VOIDP],
+        Fiddle::TYPE_INT
+      ),
       rdl_report_render_file: Fiddle::Function.new(
         handle['rdl_report_render_file'],
         [Fiddle::TYPE_VOIDP, Fiddle::TYPE_VOIDP, Fiddle::TYPE_VOIDP],
@@ -101,10 +111,11 @@ class ReportNative
   VALID_TYPES   = %w[pdf csv xlsx xlsx_table xml rtf tif tifb html mht].freeze
 
   def initialize(fns, report_path)
-    @fns              = fns
-    @report_path      = report_path
+    @fns               = fns
+    @report_path       = report_path
     @connection_string = nil
-    @parameters       = {}
+    @parameters        = {}
+    @data_sets         = {}
   end
 
   # Set a report parameter value.
@@ -117,6 +128,23 @@ class ReportNative
   # Override the connection string defined in the RDL.
   def set_connection_string(connection_string)
     @connection_string = connection_string
+  end
+
+  # Supply in-memory data for a named dataset, bypassing any database query.
+  #   dataset_name - name of the DataSet element in the RDL (e.g. "Data")
+  #   rows         - Array of Hashes mapping field name => value (all values as strings).
+  #                  Field names must match the <Field Name="..."> values in the RDL.
+  #
+  # SkipDatabaseSchemaValidation is set automatically when dataset rows are present,
+  # so no DB connection is needed at parse or render time.
+  #
+  # Example:
+  #   rpt.add_data('Data', [
+  #     { 'Product' => 'Chai',  'Region' => 'North America', 'Amount' => '1250.00', 'Quantity' => '50' },
+  #     { 'Product' => 'Chang', 'Region' => 'North America', 'Amount' =>  '980.50', 'Quantity' => '42' },
+  #   ])
+  def add_data(dataset_name, rows)
+    @data_sets[dataset_name] = rows
   end
 
   # Render the report and save it to export_path.
@@ -148,7 +176,7 @@ class ReportNative
 
   private
 
-  # Open a native handle, yield it with params applied, then close it.
+  # Open a native handle, yield it with params and dataset rows applied, then close it.
   def with_handle
     cs_ptr = @connection_string ? c_str(@connection_string) : Fiddle::NULL
     h = @fns[:rdl_report_open].call(c_str(@report_path), cs_ptr)
@@ -157,6 +185,17 @@ class ReportNative
       @parameters.each do |name, value|
         ret = @fns[:rdl_report_set_param].call(h, c_str(name), c_str(value))
         raise_last_error('rdl_report_set_param') unless ret.zero?
+      end
+      @data_sets.each do |ds_name, rows|
+        ds_ptr = c_str(ds_name)
+        rows.each do |row|
+          row.each do |field, value|
+            ret = @fns[:rdl_dataset_set_field].call(h, ds_ptr, c_str(field.to_s), c_str(value.to_s))
+            raise_last_error('rdl_dataset_set_field') unless ret.zero?
+          end
+          ret = @fns[:rdl_dataset_commit_row].call(h, ds_ptr)
+          raise_last_error('rdl_dataset_commit_row') unless ret.zero?
+        end
       end
       yield h
     ensure

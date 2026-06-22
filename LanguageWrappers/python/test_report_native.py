@@ -20,10 +20,17 @@ import unittest
 LIB_PATH = os.environ.get("RDLNATIVE_LIB", "")
 
 # Paths to the sample RDL and SQLite database shipped in the repo.
-REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
-RDL_PATH  = os.path.join(REPO_ROOT, "Examples", "SqliteExamples", "SimpleTest1.rdl")
-DB_PATH   = os.path.join(REPO_ROOT, "Examples", "northwindEF.db")
-DB_CS     = f"Data Source={DB_PATH}"
+REPO_ROOT      = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+RDL_PATH       = os.path.join(REPO_ROOT, "Examples", "SqliteExamples", "SimpleTest1.rdl")
+DB_PATH        = os.path.join(REPO_ROOT, "Examples", "northwindEF.db")
+DB_CS          = f"Data Source={DB_PATH}"
+SALES_RDL_PATH = os.path.join(REPO_ROOT, "Examples", "SetDataFromCode", "SalesReport.rdl")
+
+SALES_DATA = [
+    {"Product": "Chai",  "Region": "North America", "Amount": "1250.00", "Quantity": "50"},
+    {"Product": "Chang", "Region": "Europe",         "Amount":  "980.50", "Quantity": "42"},
+    {"Product": "Tofu",  "Region": "Asia Pacific",   "Amount":  "560.00", "Quantity": "40"},
+]
 
 
 def setUpModule():
@@ -158,6 +165,62 @@ class TestBufferRender(unittest.TestCase):
         rpt.set_connection_string(DB_CS)
         text = rpt.export_to_memory("csv").decode("utf-8", errors="replace")
         self.assertIn("Hello World", text)
+
+
+class TestAddData(unittest.TestCase):
+    """add_data injects in-memory rows — no database connection required."""
+
+    def setUp(self):
+        if not os.path.isfile(SALES_RDL_PATH):
+            self.skipTest(f"SalesReport.rdl not found at {SALES_RDL_PATH!r}")
+
+    def _rpt(self):
+        from report_native import Report
+        rpt = Report(_get_lib(), SALES_RDL_PATH)
+        rpt.add_data("Data", SALES_DATA)
+        return rpt
+
+    def test_pdf_returns_valid_pdf(self):
+        data = self._rpt().export_to_memory("pdf")
+        self.assertGreater(len(data), 1000)
+        self.assertEqual(data[:4], b"%PDF", "Expected PDF magic bytes")
+
+    def test_csv_contains_injected_rows(self):
+        text = self._rpt().export_to_memory("csv").decode("utf-8", errors="replace")
+        self.assertIn("Chai", text)
+        self.assertIn("Chang", text)
+        self.assertIn("Tofu", text)
+
+    def test_export_to_file(self):
+        rpt = self._rpt()
+        with tempfile.NamedTemporaryFile(suffix=".pdf", delete=False) as f:
+            out = f.name
+        try:
+            rpt.export("pdf", out)
+            self.assertGreater(os.path.getsize(out), 1000)
+        finally:
+            if os.path.isfile(out):
+                os.unlink(out)
+
+    def test_no_connection_string_needed(self):
+        from report_native import Report
+        # add_data bypasses the DB entirely — no set_connection_string call needed
+        rpt = Report(_get_lib(), SALES_RDL_PATH)
+        rpt.add_data("Data", SALES_DATA)
+        data = rpt.export_to_memory("csv")
+        self.assertGreater(len(data), 0)
+
+    def test_all_rows_present_in_csv(self):
+        text = self._rpt().export_to_memory("csv").decode("utf-8", errors="replace")
+        for row in SALES_DATA:
+            self.assertIn(row["Product"], text)
+
+    def test_empty_dataset_does_not_crash(self):
+        from report_native import Report
+        rpt = Report(_get_lib(), SALES_RDL_PATH)
+        rpt.add_data("Data", [])
+        data = rpt.export_to_memory("pdf")
+        self.assertEqual(data[:4], b"%PDF")
 
 
 if __name__ == "__main__":

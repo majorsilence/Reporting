@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.Data;
 using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
@@ -17,6 +18,10 @@ internal sealed class ReportContext
     internal string RdlPath { get; }
     internal string? ConnectionString { get; }
     internal Dictionary<string, string> Parameters { get; } = new(StringComparer.OrdinalIgnoreCase);
+    internal Dictionary<string, List<Dictionary<string, string>>> DataSetRows { get; }
+        = new(StringComparer.OrdinalIgnoreCase);
+    internal Dictionary<string, Dictionary<string, string>> StagedRows { get; }
+        = new(StringComparer.OrdinalIgnoreCase);
 
     internal ReportContext(string rdlPath, string? connectionString)
     {
@@ -171,6 +176,58 @@ public static class RdlNativeApi
         catch (Exception ex) { SetError(ex); return -1; }
     }
 
+    /// <summary>
+    /// Set a field value in the staged row for a dataset. Call rdl_dataset_commit_row to finalise.
+    /// Returns 0 on success, -1 on error.
+    /// </summary>
+    [UnmanagedCallersOnly(EntryPoint = "rdl_dataset_set_field")]
+    public static unsafe int DataSetSetField(
+        nint handle, byte* datasetNameUtf8, byte* fieldNameUtf8, byte* fieldValueUtf8)
+    {
+        try
+        {
+            var ctx = GetCtx(handle);
+            if (ctx is null) { SetError("Invalid handle."); return -1; }
+            string dsName    = Marshal.PtrToStringUTF8((nint)datasetNameUtf8) ?? "";
+            string fieldName = Marshal.PtrToStringUTF8((nint)fieldNameUtf8)   ?? "";
+            string fieldVal  = Marshal.PtrToStringUTF8((nint)fieldValueUtf8)  ?? "";
+            if (!ctx.StagedRows.TryGetValue(dsName, out var row))
+            {
+                row = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+                ctx.StagedRows[dsName] = row;
+            }
+            row[fieldName] = fieldVal;
+            return 0;
+        }
+        catch (Exception ex) { SetError(ex); return -1; }
+    }
+
+    /// <summary>
+    /// Commit the staged row for a dataset. Each call appends one row to the dataset.
+    /// Returns 0 on success, -1 on error.
+    /// </summary>
+    [UnmanagedCallersOnly(EntryPoint = "rdl_dataset_commit_row")]
+    public static unsafe int DataSetCommitRow(nint handle, byte* datasetNameUtf8)
+    {
+        try
+        {
+            var ctx = GetCtx(handle);
+            if (ctx is null) { SetError("Invalid handle."); return -1; }
+            string dsName = Marshal.PtrToStringUTF8((nint)datasetNameUtf8) ?? "";
+            if (!ctx.StagedRows.TryGetValue(dsName, out var row) || row.Count == 0)
+                return 0;
+            if (!ctx.DataSetRows.TryGetValue(dsName, out var list))
+            {
+                list = new List<Dictionary<string, string>>();
+                ctx.DataSetRows[dsName] = list;
+            }
+            list.Add(new Dictionary<string, string>(row, StringComparer.OrdinalIgnoreCase));
+            row.Clear();
+            return 0;
+        }
+        catch (Exception ex) { SetError(ex); return -1; }
+    }
+
     /// <summary>Render the report to a file. Returns 0 on success, -1 on error.</summary>
     [UnmanagedCallersOnly(EntryPoint = "rdl_report_render_file")]
     public static unsafe int ReportRenderFile(nint handle, byte* outputPathUtf8, byte* formatUtf8)
@@ -250,7 +307,11 @@ public static class RdlNativeApi
     {
         string xml    = await File.ReadAllTextAsync(ctx.RdlPath);
         string folder = Path.GetDirectoryName(ctx.RdlPath) ?? Directory.GetCurrentDirectory();
-        var parser = new RDLParser(xml) { Folder = folder };
+        var parser = new RDLParser(xml)
+        {
+            Folder = folder,
+            SkipDatabaseSchemaValidation = ctx.DataSetRows.Count > 0,
+        };
         if (ctx.ConnectionString is not null)
             parser.OverwriteConnectionString = ctx.ConnectionString;
         var report = await parser.Parse();
@@ -272,6 +333,7 @@ public static class RdlNativeApi
     private static async Task<byte[]> RenderToBytes(ReportContext ctx, string fmt)
     {
         using var report = await BuildReport(ctx);
+        await InjectDataSets(ctx, report);
         await report.RunGetData(BuildParams(ctx));
         using var sg = new MemoryStreamGen();
         await report.RunRender(sg, ParseFormat(fmt));
@@ -282,9 +344,31 @@ public static class RdlNativeApi
     private static async Task RenderToFile(ReportContext ctx, string outPath, string fmt)
     {
         using var report = await BuildReport(ctx);
+        await InjectDataSets(ctx, report);
         await report.RunGetData(BuildParams(ctx));
         using var sg = new OneFileStreamGen(outPath, true);
         await report.RunRender(sg, ParseFormat(fmt));
         sg.CloseMainStream();
+    }
+
+    private static async Task InjectDataSets(ReportContext ctx, Report report)
+    {
+        foreach (var (dsName, rows) in ctx.DataSetRows)
+        {
+            var ds = report.DataSets[dsName];
+            if (ds is null || rows.Count == 0) continue;
+            var dt = new DataTable();
+            foreach (var col in rows[0].Keys)
+                dt.Columns.Add(col);
+            foreach (var row in rows)
+            {
+                var dr = dt.NewRow();
+                foreach (var kv in row)
+                    if (dt.Columns.Contains(kv.Key))
+                        dr[kv.Key] = kv.Value;
+                dt.Rows.Add(dr);
+            }
+            await ds.SetData(dt);
+        }
     }
 }
