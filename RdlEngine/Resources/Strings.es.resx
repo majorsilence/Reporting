@@ -1,0 +1,441 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="ChartLayout_Error_PlotAreaWidthIs0" xml:space="preserve">
+    <value>El ancho del área de trazado es menor o igual a 0</value>
+  </data>
+  <data name="ChartLayout_Error_PlotAreaHeightIs0" xml:space="preserve">
+    <value>La altura del área de trazado es menor o igual a 0</value>
+  </data>
+  <data name="DataSourceDefn_Error_NoPasswordForDSR" xml:space="preserve">
+    <value>No se proporcionó contraseña para la referencia de origen de datos compartido</value>
+  </data>
+  <data name="Filter_Error_TopNAndBottomNRequireInt" xml:space="preserve">
+    <value>Los operadores de filtro TopN y BottomN requieren un valor entero; se obtuvo {0}.</value>
+  </data>
+  <data name="Query_Error_XMLMustContainTopLevelRows" xml:space="preserve">
+    <value>Error: los datos XML deben contener filas de nivel superior.</value>
+  </data>
+  <data name="ReportLog_Error_Severity" xml:space="preserve">
+    <value>Gravedad</value>
+  </data>
+  <data name="Subreport_Error_SubreportNotParameter" xml:space="preserve">
+    <value>El subinforme {0} no define el parámetro {1}.</value>
+  </data>
+  <data name="Table_Error_RecursiveGroupsMustOnlyGroupDefinition" xml:space="preserve">
+    <value>Error: los grupos recursivos deben ser la única definición de grupo.</value>
+  </data>
+  <data name="TableRow_Error_TableRowNotRelatedToTable" xml:space="preserve">
+    <value>Error interno: TableRow no está relacionado con una tabla</value>
+  </data>
+  <data name="TableRows_Error_TableRowsMustOwnedTable" xml:space="preserve">
+    <value>Error interno. TableRows debe pertenecer finalmente a una tabla.</value>
+  </data>
+  <data name="CharReader_Error_FileReaderUnGetFirstChar" xml:space="preserve">
+    <value>error: FileReader.UnGet: se intentó devolver el primer carácter</value>
+  </data>
+  <data name="Financial_Error_IPmtNotSupportPayments" xml:space="preserve">
+    <value>IPmt no admite pagos vencidos al inicio del período.</value>
+  </data>
+  <data name="FunctionCode_Error_MethodNotFound" xml:space="preserve">
+    <value>Método {0} no encontrado en el código</value>
+  </data>
+  <data name="FunctionCustomInstance_Error_MethodNotFoundInClass" xml:space="preserve">
+    <value>Método {0} no encontrado en la clase {1}</value>
+  </data>
+  <data name="FunctionCustomStatic_Error_MethodNotFoundInClass" xml:space="preserve">
+    <value>Método {0} no encontrado en la clase {1}</value>
+  </data>
+  <data name="FunctionFieldCollection_Error_FieldCollectionNull" xml:space="preserve">
+    <value>El argumento de la colección de campos es nulo</value>
+  </data>
+  <data name="FunctionFieldCollection_Error_FieldCollectionInvalid" xml:space="preserve">
+    <value>El argumento {0} de la colección de campos no es válido</value>
+  </data>
+  <data name="FunctionGlobalCollection_Error_GlobalsNull" xml:space="preserve">
+    <value>El argumento de la colección de variables globales es nulo</value>
+  </data>
+  <data name="FunctionGlobalCollection_Error_GlobalsUnknown" xml:space="preserve">
+    <value>El argumento '{0}' de la colección de variables globales es desconocido.</value>
+  </data>
+  <data name="FunctionParameterCollection_Error_ParameterCollectionNull" xml:space="preserve">
+    <value>El argumento de la colección de parámetros es nulo</value>
+  </data>
+  <data name="FunctionParameterCollection_Error_ParameterCollectionInvalid" xml:space="preserve">
+    <value>El argumento {0} de la colección de parámetros no es válido</value>
+  </data>
+  <data name="FunctionReportItemCollection_Error_ReportItemCollectionNull" xml:space="preserve">
+    <value>El argumento de la colección de elementos de informe es nulo</value>
+  </data>
+  <data name="FunctionReportItemCollection_Error_ReportItemCollectionInvalid" xml:space="preserve">
+    <value>El argumento {0} de la colección de elementos de informe no es válido</value>
+  </data>
+  <data name="FunctionReportParameter_Error_UnknownReporParameterMethod" xml:space="preserve">
+    <value>Error interno: método de parámetro de informe desconocido</value>
+  </data>
+  <data name="FunctionSystem_Error_MethodNotFound" xml:space="preserve">
+    <value>Método {0} no encontrado en la clase {1}</value>
+  </data>
+  <data name="FunctionUserCollection_Error_UserCollectionNull" xml:space="preserve">
+    <value>El argumento de la colección de usuario es nulo</value>
+  </data>
+  <data name="FunctionUserCollection_Error_UserCollectionInvalid" xml:space="preserve">
+    <value>El argumento {0} de la colección de usuario no es válido.</value>
+  </data>
+  <data name="FunctionUserLanguage_Error_ConvertToDouble" xml:space="preserve">
+    <value>Conversión no válida de Language a double.</value>
+  </data>
+  <data name="FunctionUserLanguage_Error_ConvertToDecimal" xml:space="preserve">
+    <value>Conversión no válida de Language a Decimal.</value>
+  </data>
+  <data name="FunctionUserLanguage_Error_ConvertToInt32" xml:space="preserve">
+    <value>Conversión no válida de Language a Int32.</value>
+  </data>
+  <data name="FunctionUserLanguage_Error_ConvertToDateTime" xml:space="preserve">
+    <value>Conversión no válida de Language a DateTime.</value>
+  </data>
+  <data name="FunctionUserLanguage_Error_ConvertToBoolean" xml:space="preserve">
+    <value>Conversión no válida de Language a boolean.</value>
+  </data>
+  <data name="MhtBuilder_Error_FilenameNoExtension" xml:space="preserve">
+    <value>El nombre de archivo proporcionado, '{0}', no tiene extensión. Si está especificando una carpeta, asegúrese de que termine con una barra diagonal. Las extensiones de archivo esperadas son '{1}'</value>
+  </data>
+  <data name="MhtBuilder_Error_Extension" xml:space="preserve">
+    <value>La extensión del nombre de archivo proporcionado + '{0}' no tiene la extensión esperada '{1}'</value>
+  </data>
+  <data name="MhtWebFile_Error_ConvertOnlyHTMLOrCSS" xml:space="preserve">
+    <value>Convertir referencias solo tiene sentido para archivos HTML o CSS; este archivo es del tipo '{0}'</value>
+  </data>
+  <data name="MhtWebFile_Error_NoFilename" xml:space="preserve">
+    <value>No se proporcionó ningún nombre de archivo y no se encontró la etiqueta de título HTML, por lo que no se pudo generar automáticamente un nombre de archivo. Deberá proporcionar un nombre de archivo y no una carpeta.</value>
+  </data>
+  <data name="OneFileStreamGen_Error_FileAlreadyExists" xml:space="preserve">
+    <value>El archivo {0} ya existe.</value>
+  </data>
+  <data name="PdfOutline_Error_GetObjectNumberMustBeforeGetOutlineDict" xml:space="preserve">
+    <value>GetObjectNumber debe llamarse antes de GetOutlineDict</value>
+  </data>
+  <data name="ProcessReport_Error_ReportHasErrors" xml:space="preserve">
+    <value>El informe contiene errores. No se puede procesar.</value>
+  </data>
+  <data name="Pages_Error_CurrentPageMustInList" xml:space="preserve">
+    <value>CurrentPage debe estar en la lista de páginas</value>
+  </data>
+  <data name="PageTextHtml_Error_BuildMethodMustCalledPriorTotalHeight" xml:space="preserve">
+    <value>El método Build debe llamarse antes de hacer referencia a TotalHeight.</value>
+  </data>
+  <data name="RdlEngineConfig_Error_UnableCreateInstance" xml:space="preserve">
+    <value>No se puede crear una instancia de '{0}' para el proveedor '{1}'</value>
+  </data>
+  <data name="RdlEngineConfig_Error_NotKnownCustomReportItemType" xml:space="preserve">
+    <value>{0} no es un tipo de CustomReportItem conocido</value>
+  </data>
+  <data name="RdlEngineConfig_Error_CashModuleNotFound" xml:space="preserve">
+    <value>No se pudo encontrar {0}</value>
+  </data>
+  <data name="RdlEngineConfig_Error_CodeModuleNotLoaded" xml:space="preserve">
+    <value>No se pudo cargar {0}</value>
+  </data>
+  <data name="MhtBuilder_Error_UnableDownload" xml:space="preserve">
+    <value>no se puede descargar '{0}': {1}</value>
+  </data>
+  <data name="RDLParser_ErrorP__NoReport" xml:space="preserve">
+    <value>Error: el RDL no contiene un elemento de informe. </value>
+  </data>
+  <data name="RDLParser_ErrorP_XMLFailed" xml:space="preserve">
+    <value>Error: error de XML </value>
+  </data>
+  <data name="Lexer_ErrorP_InvalidNumberConstant" xml:space="preserve">
+    <value>Constante numérica no válida.</value>
+  </data>
+  <data name="Lexer_Error_SeparatorMustFollowedNumber" xml:space="preserve">
+    <value>'{0}' debe ir seguido de un número</value>
+  </data>
+  <data name="Lexer_ErrorP_UnterminatedString" xml:space="preserve">
+    <value>¡Cadena sin terminar!</value>
+  </data>
+  <data name="Lexer_Error_UnterminatedComment" xml:space="preserve">
+    <value>¡Comentario sin terminar!</value>
+  </data>
+  <data name="Parser_ErrorP_AtColumn" xml:space="preserve">
+    <value>  En la columna {0}</value>
+  </data>
+  <data name="Parser_ErrorP_EndExpressionExpected" xml:space="preserve">
+    <value>Se esperaba el final de la expresión.</value>
+  </data>
+  <data name="Parser_ErrorP_AND_OR_RequiresBoolean" xml:space="preserve">
+    <value>Las operaciones AND/OR requieren que ambos lados sean expresiones booleanas.</value>
+  </data>
+  <data name="Parser_ErrorP_NOTRequiresBoolean" xml:space="preserve">
+    <value>NOT requiere una expresión booleana.</value>
+  </data>
+  <data name="Parser_ErrorP_MinusNeedNumbers" xml:space="preserve">
+    <value>El operador '-' solo funciona con números.</value>
+  </data>
+  <data name="Parser_ErrorP_FoundValue" xml:space="preserve">
+    <value>  Se encontró '{0}'</value>
+  </data>
+  <data name="Parser_ErrorP_BracketExpected" xml:space="preserve">
+    <value>Se esperaba ')' pero no se encontró.</value>
+  </data>
+  <data name="Parser_ErrorP_IdentifierExpected" xml:space="preserve">
+    <value>Se esperaba una constante o un identificador pero no se encontró.</value>
+  </data>
+  <data name="Parser_ErrorP_FieldNotFound" xml:space="preserve">
+    <value>Campo '{0}' no encontrado.</value>
+  </data>
+  <data name="Parser_ErrorP_FieldSupportsValueAndIsMissing" xml:space="preserve">
+    <value>El campo '{0}' solo admite las propiedades 'Value' e 'IsMissing'.</value>
+  </data>
+  <data name="Parser_ErrorP_ParameterNotFound" xml:space="preserve">
+    <value>Parámetro de informe '{0}' no encontrado.</value>
+  </data>
+  <data name="Parser_ErrorP_ParameterSupportsValueAndLabel" xml:space="preserve">
+    <value>El parámetro '{0}' solo admite las propiedades 'Value' y 'Label'.</value>
+  </data>
+  <data name="Parser_ErrorP_ItemNotFound" xml:space="preserve">
+    <value>Elemento de informe '{0}' no encontrado.</value>
+  </data>
+  <data name="Parser_ErrorP_ItemSupportsValue" xml:space="preserve">
+    <value>El elemento de informe '{0}' solo admite la propiedad 'Value'.</value>
+  </data>
+  <data name="Parser_ErrorP_GlobalsNotFound" xml:space="preserve">
+    <value>Variable global '{0}' no encontrada.</value>
+  </data>
+  <data name="Parser_ErrorP_UserVarNotFound" xml:space="preserve">
+    <value>Variable de usuario '{0}' no encontrada.</value>
+  </data>
+  <data name="Parser_ErrorP_UnknownIdentifer" xml:space="preserve">
+    <value>'{0}' es un identificador desconocido.</value>
+  </data>
+  <data name="Parser_ErrorP_AggregateCannotUsedWithinGrouping" xml:space="preserve">
+    <value>La función de agregado '{0}' no se puede usar dentro de una expresión de agrupación.</value>
+  </data>
+  <data name="Parser_ErrorP_AggregateCannotNestedInAnotherAggregate" xml:space="preserve">
+    <value>La función de agregado '{0}' no se puede anidar dentro de otra función de agregado.</value>
+  </data>
+  <data name="Parser_ErrorP_Invalid_function_arguments" xml:space="preserve">
+    <value>Argumentos de función no válidos.</value>
+  </data>
+  <data name="Parser_ErrorP_ExpectingComma" xml:space="preserve">
+    <value>Se esperaba ',' o ')'.</value>
+  </data>
+  <data name="Parser_ErrorP_iff_function_requires_3_arguments" xml:space="preserve">
+    <value>La función iif requiere 3 argumentos.</value>
+  </data>
+  <data name="Parser_ErrorP_ChooseRequires2Arguments" xml:space="preserve">
+    <value>La función Choose requiere al menos 2 argumentos.</value>
+  </data>
+  <data name="Parser_ErrorP_ChooseFirstArgumentMustNumeric" xml:space="preserve">
+    <value>El primer argumento de la función Choose debe ser numérico.</value>
+  </data>
+  <data name="Parser_ErrorP_SwitchRequires2Arguments" xml:space="preserve">
+    <value>La función Switch requiere al menos 2 argumentos.</value>
+  </data>
+  <data name="Parser_ErrorP_SwitchMustEvenArguments" xml:space="preserve">
+    <value>La función Switch debe tener un número par de argumentos.</value>
+  </data>
+  <data name="Parser_ErrorP_SwitchMustBoolean" xml:space="preserve">
+    <value>La función Switch debe tener una expresión booleana en uno de cada dos argumentos.</value>
+  </data>
+  <data name="Parser_ErrorP_FormatRequires2Arguments" xml:space="preserve">
+    <value>La función Format requiere 2 argumentos.</value>
+  </data>
+  <data name="Parser_ErrorP_SecondMustString" xml:space="preserve">
+    <value>El segundo argumento de la función Format debe ser una cadena.</value>
+  </data>
+  <data name="Parser_ErrorP_FieldsRequires1Argument" xml:space="preserve">
+    <value>La colección Fields requiere exactamente 1 argumento.</value>
+  </data>
+  <data name="Parser_ErrorP_UnknownProperty" xml:space="preserve">
+    <value>{0} no es una propiedad conocida para {1}.</value>
+  </data>
+  <data name="Parser_ErrorP_ParametersRequires1Argument" xml:space="preserve">
+    <value>La colección Parameters requiere exactamente 1 argumento.</value>
+  </data>
+  <data name="Parser_ErrorP_ReportItemsRequires1Argument" xml:space="preserve">
+    <value>La colección ReportItems requiere exactamente 1 argumento.</value>
+  </data>
+  <data name="Parser_ErrorP_GlobalsRequires1Argument" xml:space="preserve">
+    <value>La colección Globals requiere exactamente 1 argumento.</value>
+  </data>
+  <data name="Parser_ErrorP_UserRequires1Argument" xml:space="preserve">
+    <value>La colección User requiere exactamente 1 argumento.</value>
+  </data>
+  <data name="Parser_ErrorP_RunningValue_takes_2_or_3_arguments" xml:space="preserve">
+    <value>RunningValue acepta 2 o 3 argumentos.</value>
+  </data>
+  <data name="Parser_ErrorP_RunningValueArgumentInvalid" xml:space="preserve">
+    <value>El argumento 'Function' de RunningValue no es válido.</value>
+  </data>
+  <data name="Parser_ErrorP_RunningValueNotSupported" xml:space="preserve">
+    <value>La función RunningValue '{0}' no es compatible.</value>
+  </data>
+  <data name="Parser_ErrorP_ScopeMustConstant" xml:space="preserve">
+    <value>El ámbito de la función {0} debe ser una constante.</value>
+  </data>
+  <data name="Parser_ErrorP_ScopeNotKnownDataSet" xml:space="preserve">
+    <value>El ámbito '{0}' no hace referencia a un DataSet conocido.</value>
+  </data>
+  <data name="Parser_ErrorP_NoScope4Aggregate" xml:space="preserve">
+    <value>No se proporcionó ámbito para la función de agregado '{0}' pero hay más de un DataSet definido.</value>
+  </data>
+  <data name="Parser_ErrorP_FieldNotInDataSet" xml:space="preserve">
+    <value>El campo '{0}' no está en el DataSet {1}.</value>
+  </data>
+  <data name="Parser_ErrorP_AggregateMust1Argument" xml:space="preserve">
+    <value>La función de agregado debe tener al menos un argumento.</value>
+  </data>
+  <data name="Parser_ErrorP_ScopeNotSpecifiedInHeaderOrFooter" xml:space="preserve">
+    <value>El ámbito '{0}' no se puede especificar en una expresión de encabezado o pie de página.</value>
+  </data>
+  <data name="Parser_ErrorP_ScopeNotKnownGrouping" xml:space="preserve">
+    <value>El ámbito '{0}' no es un nombre conocido de agrupación, DataSet o región de datos.</value>
+  </data>
+  <data name="Parser_ErrorP_ScopeIdentifer" xml:space="preserve">
+    <value>Se especificó un identificador de ámbito no válido.</value>
+  </data>
+  <data name="Parser_ErrorP_NotCodeMethod" xml:space="preserve">
+    <value>{0} no es un método de Code. Verifique que el nombre del método y sus argumentos coincidan con una función de código existente.</value>
+  </data>
+  <data name="Parser_ErrorP_FunctionUnknown" xml:space="preserve">
+    <value>La función {0} no es conocida.</value>
+  </data>
+  <data name="Parser_ErrorP_ClassUnknown" xml:space="preserve">
+    <value>La clase {0} no es conocida.</value>
+  </data>
+  <data name="Parser_ErrorP_FunctionOfClassUnknown" xml:space="preserve">
+    <value>La función '{0}' de la clase '{1}' no es conocida.</value>
+  </data>
+  <data name="Parser_ErrorP_CurlyBracketExpected" xml:space="preserve">
+    <value>Se esperaba '}' pero no se encontró.</value>
+  </data>
+  <data name="SaveToFile_CheckIf_SameFilesInDir" xml:space="preserve">
+    <value>El directorio contiene un archivo con el mismo nombre, ¿desea sobrescribirlo?</value>
+  </data>
+  <data name="ButtonSave_Text" xml:space="preserve">
+    <value>Guardar</value>
+  </data>
+  <data name="ButtonCancel_Text" xml:space="preserve">
+    <value>Cancelar</value>
+  </data>
+  <data name="FileChooser_SaveFileTo_Title" xml:space="preserve">
+    <value>Guardar archivo como</value>
+  </data>
+</root>
