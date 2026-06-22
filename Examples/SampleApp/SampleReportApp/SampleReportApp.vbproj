@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net8.0-windows</TargetFramework>
+    <TargetFrameworks>net48;net8.0-windows</TargetFrameworks>
     <OutputType>WinExe</OutputType>
     <StartupObject>SampleReportApp.My.MyApplication</StartupObject>
     <MyType>WindowsForms</MyType>

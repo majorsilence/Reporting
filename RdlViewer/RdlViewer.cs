@@ -76,6 +76,7 @@ namespace Majorsilence.Reporting.RdlViewer
         /// The pages of the report to view
         /// </summary>
         private Pages _pgs;
+        private bool _loadingPages = false;
         /// <summary>
         /// Last load of report failed
         /// </summary>
@@ -1610,8 +1611,9 @@ namespace Majorsilence.Reporting.RdlViewer
         /// </summary>
         private async Task LoadPageIfNeeded()
         {
-            if (_pgs == null)
+            if (_pgs == null && !_loadingPages)
             {
+                _loadingPages = true;
                 Cursor savec = null;
                 try
                 {
@@ -1622,7 +1624,7 @@ namespace Majorsilence.Reporting.RdlViewer
                     }
 
                     savec = this.Cursor;                // this could take a while so put up wait cursor
-                    this.Cursor = Cursors.WaitCursor;              
+                    this.Cursor = Cursors.WaitCursor;
                     _pgs = await GetPages();
                     _DrawPanel.Pgs = _pgs;
                     CalcZoom();                         // this could affect zoom
@@ -1630,6 +1632,7 @@ namespace Majorsilence.Reporting.RdlViewer
                 }
                 finally
                 {
+                    _loadingPages = false;
                     this.HideWaiter();
                     if (savec != null)
                         this.Cursor = savec;
@@ -2181,12 +2184,18 @@ namespace Majorsilence.Reporting.RdlViewer
 
         public void HideRunButton()
         {
+            // RdlViewer_Layout resets _RunButton.Visible from _ShowParameters on every
+            // layout pass, so the flag must be updated for the change to persist.
+            _ShowParameters = false;
             _RunButton.Visible = false;
+            RdlViewer_Layout(this, null);
         }
 
         public void ShowRunButton()
         {
+            _ShowParameters = true;
             _RunButton.Visible = true;
+            RdlViewer_Layout(this, null);
         }
     }
 
