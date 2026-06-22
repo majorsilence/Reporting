@@ -22,10 +22,6 @@ if ($env:GITHUB_OUTPUT) {
     "version=$Version" | Out-File -Append -FilePath $env:GITHUB_OUTPUT
 }
 
-$solutionPath = Join-Path $CURRENTPATH "MajorsilenceReporting.sln"
-dotnet restore $solutionPath -p:EnableWindowsTargeting=true
-dotnet build $solutionPath --configuration $pConfigurationCompat --verbosity minimal -p:EnableWindowsTargeting=true -p:GeneratePackageOnBuild=false
-
 dotnet publish RdlCmd -c Release-DrawingCompat -r osx-x64   -f $pTargetFrameworkGeneric --self-contained true -p:PublishAot=true -p:GeneratePackageOnBuild=false -o "RdlCmd/bin/$pConfigurationCompat/$pTargetFrameworkGeneric/osx-x64-aot/publish"
 dotnet publish RdlCmd -c Release-DrawingCompat -r osx-arm64 -f $pTargetFrameworkGeneric --self-contained true -p:PublishAot=true -p:GeneratePackageOnBuild=false -o "RdlCmd/bin/$pConfigurationCompat/$pTargetFrameworkGeneric/osx-arm64-aot/publish"
 
