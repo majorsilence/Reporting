@@ -54,6 +54,9 @@ class RdlLibrary
 	 */
 	public static function load(string $lib_path): \FFI
 	{
+		// Tell the C# resolver where to find P/Invoke sibling libraries (libSkiaSharp.so,
+		// libe_sqlite3.so, etc.) — must be set before rdl_init() is called.
+		putenv('RDLNATIVE_LIB_DIR=' . dirname(realpath($lib_path)));
 		$ffi = \FFI::cdef(self::C_DECLS, $lib_path);
 		$ret = $ffi->rdl_init();
 		if ($ret !== 0) {

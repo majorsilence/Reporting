@@ -37,6 +37,21 @@ module RdlLibrary
   # Returns a Hash of bound Fiddle::Function objects.
   # Call this once per process before creating any ReportNative instances.
   def self.load(lib_path)
+    lib_path = File.expand_path(lib_path)
+    lib_dir  = File.dirname(lib_path)
+
+    # Tell the C# resolver where to find P/Invoke sibling libraries (libSkiaSharp.so,
+    # libe_sqlite3.so, etc.) — must be set before rdl_init() is called.
+    ENV['RDLNATIVE_LIB_DIR'] = lib_dir
+
+    # Pre-load all shared libraries in the directory with RTLD_GLOBAL (Fiddle's
+    # default).  On .NET 10+, libSystem.Native.so and sibling P/Invoke targets are
+    # shared libraries — they must be globally visible before rdlnative.so runs.
+    ext = RUBY_PLATFORM =~ /darwin/ ? '*.dylib' : '*.so'
+    Dir.glob(File.join(lib_dir, ext)).sort.each do |f|
+      begin Fiddle.dlopen(f) rescue Fiddle::DLError; end
+    end
+
     handle = Fiddle.dlopen(lib_path)
 
     fns = {

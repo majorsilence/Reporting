@@ -30,6 +30,8 @@ Supported export types: "pdf", "csv", "xlsx", "xlsx_table", "xml", "rtf",
 
 import ctypes
 import contextlib
+import glob
+import os
 import platform
 
 
@@ -40,6 +42,29 @@ def load_library(lib_path: str) -> ctypes.CDLL:
     Call this once per process before creating any Report instances.
     Returns the loaded CDLL object to pass to Report().
     """
+    lib_path = os.path.abspath(lib_path)
+    lib_dir  = os.path.dirname(lib_path)
+    lib_name = os.path.basename(lib_path)
+
+    # Set RDLNATIVE_LIB_DIR before loading so rdl_init() can register a DllImportResolver
+    # that finds P/Invoke sibling libraries (libSkiaSharp.so etc.) in this directory.
+    os.environ['RDLNATIVE_LIB_DIR'] = lib_dir
+
+    # Pre-load all shared libraries in the directory (including rdlnative itself) with
+    # RTLD_GLOBAL before the final load below.  On .NET 10+, runtime components
+    # (libSystem.Native.so etc.) are shared libraries whose symbols must be globally
+    # visible for rdlnative.so to load and resolve P/Invoke calls correctly.
+    # Loading rdlnative.so with RTLD_GLOBAL is also required: it ensures .NET's
+    # P/Invoke resolver finds sibling libraries (libSkiaSharp.so, libe_sqlite3.so)
+    # through the OS SONAME cache rather than the host-process search path.
+    ext = '.dylib' if platform.system() == 'Darwin' else '.so'
+    for sibling in sorted(glob.glob(os.path.join(lib_dir, f'*{ext}'))):
+        try:
+            ctypes.CDLL(sibling, ctypes.RTLD_GLOBAL)
+        except OSError:
+            pass
+
+    # Returns the already-loaded RTLD_GLOBAL handle (from the loop above).
     lib = ctypes.CDLL(lib_path)
 
     lib.rdl_init.restype = ctypes.c_int

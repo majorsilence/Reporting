@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.IO;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
@@ -39,7 +40,17 @@ public static class RdlNativeApi
         s_errorBuf = (nint)NativeMemory.AllocZeroed(2048);
     }
 
-    private static unsafe void SetError(Exception ex) => SetError(ex.Message);
+    private static unsafe void SetError(Exception ex)
+    {
+        // Walk the inner exception chain for the most useful message.
+        var sb = new System.Text.StringBuilder();
+        for (var e = ex; e != null; e = e.InnerException)
+        {
+            if (sb.Length > 0) sb.Append(" -> ");
+            sb.Append(e.GetType().Name).Append(": ").Append(e.Message);
+        }
+        SetError(sb.ToString());
+    }
 
     private static unsafe void SetError(string msg)
     {
@@ -66,13 +77,66 @@ public static class RdlNativeApi
             RdlEngineConfig.RdlEngineConfigInit();
     }
 
+    // ─── P/Invoke library resolver ───────────────────────────────────────────
+    // When rdlnative.so is loaded by a foreign host (Python/PHP/Ruby), .NET's
+    // P/Invoke resolver searches for dependencies (e.g. libSkiaSharp.so) relative
+    // to the host process rather than rdlnative.so's own directory. The caller
+    // sets RDLNATIVE_LIB_DIR to the directory containing rdlnative.so before
+    // calling rdl_init(), and we register a resolver that looks there first.
+
+    private static void SetupLibraryResolver(string libDir)
+    {
+        DllImportResolver resolver = (name, _, _) => ResolveFromDir(name, libDir);
+        RegisterSafe(resolver, typeof(RdlNativeApi).Assembly);
+        RegisterSafe(resolver, typeof(RdlEngineConfig).Assembly);
+#if DRAWINGCOMPAT
+        RegisterSafe(resolver, typeof(SkiaSharp.SKBitmap).Assembly);
+#endif
+        RegisterSafe(resolver, typeof(SQLitePCL.raw).Assembly);
+        RegisterSafe(resolver, typeof(MySql.Data.MySqlClient.MySqlConnection).Assembly);
+        RegisterSafe(resolver, typeof(Npgsql.NpgsqlConnection).Assembly);
+    }
+
+    private static void RegisterSafe(DllImportResolver resolver, Assembly asm)
+    {
+        try { NativeLibrary.SetDllImportResolver(asm, resolver); }
+        catch { }
+    }
+
+    private static nint ResolveFromDir(string name, string dir)
+    {
+        string[] candidates = RuntimeInformation.IsOSPlatform(OSPlatform.OSX)
+            ? new[] { $"lib{name}.dylib", $"{name}.dylib", name }
+            : RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
+            ? new[] { $"{name}.dll", name }
+            : new[] { $"lib{name}.so", $"{name}.so", name };
+
+        foreach (string c in candidates)
+        {
+            if (NativeLibrary.TryLoad(Path.Combine(dir, c), out nint h))
+                return h;
+        }
+        NativeLibrary.TryLoad(name, out nint fallback);
+        return fallback;
+    }
+
     // ─── Exported C API ─────────────────────────────────────────────────────
 
     /// <summary>Initialize the reporting engine. Call once at startup before any other function.</summary>
     [UnmanagedCallersOnly(EntryPoint = "rdl_init")]
     public static int Init()
     {
-        try { EnsureInit(); return 0; }
+        try
+        {
+            // If the caller set RDLNATIVE_LIB_DIR, register a P/Invoke resolver so
+            // that sibling libraries (libSkiaSharp.so etc.) are found in the same
+            // directory as rdlnative.so rather than the host process directory.
+            string? libDir = Environment.GetEnvironmentVariable("RDLNATIVE_LIB_DIR");
+            if (libDir is not null)
+                SetupLibraryResolver(libDir);
+            EnsureInit();
+            return 0;
+        }
         catch (Exception ex) { SetError(ex); return -1; }
     }
 
