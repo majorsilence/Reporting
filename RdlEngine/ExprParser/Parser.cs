@@ -564,6 +564,13 @@ namespace Majorsilence.Reporting.Rdl
 				int level = 0;
 				bool nextScope = false;
 				Token scopeToken = null;
+				// RunningValue's signature is RunningValue(expression, aggregateFunction, scope),
+				// so its scope is the third argument (after the second top-level comma) rather
+				// than the second argument used by the other aggregate functions. The scope of
+				// a RunningValue is also typically a grouping name, not a DataSet name.
+				bool isRunningValue = method.ToLower() == "runningvalue";
+				int commasBeforeScope = isRunningValue ? 2 : 1;
+				int commaCount = 0;
 				foreach(Token tok in tokens)
 				{
 					if(nextScope)
@@ -571,9 +578,12 @@ namespace Majorsilence.Reporting.Rdl
 						scopeToken = tok;
 						break;
 					}
-					
+
 					if(level == 0 && tok.Type == TokenTypes.COMMA)
 					{
+						commaCount++;
+						if (commaCount < commasBeforeScope)
+							continue;
 						nextScope = true;
 						continue;
 					}
@@ -585,11 +595,20 @@ namespace Majorsilence.Reporting.Rdl
 
 				if (scopeToken != null)
 				{
-					if (scopeToken.Type != TokenTypes.QUOTE)
+					if (scopeToken.Type == TokenTypes.QUOTE)
+					{
+						// A quoted scope names a DataSet; capture it so field references inside
+						// the aggregate resolve against that DataSet.
+						inAggregateDataSet = this.idLookup.ScopeDataSet(scopeToken.Value);
+						if (inAggregateDataSet == null && !isRunningValue)
+							throw new ParserException(string.Format(Strings.Parser_ErrorP_ScopeNotKnownDataSet, scopeToken.Value));
+					}
+					else if (!isRunningValue)
+					{
 						throw new ParserException(string.Format(Strings.Parser_ErrorP_ScopeMustConstant, scopeToken.Value));
-					inAggregateDataSet = this.idLookup.ScopeDataSet(scopeToken.Value);
-					if (inAggregateDataSet == null)
-						throw new ParserException(string.Format(Strings.Parser_ErrorP_ScopeNotKnownDataSet, scopeToken.Value));
+					}
+					// For RunningValue a non-quoted scope is a grouping name; it is resolved
+					// later in ResolveAggrScope, so no DataSet capture is required here.
 				}
 			}
 
