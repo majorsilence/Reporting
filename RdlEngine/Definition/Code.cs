@@ -51,10 +51,14 @@ namespace Majorsilence.Reporting.Rdl
 		[RequiresDynamicCode("Compiles and loads VB source at runtime via VBCodeProvider; not AOT-compatible")]
 		private Assembly GetAssembly()
 		{
+#if !NETFRAMEWORK
+			// .NET Framework always supports dynamic code (JIT); the property only
+			// exists on net6.0+, where Native AOT can report it as false.
 			if (!RuntimeFeature.IsDynamicCodeSupported)
 				throw new PlatformNotSupportedException(
 					"The <Code> element in RDL reports requires dynamic code compilation (VBCodeProvider) " +
 					"which is not supported under Native AOT. Remove the <Code> element or use a pre-compiled CodeModule instead.");
+#endif
 
 			// Generate the proxy source code
             List<string> lines = new List<string>();		// hold lines in array in case of error
