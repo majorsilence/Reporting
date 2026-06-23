@@ -18,12 +18,14 @@ namespace Majorsilence.Reporting.Rdl
         List<TableRow> _Items;			// list of TableRow
 		float _HeightOfRows;		// height of contained rows
 		bool _CanGrow;				// if any TableRow contains a TextBox with CanGrow
+		bool _CanShrink;			// if any TableRow contains a TextBox with CanShrink
 
 		internal TableRows(ReportDefn r, ReportLink p, XmlNode xNode) : base(r, p)
 		{
 			TableRow t;
             _Items = new List<TableRow>();
 			_CanGrow = false;
+			_CanShrink = false;
 			// Loop thru all the child nodes
 			foreach(XmlNode xNodeLoop in xNode.ChildNodes)
 			{
@@ -57,6 +59,7 @@ namespace Majorsilence.Reporting.Rdl
 				_HeightOfRows += t.Height.Points;
                 await t.FinalPass();
 				_CanGrow |= t.CanGrow;
+				_CanShrink |= t.CanShrink;
 			}
 
 			return;
@@ -127,14 +130,19 @@ namespace Majorsilence.Reporting.Rdl
 
 		internal async Task<float> HeightOfRows(Pages pgs, Row r)
 		{
-			if (!this._CanGrow)
+			if (!this._CanGrow && !this._CanShrink)
 				return _HeightOfRows;
-			
+
 			float height=0;
 			foreach (TableRow tr in this._Items)
 			{
 				height += await tr.HeightOfRow(pgs, r);
 			}
+
+			// When rows can shrink, the total may legitimately fall below the sum of
+			// defined heights, so the defined-height floor must not be applied.
+			if (this._CanShrink)
+				return height;
 
 			return Math.Max(height, _HeightOfRows);
 		}

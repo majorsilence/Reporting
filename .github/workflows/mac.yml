@@ -33,3 +33,13 @@ jobs:
           name: unit tests
           path: "**/TestResults/*.trx"
           reporter: dotnet-trx
+      - name: Build AOT macOS
+        id: aot_build
+        shell: pwsh
+        run: ./build-release-aot-osx.ps1
+      - name: Archive AOT artifacts
+        uses: actions/upload-artifact@v6
+        with:
+          name: majorsilence-reporting-aot-osx-${{ steps.aot_build.outputs.version }}
+          path: Release-Builds/build-output/*.zip
+          retention-days: 1

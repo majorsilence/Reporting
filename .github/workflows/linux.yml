@@ -33,4 +33,16 @@ jobs:
           name: unit tests
           path: "**/TestResults/*.trx"
           reporter: dotnet-trx
+      - name: Install arm64 cross-compilation toolchain
+        run: sudo apt-get install -y gcc-aarch64-linux-gnu binutils-aarch64-linux-gnu
+      - name: Build AOT Linux
+        id: aot_build
+        shell: pwsh
+        run: ./build-release-aot-linux.ps1
+      - name: Archive AOT artifacts
+        uses: actions/upload-artifact@v6
+        with:
+          name: majorsilence-reporting-aot-linux-${{ steps.aot_build.outputs.version }}
+          path: Release-Builds/build-output/*.zip
+          retention-days: 1
 

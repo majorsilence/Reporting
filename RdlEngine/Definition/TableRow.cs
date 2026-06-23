@@ -26,6 +26,7 @@ namespace Majorsilence.Reporting.Rdl
 		RSize _Height;				// Height of the row
 		Visibility _Visibility;		// Indicates if the row should be hidden		
 		bool _CanGrow;			// indicates that row height can increase in size
+		bool _CanShrink;		// indicates that row height can decrease in size
 		List<Textbox> _GrowList;	// list of TextBox's that need to be checked for growth
 
 		internal TableRow(ReportDefn r, ReportLink p, XmlNode xNode) : base(r, p)
@@ -34,6 +35,7 @@ namespace Majorsilence.Reporting.Rdl
 			_Height=null;
 			_Visibility=null;
 			_CanGrow = false;
+			_CanShrink = false;
 			_GrowList = null;
 
 			// Loop thru all the child nodes
@@ -83,6 +85,8 @@ namespace Majorsilence.Reporting.Rdl
 					_GrowList.Add(tb);
 					_CanGrow = true;
 				}
+				if (tb.CanShrink)
+					_CanShrink = true;
 			}
 
 			if (_CanGrow)				// shrink down the resulting list
@@ -139,22 +143,46 @@ namespace Majorsilence.Reporting.Rdl
 			}
 
 			float defnHeight = _Height.Points;
-			if (!_CanGrow)
+			if (!_CanGrow && !_CanShrink)
 			{
 				wc.CalcHeight = defnHeight;
 				return defnHeight;
 			}
 
-            TableColumns tcs= this.Table.TableColumns;
-			float height=0;
-			foreach (Textbox tb in this._GrowList)
+			// Determine the row height from the natural (content) height of each cell.
+			// A fixed cell always needs the defined height; a CanGrow cell may exceed
+			// it; a CanShrink cell may fall below it.  The row takes the tallest
+			// requirement of its cells.
+			TableColumns tcs = this.Table.TableColumns;
+			float height = 0;
+			foreach (TableCell tc in _TableCells.Items)
 			{
-                int ci = tb.TC.ColIndex;
-                if (await tcs[ci].IsHidden(rpt, r))    // if column is hidden don't use in calculation
-                    continue;
-				height = Math.Max(height, await tb.RunTextCalcHeight(rpt, g, r));
+				Textbox tb = tc.ReportItems.Items[0] as Textbox;
+				float cellHeight;
+				if (tb != null && (tb.CanGrow || tb.CanShrink))
+				{
+					int ci = tb.TC.ColIndex;
+					if (await tcs[ci].IsHidden(rpt, r))    // if column is hidden don't use in calculation
+						continue;
+					float content = await tb.RunTextCalcHeight(rpt, g, r);
+					if (tb.CanGrow && !tb.CanShrink)
+						cellHeight = Math.Max(content, defnHeight);  // grow only
+					else
+						cellHeight = content;                        // shrink-only or grow+shrink
+				}
+				else
+					cellHeight = defnHeight;                         // fixed item needs full height
+				height = Math.Max(height, cellHeight);
 			}
-			wc.CalcHeight = Math.Max(height, defnHeight);
+
+			// Preserve prior behaviour: a CanGrow row never drops below its defined
+			// height.  A CanShrink-only row may shrink but never exceed it.
+			if (_CanGrow)
+				height = Math.Max(height, defnHeight);
+			else
+				height = Math.Min(height, defnHeight);
+
+			wc.CalcHeight = height;
 			return wc.CalcHeight;
 		}
 
@@ -188,6 +216,11 @@ namespace Majorsilence.Reporting.Rdl
 		internal bool CanGrow
 		{
 			get { return _CanGrow; }
+		}
+
+		internal bool CanShrink
+		{
+			get { return _CanShrink; }
 		}
 
 		internal List<Textbox> GrowList

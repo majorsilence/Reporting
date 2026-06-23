@@ -1,0 +1,99 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="Majorsilence.Reporting.UI.RdlAvalonia.Viewer.PdfSecurityDialog"
+        Title="PDF Security"
+        Width="400"
+        SizeToContent="Height"
+        CanResize="False"
+        WindowStartupLocation="CenterOwner"
+        Background="{DynamicResource SystemControlPageBackgroundAltHighBrush}">
+
+  <Window.Styles>
+    <Style Selector="TextBlock.label">
+      <Setter Property="FontSize" Value="12"/>
+      <Setter Property="Opacity" Value="0.7"/>
+      <Setter Property="Margin" Value="0,0,0,3"/>
+    </Style>
+    <Style Selector="CheckBox">
+      <Setter Property="FontSize" Value="13"/>
+    </Style>
+  </Window.Styles>
+
+  <StackPanel Spacing="0" Margin="20,16,20,20">
+
+    <!-- Protect toggle -->
+    <CheckBox x:Name="ProtectCheck"
+              Content="Password-protect this PDF"
+              FontSize="14"
+              FontWeight="SemiBold"
+              Margin="0,0,0,14"/>
+
+    <!-- Security options (shown only when protect is enabled) -->
+    <Border x:Name="SecurityPanel" IsVisible="False">
+      <StackPanel Spacing="0">
+
+        <!-- Passwords -->
+        <Border BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}"
+                BorderThickness="0,0,0,1"
+                Margin="0,0,0,14"
+                Padding="0,0,0,14">
+          <StackPanel Spacing="10">
+            <StackPanel Spacing="3">
+              <TextBlock Classes="label" Text="User password (required to open the document)"/>
+              <TextBox x:Name="UserPasswordBox" PasswordChar="●" FontSize="13"/>
+            </StackPanel>
+            <StackPanel Spacing="3">
+              <TextBlock Classes="label" Text="Owner password (required to change security settings — optional)"/>
+              <TextBox x:Name="OwnerPasswordBox" PasswordChar="●" FontSize="13"/>
+            </StackPanel>
+          </StackPanel>
+        </Border>
+
+        <!-- Permissions -->
+        <TextBlock Text="What users may do with the document:"
+                   Classes="label"
+                   Margin="0,0,0,8"/>
+        <StackPanel Spacing="4" Margin="0,0,0,14">
+          <CheckBox x:Name="AllowPrintCheck"    Content="Print"                    IsChecked="True"/>
+          <CheckBox x:Name="AllowHiResPrintCheck" Content="High-quality printing"  IsChecked="True"/>
+          <CheckBox x:Name="AllowCopyCheck"     Content="Copy text and graphics"   IsChecked="True"/>
+          <CheckBox x:Name="AllowModifyCheck"   Content="Modify document content"  IsChecked="False"/>
+          <CheckBox x:Name="AllowAnnotateCheck" Content="Add or edit annotations"  IsChecked="True"/>
+          <CheckBox x:Name="AllowFillFormsCheck" Content="Fill in form fields"     IsChecked="True"/>
+          <CheckBox x:Name="AllowAssembleCheck" Content="Assemble document (insert/delete pages)" IsChecked="False"/>
+        </StackPanel>
+
+        <!-- Encryption strength -->
+        <Border BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}"
+                BorderThickness="0,1,0,0"
+                Padding="0,14,0,0"
+                Margin="0,0,0,14">
+          <StackPanel Spacing="3">
+            <TextBlock Classes="label" Text="Encryption strength"/>
+            <ComboBox x:Name="EncryptionCombo" Width="220" HorizontalAlignment="Left" FontSize="13">
+              <ComboBoxItem Content="AES-256 (recommended, PDF 2.0)" IsSelected="True"/>
+              <ComboBoxItem Content="AES-128 (PDF 1.6 compatible)"/>
+            </ComboBox>
+          </StackPanel>
+        </Border>
+
+      </StackPanel>
+    </Border>
+
+    <!-- Validation message -->
+    <TextBlock x:Name="ValidationText"
+               Foreground="OrangeRed"
+               FontSize="12"
+               IsVisible="False"
+               Margin="0,0,0,8"/>
+
+    <!-- Buttons -->
+    <StackPanel Orientation="Horizontal"
+                HorizontalAlignment="Right"
+                Spacing="8">
+      <Button x:Name="CancelButton" Content="Cancel" Width="80"/>
+      <Button x:Name="OkButton" Content="Save" Width="80" Classes="accent"/>
+    </StackPanel>
+
+  </StackPanel>
+</Window>

@@ -1,6 +1,7 @@
 
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Xml;
 using System.Xml.Xsl;
 using System.Text;
@@ -125,11 +126,12 @@ namespace Majorsilence.Reporting.Rdl
 			return result;
 		}
 		/// <summary>
-		/// Loads assembly from file; tries up to 3 time; load with name, load from BaseDirectory, 
+		/// Loads assembly from file; tries up to 3 time; load with name, load from BaseDirectory,
 		/// and load from BaseDirectory concatenated with Relative directory.
 		/// </summary>
 		/// <param name="s"></param>
 		/// <returns></returns>
+		[RequiresDynamicCode("Loading assemblies at runtime is not supported under Native AOT")]
 		static internal Assembly AssemblyLoadFrom(string s)
 		{
 			Assembly ra=null;
@@ -159,6 +161,7 @@ namespace Majorsilence.Reporting.Rdl
 			return ra;
 		}
 
+        [RequiresDynamicCode("Loading assemblies at runtime is not supported under Native AOT")]
         static Assembly AssemblyLoadFromPvt(string file, params string[] dir)
         {
             Assembly ra = null;
@@ -196,6 +199,7 @@ namespace Majorsilence.Reporting.Rdl
             return ra;
         }
 
+        [RequiresUnreferencedCode("Type members may be removed by the trimmer")]
         static internal MethodInfo GetMethod(Type t, string method, Type[] argTypes)
         {
             if (t == null || method == null)
@@ -226,62 +230,26 @@ namespace Majorsilence.Reporting.Rdl
 
         static internal Type GetTypeFromTypeCode(TypeCode tc)
 		{
-			Type t =null;
-			switch (tc)
+			return tc switch
 			{
-				case TypeCode.Boolean:
-					t = Type.GetType("System.Boolean");
-					break;
-				case TypeCode.Byte:
-					t = Type.GetType("System.Byte");
-					break;
-				case TypeCode.Char:
-					t = Type.GetType("System.Char");
-					break;
-				case TypeCode.DateTime:
-					t = Type.GetType("System.DateTime");
-					break;
-				case TypeCode.Decimal:
-					t = Type.GetType("System.Decimal");
-					break;
-				case TypeCode.Double:
-					t = Type.GetType("System.Double");
-					break;
-				case TypeCode.Int16:
-					t = Type.GetType("System.Int16");
-					break;
-				case TypeCode.Int32:
-					t = Type.GetType("System.Int32");
-					break;
-				case TypeCode.Int64:
-					t = Type.GetType("System.Int64");
-					break;
-				case TypeCode.Object:
-					t = Type.GetType("System.Object");
-					break;
-				case TypeCode.SByte:
-					t = Type.GetType("System.SByte");
-					break;
-				case TypeCode.Single:
-					t = Type.GetType("System.Single");
-					break;
-				case TypeCode.String:
-					t = Type.GetType("System.String");
-					break;
-				case TypeCode.UInt16:
-					t = Type.GetType("System.UInt16");
-					break;
-				case TypeCode.UInt32:
-					t = Type.GetType("System.UInt32");
-					break;
-				case TypeCode.UInt64:
-					t = Type.GetType("System.UInt64");
-					break;
-				default:
-					t = Type.GetType("Object");
-					break;
-			}
-			return t;
+				TypeCode.Boolean  => typeof(bool),
+				TypeCode.Byte     => typeof(byte),
+				TypeCode.Char     => typeof(char),
+				TypeCode.DateTime => typeof(DateTime),
+				TypeCode.Decimal  => typeof(decimal),
+				TypeCode.Double   => typeof(double),
+				TypeCode.Int16    => typeof(short),
+				TypeCode.Int32    => typeof(int),
+				TypeCode.Int64    => typeof(long),
+				TypeCode.Object   => typeof(object),
+				TypeCode.SByte    => typeof(sbyte),
+				TypeCode.Single   => typeof(float),
+				TypeCode.String   => typeof(string),
+				TypeCode.UInt16   => typeof(ushort),
+				TypeCode.UInt32   => typeof(uint),
+				TypeCode.UInt64   => typeof(ulong),
+				_                 => typeof(object),
+			};
 		}
     
         static internal object GetConstFromTypeCode(TypeCode tc)

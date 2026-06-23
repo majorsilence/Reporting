@@ -121,9 +121,13 @@ namespace Majorsilence.Reporting.Rdl
 
 		internal Type LookupType(string clsname)
 		{
-			if (cms == null || clsname == string.Empty)
+			if (clsname == string.Empty)
 				return null;
-			return cms[clsname];
+			if (cms != null)
+				return cms[clsname];
+			// No <CodeModules> element — still check AOT pre-registrations
+			RdlEngineConfig.TryGetRegisteredType(clsname, out Type? t);
+			return t;
 		}
 
 		internal CodeModules CMS

@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Xml;
 using System.Collections;
 using System.Collections.Generic;
@@ -27,6 +28,11 @@ namespace Majorsilence.Reporting.Rdl
         // Compression entries
         static CompressionConfig _Compression = null;
         static string _DirectoryLoadedFrom = null;
+
+        // AOT registration state
+        static Func<Report, RdlCodeFunctions>? _codeProviderFactory = null;
+        static Dictionary<string, Type>? _registeredTypes = null;
+        static Dictionary<string, Func<object>>? _instanceFactories = null;
 
         static public string DirectoryLoadedFrom
         {
@@ -691,8 +697,7 @@ namespace Majorsilence.Reporting.Rdl
                     Assembly[] allLoadedAss = AppDomain.CurrentDomain.GetAssemblies();
                     foreach (Assembly ass in allLoadedAss)
                     {
-                        var type = ass.GetType();
-                        if (type.GetMethod("Location") != null)
+                        try
                         {
                             if (ass.Location.Equals(codemodule, StringComparison.CurrentCultureIgnoreCase))
                             {
@@ -700,6 +705,7 @@ namespace Majorsilence.Reporting.Rdl
                                 break;
                             }
                         }
+                        catch { }
                     }
 
                     if (la == null)     // not previously loaded? 
@@ -720,17 +726,22 @@ namespace Majorsilence.Reporting.Rdl
             }
         }
 
+        [RequiresDynamicCode("Falls back to Activator.CreateInstance when no factory is registered; call RegisterCustomReportItem<T> for AOT")]
+        [RequiresUnreferencedCode("Custom report item types resolved from config may be trimmed; call RegisterCustomReportItem<T> for AOT")]
         public static ICustomReportItem CreateCustomReportItem(string friendlyTypeName)
         {
             CustomReportItemEntry crie = null;
             if (!CustomReportItemEntries.TryGetValue(friendlyTypeName, out crie))
                 throw new Exception(string.Format(Strings.RdlEngineConfig_Error_NotKnownCustomReportItemType, friendlyTypeName));
+
+            if (crie.Factory != null)
+                return crie.Factory();
+
             if (crie.Type == null)
                 throw new Exception(crie.ErrorMsg ??
                     string.Format(Strings.RdlEngineConfig_Error_NotKnownCustomReportItemType, friendlyTypeName));
 
-            var item = (ICustomReportItem)Activator.CreateInstance(crie.Type);
-            return item;
+            return (ICustomReportItem)Activator.CreateInstance(crie.Type)!;
         }
 
         public static void DeclareNewCustomReportItem(string itemName, Type type)
@@ -742,13 +753,88 @@ namespace Majorsilence.Reporting.Rdl
             if (CustomReportItemEntries == null)
                 RdlEngineConfigInit();
 
-            // Let's manage doublons, if any. 
+            // Let's manage doublons, if any.
             CustomReportItemEntry item;
             if (!CustomReportItemEntries.TryGetValue(itemName, out item))
                 CustomReportItemEntries[itemName] = new CustomReportItemEntry(itemName, type, null);
             else if (!item.Type.Equals(type))
                 throw new ArgumentException("A different type of CustomReportItem with the same has already been declared.");
         }
+
+        /// <summary>
+        /// AOT-safe: registers a custom report item using a generic constraint so the trimmer
+        /// can see the concrete type at compile time.
+        /// </summary>
+        public static void RegisterCustomReportItem<
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)] T>(
+            string friendlyName)
+            where T : ICustomReportItem, new()
+            => RegisterCustomReportItem(friendlyName, () => new T());
+
+        /// <summary>
+        /// AOT-safe: registers a custom report item using a factory delegate.
+        /// </summary>
+        public static void RegisterCustomReportItem(string friendlyName, Func<ICustomReportItem> factory)
+        {
+            if (CustomReportItemEntries == null)
+                RdlEngineConfigInit();
+
+            if (!CustomReportItemEntries.TryGetValue(friendlyName, out var existing))
+                CustomReportItemEntries[friendlyName] = new CustomReportItemEntry(friendlyName, null, null) { Factory = factory };
+            else
+                existing.Factory = factory;
+        }
+
+        /// <summary>
+        /// AOT-safe: registers a delegate-based replacement for the RDL &lt;Code&gt; element,
+        /// used instead of runtime VB compilation via VBCodeProvider.
+        /// </summary>
+        public static void RegisterCodeProvider(Func<Report, RdlCodeFunctions> factory)
+            => _codeProviderFactory = factory;
+
+        /// <summary>
+        /// AOT-safe: pre-registers a type by its fully-qualified class name so the CodeModules
+        /// subsystem can resolve it without scanning loaded assemblies.
+        /// The <see cref="DynamicallyAccessedMembersAttribute"/> tells the trimmer to keep all
+        /// public methods and constructors on the type.
+        /// </summary>
+        public static void RegisterType(
+            string fullyQualifiedClassName,
+            [DynamicallyAccessedMembers(
+                DynamicallyAccessedMemberTypes.PublicMethods |
+                DynamicallyAccessedMemberTypes.PublicConstructors)] Type type)
+        {
+            _registeredTypes ??= new Dictionary<string, Type>(StringComparer.Ordinal);
+            _registeredTypes[fullyQualifiedClassName] = type;
+        }
+
+        /// <summary>
+        /// AOT-safe: pre-registers a factory for instance types used by ReportClass
+        /// and FunctionCustomInstance, keyed by fully-qualified class name.
+        /// </summary>
+        public static void RegisterInstanceFactory(string fullyQualifiedClassName, Func<object> factory)
+        {
+            _instanceFactories ??= new Dictionary<string, Func<object>>(StringComparer.Ordinal);
+            _instanceFactories[fullyQualifiedClassName] = factory;
+        }
+
+        internal static bool TryGetRegisteredType(string name, out Type? type)
+        {
+            if (_registeredTypes != null && _registeredTypes.TryGetValue(name, out type))
+                return true;
+            type = null;
+            return false;
+        }
+
+        internal static bool TryGetInstanceFactory(string name, out Func<object>? factory)
+        {
+            if (_instanceFactories != null && _instanceFactories.TryGetValue(name, out factory))
+                return true;
+            factory = null;
+            return false;
+        }
+
+        internal static Func<Report, RdlCodeFunctions>? CodeProviderFactory => _codeProviderFactory;
     }
 
     internal class CompressionConfig
@@ -904,6 +990,8 @@ namespace Majorsilence.Reporting.Rdl
             get { return _ErrorMsg; }
         }
 
+        [RequiresDynamicCode("Loads compression assemblies at runtime; not AOT-compatible")]
+        [RequiresUnreferencedCode("Compression types are resolved from config at runtime and may be trimmed")]
         void Init()
         {
             lock (this)
@@ -972,10 +1060,11 @@ namespace Majorsilence.Reporting.Rdl
     internal class CustomReportItemEntry
     {
         internal string ItemName;
-        internal Type Type;
-        internal string ErrorMsg;
+        internal Type? Type;
+        internal Func<ICustomReportItem>? Factory;
+        internal string? ErrorMsg;
 
-        internal CustomReportItemEntry(string itemName, Type type, string msg)
+        internal CustomReportItemEntry(string itemName, Type? type, string? msg)
         {
             Type = type;
             ItemName = itemName;

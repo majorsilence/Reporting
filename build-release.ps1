@@ -93,72 +93,34 @@ Copy-Item (Join-Path $CURRENTPATH "RdlCmd" "bin" $pConfigurationCompat $pTargetF
 Copy-Item (Join-Path $CURRENTPATH "RdlCmd" "bin" $pConfigurationCompat $pTargetFrameworkGeneric "linux-arm64" "publish") -Destination "$rdlcmd_linux_arm64" -Recurse
 Copy-Item (Join-Path $CURRENTPATH "RdlCmd" "bin" $pConfigurationCompat $pTargetFrameworkGeneric "osx-x64" "publish") -Destination "$rdlcmd_osx" -Recurse
 Copy-Item (Join-Path $CURRENTPATH "RdlCmd" "bin" $pConfigurationCompat $pTargetFrameworkGeneric "osx-arm64" "publish") -Destination "$rdlcmd_osx_arm64" -Recurse
+
+
 Copy-Item (Join-Path $CURRENTPATH "RdlReader" "bin" $pConfiguration $pTargetFramework) -Destination "$buildoutputpath_reader\" -Recurse
 Copy-Item (Join-Path $CURRENTPATH "RdlMapFile" "bin" $pConfiguration $pTargetFramework) -Destination "$buildoutputpath_mapfile\" -Recurse
 
+# Exclude debug symbols from all release zips
+$7zaExclude = "-xr!*.pdb", "-xr!*.dbg"
+
 cd Release-Builds
-cd build-output	
-..\7za.exe a -tzip $Version-majorsilence-reporting-designer-$pTargetFramework-anycpu.zip majorsilence-reporting-designer-$pTargetFramework-anycpu\
-..\7za.exe a -tzip $Version-majorsilence-reporting-desktop-$pTargetFrameworkGeneric-anycpu.zip majorsilence-reporting-desktop-$pTargetFrameworkGeneric-anycpu\
-..\7za.exe a -tzip $Version-majorsilence-reporting-mapfile-$pTargetFrameworkGeneric-anycpu.zip majorsilence-reporting-mapfile-$pTargetFrameworkGeneric-anycpu\
+cd build-output
+..\7za.exe a -tzip $Version-majorsilence-reporting-designer-$pTargetFramework-anycpu.zip @7zaExclude majorsilence-reporting-designer-$pTargetFramework-anycpu\
+..\7za.exe a -tzip $Version-majorsilence-reporting-desktop-$pTargetFrameworkGeneric-anycpu.zip @7zaExclude majorsilence-reporting-desktop-$pTargetFrameworkGeneric-anycpu\
+..\7za.exe a -tzip $Version-majorsilence-reporting-mapfile-$pTargetFrameworkGeneric-anycpu.zip @7zaExclude majorsilence-reporting-mapfile-$pTargetFrameworkGeneric-anycpu\
 
 ..\7za.exe a -tzip "$Version-majorsilence-reporting-rdlcmd-$pTargetFrameworkGeneric-anycpu.zip" `
   -x!"majorsilence-reporting-rdlcmd-$pTargetFrameworkGeneric-anycpu\$pTargetFrameworkGeneric\win-arm64\" `
   -x!"majorsilence-reporting-rdlcmd-$pTargetFrameworkGeneric-anycpu\$pTargetFrameworkGeneric\win-x64\" `
+  @7zaExclude `
   "majorsilence-reporting-rdlcmd-$pTargetFrameworkGeneric-anycpu\"
 
 
-..\7za.exe a -tzip $Version-majorsilence-reporting-reader-$pTargetFramework-anycpu.zip majorsilence-reporting-reader-$pTargetFramework-anycpu\
-..\7za.exe a -tzip $Version-majorsilence-reporting-rdlcmd-self-contained.zip majorsilence-reporting-rdlcmd-self-contained\
+..\7za.exe a -tzip $Version-majorsilence-reporting-reader-$pTargetFramework-anycpu.zip @7zaExclude majorsilence-reporting-reader-$pTargetFramework-anycpu\
+..\7za.exe a -tzip $Version-majorsilence-reporting-rdlcmd-self-contained.zip @7zaExclude majorsilence-reporting-rdlcmd-self-contained\
 cd "$CURRENTPATH"
 
 
 # ************* End anycpu *********************************************
 
-
-# ************* Begin PHP *********************************************
-$buildoutputpath_php="$CURRENTPATH\Release-Builds\build-output\majorsilence-reporting-php"
-delete_files "$buildoutputpath_php"
-mkdir "$buildoutputpath_php"
-
-Copy-Item ".\LanguageWrappers\php\report.php" "$buildoutputpath_php\report.php"
-
-cd Release-Builds
-cd build-output	
-..\7za.exe a -tzip $Version-majorsilence-reporting-build-php.zip majorsilence-reporting-php\
-cd "$CURRENTPATH"
-
-# ************* End PHP *********************************************
-
-
-
-# ************* Begin Python *********************************************
-$buildoutputpath_python="$CURRENTPATH\Release-Builds\build-output\majorsilence-reporting-python"
-delete_files "$buildoutputpath_python"
-mkdir "$buildoutputpath_python"
-
-Copy-Item ".\LanguageWrappers\python\report.py" "$buildoutputpath_python\report.py"
-
-cd Release-Builds
-cd build-output	
-..\7za.exe a -tzip $Version-majorsilence-reporting-python.zip majorsilence-reporting-python\
-cd "$CURRENTPATH"
-# ************* End Python *********************************************
-
-
-# ************* Begin Ruby *********************************************
-$buildoutputpath_ruby="$CURRENTPATH\Release-Builds\build-output\majorsilence-reporting-ruby"
-delete_files "$buildoutputpath_ruby"
-mkdir "$buildoutputpath_ruby"
-
-Copy-Item ".\LanguageWrappers\ruby\report.rb" "$buildoutputpath_ruby\report.rb"
-
-cd Release-Builds
-cd build-output	
-..\7za.exe a -tzip $Version-majorsilence-reporting-ruby.zip majorsilence-reporting-ruby\
-cd "$CURRENTPATH"
-
-# ************* End Ruby *********************************************
 
 
 # ************* Nuget ************************************************

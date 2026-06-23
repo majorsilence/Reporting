@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Reflection;
 using Majorsilence.Reporting.RdlEngine.Resources;
@@ -65,6 +66,8 @@ namespace Majorsilence.Reporting.Rdl
 		}
 
 		// Evaluate is for interpretation  (and is relatively slow)
+		[RequiresDynamicCode("Invokes Code element VB methods at runtime; not AOT-compatible")]
+		[RequiresUnreferencedCode("Type members may be removed by the trimmer")]
 		public async Task<object> Evaluate(Report rpt, Row row)
 		{
 			if (rpt == null || rpt.CodeInstance == null)
@@ -89,18 +92,24 @@ namespace Majorsilence.Reporting.Rdl
 			// We can definitely optimize this by caching some info TODO
 
 			// Get ready to call the function
-			Object returnVal;
-
 			object inst = rpt.CodeInstance;
-			Type theClassType=inst.GetType();
+
+			// AOT path: delegate-dictionary registered via RdlEngineConfig.RegisterCodeProvider
+			if (inst is RdlCodeFunctions rcf)
+			{
+				if (rcf.TryInvoke(_Func, argResults!, out var task))
+					return await task;
+				throw new Exception(string.Format(Strings.FunctionCode_Error_MethodNotFound, _Func));
+			}
+
+			// Non-AOT path: reflection over VBCodeProvider-compiled assembly
+			Type theClassType = inst.GetType();
             MethodInfo mInfo = XmlUtil.GetMethod(theClassType, _Func, argTypes);
             if (mInfo == null)
             {
                 throw new Exception(string.Format(Strings.FunctionCode_Error_MethodNotFound, _Func));
             }
-            returnVal = mInfo.Invoke(inst, argResults);
-
-			return returnVal;
+            return mInfo.Invoke(inst, argResults);
 		}
 
 		public async Task<double> EvaluateDouble(Report rpt, Row row)

@@ -61,11 +61,18 @@ namespace Majorsilence.Reporting.Rdl
 			if (wc.Instance != null)	// Already loaded
 				return wc.Instance;
 
+			// AOT path: use pre-registered factory before requiring CodeModules
+			if (RdlEngineConfig.TryGetInstanceFactory(_ClassName, out Func<object>? factory))
+			{
+				wc.Instance = factory!();
+				return wc.Instance;
+			}
+
 			if (OwnerReport.CodeModules == null)	// nothing to load against
 				return null;
 
 			// Load an instance of the object
-			string err="";
+			string err = "";
 			try
 			{
 				Type tp = OwnerReport.CodeModules[_ClassName];

@@ -1,0 +1,38 @@
+<Project>
+  <!--
+    Strip net48 from TargetFrameworks during AOT publish so the SDK never spawns a .NETFramework
+    inner build. PublishAot=true propagates to all project references; .NETFramework triggers
+    NETSDK1207. This PropertyGroup fires after each project file sets TargetFrameworks, so the
+    override takes effect before the SDK's multi-target dispatch targets run.
+  -->
+  <PropertyGroup Condition="'$(PublishAot)' == 'true' AND $(TargetFrameworks.Contains('net48'))">
+    <TargetFrameworks>$([System.String]::Copy('$(TargetFrameworks)').Replace('net48;', '').Replace(';net48', '').Replace('net48', ''))</TargetFrameworks>
+  </PropertyGroup>
+
+  <!--
+    For project references that resolve to a non-.NETCoreApp TFM (e.g. netstandard2.0 in
+    Majorsilence.Pdf), disable AOT before ProcessFrameworkReferences passes PublishAot to the
+    SDK task. When PublishAot=true, the SDK sets _RequiresILLinkPack=true, causing
+    ProcessFrameworkReferences to run even for netstandard2.0 projects; the task then throws
+    NETSDK1207 because it receives PublishAot=true and a non-.NETCoreApp TargetFrameworkIdentifier.
+    A target-level PropertyGroup overrides the global CLI property for all subsequent tasks and
+    targets in the same build session, so setting PublishAot=false here prevents the error.
+    The top-level .NETCoreApp project's ILC pass handles all referenced IL; referenced libraries
+    do not need their own AOT compilation pass.
+  -->
+  <!--
+    Suppress AOT/trim for any inner build whose TFM does not support Native AOT (requires ≥ net7.0).
+    IsTargetFrameworkCompatible(tfm, 'net7.0') returns false for netstandard2.0, net6.0, net48, etc.
+    The condition gates on '$(TargetFramework)' != '' so it only fires in inner builds, not the outer
+    multi-target dispatch where TargetFramework is still empty.
+  -->
+  <Target Name="_DisableAotForNonAotCompatibleTfm" BeforeTargets="ProcessFrameworkReferences"
+          Condition="'$(PublishAot)' == 'true' AND '$(TargetFramework)' != '' AND
+                     !$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net7.0'))">
+    <PropertyGroup>
+      <PublishAot>false</PublishAot>
+      <PublishTrimmed>false</PublishTrimmed>
+      <_RequiresILLinkPack>false</_RequiresILLinkPack>
+    </PropertyGroup>
+  </Target>
+</Project>

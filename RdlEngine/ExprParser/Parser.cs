@@ -564,6 +564,13 @@ namespace Majorsilence.Reporting.Rdl
 				int level = 0;
 				bool nextScope = false;
 				Token scopeToken = null;
+				// RunningValue's signature is RunningValue(expression, aggregateFunction, scope),
+				// so its scope is the third argument (after the second top-level comma) rather
+				// than the second argument used by the other aggregate functions. The scope of
+				// a RunningValue is also typically a grouping name, not a DataSet name.
+				bool isRunningValue = method.ToLower() == "runningvalue";
+				int commasBeforeScope = isRunningValue ? 2 : 1;
+				int commaCount = 0;
 				foreach(Token tok in tokens)
 				{
 					if(nextScope)
@@ -571,9 +578,12 @@ namespace Majorsilence.Reporting.Rdl
 						scopeToken = tok;
 						break;
 					}
-					
+
 					if(level == 0 && tok.Type == TokenTypes.COMMA)
 					{
+						commaCount++;
+						if (commaCount < commasBeforeScope)
+							continue;
 						nextScope = true;
 						continue;
 					}
@@ -585,11 +595,20 @@ namespace Majorsilence.Reporting.Rdl
 
 				if (scopeToken != null)
 				{
-					if (scopeToken.Type != TokenTypes.QUOTE)
+					if (scopeToken.Type == TokenTypes.QUOTE)
+					{
+						// A quoted scope names a DataSet; capture it so field references inside
+						// the aggregate resolve against that DataSet.
+						inAggregateDataSet = this.idLookup.ScopeDataSet(scopeToken.Value);
+						if (inAggregateDataSet == null && !isRunningValue)
+							throw new ParserException(string.Format(Strings.Parser_ErrorP_ScopeNotKnownDataSet, scopeToken.Value));
+					}
+					else if (!isRunningValue)
+					{
 						throw new ParserException(string.Format(Strings.Parser_ErrorP_ScopeMustConstant, scopeToken.Value));
-					inAggregateDataSet = this.idLookup.ScopeDataSet(scopeToken.Value);
-					if (inAggregateDataSet == null)
-						throw new ParserException(string.Format(Strings.Parser_ErrorP_ScopeNotKnownDataSet, scopeToken.Value));
+					}
+					// For RunningValue a non-quoted scope is a grouping name; it is resolved
+					// later in ResolveAggrScope, so no DataSet capture is required here.
 				}
 			}
 
@@ -1035,7 +1054,12 @@ namespace Majorsilence.Reporting.Rdl
 						bCodeFunction = true;
 				}
 				if (cls != "" && !bCodeFunction)
+				{
+					// AOT registered-provider path: no compiled class to inspect at parse time
+					if (cls.ToLower() == "code" && RdlEngineConfig.CodeProviderFactory != null)
+						return new FunctionCode(method, args, TypeCode.Object);
 					throw new ParserException(string.Format(Strings.Parser_ErrorP_NotCodeMethod, method));
+				}
 			}
 
 			// See if this is a function within the instance classes
@@ -1052,33 +1076,18 @@ namespace Majorsilence.Reporting.Rdl
 					cType= idLookup.LookupType(rc.ClassName);	// yes, use the classname of the ReportClass
 				}
 			}
-			string syscls=null;
+			string syscls = null;
 
 			if (cType == null)
 			{	// ok try for some of the system functions
-
-				switch(cls)
+				(cType, syscls) = cls switch
 				{
-					case "Math":
-						syscls = "System.Math";
-						break;
-					case "String":
-						syscls = "System.String";
-						break;
-					case "Convert":
-						syscls = "System.Convert";
-						break;
-					case "Financial":
-						syscls = "Majorsilence.Reporting.Rdl.Financial";
-						break;
-					default:
-						syscls = "Majorsilence.Reporting.Rdl.VBFunctions";
-						break;
-				}
-				if (syscls != null)
-				{
-					cType = Type.GetType(syscls, false, true);
-				}
+					"Math"      => (typeof(System.Math),    "System.Math"),
+					"String"    => (typeof(string),          "System.String"),
+					"Convert"   => (typeof(System.Convert),  "System.Convert"),
+					"Financial" => (typeof(Financial),       "Majorsilence.Reporting.Rdl.Financial"),
+					_           => (typeof(VBFunctions),     "Majorsilence.Reporting.Rdl.VBFunctions"),
+				};
 			}
 
 			if (cType == null)

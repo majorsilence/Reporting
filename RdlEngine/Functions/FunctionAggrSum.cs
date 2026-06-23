@@ -4,7 +4,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -76,7 +75,7 @@ namespace Majorsilence.Reporting.Rdl
 				if (temp != null)
 				{
 					if (sum != null)
-						sum = temp.GetType().GetMethod("op_Addition").Invoke(null, new []{ sum, temp});
+						sum = AddObjects(sum, temp);
 					else
 						sum = temp;
 				}
@@ -194,5 +193,24 @@ namespace Majorsilence.Reporting.Rdl
 		}
 
 		#endregion
+
+		private static object AddObjects(object a, object b)
+		{
+			return Type.GetTypeCode(a.GetType()) switch
+			{
+				TypeCode.Int32   => (int)a    + (int)b,
+				TypeCode.Int64   => (long)a   + (long)b,
+				TypeCode.Double  => (double)a + (double)b,
+				TypeCode.Decimal => (decimal)a + (decimal)b,
+				TypeCode.Single  => (float)a  + (float)b,
+				TypeCode.Int16   => (short)a  + (short)b,
+				TypeCode.UInt32  => (uint)a   + (uint)b,
+				TypeCode.UInt64  => (ulong)a  + (ulong)b,
+				TypeCode.UInt16  => (ushort)a + (ushort)b,
+				TypeCode.Byte    => (byte)a   + (byte)b,
+				TypeCode.SByte   => (sbyte)a  + (sbyte)b,
+				_ => Convert.ToDouble(a) + Convert.ToDouble(b),
+			};
+		}
 	}
 }

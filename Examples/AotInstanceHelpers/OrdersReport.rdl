@@ -1,0 +1,262 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Report xmlns="http://schemas.microsoft.com/sqlserver/reporting/2005/01/reportdefinition"
+        xmlns:rd="http://schemas.microsoft.com/SQLServer/reporting/reportdesigner">
+  <PageHeight>11in</PageHeight>
+  <PageWidth>8.5in</PageWidth>
+  <TopMargin>.5in</TopMargin>
+  <LeftMargin>.5in</LeftMargin>
+  <RightMargin>.5in</RightMargin>
+  <BottomMargin>.5in</BottomMargin>
+  <Width>7.5in</Width>
+
+  <!-- <Classes> declares instance objects accessible in expressions.
+       Under traditional (non-AOT) usage the engine creates instances via
+       Assembly.CreateInstance.  RegisterInstanceFactory + RegisterType replace
+       that scan with pre-registered C# code, enabling trim/AOT safety. -->
+  <Classes>
+    <Class>
+      <ClassName>AotInstanceHelpers.OrderFormatter</ClassName>
+      <InstanceName>Helper</InstanceName>
+    </Class>
+  </Classes>
+
+  <DataSources>
+    <DataSource Name="DS1">
+      <ConnectionProperties>
+        <DataProvider>Microsoft.Data.Sqlite</DataProvider>
+        <ConnectString>Data Source=sqlitetestdb2.db</ConnectString>
+      </ConnectionProperties>
+    </DataSource>
+  </DataSources>
+
+  <DataSets>
+    <DataSet Name="Data">
+      <Query>
+        <DataSourceName>DS1</DataSourceName>
+        <CommandText>SELECT ProductName AS OrderId, '' AS Product, CURRENT_DATE AS OrderDate, UnitPrice AS Amount, '' AS Status FROM Products LIMIT 0</CommandText>
+      </Query>
+      <Fields>
+        <Field Name="OrderId">
+          <DataField>OrderId</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="Product">
+          <DataField>Product</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="OrderDate">
+          <DataField>OrderDate</DataField>
+          <rd:TypeName>System.DateTime</rd:TypeName>
+        </Field>
+        <Field Name="Amount">
+          <DataField>Amount</DataField>
+          <rd:TypeName>System.Decimal</rd:TypeName>
+        </Field>
+        <Field Name="Status">
+          <DataField>Status</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+      </Fields>
+    </DataSet>
+  </DataSets>
+
+  <PageHeader>
+    <Height>.5in</Height>
+    <PrintOnFirstPage>true</PrintOnFirstPage>
+    <PrintOnLastPage>true</PrintOnLastPage>
+    <ReportItems>
+      <Textbox Name="Title">
+        <Top>.1in</Top>
+        <Left>0in</Left>
+        <Width>7.5in</Width>
+        <Height>.3in</Height>
+        <Value>Orders Report — AOT Instance Helpers Demo</Value>
+        <Style>
+          <FontSize>14pt</FontSize>
+          <FontWeight>Bold</FontWeight>
+        </Style>
+      </Textbox>
+    </ReportItems>
+  </PageHeader>
+
+  <Body>
+    <Height>4in</Height>
+    <ReportItems>
+      <Table Name="OrdersTable">
+        <DataSetName>Data</DataSetName>
+        <NoRows>No data provided.</NoRows>
+        <Top>0in</Top>
+        <Left>0in</Left>
+        <TableColumns>
+          <TableColumn><Width>0.9in</Width></TableColumn>
+          <TableColumn><Width>1.9in</Width></TableColumn>
+          <TableColumn><Width>1.4in</Width></TableColumn>
+          <TableColumn><Width>1.4in</Width></TableColumn>
+          <TableColumn><Width>1.4in</Width></TableColumn>
+        </TableColumns>
+        <Header>
+          <TableRows>
+            <TableRow>
+              <Height>16pt</Height>
+              <TableCells>
+                <TableCell>
+                  <ReportItems>
+                    <Textbox Name="H_OrderId">
+                      <Value>Order #</Value>
+                      <Style>
+                        <FontWeight>Bold</FontWeight>
+                        <BackgroundColor>#243F60</BackgroundColor>
+                        <Color>White</Color>
+                        <PaddingLeft>4pt</PaddingLeft>
+                      </Style>
+                    </Textbox>
+                  </ReportItems>
+                </TableCell>
+                <TableCell>
+                  <ReportItems>
+                    <Textbox Name="H_Product">
+                      <Value>Product</Value>
+                      <Style>
+                        <FontWeight>Bold</FontWeight>
+                        <BackgroundColor>#243F60</BackgroundColor>
+                        <Color>White</Color>
+                        <PaddingLeft>4pt</PaddingLeft>
+                      </Style>
+                    </Textbox>
+                  </ReportItems>
+                </TableCell>
+                <TableCell>
+                  <ReportItems>
+                    <Textbox Name="H_OrderDate">
+                      <Value>Order Date</Value>
+                      <Style>
+                        <FontWeight>Bold</FontWeight>
+                        <BackgroundColor>#243F60</BackgroundColor>
+                        <Color>White</Color>
+                        <PaddingLeft>4pt</PaddingLeft>
+                      </Style>
+                    </Textbox>
+                  </ReportItems>
+                </TableCell>
+                <TableCell>
+                  <ReportItems>
+                    <Textbox Name="H_Amount">
+                      <Value>Amount</Value>
+                      <Style>
+                        <FontWeight>Bold</FontWeight>
+                        <BackgroundColor>#243F60</BackgroundColor>
+                        <Color>White</Color>
+                        <TextAlign>Right</TextAlign>
+                        <PaddingRight>4pt</PaddingRight>
+                      </Style>
+                    </Textbox>
+                  </ReportItems>
+                </TableCell>
+                <TableCell>
+                  <ReportItems>
+                    <Textbox Name="H_Status">
+                      <Value>Status</Value>
+                      <Style>
+                        <FontWeight>Bold</FontWeight>
+                        <BackgroundColor>#243F60</BackgroundColor>
+                        <Color>White</Color>
+                        <PaddingLeft>4pt</PaddingLeft>
+                      </Style>
+                    </Textbox>
+                  </ReportItems>
+                </TableCell>
+              </TableCells>
+            </TableRow>
+          </TableRows>
+          <RepeatOnNewPage>true</RepeatOnNewPage>
+        </Header>
+        <Details>
+          <TableRows>
+            <TableRow>
+              <Height>14pt</Height>
+              <TableCells>
+                <TableCell>
+                  <ReportItems>
+                    <Textbox Name="OrderId">
+                      <Value>=Fields!OrderId.Value</Value>
+                      <Style>
+                        <BackgroundColor>=IIf(RowNumber(Nothing) Mod 2 = 0, "#D9E1F2", "White")</BackgroundColor>
+                        <PaddingLeft>4pt</PaddingLeft>
+                      </Style>
+                    </Textbox>
+                  </ReportItems>
+                </TableCell>
+                <TableCell>
+                  <ReportItems>
+                    <Textbox Name="Product">
+                      <Value>=Fields!Product.Value</Value>
+                      <Style>
+                        <BackgroundColor>=IIf(RowNumber(Nothing) Mod 2 = 0, "#D9E1F2", "White")</BackgroundColor>
+                        <PaddingLeft>4pt</PaddingLeft>
+                      </Style>
+                    </Textbox>
+                  </ReportItems>
+                </TableCell>
+                <TableCell>
+                  <ReportItems>
+                    <!-- Helper.FormatDate calls OrderFormatter.FormatDate on the registered instance -->
+                    <Textbox Name="OrderDate">
+                      <Value>=Helper.FormatDate(Fields!OrderDate.Value)</Value>
+                      <Style>
+                        <BackgroundColor>=IIf(RowNumber(Nothing) Mod 2 = 0, "#D9E1F2", "White")</BackgroundColor>
+                        <PaddingLeft>4pt</PaddingLeft>
+                      </Style>
+                    </Textbox>
+                  </ReportItems>
+                </TableCell>
+                <TableCell>
+                  <ReportItems>
+                    <!-- Helper.FormatMoney calls OrderFormatter.FormatMoney on the registered instance -->
+                    <Textbox Name="Amount">
+                      <Value>=Helper.FormatMoney(Fields!Amount.Value)</Value>
+                      <Style>
+                        <BackgroundColor>=IIf(RowNumber(Nothing) Mod 2 = 0, "#D9E1F2", "White")</BackgroundColor>
+                        <TextAlign>Right</TextAlign>
+                        <PaddingRight>4pt</PaddingRight>
+                      </Style>
+                    </Textbox>
+                  </ReportItems>
+                </TableCell>
+                <TableCell>
+                  <ReportItems>
+                    <!-- Helper.StatusColor / Helper.StatusTextColor drive conditional formatting -->
+                    <Textbox Name="Status">
+                      <Value>=Fields!Status.Value</Value>
+                      <Style>
+                        <BackgroundColor>=Helper.StatusColor(Fields!Status.Value)</BackgroundColor>
+                        <Color>=Helper.StatusTextColor(Fields!Status.Value)</Color>
+                        <FontWeight>Bold</FontWeight>
+                        <PaddingLeft>4pt</PaddingLeft>
+                      </Style>
+                    </Textbox>
+                  </ReportItems>
+                </TableCell>
+              </TableCells>
+            </TableRow>
+          </TableRows>
+        </Details>
+      </Table>
+    </ReportItems>
+  </Body>
+
+  <PageFooter>
+    <Height>18pt</Height>
+    <PrintOnFirstPage>true</PrintOnFirstPage>
+    <PrintOnLastPage>true</PrintOnLastPage>
+    <ReportItems>
+      <Textbox Name="PageNum">
+        <Top>2pt</Top>
+        <Left>0in</Left>
+        <Width>3in</Width>
+        <Height>14pt</Height>
+        <Value>=Globals!PageNumber &amp; " of " &amp; Globals!TotalPages</Value>
+        <Style><FontSize>9pt</FontSize></Style>
+      </Textbox>
+    </ReportItems>
+  </PageFooter>
+</Report>

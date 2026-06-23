@@ -612,6 +612,12 @@ namespace Majorsilence.Drawing
             bool noWrap = format != null &&
                 (format.FormatFlags & StringFormatFlags.NoWrap) != 0;
 
+            // Clip to the layout rectangle so text never overflows the cell boundary.
+            _canvas.Save();
+            _canvas.ClipRect(new SKRect(layoutRect.X, layoutRect.Y,
+                                        layoutRect.X + layoutRect.Width,
+                                        layoutRect.Y + layoutRect.Height));
+
             var paragraphs = s.Replace("\r\n", "\n").Split('\n');
             foreach (var para in paragraphs)
             {
@@ -642,6 +648,21 @@ namespace Majorsilence.Drawing
                     {
                         currentLine = testLine;
                     }
+
+                    // If currentLine is now a single word wider than the cell,
+                    // break it at character boundaries and flush all but the last chunk.
+                    skFont.MeasureText(currentLine, out var lineBounds);
+                    if (lineBounds.Width > maxWidth)
+                    {
+                        var chunks = BreakWordToFit(currentLine, maxWidth, skFont);
+                        for (int ci = 0; ci < chunks.Count - 1; ci++)
+                        {
+                            float drawX = ComputeAlignX(x, maxWidth, chunks[ci], skFont, format);
+                            _canvas.DrawText(chunks[ci], drawX, y, skFont, skPaint);
+                            y += lineHeight;
+                        }
+                        currentLine = chunks.Count > 0 ? chunks[chunks.Count - 1] : "";
+                    }
                 }
 
                 if (currentLine.Length > 0)
@@ -651,6 +672,31 @@ namespace Majorsilence.Drawing
                     y += lineHeight;
                 }
             }
+
+            _canvas.Restore();
+        }
+
+        private static System.Collections.Generic.List<string> BreakWordToFit(string word, float maxWidth, SKFont font)
+        {
+            var chunks = new System.Collections.Generic.List<string>();
+            var current = "";
+            foreach (var ch in word)
+            {
+                var test = current + ch;
+                font.MeasureText(test, out var b);
+                if (b.Width > maxWidth && current.Length > 0)
+                {
+                    chunks.Add(current);
+                    current = ch.ToString();
+                }
+                else
+                {
+                    current = test;
+                }
+            }
+            if (current.Length > 0)
+                chunks.Add(current);
+            return chunks;
         }
 
         private static float ComputeAlignX(float baseX, float maxWidth, string text,

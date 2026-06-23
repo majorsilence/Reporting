@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
@@ -50,10 +51,39 @@ namespace Majorsilence.Reporting.UI.RdlAvalonia.Viewer
         private readonly Color _selectionColor = Color.FromArgb(80, 51, 153, 255);
         private readonly Color _selectedItemColor = Color.FromArgb(100, 100, 149, 237);
 
+        // Search highlighting
+        private readonly List<PageItem> _searchPageItems = new();
+        private PageItem? _currentSearchItem;
+        private readonly Color _searchHighlightColor = Color.FromArgb(110, 255, 210, 0);
+        private readonly Color _currentSearchHighlightColor = Color.FromArgb(200, 255, 140, 0);
+
         public ReportCanvas()
         {
             Focusable = true;
             Cursor = new Cursor(StandardCursorType.Ibeam);
+
+            var copyItem = new MenuItem { Header = "Copy" };
+            copyItem.Click += (_, _) => CopySelection();
+            var selectAllItem = new MenuItem { Header = "Select All" };
+            selectAllItem.Click += (_, _) => SelectAll();
+            ContextMenu = new ContextMenu();
+            ContextMenu.Items.Add(copyItem);
+            ContextMenu.Items.Add(selectAllItem);
+        }
+
+        public void SetSearch(IEnumerable<PageItem> pageItems, PageItem? current)
+        {
+            _searchPageItems.Clear();
+            _searchPageItems.AddRange(pageItems);
+            _currentSearchItem = current;
+            InvalidateVisual();
+        }
+
+        public void ClearSearch()
+        {
+            _searchPageItems.Clear();
+            _currentSearchItem = null;
+            InvalidateVisual();
         }
 
         /// <summary>
@@ -271,32 +301,72 @@ namespace Majorsilence.Reporting.UI.RdlAvalonia.Viewer
         protected override void OnPointerMoved(PointerEventArgs e)
         {
             base.OnPointerMoved(e);
-            
+
+            var pos = e.GetPosition(this);
+
+            if (!_isSelecting)
+            {
+                var hoverEntry = _hitList.FirstOrDefault(h => h.Contains(pos));
+                Cursor = !string.IsNullOrEmpty(hoverEntry?.PageItem.HyperLink)
+                    ? new Cursor(StandardCursorType.Hand)
+                    : new Cursor(StandardCursorType.Ibeam);
+
+                var tip = hoverEntry?.PageItem.Tooltip;
+                ToolTip.SetTip(this, string.IsNullOrEmpty(tip) ? null : tip);
+            }
+
             if (!_selectToolEnabled || !_isSelecting)
                 return;
 
-            _selectionEnd = e.GetPosition(this);
+            _selectionEnd = pos;
             InvalidateVisual();
         }
 
         protected override void OnPointerReleased(PointerReleasedEventArgs e)
         {
             base.OnPointerReleased(e);
-            
+
             if (!_selectToolEnabled || !_isSelecting)
                 return;
 
             _isSelecting = false;
             _selectionEnd = e.GetPosition(this);
-            
-            // Create selection from rectangle
+
+            var dragDelta = _selectionEnd - _selectionStart;
+            bool isClick = Math.Abs(dragDelta.X) < 4 && Math.Abs(dragDelta.Y) < 4;
+
+            if (isClick)
+            {
+                var linkEntry = _hitList.FirstOrDefault(
+                    h => h.Contains(_selectionEnd) && !string.IsNullOrEmpty(h.PageItem.HyperLink));
+                if (linkEntry != null)
+                {
+                    LaunchHyperLink(linkEntry.PageItem.HyperLink!);
+                    return;
+                }
+            }
+
             var selectionRect = CreateRect(_selectionStart, _selectionEnd);
             bool ctrlPressed = e.KeyModifiers.HasFlag(KeyModifiers.Control);
-            
+
             UpdateSelectionFromRect(selectionRect, ctrlPressed);
-            
+
             SelectionChanged?.Invoke(this, EventArgs.Empty);
             InvalidateVisual();
+        }
+
+        private async void LaunchHyperLink(string url)
+        {
+            try
+            {
+                if (Uri.TryCreate(url, UriKind.Absolute, out var uri))
+                {
+                    var topLevel = TopLevel.GetTopLevel(this);
+                    if (topLevel != null)
+                        await topLevel.Launcher.LaunchUriAsync(uri);
+                }
+            }
+            catch { }
         }
 
         protected override void OnKeyDown(KeyEventArgs e)
@@ -374,7 +444,7 @@ namespace Majorsilence.Reporting.UI.RdlAvalonia.Viewer
                 context.DrawImage(_bitmap, new Rect(0, 0, _bitmap.Size.Width, _bitmap.Size.Height));
             }
 
-            // Draw selection highlights
+            DrawSearchHighlights(context);
             DrawSelectionHighlights(context);
             
             // Draw selection rectangle while dragging
@@ -384,6 +454,22 @@ namespace Majorsilence.Reporting.UI.RdlAvalonia.Viewer
                 var brush = new SolidColorBrush(_selectionColor);
                 var pen = new Pen(new SolidColorBrush(Color.FromRgb(51, 153, 255)));
                 context.DrawRectangle(brush, pen, selectionRect);
+            }
+        }
+
+        private void DrawSearchHighlights(DrawingContext context)
+        {
+            if (_searchPageItems.Count == 0)
+                return;
+
+            var highlightBrush = new SolidColorBrush(_searchHighlightColor);
+            var currentBrush = new SolidColorBrush(_currentSearchHighlightColor);
+            foreach (var entry in _hitList)
+            {
+                if (entry.PageItem == _currentSearchItem)
+                    context.DrawRectangle(currentBrush, null, entry.Rect);
+                else if (_searchPageItems.Contains(entry.PageItem))
+                    context.DrawRectangle(highlightBrush, null, entry.Rect);
             }
         }
 
@@ -443,60 +529,55 @@ namespace Majorsilence.Reporting.UI.RdlAvalonia.Viewer
                 PageUnit = Majorsilence.Drawing.GraphicsUnit.Pixel
             };
 
-            var renderer = new SkiaPageDrawing(_pages, (float)_zoom);
+            // Items are in points; scale to physical pixels: points * (dpi/72) * zoom
+            var effectiveZoom = (float)(_zoom * dpi / 72.0);
+            var renderer = new SkiaPageDrawing(_pages, effectiveZoom);
             renderer.Draw(g, pageIndex);
 
             // Build hit list for selection
-            BuildHitList(pageIndex, dpi);
+            BuildHitList(pageIndex);
 
             surface.Flush();
             _needsRender = false;
         }
 
-        private void BuildHitList(int pageIndex, double dpi)
+        private void BuildHitList(int pageIndex)
         {
             _hitList.Clear();
-            
+
             if (_pages == null || pageIndex < 0 || pageIndex >= _pages.PageCount)
                 return;
 
             var page = _pages[pageIndex];
-            // The renderer (SkiaPageDrawing) draws at coordinates: points * zoom
-            // The bitmap is displayed at logical size: pixelSize * 96 / dpi
-            // So a rendered pixel at (x * zoom) maps to logical position: x * zoom * 96 / dpi
-            var scale = dpi / 96.0;
-            BuildHitListFromPage(page, scale);
+            BuildHitListFromPage(page);
         }
 
-        private void BuildHitListFromPage(Majorsilence.Reporting.Rdl.Page page, double scale)
+        private void BuildHitListFromPage(Majorsilence.Reporting.Rdl.Page page)
         {
             foreach (var item in page)
             {
                 if (item is not PageItem pi)
                     continue;
 
-                // Match the renderer's coordinate conversion: points * zoom
-                // Then convert from physical pixels to logical pixels: / scale
                 var rect = new Rect(
-                    PointsToLogical(pi.X, scale),
-                    PointsToLogical(pi.Y, scale),
-                    PointsToLogical(pi.W, scale),
-                    PointsToLogical(pi.H, scale)
+                    PointsToLogical(pi.X),
+                    PointsToLogical(pi.Y),
+                    PointsToLogical(pi.W),
+                    PointsToLogical(pi.H)
                 );
 
                 if (pi is PageTextHtml pth)
                 {
                     _hitList.Add(new HitListEntry(rect, pi));
-                    // Also add child items
                     foreach (PageItem child in pth)
                     {
                         if (child is PageText)
                         {
                             var childRect = new Rect(
-                                PointsToLogical(child.X, scale),
-                                PointsToLogical(child.Y, scale),
-                                PointsToLogical(child.W, scale),
-                                PointsToLogical(child.H, scale)
+                                PointsToLogical(child.X),
+                                PointsToLogical(child.Y),
+                                PointsToLogical(child.W),
+                                PointsToLogical(child.H)
                             );
                             _hitList.Add(new HitListEntry(childRect, child));
                         }
@@ -509,17 +590,71 @@ namespace Majorsilence.Reporting.UI.RdlAvalonia.Viewer
             }
         }
 
-        /// <summary>
-        /// Converts points to logical (device-independent) pixel coordinates,
-        /// matching the renderer's coordinate system (points * zoom) then
-        /// accounting for display scaling (physical pixels to logical pixels).
-        /// </summary>
-        private double PointsToLogical(float points, double scale)
+        public void SaveCurrentPageAsPng(string filePath)
         {
-            // Renderer draws at: points * zoom (in physical pixels on the SKSurface)
-            // Bitmap logical size = physical size / scale
-            // So logical coordinate = points * zoom / scale
-            return points * _zoom / scale;
+            if (_bitmap == null) return;
+            using var stream = System.IO.File.Create(filePath);
+            _bitmap.Save(stream);
+        }
+
+        public async Task SavePageAsPngAsync()
+        {
+            if (_bitmap == null) return;
+            var topLevel = TopLevel.GetTopLevel(this);
+            if (topLevel == null) return;
+
+            var file = await topLevel.StorageProvider.SaveFilePickerAsync(
+                new Avalonia.Platform.Storage.FilePickerSaveOptions
+                {
+                    Title = "Save Page as PNG",
+                    SuggestedFileName = "page.png",
+                    FileTypeChoices = new[]
+                    {
+                        new Avalonia.Platform.Storage.FilePickerFileType("PNG Image")
+                        { Patterns = new[] { "*.png" } }
+                    }
+                });
+
+            if (file == null) return;
+            using var stream = await file.OpenWriteAsync();
+            _bitmap.Save(stream);
+        }
+
+        public static Bitmap? RenderPageThumbnail(Pages pages, int pageIndex, double thumbWidthPx, double dpi = 96.0)
+        {
+            if (pages == null || pageIndex < 0 || pageIndex >= pages.PageCount)
+                return null;
+
+            var zoom = thumbWidthPx / (pages.PageWidth * dpi / 72.0);
+            var pixelWidth  = Math.Max(1, (int)Math.Ceiling(pages.PageWidth  * dpi / 72.0 * zoom));
+            var pixelHeight = Math.Max(1, (int)Math.Ceiling(pages.PageHeight * dpi / 72.0 * zoom));
+
+            var info = new SKImageInfo(pixelWidth, pixelHeight, SKColorType.Bgra8888, SKAlphaType.Premul);
+            using var surface = SKSurface.Create(info);
+            if (surface == null) return null;
+
+            surface.Canvas.Clear(SKColors.White);
+            using var g = new Majorsilence.Drawing.Graphics(surface.Canvas)
+            {
+                DpiX = (float)dpi,
+                DpiY = (float)dpi
+            };
+            var effectiveZoom = (float)(zoom * dpi / 72.0);
+            new SkiaPageDrawing(pages, effectiveZoom).Draw(g, pageIndex);
+            surface.Flush();
+
+            using var img  = surface.Snapshot();
+            using var data = img.Encode(SKEncodedImageFormat.Png, 80);
+            using var bms  = new System.IO.MemoryStream(data.ToArray());
+            return new Bitmap(bms);
+        }
+
+        // Renderer places items at points * effectiveZoom physical pixels,
+        // where effectiveZoom = _zoom * dpi/72 and dpi = 96 * renderScaling.
+        // Logical position = physical / renderScaling = points * _zoom * 96/72.
+        private double PointsToLogical(float points)
+        {
+            return points * _zoom * (96.0 / 72.0);
         }
     }
 }

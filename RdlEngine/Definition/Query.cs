@@ -1,6 +1,7 @@
 
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Xml;
 using System.Data;
 using System.Data.SqlClient;
@@ -369,6 +370,7 @@ namespace Majorsilence.Reporting.Rdl
 
         }
 
+        [RequiresUnreferencedCode("Reflects over user-provided object types to map fields; members may be trimmed")]
         internal async Task SetData(Report rpt, IEnumerable ie, Fields flds, Filters f, bool collection = false)
         {
             if (ie == null)         // Does user want to remove user data?

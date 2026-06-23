@@ -1,3 +1,5 @@
 <Solution>
+  <Project Path="../../Majorsilence.Pdf.Security/Majorsilence.Pdf.Security.csproj" />
+  <Project Path="../../Majorsilence.Pdf/Majorsilence.Pdf.csproj" />
   <Project Path="MajorsilencePdfExample.csproj" />
 </Solution>

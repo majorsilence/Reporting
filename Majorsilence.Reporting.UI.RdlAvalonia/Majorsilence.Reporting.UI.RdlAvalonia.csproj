@@ -29,6 +29,7 @@
         <PackageReference Include="SkiaSharp" />
     </ItemGroup>
     <ItemGroup>
+        <ProjectReference Include="..\Majorsilence.Pdf.Security\Majorsilence.Pdf.Security.csproj" />
         <ProjectReference Include="..\RdlCri\Majorsilence.Reporting.RdlCri.csproj" />
         <ProjectReference Include="..\RdlEngine\Majorsilence.Reporting.RdlEngine.csproj" />
     </ItemGroup>

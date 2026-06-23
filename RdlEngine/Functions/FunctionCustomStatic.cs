@@ -1,6 +1,7 @@
 
 using System;
 using System.Collections;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -67,6 +68,8 @@ namespace Majorsilence.Reporting.Rdl
 		}
 
 		// Evaluate is for interpretation  (and is relatively slow)
+		[RequiresDynamicCode("Invokes methods by name at runtime; not AOT-compatible")]
+		[RequiresUnreferencedCode("Type members may be removed by the trimmer")]
 		public async Task<object> Evaluate(Report rpt, Row row)
 		{
 			// get the results
@@ -87,7 +90,9 @@ namespace Majorsilence.Reporting.Rdl
 
 			// Get ready to call the function
 			Object returnVal;
-			Type theClassType= _Cm[_Cls];
+			Type theClassType = _Cm != null
+				? _Cm[_Cls]
+				: (RdlEngineConfig.TryGetRegisteredType(_Cls, out Type? rt) ? rt : null);
             MethodInfo mInfo = XmlUtil.GetMethod(theClassType, _Func, argTypes);
             if (mInfo == null)
             {

@@ -25,4 +25,15 @@
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
+
+  <!-- Don't let AOT publish properties flow into referenced libraries. Passing -p:PublishAot=true on
+       the command line otherwise propagates it as a global property to the multi-targeting library
+       references (DataProviders, RdlCri, RdlEngine), which breaks their target-framework resolution
+       ("cannot be referenced by a project that targets .NETCoreApp,Version=v10.0"). Only the entry
+       executable needs to be AOT-compiled; the libraries just need to be AOT-compatible. -->
+  <ItemDefinitionGroup>
+    <ProjectReference>
+      <UndefineProperties>%(UndefineProperties);PublishAot</UndefineProperties>
+    </ProjectReference>
+  </ItemDefinitionGroup>
 </Project>

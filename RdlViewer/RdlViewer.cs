@@ -9,6 +9,7 @@ using System.Drawing.Printing;
 using System.Text;
 using EncryptionProvider;
 using EncryptionProvider.String;
+using Majorsilence.Pdf.Security;
 using Majorsilence.Reporting.RdlViewer.Resources;
 using Majorsilence.Reporting.Rdl;
 using Majorsilence.WinformUtils;
@@ -75,6 +76,7 @@ namespace Majorsilence.Reporting.RdlViewer
         /// The pages of the report to view
         /// </summary>
         private Pages _pgs;
+        private bool _loadingPages = false;
         /// <summary>
         /// Last load of report failed
         /// </summary>
@@ -911,10 +913,17 @@ namespace Majorsilence.Reporting.RdlViewer
         /// </summary>
         /// <param name="FileName">Name of the file to be saved to.</param>
         /// <param name="type">Type of file to save.  Should be "pdf", "xml", "html", "mhtml", "csv", "rtf", "excel", "tif".</param>
-        public async Task SaveAs(string FileName, Majorsilence.Reporting.Rdl.OutputPresentationType type)
+        /// <summary>
+        /// Save the file.  The extension determines the type of file to save.
+        /// </summary>
+        /// <param name="FileName">Name of the file to be saved to.</param>
+        /// <param name="type">Type of file to save.  Should be "pdf", "xml", "html", "mhtml", "csv", "rtf", "excel", "tif".</param>
+        /// <param name="security">Optional PDF encryption settings (password, permissions). Ignored for non-PDF output.</param>
+        /// <param name="signature">Optional PKCS#7 digital signature to embed. Ignored for non-PDF output.</param>
+        public async Task SaveAs(string FileName, Majorsilence.Reporting.Rdl.OutputPresentationType type,
+            PdfSecurity? security = null, PdfSignatureOptions? signature = null)
         {
             await LoadPageIfNeeded();
-
 
             OneFileStreamGen sg = new OneFileStreamGen(FileName, true); // overwrite with this name
             if (!(type == OutputPresentationType.PDF || type == OutputPresentationType.PDFOldStyle ||
@@ -929,11 +938,11 @@ namespace Majorsilence.Reporting.RdlViewer
                 {
                     case OutputPresentationType.PDF:
                         _Report.ItextPDF = true;
-                        await _Report.RunRenderPdf(sg, _pgs);
+                        await _Report.RunRenderPdf(sg, _pgs, security, signature);
                         break;
                     case OutputPresentationType.PDFOldStyle:
                         _Report.ItextPDF = false;
-                        await _Report.RunRenderPdf(sg, _pgs);
+                        await _Report.RunRenderPdf(sg, _pgs, security, signature);
                         break;
                     case OutputPresentationType.TIF:
                         await _Report.RunRenderTif(sg, _pgs, true);
@@ -1599,8 +1608,9 @@ namespace Majorsilence.Reporting.RdlViewer
         /// </summary>
         private async Task LoadPageIfNeeded()
         {
-            if (_pgs == null)
+            if (_pgs == null && !_loadingPages)
             {
+                _loadingPages = true;
                 Cursor savec = null;
                 try
                 {
@@ -1611,7 +1621,7 @@ namespace Majorsilence.Reporting.RdlViewer
                     }
 
                     savec = this.Cursor;                // this could take a while so put up wait cursor
-                    this.Cursor = Cursors.WaitCursor;              
+                    this.Cursor = Cursors.WaitCursor;
                     _pgs = await GetPages();
                     _DrawPanel.Pgs = _pgs;
                     CalcZoom();                         // this could affect zoom
@@ -1619,6 +1629,7 @@ namespace Majorsilence.Reporting.RdlViewer
                 }
                 finally
                 {
+                    _loadingPages = false;
                     this.HideWaiter();
                     if (savec != null)
                         this.Cursor = savec;
@@ -2176,12 +2187,18 @@ namespace Majorsilence.Reporting.RdlViewer
 
         public void HideRunButton()
         {
+            // RdlViewer_Layout resets _RunButton.Visible from _ShowParameters on every
+            // layout pass, so the flag must be updated for the change to persist.
+            _ShowParameters = false;
             _RunButton.Visible = false;
+            RdlViewer_Layout(this, null);
         }
 
         public void ShowRunButton()
         {
+            _ShowParameters = true;
             _RunButton.Visible = true;
+            RdlViewer_Layout(this, null);
         }
     }
 

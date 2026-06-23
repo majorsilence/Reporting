@@ -1113,11 +1113,9 @@ namespace Majorsilence.Reporting.Rdl
                                 t = ((double)o).ToString(format);
                                 break;
                             default:
-								var formatedMethod = o.GetType().GetMethod("ToString", new Type[] { typeof(string) });
-								if (formatedMethod != null)
-									t = (string)formatedMethod.Invoke(o, new object[] { format });
-								else
-									t = o.ToString();
+								t = (o is IFormattable fmt)
+									? fmt.ToString(format, null)
+									: o.ToString();
                                 break;
                         }
                     }

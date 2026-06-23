@@ -82,6 +82,7 @@ namespace Majorsilence.Reporting.Rdl
 
 		string _OverwriteConnectionString; // To overwrite ConnectionString
 		bool _OverwriteInSubreport; // Overwrite ConnectionString in subreport too
+		bool _SkipDatabaseSchemaValidation; // When true, skip DB connection at parse time (for SetData() workflows)
 		readonly XmlNode _xNode;
 
         /// <summary>
@@ -97,7 +98,7 @@ namespace Majorsilence.Reporting.Rdl
 
 		// Constructor
 		internal ReportDefn(XmlNode xNode, ReportLog replog, string folder, NeedPassword getpswd, int objcount, CrossDelegate crossdel,
-			string overwriteConnectionString, bool overwriteInSubreport)        // report has no parents
+			string overwriteConnectionString, bool overwriteInSubreport, bool skipDatabaseSchemaValidation = false)        // report has no parents
 		{
             _xNode = xNode;
             rl = replog;                // used for error reporting
@@ -139,6 +140,7 @@ namespace Majorsilence.Reporting.Rdl
 
 			_OverwriteConnectionString = overwriteConnectionString;
 			_OverwriteInSubreport = overwriteInSubreport;
+			_SkipDatabaseSchemaValidation = skipDatabaseSchemaValidation;
 		}
 
 		public async Task InitializeAsync() { 
@@ -794,6 +796,12 @@ namespace Majorsilence.Reporting.Rdl
 		{
 			get {return _OverwriteInSubreport;}
 			set {_OverwriteInSubreport = value;}
+		}
+
+		internal bool SkipDatabaseSchemaValidation
+		{
+			get {return _SkipDatabaseSchemaValidation;}
+			set {_SkipDatabaseSchemaValidation = value;}
 		}
 
 		internal int ErrorMaxSeverity

@@ -29,7 +29,7 @@ namespace SampleApp2_SetData
             rdlViewerSetSource = new Majorsilence.Reporting.RdlViewer.RdlViewer();
             rdlViewerSetSource.Dock = DockStyle.Fill;
             split.Panel2.Controls.Add(rdlViewerSetSource);
-            
+
             // 50% left, 50% right
             split.SplitterDistance = split.Width / 2;
         }
@@ -57,7 +57,7 @@ namespace SampleApp2_SetData
 
         private async Task ExampleViaSourceRdlNoLoad(string filepath, DataTable dt)
         {
-            rdlViewerSourceRdlNoLoad.SourceRdlNoLoad = await System.IO.File.ReadAllTextAsync(filepath);
+            rdlViewerSourceRdlNoLoad.SourceRdlNoLoad = System.IO.File.ReadAllText(filepath);
             rdlViewerSourceRdlNoLoad.Parameters = "";
             var rpt = await rdlViewerSourceRdlNoLoad.Report();
             await rpt.DataSets["Data"].SetData(dt);
@@ -82,16 +82,18 @@ namespace SampleApp2_SetData
             }
 
             DataTable dt = new DataTable();
-            await using var dr = await cmd.ExecuteReaderAsync();
-            dt.Load(dr);
-            dr.Close();
-
-            if (original == ConnectionState.Closed)
+            using (var dr = await cmd.ExecuteReaderAsync())
             {
-                cmd.Connection.Close();
-            }
+                dt.Load(dr);
+                dr.Close();
 
-            return dt;
+                if (original == ConnectionState.Closed)
+                {
+                    cmd.Connection.Close();
+                }
+
+                return dt;
+            }
         }
     }
 }

@@ -110,7 +110,7 @@ namespace RdlEngine.Render.ExcelConverter
 			if(CurrentExcelTable.Table == null) {
 				return;
 			}
-			float rowHeight = tr.CanGrow ? await tr.HeightOfRow(Report, g, row) : tr.Height.Points;
+			float rowHeight = (tr.CanGrow || tr.CanShrink) ? await tr.HeightOfRow(Report, g, row) : tr.Height.Points;
 
 			var shiftingRows = Rows.Where(x => x.YPosition >= rowPosition);
 			ShiftBottomRows(shiftingRows, rowHeight);
