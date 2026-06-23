@@ -122,56 +122,6 @@ cd "$CURRENTPATH"
 # ************* End anycpu *********************************************
 
 
-# ************* Begin PHP *********************************************
-$buildoutputpath_php="$CURRENTPATH\Release-Builds\build-output\majorsilence-reporting-php"
-delete_files "$buildoutputpath_php"
-mkdir "$buildoutputpath_php"
-
-Copy-Item ".\LanguageWrappers\php\report.php"        "$buildoutputpath_php\report.php"
-Copy-Item ".\LanguageWrappers\php\report_aot.php"    "$buildoutputpath_php\report_aot.php"
-Copy-Item ".\LanguageWrappers\php\report_native.php" "$buildoutputpath_php\report_native.php"
-
-cd Release-Builds
-cd build-output
-..\7za.exe a -tzip $Version-majorsilence-reporting-build-php.zip majorsilence-reporting-php\
-cd "$CURRENTPATH"
-
-# ************* End PHP *********************************************
-
-
-
-# ************* Begin Python *********************************************
-$buildoutputpath_python="$CURRENTPATH\Release-Builds\build-output\majorsilence-reporting-python"
-delete_files "$buildoutputpath_python"
-mkdir "$buildoutputpath_python"
-
-Copy-Item ".\LanguageWrappers\python\report.py"        "$buildoutputpath_python\report.py"
-Copy-Item ".\LanguageWrappers\python\report_aot.py"    "$buildoutputpath_python\report_aot.py"
-Copy-Item ".\LanguageWrappers\python\report_native.py" "$buildoutputpath_python\report_native.py"
-
-cd Release-Builds
-cd build-output
-..\7za.exe a -tzip $Version-majorsilence-reporting-python.zip majorsilence-reporting-python\
-cd "$CURRENTPATH"
-# ************* End Python *********************************************
-
-
-# ************* Begin Ruby *********************************************
-$buildoutputpath_ruby="$CURRENTPATH\Release-Builds\build-output\majorsilence-reporting-ruby"
-delete_files "$buildoutputpath_ruby"
-mkdir "$buildoutputpath_ruby"
-
-Copy-Item ".\LanguageWrappers\ruby\report.rb"        "$buildoutputpath_ruby\report.rb"
-Copy-Item ".\LanguageWrappers\ruby\report_aot.rb"    "$buildoutputpath_ruby\report_aot.rb"
-Copy-Item ".\LanguageWrappers\ruby\report_native.rb" "$buildoutputpath_ruby\report_native.rb"
-
-cd Release-Builds
-cd build-output
-..\7za.exe a -tzip $Version-majorsilence-reporting-ruby.zip majorsilence-reporting-ruby\
-cd "$CURRENTPATH"
-
-# ************* End Ruby *********************************************
-
 
 # ************* Nuget ************************************************
 $nugetOutputPath = Join-Path $CURRENTPATH "Release-Builds" "build-output"

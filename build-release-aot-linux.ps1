@@ -53,10 +53,7 @@ mkdir $rdlnative_linux_arm64
 Copy-Item (Join-Path $CURRENTPATH "RdlNative" "bin" $pConfigurationCompat $pTargetFrameworkGeneric "linux-x64-aot" "publish")   -Destination $rdlnative_linux_x64   -Recurse
 Copy-Item (Join-Path $CURRENTPATH "RdlNative" "bin" $pConfigurationCompat $pTargetFrameworkGeneric "linux-arm64-aot" "publish")  -Destination $rdlnative_linux_arm64  -Recurse
 
-Copy-Item (Join-Path $CURRENTPATH "RdlNative" "rdlnative.h")                         (Join-Path $buildoutputpath_rdlnative "rdlnative.h")
-Copy-Item (Join-Path $CURRENTPATH "LanguageWrappers" "python" "report_native.py")    (Join-Path $buildoutputpath_rdlnative "report_native.py")
-Copy-Item (Join-Path $CURRENTPATH "LanguageWrappers" "php" "report_native.php")      (Join-Path $buildoutputpath_rdlnative "report_native.php")
-Copy-Item (Join-Path $CURRENTPATH "LanguageWrappers" "ruby" "report_native.rb")      (Join-Path $buildoutputpath_rdlnative "report_native.rb")
+Copy-Item (Join-Path $CURRENTPATH "RdlNative" "rdlnative.h") (Join-Path $buildoutputpath_rdlnative "rdlnative.h")
 
 $7zaExclude = "-xr!*.pdb", "-xr!*.dbg"
 $buildOutputDir = Join-Path $CURRENTPATH "Release-Builds" "build-output"

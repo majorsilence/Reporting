@@ -57,10 +57,7 @@ mkdir "$rdlnative_win_arm64"
 Copy-Item (Join-Path $CURRENTPATH "RdlNative" "bin" $pConfiguration $pTargetFrameworkGeneric "win-x64-aot" "publish")   -Destination "$rdlnative_win_x64"   -Recurse
 Copy-Item (Join-Path $CURRENTPATH "RdlNative" "bin" $pConfiguration $pTargetFrameworkGeneric "win-arm64-aot" "publish")  -Destination "$rdlnative_win_arm64"  -Recurse
 
-Copy-Item ".\RdlNative\rdlnative.h"                          "$buildoutputpath_rdlnative\rdlnative.h"
-Copy-Item ".\LanguageWrappers\python\report_native.py"        "$buildoutputpath_rdlnative\report_native.py"
-Copy-Item ".\LanguageWrappers\php\report_native.php"          "$buildoutputpath_rdlnative\report_native.php"
-Copy-Item ".\LanguageWrappers\ruby\report_native.rb"          "$buildoutputpath_rdlnative\report_native.rb"
+Copy-Item ".\RdlNative\rdlnative.h" "$buildoutputpath_rdlnative\rdlnative.h"
 
 $7zaExclude = "-xr!*.pdb", "-xr!*.dbg"
 
