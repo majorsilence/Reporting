@@ -28,21 +28,37 @@ jobs:
         run: dotnet test -c Release-DrawingCompat MajorsilenceReporting.sln --verbosity normal --collect:"XPlat Code Coverage" --logger:"trx"
       - name: Test Report
         uses: dorny/test-reporter@v2
-        if: success() || failure() # run this step even if previous step failed
+        if: success() || failure()
         with:
           name: unit tests
           path: "**/TestResults/*.trx"
           reporter: dotnet-trx
-      - name: Install arm64 cross-compilation toolchain
-        run: sudo apt-get install -y gcc-aarch64-linux-gnu binutils-aarch64-linux-gnu
-      - name: Build AOT Linux
+      - name: Build AOT Linux x64
         id: aot_build
         shell: pwsh
-        run: ./build-release-aot-linux.ps1
+        run: ./build-release-aot-linux.ps1 -Arch x64
       - name: Archive AOT artifacts
         uses: actions/upload-artifact@v6
         with:
-          name: majorsilence-reporting-aot-linux-${{ steps.aot_build.outputs.version }}
+          name: majorsilence-reporting-aot-linux-x64-${{ steps.aot_build.outputs.version }}
           path: Release-Builds/build-output/*.zip
           retention-days: 1
 
+  linux-arm64-aot:
+    runs-on: ubuntu-24.04-arm
+    steps:
+      - uses: actions/checkout@v6
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 10.0.x
+      - name: Build AOT Linux arm64
+        id: aot_build
+        shell: pwsh
+        run: ./build-release-aot-linux.ps1 -Arch arm64
+      - name: Archive AOT artifacts
+        uses: actions/upload-artifact@v6
+        with:
+          name: majorsilence-reporting-aot-linux-arm64-${{ steps.aot_build.outputs.version }}
+          path: Release-Builds/build-output/*.zip
+          retention-days: 1
