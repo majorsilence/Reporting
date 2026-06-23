@@ -1,0 +1,32 @@
+<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<OutputType>Library</OutputType>
+		<AssemblyName>pdfnative</AssemblyName>
+		<RootNamespace>Majorsilence.Pdf.Native</RootNamespace>
+		<!-- AOT publishing targets net10.0 only; net8.0 kept for managed-mode builds -->
+		<TargetFrameworks>net8.0;net10.0</TargetFrameworks>
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+		<IsAotCompatible>true</IsAotCompatible>
+		<EnableTrimAnalyzer>true</EnableTrimAnalyzer>
+		<Nullable>enable</Nullable>
+	</PropertyGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\Majorsilence.Pdf\Majorsilence.Pdf.csproj" />
+		<ProjectReference Include="..\Majorsilence.Pdf.Security\Majorsilence.Pdf.Security.csproj" />
+	</ItemGroup>
+	<!-- Copy the .NET runtime shared libraries (.so/.dylib) to the publish directory.
+	     On .NET 10+, these are no longer statically linked — they must ship alongside
+	     pdfnative.so so the host wrapper can pre-load them with RTLD_GLOBAL. -->
+	<Target Name="CopyRuntimeNativeLibs" AfterTargets="Publish"
+	        Condition="'$(PublishAot)' == 'true' AND '$([MSBuild]::IsOSUnixLike())' == 'true'">
+		<ItemGroup>
+			<_RuntimeNativeLib Include="$(NuGetPackageRoot)microsoft.netcore.app.runtime.nativeaot.$(RuntimeIdentifier)/*/runtimes/$(RuntimeIdentifier)/native/libSystem*.so" />
+			<_RuntimeNativeLib Include="$(NuGetPackageRoot)microsoft.netcore.app.runtime.nativeaot.$(RuntimeIdentifier)/*/runtimes/$(RuntimeIdentifier)/native/libSystem*.dylib" />
+		</ItemGroup>
+		<Copy SourceFiles="@(_RuntimeNativeLib)"
+		      DestinationFolder="$(PublishDir)"
+		      SkipUnchangedFiles="true"
+		      OverwriteReadOnlyFiles="true"
+		      Condition="'@(_RuntimeNativeLib)' != ''" />
+	</Target>
+</Project>

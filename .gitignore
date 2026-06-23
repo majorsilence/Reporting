@@ -250,3 +250,5 @@ obj/
 /Majorsilence.Pdf/out/Majorsilence.Pdf.deps.json
 /Majorsilence.Pdf/out/Majorsilence.Pdf.dll
 /ReportTests/Reports/northwindEF.db
+.claude/settings.local.json
+/.claude/worktrees

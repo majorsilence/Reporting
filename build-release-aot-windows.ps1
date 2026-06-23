@@ -32,8 +32,12 @@ dotnet publish RdlCmd -c Release -r win-arm64 -f $pTargetFrameworkGeneric --self
 dotnet publish RdlNative -c Release -r win-x64   -f $pTargetFrameworkGeneric --self-contained true -p:PublishAot=true -p:GeneratePackageOnBuild=false -o "RdlNative\bin\$pConfiguration\$pTargetFrameworkGeneric\win-x64-aot\publish"
 dotnet publish RdlNative -c Release -r win-arm64 -f $pTargetFrameworkGeneric --self-contained true -p:PublishAot=true -p:GeneratePackageOnBuild=false -o "RdlNative\bin\$pConfiguration\$pTargetFrameworkGeneric\win-arm64-aot\publish"
 
+dotnet publish PdfNative -c Release -r win-x64   -f $pTargetFrameworkGeneric --self-contained true -p:PublishAot=true -p:GeneratePackageOnBuild=false -o "PdfNative\bin\$pConfiguration\$pTargetFrameworkGeneric\win-x64-aot\publish"
+dotnet publish PdfNative -c Release -r win-arm64 -f $pTargetFrameworkGeneric --self-contained true -p:PublishAot=true -p:GeneratePackageOnBuild=false -o "PdfNative\bin\$pConfiguration\$pTargetFrameworkGeneric\win-arm64-aot\publish"
+
 $buildoutputpath_rdlcmd_aot = "$CURRENTPATH\Release-Builds\build-output\majorsilence-reporting-rdlcmd-aot"
 $buildoutputpath_rdlnative  = "$CURRENTPATH\Release-Builds\build-output\majorsilence-reporting-rdlnative"
+$buildoutputpath_pdfnative  = "$CURRENTPATH\Release-Builds\build-output\majorsilence-pdfnative"
 
 Remove-Item "$buildoutputpath_rdlcmd_aot" -Recurse -ErrorAction Ignore
 mkdir "$buildoutputpath_rdlcmd_aot"
@@ -59,10 +63,24 @@ Copy-Item (Join-Path $CURRENTPATH "RdlNative" "bin" $pConfiguration $pTargetFram
 
 Copy-Item ".\RdlNative\rdlnative.h" "$buildoutputpath_rdlnative\rdlnative.h"
 
+Remove-Item "$buildoutputpath_pdfnative" -Recurse -ErrorAction Ignore
+mkdir "$buildoutputpath_pdfnative"
+
+$pdfnative_win_x64   = "$buildoutputpath_pdfnative\win-x64"
+$pdfnative_win_arm64 = "$buildoutputpath_pdfnative\win-arm64"
+mkdir "$pdfnative_win_x64"
+mkdir "$pdfnative_win_arm64"
+
+Copy-Item (Join-Path $CURRENTPATH "PdfNative" "bin" $pConfiguration $pTargetFrameworkGeneric "win-x64-aot" "publish")   -Destination "$pdfnative_win_x64"   -Recurse
+Copy-Item (Join-Path $CURRENTPATH "PdfNative" "bin" $pConfiguration $pTargetFrameworkGeneric "win-arm64-aot" "publish")  -Destination "$pdfnative_win_arm64"  -Recurse
+
+Copy-Item ".\PdfNative\pdfnative.h" "$buildoutputpath_pdfnative\pdfnative.h"
+
 $7zaExclude = "-xr!*.pdb", "-xr!*.dbg"
 
 cd Release-Builds
 cd build-output
 ..\7za.exe a -tzip "$Version-majorsilence-reporting-rdlcmd-aot-windows.zip"   @7zaExclude majorsilence-reporting-rdlcmd-aot\
 ..\7za.exe a -tzip "$Version-majorsilence-reporting-rdlnative-windows.zip"    @7zaExclude majorsilence-reporting-rdlnative\
+..\7za.exe a -tzip "$Version-majorsilence-pdfnative-windows.zip"              @7zaExclude majorsilence-pdfnative\
 cd "$CURRENTPATH"
