@@ -78,9 +78,13 @@ Copy-Item ".\PdfNative\pdfnative.h" "$buildoutputpath_pdfnative\pdfnative.h"
 
 $7zaExclude = "-xr!*.pdb", "-xr!*.dbg"
 
-cd Release-Builds
-cd build-output
-..\7za.exe a -tzip "$Version-majorsilence-reporting-rdlcmd-aot-windows.zip"   @7zaExclude majorsilence-reporting-rdlcmd-aot\
-..\7za.exe a -tzip "$Version-majorsilence-reporting-rdlnative-windows.zip"    @7zaExclude majorsilence-reporting-rdlnative\
-..\7za.exe a -tzip "$Version-majorsilence-pdfnative-windows.zip"              @7zaExclude majorsilence-pdfnative\
-cd "$CURRENTPATH"
+$buildOutputDir = Join-Path $CURRENTPATH "Release-Builds" "build-output"
+Set-Location $buildOutputDir
+
+foreach ($arch in @("x64", "arm64")) {
+    ..\7za.exe a -tzip "$Version-majorsilence-reporting-rdlcmd-aot-windows-$arch.zip"  @7zaExclude "majorsilence-reporting-rdlcmd-aot\win-$arch\"
+    ..\7za.exe a -tzip "$Version-majorsilence-reporting-rdlnative-windows-$arch.zip"   @7zaExclude "majorsilence-reporting-rdlnative\win-$arch\" "majorsilence-reporting-rdlnative\rdlnative.h"
+    ..\7za.exe a -tzip "$Version-majorsilence-pdfnative-windows-$arch.zip"             @7zaExclude "majorsilence-pdfnative\win-$arch\" "majorsilence-pdfnative\pdfnative.h"
+}
+
+Set-Location $CURRENTPATH
