@@ -83,9 +83,13 @@ namespace Majorsilence.Reporting.Rdl
                     bLoaded = true;
                     _DirectoryLoadedFrom = dir;
                 }
-                catch (Exception ex)
-                {   // can't do much about failures; no place to report them 
+                catch (Exception ex) when (ex is not FileNotFoundException && ex is not DirectoryNotFoundException)
+                {   // can't do much about failures; no place to report them
                     System.Console.WriteLine("Error opening RdlEngineConfig.xml: {0}", ex.Message);
+                }
+                catch
+                {
+                    // file not found is expected; built-in config will be used
                 }
                 if (bLoaded)
                     break;
