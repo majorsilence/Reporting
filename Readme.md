@@ -217,3 +217,42 @@ BuildConfiguration=Release-DrawingCompat  RunStrategy=Throughput
 |50|30|JsonDataProviderBenchmark|290|8,720|0|
 
 
+# License
+
+The entire project is Apache 2.0 licensed with select sub projects tri-licensed.  Original code is apache 2.0 only.  New projects are tri-licensed as of 26.0.0.
+
+
+## Apache 2.0 Licensed
+- DataProviders
+- EncryptionProver
+- LibRdlWpfViewer
+- Majorsilence.WinformUtils
+- RdlAsp.Mvc
+- RdlCmd
+- RdlCri
+- RdlDesign
+- RdlDesktop
+- RdlEngine
+- RdlGtk3
+- RdlGtk3Viewer
+- RdlMapFile
+- RdlReader
+- RdlViewer
+- ReportDesigner
+
+## Tri Licensed
+- MIT License               — see LICENSE-MIT in sub folders
+- Apache License 2.0        — see LICENSE-APACHE in sub folders
+- BSD 2-Clause License      — see LICENSE-BSD in sub folders
+
+tri-licensed projects
+
+- Majorsilence.Drawing.Common
+- Majorsilence.Pdf
+- Majorsilence.Pdf.Security
+- Majorsilence.Reporting.UI
+- Majorsilence.Reporting.UI.RdlAvalonia
+- PdfNative
+- RdlCreator
+- RdlNative
+- WebDesigner
