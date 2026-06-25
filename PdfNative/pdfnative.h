@@ -80,6 +80,38 @@
  *                        4 | 2048,  // Print | PrintHighQuality
  *                        0);        // 0 = AES-256, 1 = AES-128
  *
+ * Digital signature example (invisible):
+ *
+ *   pdf_doc_set_signature(doc, "signer.p12", "password",
+ *                         "Approved", "Toronto", NULL,
+ *                         0, 0, 0, 0);   // appearW == 0 → invisible
+ *
+ * Digital signature example (visible appearance):
+ *
+ *   pdf_doc_set_signature(doc, "signer.p12", "password",
+ *                         "Approved", "Toronto", NULL,
+ *                         72, 700, 200, 50);  // rect at (72,700) 200×50 pt
+ *
+ * PDF/A conformance example:
+ *
+ *   pdf_doc_set_conformance(doc, 2);  // 2 = PDF/A-2b
+ *
+ * Opacity / shape style example:
+ *
+ *   void* ss = pdf_shape_style_create();
+ *   pdf_shape_style_set_fill(ss, 255, 0, 0);       // red fill
+ *   pdf_shape_style_set_fill_opacity(ss, 0.4f);    // 40% opacity
+ *   pdf_shape_style_set_stroke(ss, 0, 0, 0, 1.0f); // black stroke
+ *   pdf_canvas_draw_rect_styled(canvas, 72, 200, 200, 100, ss);
+ *   pdf_shape_style_close(ss);
+ *
+ * Public-key encryption example:
+ *
+ *   void* ps = pdf_pubkey_security_create();
+ *   pdf_pubkey_security_add_recipient(ps, "recipient.cer");
+ *   pdf_doc_set_pubkey_security(doc, ps);
+ *   pdf_pubkey_security_close(ps);
+ *
  * Coordinate system:
  *   All coordinates are in PDF points (1 pt = 1/72 inch).
  *   The origin is at the top-left corner of the page; Y increases downward.
@@ -149,6 +181,51 @@ int pdf_doc_set_security(void* handle,
                          const char* owner_password,
                          int         permissions,
                          int         enc_version);
+
+/*
+ * Set PDF/A conformance level.  The serializer will embed the required XMP
+ * metadata and sRGB ICC output intent; only embedded (TrueType) fonts are
+ * permitted.
+ *
+ * level: 0 = None (default), 1 = PDF/A-1b, 2 = PDF/A-2b, 3 = PDF/A-3b.
+ *
+ * Returns 0 on success, -1 on error.
+ */
+int pdf_doc_set_conformance(void* handle, int level);
+
+/*
+ * Embed an invisible or visible PKCS#7 detached digital signature.
+ *
+ * p12_path       — path to a PKCS#12 (.p12/.pfx) file with the signing cert+key.
+ * p12_password   — password for the PKCS#12 file (pass "" or NULL if none).
+ * reason         — signing reason shown in viewer (NULL = omit).
+ * location       — signing location shown in viewer (NULL = omit).
+ * tsa_url        — RFC 3161 timestamp authority URL (NULL = no timestamp).
+ * appear_x/y/w/h — visible appearance rectangle in top-left coordinates (points).
+ *                  Pass appear_w == 0 for an invisible signature.
+ *                  Pass appear_w >  0 for a visible signature appearance box.
+ *
+ * Returns 0 on success, -1 on error.
+ */
+int pdf_doc_set_signature(void*       handle,
+                          const char* p12_path,
+                          const char* p12_password,
+                          const char* reason,
+                          const char* location,
+                          const char* tsa_url,
+                          float       appear_x,
+                          float       appear_y,
+                          float       appear_w,
+                          float       appear_h);
+
+/*
+ * Encrypt the document for one or more certificate recipients (Adobe.PubSec).
+ * ps must be a handle created with pdf_pubkey_security_create() with at least
+ * one recipient added via pdf_pubkey_security_add_recipient().
+ * Pass NULL to remove previously configured public-key encryption.
+ * Returns 0 on success, -1 on error.
+ */
+int pdf_doc_set_pubkey_security(void* handle, void* ps);
 
 /*
  * Add a page to the document and return a canvas handle for drawing.
@@ -346,6 +423,94 @@ int pdf_style_set_decoration(void* style, int decoration);
  * Release a style handle.
  */
 void pdf_style_close(void* handle);
+
+/* ── Shape Style ───────────────────────────────────────────────────────────── */
+
+/*
+ * Create a shape style handle for use with pdf_canvas_draw_rect_styled and
+ * pdf_canvas_draw_ellipse_styled.
+ * Defaults: no fill, no stroke, full opacity (1.0).
+ * Returns a handle on success, or NULL on error.
+ */
+void* pdf_shape_style_create(void);
+
+/*
+ * Set the fill colour.  r, g, b are byte values 0-255.
+ * Returns 0 on success, -1 on error.
+ */
+int pdf_shape_style_set_fill(void* style, uint8_t r, uint8_t g, uint8_t b);
+
+/*
+ * Set the fill opacity.  opacity: 0.0 = fully transparent, 1.0 = fully opaque.
+ * Returns 0 on success, -1 on error.
+ */
+int pdf_shape_style_set_fill_opacity(void* style, float opacity);
+
+/*
+ * Set the stroke colour and width.  r, g, b are byte values 0-255.
+ * Returns 0 on success, -1 on error.
+ */
+int pdf_shape_style_set_stroke(void* style,
+                               uint8_t r, uint8_t g, uint8_t b,
+                               float   width);
+
+/*
+ * Set the stroke opacity.  opacity: 0.0 = fully transparent, 1.0 = fully opaque.
+ * Returns 0 on success, -1 on error.
+ */
+int pdf_shape_style_set_stroke_opacity(void* style, float opacity);
+
+/*
+ * Release a shape style handle.
+ */
+void pdf_shape_style_close(void* style);
+
+/*
+ * Draw a rectangle using a shape style handle (supports fill and stroke opacity).
+ * Returns 0 on success, -1 on error.
+ */
+int pdf_canvas_draw_rect_styled(void* canvas,
+                                float x, float y,
+                                float width, float height,
+                                void* style);
+
+/*
+ * Draw an ellipse using a shape style handle (supports fill and stroke opacity).
+ * Returns 0 on success, -1 on error.
+ */
+int pdf_canvas_draw_ellipse_styled(void* canvas,
+                                   float x, float y,
+                                   float width, float height,
+                                   void* style);
+
+/* ── Public-Key Security ───────────────────────────────────────────────────── */
+
+/*
+ * Create a public-key security handle.
+ * Add recipients with pdf_pubkey_security_add_recipient(), then pass the handle
+ * to pdf_doc_set_pubkey_security().
+ * Returns a handle on success, or NULL on error.
+ */
+void* pdf_pubkey_security_create(void);
+
+/*
+ * Add a recipient certificate from a DER or PEM file.
+ * cert_path: path to an X.509 certificate file (.cer/.der/.pem) — public key only.
+ * Returns 0 on success, -1 on error.
+ */
+int pdf_pubkey_security_add_recipient(void* ps, const char* cert_path);
+
+/*
+ * Set the permissions bitmask (same flags as pdf_doc_set_security).
+ * Pass -1 for all permissions (default).
+ * Returns 0 on success, -1 on error.
+ */
+int pdf_pubkey_security_set_permissions(void* ps, int permissions);
+
+/*
+ * Release a public-key security handle.
+ */
+void pdf_pubkey_security_close(void* ps);
 
 /* ── Table ─────────────────────────────────────────────────────────────────── */
 

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using Majorsilence.Pdf;
 using Majorsilence.Pdf.Security;
@@ -62,6 +63,31 @@ internal sealed class TableContext
 internal sealed class MergeContext
 {
     internal PdfMerger Merger { get; } = new PdfMerger();
+}
+
+internal sealed class ShapeStyleContext
+{
+    internal PdfColor? FillColor    { get; set; }
+    internal float     FillOpacity  { get; set; } = 1f;
+    internal PdfColor? StrokeColor  { get; set; }
+    internal float     StrokeWidth  { get; set; } = 1f;
+    internal float     StrokeOpacity { get; set; } = 1f;
+
+    internal ShapeStyle ToShapeStyle()
+    {
+        ShapeStyle s = ShapeStyle.Empty;
+        if (FillColor.HasValue)
+            s = s.WithFill(FillColor.Value).WithFillOpacity(FillOpacity);
+        if (StrokeColor.HasValue)
+            s = s.WithStroke(StrokeColor.Value, StrokeWidth).WithStrokeOpacity(StrokeOpacity);
+        return s;
+    }
+}
+
+internal sealed class PubKeySecurityContext
+{
+    internal List<X509Certificate2> Recipients { get; } = new();
+    internal PdfPermissions Permissions { get; set; } = PdfPermissions.All;
 }
 
 /// <summary>
@@ -266,6 +292,172 @@ public static class PdfNativeApi
             return 0;
         }
         catch (Exception ex) { SetError(ex); return -1; }
+    }
+
+    /// <summary>
+    /// Set PDF/A conformance level.
+    /// level: 0 = None (default), 1 = PDF/A-1b, 2 = PDF/A-2b, 3 = PDF/A-3b.
+    /// Returns 0 on success, -1 on error.
+    /// </summary>
+    [UnmanagedCallersOnly(EntryPoint = "pdf_doc_set_conformance")]
+    public static int DocSetConformance(nint handle, int level)
+    {
+        try
+        {
+            var ctx = GetCtx<DocContext>(handle);
+            if (ctx is null) { SetError("Invalid handle."); return -1; }
+            ctx.Doc.WithConformance(level switch
+            {
+                1 => PdfConformance.PdfA1b,
+                2 => PdfConformance.PdfA2b,
+                3 => PdfConformance.PdfA3b,
+                _ => PdfConformance.None,
+            });
+            return 0;
+        }
+        catch (Exception ex) { SetError(ex); return -1; }
+    }
+
+    /// <summary>
+    /// Embed an invisible (appearW == 0) or visible (appearW > 0) PKCS#7 digital signature.
+    /// p12Path: path to a PKCS#12 (.p12/.pfx) file containing the signing certificate and private key.
+    /// p12Password: password for the PKCS#12 file (pass NULL or empty string if not password-protected).
+    /// reason/location/tsaUrl: optional — pass NULL to omit each.
+    /// appearX/Y/W/H: visible appearance rectangle in top-left coordinates (points).
+    ///   Pass appearW == 0 for an invisible signature (example 14).
+    ///   Pass appearW > 0 for a visible signature appearance (example 22).
+    /// Returns 0 on success, -1 on error.
+    /// </summary>
+    [UnmanagedCallersOnly(EntryPoint = "pdf_doc_set_signature")]
+    public static unsafe int DocSetSignature(nint handle,
+        byte* p12PathUtf8, byte* p12PasswordUtf8,
+        byte* reasonUtf8, byte* locationUtf8, byte* tsaUrlUtf8,
+        float appearX, float appearY, float appearW, float appearH)
+    {
+        try
+        {
+            var ctx = GetCtx<DocContext>(handle);
+            if (ctx is null) { SetError("Invalid handle."); return -1; }
+
+            string p12Path  = Marshal.PtrToStringUTF8((nint)p12PathUtf8) ?? "";
+            string p12Pass  = Marshal.PtrToStringUTF8((nint)p12PasswordUtf8) ?? "";
+            string? reason   = reasonUtf8   != null ? Marshal.PtrToStringUTF8((nint)reasonUtf8)   : null;
+            string? location = locationUtf8 != null ? Marshal.PtrToStringUTF8((nint)locationUtf8) : null;
+            string? tsaUrl   = tsaUrlUtf8   != null ? Marshal.PtrToStringUTF8((nint)tsaUrlUtf8)   : null;
+
+#if NET9_0_OR_GREATER
+            var cert = X509CertificateLoader.LoadPkcs12FromFile(p12Path, p12Pass,
+                X509KeyStorageFlags.Exportable | X509KeyStorageFlags.EphemeralKeySet);
+#else
+            var cert = new X509Certificate2(p12Path, p12Pass,
+                X509KeyStorageFlags.Exportable | X509KeyStorageFlags.EphemeralKeySet);
+#endif
+
+            var opts = new PdfSignatureOptions(cert);
+            if (reason   is not null) opts = opts.WithReason(reason);
+            if (location is not null) opts = opts.WithLocation(location);
+            if (tsaUrl   is not null) opts = opts.WithTimestampAuthority(tsaUrl);
+            if (appearW  > 0f)       opts = opts.WithAppearance(appearX, appearY, appearW, appearH);
+
+            ctx.Doc.WithSignature(opts);
+            return 0;
+        }
+        catch (Exception ex) { SetError(ex); return -1; }
+    }
+
+    /// <summary>
+    /// Encrypt the document so that only holders of the specified X.509 certificates can open it.
+    /// ps: a handle created with pdf_pubkey_security_create() with recipients added via
+    ///     pdf_pubkey_security_add_recipient(). Pass 0 to remove previously configured pubkey encryption.
+    /// Returns 0 on success, -1 on error.
+    /// </summary>
+    [UnmanagedCallersOnly(EntryPoint = "pdf_doc_set_pubkey_security")]
+    public static int DocSetPubKeySecurity(nint handle, nint ps)
+    {
+        try
+        {
+            var ctx = GetCtx<DocContext>(handle);
+            if (ctx is null) { SetError("Invalid handle."); return -1; }
+
+            if (ps == 0)
+            {
+                ctx.Doc.WithPublicKeySecurity(null);
+                return 0;
+            }
+
+            var psctx = GetCtx<PubKeySecurityContext>(ps);
+            if (psctx is null) { SetError("Invalid pubkey security handle."); return -1; }
+            if (psctx.Recipients.Count == 0) { SetError("No recipient certificates added."); return -1; }
+
+            var security = PdfPublicKeySecurity.ForRecipients(psctx.Recipients.ToArray())
+                .WithPermissions(psctx.Permissions);
+            ctx.Doc.WithPublicKeySecurity(security);
+            return 0;
+        }
+        catch (Exception ex) { SetError(ex); return -1; }
+    }
+
+    // ── PubKey Security ───────────────────────────────────────────────────────
+
+    /// <summary>
+    /// Create a public-key security handle. Add recipient certificates with
+    /// pdf_pubkey_security_add_recipient(), then pass the handle to pdf_doc_set_pubkey_security().
+    /// Returns handle on success, or 0 on error.
+    /// </summary>
+    [UnmanagedCallersOnly(EntryPoint = "pdf_pubkey_security_create")]
+    public static nint PubKeySecurityCreate()
+    {
+        try { return GCHandle.ToIntPtr(GCHandle.Alloc(new PubKeySecurityContext())); }
+        catch (Exception ex) { SetError(ex); return 0; }
+    }
+
+    /// <summary>
+    /// Add a recipient certificate from a DER or PEM file.
+    /// certPath: path to an X.509 certificate file (.cer/.der/.pem) — public key only, no password needed.
+    /// Returns 0 on success, -1 on error.
+    /// </summary>
+    [UnmanagedCallersOnly(EntryPoint = "pdf_pubkey_security_add_recipient")]
+    public static unsafe int PubKeySecurityAddRecipient(nint ps, byte* certPathUtf8)
+    {
+        try
+        {
+            var ctx = GetCtx<PubKeySecurityContext>(ps);
+            if (ctx is null) { SetError("Invalid pubkey security handle."); return -1; }
+            string path = Marshal.PtrToStringUTF8((nint)certPathUtf8) ?? "";
+#if NET9_0_OR_GREATER
+            ctx.Recipients.Add(X509CertificateLoader.LoadCertificateFromFile(path));
+#else
+            ctx.Recipients.Add(new X509Certificate2(path));
+#endif
+            return 0;
+        }
+        catch (Exception ex) { SetError(ex); return -1; }
+    }
+
+    /// <summary>
+    /// Set the permissions bitmask for public-key encrypted documents (default: all permissions).
+    /// Uses the same flag values as pdf_doc_set_security (Print=4, ModifyContent=8, etc.).
+    /// Returns 0 on success, -1 on error.
+    /// </summary>
+    [UnmanagedCallersOnly(EntryPoint = "pdf_pubkey_security_set_permissions")]
+    public static int PubKeySecuritySetPermissions(nint ps, int permissionsFlags)
+    {
+        try
+        {
+            var ctx = GetCtx<PubKeySecurityContext>(ps);
+            if (ctx is null) { SetError("Invalid pubkey security handle."); return -1; }
+            ctx.Permissions = permissionsFlags < 0 ? PdfPermissions.All : (PdfPermissions)permissionsFlags;
+            return 0;
+        }
+        catch (Exception ex) { SetError(ex); return -1; }
+    }
+
+    /// <summary>Release a public-key security handle.</summary>
+    [UnmanagedCallersOnly(EntryPoint = "pdf_pubkey_security_close")]
+    public static void PubKeySecurityClose(nint handle)
+    {
+        if (handle == 0) return;
+        try { GCHandle.FromIntPtr(handle).Free(); } catch { }
     }
 
     /// <summary>
@@ -657,6 +849,123 @@ public static class PdfNativeApi
     {
         if (handle == 0) return;
         try { GCHandle.FromIntPtr(handle).Free(); } catch { }
+    }
+
+    // ── Shape Style ───────────────────────────────────────────────────────────
+
+    /// <summary>
+    /// Create a shape style handle for use with pdf_canvas_draw_rect_styled and
+    /// pdf_canvas_draw_ellipse_styled. Defaults: no fill, no stroke, full opacity.
+    /// Returns handle on success, or 0 on error.
+    /// </summary>
+    [UnmanagedCallersOnly(EntryPoint = "pdf_shape_style_create")]
+    public static nint ShapeStyleCreate()
+    {
+        try { return GCHandle.ToIntPtr(GCHandle.Alloc(new ShapeStyleContext())); }
+        catch (Exception ex) { SetError(ex); return 0; }
+    }
+
+    /// <summary>Set the fill colour (byte values 0-255). Returns 0 on success.</summary>
+    [UnmanagedCallersOnly(EntryPoint = "pdf_shape_style_set_fill")]
+    public static int ShapeStyleSetFill(nint style, byte r, byte g, byte b)
+    {
+        try
+        {
+            var ctx = GetCtx<ShapeStyleContext>(style);
+            if (ctx is null) { SetError("Invalid shape style handle."); return -1; }
+            ctx.FillColor = new PdfColor(r, g, b);
+            return 0;
+        }
+        catch (Exception ex) { SetError(ex); return -1; }
+    }
+
+    /// <summary>Set the fill opacity (0.0 = transparent, 1.0 = opaque). Returns 0 on success.</summary>
+    [UnmanagedCallersOnly(EntryPoint = "pdf_shape_style_set_fill_opacity")]
+    public static int ShapeStyleSetFillOpacity(nint style, float opacity)
+    {
+        try
+        {
+            var ctx = GetCtx<ShapeStyleContext>(style);
+            if (ctx is null) { SetError("Invalid shape style handle."); return -1; }
+            ctx.FillOpacity = opacity < 0f ? 0f : opacity > 1f ? 1f : opacity;
+            return 0;
+        }
+        catch (Exception ex) { SetError(ex); return -1; }
+    }
+
+    /// <summary>Set the stroke colour and width (byte values 0-255). Returns 0 on success.</summary>
+    [UnmanagedCallersOnly(EntryPoint = "pdf_shape_style_set_stroke")]
+    public static int ShapeStyleSetStroke(nint style, byte r, byte g, byte b, float width)
+    {
+        try
+        {
+            var ctx = GetCtx<ShapeStyleContext>(style);
+            if (ctx is null) { SetError("Invalid shape style handle."); return -1; }
+            ctx.StrokeColor = new PdfColor(r, g, b);
+            ctx.StrokeWidth = width;
+            return 0;
+        }
+        catch (Exception ex) { SetError(ex); return -1; }
+    }
+
+    /// <summary>Set the stroke opacity (0.0 = transparent, 1.0 = opaque). Returns 0 on success.</summary>
+    [UnmanagedCallersOnly(EntryPoint = "pdf_shape_style_set_stroke_opacity")]
+    public static int ShapeStyleSetStrokeOpacity(nint style, float opacity)
+    {
+        try
+        {
+            var ctx = GetCtx<ShapeStyleContext>(style);
+            if (ctx is null) { SetError("Invalid shape style handle."); return -1; }
+            ctx.StrokeOpacity = opacity < 0f ? 0f : opacity > 1f ? 1f : opacity;
+            return 0;
+        }
+        catch (Exception ex) { SetError(ex); return -1; }
+    }
+
+    /// <summary>Release a shape style handle.</summary>
+    [UnmanagedCallersOnly(EntryPoint = "pdf_shape_style_close")]
+    public static void ShapeStyleClose(nint handle)
+    {
+        if (handle == 0) return;
+        try { GCHandle.FromIntPtr(handle).Free(); } catch { }
+    }
+
+    /// <summary>
+    /// Draw a rectangle using a shape style handle (supports opacity).
+    /// Returns 0 on success, -1 on error.
+    /// </summary>
+    [UnmanagedCallersOnly(EntryPoint = "pdf_canvas_draw_rect_styled")]
+    public static int CanvasDrawRectStyled(nint canvas, float x, float y, float width, float height, nint style)
+    {
+        try
+        {
+            var cctx = GetCtx<CanvasContext>(canvas);
+            if (cctx is null) { SetError("Invalid canvas handle."); return -1; }
+            var sctx = GetCtx<ShapeStyleContext>(style);
+            if (sctx is null) { SetError("Invalid shape style handle."); return -1; }
+            cctx.Canvas.DrawRectangle(x, y, width, height, sctx.ToShapeStyle());
+            return 0;
+        }
+        catch (Exception ex) { SetError(ex); return -1; }
+    }
+
+    /// <summary>
+    /// Draw an ellipse using a shape style handle (supports opacity).
+    /// Returns 0 on success, -1 on error.
+    /// </summary>
+    [UnmanagedCallersOnly(EntryPoint = "pdf_canvas_draw_ellipse_styled")]
+    public static int CanvasDrawEllipseStyled(nint canvas, float x, float y, float width, float height, nint style)
+    {
+        try
+        {
+            var cctx = GetCtx<CanvasContext>(canvas);
+            if (cctx is null) { SetError("Invalid canvas handle."); return -1; }
+            var sctx = GetCtx<ShapeStyleContext>(style);
+            if (sctx is null) { SetError("Invalid shape style handle."); return -1; }
+            cctx.Canvas.DrawEllipse(x, y, width, height, sctx.ToShapeStyle());
+            return 0;
+        }
+        catch (Exception ex) { SetError(ex); return -1; }
     }
 
     // ── Table ─────────────────────────────────────────────────────────────────
