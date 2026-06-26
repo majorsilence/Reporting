@@ -1070,56 +1070,17 @@ namespace Majorsilence.Reporting.Rdl
 				return "";
 
 			string format = null;
-			try 
+			try
 			{
                 if (s != null && s.Format != null)
                 {
                     format = await s.Format.EvaluateString(rpt, row);
                     if (format != null && format.Length > 0)
                     {
-                        switch (tc)
-                        {
-                            case TypeCode.DateTime:
-                                t = ((DateTime)o).ToString(format);
-                                break;
-                            case TypeCode.Int16:
-                                t = ((short)o).ToString(format);
-                                break;
-                            case TypeCode.UInt16:
-                                t = ((ushort)o).ToString(format);
-                                break;
-                            case TypeCode.Int32:
-                                t = ((int)o).ToString(format);
-                                break;
-                            case TypeCode.UInt32:
-                                t = ((uint)o).ToString(format);
-                                break;
-                            case TypeCode.Int64:
-                                t = ((long)o).ToString(format);
-                                break;
-                            case TypeCode.UInt64:
-                                t = ((ulong)o).ToString(format);
-                                break;
-                            case TypeCode.String:
-                                t = (string)o;
-                                break;
-                            case TypeCode.Decimal:
-                                t = ((decimal)o).ToString(format);
-                                break;
-                            case TypeCode.Single:
-                                t = ((float)o).ToString(format);
-                                break;
-                            case TypeCode.Double:
-                                t = ((double)o).ToString(format);
-                                break;
-                            default:
-								t = (o is IFormattable fmt)
-									? fmt.ToString(format, null)
-									: o.ToString();
-                                break;
-                        }
+                        string language = await s.EvalLanguage(rpt, row);
+                        t = FormatValue(o, tc, format, language);
                     }
-                    else    
+                    else
                         t = o.ToString();       // No format provided
                 }
                 else
@@ -1134,6 +1095,51 @@ namespace Majorsilence.Reporting.Rdl
 				t = o.ToString();       // probably type mismatch from expectation
 			}
 			return t;
+		}
+
+		// Apply a format string to a value using the given BCP 47 language tag for locale-sensitive
+		// formats (C, N, P, etc.). Falls back to CurrentCulture if the tag is absent or unrecognised.
+		static internal string FormatValue(object o, TypeCode tc, string format, string language)
+		{
+			if (string.IsNullOrEmpty(format))
+				return o.ToString();
+
+			CultureInfo ci = CultureInfo.CurrentCulture;
+			if (!string.IsNullOrEmpty(language))
+			{
+				try { ci = CultureInfo.GetCultureInfo(language); }
+				catch (CultureNotFoundException) { }
+			}
+
+			switch (tc)
+			{
+				case TypeCode.DateTime:
+					return ((DateTime)o).ToString(format, ci);
+				case TypeCode.Int16:
+					return ((short)o).ToString(format, ci);
+				case TypeCode.UInt16:
+					return ((ushort)o).ToString(format, ci);
+				case TypeCode.Int32:
+					return ((int)o).ToString(format, ci);
+				case TypeCode.UInt32:
+					return ((uint)o).ToString(format, ci);
+				case TypeCode.Int64:
+					return ((long)o).ToString(format, ci);
+				case TypeCode.UInt64:
+					return ((ulong)o).ToString(format, ci);
+				case TypeCode.String:
+					return (string)o;
+				case TypeCode.Decimal:
+					return ((decimal)o).ToString(format, ci);
+				case TypeCode.Single:
+					return ((float)o).ToString(format, ci);
+				case TypeCode.Double:
+					return ((double)o).ToString(format, ci);
+				default:
+					return (o is IFormattable fmt)
+						? fmt.ToString(format, ci)
+						: o.ToString();
+			}
 		}
 
 		private async Task<bool> IsConstant()
