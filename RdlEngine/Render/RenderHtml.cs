@@ -444,12 +444,13 @@ function findObject(id) {
 			if (_Asp && prefix == "table#")
 				bForceRelative = true;
 
+			string position = await CssPosition(rl, row, bForceRelative, h, w);
 			if (s != null)
-				css = prefix + "{" + CssPosition(rl, row, bForceRelative, h, w) + await s.GetCSS(this.r, row, true) + "}";
+				css = prefix + "{" + position + await s.GetCSS(this.r, row, true) + "}";
 			else if (rl is Table || rl is Matrix)
-				css = prefix + "{" + CssPosition(rl, row, bForceRelative, h, w) + "border-collapse:collapse;}";
+				css = prefix + "{" + position + "border-collapse:collapse;}";
 			else
-				css = prefix + "{" + CssPosition(rl, row, bForceRelative, h, w) + "}";
+				css = prefix + "{" + position + "}";
 
 			CssCacheEntry cce = (CssCacheEntry) _styles[css];
 			if (cce == null)
@@ -466,7 +467,7 @@ function findObject(id) {
 				return cce.Name;
 		}
 
-		private string CssPosition(ReportLink rl,Row row, bool bForceRelative, float h, float w)
+		private async Task<string> CssPosition(ReportLink rl,Row row, bool bForceRelative, float h, float w)
 		{
 			if (!(rl is ReportItem))		// if not a report item then no position
 				return "";
@@ -513,7 +514,7 @@ function findObject(id) {
 			if (ri is List)
 			{
 				List l = ri as List;
-				sb.AppendFormat(NumberFormatInfo.InvariantInfo, "height: {0}pt; ", l.HeightOfList(this.r, GetGraphics,row));
+				sb.AppendFormat(NumberFormatInfo.InvariantInfo, "height: {0}pt; ", await l.HeightOfList(this.r, GetGraphics,row));
 			}
 			else if (ri is Matrix || ri is Table || ri is Image || ri is Chart)
 			{}
@@ -935,13 +936,20 @@ function findObject(id) {
 				togText = tg.ToggleTextbox;
 			}
 
+			StringBuilder rowStyle = new StringBuilder();
+			if (tr.Height != null)
+				rowStyle.AppendFormat(NumberFormatInfo.InvariantInfo, "height: {0};", tr.Height.CSS);
+
 			if (v != null &&
 				v.Hidden != null)
 			{
 				bool bHide = await v.Hidden.EvaluateBoolean(this.r, row);
 				if (bHide)
-					tw.Write(" style=\"display:none;\"");
+					rowStyle.Append("display:none;");
 			}
+
+			if (rowStyle.Length > 0)
+				tw.Write(" style=\"{0}\"", rowStyle.ToString());
 
 			if (togText != null && togText.Name != null)
 			{
