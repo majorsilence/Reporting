@@ -57,9 +57,15 @@ namespace Majorsilence.Pdf
         public TextDecoration Decoration { get; private set; } = TextDecoration.None;
 
         /// <summary>
-        /// When <c>true</c> the text is rotated 90° counter-clockwise (top-to-bottom writing).
+        /// Counter-clockwise rotation applied to the text run, in degrees. One of 0, 90, 180, or 270.
         /// </summary>
-        public bool IsVertical { get; private set; }
+        public int Rotation { get; private set; }
+
+        /// <summary>
+        /// When <c>true</c> the text is rotated 90° counter-clockwise (top-to-bottom writing).
+        /// Equivalent to <c>Rotation == 90</c>. Kept for backward compatibility with <see cref="WithVertical"/>.
+        /// </summary>
+        public bool IsVertical => Rotation == 90;
 
         /// <summary>
         /// When <c>true</c> the Unicode code points in the text string are reversed before
@@ -130,7 +136,18 @@ namespace Majorsilence.Pdf
         /// <summary>Rotate text 90° counter-clockwise (top-to-bottom writing direction).</summary>
         public TextStyle WithVertical(bool vertical = true)
         {
-            var s = Clone(); s.IsVertical = vertical; return s;
+            return WithRotation(vertical ? 90 : 0);
+        }
+
+        /// <summary>
+        /// Rotate the text run counter-clockwise by <paramref name="degrees"/>. Normalized to one
+        /// of 0, 90, 180, or 270 (e.g. -90 becomes 270).
+        /// </summary>
+        public TextStyle WithRotation(int degrees)
+        {
+            int normalized = ((degrees % 360) + 360) % 360;
+            normalized = (normalized / 90) * 90; // snap to the nearest supported quadrant
+            var s = Clone(); s.Rotation = normalized; return s;
         }
 
         /// <summary>

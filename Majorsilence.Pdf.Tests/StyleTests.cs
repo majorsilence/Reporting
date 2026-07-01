@@ -116,6 +116,25 @@ namespace Majorsilence.Pdf.Tests
         }
 
         [Test]
+        public void WithRotation_SetsRotationAndIsVertical()
+        {
+            Assert.That(TextStyle.Default.Rotation, Is.EqualTo(0));
+            Assert.That(TextStyle.Default.WithRotation(90).Rotation, Is.EqualTo(90));
+            Assert.That(TextStyle.Default.WithRotation(90).IsVertical, Is.True);
+            Assert.That(TextStyle.Default.WithRotation(180).Rotation, Is.EqualTo(180));
+            Assert.That(TextStyle.Default.WithRotation(270).Rotation, Is.EqualTo(270));
+            Assert.That(TextStyle.Default.WithRotation(180).IsVertical, Is.False);
+        }
+
+        [Test]
+        public void WithRotation_NormalizesOutOfRangeAndNegativeValues()
+        {
+            Assert.That(TextStyle.Default.WithRotation(-90).Rotation, Is.EqualTo(270));
+            Assert.That(TextStyle.Default.WithRotation(360).Rotation, Is.EqualTo(0));
+            Assert.That(TextStyle.Default.WithRotation(450).Rotation, Is.EqualTo(90));
+        }
+
+        [Test]
         public void FluentChain_CombinesProperties()
         {
             var s = TextStyle.Default

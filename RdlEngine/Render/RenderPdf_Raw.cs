@@ -285,8 +285,15 @@ namespace Majorsilence.Reporting.Rdl
                                 startY = y + height - textwidth - si.PaddingRight;
                             break;
                     }
+                    int rotationDegrees = si.WritingMode switch
+                    {
+                        WritingModeEnum.tb_lr => 90,
+                        WritingModeEnum.rl_bt => 180,
+                        WritingModeEnum.tb_rl => 270,
+                        _ => 90,
+                    };
                     _currentPage.DrawText(text, startX, startY + si.FontSize,
-                        baseStyle.WithVertical());
+                        baseStyle.WithRotation(rotationDegrees));
                 }
             }
 

@@ -63,6 +63,9 @@
 		<None Update="Reports\logo-example.png">
 		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
+		<None Update="Reports\TextRotationTest.rdl">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
 	</ItemGroup>
 	<ItemGroup>
 		<None Include="..\RdlEngine\RdlEngineConfig.xml">
