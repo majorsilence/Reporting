@@ -415,6 +415,13 @@ function findObject(id) {
 			if (!_Asp)
 				ftw.WriteLine("<style type='text/css'>");
 
+			// Browsers default <th> to center-aligned text, but the RDL's "General" alignment
+			// (used whenever a cell has no explicit TextAlign, header or not) means left for
+			// text - which is how the PDF renderer draws it and how <td> already behaves with
+			// no CSS at all. Cells with an explicit TextAlign still win: an id-qualified rule
+			// like "th#cssN {text-align:Center;}" is more specific than this bare-element rule.
+			ftw.WriteLine("th {text-align: left;}");
+
 			foreach (CssCacheEntry cce in _styles.Values)
 			{
 				int i = cce.Css.IndexOf('{');

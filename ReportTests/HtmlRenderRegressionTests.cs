@@ -76,6 +76,48 @@ namespace ReportTests
         }
 
         [Test]
+        public async Task MeetingMinutesReport_HeaderCellsDefaultToLeftAlignExceptWhereCentered()
+        {
+            // Bug: browsers default <th> to center-aligned text (unlike <td>, which defaults
+            // to left), but the RDL's "General" alignment - used by any header textbox with no
+            // explicit <TextAlign>, e.g. Name/Title, Topic/Discussion/Owner, Action/Due Date -
+            // means left, same as the PDF renderer and the <td> data rows underneath. Only
+            // cells with an explicit <TextAlign>Center</TextAlign> in the RDL (#, Present,
+            // Status, Priority) should end up centered.
+            string html = await RenderHtml("meeting-minutes1-a4.rdl");
+
+            Assert.That(html, Does.Match(@"(?i)th\s*\{[^}]*text-align:\s*left"),
+                "No default left text-align rule found for <th> cells");
+
+            AssertHeaderTextAlign(html, "Name", expectCenter: false);
+            AssertHeaderTextAlign(html, "Title", expectCenter: false);
+            AssertHeaderTextAlign(html, "Present", expectCenter: true);
+            AssertHeaderTextAlign(html, "Topic", expectCenter: false);
+            AssertHeaderTextAlign(html, "Owner", expectCenter: false);
+            AssertHeaderTextAlign(html, "Status", expectCenter: true);
+            AssertHeaderTextAlign(html, "Action", expectCenter: false);
+            AssertHeaderTextAlign(html, "Priority", expectCenter: true);
+        }
+
+        private static void AssertHeaderTextAlign(string html, string headerText, bool expectCenter)
+        {
+            var cellMatch = Regex.Match(html, $@"<th id='([^']+)'[^>]*>{Regex.Escape(headerText)}</th>");
+            Assert.That(cellMatch.Success, Is.True, $"Could not find header cell '{headerText}'");
+            string cssId = cellMatch.Groups[1].Value;
+
+            var ruleMatch = Regex.Match(html, $@"th#{Regex.Escape(cssId)}\s*\{{([^}}]*)\}}");
+            Assert.That(ruleMatch.Success, Is.True, $"Could not find CSS rule for header cell '{headerText}' (id {cssId})");
+            bool hasExplicitCenter = ruleMatch.Groups[1].Value.IndexOf("text-align:Center", StringComparison.OrdinalIgnoreCase) >= 0;
+
+            // A per-id rule that doesn't declare text-align at all still lets the bare "th"
+            // default rule apply for that property, so the absence of an explicit center here
+            // means the cell resolves to the sheet-wide left default - this mirrors real CSS
+            // cascade behavior rather than any specific browser quirk.
+            Assert.That(hasExplicitCenter, Is.EqualTo(expectCenter),
+                $"Header cell '{headerText}' {(expectCenter ? "should" : "should not")} have an explicit centered text-align rule");
+        }
+
+        [Test]
         public async Task ListReport_ListHeightIsAnAwaitedNumericValue()
         {
             // Bug: CssPosition() interpolated `l.HeightOfList(...)` directly into a format
