@@ -118,6 +118,39 @@ namespace ReportTests
         }
 
         [Test]
+        public async Task MeetingMinutesReport_BodyHasNoDefaultMargin()
+        {
+            // Bug: browsers apply a non-zero default margin to <body>, but every report item
+            // is positioned with "position: absolute; left: ...; top: ...;" relative to it.
+            // The header band's textbox is designed to bleed to the page edge (Top/Left 0in,
+            // Width equal to the full 8.27in PageWidth), which the PDF renderer draws flush
+            // against the page edge since it has no such default margin. Without resetting it,
+            // HTML rendered the same header inset from the left/right/top by the browser's
+            // default body margin instead of flush against the edge.
+            string html = await RenderHtml("meeting-minutes1-a4.rdl");
+
+            Assert.That(html, Does.Match(@"(?i)body\s*\{[^}]*margin:\s*0"),
+                "No default zero-margin rule found for <body>");
+        }
+
+        [Test]
+        public async Task MeetingMinutesReport_PositioningTableHasNoDefaultSpacingOrPadding()
+        {
+            // Bug: resetting <body>'s default margin wasn't enough - the report body is
+            // wrapped in a plain <table><td> purely to host the "position: relative;" div that
+            // every item is absolutely positioned against, and browsers default <table> to a
+            // 2px border-spacing and <td>/<th> to a small default padding. Either one still
+            // shifts that div (and everything positioned relative to it) away from the page
+            // edge, the same way the <body> margin did, leaving a visible gap versus the PDF.
+            string html = await RenderHtml("meeting-minutes1-a4.rdl");
+
+            Assert.That(html, Does.Match(@"(?i)table\s*\{[^}]*border-spacing:\s*0"),
+                "No default zero border-spacing rule found for <table>");
+            Assert.That(html, Does.Match(@"(?i)td\s*,\s*th\s*\{[^}]*padding:\s*0"),
+                "No default zero padding rule found for <td>/<th>");
+        }
+
+        [Test]
         public async Task ListReport_ListHeightIsAnAwaitedNumericValue()
         {
             // Bug: CssPosition() interpolated `l.HeightOfList(...)` directly into a format

@@ -422,6 +422,22 @@ function findObject(id) {
 			// like "th#cssN {text-align:Center;}" is more specific than this bare-element rule.
 			ftw.WriteLine("th {text-align: left;}");
 
+			// Browsers also default <body> to a non-zero margin, which offsets every item
+			// positioned via "position: absolute; left: 0; top: 0;" away from the page edge.
+			// The PDF renderer has no such default, so a report item designed to bleed to the
+			// edge of the page (e.g. Top/Left 0 with Width equal to PageWidth) renders inset
+			// from the edge in HTML unless that default margin is reset.
+			ftw.WriteLine("body {margin: 0; padding: 0;}");
+
+			// The entire report body is wrapped in a plain, unstyled <table> purely so its
+			// single cell can host the "position: relative;" div that every report item is
+			// absolutely positioned against. Browsers default <table> to a 2px border-spacing
+			// and <td>/<th> to a small default padding, both of which shift that div (and so
+			// every item positioned relative to it) away from the page edge just like the
+			// <body> margin did. Explicit per-cell padding from the RDL (always emitted, even
+			// as "0pt" - see Style.GetCSS) still overrides this default.
+			ftw.WriteLine("table {border-spacing: 0;} td, th {padding: 0; margin: 0;}");
+
 			foreach (CssCacheEntry cce in _styles.Values)
 			{
 				int i = cce.Css.IndexOf('{');
