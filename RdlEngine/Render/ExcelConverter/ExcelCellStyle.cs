@@ -61,6 +61,7 @@ namespace RdlEngine.Render.ExcelConverter
             {
                 case WritingModeEnum.tb_rl: fmt.Rotation = -90; break;
                 case WritingModeEnum.tb_lr: fmt.Rotation = 90; break;
+                case WritingModeEnum.rl_bt: fmt.Rotation = 180; break;
                 default: fmt.Rotation = 0; break;
             }
 

@@ -85,8 +85,15 @@ namespace Majorsilence.Pdf
 
             sb.Append("q\n");
 
-            if (style.IsVertical)
-                sb.Append($"{F(0)} {F(1)} {F(-1)} {F(0)} {F(x)} {F(pdfY)} cm\n");
+            if (style.Rotation != 0)
+            {
+                double radians = style.Rotation * Math.PI / 180.0;
+                float rotA = (float)Math.Cos(radians);
+                float rotB = (float)Math.Sin(radians);
+                float rotC = -rotB;
+                float rotD = rotA;
+                sb.Append($"{F(rotA)} {F(rotB)} {F(rotC)} {F(rotD)} {F(x)} {F(pdfY)} cm\n");
+            }
             else
                 sb.Append("1 0 0 1 0 0 cm\n");
 
@@ -119,7 +126,7 @@ namespace Majorsilence.Pdf
 
                 foreach (var (segText, segTtf, segSrc) in segments)
                 {
-                    if (segTtf.IsColorBitmapOnly && !style.IsVertical)
+                    if (segTtf.IsColorBitmapOnly && style.Rotation == 0)
                     {
                         // Close any open BT block before emitting image XObjects.
                         if (inBt) { sb.Append("ET\n"); inBt = false; }
@@ -179,7 +186,7 @@ namespace Majorsilence.Pdf
                         if (!inBt)
                         {
                             sb.Append("BT\n");
-                            if (style.IsVertical)
+                            if (style.Rotation != 0)
                                 sb.Append($"{F(0)} {F(style.FontSize)} Td\n");
                             else
                                 sb.Append($"{F(cursorX)} {F(pdfY)} Td\n");
@@ -212,7 +219,7 @@ namespace Majorsilence.Pdf
 
                 sb.Append("BT\n");
                 sb.Append($"/{font.PdfName} {F(style.FontSize)} Tf\n");
-                if (style.IsVertical)
+                if (style.Rotation != 0)
                     sb.Append($"{F(0)} {F(style.FontSize)} Td\n");
                 else
                     sb.Append($"{F(x)} {F(pdfY)} Td\n");

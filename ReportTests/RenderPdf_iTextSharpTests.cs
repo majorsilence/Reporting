@@ -57,10 +57,11 @@ namespace ReportTests.Utils
             new object[]{ "ListReport.rdl",
                             "en-US",
                             "RenderPdf_iTextSharp",
-                            null } //Load data from sqlite
-      
-      
-      
+                            null }, //Load data from sqlite
+            new object[]{ "TextRotationTest.rdl",
+                            "en-US",
+                            "RenderPdf_iTextSharp",
+                            null } //0/90/180/270 degree text rotation
 
         };
 
