@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Report Name="CanGrowPageTest">
+  <Description>Issue #159: a CanGrow textbox near the bottom of the page that grows beyond the page bottom.</Description>
+  <Body>
+    <Height>10in</Height>
+    <ReportItems>
+      <Textbox Name="TopMarker">
+        <Top>0in</Top>
+        <Left>0in</Left>
+        <Height>0.3in</Height>
+        <Width>6in</Width>
+        <Value>TOPMARKER</Value>
+        <Style><FontSize>10pt</FontSize></Style>
+      </Textbox>
+      <Textbox Name="GrowBox">
+        <Top>8.5in</Top>
+        <Left>0in</Left>
+        <Height>0.3in</Height>
+        <Width>3in</Width>
+        <CanGrow>true</CanGrow>
+        <Value>LINE01 wraps here LINE02 wraps here LINE03 wraps here LINE04 wraps here LINE05 wraps here LINE06 wraps here LINE07 wraps here LINE08 wraps here LINE09 wraps here LINE10 wraps here LINE11 wraps here LINE12 wraps here LINE13 wraps here LINE14 wraps here LINE15 wraps here LINE16 wraps here LINE17 wraps here LINE18 wraps here LINE19 wraps here LINE20 wraps here LINE21 wraps here LINE22 wraps here LINE23 wraps here LINE24 wraps here LINE25 wraps here LINE26 wraps here LINE27 wraps here LINE28 wraps here LINE29 wraps here LINE30 wraps here ENDMARKER</Value>
+        <Style><FontSize>10pt</FontSize></Style>
+      </Textbox>
+    </ReportItems>
+  </Body>
+  <Width>6in</Width>
+  <PageWidth>8.5in</PageWidth>
+  <PageHeight>11in</PageHeight>
+  <TopMargin>0.5in</TopMargin>
+  <BottomMargin>0.5in</BottomMargin>
+</Report>
