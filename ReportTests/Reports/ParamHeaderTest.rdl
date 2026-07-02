@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Report Name="ParamHeaderTest">
+  <Description>Issue #108: a report parameter shown in the page header must reflect the value supplied at run time, not always the default.</Description>
+  <ReportParameters>
+    <ReportParameter Name="P">
+      <DataType>String</DataType>
+      <DefaultValue>
+        <Values>
+          <Value>DEFAULTVAL</Value>
+        </Values>
+      </DefaultValue>
+      <Prompt>Enter P</Prompt>
+    </ReportParameter>
+  </ReportParameters>
+  <PageHeader>
+    <Height>0.5in</Height>
+    <PrintOnFirstPage>true</PrintOnFirstPage>
+    <ReportItems>
+      <Textbox Name="HdrParam">
+        <Top>0in</Top>
+        <Left>0in</Left>
+        <Height>0.3in</Height>
+        <Width>5in</Width>
+        <Value>=Parameters!P.Value</Value>
+        <Style>
+          <FontSize>10pt</FontSize>
+        </Style>
+      </Textbox>
+    </ReportItems>
+  </PageHeader>
+  <Body>
+    <Height>1in</Height>
+    <ReportItems>
+      <Textbox Name="BodyBox">
+        <Top>0in</Top>
+        <Left>0in</Left>
+        <Height>0.3in</Height>
+        <Width>5in</Width>
+        <Value>=Parameters!P.Value</Value>
+        <Style>
+          <FontSize>10pt</FontSize>
+        </Style>
+      </Textbox>
+    </ReportItems>
+  </Body>
+  <Width>5in</Width>
+  <PageWidth>8.5in</PageWidth>
+  <PageHeight>11in</PageHeight>
+</Report>
