@@ -130,6 +130,7 @@ namespace Majorsilence.Reporting.Rdl
 			<DataProvider>OLEDB</DataProvider>
 			<TableSelect>SELECT TABLE_NAME, TABLE_TYPE FROM INFORMATION_SCHEMA.TABLES ORDER BY 2, 1</TableSelect>
 			<Interface>SQL</Interface>
+			<ReplaceParameters>true</ReplaceParameters>
 		</DataSource>
 		<DataSource>
 			<DataProvider>Oracle</DataProvider>
