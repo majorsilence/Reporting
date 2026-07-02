@@ -415,6 +415,29 @@ function findObject(id) {
 			if (!_Asp)
 				ftw.WriteLine("<style type='text/css'>");
 
+			// Browsers default <th> to center-aligned text, but the RDL's "General" alignment
+			// (used whenever a cell has no explicit TextAlign, header or not) means left for
+			// text - which is how the PDF renderer draws it and how <td> already behaves with
+			// no CSS at all. Cells with an explicit TextAlign still win: an id-qualified rule
+			// like "th#cssN {text-align:Center;}" is more specific than this bare-element rule.
+			ftw.WriteLine("th {text-align: left;}");
+
+			// Browsers also default <body> to a non-zero margin, which offsets every item
+			// positioned via "position: absolute; left: 0; top: 0;" away from the page edge.
+			// The PDF renderer has no such default, so a report item designed to bleed to the
+			// edge of the page (e.g. Top/Left 0 with Width equal to PageWidth) renders inset
+			// from the edge in HTML unless that default margin is reset.
+			ftw.WriteLine("body {margin: 0; padding: 0;}");
+
+			// The entire report body is wrapped in a plain, unstyled <table> purely so its
+			// single cell can host the "position: relative;" div that every report item is
+			// absolutely positioned against. Browsers default <table> to a 2px border-spacing
+			// and <td>/<th> to a small default padding, both of which shift that div (and so
+			// every item positioned relative to it) away from the page edge just like the
+			// <body> margin did. Explicit per-cell padding from the RDL (always emitted, even
+			// as "0pt" - see Style.GetCSS) still overrides this default.
+			ftw.WriteLine("table {border-spacing: 0;} td, th {padding: 0; margin: 0;}");
+
 			foreach (CssCacheEntry cce in _styles.Values)
 			{
 				int i = cce.Css.IndexOf('{');
@@ -444,12 +467,13 @@ function findObject(id) {
 			if (_Asp && prefix == "table#")
 				bForceRelative = true;
 
+			string position = await CssPosition(rl, row, bForceRelative, h, w);
 			if (s != null)
-				css = prefix + "{" + CssPosition(rl, row, bForceRelative, h, w) + await s.GetCSS(this.r, row, true) + "}";
+				css = prefix + "{" + position + await s.GetCSS(this.r, row, true) + "}";
 			else if (rl is Table || rl is Matrix)
-				css = prefix + "{" + CssPosition(rl, row, bForceRelative, h, w) + "border-collapse:collapse;}";
+				css = prefix + "{" + position + "border-collapse:collapse;}";
 			else
-				css = prefix + "{" + CssPosition(rl, row, bForceRelative, h, w) + "}";
+				css = prefix + "{" + position + "}";
 
 			CssCacheEntry cce = (CssCacheEntry) _styles[css];
 			if (cce == null)
@@ -466,7 +490,7 @@ function findObject(id) {
 				return cce.Name;
 		}
 
-		private string CssPosition(ReportLink rl,Row row, bool bForceRelative, float h, float w)
+		private async Task<string> CssPosition(ReportLink rl,Row row, bool bForceRelative, float h, float w)
 		{
 			if (!(rl is ReportItem))		// if not a report item then no position
 				return "";
@@ -513,7 +537,7 @@ function findObject(id) {
 			if (ri is List)
 			{
 				List l = ri as List;
-				sb.AppendFormat(NumberFormatInfo.InvariantInfo, "height: {0}pt; ", l.HeightOfList(this.r, GetGraphics,row));
+				sb.AppendFormat(NumberFormatInfo.InvariantInfo, "height: {0}pt; ", await l.HeightOfList(this.r, GetGraphics,row));
 			}
 			else if (ri is Matrix || ri is Table || ri is Image || ri is Chart)
 			{}
@@ -935,13 +959,20 @@ function findObject(id) {
 				togText = tg.ToggleTextbox;
 			}
 
+			StringBuilder rowStyle = new StringBuilder();
+			if (tr.Height != null)
+				rowStyle.AppendFormat(NumberFormatInfo.InvariantInfo, "height: {0};", tr.Height.CSS);
+
 			if (v != null &&
 				v.Hidden != null)
 			{
 				bool bHide = await v.Hidden.EvaluateBoolean(this.r, row);
 				if (bHide)
-					tw.Write(" style=\"display:none;\"");
+					rowStyle.Append("display:none;");
 			}
+
+			if (rowStyle.Length > 0)
+				tw.Write(" style=\"{0}\"", rowStyle.ToString());
 
 			if (togText != null && togText.Name != null)
 			{

@@ -252,3 +252,4 @@ obj/
 /ReportTests/Reports/northwindEF.db
 .claude/settings.local.json
 /.claude/worktrees
+/graphify-out

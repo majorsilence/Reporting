@@ -671,18 +671,18 @@ namespace Majorsilence.Reporting.Rdl
 		/// </summary>
 		public string ClientLanguage
 		{
-			get 
+			get
             {
+                if (_ClientLanguage != null)
+                    return _ClientLanguage;
+
 				if (_Report.Language != null)
 				{
 					// HACK: async
 					return Task.Run(async () => await _Report.Language.EvaluateString(this, null)).GetAwaiter().GetResult();
 				}
 
-                if (_ClientLanguage != null)
-                    return _ClientLanguage;
-
-                return CultureInfo.CurrentCulture.ThreeLetterISOLanguageName; 
+                return CultureInfo.CurrentCulture.ThreeLetterISOLanguageName;
             }
 			set { _ClientLanguage = value; }
 		}

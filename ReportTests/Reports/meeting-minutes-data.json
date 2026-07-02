@@ -1,0 +1,121 @@
+{
+  "Language": "en-US",
+  "MeetingTitle": "Q2 Product Review and Roadmap Planning",
+  "MeetingDate": "June 10, 2026",
+  "MeetingTime": "14:00 - 16:00",
+  "Location": "Board Room A, 5th Floor",
+  "Chairperson": "James Reid",
+  "Secretary": "Amy Chen",
+  "Quorum": "Achieved (7 of 8 members)",
+  "NextMeetingDate": "July 8, 2026",
+  "NextMeetingLocation": "Board Room A, 5th Floor",
+  "Attendees": [
+    {
+      "Name": "James Reid",
+      "Title": "CEO",
+      "Present": "Yes"
+    },
+    {
+      "Name": "Amy Chen",
+      "Title": "Product Lead",
+      "Present": "Yes"
+    },
+    {
+      "Name": "David Park",
+      "Title": "CTO",
+      "Present": "Yes"
+    },
+    {
+      "Name": "Priya Menon",
+      "Title": "Engineering Manager",
+      "Present": "Yes"
+    },
+    {
+      "Name": "Tom Bassett",
+      "Title": "Sales Director",
+      "Present": "Yes"
+    },
+    {
+      "Name": "Rachel Osei",
+      "Title": "UX Lead",
+      "Present": "Yes"
+    },
+    {
+      "Name": "Carlos Marin",
+      "Title": "QA Lead",
+      "Present": "Yes"
+    },
+    {
+      "Name": "Mei Tanaka",
+      "Title": "Finance Analyst",
+      "Present": "No"
+    }
+  ],
+  "AgendaItems": [
+    {
+      "ItemNumber": "1",
+      "Topic": "Q2 Performance Review",
+      "Discussion": "Revenue target achieved at 103%. Two major enterprise accounts closed. Customer churn improved to 2.1% (down from 3.4%).",
+      "Owner": "Tom Bassett",
+      "Status": "Closed"
+    },
+    {
+      "ItemNumber": "2",
+      "Topic": "Product Roadmap H2 2026",
+      "Discussion": "Prioritised AI-assisted reporting and mobile SDK for Q3. Gallery redesign deferred to Q4 pending UX research.",
+      "Owner": "Amy Chen",
+      "Status": "Approved"
+    },
+    {
+      "ItemNumber": "3",
+      "Topic": "Engineering Capacity Planning",
+      "Discussion": "Two new senior engineers joining July 1. Backend migration to .NET 10 on track for August 15 completion.",
+      "Owner": "Priya Menon",
+      "Status": "In Progress"
+    },
+    {
+      "ItemNumber": "4",
+      "Topic": "QA Process Improvement",
+      "Discussion": "Proposal to adopt shift-left testing with automated integration gates. Pilot approved starting June 24.",
+      "Owner": "Carlos Marin",
+      "Status": "Approved"
+    }
+  ],
+  "ActionItems": [
+    {
+      "Number": "1",
+      "Action": "Prepare H2 sales forecast by account segment",
+      "Owner": "Tom Bassett",
+      "DueDate": "Jun 20, 2026",
+      "Priority": "High"
+    },
+    {
+      "Number": "2",
+      "Action": "Publish updated product roadmap to stakeholder portal",
+      "Owner": "Amy Chen",
+      "DueDate": "Jun 17, 2026",
+      "Priority": "High"
+    },
+    {
+      "Number": "3",
+      "Action": "Complete onboarding plan for two new engineers",
+      "Owner": "Priya Menon",
+      "DueDate": "Jun 28, 2026",
+      "Priority": "Medium"
+    },
+    {
+      "Number": "4",
+      "Action": "Set up CI integration test gates for pilot",
+      "Owner": "Carlos Marin",
+      "DueDate": "Jun 24, 2026",
+      "Priority": "Medium"
+    },
+    {
+      "Number": "5",
+      "Action": "Schedule UX research sessions for Gallery redesign",
+      "Owner": "Rachel Osei",
+      "DueDate": "Jul 1, 2026",
+      "Priority": "Low"
+    }
+  ]
+}

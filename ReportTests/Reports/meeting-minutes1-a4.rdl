@@ -1,0 +1,248 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Report xmlns="http://schemas.microsoft.com/sqlserver/reporting/2005/01/reportdefinition" xmlns:rd="http://schemas.microsoft.com/SQLServer/reporting/reportdesigner">
+  <DataSources>
+    <DataSource Name="HeaderSrc">
+      <ConnectionProperties><DataProvider>Json</DataProvider><ConnectString>file=meeting-minutes-data.json;table=root</ConnectString></ConnectionProperties>
+    </DataSource>
+    <DataSource Name="AttendeesSrc">
+      <ConnectionProperties><DataProvider>Json</DataProvider><ConnectString>file=meeting-minutes-data.json;table=root_Attendees</ConnectString></ConnectionProperties>
+    </DataSource>
+    <DataSource Name="AgendaSrc">
+      <ConnectionProperties><DataProvider>Json</DataProvider><ConnectString>file=meeting-minutes-data.json;table=root_AgendaItems</ConnectString></ConnectionProperties>
+    </DataSource>
+    <DataSource Name="ActionSrc">
+      <ConnectionProperties><DataProvider>Json</DataProvider><ConnectString>file=meeting-minutes-data.json;table=root_ActionItems</ConnectString></ConnectionProperties>
+    </DataSource>
+  </DataSources>
+  <DataSets>
+    <DataSet Name="HeaderData">
+      <Query>
+        <DataSourceName>HeaderSrc</DataSourceName>
+        <CommandText>columns=MeetingTitle,MeetingDate,MeetingTime,Location,Chairperson,Secretary,Quorum,NextMeetingDate,NextMeetingLocation</CommandText>
+      </Query>
+      <Fields>
+        <Field Name="MeetingTitle"><DataField>MeetingTitle</DataField><rd:TypeName>System.String</rd:TypeName></Field>
+        <Field Name="MeetingDate"><DataField>MeetingDate</DataField><rd:TypeName>System.String</rd:TypeName></Field>
+        <Field Name="MeetingTime"><DataField>MeetingTime</DataField><rd:TypeName>System.String</rd:TypeName></Field>
+        <Field Name="Location"><DataField>Location</DataField><rd:TypeName>System.String</rd:TypeName></Field>
+        <Field Name="Chairperson"><DataField>Chairperson</DataField><rd:TypeName>System.String</rd:TypeName></Field>
+        <Field Name="Secretary"><DataField>Secretary</DataField><rd:TypeName>System.String</rd:TypeName></Field>
+        <Field Name="Quorum"><DataField>Quorum</DataField><rd:TypeName>System.String</rd:TypeName></Field>
+        <Field Name="NextMeetingDate"><DataField>NextMeetingDate</DataField><rd:TypeName>System.String</rd:TypeName></Field>
+        <Field Name="NextMeetingLocation"><DataField>NextMeetingLocation</DataField><rd:TypeName>System.String</rd:TypeName></Field>
+      </Fields>
+    </DataSet>
+    <DataSet Name="Attendees">
+      <Query>
+        <DataSourceName>AttendeesSrc</DataSourceName>
+        <CommandText>columns=Name,Title,Present</CommandText>
+      </Query>
+      <Fields>
+        <Field Name="AttName"><DataField>Name</DataField><rd:TypeName>System.String</rd:TypeName></Field>
+        <Field Name="AttTitle"><DataField>Title</DataField><rd:TypeName>System.String</rd:TypeName></Field>
+        <Field Name="AttPresent"><DataField>Present</DataField><rd:TypeName>System.String</rd:TypeName></Field>
+      </Fields>
+    </DataSet>
+    <DataSet Name="AgendaItems">
+      <Query>
+        <DataSourceName>AgendaSrc</DataSourceName>
+        <CommandText>columns=ItemNumber,Topic,Discussion,Owner,Status</CommandText>
+      </Query>
+      <Fields>
+        <Field Name="ItemNumber"><DataField>ItemNumber</DataField><rd:TypeName>System.String</rd:TypeName></Field>
+        <Field Name="Topic"><DataField>Topic</DataField><rd:TypeName>System.String</rd:TypeName></Field>
+        <Field Name="Discussion"><DataField>Discussion</DataField><rd:TypeName>System.String</rd:TypeName></Field>
+        <Field Name="AgendaOwner"><DataField>Owner</DataField><rd:TypeName>System.String</rd:TypeName></Field>
+        <Field Name="AgendaStatus"><DataField>Status</DataField><rd:TypeName>System.String</rd:TypeName></Field>
+      </Fields>
+    </DataSet>
+    <DataSet Name="ActionItems">
+      <Query>
+        <DataSourceName>ActionSrc</DataSourceName>
+        <CommandText>columns=Number,Action,Owner,DueDate,Priority</CommandText>
+      </Query>
+      <Fields>
+        <Field Name="ActionNumber"><DataField>Number</DataField><rd:TypeName>System.String</rd:TypeName></Field>
+        <Field Name="ActionText"><DataField>Action</DataField><rd:TypeName>System.String</rd:TypeName></Field>
+        <Field Name="ActionOwner"><DataField>Owner</DataField><rd:TypeName>System.String</rd:TypeName></Field>
+        <Field Name="DueDate"><DataField>DueDate</DataField><rd:TypeName>System.String</rd:TypeName></Field>
+        <Field Name="Priority"><DataField>Priority</DataField><rd:TypeName>System.String</rd:TypeName></Field>
+      </Fields>
+    </DataSet>
+  </DataSets>
+  <Body>
+    <ReportItems>
+      <!-- ── Header band ───────────────────────────────────── -->
+      <Textbox Name="HdrBg"><Top>0in</Top><Left>0in</Left><Height>1.0627in</Height><Width>8.27in</Width><Value></Value><Style><BackgroundColor>#006d6d</BackgroundColor></Style></Textbox>
+      <Textbox Name="HdrTitle"><Top>0.1913in</Top><Left>0.4865in</Left><Height>0.5101in</Height><Width>5.3512in</Width><Value>=First(Fields!MeetingTitle.Value, "HeaderData")</Value><Style><FontSize>18pt</FontSize><FontWeight>Bold</FontWeight><Color>White</Color></Style></Textbox>
+      <Textbox Name="HdrLabel"><Top>0.3401in</Top><Left>5.6431in</Left><Height>0.3188in</Height><Width>2.2378in</Width><Value>MEETING MINUTES</Value><Style><FontSize>10pt</FontSize><Color>#a0d8d8</Color><TextAlign>Right</TextAlign></Style></Textbox>
+      <Textbox Name="HdrAccent"><Top>1.0627in</Top><Left>0in</Left><Height>0.0638in</Height><Width>8.27in</Width><Value></Value><Style><BackgroundColor>#004d4d</BackgroundColor></Style></Textbox>
+
+      <!-- ── Meeting info card ─────────────────────────────── -->
+      <Textbox Name="InfoBg"><Top>1.2221in</Top><Left>0.4865in</Left><Height>1.169in</Height><Width>7.2971in</Width><Value></Value><Style><BackgroundColor>#e8f8f7</BackgroundColor><BorderStyle><Default>Solid</Default></BorderStyle><BorderColor><Default>#b0dede</Default></BorderColor><BorderWidth><Default>1pt</Default></BorderWidth></Style></Textbox>
+
+      <!-- Row 1: Date / Time / Location -->
+      <Textbox Name="LDate"><Top>1.3072in</Top><Left>0.6324in</Left><Height>0.2125in</Height><Width>1.7513in</Width><Value>DATE</Value><Style><FontSize>7.5pt</FontSize><FontWeight>Bold</FontWeight><Color>#006d6d</Color></Style></Textbox>
+      <Textbox Name="LTime"><Top>1.3072in</Top><Left>2.9188in</Left><Height>0.2125in</Height><Width>1.654in</Width><Value>TIME</Value><Style><FontSize>7.5pt</FontSize><FontWeight>Bold</FontWeight><Color>#006d6d</Color></Style></Textbox>
+      <Textbox Name="LLoc"><Top>1.3072in</Top><Left>5.0593in</Left><Height>0.2125in</Height><Width>1.9459in</Width><Value>LOCATION</Value><Style><FontSize>7.5pt</FontSize><FontWeight>Bold</FontWeight><Color>#006d6d</Color></Style></Textbox>
+      <Textbox Name="VDate"><Top>1.541in</Top><Left>0.6324in</Left><Height>0.2551in</Height><Width>2.1405in</Width><Value>=First(Fields!MeetingDate.Value, "HeaderData")</Value><Style><FontSize>10pt</FontSize><Color>#222</Color></Style></Textbox>
+      <Textbox Name="VTime"><Top>1.541in</Top><Left>2.9188in</Left><Height>0.2551in</Height><Width>2.0432in</Width><Value>=First(Fields!MeetingTime.Value, "HeaderData")</Value><Style><FontSize>10pt</FontSize><Color>#222</Color></Style></Textbox>
+      <Textbox Name="VLoc"><Top>1.541in</Top><Left>5.0593in</Left><Height>0.2551in</Height><Width>2.0432in</Width><Value>=First(Fields!Location.Value, "HeaderData")</Value><Style><FontSize>10pt</FontSize><Color>#222</Color></Style></Textbox>
+
+      <!-- Row 2: Chairperson / Secretary / Quorum -->
+      <Textbox Name="LChair"><Top>1.8598in</Top><Left>0.6324in</Left><Height>0.2125in</Height><Width>1.7513in</Width><Value>CHAIRPERSON</Value><Style><FontSize>7.5pt</FontSize><FontWeight>Bold</FontWeight><Color>#006d6d</Color></Style></Textbox>
+      <Textbox Name="LSec"><Top>1.8598in</Top><Left>2.9188in</Left><Height>0.2125in</Height><Width>1.654in</Width><Value>SECRETARY</Value><Style><FontSize>7.5pt</FontSize><FontWeight>Bold</FontWeight><Color>#006d6d</Color></Style></Textbox>
+      <Textbox Name="LQuorum"><Top>1.8598in</Top><Left>5.0593in</Left><Height>0.2125in</Height><Width>1.9459in</Width><Value>QUORUM</Value><Style><FontSize>7.5pt</FontSize><FontWeight>Bold</FontWeight><Color>#006d6d</Color></Style></Textbox>
+      <Textbox Name="VChair"><Top>2.0936in</Top><Left>0.6324in</Left><Height>0.2551in</Height><Width>2.1405in</Width><Value>=First(Fields!Chairperson.Value, "HeaderData")</Value><Style><FontSize>10pt</FontSize><Color>#222</Color></Style></Textbox>
+      <Textbox Name="VSec"><Top>2.0936in</Top><Left>2.9188in</Left><Height>0.2551in</Height><Width>2.0432in</Width><Value>=First(Fields!Secretary.Value, "HeaderData")</Value><Style><FontSize>10pt</FontSize><Color>#222</Color></Style></Textbox>
+      <Textbox Name="VQuorum"><Top>2.0936in</Top><Left>5.0593in</Left><Height>0.2551in</Height><Width>2.0432in</Width><Value>=First(Fields!Quorum.Value, "HeaderData")</Value><Style><FontSize>10pt</FontSize><Color>#006d6d</Color><FontWeight>Bold</FontWeight></Style></Textbox>
+
+      <!-- ── Attendees ─────────────────────────────────────── -->
+      <Textbox Name="AttLbl"><Top>2.5505in</Top><Left>0.4865in</Left><Height>0.2976in</Height><Width>7.2971in</Width><Value>ATTENDEES</Value><Style><FontSize>11pt</FontSize><FontWeight>Bold</FontWeight><Color>#006d6d</Color></Style></Textbox>
+      <Textbox Name="AttRule"><Top>2.8906in</Top><Left>0.4865in</Left><Height>0.0319in</Height><Width>7.2971in</Width><Value></Value><Style><BackgroundColor>#006d6d</BackgroundColor></Style></Textbox>
+      <Table Name="AttendeesTable">
+        <DataSetName>Attendees</DataSetName>
+        <Top>2.9225in</Top><Left>0.4865in</Left><Width>7.2971in</Width>
+        <TableColumns>
+          <TableColumn><Width>2.7242in</Width></TableColumn>
+          <TableColumn><Width>3.6972in</Width></TableColumn>
+          <TableColumn><Width>0.8756in</Width></TableColumn>
+        </TableColumns>
+        <Header>
+          <TableRows>
+            <TableRow>
+              <Height>0.2763in</Height>
+              <TableCells>
+                <TableCell><ReportItems><Textbox Name="AHdrName"><Value>Name</Value><Style><FontWeight>Bold</FontWeight><BackgroundColor>#006d6d</BackgroundColor><Color>White</Color><FontSize>9pt</FontSize><PaddingLeft>4pt</PaddingLeft></Style></Textbox></ReportItems></TableCell>
+                <TableCell><ReportItems><Textbox Name="AHdrTitle"><Value>Title</Value><Style><FontWeight>Bold</FontWeight><BackgroundColor>#006d6d</BackgroundColor><Color>White</Color><FontSize>9pt</FontSize><PaddingLeft>4pt</PaddingLeft></Style></Textbox></ReportItems></TableCell>
+                <TableCell><ReportItems><Textbox Name="AHdrPresent"><Value>Present</Value><Style><FontWeight>Bold</FontWeight><BackgroundColor>#006d6d</BackgroundColor><Color>White</Color><FontSize>9pt</FontSize><TextAlign>Center</TextAlign></Style></Textbox></ReportItems></TableCell>
+              </TableCells>
+            </TableRow>
+          </TableRows>
+        </Header>
+        <Details>
+          <TableRows>
+            <TableRow>
+              <Height>0.2551in</Height>
+              <TableCells>
+                <TableCell><ReportItems><Textbox Name="ARowName"><Value>=Fields!AttName.Value</Value><Style><FontSize>9pt</FontSize><BackgroundColor>=IIf(RowNumber(Nothing) Mod 2 = 0, "#e8f8f7", "White")</BackgroundColor><PaddingLeft>4pt</PaddingLeft></Style></Textbox></ReportItems></TableCell>
+                <TableCell><ReportItems><Textbox Name="ARowTitle"><Value>=Fields!AttTitle.Value</Value><Style><FontSize>9pt</FontSize><BackgroundColor>=IIf(RowNumber(Nothing) Mod 2 = 0, "#e8f8f7", "White")</BackgroundColor><PaddingLeft>4pt</PaddingLeft></Style></Textbox></ReportItems></TableCell>
+                <TableCell><ReportItems><Textbox Name="ARowPresent"><Value>=Fields!AttPresent.Value</Value><Style><FontSize>9pt</FontSize><TextAlign>Center</TextAlign><BackgroundColor>=IIf(RowNumber(Nothing) Mod 2 = 0, "#e8f8f7", "White")</BackgroundColor><Color>=IIf(Fields!AttPresent.Value = "Yes", "#006d6d", "#c0392b")</Color><FontWeight>Bold</FontWeight></Style></Textbox></ReportItems></TableCell>
+              </TableCells>
+            </TableRow>
+          </TableRows>
+        </Details>
+      </Table>
+
+      <!-- ── Agenda items ──────────────────────────────────── -->
+      <Textbox Name="AgendaLbl"><Top>5.3136in</Top><Left>0.4865in</Left><Height>0.2976in</Height><Width>7.2971in</Width><Value>AGENDA ITEMS</Value><Style><FontSize>11pt</FontSize><FontWeight>Bold</FontWeight><Color>#006d6d</Color></Style></Textbox>
+      <Textbox Name="AgendaRule"><Top>5.6537in</Top><Left>0.4865in</Left><Height>0.0319in</Height><Width>7.2971in</Width><Value></Value><Style><BackgroundColor>#006d6d</BackgroundColor></Style></Textbox>
+      <Table Name="AgendaTable">
+        <DataSetName>AgendaItems</DataSetName>
+        <Top>5.6856in</Top><Left>0.4865in</Left><Width>7.2971in</Width>
+        <TableColumns>
+          <TableColumn><Width>0.3892in</Width></TableColumn>
+          <TableColumn><Width>1.654in</Width></TableColumn>
+          <TableColumn><Width>3.4053in</Width></TableColumn>
+          <TableColumn><Width>1.1675in</Width></TableColumn>
+          <TableColumn><Width>0.6811in</Width></TableColumn>
+        </TableColumns>
+        <Header>
+          <TableRows>
+            <TableRow>
+              <Height>0.2763in</Height>
+              <TableCells>
+                <TableCell><ReportItems><Textbox Name="GHdrNo"><Value>#</Value><Style><FontWeight>Bold</FontWeight><BackgroundColor>#006d6d</BackgroundColor><Color>White</Color><FontSize>9pt</FontSize><TextAlign>Center</TextAlign></Style></Textbox></ReportItems></TableCell>
+                <TableCell><ReportItems><Textbox Name="GHdrTopic"><Value>Topic</Value><Style><FontWeight>Bold</FontWeight><BackgroundColor>#006d6d</BackgroundColor><Color>White</Color><FontSize>9pt</FontSize><PaddingLeft>4pt</PaddingLeft></Style></Textbox></ReportItems></TableCell>
+                <TableCell><ReportItems><Textbox Name="GHdrDiscuss"><Value>Discussion / Notes</Value><Style><FontWeight>Bold</FontWeight><BackgroundColor>#006d6d</BackgroundColor><Color>White</Color><FontSize>9pt</FontSize><PaddingLeft>4pt</PaddingLeft></Style></Textbox></ReportItems></TableCell>
+                <TableCell><ReportItems><Textbox Name="GHdrOwner"><Value>Owner</Value><Style><FontWeight>Bold</FontWeight><BackgroundColor>#006d6d</BackgroundColor><Color>White</Color><FontSize>9pt</FontSize><PaddingLeft>4pt</PaddingLeft></Style></Textbox></ReportItems></TableCell>
+                <TableCell><ReportItems><Textbox Name="GHdrStatus"><Value>Status</Value><Style><FontWeight>Bold</FontWeight><BackgroundColor>#006d6d</BackgroundColor><Color>White</Color><FontSize>9pt</FontSize><TextAlign>Center</TextAlign></Style></Textbox></ReportItems></TableCell>
+              </TableCells>
+            </TableRow>
+          </TableRows>
+        </Header>
+        <Details>
+          <TableRows>
+            <TableRow>
+              <Height>0.5845in</Height>
+              <TableCells>
+                <TableCell><ReportItems><Textbox Name="GRowNo"><Value>=Fields!ItemNumber.Value</Value><Style><FontSize>9pt</FontSize><TextAlign>Center</TextAlign><BackgroundColor>=IIf(RowNumber(Nothing) Mod 2 = 0, "#e8f8f7", "White")</BackgroundColor></Style></Textbox></ReportItems></TableCell>
+                <TableCell><ReportItems><Textbox Name="GRowTopic"><Value>=Fields!Topic.Value</Value><Style><FontSize>9pt</FontSize><FontWeight>Bold</FontWeight><BackgroundColor>=IIf(RowNumber(Nothing) Mod 2 = 0, "#e8f8f7", "White")</BackgroundColor><PaddingLeft>4pt</PaddingLeft></Style></Textbox></ReportItems></TableCell>
+                <TableCell><ReportItems><Textbox Name="GRowDiscuss"><Value>=Fields!Discussion.Value</Value><Style><FontSize>8.5pt</FontSize><Color>#333</Color><BackgroundColor>=IIf(RowNumber(Nothing) Mod 2 = 0, "#e8f8f7", "White")</BackgroundColor><PaddingLeft>4pt</PaddingLeft></Style></Textbox></ReportItems></TableCell>
+                <TableCell><ReportItems><Textbox Name="GRowOwner"><Value>=Fields!AgendaOwner.Value</Value><Style><FontSize>8.5pt</FontSize><BackgroundColor>=IIf(RowNumber(Nothing) Mod 2 = 0, "#e8f8f7", "White")</BackgroundColor><PaddingLeft>4pt</PaddingLeft></Style></Textbox></ReportItems></TableCell>
+                <TableCell><ReportItems><Textbox Name="GRowStatus"><Value>=Fields!AgendaStatus.Value</Value><Style><FontSize>8.5pt</FontSize><TextAlign>Center</TextAlign><BackgroundColor>=IIf(RowNumber(Nothing) Mod 2 = 0, "#e8f8f7", "White")</BackgroundColor><Color>=IIf(Fields!AgendaStatus.Value = "Closed", "#006d6d", IIf(Fields!AgendaStatus.Value = "Approved", "#2980b9", "#d35400"))</Color><FontWeight>Bold</FontWeight></Style></Textbox></ReportItems></TableCell>
+              </TableCells>
+            </TableRow>
+          </TableRows>
+        </Details>
+      </Table>
+
+      <!-- ── Action items ──────────────────────────────────── -->
+      <Textbox Name="ActionLbl"><Top>8.3955in</Top><Left>0.4865in</Left><Height>0.2976in</Height><Width>7.2971in</Width><Value>ACTION ITEMS</Value><Style><FontSize>11pt</FontSize><FontWeight>Bold</FontWeight><Color>#006d6d</Color></Style></Textbox>
+      <Textbox Name="ActionRule"><Top>8.7356in</Top><Left>0.4865in</Left><Height>0.0319in</Height><Width>7.2971in</Width><Value></Value><Style><BackgroundColor>#006d6d</BackgroundColor></Style></Textbox>
+      <Table Name="ActionTable">
+        <DataSetName>ActionItems</DataSetName>
+        <Top>8.7675in</Top><Left>0.4865in</Left><Width>7.2971in</Width>
+        <TableColumns>
+          <TableColumn><Width>0.3405in</Width></TableColumn>
+          <TableColumn><Width>3.0648in</Width></TableColumn>
+          <TableColumn><Width>1.4594in</Width></TableColumn>
+          <TableColumn><Width>1.4594in</Width></TableColumn>
+          <TableColumn><Width>0.9729in</Width></TableColumn>
+        </TableColumns>
+        <Header>
+          <TableRows>
+            <TableRow>
+              <Height>0.2763in</Height>
+              <TableCells>
+                <TableCell><ReportItems><Textbox Name="IHdrNo"><Value>#</Value><Style><FontWeight>Bold</FontWeight><BackgroundColor>#004d4d</BackgroundColor><Color>White</Color><FontSize>9pt</FontSize><TextAlign>Center</TextAlign></Style></Textbox></ReportItems></TableCell>
+                <TableCell><ReportItems><Textbox Name="IHdrAction"><Value>Action</Value><Style><FontWeight>Bold</FontWeight><BackgroundColor>#004d4d</BackgroundColor><Color>White</Color><FontSize>9pt</FontSize><PaddingLeft>4pt</PaddingLeft></Style></Textbox></ReportItems></TableCell>
+                <TableCell><ReportItems><Textbox Name="IHdrOwner"><Value>Owner</Value><Style><FontWeight>Bold</FontWeight><BackgroundColor>#004d4d</BackgroundColor><Color>White</Color><FontSize>9pt</FontSize><PaddingLeft>4pt</PaddingLeft></Style></Textbox></ReportItems></TableCell>
+                <TableCell><ReportItems><Textbox Name="IHdrDue"><Value>Due Date</Value><Style><FontWeight>Bold</FontWeight><BackgroundColor>#004d4d</BackgroundColor><Color>White</Color><FontSize>9pt</FontSize><PaddingLeft>4pt</PaddingLeft></Style></Textbox></ReportItems></TableCell>
+                <TableCell><ReportItems><Textbox Name="IHdrPri"><Value>Priority</Value><Style><FontWeight>Bold</FontWeight><BackgroundColor>#004d4d</BackgroundColor><Color>White</Color><FontSize>9pt</FontSize><TextAlign>Center</TextAlign></Style></Textbox></ReportItems></TableCell>
+              </TableCells>
+            </TableRow>
+          </TableRows>
+        </Header>
+        <Details>
+          <TableRows>
+            <TableRow>
+              <Height>0.3188in</Height>
+              <TableCells>
+                <TableCell><ReportItems><Textbox Name="IRowNo"><Value>=Fields!ActionNumber.Value</Value><Style><FontSize>9pt</FontSize><TextAlign>Center</TextAlign><BackgroundColor>=IIf(RowNumber(Nothing) Mod 2 = 0, "#e8f8f7", "White")</BackgroundColor></Style></Textbox></ReportItems></TableCell>
+                <TableCell><ReportItems><Textbox Name="IRowAction"><Value>=Fields!ActionText.Value</Value><Style><FontSize>9pt</FontSize><BackgroundColor>=IIf(RowNumber(Nothing) Mod 2 = 0, "#e8f8f7", "White")</BackgroundColor><PaddingLeft>4pt</PaddingLeft></Style></Textbox></ReportItems></TableCell>
+                <TableCell><ReportItems><Textbox Name="IRowOwner"><Value>=Fields!ActionOwner.Value</Value><Style><FontSize>9pt</FontSize><BackgroundColor>=IIf(RowNumber(Nothing) Mod 2 = 0, "#e8f8f7", "White")</BackgroundColor><PaddingLeft>4pt</PaddingLeft></Style></Textbox></ReportItems></TableCell>
+                <TableCell><ReportItems><Textbox Name="IRowDue"><Value>=Fields!DueDate.Value</Value><Style><FontSize>9pt</FontSize><BackgroundColor>=IIf(RowNumber(Nothing) Mod 2 = 0, "#e8f8f7", "White")</BackgroundColor><PaddingLeft>4pt</PaddingLeft></Style></Textbox></ReportItems></TableCell>
+                <TableCell><ReportItems><Textbox Name="IRowPri"><Value>=Fields!Priority.Value</Value><Style><FontSize>9pt</FontSize><TextAlign>Center</TextAlign><FontWeight>Bold</FontWeight><BackgroundColor>=IIf(RowNumber(Nothing) Mod 2 = 0, "#e8f8f7", "White")</BackgroundColor><Color>=IIf(Fields!Priority.Value = "High", "#c0392b", IIf(Fields!Priority.Value = "Medium", "#d35400", "#27ae60"))</Color></Style></Textbox></ReportItems></TableCell>
+              </TableCells>
+            </TableRow>
+          </TableRows>
+        </Details>
+      </Table>
+
+      <!-- ── Next meeting info ─────────────────────────────── -->
+      <Textbox Name="NextBg"><Top>10.6804in</Top><Left>0.4865in</Left><Height>0.6376in</Height><Width>7.2971in</Width><Value></Value><Style><BackgroundColor>#e8f8f7</BackgroundColor><BorderStyle><Default>Solid</Default></BorderStyle><BorderColor><Default>#b0dede</Default></BorderColor><BorderWidth><Default>1pt</Default></BorderWidth></Style></Textbox>
+      <Textbox Name="NextLbl"><Top>10.7548in</Top><Left>0.6324in</Left><Height>0.2338in</Height><Width>1.9459in</Width><Value>NEXT MEETING</Value><Style><FontSize>8.5pt</FontSize><FontWeight>Bold</FontWeight><Color>#006d6d</Color></Style></Textbox>
+      <Textbox Name="NextVal"><Top>11.0205in</Top><Left>0.6324in</Left><Height>0.2338in</Height><Width>6.4214in</Width>
+        <Value>=First(Fields!NextMeetingDate.Value, "HeaderData") &amp; "  —  " &amp; First(Fields!NextMeetingLocation.Value, "HeaderData")</Value>
+        <Style><FontSize>10pt</FontSize><Color>#222</Color></Style>
+      </Textbox>
+    </ReportItems>
+    <Height>11.4243in</Height>
+    <Columns>1</Columns>
+  </Body>
+  <PageHeader><Height>0in</Height><PrintOnFirstPage>true</PrintOnFirstPage><PrintOnLastPage>true</PrintOnLastPage></PageHeader>
+  <PageFooter><Height>0in</Height><PrintOnFirstPage>true</PrintOnFirstPage><PrintOnLastPage>true</PrintOnLastPage></PageFooter>
+  <Width>8.27in</Width><Author></Author><Description></Description>
+  <MarginLeft>0in</MarginLeft><MarginRight>0in</MarginRight><MarginTop>0in</MarginTop><MarginBottom>0in</MarginBottom>
+  <PageWidth>8.27in</PageWidth><PageHeight>11.69in</PageHeight>
+  <DataElementName>Report</DataElementName><DataElementStyle>AttributeNormal</DataElementStyle>
+  <Language>=Parameters!Language.Value</Language>
+  <ReportParameters>
+    <ReportParameter Name="Language">
+      <DataType>String</DataType>
+      <DefaultValue><Values><Value>en-US</Value></Values></DefaultValue>
+      <Nullable>true</Nullable><AllowBlank>true</AllowBlank><MultiValue>false</MultiValue><Prompt></Prompt>
+    </ReportParameter>
+  </ReportParameters>
+</Report>
