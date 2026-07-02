@@ -43,6 +43,9 @@
 		<None Update="Reports\CanGrowPageTest.rdl">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
+		<None Update="Reports\ParamHeaderTest.rdl">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
 		<None Update="Reports\MatrixExample.rdl">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
