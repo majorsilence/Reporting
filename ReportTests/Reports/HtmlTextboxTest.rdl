@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Report Name="HtmlTextboxTest">
+  <Description>Issue #149: a textbox with Style/Format = "html" should have its HTML markup treated as HTML rather than escaped as literal text.</Description>
+  <Body>
+    <Height>2in</Height>
+    <ReportItems>
+      <Textbox Name="HtmlBox">
+        <Top>0in</Top>
+        <Left>0in</Left>
+        <Height>0.5in</Height>
+        <Width>4in</Width>
+        <Value>&lt;b&gt;HtmlBold&lt;/b&gt; markup</Value>
+        <Style>
+          <Format>html</Format>
+          <FontSize>10pt</FontSize>
+        </Style>
+      </Textbox>
+      <Textbox Name="PlainBox">
+        <Top>0.75in</Top>
+        <Left>0in</Left>
+        <Height>0.5in</Height>
+        <Width>4in</Width>
+        <Value>&lt;b&gt;PlainBold&lt;/b&gt; markup</Value>
+        <Style>
+          <FontSize>10pt</FontSize>
+        </Style>
+      </Textbox>
+    </ReportItems>
+  </Body>
+  <Width>4in</Width>
+  <PageWidth>8.5in</PageWidth>
+  <PageHeight>11in</PageHeight>
+</Report>
