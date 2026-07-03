@@ -289,7 +289,15 @@ namespace Majorsilence.Reporting.Rdl
 
                 Page p = pgs.CurrentPage;
                 RecordPageReference(r, p, row);			// save information for late page header/footer references
-                p.AddObject(pt);
+                if (this.IsInBody && pt.CanGrow && pth == null && t.Length > 0 &&
+                    p.YOffset + pt.Y + pt.H > pgs.BottomOfPage)
+                {   // Issue #159: grown taller than the space any page can offer;
+                    // split the text across pages instead of clipping the overflow
+                    pt = await RunPageSplitOverflow(r, pgs, pt, row);
+                    p = pgs.CurrentPage;
+                }
+                else
+                    p.AddObject(pt);
                 if (!bDup)
                 {
                     tbr.PreviousText = t;	// previous text displayed
@@ -305,6 +313,114 @@ namespace Majorsilence.Reporting.Rdl
 				tbr.RunHeight = 0;					// need to recalculate
 			}
 			return;
+		}
+
+		// Issue #159: called when a body textbox has grown taller than the space any
+		// single page can offer (that case previously clipped the overflow). Splits
+		// the text at whitespace boundaries into page-sized chunks, emitting one
+		// PageText per page. Returns the last chunk (already added to its page).
+		private async Task<PageText> RunPageSplitOverflow(Report rpt, Pages pgs, PageText pt, Row row)
+		{
+			Graphics g = pgs.G;
+			int widthPx = this.WidthCalc(rpt, g);
+			float padV = 0;
+			if (this.Style != null)
+			{
+				widthPx -= (await Style.EvalPaddingLeftPx(rpt, row) + await Style.EvalPaddingRightPx(rpt, row));
+				padV = await Style.EvalPaddingTop(rpt, row) + await Style.EvalPaddingBottom(rpt, row);
+			}
+			float lineH = await MeasureTextHeightPoints(rpt, g, "Xg", row, widthPx);
+
+			PageText chunk = pt;
+			string remaining = pt.Text;
+			int guard = 0;
+			while (++guard < 1000)		// safety net; every iteration emits text or advances a page
+			{
+				Page p = pgs.CurrentPage;
+				float availText = pgs.BottomOfPage - (p.YOffset + chunk.Y) - padV;
+				float textH = await MeasureTextHeightPoints(rpt, g, remaining, row, widthPx);
+				bool freshPage = chunk.Y == 0 && p.YOffset <= OwnerReport.TopOfPage;
+
+				if (textH <= availText)
+				{	// the rest fits on this page; done
+					chunk.Text = remaining;
+					chunk.H = textH + padV;
+					p.AddObject(chunk);
+					return chunk;
+				}
+
+				if (availText < lineH && !freshPage)
+				{	// not even one line fits here; move the whole chunk to a new page
+					pgs.NextOrNew();
+					pgs.CurrentPage.YOffset = OwnerReport.TopOfPage;
+					RecordPageReference(rpt, pgs.CurrentPage, row);
+					chunk.Y = 0;
+					continue;
+				}
+
+				(string head, string tail) = await SplitTextToFit(rpt, g, remaining, row, widthPx, availText);
+				if (tail.Length == 0)
+				{	// couldn't split (single unbreakable run); emit as-is
+					chunk.Text = head;
+					chunk.H = await MeasureTextHeightPoints(rpt, g, head, row, widthPx) + padV;
+					p.AddObject(chunk);
+					return chunk;
+				}
+
+				PageText next = (PageText)chunk.Clone();	// clone BEFORE AddObject adjusts coordinates
+				chunk.Text = head;
+				chunk.H = await MeasureTextHeightPoints(rpt, g, head, row, widthPx) + padV;
+				p.AddObject(chunk);
+
+				pgs.NextOrNew();
+				pgs.CurrentPage.YOffset = OwnerReport.TopOfPage;
+				RecordPageReference(rpt, pgs.CurrentPage, row);
+				next.Y = 0;
+				chunk = next;
+				remaining = tail;
+			}
+			// guard tripped: emit whatever is left rather than looping forever
+			chunk.Text = remaining;
+			pgs.CurrentPage.AddObject(chunk);
+			return chunk;
+		}
+
+		// Largest whitespace-bounded prefix of text whose wrapped height fits availPts.
+		// Returns the whole text as head (empty tail) when no split point exists.
+		private async Task<(string head, string tail)> SplitTextToFit(Report rpt, Graphics g, string text, Row row, int widthPx, float availPts)
+		{
+			List<int> breaks = new List<int>();
+			for (int i = 1; i < text.Length - 1; i++)
+			{
+				if (char.IsWhiteSpace(text[i]) && !char.IsWhiteSpace(text[i - 1]))
+					breaks.Add(i);
+			}
+			if (breaks.Count == 0)
+				return (text, "");
+
+			int lo = 0, hi = breaks.Count - 1, best = -1;
+			while (lo <= hi)
+			{
+				int mid = (lo + hi) / 2;
+				float h = await MeasureTextHeightPoints(rpt, g, text.Substring(0, breaks[mid]), row, widthPx);
+				if (h <= availPts)
+				{
+					best = mid;
+					lo = mid + 1;
+				}
+				else
+					hi = mid - 1;
+			}
+			int split = breaks[best < 0 ? 0 : best];	// force minimal progress when nothing fits
+			return (text.Substring(0, split), text.Substring(split).TrimStart());
+		}
+
+		private async Task<float> MeasureTextHeightPoints(Report rpt, Graphics g, string text, Row row, int widthPx)
+		{
+			Size s = this.Style != null
+				? await Style.MeasureString(rpt, g, text, TypeCode.String, row, widthPx)
+				: await Style.MeasureStringDefaults(rpt, g, text, TypeCode.String, row, widthPx);
+			return RSize.PointsFromPixels(g, s.Height);
 		}
 
 		// routine to determine if text is considered to be a duplicate;
