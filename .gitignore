@@ -253,3 +253,4 @@ obj/
 .claude/settings.local.json
 /.claude/worktrees
 /graphify-out
+/artifacts-159
