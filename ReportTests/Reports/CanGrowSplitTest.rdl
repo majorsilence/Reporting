@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Report Name="CanGrowSplitTest">
+  <Description>Issue #159: a CanGrow textbox grown taller than a whole page must be split across pages, not clipped. Page is deliberately short (2in) so the grown box spans several pages.</Description>
+  <Body>
+    <Height>1.8in</Height>
+    <ReportItems>
+      <Textbox Name="TopMarker">
+        <Top>0in</Top>
+        <Left>0in</Left>
+        <Height>0.2in</Height>
+        <Width>6in</Width>
+        <Value>TOPMARKER</Value>
+        <Style><FontSize>10pt</FontSize></Style>
+      </Textbox>
+      <Textbox Name="GrowBox">
+        <Top>0.3in</Top>
+        <Left>0in</Left>
+        <Height>0.3in</Height>
+        <Width>3in</Width>
+        <CanGrow>true</CanGrow>
+        <Value>LINE01 wraps here LINE02 wraps here LINE03 wraps here LINE04 wraps here LINE05 wraps here LINE06 wraps here LINE07 wraps here LINE08 wraps here LINE09 wraps here LINE10 wraps here LINE11 wraps here LINE12 wraps here LINE13 wraps here LINE14 wraps here LINE15 wraps here LINE16 wraps here LINE17 wraps here LINE18 wraps here LINE19 wraps here LINE20 wraps here LINE21 wraps here LINE22 wraps here LINE23 wraps here LINE24 wraps here LINE25 wraps here LINE26 wraps here LINE27 wraps here LINE28 wraps here LINE29 wraps here LINE30 wraps here LINE31 wraps here LINE32 wraps here LINE33 wraps here LINE34 wraps here LINE35 wraps here LINE36 wraps here LINE37 wraps here LINE38 wraps here LINE39 wraps here LINE40 wraps here LINE41 wraps here LINE42 wraps here LINE43 wraps here LINE44 wraps here LINE45 wraps here LINE46 wraps here LINE47 wraps here LINE48 wraps here LINE49 wraps here LINE50 wraps here LINE51 wraps here LINE52 wraps here LINE53 wraps here LINE54 wraps here LINE55 wraps here LINE56 wraps here LINE57 wraps here LINE58 wraps here LINE59 wraps here LINE60 wraps here ENDMARKER</Value>
+        <Style><FontSize>10pt</FontSize></Style>
+      </Textbox>
+    </ReportItems>
+  </Body>
+  <Width>6in</Width>
+  <PageWidth>8.5in</PageWidth>
+  <PageHeight>2in</PageHeight>
+  <TopMargin>0.25in</TopMargin>
+  <BottomMargin>0.25in</BottomMargin>
+</Report>

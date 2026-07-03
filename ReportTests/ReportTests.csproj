@@ -44,6 +44,7 @@
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
 		<None Update="Reports\ParamHeaderTest.rdl">
+		<None Update="Reports\CanGrowSplitTest.rdl">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
 		<None Update="Reports\MatrixExample.rdl">
