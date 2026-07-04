@@ -1,0 +1,12 @@
+{
+  "name": "Inventory Report",
+  "slug": "inventory-report",
+  "description": "Stock levels with conditional formatting flagging items at or below their reorder point.",
+  "tags": ["business", "warehouse", "conditional-formatting", "letter-size"],
+  "dataProvider": "Json",
+  "parameters": [],
+  "dataContract": {
+    "root": ["ReportDate", "WarehouseName"],
+    "root.Items[]": ["Sku", "Description", "StockOnHand", "ReorderPoint"]
+  }
+}

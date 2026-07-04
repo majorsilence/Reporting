@@ -69,7 +69,7 @@ namespace Majorsilence.Reporting.Rdl
 					case "details":
 						_Details = new Details(r, this, xNodeLoop);
 						break;
-					case "gooter":
+					case "footer":
 						_Footer = new Footer(r, this, xNodeLoop);
 						break;
 					case "fillpage":

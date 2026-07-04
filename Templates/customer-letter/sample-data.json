@@ -1,0 +1,13 @@
+{
+  "LetterDate": "2026-07-01",
+  "CustomerName": "Ms. Jordan Lee",
+  "CustomerAddress": "900 Lakeview Ave, Suite 200, Chicago, IL 60601",
+  "SenderName": "Acme Robotics LLC",
+  "SenderAddress": "482 Foundry Street, Springfield, IL 62701",
+  "SenderSignatory": "Priya Natarajan, Customer Success Manager",
+  "RecentOrders": [
+    { "OrderNumber": "SO-100518", "OrderDate": "2026-04-11", "Total": 1240.00 },
+    { "OrderNumber": "SO-100530", "OrderDate": "2026-05-22", "Total": 2532.17 },
+    { "OrderNumber": "SO-100542", "OrderDate": "2026-06-20", "Total": 1875.50 }
+  ]
+}

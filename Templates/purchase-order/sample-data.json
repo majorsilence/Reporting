@@ -1,0 +1,15 @@
+{
+  "PONumber": "PO-30187",
+  "OrderDate": "2026-06-18",
+  "ExpectedDelivery": "2026-07-02",
+  "VendorName": "Precision Bearing Supply Co.",
+  "VendorAddress": "1220 Industrial Pkwy, Toledo, OH 43604",
+  "ShipToName": "Acme Robotics LLC -- Receiving",
+  "ShipToAddress": "482 Foundry Street, Springfield, IL 62701",
+  "Lines": [
+    { "Sku": "PBK-04", "Description": "Precision Bearing Kit",  "Quantity": 100, "UnitCost": 9.10 },
+    { "Sku": "PBK-06", "Description": "Heavy-Duty Bearing Kit", "Quantity": 40,  "UnitCost": 14.75 },
+    { "Sku": "LUB-02", "Description": "Bearing Lubricant (1L)", "Quantity": 20,  "UnitCost": 6.50 }
+  ],
+  "Terms": "Net 30. Please confirm receipt of this order and reference the PO number on the invoice."
+}
