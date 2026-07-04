@@ -235,6 +235,14 @@ namespace Majorsilence.Pdf.Markdown.Internal
         private static void AppendWords(List<InlineRun> runs, string text, TextStyle style, string? linkUrl)
         {
             if (string.IsNullOrEmpty(text)) return;
+
+            // A leading space is significant when this literal segment follows a differently
+            // styled run (e.g. the " adds:" after a bold "**2.0**") -- Split(' ') turns it into
+            // an empty first element, which the loop below skips, silently gluing the previous
+            // run's text to this one ("2.0adds:"). Emit it as its own token so the gap survives.
+            if (text[0] == ' ' && runs.Count > 0)
+                runs.Add(new InlineRun(" ", style, linkUrl));
+
             var words = text.Split(' ');
             for (int i = 0; i < words.Length; i++)
             {

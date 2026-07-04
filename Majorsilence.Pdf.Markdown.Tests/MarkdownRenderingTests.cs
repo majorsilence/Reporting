@@ -65,6 +65,21 @@ namespace Majorsilence.Pdf.Markdown.Tests
         }
 
         [Test]
+        public void DrawMarkdown_PlainTextAfterInlineStyle_KeepsSpaceSeparation()
+        {
+            // Regression test: a literal text segment that starts with a space right after a
+            // differently-styled run (bold/code/link) previously lost that space -- Split(' ')
+            // turns a leading space into an empty first token, which got silently skipped,
+            // gluing the words together ("2.0adds:", "publishAOT", "changelogfor").
+            var bytes = RenderOnePage(
+                "Version **2.0** adds: faster startup. Run `dotnet publish` AOT. See the [changelog](https://example.com) for details.");
+            var text = ExtractText(bytes);
+            Assert.That(text, Does.Contain("Version 2.0 adds:"));
+            Assert.That(text, Does.Contain("publish AOT"));
+            Assert.That(text, Does.Contain("changelog for details"));
+        }
+
+        [Test]
         public void DrawMarkdown_FencedCodeBlock_RendersLineContent()
         {
             var bytes = RenderOnePage("```csharp\nvar x = 1;\nvar y = 2;\n```");
