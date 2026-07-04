@@ -70,7 +70,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebDesigner", "WebDesigner\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebDesigner.Tests", "WebDesigner.Tests\WebDesigner.Tests.csproj", "{77C534B6-4533-4658-9C8A-21346C6B0855}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Majorsilence.WinformUtils.Forms", "Majorsilence.WinformUtils.Forms\Majorsilence.WinformUtils.csproj", "{394EE473-7B99-47E2-BBF7-36F224B21A6E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Majorsilence.WinformUtils", "Majorsilence.WinformUtils.Forms\Majorsilence.WinformUtils.csproj", "{394EE473-7B99-47E2-BBF7-36F224B21A6E}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Majorsilence.WinformUtils.Forms.Tests", "Majorsilence.WinformUtils.Forms.Tests\Majorsilence.WinformUtils.Forms.Tests.csproj", "{A8117991-EEE8-41D5-8E1C-80DC75C989B8}"
 EndProject
@@ -111,6 +111,14 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "RdlCri", "RdlCri", "{555B9B6A-312B-1E89-50E3-AA37F0A49AC6}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "RdlEngine", "RdlEngine", "{CFA7EE07-0BD9-C2E8-4BF1-99C79E990257}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "RdlViewer.Forms", "RdlViewer.Forms", "{4734CDA6-6C87-35A2-C204-1D7F06AA97BA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RdlViewer", "RdlViewer.Forms\RdlViewer.csproj", "{6639EB1E-5D9F-4D80-837B-81DB20B48630}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Majorsilence.WinformUtils.Forms", "Majorsilence.WinformUtils.Forms", "{C83DFC50-DF88-7865-A27D-D05C605E0E70}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RdlViewer.Forms.Tests", "RdlViewer.Forms.Tests\RdlViewer.Forms.Tests.csproj", "{65DB40BD-F99A-4190-BE76-96B97D4B21F1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -1188,6 +1196,54 @@ Global
 		{3036EC2B-4009-4C17-9BF0-BE52F589E1A9}.Release-DrawingCompat|x64.Build.0 = Release-DrawingCompat|Any CPU
 		{3036EC2B-4009-4C17-9BF0-BE52F589E1A9}.Release-DrawingCompat|x86.ActiveCfg = Release-DrawingCompat|Any CPU
 		{3036EC2B-4009-4C17-9BF0-BE52F589E1A9}.Release-DrawingCompat|x86.Build.0 = Release-DrawingCompat|Any CPU
+		{6639EB1E-5D9F-4D80-837B-81DB20B48630}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6639EB1E-5D9F-4D80-837B-81DB20B48630}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6639EB1E-5D9F-4D80-837B-81DB20B48630}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{6639EB1E-5D9F-4D80-837B-81DB20B48630}.Debug|x64.Build.0 = Debug|Any CPU
+		{6639EB1E-5D9F-4D80-837B-81DB20B48630}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{6639EB1E-5D9F-4D80-837B-81DB20B48630}.Debug|x86.Build.0 = Debug|Any CPU
+		{6639EB1E-5D9F-4D80-837B-81DB20B48630}.Debug-DrawingCompat|Any CPU.ActiveCfg = Debug|Any CPU
+		{6639EB1E-5D9F-4D80-837B-81DB20B48630}.Debug-DrawingCompat|Any CPU.Build.0 = Debug|Any CPU
+		{6639EB1E-5D9F-4D80-837B-81DB20B48630}.Debug-DrawingCompat|x64.ActiveCfg = Debug|Any CPU
+		{6639EB1E-5D9F-4D80-837B-81DB20B48630}.Debug-DrawingCompat|x64.Build.0 = Debug|Any CPU
+		{6639EB1E-5D9F-4D80-837B-81DB20B48630}.Debug-DrawingCompat|x86.ActiveCfg = Debug|Any CPU
+		{6639EB1E-5D9F-4D80-837B-81DB20B48630}.Debug-DrawingCompat|x86.Build.0 = Debug|Any CPU
+		{6639EB1E-5D9F-4D80-837B-81DB20B48630}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6639EB1E-5D9F-4D80-837B-81DB20B48630}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6639EB1E-5D9F-4D80-837B-81DB20B48630}.Release|x64.ActiveCfg = Release|Any CPU
+		{6639EB1E-5D9F-4D80-837B-81DB20B48630}.Release|x64.Build.0 = Release|Any CPU
+		{6639EB1E-5D9F-4D80-837B-81DB20B48630}.Release|x86.ActiveCfg = Release|Any CPU
+		{6639EB1E-5D9F-4D80-837B-81DB20B48630}.Release|x86.Build.0 = Release|Any CPU
+		{6639EB1E-5D9F-4D80-837B-81DB20B48630}.Release-DrawingCompat|Any CPU.ActiveCfg = Debug|Any CPU
+		{6639EB1E-5D9F-4D80-837B-81DB20B48630}.Release-DrawingCompat|Any CPU.Build.0 = Debug|Any CPU
+		{6639EB1E-5D9F-4D80-837B-81DB20B48630}.Release-DrawingCompat|x64.ActiveCfg = Debug|Any CPU
+		{6639EB1E-5D9F-4D80-837B-81DB20B48630}.Release-DrawingCompat|x64.Build.0 = Debug|Any CPU
+		{6639EB1E-5D9F-4D80-837B-81DB20B48630}.Release-DrawingCompat|x86.ActiveCfg = Debug|Any CPU
+		{6639EB1E-5D9F-4D80-837B-81DB20B48630}.Release-DrawingCompat|x86.Build.0 = Debug|Any CPU
+		{65DB40BD-F99A-4190-BE76-96B97D4B21F1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{65DB40BD-F99A-4190-BE76-96B97D4B21F1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{65DB40BD-F99A-4190-BE76-96B97D4B21F1}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{65DB40BD-F99A-4190-BE76-96B97D4B21F1}.Debug|x64.Build.0 = Debug|Any CPU
+		{65DB40BD-F99A-4190-BE76-96B97D4B21F1}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{65DB40BD-F99A-4190-BE76-96B97D4B21F1}.Debug|x86.Build.0 = Debug|Any CPU
+		{65DB40BD-F99A-4190-BE76-96B97D4B21F1}.Debug-DrawingCompat|Any CPU.ActiveCfg = Debug|Any CPU
+		{65DB40BD-F99A-4190-BE76-96B97D4B21F1}.Debug-DrawingCompat|Any CPU.Build.0 = Debug|Any CPU
+		{65DB40BD-F99A-4190-BE76-96B97D4B21F1}.Debug-DrawingCompat|x64.ActiveCfg = Debug|Any CPU
+		{65DB40BD-F99A-4190-BE76-96B97D4B21F1}.Debug-DrawingCompat|x64.Build.0 = Debug|Any CPU
+		{65DB40BD-F99A-4190-BE76-96B97D4B21F1}.Debug-DrawingCompat|x86.ActiveCfg = Debug|Any CPU
+		{65DB40BD-F99A-4190-BE76-96B97D4B21F1}.Debug-DrawingCompat|x86.Build.0 = Debug|Any CPU
+		{65DB40BD-F99A-4190-BE76-96B97D4B21F1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{65DB40BD-F99A-4190-BE76-96B97D4B21F1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{65DB40BD-F99A-4190-BE76-96B97D4B21F1}.Release|x64.ActiveCfg = Release|Any CPU
+		{65DB40BD-F99A-4190-BE76-96B97D4B21F1}.Release|x64.Build.0 = Release|Any CPU
+		{65DB40BD-F99A-4190-BE76-96B97D4B21F1}.Release|x86.ActiveCfg = Release|Any CPU
+		{65DB40BD-F99A-4190-BE76-96B97D4B21F1}.Release|x86.Build.0 = Release|Any CPU
+		{65DB40BD-F99A-4190-BE76-96B97D4B21F1}.Release-DrawingCompat|Any CPU.ActiveCfg = Debug|Any CPU
+		{65DB40BD-F99A-4190-BE76-96B97D4B21F1}.Release-DrawingCompat|Any CPU.Build.0 = Debug|Any CPU
+		{65DB40BD-F99A-4190-BE76-96B97D4B21F1}.Release-DrawingCompat|x64.ActiveCfg = Debug|Any CPU
+		{65DB40BD-F99A-4190-BE76-96B97D4B21F1}.Release-DrawingCompat|x64.Build.0 = Debug|Any CPU
+		{65DB40BD-F99A-4190-BE76-96B97D4B21F1}.Release-DrawingCompat|x86.ActiveCfg = Debug|Any CPU
+		{65DB40BD-F99A-4190-BE76-96B97D4B21F1}.Release-DrawingCompat|x86.Build.0 = Debug|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -1210,6 +1266,7 @@ Global
 		{4CEACD7D-1FC4-4910-8931-A6A77130A260} = {4FD35435-4E05-40B9-9C54-628ED02E4FE8}
 		{4AE15441-22F6-4C1A-B990-AA8FD10BFF04} = {4FD35435-4E05-40B9-9C54-628ED02E4FE8}
 		{3036EC2B-4009-4C17-9BF0-BE52F589E1A9} = {C5D276F9-0FF0-C534-1B84-B3D80D954D4E}
+		{6639EB1E-5D9F-4D80-837B-81DB20B48630} = {4734CDA6-6C87-35A2-C204-1D7F06AA97BA}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {926406B1-6334-4091-963D-93DEB6837CCB}

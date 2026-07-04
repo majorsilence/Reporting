@@ -1,0 +1,50 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <ProjectType>Local</ProjectType>
+    <OutputType>Library</OutputType>
+    <RootNamespace>Majorsilence.Reporting.RdlViewer</RootNamespace>
+    <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
+    <PublishUrl>publish\</PublishUrl>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <AssemblyTitle>RDL Viewer (Majorsilence.Forms)</AssemblyTitle>
+    <DelaySign>false</DelaySign>
+    <PackageId>Majorsilence.Reporting.RdlViewer.Forms</PackageId>
+    <VersionSuffix>preview</VersionSuffix>
+    <Description>Cross-platform report viewer control for Majorsilence Reporting, built on Majorsilence.Forms instead of System.Windows.Forms. Embed RDL/RDLC report viewing, printing (PDF only -- see MIGRATION-NOTES.md), and export in desktop apps. Targets .NET 8 and .NET 10, any OS Majorsilence.Forms.Avalonia supports. Preview: successor to Majorsilence.Reporting.RdlViewer (Windows-only).</Description>
+    <!-- net48 dropped: Majorsilence.Forms itself only targets net8.0/net10.0. -->
+    <TargetFrameworks>net8.0;net10.0</TargetFrameworks>
+    <WarningsAsErrors>4014</WarningsAsErrors>
+    <GenerateResourceUsePreserializedResources>true</GenerateResourceUsePreserializedResources>
+    <IsPackable>true</IsPackable>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Update="PageDrawing.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="RdlViewer.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="RdlViewerFind.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="ViewerToolstrip.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <EmbeddedResource Include="Resources\document-print.png" />
+    <EmbeddedResource Include="Resources\document-open.png" />
+    <EmbeddedResource Include="Resources\document-save.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\EncryptionProvider\EncryptionProvider.csproj" />
+    <ProjectReference Include="..\Majorsilence.WinformUtils.Forms\Majorsilence.WinformUtils.csproj" />
+    <ProjectReference Include="..\RdlEngine\Majorsilence.Reporting.RdlEngine.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="System.Text.Json" />
+    <PackageReference Include="System.Resources.Extensions" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Majorsilence.Forms" />
+    <PackageReference Include="Majorsilence.Forms.Avalonia" />
+  </ItemGroup>
+</Project>
