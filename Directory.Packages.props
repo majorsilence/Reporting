@@ -59,7 +59,7 @@
     <PackageVersion Include="XamlNameReferenceGenerator" Version="1.3.4" />
   </ItemGroup>
   <ItemGroup>
-    <!-- Majorsilence.Forms migration track (Track D). 26.0.5 is packed locally from
+    <!-- Majorsilence.Forms migration track (Track D). 26.0.6 is packed locally from
          ../Modern.Forms source (see nuget.config and MIGRATION-NOTES.md): 26.0.1 added
          Pen.Dispose, Form.Width/Height, TextBox.PreferredHeight, LinearGradientBrush(...,
          LinearGradientMode), DrawLine(Pen, float x1, y1, x2, y2), and a real tension-aware
@@ -74,10 +74,12 @@
          (stubs matching Control's existing no-op equivalents); 26.0.5 added MessageBoxIcon.
          Hand/Stop/Exclamation/Asterisk aliases, Control.DefaultBackColor, FontFamily.Families
          (real, SkiaSharp-backed installed-font enumeration), and a real ControlPaint.DrawGrid
-         implementation (design-surface alignment dots). None of this is in the 26.0.0 published
-         on nuget.org yet. -->
-    <PackageVersion Include="Majorsilence.Forms" Version="26.0.5" />
-    <PackageVersion Include="Majorsilence.Forms.Avalonia" Version="26.0.5" />
-    <PackageVersion Include="Majorsilence.Forms.Headless" Version="26.0.5" />
+         implementation (design-surface alignment dots); 26.0.6 added DataGridViewComboBoxColumn.
+         Items/DropDownWidth, a real (not no-op) CheckedObjectCollection.Insert, and changed
+         DragEventArgs.Data from object to IDataObject (matching WinForms). None of this is in the
+         26.0.0 published on nuget.org yet. -->
+    <PackageVersion Include="Majorsilence.Forms" Version="26.0.6" />
+    <PackageVersion Include="Majorsilence.Forms.Avalonia" Version="26.0.6" />
+    <PackageVersion Include="Majorsilence.Forms.Headless" Version="26.0.6" />
   </ItemGroup>
 </Project>
