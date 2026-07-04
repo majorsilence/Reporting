@@ -305,6 +305,100 @@ with the plan's own "printing may no-op initially" allowance, just more useful t
 - `.sln` registration: `RdlViewer.Forms`/`RdlViewer.Forms.Tests` weren't added to
   `MajorsilenceReporting.sln` as part of the migrator run — `dotnet sln add` by hand, same as D1.
 
+## D4: RdlDesign — the big one (283 files, 566 → 0 unique compile errors)
+
+By far the largest and most varied of the Track D migrations. Went from 566 unique `error CS*`
+lines after the mechanical migration to a clean `dotnet build` (net8.0/net10.0) across roughly
+two dozen build/fix/rebuild/commit cycles, each one bumping a local `Majorsilence.Forms` patch
+version (26.0.1 → 26.0.12) after verifying the full 2507-test `Majorsilence.Forms.Tests` suite
+stayed green. Same triage method as D1-D3: fix the highest-count `CS*` category first, not
+file-by-file.
+
+### ScintillaNET → `ScintillaCompat` shim (see `reporting.map.json`)
+
+Mapped the whole `ScintillaNET` namespace to `Majorsilence.Reporting.RdlDesign.Syntax` via the
+migrator's `--map`, then defined a shim class literally named `Scintilla` (not `ScintillaCompat`)
+in that namespace so the migrator's prefix-rewrite resolves — `RdlDesign.Forms/Syntax/
+ScintillaCompat.cs`. It's a `RichTextBox` subclass with real undo/redo/selection/search-in-target;
+styling/lexer members are no-ops. Made *real* (actual syntax coloring) is D5's job, not D4's.
+
+### `Form` is not a `Control` — the recurring pattern, one level deeper
+
+D1 already documented that `Form : WindowBase : Component` (not `Control`), so `is Form`/`as Form`
+casts on a `Control`-typed value are compile breaks. D4 surfaced the *second-order* version of the
+same problem: code that walks a `Control.Parent` chain looking for an ancestor `MDIChild`/
+`RdlDesigner` (both Forms) can never find one — the chain can't reach a Form at all, regardless of
+cast syntax, because Forms don't participate in the Control.Parent hierarchy.
+
+**Fix, applied in `DesignerUtility.GetConnnectionInfo`, `DataSetRowsCtl.cs`, `PropertyCtl.cs`:**
+replace the manual `while (p != null && !(p is RdlDesigner)) { ...; p = p.Parent; }` walk with
+`someControl.FindForm()` (closest enclosing Form) and, when a *specific* Form further up an MDI
+hierarchy is needed, `.MdiParent` from there. `Control.FindForm()` already existed in
+Majorsilence.Forms; nothing needed adding upstream for this one.
+
+### Bitmap/ImageFormat: three unrelated types share a name
+
+This project juggles **three** different `Bitmap`/`Image`/`ImageFormat` types that all resolve
+from a bare identifier depending which `using` wins, and none convert to each other publicly:
+1. `Majorsilence.Forms.Drawing.*` — the UI framework's SkiaSharp-backed types, used for on-screen
+   drawing (`Graphics.DrawImage`, `DrawImageSized`, etc.).
+2. `Majorsilence.Drawing.*` (`Majorsilence.Drawing.Common`) — RdlEngine's own SkiaSharp-backed
+   DRAWINGCOMPAT types, used by RdlEngine's own APIs like `ICustomReportItem.DrawDesignerImage
+   (ref Majorsilence.Drawing.Bitmap)` and `PageImage`'s constructor.
+3. `System.Drawing.*` — still referenced directly in a few spots (via `System.Drawing.Common`).
+
+Neither (1) nor (2) exposes a public `SKBitmap` accessor usable from the other's assembly (both
+have one, but `internal`). **Fix pattern:** bridge via a PNG round-trip through a `MemoryStream`
+(`engineBm.Save(ms, Majorsilence.Drawing.Imaging.ImageFormat.Png)` then
+`new Majorsilence.Forms.Drawing.Bitmap(ms)`) rather than trying to expose the internals publicly.
+For bare `ImageFormat.Jpeg`-style references that silently resolved to the wrong one of the three,
+just fully-qualify at the call site — cheaper than chasing a using-directive fix per file.
+
+### Upstream additions to `../Modern.Forms` this pass required (26.0.1 → 26.0.12)
+
+All verified against the full `Majorsilence.Forms.Tests` suite (2507 tests) before packing. Full
+per-patch detail lives in `../Modern.Forms`'s git log (one commit per version bump) — not
+duplicated here or in `Directory.Packages.props`'s comment (which itself got trimmed partway
+through D4 once the running list got too long to stay readable). Categories, roughly:
+- **Form parity additions**: `Width`/`Height`, `AllowDrop`/`DragEnter`/`DragDrop`,
+  `MouseDown`/`MouseMove`/`Leave` (real events, forwarded from the internal adapter Control),
+  `CausesValidation`, `Focus()`, `Validating` (stub).
+- **Control-collection gaps**: `ListBoxItemCollection.Add(object)` (int-returning, matching
+  `ObjectCollection.Add`; the inherited `ObservableCollection<T>.Add` is void), a real (not lazy)
+  `CheckedListBox.CheckedItems`, a real (not no-op) `CheckedObjectCollection.CopyTo`,
+  `DataGridViewComboBoxColumn.Items` as `List<object>` (was `IList`, no `AddRange`),
+  `MenuItemCollection`'s string (name-based) indexer, `GridItem` (`PropertyGrid.SelectedGridItem`
+  now returns it instead of `object`, still always `null` — D6's problem to make real).
+- **Drawing/Graphics overloads**: `DrawLine`/`DrawCurve`/`DrawEllipse`/`DrawImage` float and
+  `RectangleF` overloads matching existing sibling overloads' pattern; `LinearGradientBrush(...,
+  LinearGradientMode)`; `FontFamily.Families` (real, SkiaSharp-backed); a real `ControlPaint.
+  DrawGrid`; `ControlStyle`'s implicit conversion from `DataGridViewCellStyle` (needed because
+  `DataGridViewRenderer` already depended on `ControlStyle`'s shape for real header painting, so
+  the property couldn't just switch to `DataGridViewCellStyle` outright); `Image.Save
+  (ImageCodecInfo, EncoderParameters)`.
+- **Printing**: `PrinterSettings.PaperSizes` (fixed list of common ISO/ANSI sizes — no real
+  printer driver to query), `PrintDialog.AllowSelection`.
+- **Misc**: `Control : IWin32Window`, `IDataObject`'s `DataFormat`-typed overloads (`GetData`/
+  `GetDataPresent`/`SetData`, including the 2-arg `autoConvert` forms), `TextBox.VScroll`/
+  `HScroll` (real events, `new`-shadowing `Control`'s unrelated bool properties of the same name),
+  `TreeViewCancelEventArgs.Node` retyped `TreeNode` (was the base `TreeViewItem`).
+
+### Things intentionally dropped, not fixed
+
+- **`ImageAttributes`/`SetColorKey`** (transparent-color-key image drawing in `SimpleButton.cs`/
+  `SimpleToggle.cs`): no Majorsilence.Forms equivalent; would need per-pixel SkiaSharp color
+  filtering to replicate. Both controls are already flagged as migration candidates (same
+  "very crazy control, need replace it" territory as `ColorPicker.cs`'s existing comment) — drew
+  the image directly instead, dropping the color-keying effect as a documented cosmetic loss.
+- **`ControlPaint.DrawReversibleFrame`** (rubber-band selection rectangle in `DesignCtl.cs`): same
+  GDI+ XOR-mode direct-to-screen gap as D2's `RubberBand` — made the method a documented no-op.
+  Selection logic itself is unaffected, only the live-drag visual feedback is gone.
+- **`GridItem`-based expression editing** (`CustomReportItemCtl.bExpr_Click`): compiles now (see
+  `GridItem` above) but is functionally dead — `PropertyGrid.SelectedGridItem` always returns
+  `null`, so this code path would `NullReferenceException` at runtime regardless. Not a D4
+  regression; the whole feature depends on PropertyGrid selection tracking Majorsilence.Forms
+  doesn't have yet (D6).
+
 ## Package/versioning conventions used (carry forward)
 
 - Package ID gets a `.Forms` suffix: `Majorsilence.WinformUtils.Forms` (folder matches: new
