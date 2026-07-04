@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Report>
+  <DataSources>
+    <DataSource Name="DS1">
+      <ConnectionProperties>
+        <DataProvider>MyMadeUpProvider</DataProvider>
+        <ConnectString>foo</ConnectString>
+      </ConnectionProperties>
+    </DataSource>
+  </DataSources>
+  <DataSets>
+    <DataSet Name="SharedOne">
+      <SharedDataSetReference>SomeSharedDataSet</SharedDataSetReference>
+      <Fields>
+        <Field Name="X"><DataField>X</DataField></Field>
+      </Fields>
+    </DataSet>
+  </DataSets>
+  <CodeModules>
+    <CodeModule>MyCustomAssembly.dll</CodeModule>
+  </CodeModules>
+  <Classes>
+    <Class>
+      <ClassName>MyCustomAssembly.Helper</ClassName>
+      <InstanceName>Helper</InstanceName>
+    </Class>
+  </Classes>
+  <Body>
+    <ReportItems>
+      <Image Name="Logo1">
+        <Source>External</Source>
+        <Value>does-not-exist.png</Value>
+      </Image>
+      <Subreport Name="Sub1">
+        <ReportName>NoSuchSubreport</ReportName>
+      </Subreport>
+    </ReportItems>
+    <Height>3in</Height>
+  </Body>
+  <Width>6in</Width>
+</Report>
