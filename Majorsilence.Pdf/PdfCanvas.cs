@@ -590,26 +590,7 @@ namespace Majorsilence.Pdf
             float pad = table.CellPadding;
             float bw  = table.BorderColor.HasValue ? table.BorderWidth : 0f;
 
-            // Pre-compute row heights: max wrapped-text height across all cells in each row.
-            var rowHeights = new float[table.Rows.Count];
-            for (int ri = 0; ri < table.Rows.Count; ri++)
-            {
-                var row  = table.Rows[ri];
-                bool isHeader = ri == 0 && table.HeaderBackground.HasValue;
-                float maxH = 0f;
-                for (int ci = 0; ci < table.ColumnWidths.Length; ci++)
-                {
-                    var cell    = ci < row.Cells.Count ? row.Cells[ci] : null;
-                    string text = cell?.Text ?? "";
-                    var style   = cell?.Style ?? (isHeader ? table.HeaderTextStyle : table.CellTextStyle);
-                    float colW  = table.ColumnWidths[ci] - 2 * pad;
-                    if (colW <= 0) continue;
-                    float h = MeasureTextBoxHeight(text, colW, style);
-                    if (h < style.FontSize) h = style.FontSize; // minimum one line height
-                    if (h > maxH) maxH = h;
-                }
-                rowHeights[ri] = maxH + 2 * pad;
-            }
+            var rowHeights = ComputeRowHeights(table);
 
             // Render rows top-to-bottom.
             var borderStyle = table.BorderColor.HasValue
@@ -664,6 +645,47 @@ namespace Majorsilence.Pdf
         public PdfCanvas DrawTable(PdfTable table, float x, float y)
         {
             float _; return DrawTable(table, x, y, out _);
+        }
+
+        /// <summary>
+        /// Returns the total height <paramref name="table"/> would occupy if drawn, without
+        /// drawing it. Used by layout code that needs to decide whether a table fits in the
+        /// remaining space on a page before committing to draw it there.
+        /// </summary>
+        public float MeasureTableHeight(PdfTable table)
+        {
+            if (table == null) throw new ArgumentNullException(nameof(table));
+            float total = 0f;
+            var rowHeights = ComputeRowHeights(table);
+            for (int i = 0; i < rowHeights.Length; i++)
+                total += rowHeights[i];
+            return total;
+        }
+
+        // Pre-compute row heights: max wrapped-text height across all cells in each row.
+        private float[] ComputeRowHeights(PdfTable table)
+        {
+            float pad = table.CellPadding;
+            var rowHeights = new float[table.Rows.Count];
+            for (int ri = 0; ri < table.Rows.Count; ri++)
+            {
+                var row  = table.Rows[ri];
+                bool isHeader = ri == 0 && table.HeaderBackground.HasValue;
+                float maxH = 0f;
+                for (int ci = 0; ci < table.ColumnWidths.Length; ci++)
+                {
+                    var cell    = ci < row.Cells.Count ? row.Cells[ci] : null;
+                    string text = cell?.Text ?? "";
+                    var style   = cell?.Style ?? (isHeader ? table.HeaderTextStyle : table.CellTextStyle);
+                    float colW  = table.ColumnWidths[ci] - 2 * pad;
+                    if (colW <= 0) continue;
+                    float h = MeasureTextBoxHeight(text, colW, style);
+                    if (h < style.FontSize) h = style.FontSize; // minimum one line height
+                    if (h > maxH) maxH = h;
+                }
+                rowHeights[ri] = maxH + 2 * pad;
+            }
+            return rowHeights;
         }
 
         // ── links and tooltips ────────────────────────────────────────────────
