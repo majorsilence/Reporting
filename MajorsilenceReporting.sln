@@ -66,6 +66,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Majorsilence.Reporting.UI.R
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebDesigner", "WebDesigner\WebDesigner.csproj", "{0D742DFC-A73D-474E-A373-EC11279E050B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebDesigner.Tests", "WebDesigner.Tests\WebDesigner.Tests.csproj", "{77C534B6-4533-4658-9C8A-21346C6B0855}"
+EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Majorsilence.Pdf", "Majorsilence.Pdf\Majorsilence.Pdf.csproj", "{84166F72-B8BD-43EA-AE1D-1591211572C1}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Majorsilence.Pdf.Tests", "Majorsilence.Pdf.Tests\Majorsilence.Pdf.Tests.csproj", "{AF116EF6-496E-4F20-8F2D-B2195AD2130A}"
@@ -720,6 +722,30 @@ Global
 		{0D742DFC-A73D-474E-A373-EC11279E050B}.Release-DrawingCompat|x64.Build.0 = Release-DrawingCompat|Any CPU
 		{0D742DFC-A73D-474E-A373-EC11279E050B}.Release-DrawingCompat|x86.ActiveCfg = Release-DrawingCompat|Any CPU
 		{0D742DFC-A73D-474E-A373-EC11279E050B}.Release-DrawingCompat|x86.Build.0 = Release-DrawingCompat|Any CPU
+		{77C534B6-4533-4658-9C8A-21346C6B0855}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{77C534B6-4533-4658-9C8A-21346C6B0855}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{77C534B6-4533-4658-9C8A-21346C6B0855}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{77C534B6-4533-4658-9C8A-21346C6B0855}.Debug|x64.Build.0 = Debug|Any CPU
+		{77C534B6-4533-4658-9C8A-21346C6B0855}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{77C534B6-4533-4658-9C8A-21346C6B0855}.Debug|x86.Build.0 = Debug|Any CPU
+		{77C534B6-4533-4658-9C8A-21346C6B0855}.Debug-DrawingCompat|Any CPU.ActiveCfg = Debug|Any CPU
+		{77C534B6-4533-4658-9C8A-21346C6B0855}.Debug-DrawingCompat|Any CPU.Build.0 = Debug|Any CPU
+		{77C534B6-4533-4658-9C8A-21346C6B0855}.Debug-DrawingCompat|x64.ActiveCfg = Debug|Any CPU
+		{77C534B6-4533-4658-9C8A-21346C6B0855}.Debug-DrawingCompat|x64.Build.0 = Debug|Any CPU
+		{77C534B6-4533-4658-9C8A-21346C6B0855}.Debug-DrawingCompat|x86.ActiveCfg = Debug|Any CPU
+		{77C534B6-4533-4658-9C8A-21346C6B0855}.Debug-DrawingCompat|x86.Build.0 = Debug|Any CPU
+		{77C534B6-4533-4658-9C8A-21346C6B0855}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{77C534B6-4533-4658-9C8A-21346C6B0855}.Release|Any CPU.Build.0 = Release|Any CPU
+		{77C534B6-4533-4658-9C8A-21346C6B0855}.Release|x64.ActiveCfg = Release|Any CPU
+		{77C534B6-4533-4658-9C8A-21346C6B0855}.Release|x64.Build.0 = Release|Any CPU
+		{77C534B6-4533-4658-9C8A-21346C6B0855}.Release|x86.ActiveCfg = Release|Any CPU
+		{77C534B6-4533-4658-9C8A-21346C6B0855}.Release|x86.Build.0 = Release|Any CPU
+		{77C534B6-4533-4658-9C8A-21346C6B0855}.Release-DrawingCompat|Any CPU.ActiveCfg = Debug|Any CPU
+		{77C534B6-4533-4658-9C8A-21346C6B0855}.Release-DrawingCompat|Any CPU.Build.0 = Debug|Any CPU
+		{77C534B6-4533-4658-9C8A-21346C6B0855}.Release-DrawingCompat|x64.ActiveCfg = Debug|Any CPU
+		{77C534B6-4533-4658-9C8A-21346C6B0855}.Release-DrawingCompat|x64.Build.0 = Debug|Any CPU
+		{77C534B6-4533-4658-9C8A-21346C6B0855}.Release-DrawingCompat|x86.ActiveCfg = Debug|Any CPU
+		{77C534B6-4533-4658-9C8A-21346C6B0855}.Release-DrawingCompat|x86.Build.0 = Debug|Any CPU
 		{84166F72-B8BD-43EA-AE1D-1591211572C1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{84166F72-B8BD-43EA-AE1D-1591211572C1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{84166F72-B8BD-43EA-AE1D-1591211572C1}.Debug|x64.ActiveCfg = Debug|Any CPU
