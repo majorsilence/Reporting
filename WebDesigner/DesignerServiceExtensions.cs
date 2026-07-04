@@ -17,4 +17,18 @@ public static class DesignerServiceExtensions
         services.AddSingleton(opts);
         return services;
     }
+
+    /// <summary>
+    /// Registers a singleton <see cref="RdlViewerOptions"/> so it is available to the
+    /// endpoint handlers via DI.  Call before <see cref="ViewerEndpoints.MapRdlViewer"/>.
+    /// </summary>
+    public static IServiceCollection AddRdlViewer(
+        this IServiceCollection services,
+        Action<RdlViewerOptions>? configure = null)
+    {
+        var opts = new RdlViewerOptions();
+        configure?.Invoke(opts);
+        services.AddSingleton(opts);
+        return services;
+    }
 }

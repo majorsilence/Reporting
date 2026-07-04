@@ -20,6 +20,11 @@ builder.Services.AddRdlDesigner(o =>
     o.AllowLoad = true;
 });
 
+builder.Services.AddRdlViewer(o =>
+{
+    o.ReportsFolder = Path.Combine(builder.Environment.ContentRootPath, "Reports");
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -42,5 +47,6 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.MapRdlDesigner();
+app.MapRdlViewer();
 
 app.Run();
