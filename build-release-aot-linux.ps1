@@ -32,6 +32,19 @@ dotnet publish RdlCmd    -c Release-DrawingCompat -r $rid -f $pTargetFrameworkGe
 dotnet publish RdlNative -c Release-DrawingCompat -r $rid -f $pTargetFrameworkGeneric --self-contained true -p:PublishAot=true -p:GeneratePackageOnBuild=false -o "RdlNative/bin/$pConfigurationCompat/$pTargetFrameworkGeneric/$rid-aot/publish"
 dotnet publish PdfNative -c Release-DrawingCompat -r $rid -f $pTargetFrameworkGeneric --self-contained true -p:PublishAot=true -p:GeneratePackageOnBuild=false -o "PdfNative/bin/$pConfigurationCompat/$pTargetFrameworkGeneric/$rid-aot/publish"
 
+# Native AOT verification: publish Majorsilence.Pdf's smoke test as a self-contained AOT
+# binary and actually run it, not just check that it compiled without trim/AOT warnings.
+# Fails the build if any exercised code path (text, tables, PdfLayout, AES encryption,
+# PKCS#7 signing, merge) doesn't work under real ahead-of-time compilation.
+$smokeTestOutDir = "Examples/PdfAotSmokeTest/bin/Release/$pTargetFrameworkGeneric/$rid/publish"
+dotnet publish Examples/PdfAotSmokeTest -c Release -r $rid -f $pTargetFrameworkGeneric --self-contained true -p:PublishAot=true -p:GeneratePackageOnBuild=false -o $smokeTestOutDir
+$smokeTestBinary = Join-Path $CURRENTPATH $smokeTestOutDir "PdfAotSmokeTest"
+Write-Host "Running Native AOT smoke test ($rid)..."
+& $smokeTestBinary
+if ($LASTEXITCODE -ne 0) {
+    throw "Native AOT smoke test failed (exit code $LASTEXITCODE) -- see Examples/PdfAotSmokeTest/Program.cs"
+}
+
 $buildoutputpath_rdlcmd_aot = Join-Path $CURRENTPATH "Release-Builds" "build-output" "majorsilence-reporting-rdlcmd-aot"
 $buildoutputpath_rdlnative  = Join-Path $CURRENTPATH "Release-Builds" "build-output" "majorsilence-reporting-rdlnative"
 $buildoutputpath_pdfnative  = Join-Path $CURRENTPATH "Release-Builds" "build-output" "majorsilence-pdfnative"

@@ -4,7 +4,7 @@
     <TargetFrameworks>netstandard2.0;net6.0;net8.0;net10.0</TargetFrameworks>
     <AssemblyTitle>Majorsilence PDF</AssemblyTitle>
     <PackageId>Majorsilence.Pdf</PackageId>
-    <Description>Zero-dependency PDF generation library. Writes PDF 1.4 and 2.0 with embedded TrueType fonts, JPEG and raster images, vector graphics, tables, PDF/A conformance, and hyperlink annotations. AOT-compatible with no native binaries — ideal for serverless and containers. Targets .NET Standard 2.0, .NET 6, .NET 8, and .NET 10.</Description>
+    <Description>Zero-dependency PDF generation library. Writes PDF 1.4 and 2.0 with embedded TrueType fonts, JPEG and raster images, vector graphics, tables, PDF/A conformance, and hyperlink annotations. Native AOT verified in CI (publish + run a real AOT binary) with no native binaries — ideal for serverless and containers. Targets .NET Standard 2.0, .NET 6, .NET 8, and .NET 10.</Description>
     <PackageTags>pdf;pdf-generation;aot;serverless;lambda;zero-dependency;pdfa;dotnet</PackageTags>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <IsPackable>true</IsPackable>
