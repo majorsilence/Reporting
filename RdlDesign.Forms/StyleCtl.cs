@@ -478,9 +478,9 @@ namespace Majorsilence.Reporting.RdlDesign
 
                 RdlDesigner.SetCustomColors(cd.CustomColors);
                 if (sender == this.bEndColor)
-                    cbEndColor.Text = ColorTranslator.ToHtml(cd.Color);
+                    cbEndColor.Text = Majorsilence.Forms.ColorTranslator.ToHtml(cd.Color);
                 else if (sender == this.bBackColor)
-                    cbBackColor.Text = ColorTranslator.ToHtml(cd.Color);
+                    cbBackColor.Text = Majorsilence.Forms.ColorTranslator.ToHtml(cd.Color);
             }
 			return;
 		}

@@ -429,11 +429,11 @@ namespace Majorsilence.Reporting.RdlDesign
             }
             if (foreColorPicker1 != null)
             {
-                foreColorPicker1.Text = si.Color.IsEmpty ? si.ColorText : ColorTranslator.ToHtml(si.Color);
+                foreColorPicker1.Text = si.Color.IsEmpty ? si.ColorText : Majorsilence.Forms.ColorTranslator.ToHtml(si.Color);
             }
             if (backColorPicker1 != null)
             {
-                backColorPicker1.Text = si.BackgroundColor.IsEmpty ? si.BackgroundColorText : ColorTranslator.ToHtml(si.BackgroundColor);
+                backColorPicker1.Text = si.BackgroundColor.IsEmpty ? si.BackgroundColorText : Majorsilence.Forms.ColorTranslator.ToHtml(si.BackgroundColor);
             }
 
             bSuppressChange = false;

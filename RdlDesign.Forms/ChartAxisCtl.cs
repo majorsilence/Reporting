@@ -799,7 +799,7 @@ namespace Majorsilence.Reporting.RdlDesign
                     return;
 
                 RdlDesigner.SetCustomColors(cd.CustomColors);
-                cbColor.Text = ColorTranslator.ToHtml(cd.Color);
+                cbColor.Text = Majorsilence.Forms.ColorTranslator.ToHtml(cd.Color);
             }
             finally
             {

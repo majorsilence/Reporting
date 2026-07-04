@@ -29,7 +29,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			try 
 			{
                 if (!sc.StartsWith("="))            // don't even try when color is an expression
-				    c = ColorTranslator.FromHtml(sc);
+				    c = Majorsilence.Forms.ColorTranslator.FromHtml(sc);
 			}
 			catch 
 			{	// Probably should report this error

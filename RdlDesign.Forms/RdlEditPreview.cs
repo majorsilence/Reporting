@@ -899,13 +899,10 @@ namespace Majorsilence.Reporting.RdlDesign
 				OnDesignTabChanged(this, e);
 		}
 
-		/// <summary>
-		/// Print the report.  
-		/// </summary>
-		public async void Print(PrintDocument pd)
-		{
-			await this.rdlPreview.Print(pd);
-		}
+        // Print(PrintDocument) removed -- rdlPreview.Print(PrintDocument) no longer exists (see
+        // RdlViewer.Forms/RdlViewer.cs and MIGRATION-NOTES.md's D2 printing-redesign writeup).
+        // "Printing" now goes through SaveAs(path, OutputPresentationType.PDF) below; see
+        // RdlDesigner.cs's menuFilePrint_Click for the caller-side change.
 
         public async Task SaveAs(string filename, OutputPresentationType type)
 		{

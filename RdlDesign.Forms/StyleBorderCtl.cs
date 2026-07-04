@@ -731,20 +731,20 @@ namespace Majorsilence.Reporting.RdlDesign
                 RdlDesigner.SetCustomColors(cd.CustomColors);
                 if (sender == this.bColorDefault)
                 {
-                    cbColorDefault.Text = ColorTranslator.ToHtml(cd.Color);
-                    cbColorLeft.Text = ColorTranslator.ToHtml(cd.Color);
-                    cbColorRight.Text = ColorTranslator.ToHtml(cd.Color);
-                    cbColorTop.Text = ColorTranslator.ToHtml(cd.Color);
-                    cbColorBottom.Text = ColorTranslator.ToHtml(cd.Color);
+                    cbColorDefault.Text = Majorsilence.Forms.ColorTranslator.ToHtml(cd.Color);
+                    cbColorLeft.Text = Majorsilence.Forms.ColorTranslator.ToHtml(cd.Color);
+                    cbColorRight.Text = Majorsilence.Forms.ColorTranslator.ToHtml(cd.Color);
+                    cbColorTop.Text = Majorsilence.Forms.ColorTranslator.ToHtml(cd.Color);
+                    cbColorBottom.Text = Majorsilence.Forms.ColorTranslator.ToHtml(cd.Color);
                 }
                 else if (sender == this.bColorLeft)
-                    cbColorLeft.Text = ColorTranslator.ToHtml(cd.Color);
+                    cbColorLeft.Text = Majorsilence.Forms.ColorTranslator.ToHtml(cd.Color);
                 else if (sender == this.bColorRight)
-                    cbColorRight.Text = ColorTranslator.ToHtml(cd.Color);
+                    cbColorRight.Text = Majorsilence.Forms.ColorTranslator.ToHtml(cd.Color);
                 else if (sender == this.bColorTop)
-                    cbColorTop.Text = ColorTranslator.ToHtml(cd.Color);
+                    cbColorTop.Text = Majorsilence.Forms.ColorTranslator.ToHtml(cd.Color);
                 else if (sender == this.bColorBottom)
-                    cbColorBottom.Text = ColorTranslator.ToHtml(cd.Color);
+                    cbColorBottom.Text = Majorsilence.Forms.ColorTranslator.ToHtml(cd.Color);
             }
 		
 			return;

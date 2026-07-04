@@ -322,19 +322,17 @@ namespace Majorsilence.Reporting.RdlDesign
 			mdi_Activate(mc);
 		}
 
-		[DllImport("user32.dll")]
-		public static extern bool LockWindowUpdate(IntPtr hWndLock);
-
+		// LockWindowUpdate is raw Win32 (user32.dll) -- a screen-freeze-during-redraw anti-flicker
+		// trick with no cross-platform equivalent and no real Majorsilence.Forms Handle/Refresh()
+		// to hang it off anyway (see MIGRATION-NOTES.md's Form-vs-Control table: Refresh() ->
+		// Invalidate(), no Handle property on Form). Purely cosmetic; dropped.
 		void mdi_Activate(MDIChild mc)
 		{
 			if (mc == null)
 				return;
 
-			LockWindowUpdate(this.Handle);
 			mc.Activate();
-			this.Refresh(); //Forces a synchronous redraw of all controls
-
-			LockWindowUpdate(IntPtr.Zero);
+			this.Invalidate();
 		}
 
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
@@ -630,7 +628,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			return;
 		}
 
-		void fxExpr_Click(object sender, EventArgs e)
+		async void fxExpr_Click(object sender, EventArgs e)
 		{
 			MDIChild mc = this.ActiveMdiChild as MDIChild;
 			if (mc == null ||
@@ -643,7 +641,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			using (DialogExprEditor de = new DialogExprEditor(mc.DrawCtl, ctlEditTextbox.Text, tn))
 			{
 				// Display the UI editor dialog
-				if (de.ShowDialog(this) == DialogResult.OK)
+				if (await de.ShowDialog(this) == DialogResult.OK)
 				{
 					ctlEditTextbox.Text = de.Expression;
 					mc.Editor.SetSelectedText(de.Expression);
@@ -839,7 +837,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			ofd.Multiselect = true;
 			try
 			{
-				if (ofd.ShowDialog(this) == DialogResult.OK)
+				if (await ofd.ShowDialog(this) == DialogResult.OK)
 				{
 					foreach (string file in ofd.FileNames)
 					{
@@ -875,7 +873,7 @@ namespace Majorsilence.Reporting.RdlDesign
 				MDIChild mc = null;
 				try
 				{
-					mc = new MDIChild(this.ClientRectangle.Width * 3 / 5, this.ClientRectangle.Height * 3 / 5);
+					mc = new MDIChild(this.ClientSize.Width * 3 / 5, this.ClientSize.Height * 3 / 5);
 					mc.OnSelectionChanged += new MDIChild.RdlChangeHandler(SelectionChanged);
 					mc.OnSelectionMoved += new MDIChild.RdlChangeHandler(SelectionMoved);
 					mc.OnReportItemInserted += new MDIChild.RdlChangeHandler(ReportItemInserted);
@@ -1391,11 +1389,11 @@ namespace Majorsilence.Reporting.RdlDesign
 			}
 			if (foreColorPicker1 != null)
 			{
-				foreColorPicker1.Text = si.Color.IsEmpty ? si.ColorText : ColorTranslator.ToHtml(si.Color);
+				foreColorPicker1.Text = si.Color.IsEmpty ? si.ColorText : Majorsilence.Forms.ColorTranslator.ToHtml(si.Color);
 			}
 			if (backColorPicker1 != null)
 			{
-				backColorPicker1.Text = si.BackgroundColor.IsEmpty ? si.BackgroundColorText : ColorTranslator.ToHtml(si.BackgroundColor);
+				backColorPicker1.Text = si.BackgroundColor.IsEmpty ? si.BackgroundColorText : Majorsilence.Forms.ColorTranslator.ToHtml(si.BackgroundColor);
 			}
 
 			bSuppressChange = false;
@@ -1607,7 +1605,11 @@ namespace Majorsilence.Reporting.RdlDesign
 			}
 		}
 
-		private void menuFilePrint_Click(object sender, EventArgs e)
+		// No real print-spooler integration under Majorsilence.Forms -- see MIGRATION-NOTES.md
+		// (D2) and RdlViewer.Forms/ViewerToolstrip.cs's PrintClicked for the same redesign.
+		// Majorsilence.Forms.PrintDialog is a no-op stub with no real UI, so go straight to
+		// "export as PDF" instead of pretending to show a print dialog.
+		private async void menuFilePrint_Click(object sender, EventArgs e)
 		{
 			MDIChild mc = this.ActiveMdiChild as MDIChild;
 			if (mc == null)
@@ -1622,58 +1624,23 @@ namespace Majorsilence.Reporting.RdlDesign
 
 			printChild = mc;
 
-			PrintDocument pd = new PrintDocument();
-			pd.DocumentName = mc.SourceFile.LocalPath;
-			pd.PrinterSettings.FromPage = 1;
-			pd.PrinterSettings.ToPage = mc.PageCount;
-			pd.PrinterSettings.MaximumPage = mc.PageCount;
-			pd.PrinterSettings.MinimumPage = 1;
-			pd.DefaultPageSettings.Landscape = mc.PageWidth > mc.PageHeight ? true : false;
-
-			// Set the paper size.
-			if (mc.SourceRdl != null)
+			SaveFileDialog sfd = new SaveFileDialog
 			{
-				System.Xml.XmlDocument docxml = new System.Xml.XmlDocument();
-				docxml.LoadXml(mc.SourceRdl);
-
-				float height = 11;
-				float width = 8.5f;
-				XmlNodeList heightList = docxml.GetElementsByTagName("PageHeight");
-				for (int i = 0; i < heightList.Count; i++)
-				{
-					height = Conversions.MeasurementTypeAsHundrethsOfAnInch(heightList[i].InnerText);
-				}
-
-				XmlNodeList widthList = docxml.GetElementsByTagName("PageWidth");
-				for (int i = 0; i < widthList.Count; i++)
-				{
-					width = Conversions.MeasurementTypeAsHundrethsOfAnInch(widthList[i].InnerText);
-				}
-
-				pd.DefaultPageSettings.PaperSize = new PaperSize("Custom", (int)width, (int)height);
-			}
-			using (PrintDialog dlg = new PrintDialog())
+				Filter = "PDF files (*.pdf)|*.pdf",
+				FileName = Path.GetFileNameWithoutExtension(mc.SourceFile.LocalPath) + ".pdf",
+			};
+			if (await sfd.ShowDialog(this) == DialogResult.OK)
 			{
-				dlg.Document = pd;
-				dlg.AllowSelection = true;
-				dlg.AllowSomePages = true;
-				if (dlg.ShowDialog() == DialogResult.OK)
+				try
 				{
-					try
-					{
-						if (pd.PrinterSettings.PrintRange == PrintRange.Selection)
-						{
-							pd.PrinterSettings.FromPage = mc.PageCurrent;
-						}
-						mc.Print(pd);
-					}
-					catch (Exception ex)
-					{
-						MessageBox.Show(Strings.RdlDesigner_Show_PrintError + ex.Message, Strings.RdlDesigner_Show_RDLDesign);
-					}
+					await mc.SaveAs(sfd.FileName, OutputPresentationType.PDF);
 				}
-				printChild = null;
+				catch (Exception ex)
+				{
+					MessageBox.Show(Strings.RdlDesigner_Show_PrintError + ex.Message, Strings.RdlDesigner_Show_RDLDesign);
+				}
 			}
+			printChild = null;
 		}
 
 		private void menuFileSave_Click(object sender, EventArgs e)
@@ -1798,13 +1765,13 @@ namespace Majorsilence.Reporting.RdlDesign
             });
 		}
 
-		private void menuFileSaveAs_Click(object sender, EventArgs e)
+		private async void menuFileSaveAs_Click(object sender, EventArgs e)
 		{
 			MDIChild mc = this.ActiveMdiChild as MDIChild;
 			if (mc == null)
 				return;
 
-			if (!mc.FileSaveAs())
+			if (!await mc.FileSaveAs())
 				return;
 
 			mc.Viewer.Folder = Path.GetDirectoryName(mc.SourceFile.LocalPath);

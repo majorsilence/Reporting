@@ -2613,7 +2613,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			Color clr;
 			try
 			{
-				clr = ColorTranslator.FromHtml(c);
+				clr = Majorsilence.Forms.ColorTranslator.FromHtml(c);
 			}
 			catch
 			{

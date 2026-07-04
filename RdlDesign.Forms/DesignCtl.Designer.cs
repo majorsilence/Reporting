@@ -147,7 +147,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			this.components = new System.ComponentModel.Container();
 			Majorsilence.Forms.ComponentResourceManager resources = new Majorsilence.Forms.ComponentResourceManager(typeof(DesignCtl));
             this.DoubleBuffered = true;
-			this.ContextMenuDefault = new Majorsilence.Forms.ContextMenuStrip(this.components);
+			this.ContextMenuDefault = new Majorsilence.Forms.ContextMenuStrip();
 			this.MenuDefaultProperties = new Majorsilence.Forms.ToolStripMenuItem();
 			this.toolStripMenuItem1 = new Majorsilence.Forms.ToolStripSeparator();
 			this.MenuDefaultCopy = new Majorsilence.Forms.ToolStripMenuItem();
@@ -167,7 +167,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			this.MenuInsertSubreport = new Majorsilence.Forms.ToolStripMenuItem();
 			this.MenuInsertTable = new Majorsilence.Forms.ToolStripMenuItem();
 			this.MenuInsertTextbox = new Majorsilence.Forms.ToolStripMenuItem();
-			this.ContextMenuChart = new Majorsilence.Forms.ContextMenuStrip(this.components);
+			this.ContextMenuChart = new Majorsilence.Forms.ContextMenuStrip();
 			this.MenuChartProperties = new Majorsilence.Forms.ToolStripMenuItem();
 			this.MenuChartLegend = new Majorsilence.Forms.ToolStripMenuItem();
 			this.MenuChartTitle = new Majorsilence.Forms.ToolStripMenuItem();
@@ -192,7 +192,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			this.MenuChartDelete = new Majorsilence.Forms.ToolStripMenuItem();
 			this.toolStripMenuItem9 = new Majorsilence.Forms.ToolStripSeparator();
 			this.MenuChartSelectAll = new Majorsilence.Forms.ToolStripMenuItem();
-			this.ContextMenuMatrix = new Majorsilence.Forms.ContextMenuStrip(this.components);
+			this.ContextMenuMatrix = new Majorsilence.Forms.ContextMenuStrip();
 			this.MenuMatrixProperties = new Majorsilence.Forms.ToolStripMenuItem();
 			this.MenuMatrixMatrixProperties = new Majorsilence.Forms.ToolStripMenuItem();
 			this.toolStripMenuItem10 = new Majorsilence.Forms.ToolStripSeparator();
@@ -211,7 +211,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			this.MenuMatrixDelete = new Majorsilence.Forms.ToolStripMenuItem();
 			this.toolStripMenuItem14 = new Majorsilence.Forms.ToolStripSeparator();
 			this.MenuMatrixSelectAll = new Majorsilence.Forms.ToolStripMenuItem();
-			this.ContextMenuSubreport = new Majorsilence.Forms.ContextMenuStrip(this.components);
+			this.ContextMenuSubreport = new Majorsilence.Forms.ContextMenuStrip();
 			this.MenuSubreportProperties = new Majorsilence.Forms.ToolStripMenuItem();
 			this.MenuSubreportOpen = new Majorsilence.Forms.ToolStripMenuItem();
 			this.toolStripMenuItem15 = new Majorsilence.Forms.ToolStripSeparator();
@@ -220,7 +220,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			this.MenuSubreportDelete = new Majorsilence.Forms.ToolStripMenuItem();
 			this.toolStripMenuItem16 = new Majorsilence.Forms.ToolStripSeparator();
 			this.MenuSubreportSelectAll = new Majorsilence.Forms.ToolStripMenuItem();
-			this.ContextMenuGrid = new Majorsilence.Forms.ContextMenuStrip(this.components);
+			this.ContextMenuGrid = new Majorsilence.Forms.ContextMenuStrip();
 			this.MenuGridProperties = new Majorsilence.Forms.ToolStripMenuItem();
 			this.MenuGridGridProperties = new Majorsilence.Forms.ToolStripMenuItem();
 			this.MenuGridReplaceCell = new Majorsilence.Forms.ToolStripMenuItem();
@@ -248,7 +248,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			this.MenuGridDelete = new Majorsilence.Forms.ToolStripMenuItem();
 			this.toolStripMenuItem21 = new Majorsilence.Forms.ToolStripSeparator();
 			this.MenuGridSelectAll = new Majorsilence.Forms.ToolStripMenuItem();
-			this.ContextMenuTable = new Majorsilence.Forms.ContextMenuStrip(this.components);
+			this.ContextMenuTable = new Majorsilence.Forms.ContextMenuStrip();
 			this.MenuTableProperties = new Majorsilence.Forms.ToolStripMenuItem();
 			this.MenuTableTableProperties = new Majorsilence.Forms.ToolStripMenuItem();
 			this.MenuTableReplaceCell = new Majorsilence.Forms.ToolStripMenuItem();

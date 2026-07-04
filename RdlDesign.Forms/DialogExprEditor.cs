@@ -456,7 +456,7 @@ namespace Majorsilence.Reporting.RdlDesign
             tvOp.SelectedNode.Nodes.Count > 0)
                 return; // this is the top level nodes (Fields, Parameters, ...)
 
-            TreeNode node = tvOp.SelectedNode;
+            TreeNode node = (TreeNode)tvOp.SelectedNode;
             string t = string.Empty;
             // Josh: 6:21:10 Changed to add parent node name for grouped nodes (eg: Convert.ToByte(value))
             // and not to add it for the root functions (the non grouped).

@@ -140,7 +140,7 @@ namespace Majorsilence.Reporting.RdlDesign
                 tvTablesColumns.SelectedNode.Parent == null)
                 return;		// this is the Tables/Views node
 
-            TreeNode node = tvTablesColumns.SelectedNode;
+            TreeNode node = (TreeNode)tvTablesColumns.SelectedNode;
             string t = node.Text;
             if (tbSQL.Text == "")
             {
@@ -149,11 +149,11 @@ namespace Majorsilence.Reporting.RdlDesign
                     tvTablesColumns_ExpandTable(node);	// make sure we've obtained the columns
 
                     StringBuilder sb = new StringBuilder("SELECT ");
-                    TreeNode next = node.FirstNode;
+                    TreeNode next = (TreeNode)node.FirstNode;
                     while (true)
                     {
                         sb.Append(DesignerUtility.NormalizeSqlName(next.Text));
-                        next = next.NextNode;
+                        next = (TreeNode)next.NextNode;
                         if (next == null)
                             break;
                         sb.Append(", ");

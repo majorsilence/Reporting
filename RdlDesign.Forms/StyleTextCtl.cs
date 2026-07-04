@@ -804,7 +804,7 @@ namespace Majorsilence.Reporting.RdlDesign
                 cbFontStyle.Text = fd.Font.Italic ? "Italic" : "Normal";
                 cbFontFamily.Text = fd.Font.FontFamily.Name;
                 cbFontSize.Text = fd.Font.Size.ToString() + "pt";
-                cbColor.Text = ColorTranslator.ToHtml(fd.Color);
+                cbColor.Text = Majorsilence.Forms.ColorTranslator.ToHtml(fd.Color);
                 if (fd.Font.Underline)
                     this.cbTextDecoration.Text = "Underline";
                 else if (fd.Font.Strikeout)
@@ -836,7 +836,7 @@ namespace Majorsilence.Reporting.RdlDesign
 
                 RdlDesigner.SetCustomColors(cd.CustomColors);
                 if (sender == this.bColor)
-                    cbColor.Text = ColorTranslator.ToHtml(cd.Color);
+                    cbColor.Text = Majorsilence.Forms.ColorTranslator.ToHtml(cd.Color);
             }		
 			return;
 		}

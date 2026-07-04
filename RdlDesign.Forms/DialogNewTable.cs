@@ -1,3 +1,4 @@
+using System.Linq;
 using System;
 using System.Drawing;
 using System.Collections;
@@ -283,7 +284,7 @@ namespace Majorsilence.Reporting.RdlDesign
 
         private void bLeft_Click(object sender, System.EventArgs e)
         {
-            ICollection sic = lbTableColumns.SelectedIndices;
+            List<int> sic = lbTableColumns.SelectedIndices.ToList();
             int count = sic.Count;
             foreach (int i in sic)
             {

@@ -18,7 +18,6 @@ namespace Majorsilence.Reporting.RdlDesign
 		{
 			this.components = new System.ComponentModel.Container();
 			Majorsilence.Forms.ComponentResourceManager resources = new Majorsilence.Forms.ComponentResourceManager(typeof(RdlDesigner));
-            this.DoubleBuffered = true;
 			this.menuStrip1 = new Majorsilence.Forms.MenuStrip();
 			this.fileToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
 			this.newReportToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
@@ -199,7 +198,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			this.toolStripStatusLabel2 = new Majorsilence.Forms.ToolStripStatusLabel();
 			this.statusPosition = new Majorsilence.Forms.ToolStripStatusLabel();
 			this.mainSP = new Majorsilence.Forms.Splitter();
-			this.ContextMenuTB = new Majorsilence.Forms.ContextMenuStrip(this.components);
+			this.ContextMenuTB = new Majorsilence.Forms.ContextMenuStrip();
 			this.MenuTBClose = new Majorsilence.Forms.ToolStripMenuItem();
 			this.MenuTBSave = new Majorsilence.Forms.ToolStripMenuItem();
 			this.MenuTBCloseAllButThis = new Majorsilence.Forms.ToolStripMenuItem();
