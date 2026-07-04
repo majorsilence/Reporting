@@ -373,24 +373,18 @@ namespace Majorsilence.Reporting.RdlDesign
                 string dataSourceReference = _Draw.GetElementValue(datasource, "DataSourceReference", null);
                 if (dataSourceReference != null)
                 {
-                    //  This is not very pretty code since it is assuming the structure of the windows parenting.
-                    //    But there isn't any other way to get this information from here.
-                    Control p = _Draw;
-                    MDIChild mc = null;
-                    while (p != null && !(p is RdlDesigner))
-                    {
-                        if (p is MDIChild)
-                            mc = (MDIChild)p;
-
-                        p = p.Parent;
-                    }
-                    if (p == null || mc == null || mc.SourceFile == null)
+                    // Was: walk _Draw.Parent looking for an MDIChild then an RdlDesigner ancestor
+                    // -- Form isn't Control-derived in Majorsilence.Forms, so that chain can never
+                    // reach either (see DesignerUtility.GetConnnectionInfo's identical fix).
+                    MDIChild mc = _Draw.FindForm() as MDIChild;
+                    RdlDesigner rd = mc?.MdiParent as RdlDesigner;
+                    if (rd == null || mc == null || mc.SourceFile == null)
                     {
                         MessageBox.Show(Strings.DataSetRowsCtl_ShowC_UnableLocateDSR);
                         return;
                     }
                     Uri filename = new Uri(Path.GetDirectoryName(mc.SourceFile.LocalPath) + Path.DirectorySeparatorChar + dataSourceReference);
-                    if (!DesignerUtility.GetSharedConnectionInfo((RdlDesigner)p, filename.LocalPath, out dataProvider, out connection))
+                    if (!DesignerUtility.GetSharedConnectionInfo(rd, filename.LocalPath, out dataProvider, out connection))
                     {
                         return;
                     }

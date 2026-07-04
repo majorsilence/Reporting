@@ -647,8 +647,9 @@ namespace Majorsilence.Reporting.RdlDesign
 			}
 		}
 
-		public void ReplaceAll(Control ctl, string str, string strReplace, bool matchCase)
-		{			
+		// `ctl` is unused inside this method -- widened from Control to object, same rationale as Goto.
+		public void ReplaceAll(object ctl, string str, string strReplace, bool matchCase)
+		{
 			if (_CurrentTab != DesignTabs.Edit)
 				return;
 
@@ -665,7 +666,10 @@ namespace Majorsilence.Reporting.RdlDesign
 			}
 		}
 
-		public void Goto(Control ctl, int nLine)
+		// `ctl` is unused inside this method -- widened from Control to object so any caller
+		// (Control- or Form-based; Form isn't Control-derived in Majorsilence.Forms) can pass
+		// itself without a cast.
+		public void Goto(object ctl, int nLine)
 		{
 			if (_CurrentTab != DesignTabs.Edit)
 				return;

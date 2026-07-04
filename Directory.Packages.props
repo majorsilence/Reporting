@@ -59,16 +59,17 @@
     <PackageVersion Include="XamlNameReferenceGenerator" Version="1.3.4" />
   </ItemGroup>
   <ItemGroup>
-    <!-- Majorsilence.Forms migration track (Track D). 26.0.10 is packed locally from
+    <!-- Majorsilence.Forms migration track (Track D). 26.0.11 is packed locally from
          ../Modern.Forms source (see nuget.config and MIGRATION-NOTES.md); none of 26.0.1
-         through 26.0.10 is in the 26.0.0 published on nuget.org yet. Full per-patch breakdown of
+         through 26.0.11 is in the 26.0.0 published on nuget.org yet. Full per-patch breakdown of
          what each version added is in ../Modern.Forms's git log (one commit per patch) and in
          MIGRATION-NOTES.md's D2/D4 sections; not repeated here to keep this file readable.
-         26.0.10 added PrinterSettings.PaperSizes (a fixed list of common ISO/ANSI sizes, since
-         there's no real printer driver to query), PrintDialog.AllowSelection, and
-         IDataObject.GetData/GetDataPresent(DataFormat, bool) overloads. -->
-    <PackageVersion Include="Majorsilence.Forms" Version="26.0.10" />
-    <PackageVersion Include="Majorsilence.Forms.Avalonia" Version="26.0.10" />
-    <PackageVersion Include="Majorsilence.Forms.Headless" Version="26.0.10" />
+         26.0.11 added ListBoxItemCollection.Add(object) int-returning overload, a real
+         CheckedListBox.CheckedItems (materialized List, not lazy IEnumerable), PrinterSettings.
+         PaperSizes, PrintDialog.AllowSelection, IDataObject.GetData/GetDataPresent(DataFormat,
+         bool), and MenuItemCollection's string (name-based) indexer. -->
+    <PackageVersion Include="Majorsilence.Forms" Version="26.0.11" />
+    <PackageVersion Include="Majorsilence.Forms.Avalonia" Version="26.0.11" />
+    <PackageVersion Include="Majorsilence.Forms.Headless" Version="26.0.11" />
   </ItemGroup>
 </Project>

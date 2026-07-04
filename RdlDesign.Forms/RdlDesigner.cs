@@ -1400,7 +1400,7 @@ namespace Majorsilence.Reporting.RdlDesign
 
 			// Run thru all the existing DataSets
 			dataSetsToolStripMenuItem.DropDownItems.Clear();
-			dataSetsToolStripMenuItem.DropDownItems.Add(new ToolStripMenuItem(Strings.RdlDesigner_menuData_Popup_New, null,
+			dataSetsToolStripMenuItem.DropDownItems.Add(new ToolStripMenuItem(Strings.RdlDesigner_menuData_Popup_New, (Image)null,
 						this.dataSetsToolStripMenuItem_Click));
 
 			DesignXmlDraw draw = mc.DrawCtl;
@@ -1415,7 +1415,7 @@ namespace Majorsilence.Reporting.RdlDesign
 					XmlAttribute nAttr = dNode.Attributes["Name"];
 					if (nAttr == null)  // shouldn't really happen
 						continue;
-					dataSetsToolStripMenuItem.DropDownItems.Add(new ToolStripMenuItem(nAttr.Value, null,
+					dataSetsToolStripMenuItem.DropDownItems.Add(new ToolStripMenuItem(nAttr.Value, (Image)null,
 						this.dataSetsToolStripMenuItem_Click));
 				}
 			}

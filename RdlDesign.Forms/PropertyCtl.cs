@@ -258,7 +258,9 @@ namespace Majorsilence.Reporting.RdlDesign
         public event EventHandler HidePropertiesClicked = null;
         private void bClose_Click(object sender, EventArgs e)
         {
-            RdlDesigner rd = this.Parent as RdlDesigner;
+            // Was: this.Parent as RdlDesigner -- Form isn't Control-derived in Majorsilence.Forms,
+            // so a Control's .Parent can never be one; FindForm() is the correct lookup here.
+            RdlDesigner rd = this.FindForm() as RdlDesigner;
             if (rd == null)
             {
                 if (HidePropertiesClicked != null)
