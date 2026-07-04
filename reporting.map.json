@@ -1,0 +1,5 @@
+{
+  "_comment": "Extra namespace mappings for the Majorsilence.Forms migrator (Track D), passed via --map reporting.map.json. Empty so far -- D1 (WinformUtils) needed none of this, since its only third-party UI dependency was the BCL itself. Fill in as D4-D6 (RdlDesign) hit ScintillaNET or other vendor-specific namespaces the migrator's built-in rules don't know about.",
+  "namespaces": {},
+  "removePackages": []
+}

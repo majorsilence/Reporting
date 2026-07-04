@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <!-- net48 dropped: Majorsilence.Forms itself only targets net8.0/net10.0. -->
+    <TargetFrameworks>net8.0;net10.0</TargetFrameworks>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <IsPackable>true</IsPackable>
+    <PackageId>Majorsilence.WinformUtils.Forms</PackageId>
+    <VersionSuffix>preview</VersionSuffix>
+    <Description>Shared utility controls used by the Majorsilence Reporting viewer and designer, built on Majorsilence.Forms (cross-platform WinForms-API-compatible framework) instead of System.Windows.Forms. Targets .NET 8 and .NET 10, any OS Majorsilence.Forms.Avalonia supports. Preview: successor to Majorsilence.WinformUtils (Windows-only).</Description>
+  </PropertyGroup>
+  <ItemGroup>
+    <EmbeddedResource Update="Strings.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Strings.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Update="Strings.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Strings.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Majorsilence.Forms" />
+    <PackageReference Include="Majorsilence.Forms.Avalonia" />
+  </ItemGroup>
+</Project>
