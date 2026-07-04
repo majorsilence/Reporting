@@ -29,12 +29,10 @@ private System.ComponentModel.Container components = null;
             // 
             // ColorPickerPopup
             // 
-            this.AutoScaleBaseSize = new System.Drawing.Size(5, 13);
             this.CausesValidation = false;
             this.ClientSize = new System.Drawing.Size(233, 187);
             this.ControlBox = false;
             this.Controls.Add(this.lStatus);
-            this.DoubleBuffered = true;
             this.FormBorderStyle = Majorsilence.Forms.FormBorderStyle.FixedToolWindow;
             this.MaximizeBox = false;
             this.MinimizeBox = false;
