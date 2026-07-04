@@ -73,10 +73,24 @@ namespace Majorsilence.Pdf.Layout
         }
 
         private float ContentLeft => _marginLeft;
-        private float ContentWidth => _pageSize.Width - _marginLeft - _marginRight;
+
+        /// <summary>The width of the content area: page width minus left and right margins.</summary>
+        public float ContentWidth => _pageSize.Width - _marginLeft - _marginRight;
+
         private float ContentTop => _marginTop;
         private float ContentBottom => _pageSize.Height - _marginBottom - _footerHeight;
         private float ContentHeight => ContentBottom - ContentTop;
+
+        /// <summary>
+        /// The <see cref="PdfCanvas"/> for the current page, for extension methods (such as
+        /// markdown rendering) that need font-metric access via
+        /// <see cref="PdfCanvas.MeasureTextWidth"/> or <see cref="PdfCanvas.MeasureTextBoxHeight"/>
+        /// to measure content before calling <see cref="Canvas"/>. Font metrics come from the
+        /// document's <see cref="FontRegistry"/>, which is shared across all pages, so a
+        /// measurement taken here stays valid even if the content is ultimately drawn via
+        /// <see cref="Canvas"/> on a later page. Starts the layout's first page if needed.
+        /// </summary>
+        public PdfCanvas CurrentCanvas { get { EnsureStarted(); return _canvas!; } }
 
         /// <summary>Set equal margins on all four sides. Must be called before the first drawing call.</summary>
         public PdfLayout WithMargins(float all) => WithMargins(all, all, all, all);

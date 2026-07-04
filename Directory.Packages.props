@@ -11,6 +11,7 @@
     <PackageVersion Include="Majorsilence.Forms" Version="26.0.32" />
     <PackageVersion Include="Majorsilence.Forms.Drawing.Common" Version="26.0.32" />
     <PackageVersion Include="Majorsilence.Reporting.RdlViewer" Version="5.0.18" />
+    <PackageVersion Include="Markdig" Version="1.3.2" />
     <PackageVersion Include="Majorsilence.Reporting.RdlEngine" Version="5.0.18" />
     <PackageVersion Include="Majorsilence.Reporting.RdlCri" Version="5.0.18" />
     <PackageVersion Include="Majorsilence.Reporting.ReportDesigner" Version="5.0.18" />
