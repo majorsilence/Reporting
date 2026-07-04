@@ -14,11 +14,14 @@ Majorsilence.Pdf is tri licensed under Apache-2.0, MIT, or BSD-3-Clause. Pick yo
 | Capability | Package |
 |---|---|
 | Text, shapes, images, tables, links | `Majorsilence.Pdf` |
+| Fluent flow layout — rows, columns, auto-pagination (`PdfLayout`) | `Majorsilence.Pdf` |
 | PDF/A-1b, PDF/A-2b, PDF/A-3b conformance | `Majorsilence.Pdf` |
 | Multi-document merge | `Majorsilence.Pdf` |
 | AES-128 (R=4) / AES-256 (R=6) password protection | `Majorsilence.Pdf.Security` |
 | Permission flags (print, copy, edit) | `Majorsilence.Pdf.Security` |
 | PKCS#7 digital signatures | `Majorsilence.Pdf.Security` |
+| Markdown rendering (headings, lists, code, tables, links) | `Majorsilence.Pdf.Markdown` |
+| Live browser preview while you code (`mspdf-preview`) | `Majorsilence.Pdf.Previewer` (dotnet tool) |
 
 Targets .NET Standard 2.0, .NET 6, .NET 8, and .NET 10 — usable from .NET Framework 4.6.1+ up through the latest runtime.
 
