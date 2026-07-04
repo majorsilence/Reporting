@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Report xmlns="http://schemas.microsoft.com/sqlserver/reporting/2005/01/reportdefinition"
+        xmlns:rd="http://schemas.microsoft.com/SQLServer/reporting/reportdesigner">
+  <Description>Purchase order -- vendor/ship-to header, a line-item table, and a computed total.</Description>
+  <PageHeight>11in</PageHeight>
+  <PageWidth>8.5in</PageWidth>
+  <TopMargin>.5in</TopMargin>
+  <LeftMargin>.6in</LeftMargin>
+  <RightMargin>.6in</RightMargin>
+  <BottomMargin>.5in</BottomMargin>
+  <Width>7.3in</Width>
+
+  <DataSources>
+    <DataSource Name="DS1">
+      <ConnectionProperties>
+        <DataProvider>Json</DataProvider>
+        <ConnectString>file=sample-data.json</ConnectString>
+      </ConnectionProperties>
+    </DataSource>
+  </DataSources>
+
+  <DataSets>
+    <DataSet Name="Header">
+      <Query>
+        <DataSourceName>DS1</DataSourceName>
+        <CommandText>columns=PONumber,OrderDate,ExpectedDelivery,VendorName,VendorAddress,ShipToName,ShipToAddress,Terms;table=root</CommandText>
+      </Query>
+      <Fields>
+        <Field Name="PONumber"><DataField>PONumber</DataField><rd:TypeName>System.String</rd:TypeName></Field>
+        <Field Name="OrderDate"><DataField>OrderDate</DataField><rd:TypeName>System.String</rd:TypeName></Field>
+        <Field Name="ExpectedDelivery"><DataField>ExpectedDelivery</DataField><rd:TypeName>System.String</rd:TypeName></Field>
+        <Field Name="VendorName"><DataField>VendorName</DataField><rd:TypeName>System.String</rd:TypeName></Field>
+        <Field Name="VendorAddress"><DataField>VendorAddress</DataField><rd:TypeName>System.String</rd:TypeName></Field>
+        <Field Name="ShipToName"><DataField>ShipToName</DataField><rd:TypeName>System.String</rd:TypeName></Field>
+        <Field Name="ShipToAddress"><DataField>ShipToAddress</DataField><rd:TypeName>System.String</rd:TypeName></Field>
+        <Field Name="Terms"><DataField>Terms</DataField><rd:TypeName>System.String</rd:TypeName></Field>
+      </Fields>
+    </DataSet>
+    <DataSet Name="Lines">
+      <Query>
+        <DataSourceName>DS1</DataSourceName>
+        <CommandText>columns=Sku,Description,Quantity,UnitCost;table=root_Lines</CommandText>
+      </Query>
+      <Fields>
+        <Field Name="Sku"><DataField>Sku</DataField><rd:TypeName>System.String</rd:TypeName></Field>
+        <Field Name="Description"><DataField>Description</DataField><rd:TypeName>System.String</rd:TypeName></Field>
+        <Field Name="Quantity"><DataField>Quantity</DataField><rd:TypeName>System.Double</rd:TypeName></Field>
+        <Field Name="UnitCost"><DataField>UnitCost</DataField><rd:TypeName>System.Double</rd:TypeName></Field>
+      </Fields>
+    </DataSet>
+  </DataSets>
+
+  <Body>
+    <Height>9in</Height>
+    <ReportItems>
+      <Textbox Name="CompanyTitle">
+        <Top>0in</Top><Left>0in</Left><Width>4in</Width><Height>.28in</Height>
+        <Value>PURCHASE ORDER</Value>
+        <Style><FontSize>18pt</FontSize><FontWeight>Bold</FontWeight><Color>#2C3E50</Color></Style>
+      </Textbox>
+
+      <Textbox Name="PONumberLabel">
+        <Top>0in</Top><Left>4.8in</Left><Width>1.2in</Width><Height>.18in</Height>
+        <Value>PO #</Value>
+        <Style><FontSize>9pt</FontSize><TextAlign>Right</TextAlign><Color>Gray</Color></Style>
+      </Textbox>
+      <Textbox Name="PONumberValue">
+        <Top>0in</Top><Left>6.1in</Left><Width>1.2in</Width><Height>.18in</Height>
+        <Value>=First(Fields!PONumber.Value, "Header")</Value>
+        <Style><FontSize>9pt</FontSize><FontWeight>Bold</FontWeight><TextAlign>Right</TextAlign></Style>
+      </Textbox>
+      <Textbox Name="OrderDateLabel">
+        <Top>.2in</Top><Left>4.8in</Left><Width>1.2in</Width><Height>.18in</Height>
+        <Value>Order date</Value>
+        <Style><FontSize>9pt</FontSize><TextAlign>Right</TextAlign><Color>Gray</Color></Style>
+      </Textbox>
+      <Textbox Name="OrderDateValue">
+        <Top>.2in</Top><Left>6.1in</Left><Width>1.2in</Width><Height>.18in</Height>
+        <Value>=First(Fields!OrderDate.Value, "Header")</Value>
+        <Style><FontSize>9pt</FontSize><TextAlign>Right</TextAlign></Style>
+      </Textbox>
+      <Textbox Name="DeliveryLabel">
+        <Top>.4in</Top><Left>4.8in</Left><Width>1.2in</Width><Height>.18in</Height>
+        <Value>Expected delivery</Value>
+        <Style><FontSize>9pt</FontSize><TextAlign>Right</TextAlign><Color>Gray</Color></Style>
+      </Textbox>
+      <Textbox Name="DeliveryValue">
+        <Top>.4in</Top><Left>6.1in</Left><Width>1.2in</Width><Height>.18in</Height>
+        <Value>=First(Fields!ExpectedDelivery.Value, "Header")</Value>
+        <Style><FontSize>9pt</FontSize><FontWeight>Bold</FontWeight><TextAlign>Right</TextAlign></Style>
+      </Textbox>
+
+      <Textbox Name="VendorLabel">
+        <Top>.85in</Top><Left>0in</Left><Width>3in</Width><Height>.18in</Height>
+        <Value>Vendor</Value>
+        <Style><FontSize>9pt</FontSize><FontWeight>Bold</FontWeight><Color>Gray</Color></Style>
+      </Textbox>
+      <Textbox Name="VendorName">
+        <Top>1.05in</Top><Left>0in</Left><Width>3.5in</Width><Height>.2in</Height>
+        <Value>=First(Fields!VendorName.Value, "Header")</Value>
+        <Style><FontSize>11pt</FontSize><FontWeight>Bold</FontWeight></Style>
+      </Textbox>
+      <Textbox Name="VendorAddress">
+        <Top>1.27in</Top><Left>0in</Left><Width>3.5in</Width><Height>.4in</Height>
+        <CanGrow>true</CanGrow>
+        <Value>=First(Fields!VendorAddress.Value, "Header")</Value>
+        <Style><FontSize>9pt</FontSize></Style>
+      </Textbox>
+
+      <Textbox Name="ShipToLabel">
+        <Top>.85in</Top><Left>4.3in</Left><Width>3in</Width><Height>.18in</Height>
+        <Value>Ship To</Value>
+        <Style><FontSize>9pt</FontSize><FontWeight>Bold</FontWeight><Color>Gray</Color><TextAlign>Right</TextAlign></Style>
+      </Textbox>
+      <Textbox Name="ShipToName">
+        <Top>1.05in</Top><Left>3.8in</Left><Width>3.5in</Width><Height>.2in</Height>
+        <Value>=First(Fields!ShipToName.Value, "Header")</Value>
+        <Style><FontSize>11pt</FontSize><FontWeight>Bold</FontWeight><TextAlign>Right</TextAlign></Style>
+      </Textbox>
+      <Textbox Name="ShipToAddress">
+        <Top>1.27in</Top><Left>3.8in</Left><Width>3.5in</Width><Height>.4in</Height>
+        <CanGrow>true</CanGrow>
+        <Value>=First(Fields!ShipToAddress.Value, "Header")</Value>
+        <Style><FontSize>9pt</FontSize><TextAlign>Right</TextAlign></Style>
+      </Textbox>
+
+      <Table Name="LinesTable">
+        <DataSetName>Lines</DataSetName>
+        <NoRows>No line items.</NoRows>
+        <Top>2.1in</Top>
+        <Left>0in</Left>
+        <TableColumns>
+          <TableColumn><Width>1in</Width></TableColumn>
+          <TableColumn><Width>2.7in</Width></TableColumn>
+          <TableColumn><Width>1in</Width></TableColumn>
+          <TableColumn><Width>1.3in</Width></TableColumn>
+          <TableColumn><Width>1.3in</Width></TableColumn>
+        </TableColumns>
+        <Header>
+          <TableRows>
+            <TableRow>
+              <Height>.22in</Height>
+              <TableCells>
+                <TableCell><ReportItems><Textbox Name="H_Sku"><Value>SKU</Value><Style><FontWeight>Bold</FontWeight><BackgroundColor>#2C3E50</BackgroundColor><Color>White</Color><PaddingLeft>4pt</PaddingLeft><VerticalAlign>Middle</VerticalAlign></Style></Textbox></ReportItems></TableCell>
+                <TableCell><ReportItems><Textbox Name="H_Desc"><Value>Description</Value><Style><FontWeight>Bold</FontWeight><BackgroundColor>#2C3E50</BackgroundColor><Color>White</Color><PaddingLeft>4pt</PaddingLeft><VerticalAlign>Middle</VerticalAlign></Style></Textbox></ReportItems></TableCell>
+                <TableCell><ReportItems><Textbox Name="H_Qty"><Value>Qty</Value><Style><FontWeight>Bold</FontWeight><BackgroundColor>#2C3E50</BackgroundColor><Color>White</Color><TextAlign>Right</TextAlign><PaddingRight>4pt</PaddingRight><VerticalAlign>Middle</VerticalAlign></Style></Textbox></ReportItems></TableCell>
+                <TableCell><ReportItems><Textbox Name="H_Cost"><Value>Unit Cost</Value><Style><FontWeight>Bold</FontWeight><BackgroundColor>#2C3E50</BackgroundColor><Color>White</Color><TextAlign>Right</TextAlign><PaddingRight>4pt</PaddingRight><VerticalAlign>Middle</VerticalAlign></Style></Textbox></ReportItems></TableCell>
+                <TableCell><ReportItems><Textbox Name="H_Total"><Value>Amount</Value><Style><FontWeight>Bold</FontWeight><BackgroundColor>#2C3E50</BackgroundColor><Color>White</Color><TextAlign>Right</TextAlign><PaddingRight>4pt</PaddingRight><VerticalAlign>Middle</VerticalAlign></Style></Textbox></ReportItems></TableCell>
+              </TableCells>
+            </TableRow>
+          </TableRows>
+          <RepeatOnNewPage>true</RepeatOnNewPage>
+        </Header>
+        <Details>
+          <TableRows>
+            <TableRow>
+              <Height>.2in</Height>
+              <TableCells>
+                <TableCell><ReportItems><Textbox Name="D_Sku"><Value>=Fields!Sku.Value</Value><Style><PaddingLeft>4pt</PaddingLeft><BackgroundColor>=IIf(RowNumber(Nothing) Mod 2 = 0, "#F3EEFA", "White")</BackgroundColor></Style></Textbox></ReportItems></TableCell>
+                <TableCell><ReportItems><Textbox Name="D_Desc"><Value>=Fields!Description.Value</Value><CanGrow>true</CanGrow><Style><PaddingLeft>4pt</PaddingLeft><BackgroundColor>=IIf(RowNumber(Nothing) Mod 2 = 0, "#F3EEFA", "White")</BackgroundColor></Style></Textbox></ReportItems></TableCell>
+                <TableCell><ReportItems><Textbox Name="D_Qty"><Value>=Fields!Quantity.Value</Value><Style><TextAlign>Right</TextAlign><PaddingRight>4pt</PaddingRight><BackgroundColor>=IIf(RowNumber(Nothing) Mod 2 = 0, "#F3EEFA", "White")</BackgroundColor></Style></Textbox></ReportItems></TableCell>
+                <TableCell><ReportItems><Textbox Name="D_Cost"><Value>=Format(Fields!UnitCost.Value, "C2")</Value><Style><TextAlign>Right</TextAlign><PaddingRight>4pt</PaddingRight><BackgroundColor>=IIf(RowNumber(Nothing) Mod 2 = 0, "#F3EEFA", "White")</BackgroundColor></Style></Textbox></ReportItems></TableCell>
+                <TableCell><ReportItems><Textbox Name="D_Total"><Value>=Format(Fields!Quantity.Value * Fields!UnitCost.Value, "C2")</Value><Style><TextAlign>Right</TextAlign><PaddingRight>4pt</PaddingRight><BackgroundColor>=IIf(RowNumber(Nothing) Mod 2 = 0, "#F3EEFA", "White")</BackgroundColor></Style></Textbox></ReportItems></TableCell>
+              </TableCells>
+            </TableRow>
+          </TableRows>
+        </Details>
+      </Table>
+
+      <Textbox Name="TotalLabel">
+        <Top>3.6in</Top><Left>4.9in</Left><Width>1.2in</Width><Height>.24in</Height>
+        <Value>Total</Value>
+        <Style><FontSize>11pt</FontSize><FontWeight>Bold</FontWeight><TextAlign>Right</TextAlign></Style>
+      </Textbox>
+      <Textbox Name="TotalValue">
+        <Top>3.6in</Top><Left>6.1in</Left><Width>1.2in</Width><Height>.24in</Height>
+        <Value>=Format(Sum(Fields!Quantity.Value * Fields!UnitCost.Value, "Lines"), "C2")</Value>
+        <Style><FontSize>11pt</FontSize><FontWeight>Bold</FontWeight><TextAlign>Right</TextAlign><Color>#7030A0</Color></Style>
+      </Textbox>
+
+      <Textbox Name="TermsLabel">
+        <Top>4.1in</Top><Left>0in</Left><Width>4in</Width><Height>.18in</Height>
+        <Value>Terms</Value>
+        <Style><FontSize>9pt</FontSize><FontWeight>Bold</FontWeight><Color>Gray</Color></Style>
+      </Textbox>
+      <Textbox Name="TermsValue">
+        <Top>4.3in</Top><Left>0in</Left><Width>7.3in</Width><Height>.6in</Height>
+        <CanGrow>true</CanGrow>
+        <Value>=First(Fields!Terms.Value, "Header")</Value>
+        <Style><FontSize>9pt</FontSize></Style>
+      </Textbox>
+    </ReportItems>
+  </Body>
+
+  <PageFooter>
+    <Height>16pt</Height>
+    <PrintOnFirstPage>true</PrintOnFirstPage>
+    <PrintOnLastPage>true</PrintOnLastPage>
+    <ReportItems>
+      <Textbox Name="PageNum">
+        <Top>1pt</Top><Left>0in</Left><Width>3in</Width><Height>14pt</Height>
+        <Value>=Globals!PageNumber &amp; " of " &amp; Globals!TotalPages</Value>
+        <Style><FontSize>8pt</FontSize><Color>Gray</Color></Style>
+      </Textbox>
+    </ReportItems>
+  </PageFooter>
+</Report>

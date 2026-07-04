@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Report xmlns="http://schemas.microsoft.com/sqlserver/reporting/2005/01/reportdefinition"
+        xmlns:rd="http://schemas.microsoft.com/SQLServer/reporting/reportdesigner">
+  <Description>Timesheet -- an Employee x Day matrix (RDL Matrix data region) with row and column subtotals.</Description>
+  <PageHeight>8.5in</PageHeight>
+  <PageWidth>11in</PageWidth>
+  <TopMargin>.5in</TopMargin>
+  <LeftMargin>.6in</LeftMargin>
+  <RightMargin>.6in</RightMargin>
+  <BottomMargin>.5in</BottomMargin>
+  <Width>9.8in</Width>
+
+  <DataSources>
+    <DataSource Name="DS1">
+      <ConnectionProperties>
+        <DataProvider>Json</DataProvider>
+        <ConnectString>file=sample-data.json</ConnectString>
+      </ConnectionProperties>
+    </DataSource>
+  </DataSources>
+
+  <DataSets>
+    <DataSet Name="Header">
+      <Query>
+        <DataSourceName>DS1</DataSourceName>
+        <CommandText>columns=WeekStarting,WeekEnding;table=root</CommandText>
+      </Query>
+      <Fields>
+        <Field Name="WeekStarting"><DataField>WeekStarting</DataField><rd:TypeName>System.String</rd:TypeName></Field>
+        <Field Name="WeekEnding"><DataField>WeekEnding</DataField><rd:TypeName>System.String</rd:TypeName></Field>
+      </Fields>
+    </DataSet>
+    <DataSet Name="Entries">
+      <Query>
+        <DataSourceName>DS1</DataSourceName>
+        <CommandText>columns=Employee,Day,DayOrder,Hours;table=root_Entries</CommandText>
+      </Query>
+      <Fields>
+        <Field Name="Employee"><DataField>Employee</DataField><rd:TypeName>System.String</rd:TypeName></Field>
+        <Field Name="Day"><DataField>Day</DataField><rd:TypeName>System.String</rd:TypeName></Field>
+        <Field Name="DayOrder"><DataField>DayOrder</DataField><rd:TypeName>System.Double</rd:TypeName></Field>
+        <Field Name="Hours"><DataField>Hours</DataField><rd:TypeName>System.Double</rd:TypeName></Field>
+      </Fields>
+    </DataSet>
+  </DataSets>
+
+  <Body>
+    <Height>4in</Height>
+    <ReportItems>
+      <Textbox Name="Title">
+        <Top>0in</Top><Left>0in</Left><Width>5in</Width><Height>.28in</Height>
+        <Value>Weekly Timesheet</Value>
+        <Style><FontSize>18pt</FontSize><FontWeight>Bold</FontWeight><Color>#2C3E50</Color></Style>
+      </Textbox>
+      <Textbox Name="WeekRange">
+        <Top>.32in</Top><Left>0in</Left><Width>5in</Width><Height>.2in</Height>
+        <Value>=&quot;Week of &quot; &amp; First(Fields!WeekStarting.Value, "Header") &amp; " to " &amp; First(Fields!WeekEnding.Value, "Header")</Value>
+        <Style><FontSize>9pt</FontSize><Color>Gray</Color></Style>
+      </Textbox>
+
+      <Matrix Name="HoursMatrix">
+        <DataSetName>Entries</DataSetName>
+        <Left>0in</Left>
+        <Top>.7in</Top>
+        <Style>
+          <BorderStyle><Default>Solid</Default></BorderStyle>
+          <BorderColor><Default>#DDDDDD</Default></BorderColor>
+        </Style>
+        <Corner>
+          <ReportItems>
+            <Textbox Name="Corner">
+              <Value>Employee</Value>
+              <Style><FontWeight>Bold</FontWeight><BackgroundColor>#2C3E50</BackgroundColor><Color>White</Color><PaddingLeft>4pt</PaddingLeft><VerticalAlign>Middle</VerticalAlign></Style>
+            </Textbox>
+          </ReportItems>
+        </Corner>
+        <ColumnGroupings>
+          <ColumnGrouping>
+            <Height>.22in</Height>
+            <DynamicColumns>
+              <Grouping Name="DayGroup">
+                <GroupExpressions>
+                  <GroupExpression>=Fields!Day.Value</GroupExpression>
+                </GroupExpressions>
+              </Grouping>
+              <Sorting>
+                <SortBy>
+                  <SortExpression>=Fields!DayOrder.Value</SortExpression>
+                  <Direction>Ascending</Direction>
+                </SortBy>
+              </Sorting>
+              <ReportItems>
+                <Textbox Name="DayHeader">
+                  <Value>=Fields!Day.Value</Value>
+                  <Style><FontWeight>Bold</FontWeight><BackgroundColor>#2C3E50</BackgroundColor><Color>White</Color><TextAlign>Center</TextAlign><VerticalAlign>Middle</VerticalAlign></Style>
+                </Textbox>
+              </ReportItems>
+              <Subtotal>
+                <ReportItems>
+                  <Textbox Name="DayTotalHeader">
+                    <Value>Total</Value>
+                    <Style><FontWeight>Bold</FontWeight><BackgroundColor>#2C3E50</BackgroundColor><Color>White</Color><TextAlign>Center</TextAlign><VerticalAlign>Middle</VerticalAlign></Style>
+                  </Textbox>
+                </ReportItems>
+              </Subtotal>
+            </DynamicColumns>
+          </ColumnGrouping>
+        </ColumnGroupings>
+        <RowGroupings>
+          <RowGrouping>
+            <Width>1.8in</Width>
+            <DynamicRows>
+              <Grouping Name="EmployeeGroup">
+                <GroupExpressions>
+                  <GroupExpression>=Fields!Employee.Value</GroupExpression>
+                </GroupExpressions>
+              </Grouping>
+              <ReportItems>
+                <Textbox Name="EmployeeName">
+                  <Value>=Fields!Employee.Value</Value>
+                  <Style><PaddingLeft>4pt</PaddingLeft><VerticalAlign>Middle</VerticalAlign></Style>
+                </Textbox>
+              </ReportItems>
+              <Subtotal>
+                <ReportItems>
+                  <Textbox Name="EmployeeTotalLabel">
+                    <Value>Weekly Total</Value>
+                    <Style><FontWeight>Bold</FontWeight><PaddingLeft>4pt</PaddingLeft><VerticalAlign>Middle</VerticalAlign></Style>
+                  </Textbox>
+                </ReportItems>
+              </Subtotal>
+            </DynamicRows>
+          </RowGrouping>
+        </RowGroupings>
+        <MatrixRows>
+          <MatrixRow>
+            <Height>.22in</Height>
+            <MatrixCells>
+              <MatrixCell>
+                <ReportItems>
+                  <Textbox Name="HoursCell">
+                    <Value>=Format(Sum(Fields!Hours.Value), "0.##")</Value>
+                    <Style><TextAlign>Center</TextAlign><VerticalAlign>Middle</VerticalAlign><BackgroundColor>=IIf(Sum(Fields!Hours.Value) = 0, "#FDECEA", "White")</BackgroundColor></Style>
+                  </Textbox>
+                </ReportItems>
+              </MatrixCell>
+            </MatrixCells>
+          </MatrixRow>
+        </MatrixRows>
+        <MatrixColumns>
+          <MatrixColumn>
+            <Width>.9in</Width>
+          </MatrixColumn>
+        </MatrixColumns>
+      </Matrix>
+    </ReportItems>
+  </Body>
+
+  <PageFooter>
+    <Height>16pt</Height>
+    <PrintOnFirstPage>true</PrintOnFirstPage>
+    <PrintOnLastPage>true</PrintOnLastPage>
+    <ReportItems>
+      <Textbox Name="PageNum">
+        <Top>1pt</Top><Left>0in</Left><Width>3in</Width><Height>14pt</Height>
+        <Value>=Globals!PageNumber &amp; " of " &amp; Globals!TotalPages</Value>
+        <Style><FontSize>8pt</FontSize><Color>Gray</Color></Style>
+      </Textbox>
+    </ReportItems>
+  </PageFooter>
+</Report>
