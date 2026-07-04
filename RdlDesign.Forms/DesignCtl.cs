@@ -3510,7 +3510,9 @@ namespace Majorsilence.Reporting.RdlDesign
             this.x = (int)(B.X / ScaleX);
             this.y = (int)(B.Y / ScaleY);
             this.location = new Point(x, y);
-            this.delta = B.Delta;
+            // Majorsilence.Forms.MouseEventArgs.Delta is a Point (X/Y wheel deltas), unlike
+            // WinForms's int Delta (vertical-only); take the vertical component.
+            this.delta = B.Delta.Y;
         }
     }
 }

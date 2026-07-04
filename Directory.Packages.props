@@ -59,17 +59,19 @@
     <PackageVersion Include="XamlNameReferenceGenerator" Version="1.3.4" />
   </ItemGroup>
   <ItemGroup>
-    <!-- Majorsilence.Forms migration track (Track D). 26.0.11 is packed locally from
+    <!-- Majorsilence.Forms migration track (Track D). 26.0.12 is packed locally from
          ../Modern.Forms source (see nuget.config and MIGRATION-NOTES.md); none of 26.0.1
-         through 26.0.11 is in the 26.0.0 published on nuget.org yet. Full per-patch breakdown of
+         through 26.0.12 is in the 26.0.0 published on nuget.org yet. Full per-patch breakdown of
          what each version added is in ../Modern.Forms's git log (one commit per patch) and in
          MIGRATION-NOTES.md's D2/D4 sections; not repeated here to keep this file readable.
-         26.0.11 added ListBoxItemCollection.Add(object) int-returning overload, a real
-         CheckedListBox.CheckedItems (materialized List, not lazy IEnumerable), PrinterSettings.
-         PaperSizes, PrintDialog.AllowSelection, IDataObject.GetData/GetDataPresent(DataFormat,
-         bool), and MenuItemCollection's string (name-based) indexer. -->
-    <PackageVersion Include="Majorsilence.Forms" Version="26.0.11" />
-    <PackageVersion Include="Majorsilence.Forms.Avalonia" Version="26.0.11" />
-    <PackageVersion Include="Majorsilence.Forms.Headless" Version="26.0.11" />
+         26.0.12 added: TextBox/RichTextBox.VScroll/HScroll (real events, shadowing Control's
+         unrelated bool properties of the same name), ControlStyle's implicit conversion from
+         DataGridViewCellStyle, Font.GetSKTypeface(), TreeViewCancelEventArgs.Node retyped to
+         TreeNode, Form.Validating (stub), a real CheckedObjectCollection.CopyTo (was a no-op
+         explicit ICollection.CopyTo), Graphics.DrawImage/DrawEllipse RectangleF-based float
+         overloads, and Image.Save(ImageCodecInfo, EncoderParameters). -->
+    <PackageVersion Include="Majorsilence.Forms" Version="26.0.12" />
+    <PackageVersion Include="Majorsilence.Forms.Avalonia" Version="26.0.12" />
+    <PackageVersion Include="Majorsilence.Forms.Headless" Version="26.0.12" />
   </ItemGroup>
 </Project>

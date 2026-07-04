@@ -1517,6 +1517,12 @@ namespace Majorsilence.Reporting.RdlDesign
             string type = GetCustomReportItemType(tNode.InnerText);
            
             ICustomReportItem cri = null;
+            // ICustomReportItem.DrawDesignerImage needs Majorsilence.Drawing.Bitmap (the
+            // RdlEngine plugin interface's own SkiaSharp-backed type, unrelated to the UI
+            // framework's Majorsilence.Forms.Drawing.Bitmap used for on-screen drawing below) --
+            // bridge the two via a PNG round-trip through a MemoryStream, since neither exposes a
+            // public SKBitmap accessor the other assembly can use directly.
+            Majorsilence.Drawing.Bitmap engineBm = null;
             Bitmap bm = null;
             try
             {
@@ -1527,8 +1533,14 @@ namespace Majorsilence.Reporting.RdlDesign
                     width = 1;
                 if (height <= 0)
                     height = 1;
-                bm = new Bitmap(width, height);
-                cri.DrawDesignerImage(ref bm);
+                engineBm = new Majorsilence.Drawing.Bitmap(width, height);
+                cri.DrawDesignerImage(ref engineBm);
+                using (var ms = new MemoryStream())
+                {
+                    engineBm.Save(ms, Majorsilence.Drawing.Imaging.ImageFormat.Png);
+                    ms.Position = 0;
+                    bm = new Bitmap(ms);
+                }
                 DrawImageSized(xNode,ImageSizingEnum.Clip, bm, si, ir);
                 DrawBorder(si, ir);
             }
@@ -1540,6 +1552,8 @@ namespace Majorsilence.Reporting.RdlDesign
             {
                 if (cri != null)
                     cri.Dispose();
+                if (engineBm != null)
+                    engineBm.Dispose();
                 if (bm != null)
                     bm.Dispose();
             }
@@ -2842,7 +2856,7 @@ namespace Majorsilence.Reporting.RdlDesign
 
                 byte[] ba = ostrm.ToArray();
                 ostrm.Close();
-                si.BackgroundImage = new PageImage(ImageFormat.Jpeg, ba, width, height);	// Create an image
+                si.BackgroundImage = new PageImage(Majorsilence.Drawing.Imaging.ImageFormat.Jpeg, ba, width, height);	// Create an image
                 si.BackgroundImage.Repeat = repeat;
             }
             catch

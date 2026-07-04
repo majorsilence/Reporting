@@ -263,7 +263,9 @@ namespace Majorsilence.Reporting.RdlDesign
 
         private void bRight_Click(object sender, System.EventArgs e)
         {
-            ListBox.SelectedIndexCollection sic = lbFields.SelectedIndices;
+            // ListBox.SelectedIndexCollection doesn't exist -- SelectedIndices is IEnumerable<int>
+            // in Majorsilence.Forms; materialize it for .Count/ArrayList ctor support below.
+            List<int> sic = lbFields.SelectedIndices.ToList();
             int count = sic.Count;
             foreach (int i in sic)
             {
