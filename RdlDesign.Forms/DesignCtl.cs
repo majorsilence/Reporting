@@ -206,7 +206,13 @@ namespace Majorsilence.Reporting.RdlDesign
 					StringWriter sw = new StringWriter();
                     var settings = new XmlWriterSettings
                     {
-                        NewLineChars = RdlDesigner.XmlNewLine == NewLineChar.Unix ? "\n" : "\r\n",
+                        // RdlDesigner is only wired up when this DesignCtl is hosted inside the
+                        // full MDI RdlDesigner shell (see RdlDesigner.CreateMDIChildAsync); guard
+                        // against it being null (e.g. a standalone/test-hosted DesignCtl) instead
+                        // of throwing here -- this was a silent NullReferenceException swallowed
+                        // by the catch below, surfacing only as an empty ReportSource with no
+                        // indication why (found via D6's designer round-trip test).
+                        NewLineChars = RdlDesigner?.XmlNewLine == NewLineChar.Unix ? "\n" : "\r\n",
                         Indent = true,
                         IndentChars = "  "
                     };
