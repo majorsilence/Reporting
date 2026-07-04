@@ -410,21 +410,20 @@ namespace Majorsilence.Drawing
             return $"Color [A={A}, R={R}, G={G}, B={B}]";
         }
 
-#if !DRAWINGCOMPAT
+        // Both directions are unconditional (the System.Drawing.Color -> Color direction below
+        // used to be `#if !DRAWINGCOMPAT`-gated, i.e. compiled out for exactly this track, since
+        // DRAWINGCOMPAT is always active here). Majorsilence.Forms's own Pen/Brush/Font/etc APIs
+        // always use real System.Drawing.Color (confirmed: Majorsilence.Forms/Drawing/Pen.cs has
+        // `using System.Drawing;`) regardless of whether RdlEngine itself is compiled with
+        // DRAWINGCOMPAT, so cross-platform Majorsilence.Forms-based UI code (RdlViewer.Forms,
+        // RdlDesign.Forms, etc.) needs to freely convert both ways between RdlEngine's
+        // Majorsilence.Drawing.Color-typed Style properties and the real System.Drawing.Color
+        // Majorsilence.Forms expects. See MIGRATION-NOTES.md's D2/D4 writeups.
         public static implicit operator System.Drawing.Color(Color p)
         {
             return System.Drawing.Color.FromArgb(p.A, p.R, p.G, p.B);
         }
-#endif
 
-        // Unconditional (unlike the operator above): Majorsilence.Forms's own Pen/Brush/Font/etc
-        // APIs always use real System.Drawing.Color (confirmed: Majorsilence.Forms/Drawing/Pen.cs
-        // has `using System.Drawing;`), regardless of whether RdlEngine itself is compiled with
-        // DRAWINGCOMPAT. Cross-platform Majorsilence.Forms-based UI code (RdlDesign.Forms et al.)
-        // needs to assign real System.Drawing.Color values (from color pickers, dialogs, Color
-        // constants) into RdlEngine's Majorsilence.Drawing.Color-typed Style properties, which the
-        // `#if !DRAWINGCOMPAT`-gated operator above can't help with since DRAWINGCOMPAT is always
-        // on for this track. See MIGRATION-NOTES.md's D4 writeup.
         public static implicit operator Color(System.Drawing.Color p)
         {
             return new Color(p.R, p.G, p.B, p.A);
