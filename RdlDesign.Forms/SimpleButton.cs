@@ -54,19 +54,13 @@ namespace Majorsilence.Reporting.RdlDesign
 						y += 1;
 					}
 
-					// Draw Image using the transparency color
-					ImageAttributes imageAttr = new ImageAttributes();
-					imageAttr.SetColorKey(_Transparency, _Transparency,
-						ColorAdjustType.Default);
-
-					g.DrawImage(this.Image,         // Image
-						new Rectangle(x, y, this.Image.Width, this.Image.Height),    // Dest. rect.
-						0,							// srcX
-						0,							// srcY
-						this.Image.Width,           // srcWidth
-						this.Image.Height,          // srcHeight
-						GraphicsUnit.Pixel,			// srcUnit
-						imageAttr);					// ImageAttributes
+					// ImageAttributes/SetColorKey (transparent-color-key drawing) has no
+					// Majorsilence.Forms equivalent -- would need per-pixel SkiaSharp color
+					// filtering to replicate properly. Draw the image directly instead; the
+					// _Transparency color-keying effect is a documented, dropped cosmetic
+					// feature (this control is already flagged as a migration candidate, same
+					// as ColorPicker.cs's "very crazy control, need replace it" note).
+					g.DrawImage(this.Image, new Rectangle(x, y, this.Image.Width, this.Image.Height));
 				}
 				else
 				{

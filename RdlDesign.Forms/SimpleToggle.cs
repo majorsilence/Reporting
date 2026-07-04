@@ -52,19 +52,11 @@ namespace Majorsilence.Reporting.RdlDesign
 					int x = (this.Width - this.Image.Width) / 2;
 					int y = (this.Height - this.Image.Height) / 2;
 
-					// Draw Image using the transparency color
-					ImageAttributes imageAttr = new ImageAttributes();
-					imageAttr.SetColorKey(_Transparency, _Transparency,
-						ColorAdjustType.Default);
-
-					g.DrawImage(this.Image,         // Image
-						new Rectangle(x, y, this.Image.Width, this.Image.Height),    // Dest. rect.
-						0,							// srcX
-						0,							// srcY
-						this.Image.Width,           // srcWidth
-						this.Image.Height,          // srcHeight
-						GraphicsUnit.Pixel,			// srcUnit
-						imageAttr);					// ImageAttributes
+					// ImageAttributes/SetColorKey (transparent-color-key drawing) has no
+					// Majorsilence.Forms equivalent -- see SimpleButton.cs for the same fix and
+					// rationale. Draw the image directly; the _Transparency color-keying effect
+					// is a documented, dropped cosmetic feature.
+					g.DrawImage(this.Image, new Rectangle(x, y, this.Image.Width, this.Image.Height));
 				}
 				else
 				{
