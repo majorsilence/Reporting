@@ -1,0 +1,13 @@
+{
+  "name": "Sales Dashboard",
+  "slug": "sales-dashboard",
+  "description": "A monthly revenue-by-region bar chart plus a product-line summary table with computed percent-of-total.",
+  "tags": ["business", "chart", "dashboard", "letter-size"],
+  "dataProvider": "Json",
+  "parameters": [],
+  "dataContract": {
+    "root": ["ReportTitle", "GeneratedDate"],
+    "root.MonthlySales[]": ["Month", "MonthOrder", "Region", "Revenue"],
+    "root.ProductLines[]": ["ProductLine", "Revenue", "UnitsSold"]
+  }
+}
