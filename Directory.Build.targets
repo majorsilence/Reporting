@@ -26,6 +26,19 @@
     The condition gates on '$(TargetFramework)' != '' so it only fires in inner builds, not the outer
     multi-target dispatch where TargetFramework is still empty.
   -->
+  <!--
+    Give every packable project a NuGet readme. Projects that want their own readme set
+    PackageReadmeFile (and pack the file) in their csproj; everything else gets the repo root
+    Readme.md. Lives in .targets (not .props) so the empty-check sees project-set values.
+  -->
+  <PropertyGroup Condition="'$(IsPackable)' == 'true' AND '$(PackageReadmeFile)' == ''">
+    <PackageReadmeFile>Readme.md</PackageReadmeFile>
+    <_PackRootReadme>true</_PackRootReadme>
+  </PropertyGroup>
+  <ItemGroup Condition="'$(_PackRootReadme)' == 'true'">
+    <None Include="$(MSBuildThisFileDirectory)Readme.md" Pack="true" PackagePath="\" Visible="false" />
+  </ItemGroup>
+
   <Target Name="_DisableAotForNonAotCompatibleTfm" BeforeTargets="ProcessFrameworkReferences"
           Condition="'$(PublishAot)' == 'true' AND '$(TargetFramework)' != '' AND
                      !$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net7.0'))">

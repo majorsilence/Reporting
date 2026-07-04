@@ -7,6 +7,7 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
         <IsPackable>true</IsPackable>
+        <Description>Shared WinForms utility controls used by the Majorsilence Reporting viewer and designer (Windows only). Targets .NET 8 (Windows), .NET 10 (Windows), and .NET Framework 4.8.</Description>
     </PropertyGroup>
 
     <ItemGroup>

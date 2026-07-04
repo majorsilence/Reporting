@@ -12,6 +12,7 @@
 		<AssemblyTitle>RDL Viewer</AssemblyTitle>
 		<DelaySign>false</DelaySign>
 		<PackageId>Majorsilence.Reporting.RdlViewer</PackageId>
+		<Description>WinForms report viewer control for Majorsilence Reporting (Windows only). Embed RDL/RDLC report viewing, printing, and export in desktop apps. Targets .NET 8 (Windows), .NET 10 (Windows), and .NET Framework 4.8.</Description>
 		<Configurations>Debug;Release;Debug-DrawingCompat</Configurations>
 		<TargetFrameworks>net48;net8.0-windows;net10.0-windows</TargetFrameworks>
 		<WarningsAsErrors>4014</WarningsAsErrors>
