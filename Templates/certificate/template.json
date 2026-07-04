@@ -1,0 +1,11 @@
+{
+  "name": "Certificate",
+  "slug": "certificate",
+  "description": "A landscape achievement/completion certificate with a decorative double border.",
+  "tags": ["hr", "training", "landscape"],
+  "dataProvider": "Json",
+  "parameters": [],
+  "dataContract": {
+    "root": ["CertificateTitle", "RecipientName", "AchievementText", "CourseName", "IssueDate", "IssuerName", "SignatoryName", "SignatoryTitle"]
+  }
+}

@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Report xmlns="http://schemas.microsoft.com/sqlserver/reporting/2005/01/reportdefinition"
+        xmlns:rd="http://schemas.microsoft.com/SQLServer/reporting/reportdesigner">
+  <Description>Receipt -- an 80mm thermal-printer-width point-of-sale receipt.</Description>
+  <PageHeight>6in</PageHeight>
+  <PageWidth>3.15in</PageWidth>
+  <TopMargin>.1in</TopMargin>
+  <LeftMargin>.1in</LeftMargin>
+  <RightMargin>.1in</RightMargin>
+  <BottomMargin>.1in</BottomMargin>
+  <Width>2.95in</Width>
+
+  <DataSources>
+    <DataSource Name="DS1">
+      <ConnectionProperties>
+        <DataProvider>Json</DataProvider>
+        <ConnectString>file=sample-data.json</ConnectString>
+      </ConnectionProperties>
+    </DataSource>
+  </DataSources>
+
+  <DataSets>
+    <DataSet Name="Header">
+      <Query>
+        <DataSourceName>DS1</DataSourceName>
+        <CommandText>columns=StoreName,StoreAddress,ReceiptNumber,ReceiptDate,CashierName,TaxRatePercent,PaymentMethod;table=root</CommandText>
+      </Query>
+      <Fields>
+        <Field Name="StoreName"><DataField>StoreName</DataField><rd:TypeName>System.String</rd:TypeName></Field>
+        <Field Name="StoreAddress"><DataField>StoreAddress</DataField><rd:TypeName>System.String</rd:TypeName></Field>
+        <Field Name="ReceiptNumber"><DataField>ReceiptNumber</DataField><rd:TypeName>System.String</rd:TypeName></Field>
+        <Field Name="ReceiptDate"><DataField>ReceiptDate</DataField><rd:TypeName>System.String</rd:TypeName></Field>
+        <Field Name="CashierName"><DataField>CashierName</DataField><rd:TypeName>System.String</rd:TypeName></Field>
+        <Field Name="TaxRatePercent"><DataField>TaxRatePercent</DataField><rd:TypeName>System.Double</rd:TypeName></Field>
+        <Field Name="PaymentMethod"><DataField>PaymentMethod</DataField><rd:TypeName>System.String</rd:TypeName></Field>
+      </Fields>
+    </DataSet>
+    <DataSet Name="Lines">
+      <Query>
+        <DataSourceName>DS1</DataSourceName>
+        <CommandText>columns=Description,Quantity,UnitPrice;table=root_Lines</CommandText>
+      </Query>
+      <Fields>
+        <Field Name="Description"><DataField>Description</DataField><rd:TypeName>System.String</rd:TypeName></Field>
+        <Field Name="Quantity"><DataField>Quantity</DataField><rd:TypeName>System.Double</rd:TypeName></Field>
+        <Field Name="UnitPrice"><DataField>UnitPrice</DataField><rd:TypeName>System.Double</rd:TypeName></Field>
+      </Fields>
+    </DataSet>
+  </DataSets>
+
+  <Body>
+    <Height>5in</Height>
+    <ReportItems>
+      <Textbox Name="StoreName">
+        <Top>0in</Top><Left>0in</Left><Width>2.95in</Width><Height>.18in</Height>
+        <Value>=First(Fields!StoreName.Value, "Header")</Value>
+        <Style><FontSize>11pt</FontSize><FontWeight>Bold</FontWeight><TextAlign>Center</TextAlign></Style>
+      </Textbox>
+      <Textbox Name="StoreAddress">
+        <Top>.2in</Top><Left>0in</Left><Width>2.95in</Width><Height>.3in</Height>
+        <CanGrow>true</CanGrow>
+        <Value>=First(Fields!StoreAddress.Value, "Header")</Value>
+        <Style><FontSize>7pt</FontSize><TextAlign>Center</TextAlign></Style>
+      </Textbox>
+
+      <Line Name="Divider1">
+        <Top>.55in</Top><Left>0in</Left><Height>0in</Height><Width>2.95in</Width>
+        <Style><BorderStyle><Default>Dashed</Default></BorderStyle><BorderColor><Default>Black</Default></BorderColor></Style>
+      </Line>
+
+      <Textbox Name="ReceiptNumber">
+        <Top>.62in</Top><Left>0in</Left><Width>2.95in</Width><Height>.16in</Height>
+        <Value>=&quot;Receipt &quot; &amp; First(Fields!ReceiptNumber.Value, "Header")</Value>
+        <Style><FontSize>8pt</FontSize></Style>
+      </Textbox>
+      <Textbox Name="ReceiptDate">
+        <Top>.78in</Top><Left>0in</Left><Width>2.95in</Width><Height>.16in</Height>
+        <Value>=First(Fields!ReceiptDate.Value, "Header") &amp; "  Cashier: " &amp; First(Fields!CashierName.Value, "Header")</Value>
+        <Style><FontSize>7pt</FontSize></Style>
+      </Textbox>
+
+      <Line Name="Divider2">
+        <Top>1in</Top><Left>0in</Left><Height>0in</Height><Width>2.95in</Width>
+        <Style><BorderStyle><Default>Dashed</Default></BorderStyle><BorderColor><Default>Black</Default></BorderColor></Style>
+      </Line>
+
+      <Table Name="LinesTable">
+        <DataSetName>Lines</DataSetName>
+        <NoRows>No items.</NoRows>
+        <Top>1.1in</Top>
+        <Left>0in</Left>
+        <TableColumns>
+          <TableColumn><Width>1.65in</Width></TableColumn>
+          <TableColumn><Width>.3in</Width></TableColumn>
+          <TableColumn><Width>1in</Width></TableColumn>
+        </TableColumns>
+        <Details>
+          <TableRows>
+            <TableRow>
+              <Height>.16in</Height>
+              <TableCells>
+                <TableCell><ReportItems><Textbox Name="D_Desc"><Value>=Fields!Description.Value</Value><CanGrow>true</CanGrow><Style><FontSize>7.5pt</FontSize></Style></Textbox></ReportItems></TableCell>
+                <TableCell><ReportItems><Textbox Name="D_Qty"><Value>=Fields!Quantity.Value</Value><Style><FontSize>7.5pt</FontSize><TextAlign>Center</TextAlign></Style></Textbox></ReportItems></TableCell>
+                <TableCell><ReportItems><Textbox Name="D_Total"><Value>=Format(Fields!Quantity.Value * Fields!UnitPrice.Value, "C2")</Value><Style><FontSize>7.5pt</FontSize><TextAlign>Right</TextAlign></Style></Textbox></ReportItems></TableCell>
+              </TableCells>
+            </TableRow>
+          </TableRows>
+        </Details>
+      </Table>
+
+      <Line Name="Divider3">
+        <Top>2in</Top><Left>0in</Left><Height>0in</Height><Width>2.95in</Width>
+        <Style><BorderStyle><Default>Dashed</Default></BorderStyle><BorderColor><Default>Black</Default></BorderColor></Style>
+      </Line>
+
+      <Textbox Name="SubtotalLabel">
+        <Top>2.08in</Top><Left>0in</Left><Width>1.95in</Width><Height>.16in</Height>
+        <Value>Subtotal</Value>
+        <Style><FontSize>8pt</FontSize></Style>
+      </Textbox>
+      <Textbox Name="SubtotalValue">
+        <Top>2.08in</Top><Left>1.95in</Left><Width>1in</Width><Height>.16in</Height>
+        <Value>=Format(Sum(Fields!Quantity.Value * Fields!UnitPrice.Value, "Lines"), "C2")</Value>
+        <Style><FontSize>8pt</FontSize><TextAlign>Right</TextAlign></Style>
+      </Textbox>
+      <Textbox Name="TaxLabel">
+        <Top>2.26in</Top><Left>0in</Left><Width>1.95in</Width><Height>.16in</Height>
+        <Value>=Format(First(Fields!TaxRatePercent.Value, "Header"), "0.##") &amp; "% Tax"</Value>
+        <Style><FontSize>8pt</FontSize></Style>
+      </Textbox>
+      <Textbox Name="TaxValue">
+        <Top>2.26in</Top><Left>1.95in</Left><Width>1in</Width><Height>.16in</Height>
+        <Value>=Format(Sum(Fields!Quantity.Value * Fields!UnitPrice.Value, "Lines") * (First(Fields!TaxRatePercent.Value, "Header") / 100), "C2")</Value>
+        <Style><FontSize>8pt</FontSize><TextAlign>Right</TextAlign></Style>
+      </Textbox>
+      <Textbox Name="TotalLabel">
+        <Top>2.48in</Top><Left>0in</Left><Width>1.95in</Width><Height>.2in</Height>
+        <Value>TOTAL</Value>
+        <Style><FontSize>10pt</FontSize><FontWeight>Bold</FontWeight></Style>
+      </Textbox>
+      <Textbox Name="TotalValue">
+        <Top>2.48in</Top><Left>1.95in</Left><Width>1in</Width><Height>.2in</Height>
+        <Value>=Format(Sum(Fields!Quantity.Value * Fields!UnitPrice.Value, "Lines") * (1 + First(Fields!TaxRatePercent.Value, "Header") / 100), "C2")</Value>
+        <Style><FontSize>10pt</FontSize><FontWeight>Bold</FontWeight><TextAlign>Right</TextAlign></Style>
+      </Textbox>
+
+      <Textbox Name="PaymentMethod">
+        <Top>2.78in</Top><Left>0in</Left><Width>2.95in</Width><Height>.16in</Height>
+        <Value>=First(Fields!PaymentMethod.Value, "Header")</Value>
+        <Style><FontSize>7.5pt</FontSize><TextAlign>Center</TextAlign></Style>
+      </Textbox>
+
+      <Textbox Name="ThankYou">
+        <Top>3.1in</Top><Left>0in</Left><Width>2.95in</Width><Height>.18in</Height>
+        <Value>Thank you for your purchase!</Value>
+        <Style><FontSize>8pt</FontSize><FontWeight>Bold</FontWeight><TextAlign>Center</TextAlign></Style>
+      </Textbox>
+    </ReportItems>
+  </Body>
+</Report>

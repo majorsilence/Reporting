@@ -67,7 +67,27 @@ namespace Majorsilence.Reporting.Data
         public bool IsDBNull(int i) => GetValue(i) == DBNull.Value;
         public object this[int i] => GetValue(i);
         public object this[string name] => GetValue(GetOrdinal(name));
-        public Type GetFieldType(int i) => GetValue(i)?.GetType() ?? typeof(object);
+
+        // Schema-level lookup: independent of the read cursor (_currentRow), so it works
+        // correctly when called before the first Read() -- which is exactly when the RDL
+        // engine's schema-detection pass calls it. Deriving this from GetValue(i) instead
+        // (as before) always saw the pre-Read() sentinel DBNull.Value, so every JSON-provider
+        // field's detected type was DBNull regardless of its real data -- silently breaking any
+        // <, >, or = comparison on that field, since Filter.ApplyCompare's DBNull case always
+        // returns -1 for a non-null right-hand side.
+        public Type GetFieldType(int i)
+        {
+            if (i < 0 || i >= _fieldNames.Length)
+                return typeof(object);
+
+            string name = _fieldNames[i];
+            foreach (var row in _data)
+            {
+                if (row.TryGetValue(name, out var val) && val != null)
+                    return val.GetType();
+            }
+            return typeof(object);
+        }
 
         // Minimal additional methods
         public void Close() { }

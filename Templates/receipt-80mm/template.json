@@ -1,0 +1,12 @@
+{
+  "name": "Receipt (80mm)",
+  "slug": "receipt-80mm",
+  "description": "An 80mm thermal-printer-width point-of-sale receipt with itemized lines and computed subtotal/tax/total.",
+  "tags": ["retail", "pos", "thermal", "80mm"],
+  "dataProvider": "Json",
+  "parameters": [],
+  "dataContract": {
+    "root": ["StoreName", "StoreAddress", "ReceiptNumber", "ReceiptDate", "CashierName", "TaxRatePercent", "PaymentMethod"],
+    "root.Lines[]": ["Description", "Quantity", "UnitPrice"]
+  }
+}
