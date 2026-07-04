@@ -10,6 +10,8 @@
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
         <DefineConstants>$(DefineConstants);DRAWINGCOMPAT</DefineConstants>
         <IsPackable>true</IsPackable>
+        <Description>Cross-platform Avalonia desktop report viewer application for Majorsilence Reporting — view and export RDL/RDLC reports on Linux, macOS, and Windows. Targets .NET 10.</Description>
+        <PackageTags>rdl;rdlc;ssrs;reporting;report-viewer;avalonia;cross-platform;dotnet</PackageTags>
     </PropertyGroup>
     <ItemGroup>
         <None Remove=".gitignore"/>

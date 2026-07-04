@@ -8,6 +8,7 @@
 		<AssemblyTitle>RDL Data WPF Library</AssemblyTitle>
 		<DelaySign>false</DelaySign>
 		<PackageId>Majorsilence.Reporting.LibRdlWpfViewer</PackageId>
+		<Description>[MAINTENANCE MODE — new development should use the Avalonia viewer (Majorsilence.Reporting.UI.RdlAvalonia) or the web viewer.] WPF wrapper around the WinForms report viewer for Majorsilence Reporting (Windows only). Targets .NET 8 (Windows), .NET 10 (Windows), and .NET Framework 4.8.</Description>
 		<Configurations>Debug;Release;Debug-DrawingCompat;Release-DrawingCompat</Configurations>
 		<TargetFrameworks>net48;net8.0-windows;net10.0-windows</TargetFrameworks>
 		<WarningsAsErrors>4014</WarningsAsErrors>

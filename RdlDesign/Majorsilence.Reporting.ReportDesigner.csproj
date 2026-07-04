@@ -13,6 +13,7 @@
 		<AssemblyTitle>RDL Designer</AssemblyTitle>
 		<DelaySign>false</DelaySign>
 		<PackageId>Majorsilence.Reporting.ReportDesigner</PackageId>
+		<Description>Drag-and-drop WinForms RDL report designer for Majorsilence Reporting (Windows only). Embed visual report design in desktop apps. Targets .NET 8 (Windows), .NET 10 (Windows), and .NET Framework 4.8.</Description>
 		<Configurations>Debug;Release;Debug-DrawingCompat;Release-DrawingCompat</Configurations>
 		<TargetFrameworks>net48;net8.0-windows;net10.0-windows</TargetFrameworks>
 		<WarningsAsErrors>4014</WarningsAsErrors>
