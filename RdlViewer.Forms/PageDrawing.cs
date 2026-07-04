@@ -861,31 +861,28 @@ namespace Majorsilence.Reporting.RdlViewer
                     Color c = ToSysColor(si.BackgroundColor);
                     Color ec = ToSysColor(si.BackgroundGradientEndColor);
 
-                    // Majorsilence.Forms.Drawing.LinearGradientBrush takes a raw angleDegrees
-                    // float, not a LinearGradientMode enum -- 0=horizontal, 90=vertical,
-                    // 45/135=the two diagonals, matching what LinearGradientMode meant.
                     switch (si.BackgroundGradientType)
                     {
                         case BackgroundGradientTypeEnum.LeftRight:
-                            linGrBrush = new LinearGradientBrush(rect, c, ec, 0f);
+                            linGrBrush = new LinearGradientBrush(rect, c, ec, LinearGradientMode.Horizontal);
                             break;
                         case BackgroundGradientTypeEnum.TopBottom:
-                            linGrBrush = new LinearGradientBrush(rect, c, ec, 90f);
+                            linGrBrush = new LinearGradientBrush(rect, c, ec, LinearGradientMode.Vertical);
                             break;
                         case BackgroundGradientTypeEnum.Center:
-                            linGrBrush = new LinearGradientBrush(rect, c, ec, 0f);
+                            linGrBrush = new LinearGradientBrush(rect, c, ec, LinearGradientMode.Horizontal);
                             break;
                         case BackgroundGradientTypeEnum.DiagonalLeft:
-                            linGrBrush = new LinearGradientBrush(rect, c, ec, 45f);
+                            linGrBrush = new LinearGradientBrush(rect, c, ec, LinearGradientMode.ForwardDiagonal);
                             break;
                         case BackgroundGradientTypeEnum.DiagonalRight:
-                            linGrBrush = new LinearGradientBrush(rect, c, ec, 135f);
+                            linGrBrush = new LinearGradientBrush(rect, c, ec, LinearGradientMode.BackwardDiagonal);
                             break;
                         case BackgroundGradientTypeEnum.HorizontalCenter:
-                            linGrBrush = new LinearGradientBrush(rect, c, ec, 0f);
+                            linGrBrush = new LinearGradientBrush(rect, c, ec, LinearGradientMode.Horizontal);
                             break;
                         case BackgroundGradientTypeEnum.VerticalCenter:
-                            linGrBrush = new LinearGradientBrush(rect, c, ec, 90f);
+                            linGrBrush = new LinearGradientBrush(rect, c, ec, LinearGradientMode.Vertical);
                             break;
                         default:
                             break;
@@ -1248,16 +1245,11 @@ namespace Majorsilence.Reporting.RdlViewer
                     tmp[i].Y = PixelsY(points[i].Y + _top - _vScroll);
                 }
 
-                // Majorsilence.Forms.Graphics.DrawCurve only has the plain (Pen, PointF[])
-                // overload -- no offset/numberOfSegments/tension parameters at all, so a
-                // PageCurve with a non-default Offset or Tension renders through all points at
-                // the framework's default tension instead. Known, documented fidelity loss (see
-                // MIGRATION-NOTES.md); curves are a rare RDL construct.
-                g.DrawCurve(p, tmp);
+                g.DrawCurve(p, tmp, Offset, tmp.Length - 1, Tension);
             }
             finally
             {
-                // Majorsilence.Forms.Drawing.Pen doesn't implement IDisposable.
+                p?.Dispose();
             }
 
         }

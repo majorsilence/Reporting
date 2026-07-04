@@ -136,14 +136,6 @@ namespace Majorsilence.Reporting.RdlViewer
         /// Compensate for non-printable region
         /// </summary>
         private bool _UseTrueMargins = true;
-        /// <summary>
-        /// End page
-        /// </summary>
-        private int printEndPage;
-        /// <summary>
-        /// Current page to print
-        /// </summary>
-        private int printCurrentPage;
 
         #endregion Printing
 

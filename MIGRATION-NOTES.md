@@ -4,6 +4,55 @@ Playbook and gotchas from **D1** (`Majorsilence.WinformUtils` → `Majorsilence.
 the toolchain-proving exercise for the rest of Track D (D2: RdlViewer, D3: RdlReader, D4-D6:
 RdlDesign/ReportDesigner/RdlMapFile). Read this before starting each of those.
 
+## Modern.Forms source vs. published package (important as of D3)
+
+The published `Majorsilence.Forms` `26.0.0` on nuget.org lags the checked-out `../Modern.Forms`
+source. D2 hit and worked around several gaps (`Pen` not `IDisposable`, `Form` missing `Width`/
+`Height`, `TextBox` missing `PreferredHeight`, `LinearGradientBrush` taking only a raw angle, no
+tension-aware `DrawCurve`) that turned out to be easy, safe additions to make directly in
+`../Modern.Forms/src/Majorsilence.Forms` (NOT `Majorsilence.Forms.Drawing.Common` — that's a
+separate, unreferenced sibling package that happens to reuse the same `Majorsilence.Forms.Drawing`
+namespace and already has several of these fixed, which is a red herring: `Majorsilence.Forms`
+itself has its own independent `Drawing/*.cs`/`Graphics.cs`, with no `ProjectReference` between
+the two projects, and that's what the published NuGet package is actually built from).
+
+**Fixed directly in `../Modern.Forms/src/Majorsilence.Forms`** (all confirmed against the real
+2507-test `Majorsilence.Forms.Tests` suite, still 100% green after the changes):
+- `Drawing/Pen.cs`: `Pen` now implements `IDisposable` (no-op `Dispose()` — `CreatePaint()` already
+  handed the caller a fresh, caller-owned `SKPaint` each time, so there was nothing to release; this
+  is purely for `using (var p = new Pen(...))` source compatibility with ported WinForms code).
+- `Form.cs`: added `int Width`/`Height` properties (thin wrappers over the existing `Size`) — this
+  was D1's own "biggest gotcha" table entry, so worth fixing at the root instead of re-deriving
+  `Func<Rectangle>` workarounds in every future migration.
+- `TextBox.cs`: added `PreferredHeight` (single-line-text-plus-padding height via `TextMeasurer`).
+- `Drawing/Brush.cs`: added a `LinearGradientBrush(RectangleF, Color, Color,
+  Drawing2D.LinearGradientMode)` overload (the enum already existed in `Drawing2D.cs`; only the
+  brush constructor accepting it was missing) mapping Horizontal/Vertical/ForwardDiagonal/
+  BackwardDiagonal to 0/90/45/135 degrees internally.
+- `Graphics.cs`: added `DrawLine(Pen, float, float, float, float)`, and a real tension-aware
+  `DrawCurve(Pen, PointF[], int offset, int numberOfSegments, float tension)` (Catmull-Rom spline
+  via Hermite basis functions, 24 steps/segment) — the existing `DrawCurve` overloads just draw
+  straight lines between points, not an actual curve.
+
+**Version bumped to `26.0.1`** in `Modern.Forms/Directory.Build.props`, packed to
+`Reporting/.local-nuget-feed/` via `dotnet pack -c Release -o .local-nuget-feed` for each of
+`Majorsilence.Forms`/`.Avalonia`/`.Headless`, and wired in via `Reporting/nuget.config` (adds the
+local feed as a second package source alongside nuget.org) plus a version bump in
+`Directory.Packages.props`. **When you change `../Modern.Forms` source, re-pack all three and
+re-restore** — the local feed doesn't auto-detect source changes, it's a snapshot from the last
+`dotnet pack`. D2's original PageDrawing.cs workarounds for `LinearGradientMode`/`DrawCurve`
+tension were reverted once 26.0.1 was in place — grep for `ToSysColor`/`Pen` usage patterns in
+`PageDrawing.cs` if you're unsure whether a given call site still needs a manual workaround or can
+use the real API now.
+
+**Action for D4+:** if you hit an API gap that looks like a small, safe, no-architectural-decision
+addition (a missing property, a missing overload with an obvious mapping to what exists), consider
+fixing it in `../Modern.Forms` directly rather than working around it in Reporting code — verify
+against `Majorsilence.Forms.Tests` (`dotnet test ../Modern.Forms/tests/Majorsilence.Forms.Tests`),
+bump the patch version, re-pack, re-restore. Reserve in-Reporting workarounds for things that are
+genuinely architectural (the printing redesign, XOR-mode rubber-band selection) rather than simple
+missing API surface.
+
 ## Toolchain
 
 - `Majorsilence.Forms` **is published to nuget.org**, currently at `26.0.0`

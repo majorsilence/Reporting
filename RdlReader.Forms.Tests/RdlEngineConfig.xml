@@ -1,0 +1,234 @@
+<?xml version="1.0" encoding="utf-8"?>
+<config>
+	<DataSources>
+		<DataSource>
+			<DataProvider>SQL</DataProvider>
+			<CodeModule>System.Data.SqlClient.dll</CodeModule>
+			<ClassName>System.Data.SqlClient.SqlConnection</ClassName>
+			<TableSelect>SELECT TABLE_NAME, TABLE_TYPE FROM INFORMATION_SCHEMA.TABLES ORDER BY 2, 1</TableSelect>
+			<Interface>SQL</Interface>
+		</DataSource>
+		<DataSource>
+			<DataProvider>Microsoft.Data.SqlClient</DataProvider>
+			<CodeModule>Microsoft.Data.SqlClient.dll</CodeModule>
+			<ClassName>Microsoft.Data.SqlClient.SqlConnection</ClassName>
+			<TableSelect>SELECT TABLE_NAME, TABLE_TYPE FROM INFORMATION_SCHEMA.TABLES ORDER BY 2, 1</TableSelect>
+			<Interface>SQL</Interface>
+		</DataSource>
+		<DataSource>
+			<DataProvider>SQLce</DataProvider>
+			<CodeModule>C:\Program Files\Microsoft SQL Server Compact Edition\v4.0\Desktop\System.Data.SqlServerCe.dll</CodeModule>
+			<ClassName>System.Data.SqlServerCe.SqlCeConnection</ClassName>
+			<TableSelect>SELECT TABLE_NAME, TABLE_TYPE FROM INFORMATION_SCHEMA.TABLES ORDER BY TABLE_NAME, TABLE_TYPE</TableSelect>
+			<Interface>SQL</Interface>
+		</DataSource>
+		<DataSource>
+			<DataProvider>ODBC</DataProvider>
+			<TableSelect>SELECT TABLE_NAME, TABLE_TYPE FROM INFORMATION_SCHEMA.TABLES ORDER BY 2, 1</TableSelect>
+			<Interface>SQL</Interface>
+			<ReplaceParameters>true</ReplaceParameters>
+		</DataSource>
+		<DataSource>
+			<DataProvider>OLEDB</DataProvider>
+			<TableSelect>SELECT TABLE_NAME, TABLE_TYPE FROM INFORMATION_SCHEMA.TABLES ORDER BY 2, 1</TableSelect>
+			<Interface>SQL</Interface>
+			<ReplaceParameters>true</ReplaceParameters>
+		</DataSource>
+		<DataSource>
+			<DataProvider>Oracle</DataProvider>
+			<CodeModule>F:\oracle\product\10.2.0\db_2\BIN\Oracle.DataAccess.dll</CodeModule>
+			<ClassName>Oracle.DataAccess.Client.OracleConnection</ClassName>
+			<TableSelect>select OWNER || '.' || TABLE_NAME from ALL_TABLES WHERE TABLESPACE_NAME NOT IN ('SYSTEM', 'SYSAUX')</TableSelect>
+			<Interface>SQL</Interface>
+		</DataSource>
+		<DataSource>
+			<DataProvider>MySQL.NET</DataProvider>
+			<CodeModule>MySql.Data.dll</CodeModule>
+			<ClassName>MySql.Data.MySqlClient.MySqlConnection</ClassName>
+			<TableSelect>show tables</TableSelect>
+			<Interface>SQL</Interface>
+			<ReplaceParameters>true</ReplaceParameters>
+		</DataSource>
+		<DataSource>
+			<DataProvider>Firebird.NET</DataProvider>
+			<CodeModule>C:\Program Files\FirebirdNETProvider1.7\FirebirdSql.Data.Firebird.dll</CodeModule>
+			<ClassName>FirebirdSql.Data.Firebird.FbConnection</ClassName>
+			<TableSelect>SELECT RDB$RELATION_NAME FROM RDB$RELATIONS WHERE RDB$RELATION_NAME NOT LIKE 'RDB$%' ORDER BY 1</TableSelect>
+			<Interface>SQL</Interface>
+		</DataSource>
+		<DataSource>
+			<DataProvider>Firebird.NET 2.0</DataProvider>
+			<CodeModule>FirebirdSql.Data.FirebirdClient.dll</CodeModule>
+			<ClassName>FirebirdSql.Data.FirebirdClient.FbConnection</ClassName>
+			<TableSelect>SELECT RDB$RELATION_NAME FROM RDB$RELATIONS WHERE RDB$SYSTEM_FLAG = 0 ORDER BY 1</TableSelect>
+			<Interface>SQL</Interface>
+		</DataSource>
+		<DataSource>
+			<DataProvider>SQLite</DataProvider>
+			<CodeModule>System.Data.SQLite.dll</CodeModule>
+			<ClassName>System.Data.SQLite.SQLiteConnection</ClassName>
+			<TableSelect>SELECT name FROM sqlite_master WHERE type = 'table'</TableSelect>
+			<Interface>SQL</Interface>
+		</DataSource>
+		<DataSource>
+			<DataProvider>Microsoft.Data.Sqlite</DataProvider>
+			<CodeModule>Microsoft.Data.Sqlite.dll</CodeModule>
+			<ClassName>Microsoft.Data.Sqlite.SqliteConnection</ClassName>
+			<TableSelect>SELECT name FROM sqlite_master WHERE type = 'table'</TableSelect>
+			<Interface>SQL</Interface>
+		</DataSource>
+		<DataSource>
+			<DataProvider>iAnywhere.NET</DataProvider>
+			<CodeModule>F:\Sybase\SQL Anywhere Studio 9\win32\iAnywhere.Data.AsaClient.dll</CodeModule>
+			<ClassName>iAnywhere.Data.AsaClient.AsaConnection</ClassName>
+			<TableSelect>
+				select table_name from systable
+				where table_type = 'BASE' and table_name not like 'SYS%'
+				and table_name not like 'ix_%'
+				and table_name not like 'ml_%'
+				and table_name not like 'ul_%'
+				and table_name not like 'rl_%'
+				and table_name not like 'rs_%'
+				and table_name not like 'migrate_%'
+				and table_name not like 'spt_%'
+				and table_name not like 'jdbc_%'
+				and table_name not in ('DUMMY', 'RowGenerator', 'EXCLUDEOBJECT')
+			</TableSelect>
+			<Interface>SQL</Interface>
+		</DataSource>
+		<DataSource>
+			<DataProvider>XML</DataProvider>
+			<CodeModule>Majorsilence.Reporting.DataProviders.dll</CodeModule>
+			<ClassName>Majorsilence.Reporting.Data.XmlConnection</ClassName>
+			<TableSelect />
+			<Interface>File</Interface>
+		</DataSource>
+		<DataSource>
+			<DataProvider>WebService</DataProvider>
+			<CodeModule>Majorsilence.Reporting.DataProviders.dll</CodeModule>
+			<ClassName>Majorsilence.Reporting.Data.WebServiceConnection</ClassName>
+			<TableSelect />
+			<Interface>WebService</Interface>
+		</DataSource>
+		<DataSource>
+			<DataProvider>WebLog</DataProvider>
+			<CodeModule>Majorsilence.Reporting.DataProviders.dll</CodeModule>
+			<ClassName>Majorsilence.Reporting.Data.LogConnection</ClassName>
+			<TableSelect />
+			<Interface>File</Interface>
+		</DataSource>
+		<DataSource>
+			<DataProvider>Text</DataProvider>
+			<CodeModule>Majorsilence.Reporting.DataProviders.dll</CodeModule>
+			<ClassName>Majorsilence.Reporting.Data.TxtConnection</ClassName>
+			<TableSelect />
+			<Interface>File</Interface>
+		</DataSource>
+		<DataSource>
+			<DataProvider>Json</DataProvider>
+			<CodeModule>Majorsilence.Reporting.DataProviders.dll</CodeModule>
+			<ClassName>Majorsilence.Reporting.Data.JsonConnection</ClassName>
+			<TableSelect />
+			<Interface>File</Interface>
+		</DataSource>
+		<DataSource>
+			<DataProvider>iTunes</DataProvider>
+			<CodeModule>Majorsilence.Reporting.DataProviders.dll</CodeModule>
+			<ClassName>Majorsilence.Reporting.Data.iTunesConnection</ClassName>
+			<TableSelect />
+			<Interface>File</Interface>
+		</DataSource>
+		<DataSource>
+			<DataProvider>FileDirectory</DataProvider>
+			<CodeModule>Majorsilence.Reporting.DataProviders.dll</CodeModule>
+			<ClassName>Majorsilence.Reporting.Data.FileDirConnection</ClassName>
+			<TableSelect />
+			<Interface>File</Interface>
+		</DataSource>
+		<DataSource>
+			<DataProvider>OracleSp</DataProvider>
+			<CodeModule>OracleSp.dll</CodeModule>
+			<ClassName>fyiReporting.OracleSp.OracleSpConnection</ClassName>
+			<TableSelect>select OWNER || '.' || TABLE_NAME from ALL_TABLES WHERE TABLESPACE_NAME NOT IN ('SYSTEM', 'SYSAUX')</TableSelect>
+			<Interface>SQL</Interface>
+		</DataSource>
+		<DataSource>
+			<DataProvider>PostgreSQL</DataProvider>
+			<CodeModule>Npgsql.dll</CodeModule>
+			<ClassName>Npgsql.NpgsqlConnection</ClassName>
+			<TableSelect>SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME NOT LIKE 'pg_%' ORDER BY 1</TableSelect>
+			<Interface>SQL</Interface>
+		</DataSource>
+		<DataSource>
+			<DataProvider>PostgreSQL_Devart</DataProvider>
+			<CodeModule>Devart.Data.PostgreSql.dll</CodeModule>
+			<ClassName>Devart.Data.PostgreSql.PgSqlConnection</ClassName>
+			<TableSelect>SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME NOT LIKE 'pg_%' ORDER BY 1</TableSelect>
+			<Interface>SQL</Interface>
+		</DataSource>
+
+	</DataSources>
+	<Compression>
+		<CodeModule>ICSharpCode.SharpZipLib.dll</CodeModule>
+		<ClassName>ICSharpCode.SharpZipLib.Zip.Compression.Streams.DeflaterOutputStream</ClassName>
+		<Finish>Finish</Finish>
+		<Enable>true</Enable>
+	</Compression>
+	<CustomReportItems>
+		<CustomReportItem>
+			<Type>BarCode EAN-13</Type>
+			<CodeModule>Majorsilence.Reporting.RdlCri.dll</CodeModule>
+			<ClassName>Majorsilence.Reporting.Cri.BarCodeEAN13</ClassName>
+		</CustomReportItem>
+		<CustomReportItem>
+			<Type>BarCode Bookland</Type>
+			<CodeModule>Majorsilence.Reporting.RdlCri.dll</CodeModule>
+			<ClassName>Majorsilence.Reporting.Cri.BarCodeBookland</ClassName>
+		</CustomReportItem>
+		<CustomReportItem>
+			<Type>QR Code</Type>
+			<CodeModule>Majorsilence.Reporting.RdlCri.dll</CodeModule>
+			<ClassName>Majorsilence.Reporting.Cri.QrCode</ClassName>
+		</CustomReportItem>
+        <CustomReportItem>
+            <Type>QRCode</Type>
+            <CodeModule>Majorsilence.Reporting.RdlCri.dll</CodeModule>
+            <ClassName>Majorsilence.Reporting.Cri.QrCode</ClassName>
+        </CustomReportItem>
+		<CustomReportItem>
+			<Type>ITF-14</Type>
+			<CodeModule>Majorsilence.Reporting.RdlCri.dll</CodeModule>
+			<ClassName>Majorsilence.Reporting.Cri.BarCodeITF14</ClassName>
+		</CustomReportItem>
+		<CustomReportItem>
+			<Type>AztecCode</Type>
+			<CodeModule>Majorsilence.Reporting.RdlCri.dll</CodeModule>
+			<ClassName>Majorsilence.Reporting.Cri.AztecCode</ClassName>
+		</CustomReportItem>
+		<CustomReportItem>
+			<Type>BarCode39</Type>
+			<CodeModule>Majorsilence.Reporting.RdlCri.dll</CodeModule>
+			<ClassName>Majorsilence.Reporting.Cri.BarCode39</ClassName>
+		</CustomReportItem>
+		<CustomReportItem>
+			<Type>BarCode128</Type>
+			<CodeModule>Majorsilence.Reporting.RdlCri.dll</CodeModule>
+			<ClassName>Majorsilence.Reporting.Cri.BarCode128</ClassName>
+		</CustomReportItem>
+		<CustomReportItem>
+			<Type>BarCodeEAN8</Type>
+			<CodeModule>Majorsilence.Reporting.RdlCri.dll</CodeModule>
+			<ClassName>Majorsilence.Reporting.Cri.BarCodeEAN8</ClassName>
+		</CustomReportItem>
+        <CustomReportItem>
+            <Type>Pdf417</Type>
+            <CodeModule>Majorsilence.Reporting.RdlCri.dll</CodeModule>
+            <ClassName>Majorsilence.Reporting.Cri.Pdf417Barcode</ClassName>
+        </CustomReportItem>
+        <CustomReportItem>
+            <Type>DataMatrix</Type>
+            <CodeModule>Majorsilence.Reporting.RdlCri.dll</CodeModule>
+            <ClassName>Majorsilence.Reporting.Cri.DataMatrix</ClassName>
+        </CustomReportItem>
+	</CustomReportItems>
+</config>
