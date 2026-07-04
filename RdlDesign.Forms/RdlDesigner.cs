@@ -1401,7 +1401,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			// Run thru all the existing DataSets
 			dataSetsToolStripMenuItem.DropDownItems.Clear();
 			dataSetsToolStripMenuItem.DropDownItems.Add(new ToolStripMenuItem(Strings.RdlDesigner_menuData_Popup_New, null,
-						new EventHandler(this.dataSetsToolStripMenuItem_Click)));
+						this.dataSetsToolStripMenuItem_Click));
 
 			DesignXmlDraw draw = mc.DrawCtl;
 			XmlNode rNode = draw.GetReportNode();
@@ -1416,7 +1416,7 @@ namespace Majorsilence.Reporting.RdlDesign
 					if (nAttr == null)  // shouldn't really happen
 						continue;
 					dataSetsToolStripMenuItem.DropDownItems.Add(new ToolStripMenuItem(nAttr.Value, null,
-						new EventHandler(this.dataSetsToolStripMenuItem_Click)));
+						this.dataSetsToolStripMenuItem_Click));
 				}
 			}
 		}
@@ -1438,7 +1438,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			}
 		}
 
-		private void dataSetsToolStripMenuItem_Click(object sender, System.EventArgs e)
+		private void dataSetsToolStripMenuItem_Click(object sender, Majorsilence.Forms.MouseEventArgs e)
 		{
 			MDIChild mc = this.ActiveMdiChild as MDIChild;
 			if (mc == null || mc.DrawCtl == null || mc.ReportDocument == null)

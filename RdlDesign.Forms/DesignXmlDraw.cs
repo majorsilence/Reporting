@@ -1803,7 +1803,7 @@ namespace Majorsilence.Reporting.RdlDesign
 					break;
 				case ImageSizingEnum.Clip:
 					Region saveRegion = g.Clip;
-					Region clipRegion = new Region(g.Clip.GetRegionData());
+					Region clipRegion = g.Clip.Clone();
 					//RectangleF r3 = new RectangleF(PointsX(r2.Left), PointsY(r2.Top), PointsX(r2.Width), PointsY(r2.Height));
 					clipRegion.Intersect(r2);
 					g.Clip = clipRegion;
@@ -3052,7 +3052,7 @@ namespace Majorsilence.Reporting.RdlDesign
                 float startY = dr.Top;
 
                 Region saveRegion = g.Clip;
-                Region clipRegion = new Region(g.Clip.GetRegionData());
+                Region clipRegion = g.Clip.Clone();
  
                 clipRegion.Intersect(dr);
                 g.Clip = clipRegion;

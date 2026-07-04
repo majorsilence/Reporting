@@ -832,13 +832,10 @@ namespace Majorsilence.Reporting.RdlDesign
             get { return rdlEditPreview1.PageCurrent; }
         }
 
-        /// <summary>
-        /// Print the report.  
-        /// </summary>
-        public void Print(PrintDocument pd)
-        {
-            rdlEditPreview1.Print(pd);
-        }
+        // Print(PrintDocument) removed -- rdlEditPreview1.Print(PrintDocument) no longer exists
+        // per D2/D4's printing redesign (see MIGRATION-NOTES.md). Use SaveAsAsync(path,
+        // OutputPresentationType.PDF) instead; see printToolStripButton2_Click for the caller-side
+        // change.
 
 
         private void openToolStripButton1_Click(object sender, EventArgs e)
@@ -1122,8 +1119,11 @@ namespace Majorsilence.Reporting.RdlDesign
         }
 
 
+        // No real print-spooler integration under Majorsilence.Forms -- see MIGRATION-NOTES.md
+        // (D2) for the full rationale. Majorsilence.Forms.PrintDialog is a no-op stub with no
+        // real UI, so go straight to "export as PDF" instead of pretending to show one.
         private bool isPrinting = false;
-        private void printToolStripButton2_Click(object sender, EventArgs e)
+        private async void printToolStripButton2_Click(object sender, EventArgs e)
         {
 
             if (isPrinting == true)			// already printing
@@ -1133,57 +1133,24 @@ namespace Majorsilence.Reporting.RdlDesign
             }
 
             isPrinting = true;
-
-            PrintDocument pd = new PrintDocument();
-            pd.DocumentName = SourceFile.LocalPath;
-            pd.PrinterSettings.FromPage = 1;
-            pd.PrinterSettings.ToPage = PageCount;
-            pd.PrinterSettings.MaximumPage = PageCount;
-            pd.PrinterSettings.MinimumPage = 1;
-            pd.DefaultPageSettings.Landscape = PageWidth > PageHeight ? true : false;
-
-            // Set the paper size.
-            if (SourceRdl != null)
+            try
             {
-                System.Xml.XmlDocument docxml = new System.Xml.XmlDocument();
-                docxml.LoadXml(SourceRdl);
-
-                float height = 11;
-                float width = 8.5f;
-                XmlNodeList heightList = docxml.GetElementsByTagName("PageHeight");
-                for (int i = 0; i < heightList.Count; i++)
+                SaveFileDialog sfd = new SaveFileDialog
                 {
-                    height = float.Parse(heightList[i].InnerText.Replace("in", "")) * 100;
-                }
-
-                XmlNodeList widthList = docxml.GetElementsByTagName("PageWidth");
-                for (int i = 0; i < widthList.Count; i++)
+                    Filter = "PDF files (*.pdf)|*.pdf",
+                    FileName = Path.GetFileNameWithoutExtension(SourceFile.LocalPath) + ".pdf",
+                };
+                if (await sfd.ShowDialog(this.FindForm()) == DialogResult.OK)
                 {
-                    width = float.Parse(widthList[i].InnerText.Replace("in", "")) * 100;
+                    await SaveAsAsync(sfd.FileName, OutputPresentationType.PDF);
                 }
-
-                pd.DefaultPageSettings.PaperSize = new PaperSize("Custom", (int)width, (int)height);
             }
-            using (PrintDialog dlg = new PrintDialog())
+            catch (Exception ex)
             {
-                dlg.Document = pd;
-                dlg.AllowSelection = true;
-                dlg.AllowSomePages = true;
-                if (dlg.ShowDialog() == DialogResult.OK)
-                {
-                    try
-                    {
-                        if (pd.PrinterSettings.PrintRange == PrintRange.Selection)
-                        {
-                            pd.PrinterSettings.FromPage = PageCurrent;
-                        }
-                        Print(pd);
-                    }
-                    catch (Exception ex)
-                    {
-                        MessageBox.Show(Strings.RdlUserControl_Show_PrintError + ex.Message, Strings.RdlUserControl_Show_RDLDesign);
-                    }
-                }
+                MessageBox.Show(Strings.RdlUserControl_Show_PrintError + ex.Message, Strings.RdlUserControl_Show_RDLDesign);
+            }
+            finally
+            {
                 isPrinting = false;
             }
         }

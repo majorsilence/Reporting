@@ -108,7 +108,7 @@ namespace Majorsilence.Reporting.RdlDesign
             this.tbEIName.Focus();
         }
 
-        private void bImport_Click(object sender, System.EventArgs e)
+        private async void bImport_Click(object sender, System.EventArgs e)
         {
             OpenFileDialog ofd = new OpenFileDialog();
             ofd.Filter = Strings.DialogEmbeddedImages_bImport_Click_ImageFilesFilter;
@@ -117,7 +117,7 @@ namespace Majorsilence.Reporting.RdlDesign
             ofd.Multiselect = true;
             try
             {
-                if (ofd.ShowDialog(this) != DialogResult.OK)
+                if (await ofd.ShowDialog(this) != DialogResult.OK)
                     return;
 
                 // need to create a new embedded image(s)

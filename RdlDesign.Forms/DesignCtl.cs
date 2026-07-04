@@ -1811,19 +1811,12 @@ namespace Majorsilence.Reporting.RdlDesign
 			menuProperties_Click();		// treat double click like a property menu click
 		}
 
+		// ControlPaint.DrawReversibleFrame doesn't exist in Majorsilence.Forms -- classic GDI+
+		// XOR-mode direct-to-screen drawing with no equivalent in a SkiaSharp/compositing-based
+		// renderer. Same documented gap and fix as RdlViewer.Forms/PageDrawing.cs's RubberBand
+		// (D2): the selection logic is unaffected, only the live-drag visual feedback is gone.
 		private void DrawPanelRubberBand(Point p1, Point p2)
 		{
-			// Convert the points to screen coordinates
-			p1 = PointToScreen(p1);
-			p2 = PointToScreen(p2);
-			
-			// Get a rectangle from the two points
-			Rectangle rc = DrawPanelRectFromPoints(p1, p2);
-
-			// Draw reversibleFrame
-			ControlPaint.DrawReversibleFrame(rc, Color.Red,	FrameStyle.Dashed);
-
-			return;
 		}
 
 		private Rectangle DrawPanelRectFromPoints(Point p1, Point p2)

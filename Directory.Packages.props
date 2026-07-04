@@ -59,33 +59,16 @@
     <PackageVersion Include="XamlNameReferenceGenerator" Version="1.3.4" />
   </ItemGroup>
   <ItemGroup>
-    <!-- Majorsilence.Forms migration track (Track D). 26.0.9 is packed locally from
-         ../Modern.Forms source (see nuget.config and MIGRATION-NOTES.md): 26.0.1 added
-         Pen.Dispose, Form.Width/Height, TextBox.PreferredHeight, LinearGradientBrush(...,
-         LinearGradientMode), DrawLine(Pen, float x1, y1, x2, y2), and a real tension-aware
-         DrawCurve overload; 26.0.2 (from D4/RdlDesign) added FileSystemDialog.Dispose,
-         ToolStripTextBox.Focused/Validated/KeyDown/Cut/Copy/Paste/Undo/SelectAll,
-         ToolStripComboBox.Validated/Width, ToolStripLabel.MouseEnter/MouseLeave (stub),
-         ToolStripButton.CheckStateChanged, and StatusStrip/ContextMenuStrip.ImageScalingSize;
-         26.0.3 added Control : IWin32Window (Handle => IntPtr.Zero, so `MessageBox.Show(this,
-         ...)`/`dlg.ShowDialog(this)` compile when `this` is any Control, not just Form) and
-         IDataObject.GetData/GetDataPresent/SetData(DataFormat, ...) default-interface-method
-         overloads; 26.0.4 added MenuStrip.ImageScalingSize and Form.AllowDrop/DragEnter/DragDrop
-         (stubs matching Control's existing no-op equivalents); 26.0.5 added MessageBoxIcon.
-         Hand/Stop/Exclamation/Asterisk aliases, Control.DefaultBackColor, FontFamily.Families
-         (real, SkiaSharp-backed installed-font enumeration), and a real ControlPaint.DrawGrid
-         implementation (design-surface alignment dots); 26.0.6 added DataGridViewComboBoxColumn.
-         Items/DropDownWidth, a real (not no-op) CheckedObjectCollection.Insert, and changed
-         DragEventArgs.Data from object to IDataObject (matching WinForms); 26.0.7 made TextBox/
-         RichTextBox.SelectedText settable (previously get-only, or a silent no-op setter; now
-         actually replaces the selection) and DataGridView.ColumnHeadersDefaultCellStyle settable;
-         26.0.8 added Form.MouseDown/MouseMove/Leave (forwarded from the internal adapter Control,
-         which already raised these), Form.CausesValidation, and Form.Focus(); 26.0.9 added a
-         GridItem type (PropertyGrid.SelectedGridItem now returns it instead of object, still
-         always null). None of this is in the 26.0.0 published on nuget.org yet. See
-         ../Modern.Forms git log for the full per-patch breakdown if needed. -->
-    <PackageVersion Include="Majorsilence.Forms" Version="26.0.9" />
-    <PackageVersion Include="Majorsilence.Forms.Avalonia" Version="26.0.9" />
-    <PackageVersion Include="Majorsilence.Forms.Headless" Version="26.0.9" />
+    <!-- Majorsilence.Forms migration track (Track D). 26.0.10 is packed locally from
+         ../Modern.Forms source (see nuget.config and MIGRATION-NOTES.md); none of 26.0.1
+         through 26.0.10 is in the 26.0.0 published on nuget.org yet. Full per-patch breakdown of
+         what each version added is in ../Modern.Forms's git log (one commit per patch) and in
+         MIGRATION-NOTES.md's D2/D4 sections; not repeated here to keep this file readable.
+         26.0.10 added PrinterSettings.PaperSizes (a fixed list of common ISO/ANSI sizes, since
+         there's no real printer driver to query), PrintDialog.AllowSelection, and
+         IDataObject.GetData/GetDataPresent(DataFormat, bool) overloads. -->
+    <PackageVersion Include="Majorsilence.Forms" Version="26.0.10" />
+    <PackageVersion Include="Majorsilence.Forms.Avalonia" Version="26.0.10" />
+    <PackageVersion Include="Majorsilence.Forms.Headless" Version="26.0.10" />
   </ItemGroup>
 </Project>

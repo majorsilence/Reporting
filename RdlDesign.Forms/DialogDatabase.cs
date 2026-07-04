@@ -1464,7 +1464,7 @@ namespace Majorsilence.Reporting.RdlDesign
             }
         }
 
-        private void buttonSqliteSelectDatabase_Click(object sender, EventArgs e)
+        private async void buttonSqliteSelectDatabase_Click(object sender, EventArgs e)
         {
             OpenFileDialog ofd = new OpenFileDialog();
             try
@@ -1474,7 +1474,7 @@ namespace Majorsilence.Reporting.RdlDesign
                 
                 try
                 {
-                    if (ofd.ShowDialog(this) != DialogResult.OK)
+                    if (await ofd.ShowDialog(this) != DialogResult.OK)
                     {
                         return;
                     }
