@@ -399,6 +399,49 @@ through D4 once the running list got too long to stay readable). Categories, rou
   regression; the whole feature depends on PropertyGrid selection tracking Majorsilence.Forms
   doesn't have yet (D6).
 
+## D5: ScintillaCompat made real (expression coloring)
+
+Decision gate from the plan: is per-span text coloring paintable in a day? **Yes** — confirmed by
+reading `Majorsilence.Forms.TextMeasurer.CreateTextBlock`'s existing mnemonic-underline code,
+which already builds a RichTextKit `TextBlock` from *multiple* styled `AddText` runs (splitting
+text into normal/underlined/normal around an access-key character). Multi-run styling was already
+proven inside the framework; it just wasn't exposed as a public hook.
+
+**Added `Majorsilence.Forms.TextBox.Colorizer`** (26.0.13): a
+`Func<string, IEnumerable<TextSpanStyle>>` property. `TextBoxDocument.GetTextBlock()` builds a
+multi-run `TextBlock` from the spans it returns instead of the single-style cached path, filling
+gaps between spans with the normal foreground color. `TextSpanStyle` is `(int Start, int Length,
+SKColor Color, bool Bold, bool Underline)`. Inherited by `RichTextBox` and therefore `ScintillaCompat`'s
+`Scintilla` shim. Malformed output (out-of-range/overlapping spans) is skipped rather than thrown.
+
+**The RdlDesign-side integration needed zero changes to `RdlScriptLexer.cs` or
+`ScintillaExprStyle.cs`** — both already drive Scintilla entirely through `StartStyling`/
+`SetStyling`/`GetEndStyled`/the `StyleNeeded` event and a `Styles[styleIndex]` color table (set up
+once by `ScintillaExprStyle.ConfigureScintillaStyle()`). D4's shim had stubbed those three methods
+to no-ops; D5 made them real instead of touching the lexer:
+- `StartStyling(pos)`/`SetStyling(len, style)` now record `(start, length, styleIndex)` runs.
+- `Scintilla`'s constructor wires `base.Colorizer` to a method that fires `StyleNeeded` for the
+  whole document (synchronously triggering `RdlScriptLexer.StyleText` through the existing event,
+  which populates the run buffer via the now-real `SetStyling`), then converts each run to a
+  `TextSpanStyle` by looking up `Styles[styleIndex].ForeColor`/`.Bold`/`.Underline` — the exact
+  indices `ConfigureScintillaStyle` already populates.
+- Recoloring is a full-document re-lex on every text change (not Scintilla's real incremental
+  restyling model), which is fine at RDL-expression scale.
+
+**SQL and XML stay uncolored, by design, not oversight.** `ScintillaSqlStyle.cs`/
+`ScintillaXMLStyle.cs` configure ScintillaNET's **built-in** `Lexer.Sql`/`Lexer.Xml` tokenizers
+(`scintilla.Lexer = Lexer.Sql` + `SetKeywords(...)`) — they never call `ConfigureScintillaStyle`
+or subscribe `StyleNeeded` at all, so there's no custom lexer to wire through the same mechanism.
+`Colorizer` safely returns zero spans for them (no listener means an empty run buffer). Real
+support would mean writing a SQL and an XML tokenizer from scratch — legitimately larger, separate
+scope, not attempted here.
+
+**Verification:** new `RdlDesign.Forms.Tests` project (Headless backend, same pattern as D2/D3's
+test projects), 4 tests exercising the real behavior end to end — not just "it compiles": a valid
+`=Fields!Name.Value` expression gets a colored span over the identifier, plain non-expression text
+produces zero spans, an unknown field name is styled as an error (red), and a `Scintilla` with no
+`ScintillaExprStyle` attached is a safe no-op.
+
 ## Package/versioning conventions used (carry forward)
 
 - Package ID gets a `.Forms` suffix: `Majorsilence.WinformUtils.Forms` (folder matches: new
