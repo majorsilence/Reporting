@@ -1,5 +1,7 @@
 # Majorsilence.Pdf
 
+**Zero-dependency PDF generation for .NET.** Pure managed code — no native binaries, no libgdiplus, no Chromium. Produces PDF 1.4, PDF 1.7, and PDF 2.0 output with optional PDF/A conformance. Native-AOT-compatible, which makes it a good fit for AWS Lambda, Azure Functions, and other serverless/container workloads where cold-start size and native dependencies matter.
+
 Majorsilence.Pdf is tri licensed under Apache-2.0, MIT, or BSD-3-Clause. Pick your choice.
 
 - SPDX-License-Identifier: MIT OR Apache-2.0 OR BSD-3-Clause
@@ -7,7 +9,18 @@ Majorsilence.Pdf is tri licensed under Apache-2.0, MIT, or BSD-3-Clause. Pick yo
 
 ---
 
-A pure-managed PDF generation library for .NET. No native dependencies. Produces PDF 1.4, PDF 1.7, and PDF 2.0 output with optional PDF/A conformance.
+## At a glance
+
+| Capability | Package |
+|---|---|
+| Text, shapes, images, tables, links | `Majorsilence.Pdf` |
+| PDF/A-1b, PDF/A-2b, PDF/A-3b conformance | `Majorsilence.Pdf` |
+| Multi-document merge | `Majorsilence.Pdf` |
+| AES-128 (R=4) / AES-256 (R=6) password protection | `Majorsilence.Pdf.Security` |
+| Permission flags (print, copy, edit) | `Majorsilence.Pdf.Security` |
+| PKCS#7 digital signatures | `Majorsilence.Pdf.Security` |
+
+Targets .NET Standard 2.0, .NET 6, .NET 8, and .NET 10 — usable from .NET Framework 4.6.1+ up through the latest runtime.
 
 ## Quick Start
 
@@ -20,7 +33,7 @@ PdfDocument.Create()
     {
         canvas.DrawText("Hello, World!", 72, 72, TextStyle.Default.WithSize(24));
         canvas.DrawRectangle(72, 120, 200, 60,
-            ShapeStyle.Filled(PdfColor.LightGray).WithBorder(PdfColor.Black, 1f));
+            ShapeStyle.Filled(PdfColor.LightGray).WithStroke(PdfColor.Black, 1f));
     })
     .Save("report.pdf");
 ```
@@ -50,22 +63,24 @@ PdfDocument.Create()
 TextStyle.Default
     .WithSize(14)
     .WithBold(true)
-    .WithColor(PdfColor.DarkBlue)
+    .WithColor(PdfColor.FromHex("#003366"))
     .WithAlignment(TextAlignment.Center)
 ```
 
 **`ShapeStyle`** — fill, border, and opacity:
 ```csharp
-ShapeStyle.Filled(PdfColor.LightBlue)
-    .WithBorder(PdfColor.Navy, 1.5f)
+ShapeStyle.Filled(PdfColor.FromRgb(200, 220, 255))
+    .WithStroke(PdfColor.Blue, 1.5f)
     .WithFillOpacity(0.5f)   // 50% transparent fill
     .WithStrokeOpacity(0.8f)
 ```
 
 **`StrokeStyle`** — line style and opacity:
 ```csharp
-StrokeStyle.Solid(PdfColor.Red, 2f)
-    .WithDash(4, 2)
+StrokeStyle.Default
+    .WithColor(PdfColor.Red)
+    .WithWidth(2f)
+    .Dashed()
     .WithOpacity(0.6f)
 ```
 
@@ -88,8 +103,8 @@ int overflowAt = canvas.DrawTextBox(
 
 ```csharp
 var table = new PdfTable(new float[] { 120, 200, 80 })
-    .WithHeaderBackground(PdfColor.SteelBlue)
-    .WithAlternateRowBackground(new PdfColor(240, 240, 240))
+    .WithHeaderBackground(PdfColor.FromRgb(70, 130, 180))
+    .WithAlternateRowBackground(PdfColor.FromRgb(240, 240, 240))
     .WithBorder(PdfColor.Gray, 0.5f)
     .WithCellPadding(6f);
 
@@ -114,12 +129,14 @@ PDF/A automatically sets the correct PDF version, embeds an sRGB ICC output inte
 
 ### Fonts
 
-Register TrueType fonts and fall back to the built-in font set:
+Register TrueType fonts and set up a fallback chain for glyphs the primary font lacks:
 
 ```csharp
-var registry = FontRegistry.CreateDefault()
-    .WithFont("NotoSans", "/path/to/NotoSans-Regular.ttf")
-    .WithFont("NotoSans", "/path/to/NotoSans-Bold.ttf", bold: true);
+var registry = new FontRegistry()
+    .AddFamily("NotoSans",
+        regular: "/path/to/NotoSans-Regular.ttf",
+        bold:    "/path/to/NotoSans-Bold.ttf")
+    .AddFallback("NotoSans");   // used when the default font has no glyph for a character
 
 PdfDocument.Create()
     .WithFontRegistry(registry)
@@ -138,6 +155,25 @@ Unicode shaping with multi-script support (Latin, Cyrillic, Greek, Arabic, CJK) 
 ```csharp
 byte[] imageBytes = File.ReadAllBytes("photo.jpg");
 canvas.DrawImage(imageBytes, x: 72, y: 200, width: 200, height: 150);
+```
+
+### Links and tooltips
+
+```csharp
+canvas.AddLink(x: 72, y: 300, width: 150, height: 20, uri: "https://example.com");
+canvas.AddTooltip(x: 72, y: 330, width: 150, height: 20, tooltip: "Hover text");
+```
+
+### Merging documents
+
+```csharp
+byte[] combined = new PdfMerger()
+    .Add(File.ReadAllBytes("cover.pdf"))
+    .Add(File.ReadAllBytes("body.pdf"))
+    .WithTitle("Combined Report")
+    .Merge();
+
+File.WriteAllBytes("combined.pdf", combined);
 ```
 
 ### Page sizes
@@ -167,3 +203,7 @@ PdfDocument.Create()
 ## Security companion
 
 Password encryption and digital signatures are provided by the companion package **Majorsilence.Pdf.Security**. See that package's Readme for details.
+
+## Native AOT
+
+Majorsilence.Pdf targets `net6.0` and above with `IsAotCompatible` enabled and no reflection in the drawing/rendering path — no native binaries are shipped or required. A dedicated AOT verification suite (publish + run a real AOT binary in CI) is in progress; see the repository README for current status.
