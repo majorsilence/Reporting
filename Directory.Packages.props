@@ -9,6 +9,7 @@
     <PackageVersion Include="DocumentFormat.OpenXml" Version="3.2.0" />
     <PackageVersion Include="dotConnect.Express.for.PostgreSQL" Version="8.3.10" />
     <PackageVersion Include="Majorsilence.Reporting.RdlViewer" Version="5.0.18" />
+    <PackageVersion Include="Markdig" Version="1.3.2" />
     <PackageVersion Include="Majorsilence.Reporting.RdlEngine" Version="5.0.18" />
     <PackageVersion Include="Majorsilence.Reporting.RdlCri" Version="5.0.18" />
     <PackageVersion Include="Majorsilence.Reporting.ReportDesigner" Version="5.0.18" />
