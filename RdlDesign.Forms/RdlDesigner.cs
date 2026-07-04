@@ -217,28 +217,16 @@ namespace Majorsilence.Reporting.RdlDesign
         /// </summary>
         /// <param name="m"></param>
         /// <returns></returns>
+        // Raw Win32 message-loop plumbing (user32.dll WindowFromPoint/SendMessage P/Invoke,
+        // WM_MOUSEWHEEL constant matching) -- fundamentally Windows-only and would fail at
+        // runtime on Linux/macOS even if it compiled. Already dead code under Majorsilence.Forms:
+        // Application.AddMessageFilter is a documented no-op (nothing ever calls
+        // PreFilterMessage), and Avalonia's own input pipeline routes wheel events to the control
+        // under the pointer by default anyway. Same fix as RdlReader.Forms/RdlReader.cs (D3).
         public bool PreFilterMessage(ref Message m)
         {
-            if (m.Msg == 0x20a)
-            {
-                // WM_MOUSEWHEEL, find the control at screen position m.LParam
-                Point pos = new Point(m.LParam.ToInt32() & 0xffff, m.LParam.ToInt32() >> 16);
-                IntPtr hWnd = WindowFromPoint(pos);
-                if (hWnd != IntPtr.Zero && hWnd != m.HWnd && Control.FromHandle(hWnd) != null)
-                {
-                    SendMessage(hWnd, m.Msg, m.WParam, m.LParam);
-                    return true;
-                }
-            }
-
             return false;
         }
-
-        // P/Invoke declarations
-		[DllImport("user32.dll")]
-		private static extern IntPtr WindowFromPoint(Point pt);
-		[DllImport("user32.dll")]
-		private static extern IntPtr SendMessage(IntPtr hWnd, int msg, IntPtr wp, IntPtr lp);
 
 		private DockStyle GetPropertiesDockStyle(string l)
 		{
