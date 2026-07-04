@@ -8,6 +8,8 @@
 		<Configurations>Debug;Release;Debug-DrawingCompat;Release-DrawingCompat</Configurations>
 		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
         <IsPackable>true</IsPackable>
+        <Description>SkiaSharp-backed implementation of the System.Drawing API surface — cross-platform GDI+-style drawing for Linux, macOS, and Windows without libgdiplus. Native-AOT-compatible. Targets .NET 8, .NET 10, and .NET Framework 4.8.</Description>
+        <PackageTags>drawing;skiasharp;system.drawing;gdi;cross-platform;aot;dotnet</PackageTags>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(TargetFramework)' != 'net48'">
 		<IsAotCompatible>true</IsAotCompatible>

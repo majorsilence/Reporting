@@ -4,7 +4,8 @@
         <RootNamespace>Majorsilence.Reporting.Cri</RootNamespace>
         <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
         <AssemblyTitle>RdlCri</AssemblyTitle>
-        <Description>RDL Project CustomReportItem Library</Description>
+        <Description>CustomReportItem library for Majorsilence Reporting — barcodes (EAN, Code 128, and more) and QR codes as native RDL report items via ZXing. Targets .NET 8, .NET 10, and .NET Framework 4.8. Use Majorsilence.Reporting.RdlCri.SkiaSharp on Linux, macOS, and containers.</Description>
+        <PackageTags>rdl;rdlc;ssrs;reporting;barcode;qrcode;crystal-reports-alternative;cross-platform;dotnet</PackageTags>
         <DelaySign>false</DelaySign>
         <PackageId>Majorsilence.Reporting.RdlCri</PackageId>
         <Configurations>Debug;Release;Debug-DrawingCompat;Release-DrawingCompat</Configurations>
@@ -20,6 +21,7 @@
     </PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)' == 'Debug-DrawingCompat' Or '$(Configuration)' == 'Release-DrawingCompat'">
 		<PackageId>Majorsilence.Reporting.RdlCri.SkiaSharp</PackageId>
+		<Description>CustomReportItem library for Majorsilence Reporting — barcodes (EAN, Code 128, and more) and QR codes as native RDL report items via ZXing. SkiaSharp-based rendering for Linux, macOS, Windows, and containers. Targets .NET 8 and .NET 10.</Description>
 	</PropertyGroup>
     <ItemGroup>
         <ProjectReference Include="..\RdlEngine\Majorsilence.Reporting.RdlEngine.csproj" />

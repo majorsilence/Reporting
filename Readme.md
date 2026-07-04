@@ -1,18 +1,83 @@
 # Majorsilence Reporting (formerly My-FyiReporting)
 
-If you have any question about Majorsilence Reporting or do you want to contribute a discussion group for Majorsilence Reporting is available here:
+**Cross-platform RDL/RDLC reporting for .NET 8 and .NET 10 — no SSRS server, no Crystal runtime, Native-AOT-ready.**
 
-https://groups.google.com/d/forum/myfyireporting
+Run SQL Server Reporting Services report definitions as a library inside your own app: render to PDF, HTML, CSV, Excel, and images on Linux, macOS, and Windows. Design reports in the browser, in a WinForms designer, or code-first in C#.
 
+[![NuGet](https://img.shields.io/nuget/v/Majorsilence.Reporting.RdlEngine.SkiaSharp?label=RdlEngine.SkiaSharp)](https://www.nuget.org/packages/Majorsilence.Reporting.RdlEngine.SkiaSharp)
+[![NuGet](https://img.shields.io/nuget/dt/Majorsilence.Reporting.RdlEngine.SkiaSharp?label=downloads)](https://www.nuget.org/packages/Majorsilence.Reporting.RdlEngine.SkiaSharp)
+[![License](https://img.shields.io/badge/license-Apache--2.0-blue)](LICENSE.txt)
 
 |         |Linux |Mac | Win | Win(AppeyVeyor) |
 |---------|:------:|:------:|:------:|:------:|
-|**Master**| [![linux](https://github.com/majorsilence/My-FyiReporting/actions/workflows/linux.yml/badge.svg?branch=master)](https://github.com/majorsilence/My-FyiReporting/actions/workflows/linux.yml) | [![mac](https://github.com/majorsilence/My-FyiReporting/actions/workflows/mac.yml/badge.svg?branch=master)](https://github.com/majorsilence/My-FyiReporting/actions/workflows/mac.yml) | [![.github/workflows/windows.yml](https://github.com/majorsilence/My-FyiReporting/actions/workflows/windows.yml/badge.svg?branch=master)](https://github.com/majorsilence/My-FyiReporting/actions/workflows/windows.yml) | [![Build status appveyor](https://ci.appveyor.com/api/projects/status/a44n015bli95rmpw?svg=true)](https://ci.appveyor.com/project/majorsilence/my-fyireporting) | 
+|**Master**| [![linux](https://github.com/majorsilence/My-FyiReporting/actions/workflows/linux.yml/badge.svg?branch=master)](https://github.com/majorsilence/My-FyiReporting/actions/workflows/linux.yml) | [![mac](https://github.com/majorsilence/My-FyiReporting/actions/workflows/mac.yml/badge.svg?branch=master)](https://github.com/majorsilence/My-FyiReporting/actions/workflows/mac.yml) | [![.github/workflows/windows.yml](https://github.com/majorsilence/My-FyiReporting/actions/workflows/windows.yml/badge.svg?branch=master)](https://github.com/majorsilence/My-FyiReporting/actions/workflows/windows.yml) | [![Build status appveyor](https://ci.appveyor.com/api/projects/status/a44n015bli95rmpw?svg=true)](https://ci.appveyor.com/project/majorsilence/my-fyireporting) |
 
+# 30-second quick start
 
+```bash
+dotnet add package Majorsilence.Reporting.RdlCreator.SkiaSharp
+dotnet add package Majorsilence.Reporting.RdlEngine.SkiaSharp
+dotnet add package Majorsilence.Reporting.RdlCri.SkiaSharp
+```
+
+```cs
+using Majorsilence.Reporting.RdlCreator;
+
+// One time per app instance
+RdlEngineConfig.RdlEngineConfigInit();
+
+var create = new Majorsilence.Reporting.RdlCreator.Create();
+using var report = await create.GenerateRdl("Microsoft.Data.Sqlite",
+    connectionString,
+    "SELECT CategoryID, CategoryName, Description FROM Categories",
+    pageHeaderText: "Categories");
+
+using var ofs = new Majorsilence.Reporting.Rdl.OneFileStreamGen("categories.pdf", true);
+await report.RunGetData(null);
+await report.RunRender(ofs, Majorsilence.Reporting.Rdl.OutputPresentationType.PDF);
+```
+
+If running on Linux install the [required fonts](https://github.com/majorsilence/My-FyiReporting/wiki/Linux---PDF-export-and-Fonts):
+
+```bash
+sudo apt install ttf-mscorefonts-installer
+```
+
+# Packages
+
+Package IDs ending in `.SkiaSharp` render with a SkiaSharp-based drawing layer and run on Linux, macOS, Windows, and containers. The unsuffixed variants render with System.Drawing and are Windows-only. Pick one family — don't mix.
+
+| Package | Purpose | Platforms | Status |
+|---------|---------|-----------|--------|
+| `Majorsilence.Reporting.RdlEngine.SkiaSharp` | RDL/RDLC rendering engine | Linux, macOS, Windows | Active |
+| `Majorsilence.Reporting.RdlEngine` | Rendering engine (System.Drawing) | Windows | Active |
+| `Majorsilence.Reporting.RdlCreator.SkiaSharp` / `…RdlCreator` | Code-first fluent report + PDF builder | per variant | Active |
+| `Majorsilence.Reporting.RdlCri.SkiaSharp` / `…RdlCri` | Barcodes and QR codes as report items | per variant | Active |
+| `Majorsilence.Reporting.DataProviders.SkiaSharp` / `…DataProviders` | SQL Server, SQLite, MySQL, PostgreSQL, ODBC, JSON, XML providers | per variant | Active |
+| `Majorsilence.Reporting.WebDesigner` | Browser-based report designer (Web Component + Blazor/React/Angular wrappers) | any (ASP.NET Core) | Active |
+| `Majorsilence.Reporting.RdlAsp.Mvc` | ASP.NET Core report display helpers | any | Active |
+| `Majorsilence.Pdf` | Zero-dependency PDF writer (usable standalone) | any | Active |
+| `Majorsilence.Pdf.Security` | PDF encryption + digital signatures | any | Active |
+| `Majorsilence.Drawing.Common` | SkiaSharp System.Drawing-compatible drawing layer | any | Active |
+| `Majorsilence.Reporting.RdlViewer` | WinForms viewer control | Windows | Active¹ |
+| `Majorsilence.Reporting.ReportDesigner` | WinForms drag-and-drop designer | Windows | Active¹ |
+| `Majorsilence.Reporting.EncryptionProvider` | Connection-string encryption for viewers/designers | any | Active |
+| `Majorsilence.Reporting.LibRdlWpfViewer` | WPF viewer wrapper | Windows | **Maintenance²** |
+| `Majorsilence.Reporting.RdlGtk3` | GTK3 viewer library | Linux | **Maintenance²** |
+
+¹ A cross-platform successor built on [Majorsilence.Forms](https://github.com/majorsilence/Modern.Forms) is planned.
+² Maintenance mode: bug fixes only. For new work use the Avalonia viewer (`Majorsilence.Reporting.UI.RdlAvalonia`, in this repo) or render server-side and display in the browser.
+
+## Viewer choices
+
+- **Server-side / web** — render to PDF or HTML with `RdlEngine` and stream it from ASP.NET Core; the `WebDesigner` package includes preview endpoints.
+- **Cross-platform desktop** — the Avalonia viewer control in `Majorsilence.Reporting.UI.RdlAvalonia` (sample app in `Majorsilence.Reporting.UI`).
+- **Windows desktop** — the WinForms `RdlViewer` control.
+- **Command line** — `RdlCmd` renders reports from scripts and cron jobs; Native AOT builds available on the [releases page](https://github.com/majorsilence/My-FyiReporting/releases).
 
 # Documentation
-See the [projects wiki](https://github.com/majorsilence/My-FyiReporting/wiki).
+
+See the [projects wiki](https://github.com/majorsilence/My-FyiReporting/wiki). If you have questions, the [discussion group](https://groups.google.com/d/forum/myfyireporting) is available.
 
 # Download
 
@@ -22,28 +87,7 @@ Alternatively if you want keep up with the latest version you can always use Git
 
     git clone https://github.com/majorsilence/My-FyiReporting.git
 
-# Introduction
-Majorsilence Reporting is a powerful, open-source .NET reporting framework designed for developers who need to create, design, and deliver rich, reports. Supporting modern .NET versions (8.0), it provides a flexible and extensible platform for building reports from a variety of data sources. With a drag-and-drop designer, multiple viewer options, and cross-platform support, Majorsilence Reporting is ideal for both desktop and web applications. Whether you need to generate reports programmatically or empower users with a visual designer (windows only), this project offers the tools and documentation to get you started quickly.
-
-**The core of Majorsilence Reporting supports Linux and macOS for server-side application report generation. Only the WinForms-based designer and viewer are Windows-only.**
-
-# Quick start
-
-Add these nuget packages to your project.
-
-```bash
-dotnet add package Majorsilence.Reporting.RdlCreator.SkiaSharp
-dotnet add package Majorsilence.Reporting.RdlEngine.SkiaSharp
-dotnet add package Majorsilence.Reporting.RdlCri.SkiaSharp
-```
-
-If running on linux install the [required fonts](https://github.com/majorsilence/My-FyiReporting/wiki/Linux---PDF-export-and-Fonts).
-
-```bash
-sudo apt install ttf-mscorefonts-installer
-```
-
-You are now ready to create and generate reports.
+# More examples
 
 ## c# example, create report, connected to an sql database
 
