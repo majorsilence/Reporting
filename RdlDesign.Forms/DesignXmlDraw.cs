@@ -2393,7 +2393,7 @@ namespace Majorsilence.Reporting.RdlDesign
 		private async Task<RectangleF> DrawTextbox(XmlNode xNode, RectangleF r)
 		{
 			StyleInfo si = await GetStyleInfo(xNode);
-			if (si.Color == Color.Empty)
+			if (si.Color.IsEmpty)
 				si.Color = Color.Black;
 
 			XmlNode v = GetNamedChildNode(xNode, "Value");
@@ -2651,13 +2651,13 @@ namespace Majorsilence.Reporting.RdlDesign
 						break;
 				}
 			}
-			if (si.BColorLeft == Color.Empty)
+			if (si.BColorLeft.IsEmpty)
 				si.BColorLeft = dColor;
-			if (si.BColorRight == Color.Empty)
+			if (si.BColorRight.IsEmpty)
 				si.BColorRight = dColor;
-			if (si.BColorTop == Color.Empty)
+			if (si.BColorTop.IsEmpty)
 				si.BColorTop = dColor;
-			if (si.BColorBottom == Color.Empty)
+			if (si.BColorBottom.IsEmpty)
 				si.BColorBottom = dColor;
 		}
 

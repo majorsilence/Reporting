@@ -59,7 +59,7 @@
     <PackageVersion Include="XamlNameReferenceGenerator" Version="1.3.4" />
   </ItemGroup>
   <ItemGroup>
-    <!-- Majorsilence.Forms migration track (Track D). 26.0.6 is packed locally from
+    <!-- Majorsilence.Forms migration track (Track D). 26.0.7 is packed locally from
          ../Modern.Forms source (see nuget.config and MIGRATION-NOTES.md): 26.0.1 added
          Pen.Dispose, Form.Width/Height, TextBox.PreferredHeight, LinearGradientBrush(...,
          LinearGradientMode), DrawLine(Pen, float x1, y1, x2, y2), and a real tension-aware
@@ -76,10 +76,12 @@
          (real, SkiaSharp-backed installed-font enumeration), and a real ControlPaint.DrawGrid
          implementation (design-surface alignment dots); 26.0.6 added DataGridViewComboBoxColumn.
          Items/DropDownWidth, a real (not no-op) CheckedObjectCollection.Insert, and changed
-         DragEventArgs.Data from object to IDataObject (matching WinForms). None of this is in the
-         26.0.0 published on nuget.org yet. -->
-    <PackageVersion Include="Majorsilence.Forms" Version="26.0.6" />
-    <PackageVersion Include="Majorsilence.Forms.Avalonia" Version="26.0.6" />
-    <PackageVersion Include="Majorsilence.Forms.Headless" Version="26.0.6" />
+         DragEventArgs.Data from object to IDataObject (matching WinForms); 26.0.7 made TextBox/
+         RichTextBox.SelectedText settable (previously get-only, or a silent no-op setter; now
+         actually replaces the selection) and DataGridView.ColumnHeadersDefaultCellStyle settable.
+         None of this is in the 26.0.0 published on nuget.org yet. -->
+    <PackageVersion Include="Majorsilence.Forms" Version="26.0.7" />
+    <PackageVersion Include="Majorsilence.Forms.Avalonia" Version="26.0.7" />
+    <PackageVersion Include="Majorsilence.Forms.Headless" Version="26.0.7" />
   </ItemGroup>
 </Project>
