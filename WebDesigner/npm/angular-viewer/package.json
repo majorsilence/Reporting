@@ -1,0 +1,17 @@
+{
+  "name": "@majorsilence/report-viewer-angular",
+  "version": "1.0.0",
+  "description": "Angular wrapper for the Majorsilence RDL report-viewer Web Component",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "sideEffects": false,
+  "peerDependencies": {
+    "@angular/common": ">=14.0.0",
+    "@angular/core": ">=14.0.0"
+  },
+  "keywords": ["angular", "rdl", "report", "viewer", "majorsilence"],
+  "license": "MIT"
+}
