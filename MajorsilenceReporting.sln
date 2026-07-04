@@ -132,6 +132,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Majorsilence.Reporting.Repo
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RdlDesign.Forms.Tests", "RdlDesign.Forms.Tests\RdlDesign.Forms.Tests.csproj", "{5D7E8531-37E7-4050-9D6B-167370EF342E}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ReportDesigner.Forms", "ReportDesigner.Forms", "{FB41F153-F6E7-8DAB-474D-DFEEB50D3028}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReportDesigner", "ReportDesigner.Forms\ReportDesigner.csproj", "{5FFE9161-B5B2-417D-B28F-DA150274CFF5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -1352,6 +1356,30 @@ Global
 		{5D7E8531-37E7-4050-9D6B-167370EF342E}.Release-DrawingCompat|x64.Build.0 = Debug|Any CPU
 		{5D7E8531-37E7-4050-9D6B-167370EF342E}.Release-DrawingCompat|x86.ActiveCfg = Debug|Any CPU
 		{5D7E8531-37E7-4050-9D6B-167370EF342E}.Release-DrawingCompat|x86.Build.0 = Debug|Any CPU
+		{5FFE9161-B5B2-417D-B28F-DA150274CFF5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5FFE9161-B5B2-417D-B28F-DA150274CFF5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5FFE9161-B5B2-417D-B28F-DA150274CFF5}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{5FFE9161-B5B2-417D-B28F-DA150274CFF5}.Debug|x64.Build.0 = Debug|Any CPU
+		{5FFE9161-B5B2-417D-B28F-DA150274CFF5}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{5FFE9161-B5B2-417D-B28F-DA150274CFF5}.Debug|x86.Build.0 = Debug|Any CPU
+		{5FFE9161-B5B2-417D-B28F-DA150274CFF5}.Debug-DrawingCompat|Any CPU.ActiveCfg = Debug|Any CPU
+		{5FFE9161-B5B2-417D-B28F-DA150274CFF5}.Debug-DrawingCompat|Any CPU.Build.0 = Debug|Any CPU
+		{5FFE9161-B5B2-417D-B28F-DA150274CFF5}.Debug-DrawingCompat|x64.ActiveCfg = Debug|Any CPU
+		{5FFE9161-B5B2-417D-B28F-DA150274CFF5}.Debug-DrawingCompat|x64.Build.0 = Debug|Any CPU
+		{5FFE9161-B5B2-417D-B28F-DA150274CFF5}.Debug-DrawingCompat|x86.ActiveCfg = Debug|Any CPU
+		{5FFE9161-B5B2-417D-B28F-DA150274CFF5}.Debug-DrawingCompat|x86.Build.0 = Debug|Any CPU
+		{5FFE9161-B5B2-417D-B28F-DA150274CFF5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5FFE9161-B5B2-417D-B28F-DA150274CFF5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5FFE9161-B5B2-417D-B28F-DA150274CFF5}.Release|x64.ActiveCfg = Release|Any CPU
+		{5FFE9161-B5B2-417D-B28F-DA150274CFF5}.Release|x64.Build.0 = Release|Any CPU
+		{5FFE9161-B5B2-417D-B28F-DA150274CFF5}.Release|x86.ActiveCfg = Release|Any CPU
+		{5FFE9161-B5B2-417D-B28F-DA150274CFF5}.Release|x86.Build.0 = Release|Any CPU
+		{5FFE9161-B5B2-417D-B28F-DA150274CFF5}.Release-DrawingCompat|Any CPU.ActiveCfg = Debug|Any CPU
+		{5FFE9161-B5B2-417D-B28F-DA150274CFF5}.Release-DrawingCompat|Any CPU.Build.0 = Debug|Any CPU
+		{5FFE9161-B5B2-417D-B28F-DA150274CFF5}.Release-DrawingCompat|x64.ActiveCfg = Debug|Any CPU
+		{5FFE9161-B5B2-417D-B28F-DA150274CFF5}.Release-DrawingCompat|x64.Build.0 = Debug|Any CPU
+		{5FFE9161-B5B2-417D-B28F-DA150274CFF5}.Release-DrawingCompat|x86.ActiveCfg = Debug|Any CPU
+		{5FFE9161-B5B2-417D-B28F-DA150274CFF5}.Release-DrawingCompat|x86.Build.0 = Debug|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -1377,6 +1405,7 @@ Global
 		{6639EB1E-5D9F-4D80-837B-81DB20B48630} = {4734CDA6-6C87-35A2-C204-1D7F06AA97BA}
 		{CBB41E82-0973-40CF-A06C-049B411F30DE} = {192CF6A1-D8EC-1306-FF2B-A8198808076B}
 		{E62B30E1-A515-4E07-A719-05DFA745BB1C} = {4A08F235-0CE5-3876-4A61-29ADCC7F7BBC}
+		{5FFE9161-B5B2-417D-B28F-DA150274CFF5} = {FB41F153-F6E7-8DAB-474D-DFEEB50D3028}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {926406B1-6334-4091-963D-93DEB6837CCB}
