@@ -1,0 +1,368 @@
+﻿<root>
+    <resheader name="resmimetype">
+        <value>text/microsoft-resx</value>
+    </resheader>
+    <resheader name="version">
+        <value>1.3</value>
+    </resheader>
+    <resheader name="reader">
+        <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    </resheader>
+    <resheader name="writer">
+        <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    </resheader>
+    <data name="$this.Text" xml:space="preserve">
+        <value>Concepteur de rapports Majorsilence</value>
+    </data>
+    <data name="aboutToolStripMenuItem.Text" xml:space="preserve">
+        <value>À propos</value>
+    </data>
+    <data name="alignToolStripMenuItem.Text" xml:space="preserve">
+        <value>Aligner</value>
+    </data>
+    <data name="boldToolStripButton1.ToolTipText" xml:space="preserve">
+        <value>Audacieux</value>
+    </data>
+    <data name="bothToolStripMenuItem.Text" xml:space="preserve">
+        <value>Les deux</value>
+    </data>
+    <data name="bottomsToolStripMenuItem.Text" xml:space="preserve">
+        <value>Fonds</value>
+    </data>
+    <data name="centerAlignToolStripButton2.Text" xml:space="preserve">
+        <value>Alignement centré</value>
+    </data>
+    <data name="centersToolStripMenuItem.Text" xml:space="preserve">
+        <value>Centres</value>
+    </data>
+    <data name="chartToolStripButton1.Text" xml:space="preserve">
+        <value>Graphique</value>
+    </data>
+    <data name="chartToolStripMenuItem.Text" xml:space="preserve">
+        <value>Graphique</value>
+    </data>
+    <data name="closeAllToolStripMenuItem.Text" xml:space="preserve">
+        <value>Fermer Al</value>
+    </data>
+    <data name="closeToolStripMenuItem.Text" xml:space="preserve">
+        <value>Fermer</value>
+    </data>
+    <data name="copyToolStripButton1.Text" xml:space="preserve">
+        <value>Copier</value>
+    </data>
+    <data name="copyToolStripMenuItem.Text" xml:space="preserve">
+        <value>Copier</value>
+    </data>
+    <data name="createSharedDataSourceToolStripMenuItem.Text" xml:space="preserve">
+        <value>Créer une source de données partagée...</value>
+    </data>
+    <data name="cutToolStripButton1.Text" xml:space="preserve">
+        <value>Couper</value>
+    </data>
+    <data name="cutToolStripMenuItem.Text" xml:space="preserve">
+        <value>Couper</value>
+    </data>
+    <data name="dataSetsToolStripMenuItem.Text" xml:space="preserve">
+        <value>Ensembles de données</value>
+    </data>
+    <data name="dataSourcesToolStripMenuItem1.Text" xml:space="preserve">
+        <value>Sources des données</value>
+    </data>
+    <data name="dataToolStripMenuItem.Text" xml:space="preserve">
+        <value>Données</value>
+    </data>
+    <data name="decreaseToolStripMenuItem.Text" xml:space="preserve">
+        <value>Diminuer</value>
+    </data>
+    <data name="decreaseToolStripMenuItem1.Text" xml:space="preserve">
+        <value>Diminuer</value>
+    </data>
+    <data name="decreaseToolStripMenuItem2.Text" xml:space="preserve">
+        <value>Diminuer</value>
+    </data>
+    <data name="decreaseToolStripMenuItem3.Text" xml:space="preserve">
+        <value>Diminuer</value>
+    </data>
+    <data name="decreaseToolStripMenuItem4.Text" xml:space="preserve">
+        <value>Diminuer</value>
+    </data>
+    <data name="decreaseToolStripMenuItem5.Text" xml:space="preserve">
+        <value>Diminuer</value>
+    </data>
+    <data name="designerToolStripMenuItem.Text" xml:space="preserve">
+        <value>Concepteur</value>
+    </data>
+    <data name="editToolStripMenuItem.Text" xml:space="preserve">
+        <value>Éditer</value>
+    </data>
+    <data name="embeddedImagesToolStripMenuItem.Text" xml:space="preserve">
+        <value>Images intégrées...</value>
+    </data>
+    <data name="exitToolStripMenuItem.Text" xml:space="preserve">
+        <value>Sortie</value>
+    </data>
+    <data name="exportToolStripMenuItem.Text" xml:space="preserve">
+        <value>Exportation</value>
+    </data>
+    <data name="fileToolStripMenuItem.Text" xml:space="preserve">
+        <value>Lime</value>
+    </data>
+    <data name="findNextToolStripMenuItem.Text" xml:space="preserve">
+        <value>Trouver suivant</value>
+    </data>
+    <data name="findToolStripMenuItem.Text" xml:space="preserve">
+        <value>Trouver</value>
+    </data>
+    <data name="fontSizeToolStripComboBox1.ToolTipText" xml:space="preserve">
+        <value>Taille de la police</value>
+    </data>
+    <data name="fontToolStripComboBox1.ToolTipText" xml:space="preserve">
+        <value>Police</value>
+    </data>
+    <data name="goToToolStripMenuItem.Text" xml:space="preserve">
+        <value>Atteindre...</value>
+    </data>
+    <data name="heightToolStripMenuItem.Text" xml:space="preserve">
+        <value>Hauteur</value>
+    </data>
+    <data name="helpToolStripMenuItem.Text" xml:space="preserve">
+        <value>Aide</value>
+    </data>
+    <data name="helpToolStripMenuItem1.Text" xml:space="preserve">
+        <value>Aide</value>
+    </data>
+    <data name="horizontalSpacingToolStripMenuItem.Text" xml:space="preserve">
+        <value>Espacement horizontal</value>
+    </data>
+    <data name="horizontalToolStripMenuItem.Text" xml:space="preserve">
+        <value>Horizontalement</value>
+    </data>
+    <data name="increaseToolStripMenuItem.Text" xml:space="preserve">
+        <value>Augmenter</value>
+    </data>
+    <data name="increaseToolStripMenuItem1.Text" xml:space="preserve">
+        <value>Augmenter</value>
+    </data>
+    <data name="increaseToolStripMenuItem2.Text" xml:space="preserve">
+        <value>Augmenter</value>
+    </data>
+    <data name="increaseToolStripMenuItem3.Text" xml:space="preserve">
+        <value>Augmenter</value>
+    </data>
+    <data name="increaseToolStripMenuItem4.Text" xml:space="preserve">
+        <value>Augmenter</value>
+    </data>
+    <data name="increaseToolStripMenuItem5.Text" xml:space="preserve">
+        <value>Augmenter</value>
+    </data>
+    <data name="insertToolStripMenuItem.Text" xml:space="preserve">
+        <value>Insérer</value>
+    </data>
+    <data name="italiacToolStripButton1.ToolTipText" xml:space="preserve">
+        <value>Italique</value>
+    </data>
+    <data name="label1.Text" xml:space="preserve">
+        <value>Couleur avant:</value>
+    </data>
+    <data name="label2.Text" xml:space="preserve">
+        <value>Couleur du dos:</value>
+    </data>
+    <data name="leftAlignToolStripButton2.Text" xml:space="preserve">
+        <value>Alignement à gauche</value>
+    </data>
+    <data name="leftsToolStripMenuItem.Text" xml:space="preserve">
+        <value>Gauches</value>
+    </data>
+    <data name="lineToolStripButton1.Text" xml:space="preserve">
+        <value>Ligne</value>
+    </data>
+    <data name="lineToolStripMenuItem.Text" xml:space="preserve">
+        <value>Ligne</value>
+    </data>
+    <data name="listToolStripButton1.Text" xml:space="preserve">
+        <value>Liste</value>
+    </data>
+    <data name="listToolStripMenuItem.Text" xml:space="preserve">
+        <value>Liste</value>
+    </data>
+    <data name="makeEqualToolStripMenuItem.Text" xml:space="preserve">
+        <value>Égaliser</value>
+    </data>
+    <data name="makeEqualToolStripMenuItem1.Text" xml:space="preserve">
+        <value>Égaliser</value>
+    </data>
+    <data name="matrixToolStripButton1.Text" xml:space="preserve">
+        <value>Matrice</value>
+    </data>
+    <data name="matrixToolStripMenuItem.Text" xml:space="preserve">
+        <value>Matrice</value>
+    </data>
+    <data name="MenuTBClose.Text" xml:space="preserve">
+        <value>Fermer</value>
+    </data>
+    <data name="MenuTBCloseAllButThis.Text" xml:space="preserve">
+        <value>Fermer Tout sauf celui-ci</value>
+    </data>
+    <data name="MenuTBSave.Text" xml:space="preserve">
+        <value>Sauvegarder</value>
+    </data>
+    <data name="middlesToolStripMenuItem.Text" xml:space="preserve">
+        <value>Milieux</value>
+    </data>
+    <data name="newReportToolStripMenuItem.Text" xml:space="preserve">
+        <value>Nouveau rapport...</value>
+    </data>
+    <data name="newToolStripButton1.Text" xml:space="preserve">
+        <value>Nouveau</value>
+    </data>
+    <data name="openToolStripButton1.Text" xml:space="preserve">
+        <value>Ouvrir</value>
+    </data>
+    <data name="openToolStripMenuItem.Text" xml:space="preserve">
+        <value>Ouvrir</value>
+    </data>
+    <data name="paddingBottomToolStripMenuItem.Text" xml:space="preserve">
+        <value>Rembourrage Bottom</value>
+    </data>
+    <data name="paddingLeftToolStripMenuItem.Text" xml:space="preserve">
+        <value>Rembourrage gauche</value>
+    </data>
+    <data name="paddingRightToolStripMenuItem.Text" xml:space="preserve">
+        <value>Rembourrage droit</value>
+    </data>
+    <data name="paddintTopToolStripMenuItem.Text" xml:space="preserve">
+        <value>Rembourrage Dessus</value>
+    </data>
+    <data name="previewToolStripMenuItem.Text" xml:space="preserve">
+        <value>Aperçu</value>
+    </data>
+    <data name="printToolStripButton2.Text" xml:space="preserve">
+        <value>Imprimer</value>
+    </data>
+    <data name="printToolStripMenuItem.Text" xml:space="preserve">
+        <value>Imprimer</value>
+    </data>
+    <data name="propertiesWindowsToolStripMenuItem.Text" xml:space="preserve">
+        <value>Propriétés Windows</value>
+    </data>
+    <data name="rDLTextToolStripMenuItem.Text" xml:space="preserve">
+        <value>Texte RDL</value>
+    </data>
+    <data name="recentFilesToolStripMenuItem.Text" xml:space="preserve">
+        <value>Fichiers récents</value>
+    </data>
+    <data name="redoToolStripMenuItem.Text" xml:space="preserve">
+        <value>Refaire</value>
+    </data>
+    <data name="replaceToolStripMenuItem.Text" xml:space="preserve">
+        <value>Remplacer</value>
+    </data>
+    <data name="rightAlignToolStripButton3.Text" xml:space="preserve">
+        <value>Alignement à droite</value>
+    </data>
+    <data name="rightsToolStripMenuItem.Text" xml:space="preserve">
+        <value>Droits</value>
+    </data>
+    <data name="saveAsToolStripMenuItem.Text" xml:space="preserve">
+        <value>Enregistrer sous</value>
+    </data>
+    <data name="saveToolStripButton1.Text" xml:space="preserve">
+        <value>Sauvegarder</value>
+    </data>
+    <data name="saveToolStripMenuItem.Text" xml:space="preserve">
+        <value>Sauvegarder</value>
+    </data>
+    <data name="selectAllToolStripMenuItem.Text" xml:space="preserve">
+        <value>Tout sélectionner</value>
+    </data>
+    <data name="showReportInBrowserToolStripMenuItem.Text" xml:space="preserve">
+        <value>Afficher le rapport dans le navigateur</value>
+    </data>
+    <data name="selectToolStripButton2.Text" xml:space="preserve">
+        <value>Outil d'assistance</value>
+    </data>
+    <data name="startDesktopServerToolStripMenuItem.Text" xml:space="preserve">
+        <value>Démarrer Desktop Server</value>
+    </data>
+    <data name="statusPosition.ToolTipText" xml:space="preserve">
+        <value>Position de l'élément de rapport sélectionné</value>
+    </data>
+    <data name="statusSelected.ToolTipText" xml:space="preserve">
+        <value>Nom du ReportItem sélectionné</value>
+    </data>
+    <data name="subreportToolStripButton1.Text" xml:space="preserve">
+        <value>Sous-état</value>
+    </data>
+    <data name="subReportToolStripMenuItem.Text" xml:space="preserve">
+        <value>Sous-état</value>
+    </data>
+    <data name="supportToolStripMenuItem.Text" xml:space="preserve">
+        <value>Soutien</value>
+    </data>
+    <data name="textboxToolStripButton1.Text" xml:space="preserve">
+        <value>Zone de texte</value>
+    </data>
+    <data name="textboxToolStripMenuItem.Text" xml:space="preserve">
+        <value>Zone de texte</value>
+    </data>
+    <data name="tileToolStripMenuItem.Text" xml:space="preserve">
+        <value>Carreau</value>
+    </data>
+    <data name="toolsToolStripMenuItem.Text" xml:space="preserve">
+        <value>Outils</value>
+    </data>
+    <data name="topsToolStripMenuItem.Text" xml:space="preserve">
+        <value>Hauts</value>
+    </data>
+    <data name="underlineToolStripButton2.ToolTipText" xml:space="preserve">
+        <value>Souligner</value>
+    </data>
+    <data name="undoToolStripButton1.Text" xml:space="preserve">
+        <value>Défaire</value>
+    </data>
+    <data name="undoToolStripMenuItem.Text" xml:space="preserve">
+        <value>Défaire</value>
+    </data>
+    <data name="validateRDLToolStripMenuItem.Text" xml:space="preserve">
+        <value>Valider RDL</value>
+    </data>
+    <data name="verticallyToolStripMenuItem.Text" xml:space="preserve">
+        <value>Verticalement</value>
+    </data>
+    <data name="verticalSpacingToolStripMenuItem.Text" xml:space="preserve">
+        <value>Espacement vertical</value>
+    </data>
+    <data name="viewToolStripMenuItem.Text" xml:space="preserve">
+        <value>Vue</value>
+    </data>
+    <data name="webArchiveSingleFileMHTToolStripMenuItem.Text" xml:space="preserve">
+        <value>Archive Web, fichier unique MHT...</value>
+    </data>
+    <data name="webPageHTMLToolStripMenuItem.Text" xml:space="preserve">
+        <value>Page web, HTML...</value>
+    </data>
+    <data name="widthToolStripMenuItem.Text" xml:space="preserve">
+        <value>Largeur</value>
+    </data>
+    <data name="windowToolStripMenuItem.Text" xml:space="preserve">
+        <value>Fenêtre</value>
+    </data>
+    <data name="zeroToolStripMenuItem.Text" xml:space="preserve">
+        <value>Zéro</value>
+    </data>
+    <data name="zeroToolStripMenuItem1.Text" xml:space="preserve">
+        <value>Zéro</value>
+    </data>
+    <data name="zeroToolStripMenuItem2.Text" xml:space="preserve">
+        <value>Zéro</value>
+    </data>
+    <data name="zeroToolStripMenuItem3.Text" xml:space="preserve">
+        <value>Zéro</value>
+    </data>
+    <data name="zeroToolStripMenuItem4.Text" xml:space="preserve">
+        <value>Zéro</value>
+    </data>
+    <data name="zeroToolStripMenuItem5.Text" xml:space="preserve">
+        <value>Zéro</value>
+    </data>
+</root>

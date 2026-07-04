@@ -1,0 +1,1376 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="cbStyleTop.Items8" xml:space="preserve">
+    <value>WindowInset</value>
+  </data>
+  <data name="&gt;&gt;tbWidthBottom.Name" xml:space="preserve">
+    <value>tbWidthBottom</value>
+  </data>
+  <assembly alias="System.Drawing" name="System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+  <data name="bWR.TextAlign" type="System.Drawing.ContentAlignment, System.Drawing">
+    <value>MiddleLeft</value>
+  </data>
+  <assembly alias="mscorlib" name="mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
+  <data name="tbWidthDefault.TabIndex" type="System.Int32, mscorlib">
+    <value>5</value>
+  </data>
+  <data name="lBottom.TextAlign" type="System.Drawing.ContentAlignment, System.Drawing">
+    <value>MiddleLeft</value>
+  </data>
+  <data name="&gt;&gt;label6.ZOrder" xml:space="preserve">
+    <value>37</value>
+  </data>
+  <data name="&gt;&gt;lBottom.ZOrder" xml:space="preserve">
+    <value>41</value>
+  </data>
+  <data name="cbStyleTop.Location" type="System.Drawing.Point, System.Drawing">
+    <value>56, 136</value>
+  </data>
+  <data name="bCT.Location" type="System.Drawing.Point, System.Drawing">
+    <value>276, 140</value>
+  </data>
+  <data name="&gt;&gt;bWT.Name" xml:space="preserve">
+    <value>bWT</value>
+  </data>
+  <data name="&gt;&gt;bCL.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Button, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;cbStyleBottom.Name" xml:space="preserve">
+    <value>cbStyleBottom</value>
+  </data>
+  <data name="bColorTop.Location" type="System.Drawing.Point, System.Drawing">
+    <value>306, 138</value>
+  </data>
+  <data name="&gt;&gt;bST.ZOrder" xml:space="preserve">
+    <value>11</value>
+  </data>
+  <data name="&gt;&gt;bColorTop.ZOrder" xml:space="preserve">
+    <value>26</value>
+  </data>
+  <data name="bSR.Location" type="System.Drawing.Point, System.Drawing">
+    <value>148, 108</value>
+  </data>
+  <data name="lTop.Location" type="System.Drawing.Point, System.Drawing">
+    <value>16, 138</value>
+  </data>
+  <data name="bWB.Size" type="System.Drawing.Size, System.Drawing">
+    <value>22, 16</value>
+  </data>
+  <data name="&gt;&gt;cbStyleDefault.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ComboBox, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;label8.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Label, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="cbStyleDefault.TabIndex" type="System.Int32, mscorlib">
+    <value>0</value>
+  </data>
+  <data name="&gt;&gt;bWL.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Button, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;cbColorRight.Parent" xml:space="preserve">
+    <value>$this</value>
+  </data>
+  <data name="bCR.Text" xml:space="preserve">
+    <value>fx</value>
+  </data>
+  <data name="cbStyleRight.Items5" xml:space="preserve">
+    <value>Groove</value>
+  </data>
+  <data name="bCR.Font" type="System.Drawing.Font, System.Drawing">
+    <value>Arial, 8.25pt, style=Bold, Italic</value>
+  </data>
+  <data name="cbStyleDefault.Items" xml:space="preserve">
+    <value>None</value>
+  </data>
+  <data name="&gt;&gt;tbWidthDefault.Type" xml:space="preserve">
+    <value>System.Windows.Forms.TextBox, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="bWT.Location" type="System.Drawing.Point, System.Drawing">
+    <value>403, 138</value>
+  </data>
+  <data name="label7.Text" xml:space="preserve">
+    <value>Color</value>
+  </data>
+  <data name="bColorLeft.Size" type="System.Drawing.Size, System.Drawing">
+    <value>22, 16</value>
+  </data>
+  <data name="lBottom.TabIndex" type="System.Int32, mscorlib">
+    <value>2</value>
+  </data>
+  <data name="&gt;&gt;bColorTop.Parent" xml:space="preserve">
+    <value>$this</value>
+  </data>
+  <data name="bWD.Text" xml:space="preserve">
+    <value>fx</value>
+  </data>
+  <data name="lBottom.Size" type="System.Drawing.Size, System.Drawing">
+    <value>40, 16</value>
+  </data>
+  <data name="&gt;&gt;bSB.Name" xml:space="preserve">
+    <value>bSB</value>
+  </data>
+  <data name="&gt;&gt;cbStyleBottom.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ComboBox, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="bCT.Font" type="System.Drawing.Font, System.Drawing">
+    <value>Arial, 8.25pt, style=Bold, Italic</value>
+  </data>
+  <data name="&gt;&gt;bColorLeft.Parent" xml:space="preserve">
+    <value>$this</value>
+  </data>
+  <data name="&gt;&gt;cbStyleDefault.Parent" xml:space="preserve">
+    <value>$this</value>
+  </data>
+  <data name="&gt;&gt;tbWidthLeft.Name" xml:space="preserve">
+    <value>tbWidthLeft</value>
+  </data>
+  <data name="tbWidthRight.Location" type="System.Drawing.Point, System.Drawing">
+    <value>334, 104</value>
+  </data>
+  <data name="&gt;&gt;bWD.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Button, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="bSL.Font" type="System.Drawing.Font, System.Drawing">
+    <value>Arial, 8.25pt, style=Bold, Italic</value>
+  </data>
+  <data name="lRight.Text" xml:space="preserve">
+    <value>Right</value>
+  </data>
+  <data name="&gt;&gt;bSD.Parent" xml:space="preserve">
+    <value>$this</value>
+  </data>
+  <data name="bWD.Size" type="System.Drawing.Size, System.Drawing">
+    <value>22, 16</value>
+  </data>
+  <data name="&gt;&gt;cbColorRight.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ComboBox, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="label6.Location" type="System.Drawing.Point, System.Drawing">
+    <value>343, 16</value>
+  </data>
+  <data name="bColorBottom.Location" type="System.Drawing.Point, System.Drawing">
+    <value>306, 170</value>
+  </data>
+  <data name="bCB.Size" type="System.Drawing.Size, System.Drawing">
+    <value>22, 16</value>
+  </data>
+  <data name="cbStyleBottom.TabIndex" type="System.Int32, mscorlib">
+    <value>28</value>
+  </data>
+  <data name="cbColorRight.Location" type="System.Drawing.Point, System.Drawing">
+    <value>176, 104</value>
+  </data>
+  <data name="bSL.TextAlign" type="System.Drawing.ContentAlignment, System.Drawing">
+    <value>MiddleLeft</value>
+  </data>
+  <data name="lLeft.TextAlign" type="System.Drawing.ContentAlignment, System.Drawing">
+    <value>MiddleLeft</value>
+  </data>
+  <data name="&gt;&gt;lTop.Parent" xml:space="preserve">
+    <value>$this</value>
+  </data>
+  <data name="cbStyleTop.Size" type="System.Drawing.Size, System.Drawing">
+    <value>88, 21</value>
+  </data>
+  <data name="&gt;&gt;bSB.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Button, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;bCR.ZOrder" xml:space="preserve">
+    <value>3</value>
+  </data>
+  <data name="&gt;&gt;bWB.Parent" xml:space="preserve">
+    <value>$this</value>
+  </data>
+  <data name="lLeft.Location" type="System.Drawing.Point, System.Drawing">
+    <value>16, 74</value>
+  </data>
+  <data name="bST.Location" type="System.Drawing.Point, System.Drawing">
+    <value>148, 139</value>
+  </data>
+  <data name="&gt;&gt;bColorDefault.ZOrder" xml:space="preserve">
+    <value>16</value>
+  </data>
+  <data name="&gt;&gt;bCT.Name" xml:space="preserve">
+    <value>bCT</value>
+  </data>
+  <data name="&gt;&gt;cbColorTop.Parent" xml:space="preserve">
+    <value>$this</value>
+  </data>
+  <data name="&gt;&gt;cbStyleRight.Parent" xml:space="preserve">
+    <value>$this</value>
+  </data>
+  <data name="&gt;&gt;cbStyleLeft.ZOrder" xml:space="preserve">
+    <value>35</value>
+  </data>
+  <data name="cbStyleLeft.Items" xml:space="preserve">
+    <value>None</value>
+  </data>
+  <data name="&gt;&gt;bCL.ZOrder" xml:space="preserve">
+    <value>0</value>
+  </data>
+  <data name="cbStyleLeft.Location" type="System.Drawing.Point, System.Drawing">
+    <value>56, 72</value>
+  </data>
+  <data name="bWL.TextAlign" type="System.Drawing.ContentAlignment, System.Drawing">
+    <value>MiddleLeft</value>
+  </data>
+  <data name="&gt;&gt;cbColorDefault.Name" xml:space="preserve">
+    <value>cbColorDefault</value>
+  </data>
+  <data name="&gt;&gt;label7.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Label, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="cbStyleRight.Items9" xml:space="preserve">
+    <value>Outset</value>
+  </data>
+  <data name="bCD.Location" type="System.Drawing.Point, System.Drawing">
+    <value>276, 42</value>
+  </data>
+  <data name="&gt;&gt;label7.Parent" xml:space="preserve">
+    <value>$this</value>
+  </data>
+  <data name="&gt;&gt;bCT.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Button, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;lRight.Name" xml:space="preserve">
+    <value>lRight</value>
+  </data>
+  <data name="bCT.TextAlign" type="System.Drawing.ContentAlignment, System.Drawing">
+    <value>MiddleLeft</value>
+  </data>
+  <data name="cbStyleRight.Items4" xml:space="preserve">
+    <value>Double</value>
+  </data>
+  <data name="&gt;&gt;cbColorTop.ZOrder" xml:space="preserve">
+    <value>27</value>
+  </data>
+  <data name="&gt;&gt;bColorTop.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Button, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="bSR.Font" type="System.Drawing.Font, System.Drawing">
+    <value>Arial, 8.25pt, style=Bold, Italic</value>
+  </data>
+  <data name="label2.Size" type="System.Drawing.Size, System.Drawing">
+    <value>56, 16</value>
+  </data>
+  <data name="bColorBottom.Text" xml:space="preserve">
+    <value>...</value>
+  </data>
+  <data name="cbStyleRight.Items3" xml:space="preserve">
+    <value>Solid</value>
+  </data>
+  <data name="lRight.TabIndex" type="System.Int32, mscorlib">
+    <value>4</value>
+  </data>
+  <data name="&gt;&gt;cbColorLeft.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ComboBox, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="cbStyleLeft.Size" type="System.Drawing.Size, System.Drawing">
+    <value>88, 21</value>
+  </data>
+  <data name="&gt;&gt;cbColorDefault.ZOrder" xml:space="preserve">
+    <value>17</value>
+  </data>
+  <data name="&gt;&gt;label6.Name" xml:space="preserve">
+    <value>label6</value>
+  </data>
+  <data name="cbStyleBottom.Items" xml:space="preserve">
+    <value>None</value>
+  </data>
+  <data name="bST.Font" type="System.Drawing.Font, System.Drawing">
+    <value>Arial, 8.25pt, style=Bold, Italic</value>
+  </data>
+  <data name="cbStyleRight.Items" xml:space="preserve">
+    <value>None</value>
+  </data>
+  <data name="&gt;&gt;bCB.Parent" xml:space="preserve">
+    <value>$this</value>
+  </data>
+  <data name="bColorRight.TabIndex" type="System.Int32, mscorlib">
+    <value>18</value>
+  </data>
+  <data name="bWD.Location" type="System.Drawing.Point, System.Drawing">
+    <value>403, 42</value>
+  </data>
+  <data name="&gt;&gt;tbWidthLeft.Type" xml:space="preserve">
+    <value>System.Windows.Forms.TextBox, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;tbWidthTop.Name" xml:space="preserve">
+    <value>tbWidthTop</value>
+  </data>
+  <data name="&gt;&gt;cbStyleLeft.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ComboBox, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="bWB.TabIndex" type="System.Int32, mscorlib">
+    <value>34</value>
+  </data>
+  <data name="bColorBottom.TabIndex" type="System.Int32, mscorlib">
+    <value>32</value>
+  </data>
+  <data name="bColorLeft.Text" xml:space="preserve">
+    <value>...</value>
+  </data>
+  <data name="cbStyleRight.Size" type="System.Drawing.Size, System.Drawing">
+    <value>88, 21</value>
+  </data>
+  <data name="&gt;&gt;cbStyleRight.ZOrder" xml:space="preserve">
+    <value>32</value>
+  </data>
+  <data name="lLeft.TabIndex" type="System.Int32, mscorlib">
+    <value>0</value>
+  </data>
+  <data name="bCL.Location" type="System.Drawing.Point, System.Drawing">
+    <value>276, 75</value>
+  </data>
+  <data name="cbStyleLeft.Items7" xml:space="preserve">
+    <value>Inset</value>
+  </data>
+  <data name="&gt;&gt;bCD.Parent" xml:space="preserve">
+    <value>$this</value>
+  </data>
+  <data name="bCL.TabIndex" type="System.Int32, mscorlib">
+    <value>10</value>
+  </data>
+  <data name="&gt;&gt;cbColorDefault.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ComboBox, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;$this.Type" xml:space="preserve">
+    <value>System.Windows.Forms.UserControl, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="bCR.Size" type="System.Drawing.Size, System.Drawing">
+    <value>22, 16</value>
+  </data>
+  <data name="&gt;&gt;cbColorRight.ZOrder" xml:space="preserve">
+    <value>29</value>
+  </data>
+  <data name="&gt;&gt;bColorBottom.Name" xml:space="preserve">
+    <value>bColorBottom</value>
+  </data>
+  <data name="&gt;&gt;bColorTop.Name" xml:space="preserve">
+    <value>bColorTop</value>
+  </data>
+  <data name="lRight.TextAlign" type="System.Drawing.ContentAlignment, System.Drawing">
+    <value>MiddleLeft</value>
+  </data>
+  <data name="&gt;&gt;bSD.Name" xml:space="preserve">
+    <value>bSD</value>
+  </data>
+  <data name="bSB.Size" type="System.Drawing.Size, System.Drawing">
+    <value>22, 16</value>
+  </data>
+  <data name="&gt;&gt;lLeft.Name" xml:space="preserve">
+    <value>lLeft</value>
+  </data>
+  <data name="bSD.TextAlign" type="System.Drawing.ContentAlignment, System.Drawing">
+    <value>MiddleLeft</value>
+  </data>
+  <data name="cbColorTop.Size" type="System.Drawing.Size, System.Drawing">
+    <value>96, 21</value>
+  </data>
+  <data name="cbStyleRight.Items2" xml:space="preserve">
+    <value>Dashed</value>
+  </data>
+  <data name="bWB.Text" xml:space="preserve">
+    <value>fx</value>
+  </data>
+  <data name="&gt;&gt;bWB.Name" xml:space="preserve">
+    <value>bWB</value>
+  </data>
+  <data name="bWL.Location" type="System.Drawing.Point, System.Drawing">
+    <value>403, 73</value>
+  </data>
+  <data name="bCB.TextAlign" type="System.Drawing.ContentAlignment, System.Drawing">
+    <value>MiddleLeft</value>
+  </data>
+  <data name="&gt;&gt;bWB.ZOrder" xml:space="preserve">
+    <value>6</value>
+  </data>
+  <data name="bWL.TabIndex" type="System.Int32, mscorlib">
+    <value>13</value>
+  </data>
+  <data name="&gt;&gt;bCB.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Button, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="bWB.Font" type="System.Drawing.Font, System.Drawing">
+    <value>Arial, 8.25pt, style=Bold, Italic</value>
+  </data>
+  <data name="bSD.Location" type="System.Drawing.Point, System.Drawing">
+    <value>148, 42</value>
+  </data>
+  <data name="cbStyleRight.Items8" xml:space="preserve">
+    <value>WindowInset</value>
+  </data>
+  <data name="cbStyleBottom.Items1" xml:space="preserve">
+    <value>Dotted</value>
+  </data>
+  <data name="&gt;&gt;bColorDefault.Name" xml:space="preserve">
+    <value>bColorDefault</value>
+  </data>
+  <data name="bColorBottom.Size" type="System.Drawing.Size, System.Drawing">
+    <value>22, 16</value>
+  </data>
+  <data name="bColorRight.Location" type="System.Drawing.Point, System.Drawing">
+    <value>306, 106</value>
+  </data>
+  <data name="bWD.TextAlign" type="System.Drawing.ContentAlignment, System.Drawing">
+    <value>MiddleLeft</value>
+  </data>
+  <data name="&gt;&gt;bColorBottom.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Button, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;tbWidthTop.Parent" xml:space="preserve">
+    <value>$this</value>
+  </data>
+  <data name="&gt;&gt;bCT.ZOrder" xml:space="preserve">
+    <value>8</value>
+  </data>
+  <data name="&gt;&gt;bSD.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Button, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="cbStyleRight.Location" type="System.Drawing.Point, System.Drawing">
+    <value>56, 104</value>
+  </data>
+  <data name="&gt;&gt;bWR.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Button, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="bWT.Size" type="System.Drawing.Size, System.Drawing">
+    <value>22, 16</value>
+  </data>
+  <data name="bSR.Size" type="System.Drawing.Size, System.Drawing">
+    <value>22, 16</value>
+  </data>
+  <data name="&gt;&gt;bSB.ZOrder" xml:space="preserve">
+    <value>10</value>
+  </data>
+  <data name="&gt;&gt;label8.Name" xml:space="preserve">
+    <value>label8</value>
+  </data>
+  <data name="bSL.Size" type="System.Drawing.Size, System.Drawing">
+    <value>22, 16</value>
+  </data>
+  <data name="bWL.Text" xml:space="preserve">
+    <value>fx</value>
+  </data>
+  <data name="bWD.TabIndex" type="System.Int32, mscorlib">
+    <value>6</value>
+  </data>
+  <data name="lRight.Size" type="System.Drawing.Size, System.Drawing">
+    <value>40, 16</value>
+  </data>
+  <data name="&gt;&gt;lBottom.Name" xml:space="preserve">
+    <value>lBottom</value>
+  </data>
+  <data name="cbStyleDefault.Items3" xml:space="preserve">
+    <value>Solid</value>
+  </data>
+  <data name="cbStyleBottom.Items3" xml:space="preserve">
+    <value>Solid</value>
+  </data>
+  <data name="&gt;&gt;bSR.Parent" xml:space="preserve">
+    <value>$this</value>
+  </data>
+  <data name="&gt;&gt;bWR.ZOrder" xml:space="preserve">
+    <value>4</value>
+  </data>
+  <data name="bWD.Font" type="System.Drawing.Font, System.Drawing">
+    <value>Arial, 8.25pt, style=Bold, Italic</value>
+  </data>
+  <data name="bSL.Location" type="System.Drawing.Point, System.Drawing">
+    <value>148, 75</value>
+  </data>
+  <data name="&gt;&gt;lRight.ZOrder" xml:space="preserve">
+    <value>39</value>
+  </data>
+  <data name="label7.TabIndex" type="System.Int32, mscorlib">
+    <value>7</value>
+  </data>
+  <data name="&gt;&gt;label7.Name" xml:space="preserve">
+    <value>label7</value>
+  </data>
+  <data name="bColorDefault.TabIndex" type="System.Int32, mscorlib">
+    <value>4</value>
+  </data>
+  <data name="&gt;&gt;cbStyleTop.Name" xml:space="preserve">
+    <value>cbStyleTop</value>
+  </data>
+  <data name="cbStyleLeft.Items4" xml:space="preserve">
+    <value>Double</value>
+  </data>
+  <data name="&gt;&gt;tbWidthRight.ZOrder" xml:space="preserve">
+    <value>22</value>
+  </data>
+  <data name="&gt;&gt;tbWidthBottom.Parent" xml:space="preserve">
+    <value>$this</value>
+  </data>
+  <data name="lBottom.Text" xml:space="preserve">
+    <value>Bottom</value>
+  </data>
+  <data name="&gt;&gt;cbStyleBottom.ZOrder" xml:space="preserve">
+    <value>34</value>
+  </data>
+  <data name="cbStyleBottom.Items2" xml:space="preserve">
+    <value>Dashed</value>
+  </data>
+  <data name="&gt;&gt;bSL.Parent" xml:space="preserve">
+    <value>$this</value>
+  </data>
+  <data name="lTop.Text" xml:space="preserve">
+    <value>Top</value>
+  </data>
+  <data name="&gt;&gt;bWD.Parent" xml:space="preserve">
+    <value>$this</value>
+  </data>
+  <data name="label6.Size" type="System.Drawing.Size, System.Drawing">
+    <value>56, 16</value>
+  </data>
+  <data name="&gt;&gt;lLeft.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Label, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;label6.Parent" xml:space="preserve">
+    <value>$this</value>
+  </data>
+  <data name="cbColorRight.Size" type="System.Drawing.Size, System.Drawing">
+    <value>96, 21</value>
+  </data>
+  <data name="bCB.Text" xml:space="preserve">
+    <value>fx</value>
+  </data>
+  <data name="&gt;&gt;cbColorRight.Name" xml:space="preserve">
+    <value>cbColorRight</value>
+  </data>
+  <data name="bColorTop.Size" type="System.Drawing.Size, System.Drawing">
+    <value>22, 16</value>
+  </data>
+  <data name="cbStyleTop.Items" xml:space="preserve">
+    <value>None</value>
+  </data>
+  <data name="bColorLeft.Location" type="System.Drawing.Point, System.Drawing">
+    <value>306, 74</value>
+  </data>
+  <data name="cbStyleLeft.TabIndex" type="System.Int32, mscorlib">
+    <value>7</value>
+  </data>
+  <data name="&gt;&gt;bCB.Name" xml:space="preserve">
+    <value>bCB</value>
+  </data>
+  <data name="bCB.Font" type="System.Drawing.Font, System.Drawing">
+    <value>Arial, 8.25pt, style=Bold, Italic</value>
+  </data>
+  <data name="&gt;&gt;cbColorBottom.Parent" xml:space="preserve">
+    <value>$this</value>
+  </data>
+  <data name="cbColorDefault.TabIndex" type="System.Int32, mscorlib">
+    <value>2</value>
+  </data>
+  <data name="bColorTop.TabIndex" type="System.Int32, mscorlib">
+    <value>25</value>
+  </data>
+  <data name="&gt;&gt;label7.ZOrder" xml:space="preserve">
+    <value>36</value>
+  </data>
+  <data name="tbWidthLeft.Size" type="System.Drawing.Size, System.Drawing">
+    <value>64, 20</value>
+  </data>
+  <data name="&gt;&gt;cbColorTop.Name" xml:space="preserve">
+    <value>cbColorTop</value>
+  </data>
+  <data name="&gt;&gt;bCD.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Button, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="lTop.TabIndex" type="System.Int32, mscorlib">
+    <value>3</value>
+  </data>
+  <data name="&gt;&gt;lTop.ZOrder" xml:space="preserve">
+    <value>40</value>
+  </data>
+  <data name="cbStyleLeft.Items1" xml:space="preserve">
+    <value>Dotted</value>
+  </data>
+  <data name="cbStyleDefault.Location" type="System.Drawing.Point, System.Drawing">
+    <value>56, 40</value>
+  </data>
+  <data name="bCR.TextAlign" type="System.Drawing.ContentAlignment, System.Drawing">
+    <value>MiddleLeft</value>
+  </data>
+  <data name="cbStyleRight.TabIndex" type="System.Int32, mscorlib">
+    <value>14</value>
+  </data>
+  <data name="&gt;&gt;label2.Name" xml:space="preserve">
+    <value>label2</value>
+  </data>
+  <data name="cbStyleBottom.Items4" xml:space="preserve">
+    <value>Double</value>
+  </data>
+  <data name="label8.Size" type="System.Drawing.Size, System.Drawing">
+    <value>40, 16</value>
+  </data>
+  <data name="bWT.Text" xml:space="preserve">
+    <value>fx</value>
+  </data>
+  <data name="lLeft.Text" xml:space="preserve">
+    <value>Left</value>
+  </data>
+  <data name="&gt;&gt;bWT.ZOrder" xml:space="preserve">
+    <value>5</value>
+  </data>
+  <data name="&gt;&gt;tbWidthTop.Type" xml:space="preserve">
+    <value>System.Windows.Forms.TextBox, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;bColorRight.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Button, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="bSL.TabIndex" type="System.Int32, mscorlib">
+    <value>8</value>
+  </data>
+  <data name="&gt;&gt;bColorBottom.Parent" xml:space="preserve">
+    <value>$this</value>
+  </data>
+  <data name="&gt;&gt;tbWidthLeft.Parent" xml:space="preserve">
+    <value>$this</value>
+  </data>
+  <data name="cbColorDefault.Location" type="System.Drawing.Point, System.Drawing">
+    <value>176, 40</value>
+  </data>
+  <data name="tbWidthTop.Size" type="System.Drawing.Size, System.Drawing">
+    <value>64, 20</value>
+  </data>
+  <data name="bSD.TabIndex" type="System.Int32, mscorlib">
+    <value>1</value>
+  </data>
+  <data name="&gt;&gt;bWD.Name" xml:space="preserve">
+    <value>bWD</value>
+  </data>
+  <data name="cbStyleBottom.Items7" xml:space="preserve">
+    <value>Inset</value>
+  </data>
+  <data name="bCD.Font" type="System.Drawing.Font, System.Drawing">
+    <value>Arial, 8.25pt, style=Bold, Italic</value>
+  </data>
+  <data name="bCT.TabIndex" type="System.Int32, mscorlib">
+    <value>24</value>
+  </data>
+  <data name="cbColorBottom.Location" type="System.Drawing.Point, System.Drawing">
+    <value>176, 168</value>
+  </data>
+  <data name="lRight.Location" type="System.Drawing.Point, System.Drawing">
+    <value>16, 106</value>
+  </data>
+  <data name="tbWidthLeft.TabIndex" type="System.Int32, mscorlib">
+    <value>12</value>
+  </data>
+  <data name="bSD.Text" xml:space="preserve">
+    <value>fx</value>
+  </data>
+  <data name="cbStyleLeft.Items2" xml:space="preserve">
+    <value>Dashed</value>
+  </data>
+  <data name="&gt;&gt;bColorLeft.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Button, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;bSR.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Button, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="cbStyleBottom.Items6" xml:space="preserve">
+    <value>Ridge</value>
+  </data>
+  <data name="&gt;&gt;bSL.Name" xml:space="preserve">
+    <value>bSL</value>
+  </data>
+  <data name="bColorDefault.Location" type="System.Drawing.Point, System.Drawing">
+    <value>306, 42</value>
+  </data>
+  <data name="&gt;&gt;bWT.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Button, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="bCB.Location" type="System.Drawing.Point, System.Drawing">
+    <value>276, 171</value>
+  </data>
+  <data name="&gt;&gt;lRight.Parent" xml:space="preserve">
+    <value>$this</value>
+  </data>
+  <data name="cbStyleBottom.Size" type="System.Drawing.Size, System.Drawing">
+    <value>88, 21</value>
+  </data>
+  <data name="&gt;&gt;bSD.ZOrder" xml:space="preserve">
+    <value>14</value>
+  </data>
+  <data name="&gt;&gt;bSR.Name" xml:space="preserve">
+    <value>bSR</value>
+  </data>
+  <data name="label8.Text" xml:space="preserve">
+    <value>Default</value>
+  </data>
+  <data name="&gt;&gt;tbWidthRight.Type" xml:space="preserve">
+    <value>System.Windows.Forms.TextBox, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;cbColorBottom.Name" xml:space="preserve">
+    <value>cbColorBottom</value>
+  </data>
+  <data name="label2.Location" type="System.Drawing.Point, System.Drawing">
+    <value>72, 16</value>
+  </data>
+  <data name="label8.TabIndex" type="System.Int32, mscorlib">
+    <value>36</value>
+  </data>
+  <data name="bWL.Size" type="System.Drawing.Size, System.Drawing">
+    <value>22, 16</value>
+  </data>
+  <data name="cbStyleBottom.Items9" xml:space="preserve">
+    <value>Outset</value>
+  </data>
+  <data name="&gt;&gt;tbWidthDefault.Name" xml:space="preserve">
+    <value>tbWidthDefault</value>
+  </data>
+  <data name="bSB.Font" type="System.Drawing.Font, System.Drawing">
+    <value>Arial, 8.25pt, style=Bold, Italic</value>
+  </data>
+  <data name="bWR.Text" xml:space="preserve">
+    <value>fx</value>
+  </data>
+  <data name="&gt;&gt;bST.Parent" xml:space="preserve">
+    <value>$this</value>
+  </data>
+  <data name="&gt;&gt;bWR.Parent" xml:space="preserve">
+    <value>$this</value>
+  </data>
+  <data name="&gt;&gt;tbWidthBottom.Type" xml:space="preserve">
+    <value>System.Windows.Forms.TextBox, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;label2.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Label, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;cbColorLeft.ZOrder" xml:space="preserve">
+    <value>31</value>
+  </data>
+  <data name="label8.TextAlign" type="System.Drawing.ContentAlignment, System.Drawing">
+    <value>MiddleLeft</value>
+  </data>
+  <data name="&gt;&gt;cbColorLeft.Name" xml:space="preserve">
+    <value>cbColorLeft</value>
+  </data>
+  <data name="cbColorTop.TabIndex" type="System.Int32, mscorlib">
+    <value>23</value>
+  </data>
+  <data name="bWB.Location" type="System.Drawing.Point, System.Drawing">
+    <value>403, 170</value>
+  </data>
+  <data name="&gt;&gt;cbStyleDefault.Name" xml:space="preserve">
+    <value>cbStyleDefault</value>
+  </data>
+  <data name="lLeft.Size" type="System.Drawing.Size, System.Drawing">
+    <value>40, 16</value>
+  </data>
+  <data name="lTop.TextAlign" type="System.Drawing.ContentAlignment, System.Drawing">
+    <value>MiddleLeft</value>
+  </data>
+  <data name="&gt;&gt;cbStyleTop.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ComboBox, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="cbStyleDefault.Items1" xml:space="preserve">
+    <value>Dotted</value>
+  </data>
+  <data name="&gt;&gt;bSL.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Button, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="cbStyleDefault.Items2" xml:space="preserve">
+    <value>Dashed</value>
+  </data>
+  <data name="cbStyleDefault.Items5" xml:space="preserve">
+    <value>Groove</value>
+  </data>
+  <data name="cbStyleDefault.Items4" xml:space="preserve">
+    <value>Double</value>
+  </data>
+  <data name="cbStyleDefault.Items7" xml:space="preserve">
+    <value>Inset</value>
+  </data>
+  <data name="cbStyleDefault.Items6" xml:space="preserve">
+    <value>Ridge</value>
+  </data>
+  <data name="cbStyleDefault.Items9" xml:space="preserve">
+    <value>Outset</value>
+  </data>
+  <data name="cbStyleDefault.Items8" xml:space="preserve">
+    <value>WindowInset</value>
+  </data>
+  <data name="bCD.TabIndex" type="System.Int32, mscorlib">
+    <value>3</value>
+  </data>
+  <data name="tbWidthRight.Size" type="System.Drawing.Size, System.Drawing">
+    <value>64, 20</value>
+  </data>
+  <data name="&gt;&gt;label2.Parent" xml:space="preserve">
+    <value>$this</value>
+  </data>
+  <data name="&gt;&gt;cbStyleTop.ZOrder" xml:space="preserve">
+    <value>33</value>
+  </data>
+  <data name="bCB.TabIndex" type="System.Int32, mscorlib">
+    <value>31</value>
+  </data>
+  <data name="tbWidthRight.TabIndex" type="System.Int32, mscorlib">
+    <value>19</value>
+  </data>
+  <data name="bSL.Text" xml:space="preserve">
+    <value>fx</value>
+  </data>
+  <data name="&gt;&gt;cbColorDefault.Parent" xml:space="preserve">
+    <value>$this</value>
+  </data>
+  <data name="&gt;&gt;lTop.Name" xml:space="preserve">
+    <value>lTop</value>
+  </data>
+  <data name="&gt;&gt;tbWidthDefault.ZOrder" xml:space="preserve">
+    <value>15</value>
+  </data>
+  <data name="cbStyleLeft.Items8" xml:space="preserve">
+    <value>WindowInset</value>
+  </data>
+  <data name="&gt;&gt;cbStyleLeft.Parent" xml:space="preserve">
+    <value>$this</value>
+  </data>
+  <data name="&gt;&gt;tbWidthRight.Parent" xml:space="preserve">
+    <value>$this</value>
+  </data>
+  <data name="bSD.Font" type="System.Drawing.Font, System.Drawing">
+    <value>Arial, 8.25pt, style=Bold, Italic</value>
+  </data>
+  <data name="&gt;&gt;cbStyleLeft.Name" xml:space="preserve">
+    <value>cbStyleLeft</value>
+  </data>
+  <data name="cbStyleRight.Items7" xml:space="preserve">
+    <value>Inset</value>
+  </data>
+  <data name="bWR.Size" type="System.Drawing.Size, System.Drawing">
+    <value>22, 16</value>
+  </data>
+  <data name="&gt;&gt;bCB.ZOrder" xml:space="preserve">
+    <value>7</value>
+  </data>
+  <data name="&gt;&gt;tbWidthDefault.Parent" xml:space="preserve">
+    <value>$this</value>
+  </data>
+  <data name="cbStyleDefault.Size" type="System.Drawing.Size, System.Drawing">
+    <value>88, 21</value>
+  </data>
+  <data name="&gt;&gt;cbStyleTop.Parent" xml:space="preserve">
+    <value>$this</value>
+  </data>
+  <data name="bWT.TextAlign" type="System.Drawing.ContentAlignment, System.Drawing">
+    <value>MiddleLeft</value>
+  </data>
+  <data name="label7.Size" type="System.Drawing.Size, System.Drawing">
+    <value>56, 16</value>
+  </data>
+  <data name="bColorRight.Size" type="System.Drawing.Size, System.Drawing">
+    <value>22, 16</value>
+  </data>
+  <data name="&gt;&gt;bColorRight.Parent" xml:space="preserve">
+    <value>$this</value>
+  </data>
+  <data name="bSB.TextAlign" type="System.Drawing.ContentAlignment, System.Drawing">
+    <value>MiddleLeft</value>
+  </data>
+  <data name="bSB.Location" type="System.Drawing.Point, System.Drawing">
+    <value>148, 171</value>
+  </data>
+  <data name="bST.TabIndex" type="System.Int32, mscorlib">
+    <value>22</value>
+  </data>
+  <data name="cbColorLeft.Location" type="System.Drawing.Point, System.Drawing">
+    <value>176, 72</value>
+  </data>
+  <data name="&gt;&gt;bColorDefault.Parent" xml:space="preserve">
+    <value>$this</value>
+  </data>
+  <data name="&gt;&gt;cbColorLeft.Parent" xml:space="preserve">
+    <value>$this</value>
+  </data>
+  <data name="cbColorBottom.TabIndex" type="System.Int32, mscorlib">
+    <value>30</value>
+  </data>
+  <data name="cbStyleTop.Items5" xml:space="preserve">
+    <value>Groove</value>
+  </data>
+  <data name="&gt;&gt;bCL.Parent" xml:space="preserve">
+    <value>$this</value>
+  </data>
+  <data name="cbStyleLeft.Items5" xml:space="preserve">
+    <value>Groove</value>
+  </data>
+  <data name="&gt;&gt;lLeft.Parent" xml:space="preserve">
+    <value>$this</value>
+  </data>
+  <data name="&gt;&gt;lBottom.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Label, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="bCL.Font" type="System.Drawing.Font, System.Drawing">
+    <value>Arial, 8.25pt, style=Bold, Italic</value>
+  </data>
+  <data name="&gt;&gt;bColorLeft.ZOrder" xml:space="preserve">
+    <value>30</value>
+  </data>
+  <data name="bCL.TextAlign" type="System.Drawing.ContentAlignment, System.Drawing">
+    <value>MiddleLeft</value>
+  </data>
+  <data name="&gt;&gt;bCR.Parent" xml:space="preserve">
+    <value>$this</value>
+  </data>
+  <data name="label6.Text" xml:space="preserve">
+    <value>Width</value>
+  </data>
+  <data name="tbWidthBottom.TabIndex" type="System.Int32, mscorlib">
+    <value>33</value>
+  </data>
+  <data name="tbWidthLeft.Location" type="System.Drawing.Point, System.Drawing">
+    <value>334, 72</value>
+  </data>
+  <data name="bCD.Size" type="System.Drawing.Size, System.Drawing">
+    <value>22, 16</value>
+  </data>
+  <data name="&gt;&gt;$this.Name" xml:space="preserve">
+    <value>StyleBorderCtl</value>
+  </data>
+  <data name="&gt;&gt;bColorRight.ZOrder" xml:space="preserve">
+    <value>28</value>
+  </data>
+  <data name="lTop.Size" type="System.Drawing.Size, System.Drawing">
+    <value>40, 16</value>
+  </data>
+  <data name="bWB.TextAlign" type="System.Drawing.ContentAlignment, System.Drawing">
+    <value>MiddleLeft</value>
+  </data>
+  <data name="lBottom.Location" type="System.Drawing.Point, System.Drawing">
+    <value>16, 170</value>
+  </data>
+  <data name="&gt;&gt;cbColorTop.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ComboBox, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="cbColorDefault.Size" type="System.Drawing.Size, System.Drawing">
+    <value>96, 21</value>
+  </data>
+  <data name="&gt;&gt;bWL.Parent" xml:space="preserve">
+    <value>$this</value>
+  </data>
+  <data name="&gt;&gt;cbStyleRight.Name" xml:space="preserve">
+    <value>cbStyleRight</value>
+  </data>
+  <data name="bCD.Text" xml:space="preserve">
+    <value>fx</value>
+  </data>
+  <data name="bSB.Text" xml:space="preserve">
+    <value>fx</value>
+  </data>
+  <data name="bST.Text" xml:space="preserve">
+    <value>fx</value>
+  </data>
+  <data name="label6.TabIndex" type="System.Int32, mscorlib">
+    <value>6</value>
+  </data>
+  <data name="bSR.TabIndex" type="System.Int32, mscorlib">
+    <value>15</value>
+  </data>
+  <data name="&gt;&gt;bST.Name" xml:space="preserve">
+    <value>bST</value>
+  </data>
+  <data name="&gt;&gt;label8.ZOrder" xml:space="preserve">
+    <value>19</value>
+  </data>
+  <data name="&gt;&gt;lRight.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Label, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;bWL.Name" xml:space="preserve">
+    <value>bWL</value>
+  </data>
+  <data name="cbStyleLeft.Items6" xml:space="preserve">
+    <value>Ridge</value>
+  </data>
+  <data name="cbStyleRight.Items6" xml:space="preserve">
+    <value>Ridge</value>
+  </data>
+  <data name="bColorDefault.Size" type="System.Drawing.Size, System.Drawing">
+    <value>22, 16</value>
+  </data>
+  <data name="&gt;&gt;bColorBottom.ZOrder" xml:space="preserve">
+    <value>24</value>
+  </data>
+  <data name="&gt;&gt;bWR.Name" xml:space="preserve">
+    <value>bWR</value>
+  </data>
+  <data name="tbWidthBottom.Size" type="System.Drawing.Size, System.Drawing">
+    <value>64, 20</value>
+  </data>
+  <data name="&gt;&gt;cbColorBottom.ZOrder" xml:space="preserve">
+    <value>25</value>
+  </data>
+  <data name="&gt;&gt;bST.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Button, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;label2.ZOrder" xml:space="preserve">
+    <value>38</value>
+  </data>
+  <data name="&gt;&gt;label6.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Label, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="cbColorLeft.Size" type="System.Drawing.Size, System.Drawing">
+    <value>96, 21</value>
+  </data>
+  <data name="&gt;&gt;lTop.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Label, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;bSR.ZOrder" xml:space="preserve">
+    <value>12</value>
+  </data>
+  <data name="&gt;&gt;cbColorBottom.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ComboBox, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="$this.Size" type="System.Drawing.Size, System.Drawing">
+    <value>472, 312</value>
+  </data>
+  <data name="&gt;&gt;bWT.Parent" xml:space="preserve">
+    <value>$this</value>
+  </data>
+  <data name="cbColorTop.Location" type="System.Drawing.Point, System.Drawing">
+    <value>176, 136</value>
+  </data>
+  <data name="bWL.Font" type="System.Drawing.Font, System.Drawing">
+    <value>Arial, 8.25pt, style=Bold, Italic</value>
+  </data>
+  <data name="tbWidthBottom.Location" type="System.Drawing.Point, System.Drawing">
+    <value>334, 168</value>
+  </data>
+  <data name="&gt;&gt;bColorDefault.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Button, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="bCT.Text" xml:space="preserve">
+    <value>fx</value>
+  </data>
+  <data name="label2.TabIndex" type="System.Int32, mscorlib">
+    <value>5</value>
+  </data>
+  <data name="bCL.Text" xml:space="preserve">
+    <value>fx</value>
+  </data>
+  <data name="cbStyleTop.TabIndex" type="System.Int32, mscorlib">
+    <value>21</value>
+  </data>
+  <data name="&gt;&gt;cbStyleRight.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ComboBox, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="bWT.TabIndex" type="System.Int32, mscorlib">
+    <value>27</value>
+  </data>
+  <data name="cbStyleLeft.Items3" xml:space="preserve">
+    <value>Solid</value>
+  </data>
+  <data name="&gt;&gt;bSL.ZOrder" xml:space="preserve">
+    <value>13</value>
+  </data>
+  <data name="cbColorLeft.TabIndex" type="System.Int32, mscorlib">
+    <value>9</value>
+  </data>
+  <data name="bCL.Size" type="System.Drawing.Size, System.Drawing">
+    <value>22, 16</value>
+  </data>
+  <data name="tbWidthDefault.Size" type="System.Drawing.Size, System.Drawing">
+    <value>64, 20</value>
+  </data>
+  <data name="bSR.Text" xml:space="preserve">
+    <value>fx</value>
+  </data>
+  <data name="&gt;&gt;bCD.Name" xml:space="preserve">
+    <value>bCD</value>
+  </data>
+  <data name="label8.Location" type="System.Drawing.Point, System.Drawing">
+    <value>16, 42</value>
+  </data>
+  <data name="bWR.TabIndex" type="System.Int32, mscorlib">
+    <value>20</value>
+  </data>
+  <data name="&gt;&gt;bCD.ZOrder" xml:space="preserve">
+    <value>9</value>
+  </data>
+  <data name="cbStyleBottom.Location" type="System.Drawing.Point, System.Drawing">
+    <value>56, 168</value>
+  </data>
+  <data name="&gt;&gt;bWB.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Button, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="bSD.Size" type="System.Drawing.Size, System.Drawing">
+    <value>22, 16</value>
+  </data>
+  <data name="&gt;&gt;bWD.ZOrder" xml:space="preserve">
+    <value>1</value>
+  </data>
+  <data name="bCD.TextAlign" type="System.Drawing.ContentAlignment, System.Drawing">
+    <value>MiddleLeft</value>
+  </data>
+  <data name="&gt;&gt;bCT.Parent" xml:space="preserve">
+    <value>$this</value>
+  </data>
+  <data name="bCR.Location" type="System.Drawing.Point, System.Drawing">
+    <value>276, 108</value>
+  </data>
+  <data name="bSB.TabIndex" type="System.Int32, mscorlib">
+    <value>29</value>
+  </data>
+  <data name="&gt;&gt;label8.Parent" xml:space="preserve">
+    <value>$this</value>
+  </data>
+  <data name="&gt;&gt;tbWidthTop.ZOrder" xml:space="preserve">
+    <value>21</value>
+  </data>
+  <data name="bCR.TabIndex" type="System.Int32, mscorlib">
+    <value>17</value>
+  </data>
+  <data name="tbWidthTop.Location" type="System.Drawing.Point, System.Drawing">
+    <value>334, 136</value>
+  </data>
+  <data name="&gt;&gt;tbWidthRight.Name" xml:space="preserve">
+    <value>tbWidthRight</value>
+  </data>
+  <data name="&gt;&gt;tbWidthBottom.ZOrder" xml:space="preserve">
+    <value>20</value>
+  </data>
+  <data name="&gt;&gt;bColorLeft.Name" xml:space="preserve">
+    <value>bColorLeft</value>
+  </data>
+  <data name="&gt;&gt;cbStyleDefault.ZOrder" xml:space="preserve">
+    <value>18</value>
+  </data>
+  <data name="cbColorRight.TabIndex" type="System.Int32, mscorlib">
+    <value>16</value>
+  </data>
+  <data name="cbStyleBottom.Items5" xml:space="preserve">
+    <value>Groove</value>
+  </data>
+  <data name="cbColorBottom.Size" type="System.Drawing.Size, System.Drawing">
+    <value>96, 21</value>
+  </data>
+  <data name="tbWidthDefault.Location" type="System.Drawing.Point, System.Drawing">
+    <value>334, 40</value>
+  </data>
+  <data name="&gt;&gt;bCL.Name" xml:space="preserve">
+    <value>bCL</value>
+  </data>
+  <data name="&gt;&gt;cbStyleBottom.Parent" xml:space="preserve">
+    <value>$this</value>
+  </data>
+  <data name="&gt;&gt;bSB.Parent" xml:space="preserve">
+    <value>$this</value>
+  </data>
+  <data name="cbStyleBottom.Items8" xml:space="preserve">
+    <value>WindowInset</value>
+  </data>
+  <data name="cbStyleRight.Items1" xml:space="preserve">
+    <value>Dotted</value>
+  </data>
+  <data name="&gt;&gt;tbWidthLeft.ZOrder" xml:space="preserve">
+    <value>23</value>
+  </data>
+  <data name="&gt;&gt;lBottom.Parent" xml:space="preserve">
+    <value>$this</value>
+  </data>
+  <data name="&gt;&gt;bCR.Name" xml:space="preserve">
+    <value>bCR</value>
+  </data>
+  <data name="bST.Size" type="System.Drawing.Size, System.Drawing">
+    <value>22, 16</value>
+  </data>
+  <data name="&gt;&gt;bWL.ZOrder" xml:space="preserve">
+    <value>2</value>
+  </data>
+  <data name="&gt;&gt;bCR.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Button, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="bWR.Location" type="System.Drawing.Point, System.Drawing">
+    <value>403, 107</value>
+  </data>
+  <data name="bSR.TextAlign" type="System.Drawing.ContentAlignment, System.Drawing">
+    <value>MiddleLeft</value>
+  </data>
+  <data name="bWT.Font" type="System.Drawing.Font, System.Drawing">
+    <value>Arial, 8.25pt, style=Bold, Italic</value>
+  </data>
+  <data name="label7.Location" type="System.Drawing.Point, System.Drawing">
+    <value>192, 16</value>
+  </data>
+  <data name="tbWidthTop.TabIndex" type="System.Int32, mscorlib">
+    <value>26</value>
+  </data>
+  <data name="&gt;&gt;bColorRight.Name" xml:space="preserve">
+    <value>bColorRight</value>
+  </data>
+  <data name="bST.TextAlign" type="System.Drawing.ContentAlignment, System.Drawing">
+    <value>MiddleLeft</value>
+  </data>
+  <data name="&gt;&gt;lLeft.ZOrder" xml:space="preserve">
+    <value>42</value>
+  </data>
+  <data name="bColorRight.Text" xml:space="preserve">
+    <value>...</value>
+  </data>
+  <data name="bColorTop.Text" xml:space="preserve">
+    <value>...</value>
+  </data>
+  <data name="label2.Text" xml:space="preserve">
+    <value>Style</value>
+  </data>
+  <data name="bColorDefault.Text" xml:space="preserve">
+    <value>...</value>
+  </data>
+  <data name="cbStyleTop.Items7" xml:space="preserve">
+    <value>Inset</value>
+  </data>
+  <data name="cbStyleTop.Items6" xml:space="preserve">
+    <value>Ridge</value>
+  </data>
+  <data name="cbStyleLeft.Items9" xml:space="preserve">
+    <value>Outset</value>
+  </data>
+  <data name="cbStyleTop.Items4" xml:space="preserve">
+    <value>Double</value>
+  </data>
+  <data name="cbStyleTop.Items3" xml:space="preserve">
+    <value>Solid</value>
+  </data>
+  <data name="cbStyleTop.Items2" xml:space="preserve">
+    <value>Dashed</value>
+  </data>
+  <data name="cbStyleTop.Items1" xml:space="preserve">
+    <value>Dotted</value>
+  </data>
+  <data name="bCT.Size" type="System.Drawing.Size, System.Drawing">
+    <value>22, 16</value>
+  </data>
+  <data name="bWR.Font" type="System.Drawing.Font, System.Drawing">
+    <value>Arial, 8.25pt, style=Bold, Italic</value>
+  </data>
+  <data name="bColorLeft.TabIndex" type="System.Int32, mscorlib">
+    <value>11</value>
+  </data>
+  <data name="cbStyleTop.Items9" xml:space="preserve">
+    <value>Outset</value>
+  </data>
+  <metadata name="$this.Localizable" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
+    <value>True</value>
+  </metadata>
+</root>

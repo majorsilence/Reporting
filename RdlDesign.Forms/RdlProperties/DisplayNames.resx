@@ -1,0 +1,558 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Appearance_Color" xml:space="preserve">
+    <value>Color</value>
+  </data>
+  <data name="Appearance_Direction" xml:space="preserve">
+    <value>Direction</value>
+  </data>
+  <data name="Appearance_FontFamily" xml:space="preserve">
+    <value>FontFamily</value>
+  </data>
+  <data name="Appearance_FontSize" xml:space="preserve">
+    <value>FontSize</value>
+  </data>
+  <data name="Appearance_FontStyle" xml:space="preserve">
+    <value>FontStyle</value>
+  </data>
+  <data name="Appearance_FontWeight" xml:space="preserve">
+    <value>FontWeight</value>
+  </data>
+  <data name="Appearance_Format" xml:space="preserve">
+    <value>Format</value>
+  </data>
+  <data name="Appearance_TextAlign" xml:space="preserve">
+    <value>TextAlign</value>
+  </data>
+  <data name="Appearance_TextDecoration" xml:space="preserve">
+    <value>TextDecoration</value>
+  </data>
+  <data name="Appearance_VerticalAlign" xml:space="preserve">
+    <value>VerticalAlign</value>
+  </data>
+  <data name="Appearance_WritingMode" xml:space="preserve">
+    <value>WritingMode</value>
+  </data>
+  <data name="BackgroundImage_MIMEType" xml:space="preserve">
+    <value>MIMEType</value>
+  </data>
+  <data name="BackgroundImage_Repeat" xml:space="preserve">
+    <value>Repeat</value>
+  </data>
+  <data name="BackgroundImage_Source" xml:space="preserve">
+    <value>Source</value>
+  </data>
+  <data name="BackgroundImage_Value" xml:space="preserve">
+    <value>Value</value>
+  </data>
+  <data name="Background_Color" xml:space="preserve">
+    <value>Color</value>
+  </data>
+  <data name="Background_EndColor" xml:space="preserve">
+    <value>EndColor</value>
+  </data>
+  <data name="Background_GradientType" xml:space="preserve">
+    <value>GradientType</value>
+  </data>
+  <data name="Background_Image" xml:space="preserve">
+    <value>Image</value>
+  </data>
+  <data name="Base_Action" xml:space="preserve">
+    <value>Action</value>
+  </data>
+  <data name="Base_Background" xml:space="preserve">
+    <value>Background</value>
+  </data>
+  <data name="Base_Bookmark" xml:space="preserve">
+    <value>Bookmark</value>
+  </data>
+  <data name="Base_Border" xml:space="preserve">
+    <value>Border</value>
+  </data>
+  <data name="Base_ColumnSpan" xml:space="preserve">
+    <value>ColumnSpan</value>
+  </data>
+  <data name="Base_DataElementName" xml:space="preserve">
+    <value>DataElementName</value>
+  </data>
+  <data name="Base_DataElementOutput" xml:space="preserve">
+    <value>DataElementOutput</value>
+  </data>
+  <data name="Base_Location" xml:space="preserve">
+    <value>Location</value>
+  </data>
+  <data name="Base_Matrix" xml:space="preserve">
+    <value>Matrix</value>
+  </data>
+  <data name="Base_Name" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="Base_Padding" xml:space="preserve">
+    <value>Padding</value>
+  </data>
+  <data name="Base_Size" xml:space="preserve">
+    <value>Size</value>
+  </data>
+  <data name="Base_Table" xml:space="preserve">
+    <value>Table</value>
+  </data>
+  <data name="Base_ToolTip" xml:space="preserve">
+    <value>ToolTip</value>
+  </data>
+  <data name="Base_Visibility" xml:space="preserve">
+    <value>Visibility</value>
+  </data>
+  <data name="Base_ZIndex" xml:space="preserve">
+    <value>ZIndex</value>
+  </data>
+  <data name="ChartAxis_Appearance" xml:space="preserve">
+    <value>Appearance</value>
+  </data>
+  <data name="ChartAxis_Background" xml:space="preserve">
+    <value>Background</value>
+  </data>
+  <data name="ChartAxis_Border" xml:space="preserve">
+    <value>Border</value>
+  </data>
+  <data name="ChartAxis_CrossAt" xml:space="preserve">
+    <value>CrossAt</value>
+  </data>
+  <data name="ChartAxis_Interlaced" xml:space="preserve">
+    <value>Interlaced</value>
+  </data>
+  <data name="ChartAxis_LogScale" xml:space="preserve">
+    <value>LogScale</value>
+  </data>
+  <data name="ChartAxis_MajorGridLines" xml:space="preserve">
+    <value>MajorGridLines</value>
+  </data>
+  <data name="ChartAxis_MajorInterval" xml:space="preserve">
+    <value>MajorInterval</value>
+  </data>
+  <data name="ChartAxis_MajorTickMarks" xml:space="preserve">
+    <value>MajorTickMarks</value>
+  </data>
+  <data name="ChartAxis_Margin" xml:space="preserve">
+    <value>Margin</value>
+  </data>
+  <data name="ChartAxis_Max" xml:space="preserve">
+    <value>Max</value>
+  </data>
+  <data name="ChartAxis_Min" xml:space="preserve">
+    <value>Min</value>
+  </data>
+  <data name="ChartAxis_MinorGridLines" xml:space="preserve">
+    <value>MinorGridLines</value>
+  </data>
+  <data name="ChartAxis_MinorInterval" xml:space="preserve">
+    <value>MinorInterval</value>
+  </data>
+  <data name="ChartAxis_MinorTickMarks" xml:space="preserve">
+    <value>MinorTickMarks</value>
+  </data>
+  <data name="ChartAxis_Padding" xml:space="preserve">
+    <value>Padding</value>
+  </data>
+  <data name="ChartAxis_Reverse" xml:space="preserve">
+    <value>Reverse</value>
+  </data>
+  <data name="ChartAxis_Scalar" xml:space="preserve">
+    <value>Scalar</value>
+  </data>
+  <data name="ChartAxis_Title" xml:space="preserve">
+    <value>Title</value>
+  </data>
+  <data name="ChartAxis_Visible" xml:space="preserve">
+    <value>Visible</value>
+  </data>
+  <data name="ChartData_DataValue" xml:space="preserve">
+    <value>DataValue</value>
+  </data>
+  <data name="ChartData_DataValue2" xml:space="preserve">
+    <value>DataValue2</value>
+  </data>
+  <data name="ChartData_DataValue3" xml:space="preserve">
+    <value>DataValue3</value>
+  </data>
+  <data name="ChartData_LabelAppearance" xml:space="preserve">
+    <value>LabelAppearance</value>
+  </data>
+  <data name="ChartData_LabelVisible" xml:space="preserve">
+    <value>LabelVisible</value>
+  </data>
+  <data name="ChartGridLines_Color" xml:space="preserve">
+    <value>Color</value>
+  </data>
+  <data name="ChartGridLines_LineStyle" xml:space="preserve">
+    <value>LineStyle</value>
+  </data>
+  <data name="ChartGridLines_ShowGridLines" xml:space="preserve">
+    <value>ShowGridLines</value>
+  </data>
+  <data name="ChartGridLines_Width" xml:space="preserve">
+    <value>Width</value>
+  </data>
+  <data name="ChartLegend_Appearance" xml:space="preserve">
+    <value>Appearance</value>
+  </data>
+  <data name="ChartLegend_Background" xml:space="preserve">
+    <value>Background</value>
+  </data>
+  <data name="ChartLegend_Border" xml:space="preserve">
+    <value>Border</value>
+  </data>
+  <data name="ChartLegend_InsidePlotArea" xml:space="preserve">
+    <value>InsidePlotArea</value>
+  </data>
+  <data name="ChartLegend_Layout" xml:space="preserve">
+    <value>Layout</value>
+  </data>
+  <data name="ChartLegend_Padding" xml:space="preserve">
+    <value>Padding</value>
+  </data>
+  <data name="ChartLegend_Position" xml:space="preserve">
+    <value>Position</value>
+  </data>
+  <data name="ChartLegend_Visible" xml:space="preserve">
+    <value>Visible</value>
+  </data>
+  <data name="ChartTitle_Appearance" xml:space="preserve">
+    <value>Appearance</value>
+  </data>
+  <data name="ChartTitle_Background" xml:space="preserve">
+    <value>Background</value>
+  </data>
+  <data name="ChartTitle_Border" xml:space="preserve">
+    <value>Border</value>
+  </data>
+  <data name="ChartTitle_Caption" xml:space="preserve">
+    <value>Caption</value>
+  </data>
+  <data name="ChartTitle_Padding" xml:space="preserve">
+    <value>Padding</value>
+  </data>
+  <data name="Chart_CategoryAxis" xml:space="preserve">
+    <value>CategoryAxis</value>
+  </data>
+  <data name="Chart_ChartData" xml:space="preserve">
+    <value>ChartData</value>
+  </data>
+  <data name="Chart_Legend" xml:space="preserve">
+    <value>Legend</value>
+  </data>
+  <data name="Chart_Palette" xml:space="preserve">
+    <value>Palette</value>
+  </data>
+  <data name="Chart_PointWidth" xml:space="preserve">
+    <value>PointWidth</value>
+  </data>
+  <data name="Chart_Title" xml:space="preserve">
+    <value>Title</value>
+  </data>
+  <data name="Chart_Type" xml:space="preserve">
+    <value>Type</value>
+  </data>
+  <data name="Chart_ValueAxis" xml:space="preserve">
+    <value>ValueAxis</value>
+  </data>
+  <data name="DataRegion_Appearance" xml:space="preserve">
+    <value>Appearance</value>
+  </data>
+  <data name="DataRegion_DataSetName" xml:space="preserve">
+    <value>DataSetName</value>
+  </data>
+  <data name="DataRegion_Filters" xml:space="preserve">
+    <value>Filters</value>
+  </data>
+  <data name="DataRegion_KeepTogether" xml:space="preserve">
+    <value>KeepTogether</value>
+  </data>
+  <data name="DataRegion_NoRows" xml:space="preserve">
+    <value>NoRows</value>
+  </data>
+  <data name="DataRegion_PageBreakAtEnd" xml:space="preserve">
+    <value>PageBreakAtEnd</value>
+  </data>
+  <data name="DataRegion_PageBreakAtStart" xml:space="preserve">
+    <value>PageBreakAtStart</value>
+  </data>
+  <data name="ImageI_MIMEType" xml:space="preserve">
+    <value>MIMEType</value>
+  </data>
+  <data name="ImageI_Sizing" xml:space="preserve">
+    <value>Sizing</value>
+  </data>
+  <data name="ImageI_Source" xml:space="preserve">
+    <value>Source</value>
+  </data>
+  <data name="ImageI_Value" xml:space="preserve">
+    <value>Value</value>
+  </data>
+  <data name="Image_Image" xml:space="preserve">
+    <value>Image</value>
+  </data>
+  <data name="List_DataInstanceElementOutput" xml:space="preserve">
+    <value>DataInstanceElementOutput</value>
+  </data>
+  <data name="List_DataInstanceName" xml:space="preserve">
+    <value>DataInstanceName</value>
+  </data>
+  <data name="List_Grouping" xml:space="preserve">
+    <value>Grouping</value>
+  </data>
+  <data name="List_Sorting" xml:space="preserve">
+    <value>Sorting</value>
+  </data>
+  <data name="Location_Left" xml:space="preserve">
+    <value>Left</value>
+  </data>
+  <data name="Location_Top" xml:space="preserve">
+    <value>Top</value>
+  </data>
+  <data name="Margin_Bottom" xml:space="preserve">
+    <value>Bottom</value>
+  </data>
+  <data name="Margin_Left" xml:space="preserve">
+    <value>Left</value>
+  </data>
+  <data name="Margin_Right" xml:space="preserve">
+    <value>Right</value>
+  </data>
+  <data name="Margin_Top" xml:space="preserve">
+    <value>Top</value>
+  </data>
+  <data name="Padding_Bottom" xml:space="preserve">
+    <value>Bottom</value>
+  </data>
+  <data name="Padding_Left" xml:space="preserve">
+    <value>Left</value>
+  </data>
+  <data name="Padding_Right" xml:space="preserve">
+    <value>Right</value>
+  </data>
+  <data name="Padding_Top" xml:space="preserve">
+    <value>Top</value>
+  </data>
+  <data name="PrintFirstLast_Height" xml:space="preserve">
+    <value>Height</value>
+  </data>
+  <data name="PrintFirstLast_PrintOnFirstPage" xml:space="preserve">
+    <value>PrintOnFirstPage</value>
+  </data>
+  <data name="PrintFirstLast_PrintOnLastPage" xml:space="preserve">
+    <value>PrintOnLastPage</value>
+  </data>
+  <data name="Rectangle_PageBreakAtEnd" xml:space="preserve">
+    <value>PageBreakAtEnd</value>
+  </data>
+  <data name="Rectangle_PageBreakAtStart" xml:space="preserve">
+    <value>PageBreakAtStart</value>
+  </data>
+  <data name="Report_Author" xml:space="preserve">
+    <value>Author</value>
+  </data>
+  <data name="Report_BodyColumns" xml:space="preserve">
+    <value>BodyColumns</value>
+  </data>
+  <data name="Report_BodyColumnSpacing" xml:space="preserve">
+    <value>BodyColumnSpacing</value>
+  </data>
+  <data name="Report_BodyHeight" xml:space="preserve">
+    <value>BodyHeight</value>
+  </data>
+  <data name="Report_Code" xml:space="preserve">
+    <value>Code</value>
+  </data>
+  <data name="Report_DataElementName" xml:space="preserve">
+    <value>DataElementName</value>
+  </data>
+  <data name="Report_DataElementStyle" xml:space="preserve">
+    <value>DataElementStyle</value>
+  </data>
+  <data name="Report_DataSchema" xml:space="preserve">
+    <value>DataSchema</value>
+  </data>
+  <data name="Report_DataTransform" xml:space="preserve">
+    <value>DataTransform</value>
+  </data>
+  <data name="Report_Description" xml:space="preserve">
+    <value>Description</value>
+  </data>
+  <data name="Report_Margins" xml:space="preserve">
+    <value>Page Margins</value>
+  </data>
+  <data name="Report_ModulesClasses" xml:space="preserve">
+    <value>ModulesClasses</value>
+  </data>
+  <data name="Report_PageFooter" xml:space="preserve">
+    <value>PageFooter</value>
+  </data>
+  <data name="Report_PageHeader" xml:space="preserve">
+    <value>PageHeader</value>
+  </data>
+  <data name="Report_PageHeight" xml:space="preserve">
+    <value>PageHeight</value>
+  </data>
+  <data name="Report_PageWidth" xml:space="preserve">
+    <value>PageWidth</value>
+  </data>
+  <data name="Report_Parameters" xml:space="preserve">
+    <value>Parameters</value>
+  </data>
+  <data name="Report_Width" xml:space="preserve">
+    <value>Width</value>
+  </data>
+  <data name="Size_Height" xml:space="preserve">
+    <value>Height</value>
+  </data>
+  <data name="Size_Width" xml:space="preserve">
+    <value>Width</value>
+  </data>
+  <data name="Subreport_MergeTransactions" xml:space="preserve">
+    <value>MergeTransactions</value>
+  </data>
+  <data name="Subreport_NoRows" xml:space="preserve">
+    <value>NoRows</value>
+  </data>
+  <data name="Subreport_Parameters" xml:space="preserve">
+    <value>Parameters</value>
+  </data>
+  <data name="Subreport_ReportName" xml:space="preserve">
+    <value>ReportName</value>
+  </data>
+  <data name="Textbox_Appearance" xml:space="preserve">
+    <value>Appearance</value>
+  </data>
+  <data name="Textbox_CanGrow" xml:space="preserve">
+    <value>CanGrow</value>
+  </data>
+  <data name="Textbox_CanShrink" xml:space="preserve">
+    <value>CanShrink</value>
+  </data>
+  <data name="Textbox_DataElementStyle" xml:space="preserve">
+    <value>DataElementStyle</value>
+  </data>
+  <data name="Textbox_HideDuplicates" xml:space="preserve">
+    <value>HideDuplicates</value>
+  </data>
+  <data name="Textbox_Value" xml:space="preserve">
+    <value>Value</value>
+  </data>
+</root>

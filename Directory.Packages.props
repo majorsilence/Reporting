@@ -59,13 +59,20 @@
     <PackageVersion Include="XamlNameReferenceGenerator" Version="1.3.4" />
   </ItemGroup>
   <ItemGroup>
-    <!-- Majorsilence.Forms migration track (Track D). 26.0.1 is packed locally from
-         ../Modern.Forms source (see nuget.config and MIGRATION-NOTES.md): it adds Pen.Dispose,
-         Form.Width/Height, TextBox.PreferredHeight, LinearGradientBrush(..., LinearGradientMode),
-         DrawLine(Pen, float x1, y1, x2, y2), and a real tension-aware DrawCurve overload, none of
-         which are in the 26.0.0 published on nuget.org yet. -->
-    <PackageVersion Include="Majorsilence.Forms" Version="26.0.1" />
-    <PackageVersion Include="Majorsilence.Forms.Avalonia" Version="26.0.1" />
-    <PackageVersion Include="Majorsilence.Forms.Headless" Version="26.0.1" />
+    <!-- Majorsilence.Forms migration track (Track D). 26.0.3 is packed locally from
+         ../Modern.Forms source (see nuget.config and MIGRATION-NOTES.md): 26.0.1 added
+         Pen.Dispose, Form.Width/Height, TextBox.PreferredHeight, LinearGradientBrush(...,
+         LinearGradientMode), DrawLine(Pen, float x1, y1, x2, y2), and a real tension-aware
+         DrawCurve overload; 26.0.2 (from D4/RdlDesign) added FileSystemDialog.Dispose,
+         ToolStripTextBox.Focused/Validated/KeyDown/Cut/Copy/Paste/Undo/SelectAll,
+         ToolStripComboBox.Validated/Width, ToolStripLabel.MouseEnter/MouseLeave (stub),
+         ToolStripButton.CheckStateChanged, and StatusStrip/ContextMenuStrip.ImageScalingSize;
+         26.0.3 added Control : IWin32Window (Handle => IntPtr.Zero, so `MessageBox.Show(this,
+         ...)`/`dlg.ShowDialog(this)` compile when `this` is any Control, not just Form) and
+         IDataObject.GetData/GetDataPresent/SetData(DataFormat, ...) default-interface-method
+         overloads. None of this is in the 26.0.0 published on nuget.org yet. -->
+    <PackageVersion Include="Majorsilence.Forms" Version="26.0.3" />
+    <PackageVersion Include="Majorsilence.Forms.Avalonia" Version="26.0.3" />
+    <PackageVersion Include="Majorsilence.Forms.Headless" Version="26.0.3" />
   </ItemGroup>
 </Project>

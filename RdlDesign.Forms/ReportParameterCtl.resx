@@ -1,0 +1,969 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="&gt;&gt;bAdd.Name" xml:space="preserve">
+    <value>bAdd</value>
+  </data>
+  <assembly alias="System.Drawing" name="System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+  <data name="lDefaultValueFields.Size" type="System.Drawing.Size, System.Drawing">
+    <value>67, 21</value>
+  </data>
+  <data name="&gt;&gt;cbDefaultDataSets.Parent" xml:space="preserve">
+    <value>gbDefaultValues</value>
+  </data>
+  <data name="&gt;&gt;bAdd.Parent" xml:space="preserve">
+    <value>$this</value>
+  </data>
+  <data name="&gt;&gt;bValidValues.Name" xml:space="preserve">
+    <value>bValidValues</value>
+  </data>
+  <data name="&gt;&gt;cbValidDataSets.ZOrder" xml:space="preserve">
+    <value>5</value>
+  </data>
+  <data name="&gt;&gt;cbParmType.Name" xml:space="preserve">
+    <value>cbParmType</value>
+  </data>
+  <data name="lDisplayField.Size" type="System.Drawing.Size, System.Drawing">
+    <value>72, 16</value>
+  </data>
+  <data name="&gt;&gt;tbParmPrompt.Name" xml:space="preserve">
+    <value>tbParmPrompt</value>
+  </data>
+  <data name="&gt;&gt;tbParmName.Name" xml:space="preserve">
+    <value>tbParmName</value>
+  </data>
+  <data name="rbDefaultValues.Location" type="System.Drawing.Point, System.Drawing">
+    <value>6, 19</value>
+  </data>
+  <data name="bAdd.Location" type="System.Drawing.Point, System.Drawing">
+    <value>3, 276</value>
+  </data>
+  <data name="&gt;&gt;cbValidDisplayField.Parent" xml:space="preserve">
+    <value>gbValidValues</value>
+  </data>
+  <data name="&gt;&gt;rbDataSet.Name" xml:space="preserve">
+    <value>rbDataSet</value>
+  </data>
+  <data name="cbParmType.Items" xml:space="preserve">
+    <value>Boolean</value>
+  </data>
+  <data name="tbParmPrompt.Size" type="System.Drawing.Size, System.Drawing">
+    <value>260, 20</value>
+  </data>
+  <data name="&gt;&gt;cbValidDisplayField.ZOrder" xml:space="preserve">
+    <value>0</value>
+  </data>
+  <assembly alias="mscorlib" name="mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
+  <data name="cbValidDataSets.Visible" type="System.Boolean, mscorlib">
+    <value>False</value>
+  </data>
+  <data name="&gt;&gt;ckbParmAllowNull.Type" xml:space="preserve">
+    <value>System.Windows.Forms.CheckBox, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;cbValidDataSets.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ComboBox, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;gbPropertyEdit.Name" xml:space="preserve">
+    <value>gbPropertyEdit</value>
+  </data>
+  <data name="&gt;&gt;ckbParmMultiValue.Type" xml:space="preserve">
+    <value>System.Windows.Forms.CheckBox, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="lDefaultValueFields.Visible" type="System.Boolean, mscorlib">
+    <value>False</value>
+  </data>
+  <data name="gbPropertyEdit.Location" type="System.Drawing.Point, System.Drawing">
+    <value>163, -4</value>
+  </data>
+  <data name="cbValidDataSets.Size" type="System.Drawing.Size, System.Drawing">
+    <value>112, 21</value>
+  </data>
+  <data name="&gt;&gt;lParmType.ZOrder" xml:space="preserve">
+    <value>7</value>
+  </data>
+  <data name="lDisplayField.Location" type="System.Drawing.Point, System.Drawing">
+    <value>223, 86</value>
+  </data>
+  <data name="cbValidDisplayField.Location" type="System.Drawing.Point, System.Drawing">
+    <value>301, 83</value>
+  </data>
+  <data name="lValidValuesField.Visible" type="System.Boolean, mscorlib">
+    <value>False</value>
+  </data>
+  <data name="&gt;&gt;cbDefaultDataSets.ZOrder" xml:space="preserve">
+    <value>4</value>
+  </data>
+  <data name="ckbParmAllowBlank.TabIndex" type="System.Int32, mscorlib">
+    <value>51</value>
+  </data>
+  <data name="bRemove.TabIndex" type="System.Int32, mscorlib">
+    <value>28</value>
+  </data>
+  <data name="lParmPrompt.Text" xml:space="preserve">
+    <value>Prompt</value>
+  </data>
+  <data name="lParmType.Text" xml:space="preserve">
+    <value>Datatype</value>
+  </data>
+  <data name="tbParmDefaultValue.Location" type="System.Drawing.Point, System.Drawing">
+    <value>76, 19</value>
+  </data>
+  <data name="&gt;&gt;tbParmDefaultValue.Type" xml:space="preserve">
+    <value>System.Windows.Forms.TextBox, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;cbDefaultDataSets.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ComboBox, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="lParmName.Size" type="System.Drawing.Size, System.Drawing">
+    <value>45, 19</value>
+  </data>
+  <data name="rbValues.Size" type="System.Drawing.Size, System.Drawing">
+    <value>64, 20</value>
+  </data>
+  <data name="rbDataSet.Location" type="System.Drawing.Point, System.Drawing">
+    <value>6, 46</value>
+  </data>
+  <data name="&gt;&gt;cbDefaultValueField.Name" xml:space="preserve">
+    <value>cbDefaultValueField</value>
+  </data>
+  <data name="&gt;&gt;ckbParmAllowBlank.Name" xml:space="preserve">
+    <value>ckbParmAllowBlank</value>
+  </data>
+  <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
+  <data name="gbPropertyEdit.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
+    <value>1, 1, 1, 1</value>
+  </data>
+  <data name="bValidValues.Text" xml:space="preserve">
+    <value>...</value>
+  </data>
+  <data name="&gt;&gt;bParmDown.Parent" xml:space="preserve">
+    <value>$this</value>
+  </data>
+  <data name="&gt;&gt;lValidValuesField.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Label, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="lParmType.Size" type="System.Drawing.Size, System.Drawing">
+    <value>56, 21</value>
+  </data>
+  <data name="rbDefaultDataSetName.Text" xml:space="preserve">
+    <value>DataSet Name</value>
+  </data>
+  <data name="cbDefaultDataSets.Visible" type="System.Boolean, mscorlib">
+    <value>False</value>
+  </data>
+  <data name="tbParmName.TabIndex" type="System.Int32, mscorlib">
+    <value>47</value>
+  </data>
+  <data name="&gt;&gt;lDisplayField.ZOrder" xml:space="preserve">
+    <value>3</value>
+  </data>
+  <data name="cbParmType.TabIndex" type="System.Int32, mscorlib">
+    <value>48</value>
+  </data>
+  <data name="lParmType.TextAlign" type="System.Drawing.ContentAlignment, System.Drawing">
+    <value>MiddleRight</value>
+  </data>
+  <data name="tbParmValidValues.TabIndex" type="System.Int32, mscorlib">
+    <value>1</value>
+  </data>
+  <data name="gbDefaultValues.Text" xml:space="preserve">
+    <value>Default Values</value>
+  </data>
+  <data name="&gt;&gt;gbValidValues.ZOrder" xml:space="preserve">
+    <value>1</value>
+  </data>
+  <data name="&gt;&gt;tbParmDefaultValue.Name" xml:space="preserve">
+    <value>tbParmDefaultValue</value>
+  </data>
+  <data name="lParmPrompt.TabIndex" type="System.Int32, mscorlib">
+    <value>56</value>
+  </data>
+  <data name="&gt;&gt;bParmUp.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Button, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;cbValidDataSets.Parent" xml:space="preserve">
+    <value>gbValidValues</value>
+  </data>
+  <data name="bParmDown.TabIndex" type="System.Int32, mscorlib">
+    <value>48</value>
+  </data>
+  <data name="&gt;&gt;tbParmPrompt.Type" xml:space="preserve">
+    <value>System.Windows.Forms.TextBox, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;cbParmType.ZOrder" xml:space="preserve">
+    <value>6</value>
+  </data>
+  <data name="cbValidFields.Location" type="System.Drawing.Point, System.Drawing">
+    <value>301, 46</value>
+  </data>
+  <data name="&gt;&gt;tbParmValidValues.Name" xml:space="preserve">
+    <value>tbParmValidValues</value>
+  </data>
+  <data name="lDisplayField.Visible" type="System.Boolean, mscorlib">
+    <value>False</value>
+  </data>
+  <data name="&gt;&gt;tbParmValidValues.Parent" xml:space="preserve">
+    <value>gbValidValues</value>
+  </data>
+  <data name="&gt;&gt;rbDefaultValues.ZOrder" xml:space="preserve">
+    <value>5</value>
+  </data>
+  <data name="&gt;&gt;rbDefaultValues.Parent" xml:space="preserve">
+    <value>gbDefaultValues</value>
+  </data>
+  <data name="gbPropertyEdit.Padding" type="System.Windows.Forms.Padding, System.Windows.Forms">
+    <value>1, 1, 1, 1</value>
+  </data>
+  <data name="bParmDown.Text" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="&gt;&gt;bAdd.ZOrder" xml:space="preserve">
+    <value>4</value>
+  </data>
+  <data name="&gt;&gt;bValidValues.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Button, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="rbDataSet.Visible" type="System.Boolean, mscorlib">
+    <value>False</value>
+  </data>
+  <data name="&gt;&gt;lValidValuesField.Parent" xml:space="preserve">
+    <value>gbValidValues</value>
+  </data>
+  <data name="&gt;&gt;bRemove.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Button, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="lDisplayField.TabIndex" type="System.Int32, mscorlib">
+    <value>37</value>
+  </data>
+  <data name="&gt;&gt;gbDefaultValues.ZOrder" xml:space="preserve">
+    <value>10</value>
+  </data>
+  <data name="&gt;&gt;rbDefaultDataSetName.ZOrder" xml:space="preserve">
+    <value>6</value>
+  </data>
+  <data name="cbDefaultDataSets.TabIndex" type="System.Int32, mscorlib">
+    <value>4</value>
+  </data>
+  <data name="lValidValuesField.Location" type="System.Drawing.Point, System.Drawing">
+    <value>226, 47</value>
+  </data>
+  <data name="bParmUp.Size" type="System.Drawing.Size, System.Drawing">
+    <value>24, 24</value>
+  </data>
+  <data name="lParmPrompt.ImageAlign" type="System.Drawing.ContentAlignment, System.Drawing">
+    <value>MiddleLeft</value>
+  </data>
+  <data name="&gt;&gt;tbParmName.ZOrder" xml:space="preserve">
+    <value>8</value>
+  </data>
+  <data name="gbDefaultValues.Size" type="System.Drawing.Size, System.Drawing">
+    <value>431, 88</value>
+  </data>
+  <data name="&gt;&gt;bDefaultValues.Parent" xml:space="preserve">
+    <value>gbDefaultValues</value>
+  </data>
+  <data name="&gt;&gt;lParmName.Name" xml:space="preserve">
+    <value>lParmName</value>
+  </data>
+  <data name="&gt;&gt;bParmDown.Name" xml:space="preserve">
+    <value>bParmDown</value>
+  </data>
+  <data name="lbParameters.Location" type="System.Drawing.Point, System.Drawing">
+    <value>3, 3</value>
+  </data>
+  <data name="cbValidDisplayField.Visible" type="System.Boolean, mscorlib">
+    <value>False</value>
+  </data>
+  <data name="lDisplayField.Text" xml:space="preserve">
+    <value>Display Field</value>
+  </data>
+  <data name="&gt;&gt;lParmType.Parent" xml:space="preserve">
+    <value>gbPropertyEdit</value>
+  </data>
+  <data name="&gt;&gt;rbDefaultValues.Type" xml:space="preserve">
+    <value>System.Windows.Forms.RadioButton, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="gbDefaultValues.TabIndex" type="System.Int32, mscorlib">
+    <value>52</value>
+  </data>
+  <data name="&gt;&gt;gbPropertyEdit.ZOrder" xml:space="preserve">
+    <value>0</value>
+  </data>
+  <data name="tbParmValidValues.Size" type="System.Drawing.Size, System.Drawing">
+    <value>313, 20</value>
+  </data>
+  <data name="&gt;&gt;cbValidFields.Parent" xml:space="preserve">
+    <value>gbValidValues</value>
+  </data>
+  <data name="&gt;&gt;cbDefaultValueField.ZOrder" xml:space="preserve">
+    <value>0</value>
+  </data>
+  <data name="lDefaultValueFields.TextAlign" type="System.Drawing.ContentAlignment, System.Drawing">
+    <value>MiddleLeft</value>
+  </data>
+  <data name="&gt;&gt;cbValidDisplayField.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ComboBox, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;$this.Name" xml:space="preserve">
+    <value>ReportParameterCtl</value>
+  </data>
+  <data name="&gt;&gt;lValidValuesField.Name" xml:space="preserve">
+    <value>lValidValuesField</value>
+  </data>
+  <data name="rbValues.Text" xml:space="preserve">
+    <value>Values</value>
+  </data>
+  <data name="&gt;&gt;rbDefaultDataSetName.Name" xml:space="preserve">
+    <value>rbDefaultDataSetName</value>
+  </data>
+  <data name="&gt;&gt;lParmName.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Label, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="tbParmPrompt.Location" type="System.Drawing.Point, System.Drawing">
+    <value>55, 37</value>
+  </data>
+  <data name="cbDefaultDataSets.Location" type="System.Drawing.Point, System.Drawing">
+    <value>108, 46</value>
+  </data>
+  <data name="&gt;&gt;tbParmValidValues.ZOrder" xml:space="preserve">
+    <value>8</value>
+  </data>
+  <data name="rbDefaultDataSetName.Size" type="System.Drawing.Size, System.Drawing">
+    <value>100, 21</value>
+  </data>
+  <data name="bParmUp.Font" type="System.Drawing.Font, System.Drawing">
+    <value>Wingdings, 8.25pt, style=Bold</value>
+  </data>
+  <data name="&gt;&gt;bDefaultValues.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Button, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;rbDefaultDataSetName.Parent" xml:space="preserve">
+    <value>gbDefaultValues</value>
+  </data>
+  <data name="tbParmName.Size" type="System.Drawing.Size, System.Drawing">
+    <value>96, 20</value>
+  </data>
+  <data name="tbParmDefaultValue.Size" type="System.Drawing.Size, System.Drawing">
+    <value>313, 20</value>
+  </data>
+  <data name="gbPropertyEdit.Size" type="System.Drawing.Size, System.Drawing">
+    <value>443, 303</value>
+  </data>
+  <data name="&gt;&gt;ckbParmAllowNull.Parent" xml:space="preserve">
+    <value>gbPropertyEdit</value>
+  </data>
+  <data name="&gt;&gt;lbParameters.Name" xml:space="preserve">
+    <value>lbParameters</value>
+  </data>
+  <data name="&gt;&gt;gbDefaultValues.Name" xml:space="preserve">
+    <value>gbDefaultValues</value>
+  </data>
+  <data name="&gt;&gt;cbParmType.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ComboBox, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="lParmPrompt.Location" type="System.Drawing.Point, System.Drawing">
+    <value>4, 38</value>
+  </data>
+  <data name="rbValues.TabIndex" type="System.Int32, mscorlib">
+    <value>0</value>
+  </data>
+  <data name="cbValidFields.Size" type="System.Drawing.Size, System.Drawing">
+    <value>124, 21</value>
+  </data>
+  <data name="&gt;&gt;rbDefaultDataSetName.Type" xml:space="preserve">
+    <value>System.Windows.Forms.RadioButton, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="bRemove.Location" type="System.Drawing.Point, System.Drawing">
+    <value>69, 276</value>
+  </data>
+  <data name="&gt;&gt;cbValidFields.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ComboBox, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;lParmPrompt.Parent" xml:space="preserve">
+    <value>gbPropertyEdit</value>
+  </data>
+  <data name="lDefaultValueFields.Location" type="System.Drawing.Point, System.Drawing">
+    <value>226, 46</value>
+  </data>
+  <data name="ckbParmAllowBlank.Text" xml:space="preserve">
+    <value>Allow blank (strings only)</value>
+  </data>
+  <data name="&gt;&gt;bRemove.Parent" xml:space="preserve">
+    <value>$this</value>
+  </data>
+  <data name="bAdd.Text" xml:space="preserve">
+    <value>Add</value>
+  </data>
+  <data name="&gt;&gt;cbDefaultDataSets.Name" xml:space="preserve">
+    <value>cbDefaultDataSets</value>
+  </data>
+  <data name="cbValidFields.TabIndex" type="System.Int32, mscorlib">
+    <value>5</value>
+  </data>
+  <data name="&gt;&gt;rbValues.Name" xml:space="preserve">
+    <value>rbValues</value>
+  </data>
+  <data name="&gt;&gt;lParmName.ZOrder" xml:space="preserve">
+    <value>9</value>
+  </data>
+  <data name="gbValidValues.Location" type="System.Drawing.Point, System.Drawing">
+    <value>4, 187</value>
+  </data>
+  <data name="&gt;&gt;lParmType.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Label, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;rbValues.Type" xml:space="preserve">
+    <value>System.Windows.Forms.RadioButton, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;cbValidFields.Name" xml:space="preserve">
+    <value>cbValidFields</value>
+  </data>
+  <data name="&gt;&gt;lDisplayField.Parent" xml:space="preserve">
+    <value>gbValidValues</value>
+  </data>
+  <data name="cbDefaultValueField.Size" type="System.Drawing.Size, System.Drawing">
+    <value>124, 21</value>
+  </data>
+  <data name="&gt;&gt;lParmPrompt.ZOrder" xml:space="preserve">
+    <value>5</value>
+  </data>
+  <data name="gbValidValues.Size" type="System.Drawing.Size, System.Drawing">
+    <value>431, 108</value>
+  </data>
+  <data name="cbDefaultValueField.TabIndex" type="System.Int32, mscorlib">
+    <value>5</value>
+  </data>
+  <data name="cbValidDisplayField.Size" type="System.Drawing.Size, System.Drawing">
+    <value>124, 21</value>
+  </data>
+  <data name="&gt;&gt;rbDefaultValues.Name" xml:space="preserve">
+    <value>rbDefaultValues</value>
+  </data>
+  <data name="&gt;&gt;gbPropertyEdit.Type" xml:space="preserve">
+    <value>System.Windows.Forms.GroupBox, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="cbDefaultValueField.Location" type="System.Drawing.Point, System.Drawing">
+    <value>301, 46</value>
+  </data>
+  <data name="&gt;&gt;tbParmDefaultValue.Parent" xml:space="preserve">
+    <value>gbDefaultValues</value>
+  </data>
+  <data name="&gt;&gt;lDefaultValueFields.Parent" xml:space="preserve">
+    <value>gbDefaultValues</value>
+  </data>
+  <data name="tbParmPrompt.TabIndex" type="System.Int32, mscorlib">
+    <value>49</value>
+  </data>
+  <data name="lValidValuesField.Text" xml:space="preserve">
+    <value>Value Field</value>
+  </data>
+  <data name="lParmName.Text" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="bParmDown.Location" type="System.Drawing.Point, System.Drawing">
+    <value>135, 43</value>
+  </data>
+  <data name="&gt;&gt;ckbParmAllowBlank.Parent" xml:space="preserve">
+    <value>gbPropertyEdit</value>
+  </data>
+  <data name="&gt;&gt;lParmPrompt.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Label, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;cbParmType.Parent" xml:space="preserve">
+    <value>gbPropertyEdit</value>
+  </data>
+  <data name="cbParmType.Items1" xml:space="preserve">
+    <value>DateTime</value>
+  </data>
+  <data name="bAdd.Size" type="System.Drawing.Size, System.Drawing">
+    <value>60, 23</value>
+  </data>
+  <data name="cbParmType.Items2" xml:space="preserve">
+    <value>Integer</value>
+  </data>
+  <data name="rbDefaultDataSetName.TabIndex" type="System.Int32, mscorlib">
+    <value>3</value>
+  </data>
+  <data name="gbValidValues.Text" xml:space="preserve">
+    <value>Valid Values</value>
+  </data>
+  <data name="&gt;&gt;lDefaultValueFields.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Label, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;lbParameters.ZOrder" xml:space="preserve">
+    <value>3</value>
+  </data>
+  <data name="bParmUp.TabIndex" type="System.Int32, mscorlib">
+    <value>47</value>
+  </data>
+  <data name="&gt;&gt;tbParmPrompt.ZOrder" xml:space="preserve">
+    <value>4</value>
+  </data>
+  <data name="&gt;&gt;lDefaultValueFields.Name" xml:space="preserve">
+    <value>lDefaultValueFields</value>
+  </data>
+  <data name="bValidValues.Location" type="System.Drawing.Point, System.Drawing">
+    <value>395, 16</value>
+  </data>
+  <data name="&gt;&gt;lDisplayField.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Label, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;bParmDown.ZOrder" xml:space="preserve">
+    <value>1</value>
+  </data>
+  <data name="rbDefaultValues.Size" type="System.Drawing.Size, System.Drawing">
+    <value>64, 20</value>
+  </data>
+  <data name="&gt;&gt;ckbParmMultiValue.Parent" xml:space="preserve">
+    <value>gbPropertyEdit</value>
+  </data>
+  <data name="&gt;&gt;cbValidFields.ZOrder" xml:space="preserve">
+    <value>1</value>
+  </data>
+  <data name="rbDefaultDataSetName.Visible" type="System.Boolean, mscorlib">
+    <value>False</value>
+  </data>
+  <data name="rbValues.Location" type="System.Drawing.Point, System.Drawing">
+    <value>6, 19</value>
+  </data>
+  <data name="&gt;&gt;lbParameters.Parent" xml:space="preserve">
+    <value>$this</value>
+  </data>
+  <data name="&gt;&gt;lParmPrompt.Name" xml:space="preserve">
+    <value>lParmPrompt</value>
+  </data>
+  <data name="lParmName.TextAlign" type="System.Drawing.ContentAlignment, System.Drawing">
+    <value>MiddleLeft</value>
+  </data>
+  <data name="ckbParmMultiValue.Text" xml:space="preserve">
+    <value>MultiValue</value>
+  </data>
+  <data name="rbDataSet.Size" type="System.Drawing.Size, System.Drawing">
+    <value>100, 21</value>
+  </data>
+  <data name="tbParmValidValues.Location" type="System.Drawing.Point, System.Drawing">
+    <value>76, 19</value>
+  </data>
+  <data name="cbDefaultDataSets.Size" type="System.Drawing.Size, System.Drawing">
+    <value>112, 21</value>
+  </data>
+  <data name="&gt;&gt;lbParameters.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ListBox, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;bRemove.ZOrder" xml:space="preserve">
+    <value>5</value>
+  </data>
+  <data name="&gt;&gt;bDefaultValues.ZOrder" xml:space="preserve">
+    <value>2</value>
+  </data>
+  <data name="&gt;&gt;cbDefaultValueField.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ComboBox, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;ckbParmAllowNull.ZOrder" xml:space="preserve">
+    <value>3</value>
+  </data>
+  <data name="&gt;&gt;rbValues.ZOrder" xml:space="preserve">
+    <value>6</value>
+  </data>
+  <data name="ckbParmMultiValue.TabIndex" type="System.Int32, mscorlib">
+    <value>57</value>
+  </data>
+  <data name="$this.Size" type="System.Drawing.Size, System.Drawing">
+    <value>614, 305</value>
+  </data>
+  <data name="&gt;&gt;lValidValuesField.ZOrder" xml:space="preserve">
+    <value>4</value>
+  </data>
+  <data name="&gt;&gt;$this.Type" xml:space="preserve">
+    <value>System.Windows.Forms.UserControl, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="bValidValues.TabIndex" type="System.Int32, mscorlib">
+    <value>2</value>
+  </data>
+  <data name="lParmName.Location" type="System.Drawing.Point, System.Drawing">
+    <value>4, 12</value>
+  </data>
+  <data name="ckbParmMultiValue.Size" type="System.Drawing.Size, System.Drawing">
+    <value>79, 24</value>
+  </data>
+  <data name="&gt;&gt;cbValidDataSets.Name" xml:space="preserve">
+    <value>cbValidDataSets</value>
+  </data>
+  <data name="&gt;&gt;lParmType.Name" xml:space="preserve">
+    <value>lParmType</value>
+  </data>
+  <data name="lParmType.TabIndex" type="System.Int32, mscorlib">
+    <value>55</value>
+  </data>
+  <data name="tbParmDefaultValue.TabIndex" type="System.Int32, mscorlib">
+    <value>1</value>
+  </data>
+  <data name="&gt;&gt;bValidValues.ZOrder" xml:space="preserve">
+    <value>2</value>
+  </data>
+  <data name="&gt;&gt;tbParmName.Parent" xml:space="preserve">
+    <value>gbPropertyEdit</value>
+  </data>
+  <data name="&gt;&gt;bParmUp.ZOrder" xml:space="preserve">
+    <value>2</value>
+  </data>
+  <data name="&gt;&gt;lDisplayField.Name" xml:space="preserve">
+    <value>lDisplayField</value>
+  </data>
+  <data name="lValidValuesField.TextAlign" type="System.Drawing.ContentAlignment, System.Drawing">
+    <value>MiddleLeft</value>
+  </data>
+  <data name="&gt;&gt;cbValidDisplayField.Name" xml:space="preserve">
+    <value>cbValidDisplayField</value>
+  </data>
+  <data name="&gt;&gt;gbDefaultValues.Type" xml:space="preserve">
+    <value>System.Windows.Forms.GroupBox, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;rbDataSet.Type" xml:space="preserve">
+    <value>System.Windows.Forms.RadioButton, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="bRemove.Text" xml:space="preserve">
+    <value>Remove</value>
+  </data>
+  <data name="lParmPrompt.TextAlign" type="System.Drawing.ContentAlignment, System.Drawing">
+    <value>MiddleLeft</value>
+  </data>
+  <data name="lDefaultValueFields.Text" xml:space="preserve">
+    <value>Value Field</value>
+  </data>
+  <data name="ckbParmAllowBlank.Location" type="System.Drawing.Point, System.Drawing">
+    <value>82, 63</value>
+  </data>
+  <data name="bDefaultValues.Location" type="System.Drawing.Point, System.Drawing">
+    <value>395, 18</value>
+  </data>
+  <data name="&gt;&gt;tbParmValidValues.Type" xml:space="preserve">
+    <value>System.Windows.Forms.TextBox, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="bValidValues.Size" type="System.Drawing.Size, System.Drawing">
+    <value>30, 23</value>
+  </data>
+  <data name="bDefaultValues.Size" type="System.Drawing.Size, System.Drawing">
+    <value>30, 23</value>
+  </data>
+  <data name="&gt;&gt;bDefaultValues.Name" xml:space="preserve">
+    <value>bDefaultValues</value>
+  </data>
+  <data name="cbValidDataSets.Location" type="System.Drawing.Point, System.Drawing">
+    <value>108, 46</value>
+  </data>
+  <data name="ckbParmAllowNull.TabIndex" type="System.Int32, mscorlib">
+    <value>50</value>
+  </data>
+  <data name="ckbParmAllowBlank.Size" type="System.Drawing.Size, System.Drawing">
+    <value>148, 24</value>
+  </data>
+  <data name="&gt;&gt;tbParmPrompt.Parent" xml:space="preserve">
+    <value>gbPropertyEdit</value>
+  </data>
+  <data name="&gt;&gt;ckbParmAllowBlank.ZOrder" xml:space="preserve">
+    <value>2</value>
+  </data>
+  <data name="&gt;&gt;bAdd.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Button, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;gbDefaultValues.Parent" xml:space="preserve">
+    <value>gbPropertyEdit</value>
+  </data>
+  <data name="lbParameters.TabIndex" type="System.Int32, mscorlib">
+    <value>26</value>
+  </data>
+  <data name="ckbParmMultiValue.Location" type="System.Drawing.Point, System.Drawing">
+    <value>236, 63</value>
+  </data>
+  <data name="lValidValuesField.Size" type="System.Drawing.Size, System.Drawing">
+    <value>66, 18</value>
+  </data>
+  <data name="cbParmType.Size" type="System.Drawing.Size, System.Drawing">
+    <value>87, 21</value>
+  </data>
+  <data name="&gt;&gt;rbValues.Parent" xml:space="preserve">
+    <value>gbValidValues</value>
+  </data>
+  <data name="bParmDown.Size" type="System.Drawing.Size, System.Drawing">
+    <value>24, 24</value>
+  </data>
+  <data name="bAdd.TabIndex" type="System.Int32, mscorlib">
+    <value>27</value>
+  </data>
+  <data name="&gt;&gt;bParmDown.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Button, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;ckbParmAllowNull.Name" xml:space="preserve">
+    <value>ckbParmAllowNull</value>
+  </data>
+  <data name="&gt;&gt;gbValidValues.Type" xml:space="preserve">
+    <value>System.Windows.Forms.GroupBox, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="bDefaultValues.Text" xml:space="preserve">
+    <value>...</value>
+  </data>
+  <data name="bParmUp.Location" type="System.Drawing.Point, System.Drawing">
+    <value>135, 3</value>
+  </data>
+  <data name="bDefaultValues.TabIndex" type="System.Int32, mscorlib">
+    <value>2</value>
+  </data>
+  <data name="rbDefaultValues.Text" xml:space="preserve">
+    <value>Values</value>
+  </data>
+  <data name="&gt;&gt;bParmUp.Parent" xml:space="preserve">
+    <value>$this</value>
+  </data>
+  <data name="ckbParmAllowNull.Size" type="System.Drawing.Size, System.Drawing">
+    <value>72, 24</value>
+  </data>
+  <data name="&gt;&gt;cbDefaultValueField.Parent" xml:space="preserve">
+    <value>gbDefaultValues</value>
+  </data>
+  <data name="&gt;&gt;ckbParmMultiValue.Name" xml:space="preserve">
+    <value>ckbParmMultiValue</value>
+  </data>
+  <data name="lParmType.Location" type="System.Drawing.Point, System.Drawing">
+    <value>157, 10</value>
+  </data>
+  <data name="&gt;&gt;bParmUp.Name" xml:space="preserve">
+    <value>bParmUp</value>
+  </data>
+  <data name="cbParmType.Items3" xml:space="preserve">
+    <value>Float</value>
+  </data>
+  <data name="&gt;&gt;lParmName.Parent" xml:space="preserve">
+    <value>gbPropertyEdit</value>
+  </data>
+  <data name="lParmName.TabIndex" type="System.Int32, mscorlib">
+    <value>54</value>
+  </data>
+  <data name="&gt;&gt;bRemove.Name" xml:space="preserve">
+    <value>bRemove</value>
+  </data>
+  <data name="&gt;&gt;bValidValues.Parent" xml:space="preserve">
+    <value>gbValidValues</value>
+  </data>
+  <data name="gbPropertyEdit.Enabled" type="System.Boolean, mscorlib">
+    <value>False</value>
+  </data>
+  <data name="rbDataSet.Text" xml:space="preserve">
+    <value>Data Set Name</value>
+  </data>
+  <data name="bParmUp.Text" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="ckbParmAllowNull.Location" type="System.Drawing.Point, System.Drawing">
+    <value>4, 63</value>
+  </data>
+  <data name="&gt;&gt;gbValidValues.Parent" xml:space="preserve">
+    <value>gbPropertyEdit</value>
+  </data>
+  <data name="&gt;&gt;rbDataSet.Parent" xml:space="preserve">
+    <value>gbValidValues</value>
+  </data>
+  <data name="cbDefaultValueField.Visible" type="System.Boolean, mscorlib">
+    <value>False</value>
+  </data>
+  <data name="lParmPrompt.Size" type="System.Drawing.Size, System.Drawing">
+    <value>48, 19</value>
+  </data>
+  <data name="cbParmType.Location" type="System.Drawing.Point, System.Drawing">
+    <value>228, 10</value>
+  </data>
+  <data name="bParmDown.Font" type="System.Drawing.Font, System.Drawing">
+    <value>Wingdings, 8.25pt, style=Bold</value>
+  </data>
+  <data name="&gt;&gt;rbDataSet.ZOrder" xml:space="preserve">
+    <value>7</value>
+  </data>
+  <data name="&gt;&gt;ckbParmAllowBlank.Type" xml:space="preserve">
+    <value>System.Windows.Forms.CheckBox, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;ckbParmMultiValue.ZOrder" xml:space="preserve">
+    <value>0</value>
+  </data>
+  <data name="&gt;&gt;gbValidValues.Name" xml:space="preserve">
+    <value>gbValidValues</value>
+  </data>
+  <data name="&gt;&gt;gbPropertyEdit.Parent" xml:space="preserve">
+    <value>$this</value>
+  </data>
+  <data name="cbValidDataSets.TabIndex" type="System.Int32, mscorlib">
+    <value>4</value>
+  </data>
+  <data name="rbDefaultValues.TabIndex" type="System.Int32, mscorlib">
+    <value>0</value>
+  </data>
+  <data name="lValidValuesField.TabIndex" type="System.Int32, mscorlib">
+    <value>35</value>
+  </data>
+  <data name="bRemove.Size" type="System.Drawing.Size, System.Drawing">
+    <value>60, 23</value>
+  </data>
+  <data name="cbValidDisplayField.TabIndex" type="System.Int32, mscorlib">
+    <value>6</value>
+  </data>
+  <data name="cbValidFields.Visible" type="System.Boolean, mscorlib">
+    <value>False</value>
+  </data>
+  <data name="lDefaultValueFields.TabIndex" type="System.Int32, mscorlib">
+    <value>35</value>
+  </data>
+  <data name="rbDefaultDataSetName.Location" type="System.Drawing.Point, System.Drawing">
+    <value>6, 46</value>
+  </data>
+  <data name="&gt;&gt;tbParmDefaultValue.ZOrder" xml:space="preserve">
+    <value>1</value>
+  </data>
+  <data name="cbParmType.Items4" xml:space="preserve">
+    <value>String</value>
+  </data>
+  <data name="ckbParmAllowNull.Text" xml:space="preserve">
+    <value>Allow null</value>
+  </data>
+  <data name="&gt;&gt;tbParmName.Type" xml:space="preserve">
+    <value>System.Windows.Forms.TextBox, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="gbValidValues.TabIndex" type="System.Int32, mscorlib">
+    <value>53</value>
+  </data>
+  <data name="rbDataSet.TabIndex" type="System.Int32, mscorlib">
+    <value>3</value>
+  </data>
+  <data name="gbDefaultValues.Location" type="System.Drawing.Point, System.Drawing">
+    <value>4, 93</value>
+  </data>
+  <data name="tbParmName.Location" type="System.Drawing.Point, System.Drawing">
+    <value>55, 11</value>
+  </data>
+  <data name="lbParameters.Size" type="System.Drawing.Size, System.Drawing">
+    <value>126, 264</value>
+  </data>
+  <data name="gbPropertyEdit.TabIndex" type="System.Int32, mscorlib">
+    <value>49</value>
+  </data>
+  <data name="&gt;&gt;lDefaultValueFields.ZOrder" xml:space="preserve">
+    <value>3</value>
+  </data>
+  <metadata name="$this.Localizable" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
+    <value>True</value>
+  </metadata>
+</root>

@@ -1,0 +1,304 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="ReportType.Text" xml:space="preserve">
+    <value>Информация</value>
+  </data>
+  <data name="groupBox2.Text" xml:space="preserve">
+    <value>Спецификация RDL</value>
+  </data>
+  <assembly alias="System.Drawing" name="System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+  <data name="rbSchema2005.Size" type="System.Drawing.Size, System.Drawing">
+    <value>104, 18</value>
+  </data>
+  <data name="rbSchema2003.Size" type="System.Drawing.Size, System.Drawing">
+    <value>104, 18</value>
+  </data>
+  <data name="rbSchemaNo.Size" type="System.Drawing.Size, System.Drawing">
+    <value>104, 18</value>
+  </data>
+  <data name="rbSchemaNo.Text" xml:space="preserve">
+    <value>Отсутствует</value>
+  </data>
+  <data name="label6.Size" type="System.Drawing.Size, System.Drawing">
+    <value>74, 23</value>
+  </data>
+  <data name="label6.Text" xml:space="preserve">
+    <value>Ориентация:</value>
+  </data>
+  <data name="label3.Text" xml:space="preserve">
+    <value>Автор:</value>
+  </data>
+  <data name="label2.Text" xml:space="preserve">
+    <value>Описание:</value>
+  </data>
+  <data name="label1.Text" xml:space="preserve">
+    <value>Название:</value>
+  </data>
+  <data name="groupBox1.Text" xml:space="preserve">
+    <value>Тип отчёта</value>
+  </data>
+  <data name="rbChart.Text" xml:space="preserve">
+    <value>График</value>
+  </data>
+  <data name="rbMatrix.Text" xml:space="preserve">
+    <value>Матрица</value>
+  </data>
+  <data name="rbList.Text" xml:space="preserve">
+    <value>Список</value>
+  </data>
+  <data name="rbTable.Text" xml:space="preserve">
+    <value>Таблица</value>
+  </data>
+  <data name="DBConnection.Text" xml:space="preserve">
+    <value>Соединение</value>
+  </data>
+  <data name="textBoxSqlPassword.Size" type="System.Drawing.Size, System.Drawing">
+    <value>202, 20</value>
+  </data>
+  <data name="label11.Text" xml:space="preserve">
+    <value>Пароль:</value>
+  </data>
+  <data name="textBoxSqlUser.Location" type="System.Drawing.Point, System.Drawing">
+    <value>98, 63</value>
+  </data>
+  <data name="textBoxSqlUser.Size" type="System.Drawing.Size, System.Drawing">
+    <value>139, 20</value>
+  </data>
+  <data name="label10.Size" type="System.Drawing.Size, System.Drawing">
+    <value>90, 23</value>
+  </data>
+  <data name="label10.Text" xml:space="preserve">
+    <value>Пользователь:</value>
+  </data>
+  <data name="label8.Size" type="System.Drawing.Size, System.Drawing">
+    <value>47, 13</value>
+  </data>
+  <data name="label8.Text" xml:space="preserve">
+    <value>Сервер:</value>
+  </data>
+  <data name="buttonDatabaseSearch.Text" xml:space="preserve">
+    <value>Найти базы данных</value>
+  </data>
+  <data name="comboServerList.Location" type="System.Drawing.Point, System.Drawing">
+    <value>98, 21</value>
+  </data>
+  <data name="comboServerList.Size" type="System.Drawing.Size, System.Drawing">
+    <value>268, 21</value>
+  </data>
+  <data name="label9.Size" type="System.Drawing.Size, System.Drawing">
+    <value>75, 13</value>
+  </data>
+  <data name="label9.Text" xml:space="preserve">
+    <value>База данных:</value>
+  </data>
+  <data name="buttonSearchSqlServers.Text" xml:space="preserve">
+    <value>Найти сервера</value>
+  </data>
+  <data name="comboDatabaseList.Location" type="System.Drawing.Point, System.Drawing">
+    <value>98, 92</value>
+  </data>
+  <data name="comboDatabaseList.Size" type="System.Drawing.Size, System.Drawing">
+    <value>268, 21</value>
+  </data>
+  <data name="buttonSqliteSelectDatabase.Location" type="System.Drawing.Point, System.Drawing">
+    <value>309, 104</value>
+  </data>
+  <data name="buttonSqliteSelectDatabase.Size" type="System.Drawing.Size, System.Drawing">
+    <value>203, 23</value>
+  </data>
+  <data name="buttonSqliteSelectDatabase.Text" xml:space="preserve">
+    <value>Выбрать файл базы данных SQLite</value>
+  </data>
+  <data name="bShared.Location" type="System.Drawing.Point, System.Drawing">
+    <value>216, 53</value>
+  </data>
+  <data name="bTestConnection.Size" type="System.Drawing.Size, System.Drawing">
+    <value>138, 23</value>
+  </data>
+  <data name="bTestConnection.Text" xml:space="preserve">
+    <value>Проверить соединение</value>
+  </data>
+  <data name="cbOdbcNames.Location" type="System.Drawing.Point, System.Drawing">
+    <value>360, 16</value>
+  </data>
+  <data name="lODBC.Location" type="System.Drawing.Point, System.Drawing">
+    <value>246, 16</value>
+  </data>
+  <data name="lODBC.Text" xml:space="preserve">
+    <value>Источник ODBC</value>
+  </data>
+  <data name="lODBC.TextAlign" type="System.Drawing.ContentAlignment, System.Drawing">
+    <value>MiddleRight</value>
+  </data>
+  <data name="lConnection.Location" type="System.Drawing.Point, System.Drawing">
+    <value>16, 53</value>
+  </data>
+  <data name="lConnection.Text" xml:space="preserve">
+    <value>Строка соединения:</value>
+  </data>
+  <data name="label7.Size" type="System.Drawing.Size, System.Drawing">
+    <value>90, 23</value>
+  </data>
+  <data name="label7.Text" xml:space="preserve">
+    <value>Тип соединения</value>
+  </data>
+  <data name="label7.TextAlign" type="System.Drawing.ContentAlignment, System.Drawing">
+    <value>MiddleRight</value>
+  </data>
+  <data name="tbConnection.Size" type="System.Drawing.Size, System.Drawing">
+    <value>496, 20</value>
+  </data>
+  <data name="ReportParameters.Text" xml:space="preserve">
+    <value>Параметры</value>
+  </data>
+  <data name="TabularGroup.Text" xml:space="preserve">
+    <value>Итоги</value>
+  </data>
+  <data name="clbSubtotal.Location" type="System.Drawing.Point, System.Drawing">
+    <value>235, 42</value>
+  </data>
+  <data name="ckbGrandTotal.Text" xml:space="preserve">
+    <value>Подсчитать общие итоги</value>
+  </data>
+  <data name="label5.Text" xml:space="preserve">
+    <value>Отметьте столбцы мер</value>
+  </data>
+  <data name="label4.Size" type="System.Drawing.Size, System.Drawing">
+    <value>200, 32</value>
+  </data>
+  <data name="label4.Text" xml:space="preserve">
+    <value>Выбрать столбец для группировки (создать иерархию)</value>
+  </data>
+  <data name="cbColumnList.Location" type="System.Drawing.Point, System.Drawing">
+    <value>16, 51</value>
+  </data>
+  <data name="ReportSyntax.Text" xml:space="preserve">
+    <value>Код</value>
+  </data>
+  <data name="ReportPreview.Text" xml:space="preserve">
+    <value>Просмотр</value>
+  </data>
+  <data name="btnCancel.Text" xml:space="preserve">
+    <value>Отменить</value>
+  </data>
+  <data name="$this.Text" xml:space="preserve">
+    <value>Создание отчёта</value>
+  </data>
+</root>

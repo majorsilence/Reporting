@@ -1,5 +1,7 @@
 {
-  "_comment": "Extra namespace mappings for the Majorsilence.Forms migrator (Track D), passed via --map reporting.map.json. Empty so far -- D1 (WinformUtils) needed none of this, since its only third-party UI dependency was the BCL itself. Fill in as D4-D6 (RdlDesign) hit ScintillaNET or other vendor-specific namespaces the migrator's built-in rules don't know about.",
-  "namespaces": {},
-  "removePackages": []
+  "_comment": "Extra namespace mappings for the Majorsilence.Forms migrator (Track D), passed via --map reporting.map.json. D1 (WinformUtils) needed none of this. D4 (RdlDesign) needs ScintillaNET redirected to a compat shim -- see RdlDesign.Forms/Syntax/ScintillaCompat.cs, which defines a `Scintilla` class (matching the original type name post-prefix-rewrite) plus stub versions of every ScintillaNET.* enum/const-holder/event-args type RdlDesign actually uses (Lexer, WrapMode, IndentView, AutomaticFold, MarginType, MarkerSymbol, IndicatorStyle, SearchFlags, UpdateChange, UpdateUIEventArgs, StyleNeededEventArgs, Style, Marker), all in the same Majorsilence.Reporting.RdlDesign.Syntax namespace so this single prefix mapping covers everything.",
+  "namespaces": {
+    "ScintillaNET": "Majorsilence.Reporting.RdlDesign.Syntax"
+  },
+  "removePackages": [ "fernandreu.ScintillaNET" ]
 }

@@ -1,0 +1,525 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Appearance_Color" xml:space="preserve">
+    <value>Цвет текста.</value>
+  </data>
+  <data name="Appearance_Direction" xml:space="preserve">
+    <value>Слева-направо (LTR) или справа-налево (RTL).</value>
+  </data>
+  <data name="Appearance_FontFamily" xml:space="preserve">
+    <value>Название семейства шрифтов. Не все шрифты поддерживаются.</value>
+  </data>
+  <data name="Appearance_FontSize" xml:space="preserve">
+    <value>Влияет на размер текста.</value>
+  </data>
+  <data name="Appearance_FontStyle" xml:space="preserve">
+    <value>Определяет является ли шрифт курсивом.</value>
+  </data>
+  <data name="Appearance_FontWeight" xml:space="preserve">
+    <value>Влияет на толщину шрифта.</value>
+  </data>
+  <data name="Appearance_Format" xml:space="preserve">
+    <value>Текст форматируется в зависимости от типа.</value>
+  </data>
+  <data name="Appearance_TextAlign" xml:space="preserve">
+    <value>Горизонтальное выравнивание</value>
+  </data>
+  <data name="Appearance_TextDecoration" xml:space="preserve">
+    <value>Определяет является ли шрифт подчёркнутым, зачёркнутым или надчёркнутым.</value>
+  </data>
+  <data name="Appearance_VerticalAlign" xml:space="preserve">
+    <value>Вертикальное выравнивание</value>
+  </data>
+  <data name="Appearance_WritingMode" xml:space="preserve">
+    <value>Горизонтально (lr-tb) или вертикально (tb-rl).</value>
+  </data>
+  <data name="BackgroundImage_MIMEType" xml:space="preserve">
+    <value>Когда источником является база данных тип MIME определяет тип изображения.</value>
+  </data>
+  <data name="BackgroundImage_Repeat" xml:space="preserve">
+    <value>Повторение фонового изображения, чтобы заполнить область.</value>
+  </data>
+  <data name="BackgroundImage_Source" xml:space="preserve">
+    <value>Источник фонового изображения: Отсутствует, Внешний, Встроенный, База данных.</value>
+  </data>
+  <data name="BackgroundImage_Value" xml:space="preserve">
+    <value>Значение зависит от источника изображения.</value>
+  </data>
+  <data name="Background_Color" xml:space="preserve">
+    <value>Цвет фона.</value>
+  </data>
+  <data name="Background_EndColor" xml:space="preserve">
+    <value>Когда выбран тип градиента.</value>
+  </data>
+  <data name="Background_GradientType" xml:space="preserve">
+    <value>Тип градиента фона.</value>
+  </data>
+  <data name="Background_Image" xml:space="preserve">
+    <value>Изображение, которое размещается на фоне.</value>
+  </data>
+  <data name="Base_Action" xml:space="preserve">
+    <value>Гиперссылка, закладка или детализация действия для элемента отчёта.</value>
+  </data>
+  <data name="Base_Background" xml:space="preserve">
+    <value>Фон.</value>
+  </data>
+  <data name="Base_Bookmark" xml:space="preserve">
+    <value>В PDF-файлах, закладки создаются для каждого экземпляра элемента отчета. Например, поставив закладку на элемент отчета в заголовке группы будет генерироваться список групп в отчете.</value>
+  </data>
+  <data name="Base_Border" xml:space="preserve">
+    <value>Определяет границу элемента отчёта.</value>
+  </data>
+  <data name="Base_ColumnSpan" xml:space="preserve">
+    <value>Элемент отчёта может охватывать несколько столбцов.</value>
+  </data>
+  <data name="Base_DataElementName" xml:space="preserve">
+    <value>Имя, которое используется для элемента или атрибута при экспорте в XML.</value>
+  </data>
+  <data name="Base_DataElementOutput" xml:space="preserve">
+    <value>При создании XML определяет, как элемент выводится в XML.</value>
+  </data>
+  <data name="Base_Location" xml:space="preserve">
+    <value>Положение элемента отчёта.</value>
+  </data>
+  <data name="Base_Matrix" xml:space="preserve">
+    <value>Свойства элемента в матричном виде.</value>
+  </data>
+  <data name="Base_Name" xml:space="preserve">
+    <value>Уникальное имя элемента отчёта.</value>
+  </data>
+  <data name="Base_Padding" xml:space="preserve">
+    <value>Отступ от границы.</value>
+  </data>
+  <data name="Base_Size" xml:space="preserve">
+    <value>Высота и ширина элемента отчёта.</value>
+  </data>
+  <data name="Base_Table" xml:space="preserve">
+    <value>Свойства элемента в табличном виде.</value>
+  </data>
+  <data name="Base_ToolTip" xml:space="preserve">
+    <value>Подсказка - это текст, который можно использовать с помощью средства визуализации. Например, обозреватель PDF использует подсказку для вывода указанного текста при наведении курсора мыши на элемент отчета.</value>
+  </data>
+  <data name="Base_Visibility" xml:space="preserve">
+    <value>Определяет видимость элемента.</value>
+  </data>
+  <data name="Base_ZIndex" xml:space="preserve">
+    <value>Порядок элемента отчёта.</value>
+  </data>
+  <data name="ChartAxis" xml:space="preserve">
+    <value>Свойства, управляющие отображением оси.</value>
+  </data>
+  <data name="ChartAxis_Appearance" xml:space="preserve">
+    <value>Шрифт, цвет, выравнивание, ... оси.</value>
+  </data>
+  <data name="ChartAxis_Background" xml:space="preserve">
+    <value>Фон оси.</value>
+  </data>
+  <data name="ChartAxis_Border" xml:space="preserve">
+    <value>Свойства границы оси</value>
+  </data>
+  <data name="ChartAxis_CrossAt" xml:space="preserve">
+    <value>Значение, при котором пересекать другую ось.</value>
+  </data>
+  <data name="ChartAxis_Interlaced" xml:space="preserve">
+    <value>Отрисовывать полосы на каждой нечётной линии?</value>
+  </data>
+  <data name="ChartAxis_LogScale" xml:space="preserve">
+    <value>Логарифмическая шкала</value>
+  </data>
+  <data name="ChartAxis_MajorGridLines" xml:space="preserve">
+    <value>Свойства основный линий оси.</value>
+  </data>
+  <data name="ChartAxis_MajorInterval" xml:space="preserve">
+    <value>Свойства основных линий сетки и делений; пропустить для автоматического деления.</value>
+  </data>
+  <data name="ChartAxis_MajorTickMarks" xml:space="preserve">
+    <value>Основные деления.</value>
+  </data>
+  <data name="ChartAxis_Margin" xml:space="preserve">
+    <value>Отступ оси.</value>
+  </data>
+  <data name="ChartAxis_Max" xml:space="preserve">
+    <value>Максимальное значение для оси. Пропустить для автомасштабирования.</value>
+  </data>
+  <data name="ChartAxis_Min" xml:space="preserve">
+    <value>Минимальное значение для оси. Пропустить для автомасштабирования.</value>
+  </data>
+  <data name="ChartAxis_MinorGridLines" xml:space="preserve">
+    <value>Свойства дополнительный линий оси.</value>
+  </data>
+  <data name="ChartAxis_MinorInterval" xml:space="preserve">
+    <value>Свойства дополнительных линий сетки и делений; пропустить для автоматического деления.</value>
+  </data>
+  <data name="ChartAxis_MinorTickMarks" xml:space="preserve">
+    <value>Дополнительные деления.</value>
+  </data>
+  <data name="ChartAxis_Padding" xml:space="preserve">
+    <value>Свойства отступа от границы.</value>
+  </data>
+  <data name="ChartAxis_Reverse" xml:space="preserve">
+    <value>Отрисовывать ось в обратном направлении?</value>
+  </data>
+  <data name="ChartAxis_Scalar" xml:space="preserve">
+    <value>Скалярная</value>
+  </data>
+  <data name="ChartAxis_Title" xml:space="preserve">
+    <value>Заголовок оси</value>
+  </data>
+  <data name="ChartAxis_Visible" xml:space="preserve">
+    <value>Ось видимая?</value>
+  </data>
+  <data name="ChartData" xml:space="preserve">
+    <value>Свойства влияющие на отображение данных диаграммы.</value>
+  </data>
+  <data name="ChartData_DataValue" xml:space="preserve">
+    <value>Выражение, которое должно быть отображено.</value>
+  </data>
+  <data name="ChartData_DataValue2" xml:space="preserve">
+    <value>Y-координата для точечной и пузырьковой диаграмм.</value>
+  </data>
+  <data name="ChartData_DataValue3" xml:space="preserve">
+    <value>Размер пузырька в пузырьковой диаграмме.</value>
+  </data>
+  <data name="ChartData_LabelAppearance" xml:space="preserve">
+    <value>Внешний вид метки, когда она видимая.</value>
+  </data>
+  <data name="ChartData_LabelVisible" xml:space="preserve">
+    <value>Должна ли метка отображаться?</value>
+  </data>
+  <data name="ChartGridLines_Color" xml:space="preserve">
+    <value>Цвет линии.</value>
+  </data>
+  <data name="ChartGridLines_LineStyle" xml:space="preserve">
+    <value>Стиль линии: Точечная, Штриховая, Сплошная.</value>
+  </data>
+  <data name="ChartGridLines_ShowGridLines" xml:space="preserve">
+    <value>Должны ли линии сетки отображаться?</value>
+  </data>
+  <data name="ChartGridLines_Width" xml:space="preserve">
+    <value>Ширина линии.</value>
+  </data>
+  <data name="ChartLegend" xml:space="preserve">
+    <value>Свойства влияющие на отображение легенды диаграммы.</value>
+  </data>
+  <data name="ChartLegend_Appearance" xml:space="preserve">
+    <value>Шрифт, цвет, выравнивание, ... легенды.</value>
+  </data>
+  <data name="ChartLegend_Background" xml:space="preserve">
+    <value>Фон легенды.</value>
+  </data>
+  <data name="ChartLegend_Border" xml:space="preserve">
+    <value>Свойства границы легенды.</value>
+  </data>
+  <data name="ChartLegend_InsidePlotArea" xml:space="preserve">
+    <value>Рисовать легенду внутри участка? (иначе снаружи)</value>
+  </data>
+  <data name="ChartLegend_Layout" xml:space="preserve">
+    <value>Макет легенды.</value>
+  </data>
+  <data name="ChartLegend_Padding" xml:space="preserve">
+    <value>Отступ от границы легенды.</value>
+  </data>
+  <data name="ChartLegend_Position" xml:space="preserve">
+    <value>Позиция легенды.</value>
+  </data>
+  <data name="ChartLegend_Visible" xml:space="preserve">
+    <value>Легенду должно быть видно?</value>
+  </data>
+  <data name="ChartTitle" xml:space="preserve">
+    <value>Свойства, влияющие на отображение заголовка диаграммы.</value>
+  </data>
+  <data name="ChartTitle_Appearance" xml:space="preserve">
+    <value>Шрифт, цвет, выравнивание, ... заголовка.</value>
+  </data>
+  <data name="ChartTitle_Background" xml:space="preserve">
+    <value>Фон заголовка.</value>
+  </data>
+  <data name="ChartTitle_Border" xml:space="preserve">
+    <value>Свойства границы заголовка.</value>
+  </data>
+  <data name="ChartTitle_Caption" xml:space="preserve">
+    <value>Текст заголовка.</value>
+  </data>
+  <data name="ChartTitle_Padding" xml:space="preserve">
+    <value>Отступ от границы заголовка.</value>
+  </data>
+  <data name="Chart_CategoryAxis" xml:space="preserve">
+    <value>Ось X.</value>
+  </data>
+  <data name="Chart_ChartData" xml:space="preserve">
+    <value>Свойства, управляющие отображением данных диаграммы.</value>
+  </data>
+  <data name="Chart_Legend" xml:space="preserve">
+    <value>Легенда диаграммы.</value>
+  </data>
+  <data name="Chart_Palette" xml:space="preserve">
+    <value>Цветовая палитра для диаграммы.</value>
+  </data>
+  <data name="Chart_PointWidth" xml:space="preserve">
+    <value>Ширина в процентах для баров и столбцов.</value>
+  </data>
+  <data name="Chart_Title" xml:space="preserve">
+    <value>Заголовок диаграммы.</value>
+  </data>
+  <data name="Chart_Type" xml:space="preserve">
+    <value>Тип диаграммы.</value>
+  </data>
+  <data name="Chart_ValueAxis" xml:space="preserve">
+    <value>Ось Y.</value>
+  </data>
+  <data name="DataRegion_Appearance" xml:space="preserve">
+    <value>Шрифт, цвет, выравнивание, ... сообщения, когда нет строк.</value>
+  </data>
+  <data name="DataRegion_DataSetName" xml:space="preserve">
+    <value>Название набора данных, для использования.</value>
+  </data>
+  <data name="DataRegion_Filters" xml:space="preserve">
+    <value>Фильтры, применяемы к каждой строке в области данных.</value>
+  </data>
+  <data name="DataRegion_KeepTogether" xml:space="preserve">
+    <value>Хранить область данных на одной странице (по возможности).</value>
+  </data>
+  <data name="DataRegion_NoRows" xml:space="preserve">
+    <value>Сообщение, отображаемое, когда нет строк.</value>
+  </data>
+  <data name="DataRegion_PageBreakAtEnd" xml:space="preserve">
+    <value>Разрывать страницу после области?</value>
+  </data>
+  <data name="DataRegion_PageBreakAtStart" xml:space="preserve">
+    <value>Разрывать страницы перед областью?</value>
+  </data>
+  <data name="ImageI_MIMEType" xml:space="preserve">
+    <value>Когда источником является база данных  Тип MIME описывает тип изображения.</value>
+  </data>
+  <data name="ImageI_Sizing" xml:space="preserve">
+    <value>Определяет как изображение масштабируется, когда размер изображения не совпадает с указанным размером.</value>
+  </data>
+  <data name="ImageI_Source" xml:space="preserve">
+    <value>Источник изображения: Внешний, Встроенный, База данных.</value>
+  </data>
+  <data name="ImageI_Value" xml:space="preserve">
+    <value>Значение зависит от источника изображения.</value>
+  </data>
+  <data name="Image_Image" xml:space="preserve">
+    <value>Свойства изображения.</value>
+  </data>
+  <data name="List_DataInstanceElementOutput" xml:space="preserve">
+    <value>Определяет появляются ли экземпляры списка в XML.</value>
+  </data>
+  <data name="List_DataInstanceName" xml:space="preserve">
+    <value>Название, которое используется для элемента данных для каждого экземпляра этого списка при экспорте в XML.</value>
+  </data>
+  <data name="List_Grouping" xml:space="preserve">
+    <value>Группировка позволяет суммировать строки.</value>
+  </data>
+  <data name="List_Sorting" xml:space="preserve">
+    <value>Сортировка влияет на порядок элементов.</value>
+  </data>
+  <data name="Rectangle_PageBreakAtEnd" xml:space="preserve">
+    <value>Разрывать страницу после нижней части прямоугольника?</value>
+  </data>
+  <data name="Rectangle_PageBreakAtStart" xml:space="preserve">
+    <value>Разрывать страницу перед верхней частью прямоугольника?</value>
+  </data>
+  <data name="Report_Author" xml:space="preserve">
+    <value>Автор отчёта.</value>
+  </data>
+  <data name="Report_BodyColumns" xml:space="preserve">
+    <value>Количество столбцов в области данных.</value>
+  </data>
+  <data name="Report_BodyColumnSpacing" xml:space="preserve">
+    <value>Растояние между столбцами.</value>
+  </data>
+  <data name="Report_BodyHeight" xml:space="preserve">
+    <value>Высота области данных.</value>
+  </data>
+  <data name="Report_Code" xml:space="preserve">
+    <value>Базовые функции, определённые для использования в отчёте.</value>
+  </data>
+  <data name="Report_DataElementName" xml:space="preserve">
+    <value>Название элемента верхнего уровня для создания XML.</value>
+  </data>
+  <data name="Report_DataElementStyle" xml:space="preserve">
+    <value>Стиль элемента: Атрибут или Элемент.</value>
+  </data>
+  <data name="Report_DataSchema" xml:space="preserve">
+    <value>Схема или пространство имён для создания XML.</value>
+  </data>
+  <data name="Report_DataTransform" xml:space="preserve">
+    <value>XSL-файл для преобразования в XML после отрисовки.</value>
+  </data>
+  <data name="Report_Description" xml:space="preserve">
+    <value>Описание отчёта.</value>
+  </data>
+  <data name="Report_Margins" xml:space="preserve">
+    <value>Отступы страницы.</value>
+  </data>
+  <data name="Report_ModulesClasses" xml:space="preserve">
+    <value>Модули и экземпляры классов для использования в отчёте.</value>
+  </data>
+  <data name="Report_PageFooter" xml:space="preserve">
+    <value>Свойства нижнего колонтитула.</value>
+  </data>
+  <data name="Report_PageHeader" xml:space="preserve">
+    <value>Свойства верхнего колонтитула.</value>
+  </data>
+  <data name="Report_PageHeight" xml:space="preserve">
+    <value>Высота страницы.</value>
+  </data>
+  <data name="Report_PageWidth" xml:space="preserve">
+    <value>Ширина страницы.</value>
+  </data>
+  <data name="Report_Parameters" xml:space="preserve">
+    <value>Параметры, определённые в отчёте.</value>
+  </data>
+  <data name="Report_Width" xml:space="preserve">
+    <value>Ширина отчёта.</value>
+  </data>
+  <data name="Subreport_MergeTransactions" xml:space="preserve">
+    <value>Использовать в подотчёте соединения главного отчёта? (по возможности)</value>
+  </data>
+  <data name="Subreport_NoRows" xml:space="preserve">
+    <value>Сообщение, когда нет строк в отчёте.</value>
+  </data>
+  <data name="Subreport_Parameters" xml:space="preserve">
+    <value>Параметры подотчёта.</value>
+  </data>
+  <data name="Subreport_ReportName" xml:space="preserve">
+    <value>Название подотчёта, полный путь или относительный путь.</value>
+  </data>
+  <data name="Textbox_Appearance" xml:space="preserve">
+    <value>Шрифт, цвет, выравнивание, ... текста.</value>
+  </data>
+  <data name="Textbox_CanGrow" xml:space="preserve">
+    <value>Может ли высота текстового поля увеличиваться в зависимости от содержания?</value>
+  </data>
+  <data name="Textbox_CanShrink" xml:space="preserve">
+    <value>Может ли высота текстового поля уменьшаться в зависимости от содержания?</value>
+  </data>
+  <data name="Textbox_DataElementStyle" xml:space="preserve">
+    <value>Выводить текстовое поле как Атрибут или Элемент?</value>
+  </data>
+  <data name="Textbox_HideDuplicates" xml:space="preserve">
+    <value>Укажите область (набор данных или группа), в которой нужно скрывать повторяющиеся значения текстового поля.</value>
+  </data>
+  <data name="Textbox_Value" xml:space="preserve">
+    <value>Значение текстового поля.</value>
+  </data>
+</root>

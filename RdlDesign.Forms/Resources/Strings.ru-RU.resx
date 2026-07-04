@@ -1,0 +1,1108 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="DesignXmlDraw_BodyRegion_Title" xml:space="preserve">
+    <value>Тело ↑</value>
+  </data>
+  <data name="DesignXmlDraw_PageFooterRegion_Title" xml:space="preserve">
+    <value>Нижний колонтитул ↑</value>
+  </data>
+  <data name="DesignXmlDraw_PageHeaderRegion_Title" xml:space="preserve">
+    <value>Верхний колонтитул ↑</value>
+  </data>
+  <data name="RdlDesigner_Status_cm" xml:space="preserve">
+    <value>см</value>
+  </data>
+  <data name="RdlDesigner_Status_Height" xml:space="preserve">
+    <value>высота</value>
+  </data>
+  <data name="DesignCtl_SelectionName_Group" xml:space="preserve">
+    <value>Группа</value>
+  </data>
+  <data name="DesignCtl_SelectionName_GroupSelection" xml:space="preserve">
+    <value>Групповое выделение</value>
+  </data>
+  <data name="DesignCtl_SelectionName_in" xml:space="preserve">
+    <value>в</value>
+  </data>
+  <data name="DesignCtl_SelectionName_Unnamed" xml:space="preserve">
+    <value>*Безымянный*</value>
+  </data>
+  <data name="RdlDesigner_Status_Ch" xml:space="preserve">
+    <value>Столбец</value>
+  </data>
+  <data name="RdlDesigner_Status_Ln" xml:space="preserve">
+    <value>Строка</value>
+  </data>
+  <data name="PropertyDialog_BuildReportItemTabs_Border" xml:space="preserve">
+    <value>Граница</value>
+  </data>
+  <data name="PropertyDialog_BuildReportItemTabs_Chart" xml:space="preserve">
+    <value>Диаграмма</value>
+  </data>
+  <data name="PropertyDialog_BuildReportItemTabs_Filters" xml:space="preserve">
+    <value>Фильтры</value>
+  </data>
+  <data name="PropertyDialog_BuildReportItemTabs_Grid" xml:space="preserve">
+    <value>Сетка</value>
+  </data>
+  <data name="PropertyDialog_BuildReportItemTabs_Grouping" xml:space="preserve">
+    <value>Группа</value>
+  </data>
+  <data name="PropertyDialog_BuildReportItemTabs_GroupSelectionProperties" xml:space="preserve">
+    <value>Свойства группового выделения</value>
+  </data>
+  <data name="PropertyDialog_BuildReportItemTabs_Image" xml:space="preserve">
+    <value>Изображение</value>
+  </data>
+  <data name="PropertyDialog_BuildReportItemTabs_Interactivity" xml:space="preserve">
+    <value>Интерактивность</value>
+  </data>
+  <data name="PropertyDialog_BuildReportItemTabs_List" xml:space="preserve">
+    <value>Список</value>
+  </data>
+  <data name="PropertyDialog_BuildReportItemTabs_Matrix" xml:space="preserve">
+    <value>Матрица</value>
+  </data>
+  <data name="PropertyDialog_BuildReportItemTabs_Name_Position" xml:space="preserve">
+    <value>Название/Позиция</value>
+  </data>
+  <data name="PropertyDialog_BuildReportItemTabs_Properties" xml:space="preserve">
+    <value />
+  </data>
+  <data name="PropertyDialog_BuildReportItemTabs_Sorting" xml:space="preserve">
+    <value>Сортировка</value>
+  </data>
+  <data name="PropertyDialog_BuildReportItemTabs_StaticSeries" xml:space="preserve">
+    <value>Статические серии</value>
+  </data>
+  <data name="PropertyDialog_BuildReportItemTabs_Style" xml:space="preserve">
+    <value>Стиль</value>
+  </data>
+  <data name="PropertyDialog_BuildReportItemTabs_Subreport" xml:space="preserve">
+    <value>Подотчёт</value>
+  </data>
+  <data name="PropertyDialog_BuildReportItemTabs_Table" xml:space="preserve">
+    <value>Таблица</value>
+  </data>
+  <data name="PropertyDialog_BuildReportItemTabs_TableColumn" xml:space="preserve">
+    <value>Столбец таблицы</value>
+  </data>
+  <data name="PropertyDialog_BuildReportItemTabs_TableRow" xml:space="preserve">
+    <value>Строка таблицы</value>
+  </data>
+  <data name="PropertyDialog_BuildReportItemTabs_Text" xml:space="preserve">
+    <value>Текст</value>
+  </data>
+  <data name="PropertyDialog_BuildChartAxisTabs_Axis" xml:space="preserve">
+    <value>Ось</value>
+  </data>
+  <data name="PropertyDialog_BuildChartAxisTabs_ChartCategoryAxis" xml:space="preserve">
+    <value>Категория (ось X)</value>
+  </data>
+  <data name="PropertyDialog_BuildChartAxisTabs_ChartValueAxis" xml:space="preserve">
+    <value>Значение (ось Y)</value>
+  </data>
+  <data name="PropertyDialog_BuildChartLegendTabs_ChartLegendProperties" xml:space="preserve">
+    <value>Свойства легенды диаграммы</value>
+  </data>
+  <data name="PropertyDialog_BuildChartLegendTabs_Legend" xml:space="preserve">
+    <value>Легенда</value>
+  </data>
+  <data name="PropertyDialog_BuildDataSetsTabs_Data" xml:space="preserve">
+    <value>Данные</value>
+  </data>
+  <data name="PropertyDialog_BuildDataSetsTabs_DataSet" xml:space="preserve">
+    <value>Набор данных</value>
+  </data>
+  <data name="PropertyDialog_BuildDataSetsTabs_DataSet_Header" xml:space="preserve">
+    <value>Набор данных</value>
+  </data>
+  <data name="PropertyDialog_BuildDataSetsTabs_QueryParameters" xml:space="preserve">
+    <value>Параметры запроса</value>
+  </data>
+  <data name="PropertyDialog_BuildGroupingTabs_CategoryGrouping" xml:space="preserve">
+    <value>Группа категории</value>
+  </data>
+  <data name="PropertyDialog_BuildGroupingTabs_GroupingAndSorting" xml:space="preserve">
+    <value>Группировка и сортировка</value>
+  </data>
+  <data name="PropertyDialog_BuildGroupingTabs_SeriesGrouping" xml:space="preserve">
+    <value>Группа серии</value>
+  </data>
+  <data name="PropertyDialog_BuildReportTabs_Body" xml:space="preserve">
+    <value>Тело</value>
+  </data>
+  <data name="PropertyDialog_BuildReportTabs_Code" xml:space="preserve">
+    <value>Код</value>
+  </data>
+  <data name="PropertyDialog_BuildReportTabs_Modules_Classes" xml:space="preserve">
+    <value>Модули/Классы</value>
+  </data>
+  <data name="PropertyDialog_BuildReportTabs_Parameters" xml:space="preserve">
+    <value>Параметры</value>
+  </data>
+  <data name="PropertyDialog_BuildReportTabs_Report" xml:space="preserve">
+    <value>Отчёт</value>
+  </data>
+  <data name="PropertyDialog_BuildReportTabs_ReportProperties" xml:space="preserve">
+    <value>Свойства отчёта</value>
+  </data>
+  <data name="PropertyDialog_BuildReportTabs_XMLRendering" xml:space="preserve">
+    <value>Вывод XML</value>
+  </data>
+  <data name="PropertyDialog_BuildTitle_CategoryAxisTitle" xml:space="preserve">
+    <value>Заголовок категории (ось X)</value>
+  </data>
+  <data name="PropertyDialog_BuildTitle_ChartTitle" xml:space="preserve">
+    <value>Заголовок диаграммы</value>
+  </data>
+  <data name="PropertyDialog_BuildTitle_ValueAxisRightTitle" xml:space="preserve">
+    <value>Заголовок значения (ось Y) справа</value>
+  </data>
+  <data name="PropertyDialog_BuildTitle_ValueAxisTitle" xml:space="preserve">
+    <value>Заголовок значения (ось Y)</value>
+  </data>
+  <data name="StyleTextCtl_InitTextStyles_Caption" xml:space="preserve">
+    <value>Заголовок</value>
+  </data>
+  <data name="DesignCtl_Undo_Align" xml:space="preserve">
+    <value>выравнивание</value>
+  </data>
+  <data name="DesignCtl_Undo_Cut" xml:space="preserve">
+    <value>вырезание</value>
+  </data>
+  <data name="DesignCtl_Undo_Delete" xml:space="preserve">
+    <value>удаление</value>
+  </data>
+  <data name="DesignCtl_Undo_DeleteGrouping" xml:space="preserve">
+    <value>удаление группы</value>
+  </data>
+  <data name="DesignCtl_Undo_DeleteTable" xml:space="preserve">
+    <value>удаление таблицы</value>
+  </data>
+  <data name="DesignCtl_Undo_DeleteTableColumn" xml:space="preserve">
+    <value>удаление столбца таблицы</value>
+  </data>
+  <data name="DesignCtl_Undo_DeleteTableGroup" xml:space="preserve">
+    <value>удаление группы таблицы</value>
+  </data>
+  <data name="DesignCtl_Undo_DeleteTableRow" xml:space="preserve">
+    <value>удаление строки таблицы</value>
+  </data>
+  <data name="DesignCtl_Undo_Dialog" xml:space="preserve">
+    <value>диалог</value>
+  </data>
+  <data name="DesignCtl_Undo_DialogGrouping" xml:space="preserve">
+    <value>изменение группы</value>
+  </data>
+  <data name="DesignCtl_Undo_DialogTableGroupEdit" xml:space="preserve">
+    <value>изменение группы таблицы</value>
+  </data>
+  <data name="DesignCtl_Undo_Insert" xml:space="preserve">
+    <value>вставку</value>
+  </data>
+  <data name="DesignCtl_Undo_InsertCategoryGrouping" xml:space="preserve">
+    <value>вставку группы категории</value>
+  </data>
+  <data name="DesignCtl_Undo_InsertChart" xml:space="preserve">
+    <value>вставку диаграммы</value>
+  </data>
+  <data name="DesignCtl_Undo_InsertMatrix" xml:space="preserve">
+    <value>вставку матрицы</value>
+  </data>
+  <data name="DesignCtl_Undo_InsertSeriesGrouping" xml:space="preserve">
+    <value>вставку группы серии</value>
+  </data>
+  <data name="DesignCtl_Undo_InsertTable" xml:space="preserve">
+    <value>вставку таблицы</value>
+  </data>
+  <data name="DesignCtl_Undo_InsertTableColumn" xml:space="preserve">
+    <value>вставку столбца таблицы</value>
+  </data>
+  <data name="DesignCtl_Undo_InsertTableGroup" xml:space="preserve">
+    <value>вставку группы таблицы</value>
+  </data>
+  <data name="DesignCtl_Undo_InsertTableRow" xml:space="preserve">
+    <value>вставку строки талбицы</value>
+  </data>
+  <data name="DesignCtl_Undo_MatrixDelete" xml:space="preserve">
+    <value>удаление матрицы</value>
+  </data>
+  <data name="DesignCtl_Undo_MatrixDeleteGroup" xml:space="preserve">
+    <value>удаление группы матрицы</value>
+  </data>
+  <data name="DesignCtl_Undo_MatrixDialog" xml:space="preserve">
+    <value>изменение матрицы</value>
+  </data>
+  <data name="DesignCtl_Undo_MatrixEdit" xml:space="preserve">
+    <value>изменение матрицы</value>
+  </data>
+  <data name="DesignCtl_Undo_MatrixInsertColumnGroup" xml:space="preserve">
+    <value>вставку группы столбца матрицы</value>
+  </data>
+  <data name="DesignCtl_Undo_MatrixInsertRowGroup" xml:space="preserve">
+    <value>вставку группы строки матрицы</value>
+  </data>
+  <data name="DesignCtl_Undo_Move" xml:space="preserve">
+    <value>перемещение</value>
+  </data>
+  <data name="DesignCtl_Undo_Move_Size" xml:space="preserve">
+    <value>перемещение/изменение размера</value>
+  </data>
+  <data name="DesignCtl_Undo_Padding" xml:space="preserve">
+    <value>отступ от границы</value>
+  </data>
+  <data name="DesignCtl_Undo_Paste" xml:space="preserve">
+    <value>вставку</value>
+  </data>
+  <data name="DesignCtl_Undo_Size" xml:space="preserve">
+    <value>изменение размера</value>
+  </data>
+  <data name="DesignCtl_Undo_Spacing" xml:space="preserve">
+    <value>отступ</value>
+  </data>
+  <data name="DesignCtl_Undo_Style" xml:space="preserve">
+    <value>изменение стиля</value>
+  </data>
+  <data name="DesignCtl_Undo_TableDialog" xml:space="preserve">
+    <value>изменение таблицы</value>
+  </data>
+  <data name="DesignCtl_Undo_TextboxValue" xml:space="preserve">
+    <value>изменение текста</value>
+  </data>
+  <data name="NodeChangedUndo_GetDescription_change" xml:space="preserve">
+    <value>изменение</value>
+  </data>
+  <data name="NodeInsertedUndo_GetDescription_insert" xml:space="preserve">
+    <value>вставку</value>
+  </data>
+  <data name="NodeRemovedUndo_GetDescription_remove" xml:space="preserve">
+    <value>удаление</value>
+  </data>
+  <data name="PropertyPrintFirstLast_SetProp_change" xml:space="preserve">
+    <value>изменение</value>
+  </data>
+  <data name="PropertyReportItem_Undo_ColumnSpanchange" xml:space="preserve">
+    <value>изменение охвата столбцов</value>
+  </data>
+  <data name="PropertyReportItem_Undo_NameChange" xml:space="preserve">
+    <value>изменение названия</value>
+  </data>
+  <data name="PropertyReport_Undo_Body" xml:space="preserve">
+    <value>в теле отчета</value>
+  </data>
+  <data name="PropertyReport_Undo_change" xml:space="preserve">
+    <value>изменение</value>
+  </data>
+  <data name="PropertyTableUIEditor_EditValue_TableDialog" xml:space="preserve">
+    <value>изменение таблицы</value>
+  </data>
+  <data name="RdlDesigner_menuData_Popup_New" xml:space="preserve">
+    <value>Создать...</value>
+  </data>
+  <data name="RdlDesigner_menuEdit_Popup_Undo" xml:space="preserve">
+    <value>Отменить</value>
+  </data>
+  <data name="RdlDesigner_Undo_DataSetDialog" xml:space="preserve">
+    <value>изменение набора данных</value>
+  </data>
+  <data name="RdlDesigner_Undo_DataSourcesDialog" xml:space="preserve">
+    <value>изменение источника данных</value>
+  </data>
+  <data name="RdlDesigner_Undo_EmbeddedImagesDialog" xml:space="preserve">
+    <value>изменение встроенного изображения</value>
+  </data>
+  <data name="SingleCtlDialog_Undo_AppearanceChange" xml:space="preserve">
+    <value>изменение внешнего вида</value>
+  </data>
+  <data name="SingleCtlDialog_Undo_BackgroundChange" xml:space="preserve">
+    <value>изменение фона</value>
+  </data>
+  <data name="SingleCtlDialog_Undo_BorderChange" xml:space="preserve">
+    <value>изменение границы</value>
+  </data>
+  <data name="SingleCtlDialog_Undo_FiltersChange" xml:space="preserve">
+    <value>изменение фильтров</value>
+  </data>
+  <data name="SingleCtlDialog_Undo_GroupingChange" xml:space="preserve">
+    <value>изменение группирования</value>
+  </data>
+  <data name="SingleCtlDialog_Undo_ImageChange" xml:space="preserve">
+    <value>изменение изображения</value>
+  </data>
+  <data name="SingleCtlDialog_Undo_InteractivityChange" xml:space="preserve">
+    <value>изменение интерактивности</value>
+  </data>
+  <data name="SingleCtlDialog_Undo_ReportCodeChange" xml:space="preserve">
+    <value>изменение кода отчёта</value>
+  </data>
+  <data name="SingleCtlDialog_Undo_ReportModules_ClassesChange" xml:space="preserve">
+    <value>изменение модулей/классов отчёта</value>
+  </data>
+  <data name="SingleCtlDialog_Undo_SortChange" xml:space="preserve">
+    <value>изменение сортировки</value>
+  </data>
+  <data name="SingleCtlDialog_Undo_SubreportChange" xml:space="preserve">
+    <value>изменение подотчёта</value>
+  </data>
+  <data name="SingleCtlDialog_Undo_VisibilityChange" xml:space="preserve">
+    <value>изменение видимости</value>
+  </data>
+  <data name="RdlDesigner_menuTools_Popup_StartDesktop" xml:space="preserve">
+    <value>Запустить сервер</value>
+  </data>
+  <data name="RdlDesigner_menuTools_Popup_StopDesktop" xml:space="preserve">
+    <value>Остановить сервер</value>
+  </data>
+  <data name="CodeCtl_Show_CodeVerification" xml:space="preserve">
+    <value>Проверка кода</value>
+  </data>
+  <data name="CodeCtl_Show_NoErrors" xml:space="preserve">
+    <value>Без ошибок</value>
+  </data>
+  <data name="DataSetRowsCtl_ShowB_ErrorReadingDataRows" xml:space="preserve">
+    <value>Ошибка чтения строк данных</value>
+  </data>
+  <data name="DataSetRowsCtl_ShowB_UnableConvert" xml:space="preserve">
+    <value>Неудалось преобразовать {1} к {0}: {2}</value>
+  </data>
+  <data name="DataSetRowsCtl_ShowB_WantSeeErrors" xml:space="preserve">
+    <value>Хотите увидеть подробности ошибки?</value>
+  </data>
+  <data name="DataSetRowsCtl_ShowC_FileNameRequired" xml:space="preserve">
+    <value>Название файла необходимо, когда отмечено 'Использовать XML файл для данных'</value>
+  </data>
+  <data name="DataSetRowsCtl_ShowC_UnableLocateDSR" xml:space="preserve">
+    <value>Не удалось найти общий источник данных. Попробуйте сначала сохранить отчёт</value>
+  </data>
+  <data name="DataSetRowsCtl_Show_DatasourceNotFound" xml:space="preserve">
+    <value>Источник данных '{0}' не найден</value>
+  </data>
+  <data name="DataSetRowsCtl_Show_LoadFailed" xml:space="preserve">
+    <value>Ошибка загрузки</value>
+  </data>
+  <data name="DataSetsCtl_Show_Name" xml:space="preserve">
+    <value>Название</value>
+  </data>
+  <data name="DesignCtl_ShowB_Copy" xml:space="preserve">
+    <value>Копирование</value>
+  </data>
+  <data name="DesignCtl_ShowB_CustomReportItemError" xml:space="preserve">
+    <value>Ошибка постоения меню CustomReportItem: {0}</value>
+  </data>
+  <data name="DesignCtl_ShowB_WantReplaceCell" xml:space="preserve">
+    <value>Хотите заменить содержимое ячейки?</value>
+  </data>
+  <data name="DesignCtl_ShowB_WantSelect" xml:space="preserve">
+    <value>Хотите выбрать {0}?</value>
+  </data>
+  <data name="DesignCtl_ShowC_IllegalInsertSyntax" xml:space="preserve">
+    <value>Внутренняя ошибка: некорректный код вставки: </value>
+  </data>
+  <data name="DesignCtl_Show_ChartsInsert" xml:space="preserve">
+    <value>Диаграммы могут быть вставлены только в тело отчёта</value>
+  </data>
+  <data name="DesignCtl_Show_CustomReportItem" xml:space="preserve">
+    <value>Метод {0}.GetCustomReportItemXml должен возвращать XML заключённый в теги &lt;CustomReportItem&gt; и &lt;/CustomReportItem&gt;
+
+Ошибка:
+{1}</value>
+  </data>
+  <data name="DesignCtl_Show_CustomReportItemException" xml:space="preserve">
+    <value>Ошибка вставки CustomReportItem: {0}</value>
+  </data>
+  <data name="DesignCtl_Show_Insert" xml:space="preserve">
+    <value>Вставка</value>
+  </data>
+  <data name="DesignCtl_Show_ListsInBody" xml:space="preserve">
+    <value>Списки могут быть вставлены только в тело отчёта</value>
+  </data>
+  <data name="DesignCtl_Show_MatrixsInBody" xml:space="preserve">
+    <value>Матрицы могут быть вставлены только в тело отчёта</value>
+  </data>
+  <data name="DesignCtl_Show_Paste" xml:space="preserve">
+    <value>Вставка</value>
+  </data>
+  <data name="DesignCtl_Show_SubreportsInBody" xml:space="preserve">
+    <value>Подотчёты могут быть вставлены только в тело отчёта</value>
+  </data>
+  <data name="DesignCtl_Show_TablesInBody" xml:space="preserve">
+    <value>Таблицы могут быть вставлены только в тело отчёта</value>
+  </data>
+  <data name="DesignCtl_Show_UnableCreateRDL" xml:space="preserve">
+    <value>Не удалось создать RDL-код</value>
+  </data>
+  <data name="DesignerUtility_Show_ConnectDataProviderError" xml:space="preserve">
+    <value>Не удалось установить соединение через поставщика данных '{0}'</value>
+  </data>
+  <data name="DesignerUtility_Show_Error" xml:space="preserve">
+    <value>Ошибка</value>
+  </data>
+  <data name="DesignerUtility_Show_OpenConnectionError" xml:space="preserve">
+    <value>Не удалось установить соединение</value>
+  </data>
+  <data name="DesignerUtility_Show_SharedConnectionError" xml:space="preserve">
+    <value>Не удалось открыть общее соединение, пароль или файл некорректны</value>
+  </data>
+  <data name="DesignerUtility_Show_SQLError" xml:space="preserve">
+    <value>Ошибка SQL</value>
+  </data>
+  <data name="DesignerUtility_Show_TestConnection" xml:space="preserve">
+    <value>Проверка соединения</value>
+  </data>
+  <data name="DesignXmlDraw_Show_XMLInvalid" xml:space="preserve">
+    <value>Некорректный XML</value>
+  </data>
+  <data name="DialogDatabase_ShowD_Error" xml:space="preserve">
+    <value>Ошибка</value>
+  </data>
+  <data name="DialogDatabase_ShowD_SelectDataProvider" xml:space="preserve">
+    <value>Выберите источник данных перед тестом.</value>
+  </data>
+  <data name="DialogDatabase_Show_ConnectionSuccessful" xml:space="preserve">
+    <value>Соединение успешно установлено!</value>
+  </data>
+  <data name="DialogDatabase_Show_InternalError" xml:space="preserve">
+    <value>Внутренняя ошибка</value>
+  </data>
+  <data name="DialogDataSourceRef_bOK_Click_UnableCreateDSR" xml:space="preserve">
+    <value>Не удалось создать общий источник данных</value>
+  </data>
+  <data name="DialogDataSources_ShowE_DataSourceMustUniqueN" xml:space="preserve">
+    <value>Каждый источник данных должен иметь уникальное имя. '{0}' уже используется.</value>
+  </data>
+  <data name="DialogDataSources_ShowE_DataSources" xml:space="preserve">
+    <value>Источники данных</value>
+  </data>
+  <data name="DialogDataSources_ShowE_NameInvalid" xml:space="preserve">
+    <value>Название '{0}' содержит некорректные символы.</value>
+  </data>
+  <data name="DialogDataSources_ShowE_NameMustSpecified" xml:space="preserve">
+    <value>Название должно быть указано у каждого источника данных.</value>
+  </data>
+  <data name="DialogEmbeddedImages_ShowE_CopyImageBeforePaste" xml:space="preserve">
+    <value>Скопируйте изображение в буфер обмена, прежде чем пытаться вставить.</value>
+  </data>
+  <data name="DialogEmbeddedImages_ShowE_ErrorConvertingImage" xml:space="preserve">
+    <value>Ошибка преобразования изображения</value>
+  </data>
+  <data name="DialogEmbeddedImages_ShowE_Image" xml:space="preserve">
+    <value>Изображение</value>
+  </data>
+  <data name="DialogEmbeddedImages_ShowE_ImageMustUniqueName" xml:space="preserve">
+    <value>Каждое встроенное изображение должно иметь уникальное имя. '{0}' уже повторяется.</value>
+  </data>
+  <data name="DialogEmbeddedImages_ShowE_NameInvalid" xml:space="preserve">
+    <value>Название '{0}' содержит некорректные символы.</value>
+  </data>
+  <data name="DialogEmbeddedImages_ShowE_NameMustSpecified" xml:space="preserve">
+    <value>Название должно быть указано для каждого встроенного изображения.</value>
+  </data>
+  <data name="DialogFilterOperator_Show_OperatorInList" xml:space="preserve">
+    <value>Оператор '{0}' должен быть в списке операторов</value>
+  </data>
+  <data name="DialogFilterOperator_Show_PickFilterOperator" xml:space="preserve">
+    <value>Выберите оператор фильтра</value>
+  </data>
+  <data name="DialogNewChart_ShowC_FillExpression" xml:space="preserve">
+    <value>Пожалуйста, заполните выражение данных диаграммы или включать серию.</value>
+  </data>
+  <data name="DialogNewChart_ShowC_FillYAndBubbleExpressions" xml:space="preserve">
+    <value>Пожалуйста, заполните выражения Y-координаты и ширины пузырька.</value>
+  </data>
+  <data name="DialogNewChart_ShowC_FillYExpression" xml:space="preserve">
+    <value>Пожалуйста, заполните выражение Y-координаты.</value>
+  </data>
+  <data name="DialogToolOptions_Show_ConfigError" xml:space="preserve">
+    <value>Ошибка обработки файла конфигурации; используется конфигурация по умолчанию.
+{0}</value>
+  </data>
+  <data name="DialogToolOptions_Show_Options" xml:space="preserve">
+    <value>Настройки</value>
+  </data>
+  <data name="DialogToolOptions_Show_RecentFilesMax" xml:space="preserve">
+    <value>Максимально количество недавних файлов должно быть целым числом от 1 до 50</value>
+  </data>
+  <data name="DialogValidateRdl_ShowC_SelectRDLTab" xml:space="preserve">
+    <value>Выберите вкладку "RDL (исходный код)" перед проверкой.</value>
+  </data>
+  <data name="DrillParametersDialog_ShowC_ReportHasErrors" xml:space="preserve">
+    <value>Отчёт имеет ошибки и не может быть обработан.</value>
+  </data>
+  <data name="DrillParametersDialog_Show_ErrorReading" xml:space="preserve">
+    <value>Ошибка чтения файла отчёта</value>
+  </data>
+  <data name="DrillParametersDialog_Show_ReportLoadFailed" xml:space="preserve">
+    <value>Ошибка загрузки отчёта</value>
+  </data>
+  <data name="DrillParametersDialog_Show_ValueMustSpecified" xml:space="preserve">
+    <value>Значение должно быть указано для каждого параметра</value>
+  </data>
+  <data name="FindTab_ShowE_InvalidLN" xml:space="preserve">
+    <value>Некорректный номер строки.</value>
+  </data>
+  <data name="FontCtl_Show_InvalidFontSize" xml:space="preserve">
+    <value>Некорректный размер шрифта</value>
+  </data>
+  <data name="GridCtl_Show_Grid" xml:space="preserve">
+    <value>Сетка</value>
+  </data>
+  <data name="GridCtl_Show_GridRegionsMustDefined" xml:space="preserve">
+    <value>У сетки должны быть определены как минимум по одной строке в Заголовке, Теле и Окончании.</value>
+  </data>
+  <data name="GroupingCtl_Show_Chart" xml:space="preserve">
+    <value>Диаграмма</value>
+  </data>
+  <data name="GroupingCtl_Show_ChartSeriesMustHaveLabelForLegend" xml:space="preserve">
+    <value>Серии диаграмм должны содержать метки для легенд</value>
+  </data>
+  <data name="GroupingCtl_Show_Group" xml:space="preserve">
+    <value>Группа</value>
+  </data>
+  <data name="GroupingCtl_Show_Grouping" xml:space="preserve">
+    <value>Группировка</value>
+  </data>
+  <data name="GroupingCtl_Show_GroupMustDefined" xml:space="preserve">
+    <value>Группа должна быть объявлена</value>
+  </data>
+  <data name="GroupingCtl_Show_GroupNameError" xml:space="preserve">
+    <value>Ошибка в названии группы</value>
+  </data>
+  <data name="GroupingCtl_Show_InvalidName" xml:space="preserve">
+    <value>Некорректное имя: {0}</value>
+  </data>
+  <data name="GroupingCtl_Show_Name" xml:space="preserve">
+    <value>Название</value>
+  </data>
+  <data name="GroupingCtl_Show_NoExpressionsForGroup" xml:space="preserve">
+    <value>В группе не должно быть выражений</value>
+  </data>
+  <data name="MDIChild_ShowF_Export" xml:space="preserve">
+    <value>Экспорт</value>
+  </data>
+  <data name="MDIChild_ShowF_WantDisplayColorsInTIF" xml:space="preserve">
+    <value>Хотите отобразить изображение в TIF?</value>
+  </data>
+  <data name="MDIChild_ShowG_ExportError" xml:space="preserve">
+    <value>Ошибка экспорта</value>
+  </data>
+  <data name="MDIChild_ShowH_fyiReportingDesigner" xml:space="preserve">
+    <value>Редактор отчётов</value>
+  </data>
+  <data name="MDIChild_ShowH_Untitled" xml:space="preserve">
+    <value>Безымянный</value>
+  </data>
+  <data name="MDIChild_ShowH_WantSaveChanges" xml:space="preserve">
+    <value>Хотите сохранить изменения в '{0}'?</value>
+  </data>
+  <data name="PositionCtl_Show_Height" xml:space="preserve">
+    <value>Высота</value>
+  </data>
+  <data name="PositionCtl_Show_Invalid" xml:space="preserve">
+    <value>{0} некорректно.  {1}</value>
+  </data>
+  <data name="PositionCtl_Show_Left" xml:space="preserve">
+    <value>Слева</value>
+  </data>
+  <data name="PositionCtl_Show_Name" xml:space="preserve">
+    <value>Название</value>
+  </data>
+  <data name="PositionCtl_Show_SizeInvalid" xml:space="preserve">
+    <value>Размер некорректен</value>
+  </data>
+  <data name="PositionCtl_Show_Top" xml:space="preserve">
+    <value>Сверху</value>
+  </data>
+  <data name="PositionCtl_Show_Width" xml:space="preserve">
+    <value>Ширина</value>
+  </data>
+  <data name="PropertyDialog_ShowF_DataSet" xml:space="preserve">
+    <value>Набор данных</value>
+  </data>
+  <data name="PropertyDialog_ShowF_WantDeleteDataset" xml:space="preserve">
+    <value>Вы уверены, что хотите удалить этот набор данных?</value>
+  </data>
+  <data name="RdlDesigner_ShowD_Error" xml:space="preserve">
+    <value>Ошибка</value>
+  </data>
+  <data name="RdlDesigner_Showl_FormatXML" xml:space="preserve">
+    <value>Формат XML</value>
+  </data>
+  <data name="RdlDesigner_Show_CustomColorSaveFailed" xml:space="preserve">
+    <value>Ошибка сохранения пользовательского цвета</value>
+  </data>
+  <data name="RdlDesigner_Show_ErrorStopProcess" xml:space="preserve">
+    <value>Ошибка остановки процесса</value>
+  </data>
+  <data name="RdlDesigner_Show_HelpURLInvalid" xml:space="preserve">
+    <value>Некорректная ссылка на помощь</value>
+  </data>
+  <data name="RdlDesigner_Show_PrintError" xml:space="preserve">
+    <value>Ошибка печати: </value>
+  </data>
+  <data name="RdlDesigner_Show_PrintOneFile" xml:space="preserve">
+    <value>Печатать можно только один файл за раз.</value>
+  </data>
+  <data name="RdlDesigner_Show_RDLDesign" xml:space="preserve">
+    <value>Дизайнер отчётов</value>
+  </data>
+  <data name="RdlDesigner_Show_ResettingHelpURL" xml:space="preserve">
+    <value>Ссылка на помощь установлена по умолчанию.</value>
+  </data>
+  <data name="RdlDesigner_Show_ResettingSupportURL" xml:space="preserve">
+    <value>Ссылка на поддержку установлена по умолчанию.</value>
+  </data>
+  <data name="RdlDesigner_Show_SupportURLInvalid" xml:space="preserve">
+    <value>Некорректная ссылка на поддержку</value>
+  </data>
+  <data name="RdlDesigner_Show_UnableShowReport" xml:space="preserve">
+    <value>Не удалось отобразить отчёт</value>
+  </data>
+  <data name="RdlDesigner_Show_UnableStartDesktop" xml:space="preserve">
+    <value>Не удалось запустить сервер</value>
+  </data>
+  <data name="RdlDesigner_Show_ZoomValueInvalid" xml:space="preserve">
+    <value>Некорректное значение масштаба</value>
+  </data>
+  <data name="RdlEditPreview_ShowI_ReachedEndDocument" xml:space="preserve">
+    <value>Достигнут конец документа.</value>
+  </data>
+  <data name="RdlEditPreview_Show_ErrorFind" xml:space="preserve">
+    <value>Повторите попытку.  Ошибка при поиске: {0}</value>
+  </data>
+  <data name="RdlEditPreview_Show_InternalError" xml:space="preserve">
+    <value>Внутренняя ошибка</value>
+  </data>
+  <data name="RdlEditPreview_Show_Report" xml:space="preserve">
+    <value>Отчёт</value>
+  </data>
+  <data name="RdlUserControl_Show_PrintError" xml:space="preserve">
+    <value>Ошибка печати: </value>
+  </data>
+  <data name="RdlUserControl_Show_PrintOneFile" xml:space="preserve">
+    <value>Печатать можно только один файл за раз.</value>
+  </data>
+  <data name="RdlUserControl_Show_RDLDesign" xml:space="preserve">
+    <value>Дизайнер отчётов</value>
+  </data>
+  <data name="RdlUserControl_Show_ZoomValueInvalid" xml:space="preserve">
+    <value>Некорректное значение масштаба</value>
+  </data>
+  <data name="ReportCtl_Show_Field_Invalid" xml:space="preserve">
+    <value>некорректное поле</value>
+  </data>
+  <data name="ReportCtl_Show_SizeInvalid" xml:space="preserve">
+    <value>Значение размера {0} некорректно.
+</value>
+  </data>
+  <data name="StyleBorderCtl_Show_BottomWidth" xml:space="preserve">
+    <value>Ширина нижней границы</value>
+  </data>
+  <data name="StyleBorderCtl_Show_DefaultWidth" xml:space="preserve">
+    <value>Ширина по умолчанию</value>
+  </data>
+  <data name="StyleBorderCtl_Show_LeftWidth" xml:space="preserve">
+    <value>Ширина левой границы</value>
+  </data>
+  <data name="StyleBorderCtl_Show_RightWidth" xml:space="preserve">
+    <value>Ширина правой границы</value>
+  </data>
+  <data name="StyleBorderCtl_Show_SizeInvalid" xml:space="preserve">
+    <value>некорректна</value>
+  </data>
+  <data name="StyleBorderCtl_Show_TopWidth" xml:space="preserve">
+    <value>Ширина верхней границы</value>
+  </data>
+  <data name="StyleCtl_Show_Bottom" xml:space="preserve">
+    <value>Снизу</value>
+  </data>
+  <data name="StyleCtl_Show_Left" xml:space="preserve">
+    <value>Слева</value>
+  </data>
+  <data name="StyleCtl_Show_PaddingInvalid" xml:space="preserve">
+    <value>{0} некорректный отступ</value>
+  </data>
+  <data name="StyleCtl_Show_Right" xml:space="preserve">
+    <value>Справа</value>
+  </data>
+  <data name="StyleCtl_Show_Top" xml:space="preserve">
+    <value>Сверху</value>
+  </data>
+  <data name="StyleTextCtl_Show_InvalidFontSize" xml:space="preserve">
+    <value>Некорректный размер шрифта</value>
+  </data>
+  <data name="SubreportCtl_Show_ErrorReading" xml:space="preserve">
+    <value>Ошибка чтения отчёта</value>
+  </data>
+  <data name="SubreportCtl_Show_ReportLoadFailed" xml:space="preserve">
+    <value>Ошибка загрузки отчёта</value>
+  </data>
+  <data name="SubreportCtl_Show_Subreport" xml:space="preserve">
+    <value>Подотчёт</value>
+  </data>
+  <data name="SubreportCtl_Show_SubreportMustSpecified" xml:space="preserve">
+    <value>Файл подотчёта должен быть указан</value>
+  </data>
+  <data name="TableColumnCtl_Show_ExpressionTrueFalse" xml:space="preserve">
+    <value>{0} должен быть 'true' или 'false'</value>
+  </data>
+  <data name="TableColumnCtl_Show_HiddenInvalid" xml:space="preserve">
+    <value>Поле "Скрытый" некорректно</value>
+  </data>
+  <data name="TableColumnCtl_Show_WidthInvalid" xml:space="preserve">
+    <value>Ширина некорректна</value>
+  </data>
+  <data name="TableCtl_Show_Table" xml:space="preserve">
+    <value>Таблица</value>
+  </data>
+  <data name="TableCtl_Show_TableMustHaveRegions" xml:space="preserve">
+    <value>В таблицы должно быть как минимум по одной строке для Заголовка, Тела и Окончания.</value>
+  </data>
+  <data name="TableRowCtl_Show_ExpressionTrueFalse" xml:space="preserve">
+    <value>{0} должен быть 'true' или 'false'</value>
+  </data>
+  <data name="TableRowCtl_Show_HeightInvalid" xml:space="preserve">
+    <value>Высота некорректна</value>
+  </data>
+  <data name="TableRowCtl_Show_HiddenInvalid" xml:space="preserve">
+    <value>Поле "Скрытый" некорректно</value>
+  </data>
+  <data name="DialogDatabase_cbConnectionTypes_SelectedIndexChanged_Connection" xml:space="preserve">
+    <value>Соединение:</value>
+  </data>
+  <data name="DialogDatabase_cbConnectionTypes_SelectedIndexChanged_Shared_Data_Source_File" xml:space="preserve">
+    <value>Общий источник данных (файл):</value>
+  </data>
+  <data name="DialogAbout_DialogAbout_About" xml:space="preserve">
+    <value>Дизайнер отчётов создает отчеты, определенные с помощью языка определения отчетов (RDL).
+Copyright (C) 2004-2008 fyiReporting Software, LLC
+
+Под лицензией Apache, версии 2.0 (the "License");
+Вы не можете использовать этот файл только в соответствии с лицензией.
+Вы можете получить копию лицензии на
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Если иное не требуется применимым законодательством или согласовано в письменной форме, программное обеспечение
+распространяется под лицензией "КАК ЕСТЬ",
+БЕЗ ГАРАНТИЙ ИЛИ УСЛОВИЙ ЛЮБОГО РОДА, явных или подразумеваемых.
+См. Лицензию на других языках, регулирующих разрешения и
+ограничения в рамках лицензии.
+
+Для получения дополнительной информации посетите
+сайт https://github.com/majorsilence/Reporting.</value>
+  </data>
+  <data name="DialogAbout_DialogAbout_Version" xml:space="preserve">
+    <value>Версия {0}</value>
+  </data>
+  <data name="PositionCtl_InitValues_GroupSelected" xml:space="preserve">
+    <value>Групповое выделение</value>
+  </data>
+  <data name="RdlDesigner_CreateMDIChild_Untitled" xml:space="preserve">
+    <value>Безымянный</value>
+  </data>
+  <data name="ReportParameterCtl_bDefaultValues_Click_Default_Values" xml:space="preserve">
+    <value>Значения по умолчанию</value>
+  </data>
+  <data name="Tabs_Background" xml:space="preserve">
+    <value>Фон</value>
+  </data>
+  <data name="Tabs_Borders" xml:space="preserve">
+    <value>Границы</value>
+  </data>
+  <data name="Tabs_Code" xml:space="preserve">
+    <value>Код</value>
+  </data>
+  <data name="Tabs_Filter" xml:space="preserve">
+    <value>Фильтр</value>
+  </data>
+  <data name="Tabs_Font" xml:space="preserve">
+    <value>Шрифт</value>
+  </data>
+  <data name="Tabs_Grouping" xml:space="preserve">
+    <value>Группировка</value>
+  </data>
+  <data name="Tabs_Image" xml:space="preserve">
+    <value>Изображение</value>
+  </data>
+  <data name="Tabs_Interactivity" xml:space="preserve">
+    <value>Интерактивность</value>
+  </data>
+  <data name="Tabs_ModulesAndClasses" xml:space="preserve">
+    <value>Модули и классы</value>
+  </data>
+  <data name="Tabs_ReportParameters" xml:space="preserve">
+    <value>Параметры отчёта</value>
+  </data>
+  <data name="Tabs_Sorting" xml:space="preserve">
+    <value>Сортировка</value>
+  </data>
+  <data name="Tabs_Subreport" xml:space="preserve">
+    <value>Подотчёт</value>
+  </data>
+  <data name="Tabs_Visibility" xml:space="preserve">
+    <value>Видимость</value>
+  </data>
+  <data name="DesignerUtility_Error_NumberFormatinvalid" xml:space="preserve">
+    <value>Формат числа некорректен. Должен быть: ###.##</value>
+  </data>
+  <data name="DesignerUtility_Error_SizeLessZero" xml:space="preserve">
+    <value>Размер не может быть меньше 0</value>
+  </data>
+  <data name="DesignerUtility_Error_SizeUnitInvalid" xml:space="preserve">
+    <value>Единица размера некорректна. Должно быть: in, cm, mm, pt, or pc.</value>
+  </data>
+  <data name="DesignerUtility_Error_SizeZero" xml:space="preserve">
+    <value>Размер не может быть равен 0</value>
+  </data>
+  <data name="DesignXmlDraw_Error_DataRegionIntoHeaderFooter" xml:space="preserve">
+    <value>Нельзя вставлять регион данных в заголовок или окончание страницы.</value>
+  </data>
+  <data name="DesignXmlDraw_Error_NoReport" xml:space="preserve">
+    <value>RDL не содержит элемента "Report".</value>
+  </data>
+  <data name="DesignXmlDraw_Error_SubreportIntoHeaderFooter" xml:space="preserve">
+    <value>Нельзя вставлять подотчёт в заголовок или окончание страницы.</value>
+  </data>
+  <data name="DialogDatabase_Error_UnknownIfdef" xml:space="preserve">
+    <value>Неизвестный элемент "{0}" указанный в шаблоне.</value>
+  </data>
+  <data name="DialogToolOptions_Error_RecentFilesMax" xml:space="preserve">
+    <value>Максимальное количество недавних файлов должно быть целым числом от 1 до 50</value>
+  </data>
+  <data name="DialogToolOptions_Error_UnableConfig" xml:space="preserve">
+    <value>Не удалось получить информацию конфигурации рабочего стола.
+{0}</value>
+  </data>
+  <data name="MDIChild_Error_AllowedExportTypes" xml:space="preserve">
+    <value>Для экспорта поддерживаются только следующие форматы: HTML, MHT, XML, CSV, RTF, DOC, Excel, TIF и PDF.</value>
+  </data>
+  <data name="Undo_Error_EndGroupNotMatchStartGroup" xml:space="preserve">
+    <value>Внутренняя логическая ошибка: конец группы не соответствует началу группу</value>
+  </data>
+  <data name="Undo_Error_UnknownAction" xml:space="preserve">
+    <value>Неизвестное действие</value>
+  </data>
+  <data name="BackgroundCtl_bExternal_Click_ImageFilesFilter" xml:space="preserve">
+    <value>BMP (*.bmp)|*.bmp|JPEG (*.jpg;*.jpeg;*.jpe;*.jfif)|*.jpg;*.jpeg;*.jpe;*.jfif|GIF (*.gif)|*.gif|TIFF (*.tif;*.tiff)|*.tif;*.tiff|PNG (*.png)|*.png|Все изображения|*.bmp;*.jpg;*.jpeg;*.jpe;*.jfif;*.gif;*.tif;*.tiff;*.png|Все файлы (*.*)|*.*</value>
+  </data>
+  <data name="DataSetRowsCtl_bRowsFile_Click_XMLFilesFilter" xml:space="preserve">
+    <value>XML (*.xml)|*.xml|Все файлы (*.*)|*.*</value>
+  </data>
+  <data name="DataSetRowsCtl_bRowsFile_Click_XMLFilesTitle" xml:space="preserve">
+    <value>Выберите XML-файл</value>
+  </data>
+  <data name="DialogDatabase_bShared_Click_DSRFilter" xml:space="preserve">
+    <value>Общие источники данных (*.dsr)|*.dsr|Все файлы (*.*)|*.*</value>
+  </data>
+  <data name="DialogDatabase_bShared_Click_DSRTitle" xml:space="preserve">
+    <value>Выберите общий источник данных</value>
+  </data>
+  <data name="DialogDatabase_buttonSqliteSelectDatabase_Click_AllFilesFilter" xml:space="preserve">
+    <value>Все файлы (*.*)|*.*</value>
+  </data>
+  <data name="DialogDataSources_bGetFilename_Click_DSRFilter" xml:space="preserve">
+    <value>Общие источники данных (*.dsr)|*.dsr|Все файлы (*.*)|*.*</value>
+  </data>
+  <data name="DialogDataSources_bGetFilename_Click_DSRTitle" xml:space="preserve">
+    <value>Выберите общий источник данных</value>
+  </data>
+  <data name="DialogEmbeddedImages_bImport_Click_ImageFilesFilter" xml:space="preserve">
+    <value>BMP (*.bmp)|*.bmp|JPEG (*.jpg;*.jpeg;*.jpe;*.jfif)|*.jpg;*.jpeg;*.jpe;*.jfif|GIF (*.gif)|*.gif|TIFF (*.tif;*.tiff)|*.tif;*.tiff|PNG (*.png)|*.png|Все изображения|*.bmp;*.jpg;*.jpeg;*.jpe;*.jfif;*.gif;*.tif;*.tiff;*.png|Все файлы (*.*)|*.*</value>
+  </data>
+  <data name="DialogToolOptions_bAddMap_Click_MapFilesFilter" xml:space="preserve">
+    <value>Карты (*.xml)|*.xml|Все файлы (*.*)|*.*</value>
+  </data>
+  <data name="DrillParametersDialog_bFile_Click_ReportFilesFilter" xml:space="preserve">
+    <value>Отчёты (*.rdl)|*.rdl|Все файлы (*.*)|*.*</value>
+  </data>
+  <data name="DrillParametersDialog_bFile_Click_ReportFilesTitle" xml:space="preserve">
+    <value>Выберите отчёт</value>
+  </data>
+  <data name="FileUIEditor_EditValue_XSLFilesFilter" xml:space="preserve">
+    <value>XSL (*.xsl)|*.xsl|Все файлы (*.*)|*.*</value>
+  </data>
+  <data name="ImageCtl_bExternal_Click_ImageFilesFilter" xml:space="preserve">
+    <value>BMP (*.bmp)|*.bmp|JPEG (*.jpg;*.jpeg;*.jpe;*.jfif)|*.jpg;*.jpeg;*.jpe;*.jfif|GIF (*.gif)|*.gif|TIFF (*.tif;*.tiff)|*.tif;*.tiff|PNG (*.png)|*.png|Все изображения|*.bmp;*.jpg;*.jpeg;*.jpe;*.jfif;*.gif;*.tif;*.tiff;*.png|Все файлы (*.*)|*.*</value>
+  </data>
+  <data name="InteractivityCtl_bDrillthrough_Click_ReportFilesFilter" xml:space="preserve">
+    <value>Отчёты (*.rdl)|*.rdl|Все файлы (*.*)|*.*</value>
+  </data>
+  <data name="InteractivityCtl_bDrillthrough_Click_ReportFilesTitle" xml:space="preserve">
+    <value>Выберите отчёт</value>
+  </data>
+  <data name="RdlDesigner_menuFileOpen_Click_ReportFilesFilter" xml:space="preserve">
+    <value>Отчёты (*.rdl;*rdlc)|*.rdl;*.rdlc|Все файлы (*.*)|*.*</value>
+  </data>
+  <data name="RdlUserControl_openToolStripButton1_Click_ReportFilesFilter" xml:space="preserve">
+    <value>Отчёты (*.rdl;*rdlc)|*.rdl;*.rdlc|Все файлы (*.*)|*.*</value>
+  </data>
+  <data name="ReportXmlCtl_bOpenXsl_Click_XslFilerTitle" xml:space="preserve">
+    <value>Выберите файл преобразования данных</value>
+  </data>
+  <data name="ReportXmlCtl_bOpenXsl_Click_XSLFilesFilter" xml:space="preserve">
+    <value>XSL (*.xsl)|*.xsl|Все файлы (*.*)|*.*</value>
+  </data>
+  <data name="SubreportCtl_bFile_Click_ReportFilesFilter" xml:space="preserve">
+    <value>Отчёты (*.rdl)|*.rdl| зашифрованный (*.encrypted)|*.encrypted|Все файлы (*.*)|*.*</value>
+  </data>
+  <data name="SubreportCtl_bFile_Click_ReportFilesTitle" xml:space="preserve">
+    <value>Выберите отчёт</value>
+  </data>
+  <data name="DialogDataSourceRef_bGetFilename_Click_DSRFilter" xml:space="preserve">
+    <value>Общие источники данных (*.dsr)|*.dsr|Все файлы (*.*)|*.*</value>
+  </data>
+  <data name="DialogDataSourceRef_bGetFilename_Click_DSRTitle" xml:space="preserve">
+    <value>Укажите название общего источника данных</value>
+  </data>
+  <data name="MDIChild_Export_CSV" xml:space="preserve">
+    <value>CSV (*.csv)|*.csv|Все файлы (*.*)|*.*</value>
+  </data>
+  <data name="MDIChild_Export_DOC" xml:space="preserve">
+    <value>DOC (*.doc)|*.doc|Все файлы (*.*)|*.*</value>
+  </data>
+  <data name="MDIChild_Export_Excel" xml:space="preserve">
+    <value>Excel (*.xlsx)|*.xlsx|Все файлы (*.*)|*.*</value>
+  </data>
+  <data name="MDIChild_Export_ExportTitleFormat" xml:space="preserve">
+    <value>Экспортировать в {0}</value>
+  </data>
+  <data name="MDIChild_Export_MHT" xml:space="preserve">
+    <value>MHT (*.mht)|*.mhtml;*.mht|Все файлы (*.*)|*.*</value>
+  </data>
+  <data name="MDIChild_Export_PDF" xml:space="preserve">
+    <value>PDF (*.pdf)|*.pdf|Все файлы (*.*)|*.*</value>
+  </data>
+  <data name="MDIChild_Export_RTF" xml:space="preserve">
+    <value>RTF (*.rtf)|*.rtf|Все файлы (*.*)|*.*</value>
+  </data>
+  <data name="MDIChild_Export_TIF" xml:space="preserve">
+    <value>TIF (*.tif, *.tiff)|*.tiff;*.tif|Все файлы (*.*)|*.*</value>
+  </data>
+  <data name="MDIChild_Export_Web_Page" xml:space="preserve">
+    <value>Веб-страница (*.html, *.htm)|*.html;*.htm|Все файлы (*.*)|*.*</value>
+  </data>
+  <data name="MDIChild_Export_XML" xml:space="preserve">
+    <value>XML (*.xml)|*.xml|Все файлы (*.*)|*.*</value>
+  </data>
+  <data name="MDIChild_FileSaveAs_RDLFilter" xml:space="preserve">
+    <value>Отчёты (*.rdl)|*.rdl|Все файлы (*.*)|*.*</value>
+  </data>
+</root>

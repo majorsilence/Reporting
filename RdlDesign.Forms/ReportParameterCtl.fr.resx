@@ -1,0 +1,59 @@
+﻿<root>
+    <resheader name="resmimetype">
+        <value>text/microsoft-resx</value>
+    </resheader>
+    <resheader name="version">
+        <value>1.3</value>
+    </resheader>
+    <resheader name="reader">
+        <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    </resheader>
+    <resheader name="writer">
+        <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    </resheader>
+    <data name="bAdd.Text" xml:space="preserve">
+        <value>Ajouter</value>
+    </data>
+    <data name="bRemove.Text" xml:space="preserve">
+        <value>Enlever</value>
+    </data>
+    <data name="ckbParmAllowBlank.Text" xml:space="preserve">
+        <value>Autoriser les blancs (chaînes uniquement)</value>
+    </data>
+    <data name="ckbParmAllowNull.Text" xml:space="preserve">
+        <value>Autoriser null</value>
+    </data>
+    <data name="ckbParmMultiValue.Text" xml:space="preserve">
+        <value>MultiValeur</value>
+    </data>
+    <data name="gbDefaultValues.Text" xml:space="preserve">
+        <value>Valeurs par défaut</value>
+    </data>
+    <data name="gbValidValues.Text" xml:space="preserve">
+        <value>Valeurs valides</value>
+    </data>
+    <data name="lDefaultValueFields.Text" xml:space="preserve">
+        <value>Champ de valeur</value>
+    </data>
+    <data name="lDisplayField.Text" xml:space="preserve">
+        <value>Champ d'affichage</value>
+    </data>
+    <data name="lParmName.Text" xml:space="preserve">
+        <value>Nom</value>
+    </data>
+    <data name="lValidValuesField.Text" xml:space="preserve">
+        <value>Champ de valeur</value>
+    </data>
+    <data name="rbDataSet.Text" xml:space="preserve">
+        <value>Nom de l'ensemble de données</value>
+    </data>
+    <data name="rbDefaultDataSetName.Text" xml:space="preserve">
+        <value>Nom du DataSet</value>
+    </data>
+    <data name="rbDefaultValues.Text" xml:space="preserve">
+        <value>Valeurs</value>
+    </data>
+    <data name="rbValues.Text" xml:space="preserve">
+        <value>Valeurs</value>
+    </data>
+</root>

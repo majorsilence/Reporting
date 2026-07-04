@@ -1,0 +1,908 @@
+﻿<root>
+    <resheader name="resmimetype">
+        <value>text/microsoft-resx</value>
+    </resheader>
+    <resheader name="version">
+        <value>1.3</value>
+    </resheader>
+    <resheader name="reader">
+        <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    </resheader>
+    <resheader name="writer">
+        <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    </resheader>
+    <data name="DesignXmlDraw_PageHeaderRegion_Title" xml:space="preserve">
+        <value>En-tête de page ↑</value>
+    </data>
+    <data name="DesignXmlDraw_PageFooterRegion_Title" xml:space="preserve">
+        <value>Pied de page ↑</value>
+    </data>
+    <data name="CodeCtl_Show_CodeVerification" xml:space="preserve">
+        <value>Vérification du code</value>
+    </data>
+    <data name="CodeCtl_Show_NoErrors" xml:space="preserve">
+        <value>Aucune erreur</value>
+    </data>
+    <data name="DataSetRowsCtl_bRowsFile_Click_XMLFilesTitle" xml:space="preserve">
+        <value>Spécifier le nom du fichier XML</value>
+    </data>
+    <data name="DataSetRowsCtl_ShowB_ErrorReadingDataRows" xml:space="preserve">
+        <value>Erreur lors de la lecture des lignes de données</value>
+    </data>
+    <data name="DataSetRowsCtl_ShowB_UnableConvert" xml:space="preserve">
+        <value>Impossible de convertir {1} en {0} : {2}</value>
+    </data>
+    <data name="DataSetRowsCtl_ShowB_WantSeeErrors" xml:space="preserve">
+        <value>Voulez-vous voir d'autres erreurs?</value>
+    </data>
+    <data name="DataSetRowsCtl_ShowC_FileNameRequired" xml:space="preserve">
+        <value>Nom de fichier requis lorsque l'option « Utiliser un fichier XML pour les données vérifiées »</value>
+    </data>
+    <data name="DataSetRowsCtl_ShowC_UnableLocateDSR" xml:space="preserve">
+        <value>Impossible de localiser le fichier partagé DataSource. Essayez d'abord d'enregistrer le rapport</value>
+    </data>
+    <data name="DataSetRowsCtl_Show_DatasourceNotFound" xml:space="preserve">
+        <value>Source de données '{0}' introuvable.</value>
+    </data>
+    <data name="DataSetRowsCtl_Show_LoadFailed" xml:space="preserve">
+        <value>Échec du chargement</value>
+    </data>
+    <data name="DataSetsCtl_Show_Name" xml:space="preserve">
+        <value>Nom</value>
+    </data>
+    <data name="DesignCtl_SelectionName_Group" xml:space="preserve">
+        <value>Groupe</value>
+    </data>
+    <data name="DesignCtl_SelectionName_GroupSelection" xml:space="preserve">
+        <value>Sélection de groupe</value>
+    </data>
+    <data name="DesignCtl_SelectionName_in" xml:space="preserve">
+        <value>dans</value>
+    </data>
+    <data name="DesignCtl_SelectionName_Unnamed" xml:space="preserve">
+        <value>*Anonyme*</value>
+    </data>
+    <data name="DesignCtl_ShowB_Copy" xml:space="preserve">
+        <value>Copier</value>
+    </data>
+    <data name="DesignCtl_ShowB_CustomReportItemError" xml:space="preserve">
+        <value>Erreur lors de la création des menus CustomReportItem : {0}</value>
+    </data>
+    <data name="DesignCtl_ShowB_WantReplaceCell" xml:space="preserve">
+        <value>Voulez-vous remplacer le contenu de TableCell?</value>
+    </data>
+    <data name="DesignCtl_ShowB_WantSelect" xml:space="preserve">
+        <value>Voulez-vous sélectionner le {0}?</value>
+    </data>
+    <data name="DesignCtl_ShowC_IllegalInsertSyntax" xml:space="preserve">
+        <value>Erreur interne : insertion illégale syntaxe :</value>
+    </data>
+    <data name="DesignCtl_Show_ChartsInsert" xml:space="preserve">
+        <value>Les graphiques ne peuvent être insérés que dans le corps du rapport.</value>
+    </data>
+    <data name="DesignCtl_Show_CustomReportItemException" xml:space="preserve">
+        <value>Création d'exceptions Insertion CustomReportItem : {0}</value>
+    </data>
+    <data name="DesignCtl_Show_Insert" xml:space="preserve">
+        <value>Insérer</value>
+    </data>
+    <data name="DesignCtl_Show_ListsInBody" xml:space="preserve">
+        <value>Les listes ne peuvent être insérées que dans le corps du rapport.</value>
+    </data>
+    <data name="DesignCtl_Show_MatrixsInBody" xml:space="preserve">
+        <value>Les matrices ne peuvent être insérées que dans le corps du rapport.</value>
+    </data>
+    <data name="DesignCtl_Show_SubreportsInBody" xml:space="preserve">
+        <value>Les sous-rapports ne peuvent être insérés que dans le corps du rapport.</value>
+    </data>
+    <data name="DesignCtl_Show_TablesInBody" xml:space="preserve">
+        <value>Les tableaux ne peuvent être insérés que dans le corps du rapport.</value>
+    </data>
+    <data name="DesignCtl_Show_UnableCreateRDL" xml:space="preserve">
+        <value>Impossible de créer la syntaxe RDL</value>
+    </data>
+    <data name="DesignCtl_Undo_Align" xml:space="preserve">
+        <value>Aligner</value>
+    </data>
+    <data name="DesignCtl_Undo_Cut" xml:space="preserve">
+        <value>Couper</value>
+    </data>
+    <data name="DesignCtl_Undo_Delete" xml:space="preserve">
+        <value>Supprimer</value>
+    </data>
+    <data name="DesignCtl_Undo_DeleteGrouping" xml:space="preserve">
+        <value>Supprimer le regroupement</value>
+    </data>
+    <data name="DesignCtl_Undo_DeleteTable" xml:space="preserve">
+        <value>Supprimer la table</value>
+    </data>
+    <data name="DesignCtl_Undo_DeleteTableColumn" xml:space="preserve">
+        <value>Supprimer la colonne du tableau</value>
+    </data>
+    <data name="DesignCtl_Undo_DeleteTableGroup" xml:space="preserve">
+        <value>Supprimer un groupe de tables</value>
+    </data>
+    <data name="DesignCtl_Undo_DeleteTableRow" xml:space="preserve">
+        <value>Supprimer une ligne de table</value>
+    </data>
+    <data name="DesignCtl_Undo_Dialog" xml:space="preserve">
+        <value>Dialogue</value>
+    </data>
+    <data name="DesignCtl_Undo_DialogGrouping" xml:space="preserve">
+        <value>Groupement de boîtes de dialogue</value>
+    </data>
+    <data name="DesignCtl_Undo_DialogTableGroupEdit" xml:space="preserve">
+        <value>Boîte de dialogue Table d'édition de groupe</value>
+    </data>
+    <data name="DesignCtl_Undo_Insert" xml:space="preserve">
+        <value>Insérer</value>
+    </data>
+    <data name="DesignCtl_Undo_InsertCategoryGrouping" xml:space="preserve">
+        <value>Insérer un regroupement de catégories</value>
+    </data>
+    <data name="DesignCtl_Undo_InsertChart" xml:space="preserve">
+        <value>Insérer un graphique</value>
+    </data>
+    <data name="DesignCtl_Undo_InsertMatrix" xml:space="preserve">
+        <value>Matrice d'insertion</value>
+    </data>
+    <data name="DesignCtl_Undo_InsertSeriesGrouping" xml:space="preserve">
+        <value>Regroupement de séries d'inserts</value>
+    </data>
+    <data name="DesignCtl_Undo_InsertTable" xml:space="preserve">
+        <value>Insérer la table</value>
+    </data>
+    <data name="DesignCtl_Undo_InsertTableColumn" xml:space="preserve">
+        <value>Insérer une colonne de tableau</value>
+    </data>
+    <data name="DesignCtl_Undo_InsertTableGroup" xml:space="preserve">
+        <value>Insérer un groupe de tables</value>
+    </data>
+    <data name="DesignCtl_Undo_InsertTableRow" xml:space="preserve">
+        <value>Insérer une ligne de tableau</value>
+    </data>
+    <data name="DesignCtl_Undo_MatrixDelete" xml:space="preserve">
+        <value>Suppression de matrice</value>
+    </data>
+    <data name="DesignCtl_Undo_MatrixDeleteGroup" xml:space="preserve">
+        <value>Groupe de suppression de matrice</value>
+    </data>
+    <data name="DesignCtl_Undo_MatrixDialog" xml:space="preserve">
+        <value>Boîte de dialogue Matrice</value>
+    </data>
+    <data name="DesignCtl_Undo_MatrixEdit" xml:space="preserve">
+        <value>Édition matricielle</value>
+    </data>
+    <data name="DesignCtl_Undo_MatrixInsertColumnGroup" xml:space="preserve">
+        <value>Groupe de colonnes d'insertion matricielle</value>
+    </data>
+    <data name="DesignCtl_Undo_MatrixInsertRowGroup" xml:space="preserve">
+        <value>Groupe de lignes d'insertion matricielle</value>
+    </data>
+    <data name="DesignCtl_Undo_Move" xml:space="preserve">
+        <value>Bouger</value>
+    </data>
+    <data name="DesignCtl_Undo_Move_Size" xml:space="preserve">
+        <value>Déplacement/Taille</value>
+    </data>
+    <data name="DesignCtl_Undo_Padding" xml:space="preserve">
+        <value>Rembourrage</value>
+    </data>
+    <data name="DesignCtl_Undo_Size" xml:space="preserve">
+        <value>Taille</value>
+    </data>
+    <data name="DesignCtl_Undo_Spacing" xml:space="preserve">
+        <value>Espacement</value>
+    </data>
+    <data name="DesignCtl_Undo_TableDialog" xml:space="preserve">
+        <value>Boîte de dialogue Table</value>
+    </data>
+    <data name="DesignCtl_Undo_TextboxValue" xml:space="preserve">
+        <value>Valeur de la zone de texte</value>
+    </data>
+    <data name="DesignerUtility_Error_NumberFormatinvalid" xml:space="preserve">
+        <value>Le format numérique n'est pas valide. ###.## est la forme appropriée.</value>
+    </data>
+    <data name="DesignerUtility_Error_SizeLessZero" xml:space="preserve">
+        <value>La taille ne peut pas être inférieure à zéro.</value>
+    </data>
+    <data name="DesignerUtility_Error_SizeUnitInvalid" xml:space="preserve">
+        <value>L'unité de taille n'est pas valide. Doit être en, cm, mm, pt ou pc.</value>
+    </data>
+    <data name="DesignerUtility_Error_SizeZero" xml:space="preserve">
+        <value>La taille ne peut pas être nulle.</value>
+    </data>
+    <data name="DesignerUtility_Show_ConnectDataProviderError" xml:space="preserve">
+        <value>Impossible de se connecter à l'aide du dataProvider '{0}'</value>
+    </data>
+    <data name="DesignerUtility_Show_Error" xml:space="preserve">
+        <value>Erreur</value>
+    </data>
+    <data name="DesignerUtility_Show_OpenConnectionError" xml:space="preserve">
+        <value>Impossible d'ouvrir la connexion</value>
+    </data>
+    <data name="DesignerUtility_Show_SharedConnectionError" xml:space="preserve">
+        <value>Impossible d'ouvrir la connexion partagée, le mot de passe ou le fichier n'est pas valide.</value>
+    </data>
+    <data name="DesignerUtility_Show_SQLError" xml:space="preserve">
+        <value>Erreur SQL</value>
+    </data>
+    <data name="DesignerUtility_Show_TestConnection" xml:space="preserve">
+        <value>Tester la connexion</value>
+    </data>
+    <data name="DesignXmlDraw_BodyRegion_Title" xml:space="preserve">
+        <value>Principal↑</value>
+    </data>
+    <data name="DesignXmlDraw_Error_DataRegionIntoHeaderFooter" xml:space="preserve">
+        <value>Vous ne pouvez pas coller une DataRegion dans un en-tête ou un pied de page</value>
+    </data>
+    <data name="DesignXmlDraw_Error_NoReport" xml:space="preserve">
+        <value>RDL ne contient pas d'élément de rapport.</value>
+    </data>
+    <data name="DesignXmlDraw_Error_SubreportIntoHeaderFooter" xml:space="preserve">
+        <value>Vous ne pouvez pas coller un sous-rapport dans un en-tête ou un pied de page</value>
+    </data>
+    <data name="DesignXmlDraw_Show_XMLInvalid" xml:space="preserve">
+        <value>XML n'est pas valide</value>
+    </data>
+    <data name="DialogDatabase_bShared_Click_DSRTitle" xml:space="preserve">
+        <value>Spécifier le nom du fichier de référence de la source de données</value>
+    </data>
+    <data name="DialogDatabase_bShared_Click_DSRFilter" xml:space="preserve">
+        <value>Fichiers de référence de source de données (*.dsr)|*.dsr|Tous les fichiers (*.*)|*.*</value>
+    </data>
+    <data name="DialogDatabase_buttonSqliteSelectDatabase_Click_AllFilesFilter" xml:space="preserve">
+        <value>Tous les fichiers (*.*)|*.*</value>
+    </data>
+    <data name="DialogDatabase_cbConnectionTypes_SelectedIndexChanged_Connection" xml:space="preserve">
+        <value>Connexion:</value>
+    </data>
+    <data name="DialogDatabase_cbConnectionTypes_SelectedIndexChanged_Shared_Data_Source_File" xml:space="preserve">
+        <value>Fichier de source de données partagé :</value>
+    </data>
+    <data name="DialogDatabase_Error_UnknownIfdef" xml:space="preserve">
+        <value>L'élément ifdef inconnu {0} spécifié dans le modèle.</value>
+    </data>
+    <data name="DialogDatabase_ShowD_Error" xml:space="preserve">
+        <value>Erreur</value>
+    </data>
+    <data name="DialogDatabase_ShowD_SelectDataProvider" xml:space="preserve">
+        <value>Veuillez sélectionner un fournisseur de données avant de tester.</value>
+    </data>
+    <data name="DialogDatabase_Show_ConnectionSuccessful" xml:space="preserve">
+        <value>Connexion réussie !</value>
+    </data>
+    <data name="DialogDatabase_Show_InternalError" xml:space="preserve">
+        <value>Erreur interne</value>
+    </data>
+    <data name="DialogDataSourceRef_bGetFilename_Click_DSRFilter" xml:space="preserve">
+        <value>Fichiers de référence de source de données (*.dsr)|*.dsr|Tous les fichiers (*.*)|*.*</value>
+    </data>
+    <data name="DialogDataSourceRef_bGetFilename_Click_DSRTitle" xml:space="preserve">
+        <value>Spécifier le nom du fichier de référence de la source de données</value>
+    </data>
+    <data name="DialogDataSourceRef_bOK_Click_UnableCreateDSR" xml:space="preserve">
+        <value>Impossible de créer le fichier de référence de la source de données</value>
+    </data>
+    <data name="DialogDataSources_bGetFilename_Click_DSRFilter" xml:space="preserve">
+        <value>Fichiers de référence de source de données (*.dsr)|*.dsr|Tous les fichiers (*.*)|*.*</value>
+    </data>
+    <data name="DialogDataSources_bGetFilename_Click_DSRTitle" xml:space="preserve">
+        <value>Spécifier le nom du fichier de référence de la source de données</value>
+    </data>
+    <data name="DialogDataSources_ShowE_DataSourceMustUniqueN" xml:space="preserve">
+        <value>Chaque DataSource doit avoir un nom unique. « {0} » est répété.</value>
+    </data>
+    <data name="DialogDataSources_ShowE_DataSources" xml:space="preserve">
+        <value>Sources des données</value>
+    </data>
+    <data name="DialogDataSources_ShowE_NameInvalid" xml:space="preserve">
+        <value>Le nom '{0}' contient des caractères non valides.</value>
+    </data>
+    <data name="DialogDataSources_ShowE_NameMustSpecified" xml:space="preserve">
+        <value>Le nom doit être spécifié pour toutes les DataSources.</value>
+    </data>
+    <data name="DialogEmbeddedImages_bImport_Click_ImageFilesFilter" xml:space="preserve">
+        <value>Fichiers bitmap (*.bmp)|*.bmp|JPEG (*.jpg ;*.jpeg ;*.jpe ;*.jfif)|*.jpg ;*.jpeg ;*.jpe ;*.jfif|GIF (*.gif)|*.gif|TIFF (*.tif ;*.tiff)|*.tif ;*.tiff|PNG (*.png)|*.png|Tous les fichiers image|*.bmp ;*.jpg ;*.jpeg ;*.jpe ;*.jfif ;*.gif ;*.tif ;*.tiff ;*.png|Tous les fichiers (*.*)|*.*</value>
+    </data>
+    <data name="DialogEmbeddedImages_ShowE_CopyImageBeforePaste" xml:space="preserve">
+        <value>Copiez l'image dans le presse-papiers avant d'essayer de coller.</value>
+    </data>
+    <data name="DialogEmbeddedImages_ShowE_ErrorConvertingImage" xml:space="preserve">
+        <value>Erreur lors de la conversion des données d'image</value>
+    </data>
+    <data name="DialogEmbeddedImages_ShowE_ImageMustUniqueName" xml:space="preserve">
+        <value>Chaque image intégrée doit avoir un nom unique. « {0} » est répété.</value>
+    </data>
+    <data name="DialogEmbeddedImages_ShowE_NameInvalid" xml:space="preserve">
+        <value>Le nom '{0}' contient des caractères non valides.</value>
+    </data>
+    <data name="DialogEmbeddedImages_ShowE_NameMustSpecified" xml:space="preserve">
+        <value>Le nom doit être spécifié pour toutes les images intégrées.</value>
+    </data>
+    <data name="DialogFilterOperator_Show_OperatorInList" xml:space="preserve">
+        <value>L'opérateur '{0}' doit figurer dans la liste des opérateurs.</value>
+    </data>
+    <data name="DialogFilterOperator_Show_PickFilterOperator" xml:space="preserve">
+        <value>Opérateur de filtre de sélection</value>
+    </data>
+    <data name="DialogNewChart_ShowC_FillExpression" xml:space="preserve">
+        <value>Veuillez remplir l'expression de données du graphique ou inclure une série.</value>
+    </data>
+    <data name="DialogNewChart_ShowC_FillYAndBubbleExpressions" xml:space="preserve">
+        <value>Veuillez remplir le tableau des expressions de coordonnées Y et de largeur de bulle.</value>
+    </data>
+    <data name="DialogNewChart_ShowC_FillYExpression" xml:space="preserve">
+        <value>Veuillez remplir le tableau Expression des données de coordonnées Y.</value>
+    </data>
+    <data name="DialogToolOptions_bAddMap_Click_MapFilesFilter" xml:space="preserve">
+        <value>Fichiers de mappage (*.xml)|*.xml|Tous les fichiers (*.*)|*.*</value>
+    </data>
+    <data name="DialogToolOptions_Error_RecentFilesMax" xml:space="preserve">
+        <value>Les fichiers récents doivent être composés au maximum d'un nombre entier compris entre 1 et 50</value>
+    </data>
+    <data name="DialogToolOptions_Error_UnableConfig" xml:space="preserve">
+        <value>Impossible d'obtenir les informations de configuration du bureau. {0}</value>
+    </data>
+    <data name="DialogToolOptions_Show_ConfigError" xml:space="preserve">
+        <value>Erreur de traitement de la configuration du bureau ; à l'aide des valeurs par défaut. {0}</value>
+    </data>
+    <data name="DialogToolOptions_Show_RecentFilesMax" xml:space="preserve">
+        <value>Les fichiers récents doivent être composés au maximum d'un nombre entier compris entre 1 et 50</value>
+    </data>
+    <data name="DialogValidateRdl_ShowC_SelectRDLTab" xml:space="preserve">
+        <value>Sélectionnez l'onglet 'RDL Text' avant de valider.</value>
+    </data>
+    <data name="DrillParametersDialog_bFile_Click_ReportFilesFilter" xml:space="preserve">
+        <value>Fichiers de rapport (*.rdl)|*.rdl|Tous les fichiers (*.*)|*.*</value>
+    </data>
+    <data name="DrillParametersDialog_bFile_Click_ReportFilesTitle" xml:space="preserve">
+        <value>Spécifier le nom du fichier de rapport</value>
+    </data>
+    <data name="DrillParametersDialog_ShowC_ReportHasErrors" xml:space="preserve">
+        <value>Le rapport contient des erreurs et ne peut pas être traité.</value>
+    </data>
+    <data name="DrillParametersDialog_Show_ErrorReading" xml:space="preserve">
+        <value>Erreur lors de la lecture du fichier de rapport</value>
+    </data>
+    <data name="DrillParametersDialog_Show_ReportLoadFailed" xml:space="preserve">
+        <value>Échec du chargement du rapport</value>
+    </data>
+    <data name="DrillParametersDialog_Show_ValueMustSpecified" xml:space="preserve">
+        <value>La valeur doit être spécifiée pour chaque paramètre</value>
+    </data>
+    <data name="FileUIEditor_EditValue_XSLFilesFilter" xml:space="preserve">
+        <value>Fichiers XSL (*.xsl)|*.xsl|Tous les fichiers (*.*)|*.*</value>
+    </data>
+    <data name="FindTab_ShowE_InvalidLN" xml:space="preserve">
+        <value>Numéro de ligne non valide</value>
+    </data>
+    <data name="FontCtl_Show_InvalidFontSize" xml:space="preserve">
+        <value>Taille de police non valide</value>
+    </data>
+    <data name="GridCtl_Show_GridRegionsMustDefined" xml:space="preserve">
+        <value>La grille doit comporter au moins une ligne d'en-tête, de détails ou de pied de page.</value>
+    </data>
+    <data name="GroupingCtl_Show_Chart" xml:space="preserve">
+        <value>Graphique</value>
+    </data>
+    <data name="GroupingCtl_Show_ChartSeriesMustHaveLabelForLegend" xml:space="preserve">
+        <value>L'étiquette de la série de graphiques doit être définie pour la légende.</value>
+    </data>
+    <data name="GroupingCtl_Show_Group" xml:space="preserve">
+        <value>Groupe</value>
+    </data>
+    <data name="GroupingCtl_Show_Grouping" xml:space="preserve">
+        <value>Groupement</value>
+    </data>
+    <data name="GroupingCtl_Show_GroupMustDefined" xml:space="preserve">
+        <value>Le groupe doit être défini.</value>
+    </data>
+    <data name="GroupingCtl_Show_GroupNameError" xml:space="preserve">
+        <value>Nom du groupe en erreur</value>
+    </data>
+    <data name="GroupingCtl_Show_InvalidName" xml:space="preserve">
+        <value>{0} nom n'est pas valide.</value>
+    </data>
+    <data name="GroupingCtl_Show_Name" xml:space="preserve">
+        <value>Nom</value>
+    </data>
+    <data name="GroupingCtl_Show_NoExpressionsForGroup" xml:space="preserve">
+        <value>Aucune expression n'a été définie pour le groupe.</value>
+    </data>
+    <data name="ImageCtl_bExternal_Click_ImageFilesFilter" xml:space="preserve">
+        <value>Fichiers bitmap (*.bmp)|*.bmp|JPEG (*.jpg ;*.jpeg ;*.jpe ;*.jfif)|*.jpg ;*.jpeg ;*.jpe ;*.jfif|GIF (*.gif)|*.gif|TIFF (*.tif ;*.tiff)|*.tif ;*.tiff|PNG (*.png)|*.png|Tous les fichiers image|*.bmp ;*.jpg ;*.jpeg ;*.jpe ;*.jfif ;*.gif ;*.tif ;*.tiff ;*.png|Tous les fichiers (*.*)|*.*</value>
+    </data>
+    <data name="InteractivityCtl_bDrillthrough_Click_ReportFilesFilter" xml:space="preserve">
+        <value>Fichiers de rapport (*.rdl)|*.rdl|Tous les fichiers (*.*)|*.*</value>
+    </data>
+    <data name="InteractivityCtl_bDrillthrough_Click_ReportFilesTitle" xml:space="preserve">
+        <value>Spécifier le nom du fichier de rapport</value>
+    </data>
+    <data name="MDIChild_Error_AllowedExportTypes" xml:space="preserve">
+        <value>Seuls les formats HTML, MHT, XML, CSV, RTF, DOC, Excel, TIF et PDF sont autorisés en tant que types d'exportation.</value>
+    </data>
+    <data name="MDIChild_Export_CSV" xml:space="preserve">
+        <value>Fichier CSV (*.csv)|*.csv|Tous les fichiers (*.*)|*.*</value>
+    </data>
+    <data name="MDIChild_Export_DOC" xml:space="preserve">
+        <value>Fichier DOC (*.doc)|*.doc|Tous les fichiers (*.*)|*.*</value>
+    </data>
+    <data name="MDIChild_Export_Excel" xml:space="preserve">
+        <value>Fichier Excel (*.xlsx)|*.xlsx|Tous les fichiers (*.*)|*.*</value>
+    </data>
+    <data name="MDIChild_Export_ExportTitleFormat" xml:space="preserve">
+        <value>Exporter vers {0}</value>
+    </data>
+    <data name="MDIChild_Export_MHT" xml:space="preserve">
+        <value>MHT (*.mht)|*.mhtml ;*.mht|Tous les fichiers (*.*)|*.*</value>
+    </data>
+    <data name="MDIChild_Export_PDF" xml:space="preserve">
+        <value>Fichier PDF (*.pdf)|*.pdf|Tous les fichiers (*.*)|*.*</value>
+    </data>
+    <data name="MDIChild_Export_RTF" xml:space="preserve">
+        <value>Fichier RTF (*.rtf)|*.rtf|Tous les fichiers (*.*)|*.*</value>
+    </data>
+    <data name="MDIChild_Export_TIF" xml:space="preserve">
+        <value>Fichier TIF (*.tif, *.tiff)|*.tiff ;*.tif|Tous les fichiers (*.*)|*.*</value>
+    </data>
+    <data name="MDIChild_Export_Web_Page" xml:space="preserve">
+        <value>Page Web (*.html, *.htm)|*.html ;*.htm|Tous les fichiers (*.*)|*.*</value>
+    </data>
+    <data name="MDIChild_Export_XML" xml:space="preserve">
+        <value>Fichier XML (*.xml)|*.xml|Tous les fichiers (*.*)|*.*</value>
+    </data>
+    <data name="MDIChild_FileSaveAs_RDLFilter" xml:space="preserve">
+        <value>Fichiers RDL (*.rdl)|*.rdl|Fichiers RDL cryptés (*.encrypted)|*.encrypted|Tous les fichiers (*.*)|*.*</value>
+    </data>
+    <data name="MDIChild_ShowF_Export" xml:space="preserve">
+        <value>Exportation</value>
+    </data>
+    <data name="MDIChild_ShowF_WantDisplayColorsInTIF" xml:space="preserve">
+        <value>Voulez-vous afficher les couleurs en TIF?</value>
+    </data>
+    <data name="MDIChild_ShowG_ExportError" xml:space="preserve">
+        <value>Erreur d'exportation</value>
+    </data>
+    <data name="MDIChild_ShowH_fyiReportingDesigner" xml:space="preserve">
+        <value>Concepteur de rapports Majorsilence</value>
+    </data>
+    <data name="MDIChild_ShowH_WantSaveChanges" xml:space="preserve">
+        <value>Voulez-vous enregistrer les modifications que vous avez apportées à {0}?</value>
+    </data>
+    <data name="NodeChangedUndo_GetDescription_change" xml:space="preserve">
+        <value>changement</value>
+    </data>
+    <data name="NodeInsertedUndo_GetDescription_insert" xml:space="preserve">
+        <value>insérer</value>
+    </data>
+    <data name="NodeRemovedUndo_GetDescription_remove" xml:space="preserve">
+        <value>enlever</value>
+    </data>
+    <data name="PositionCtl_InitValues_GroupSelected" xml:space="preserve">
+        <value>Groupe sélectionné</value>
+    </data>
+    <data name="PositionCtl_Show_Height" xml:space="preserve">
+        <value>Hauteur</value>
+    </data>
+    <data name="PositionCtl_Show_Invalid" xml:space="preserve">
+        <value>{0} n'est pas valide. {1}</value>
+    </data>
+    <data name="PositionCtl_Show_Left" xml:space="preserve">
+        <value>Gauche</value>
+    </data>
+    <data name="PositionCtl_Show_Name" xml:space="preserve">
+        <value>Nom</value>
+    </data>
+    <data name="PositionCtl_Show_SizeInvalid" xml:space="preserve">
+        <value>La taille n'est pas valide</value>
+    </data>
+    <data name="PositionCtl_Show_Top" xml:space="preserve">
+        <value>Retour au début</value>
+    </data>
+    <data name="PositionCtl_Show_Width" xml:space="preserve">
+        <value>Largeur</value>
+    </data>
+    <data name="PropertyDialog_BuildChartAxisTabs_Axis" xml:space="preserve">
+        <value>Axe</value>
+    </data>
+    <data name="PropertyDialog_BuildChartAxisTabs_ChartCategoryAxis" xml:space="preserve">
+        <value>Axe de la catégorie de graphique (X)</value>
+    </data>
+    <data name="PropertyDialog_BuildChartAxisTabs_ChartValueAxis" xml:space="preserve">
+        <value>Axe des valeurs du graphique (y)</value>
+    </data>
+    <data name="PropertyDialog_BuildChartLegendTabs_ChartLegendProperties" xml:space="preserve">
+        <value>Propriétés de la légende du graphique</value>
+    </data>
+    <data name="PropertyDialog_BuildChartLegendTabs_Legend" xml:space="preserve">
+        <value>Légende</value>
+    </data>
+    <data name="PropertyDialog_BuildDataSetsTabs_Data" xml:space="preserve">
+        <value>Données</value>
+    </data>
+    <data name="PropertyDialog_BuildDataSetsTabs_DataSet" xml:space="preserve">
+        <value>Jeu de données</value>
+    </data>
+    <data name="PropertyDialog_BuildDataSetsTabs_DataSet_Header" xml:space="preserve">
+        <value>Jeu de données</value>
+    </data>
+    <data name="PropertyDialog_BuildDataSetsTabs_QueryParameters" xml:space="preserve">
+        <value>Paramètres de requête</value>
+    </data>
+    <data name="PropertyDialog_BuildGroupingTabs_CategoryGrouping" xml:space="preserve">
+        <value>Regroupement de catégories</value>
+    </data>
+    <data name="PropertyDialog_BuildGroupingTabs_GroupingAndSorting" xml:space="preserve">
+        <value>Regroupement et tri</value>
+    </data>
+    <data name="PropertyDialog_BuildGroupingTabs_SeriesGrouping" xml:space="preserve">
+        <value>Regroupement de séries</value>
+    </data>
+    <data name="PropertyDialog_BuildReportItemTabs_Border" xml:space="preserve">
+        <value>Frontière</value>
+    </data>
+    <data name="PropertyDialog_BuildReportItemTabs_Chart" xml:space="preserve">
+        <value>Graphique</value>
+    </data>
+    <data name="PropertyDialog_BuildReportItemTabs_Grouping" xml:space="preserve">
+        <value>Groupement</value>
+    </data>
+    <data name="PropertyDialog_BuildReportItemTabs_GroupSelectionProperties" xml:space="preserve">
+        <value>Propriétés de sélection de groupe</value>
+    </data>
+    <data name="PropertyDialog_BuildReportItemTabs_Filters" xml:space="preserve">
+        <value>Filtres</value>
+    </data>
+    <data name="PropertyDialog_BuildReportItemTabs_Interactivity" xml:space="preserve">
+        <value>Interactivité</value>
+    </data>
+    <data name="PropertyDialog_BuildReportItemTabs_List" xml:space="preserve">
+        <value>Liste</value>
+    </data>
+    <data name="PropertyDialog_BuildReportItemTabs_Matrix" xml:space="preserve">
+        <value>Matrice</value>
+    </data>
+    <data name="PropertyDialog_BuildReportItemTabs_Name_Position" xml:space="preserve">
+        <value>Nom/Poste</value>
+    </data>
+    <data name="PropertyDialog_BuildReportItemTabs_Properties" xml:space="preserve">
+        <value>Propriétés</value>
+    </data>
+    <data name="PropertyDialog_BuildReportItemTabs_Sorting" xml:space="preserve">
+        <value>Classement</value>
+    </data>
+    <data name="PropertyDialog_BuildReportItemTabs_StaticSeries" xml:space="preserve">
+        <value>Série statique</value>
+    </data>
+    <data name="PropertyDialog_BuildReportItemTabs_Subreport" xml:space="preserve">
+        <value>Sous-état</value>
+    </data>
+    <data name="PropertyDialog_BuildReportItemTabs_TableColumn" xml:space="preserve">
+        <value>Colonne du tableau</value>
+    </data>
+    <data name="PropertyDialog_BuildReportItemTabs_TableRow" xml:space="preserve">
+        <value>Rangée de tableau</value>
+    </data>
+    <data name="PropertyDialog_BuildReportItemTabs_Table" xml:space="preserve">
+        <value>Tableau</value>
+    </data>
+    <data name="PropertyDialog_BuildReportItemTabs_Text" xml:space="preserve">
+        <value>Texte</value>
+    </data>
+    <data name="PropertyDialog_BuildReportTabs_Body" xml:space="preserve">
+        <value>Principal</value>
+    </data>
+    <data name="PropertyDialog_BuildReportTabs_Parameters" xml:space="preserve">
+        <value>Paramètres</value>
+    </data>
+    <data name="PropertyDialog_BuildReportTabs_Report" xml:space="preserve">
+        <value>Rapport</value>
+    </data>
+    <data name="PropertyDialog_BuildReportTabs_ReportProperties" xml:space="preserve">
+        <value>Propriétés du rapport</value>
+    </data>
+    <data name="PropertyDialog_BuildReportTabs_XMLRendering" xml:space="preserve">
+        <value>Rendu XML</value>
+    </data>
+    <data name="PropertyDialog_BuildTitle_CategoryAxisTitle" xml:space="preserve">
+        <value>Catégorie (X) Axe Titre</value>
+    </data>
+    <data name="PropertyDialog_BuildTitle_ChartTitle" xml:space="preserve">
+        <value>Titre du graphique</value>
+    </data>
+    <data name="PropertyDialog_BuildTitle_ValueAxisRightTitle" xml:space="preserve">
+        <value>Valeur (y) Axe (droite) Titre</value>
+    </data>
+    <data name="PropertyDialog_BuildTitle_ValueAxisTitle" xml:space="preserve">
+        <value>Valeur (y) Titre de l'axe</value>
+    </data>
+    <data name="PropertyDialog_ShowF_DataSet" xml:space="preserve">
+        <value>Jeu de données</value>
+    </data>
+    <data name="PropertyDialog_ShowF_WantDeleteDataset" xml:space="preserve">
+        <value>Êtes-vous sûr de vouloir supprimer cet ensemble de données?</value>
+    </data>
+    <data name="PropertyPrintFirstLast_SetProp_change" xml:space="preserve">
+        <value>changement</value>
+    </data>
+    <data name="PropertyReportItem_Undo_ColumnSpanchange" xml:space="preserve">
+        <value>Modification de l'étendue des colonnes</value>
+    </data>
+    <data name="PropertyReportItem_Undo_NameChange" xml:space="preserve">
+        <value>Changement de nom</value>
+    </data>
+    <data name="PropertyReport_Undo_Body" xml:space="preserve">
+        <value>Principal</value>
+    </data>
+    <data name="PropertyReport_Undo_change" xml:space="preserve">
+        <value>changement</value>
+    </data>
+    <data name="PropertyTableUIEditor_EditValue_TableDialog" xml:space="preserve">
+        <value>Boîte de dialogue Table</value>
+    </data>
+    <data name="RdlDesigner_menuData_Popup_New" xml:space="preserve">
+        <value>Nouveau...</value>
+    </data>
+    <data name="RdlDesigner_menuEdit_Popup_Undo" xml:space="preserve">
+        <value>Défaire</value>
+    </data>
+    <data name="RdlDesigner_menuFileOpen_Click_ReportFilesFilter" xml:space="preserve">
+        <value>Fichiers de rapport (*.rdl ;*rdlc)|*.rdl ;*.rdlc|Fichiers RDL cryptés (*.encrypted)|*.encrypted|Tous les fichiers (*.*)|*.*</value>
+    </data>
+    <data name="RdlDesigner_menuTools_Popup_StartDesktop" xml:space="preserve">
+        <value>Démarrer le bureau</value>
+    </data>
+    <data name="RdlDesigner_menuTools_Popup_StopDesktop" xml:space="preserve">
+        <value>Arrêter le bureau</value>
+    </data>
+    <data name="RdlDesigner_ShowD_Error" xml:space="preserve">
+        <value>Erreur</value>
+    </data>
+    <data name="RdlDesigner_Show_CustomColorSaveFailed" xml:space="preserve">
+        <value>Échec de l'enregistrement des couleurs personnalisées</value>
+    </data>
+    <data name="RdlDesigner_Show_ErrorStopProcess" xml:space="preserve">
+        <value>Erreur d'arrêt du processus</value>
+    </data>
+    <data name="RdlDesigner_Show_HelpURLInvalid" xml:space="preserve">
+        <value>URL d'aide non valide</value>
+    </data>
+    <data name="RdlDesigner_Show_PrintError" xml:space="preserve">
+        <value>Erreur d'impression :</value>
+    </data>
+    <data name="RdlDesigner_Show_PrintOneFile" xml:space="preserve">
+        <value>Ne peut imprimer qu'un seul fichier à la fois.</value>
+    </data>
+    <data name="RdlDesigner_Show_RDLDesign" xml:space="preserve">
+        <value>Conception RDL</value>
+    </data>
+    <data name="RdlDesigner_Show_ResettingHelpURL" xml:space="preserve">
+        <value>Réinitialisation de l'URL d'aide par défaut.</value>
+    </data>
+    <data name="RdlDesigner_Show_ResettingSupportURL" xml:space="preserve">
+        <value>Réinitialisation de l'URL d'assistance par défaut.</value>
+    </data>
+    <data name="RdlDesigner_Show_SupportURLInvalid" xml:space="preserve">
+        <value>URL d'assistance non valide</value>
+    </data>
+    <data name="RdlDesigner_Show_UnableShowReport" xml:space="preserve">
+        <value>Impossible d'afficher le rapport</value>
+    </data>
+    <data name="RdlDesigner_Show_UnableStartDesktop" xml:space="preserve">
+        <value>Impossible de démarrer le bureau</value>
+    </data>
+    <data name="RdlDesigner_Show_ZoomValueInvalid" xml:space="preserve">
+        <value>Valeur de zoom non valide</value>
+    </data>
+    <data name="RdlDesigner_Status_Height" xml:space="preserve">
+        <value>hauteur</value>
+    </data>
+    <data name="RdlDesigner_Undo_DataSetDialog" xml:space="preserve">
+        <value>Boîte de dialogue DataSet</value>
+    </data>
+    <data name="RdlDesigner_Undo_DataSourcesDialog" xml:space="preserve">
+        <value>Boîte de dialogue Sources de données</value>
+    </data>
+    <data name="RdlDesigner_Undo_EmbeddedImagesDialog" xml:space="preserve">
+        <value>Boîte de dialogue Images intégrées</value>
+    </data>
+    <data name="RdlEditPreview_ShowI_ReachedEndDocument" xml:space="preserve">
+        <value>Atteint la fin du document.</value>
+    </data>
+    <data name="RdlEditPreview_Show_ErrorFind" xml:space="preserve">
+        <value>Veuillez réessayer. Erreur lors de la recherche : {0}</value>
+    </data>
+    <data name="RdlEditPreview_Show_InternalError" xml:space="preserve">
+        <value>Erreur interne</value>
+    </data>
+    <data name="RdlEditPreview_Show_Report" xml:space="preserve">
+        <value>Rapport</value>
+    </data>
+    <data name="RdlUserControl_openToolStripButton1_Click_ReportFilesFilter" xml:space="preserve">
+        <value>Fichiers de rapport (*.rdl ;*rdlc)|*.rdl ;*.rdlc|Tous les fichiers (*.*)|*.*</value>
+    </data>
+    <data name="RdlUserControl_Show_PrintError" xml:space="preserve">
+        <value>Erreur d'impression:</value>
+    </data>
+    <data name="RdlUserControl_Show_PrintOneFile" xml:space="preserve">
+        <value>Ne peut imprimer qu'un seul fichier à la fois.</value>
+    </data>
+    <data name="RdlUserControl_Show_RDLDesign" xml:space="preserve">
+        <value>Conception RDL</value>
+    </data>
+    <data name="RdlUserControl_Show_ZoomValueInvalid" xml:space="preserve">
+        <value>Valeur de zoom non valide</value>
+    </data>
+    <data name="ReportCtl_Show_Field_Invalid" xml:space="preserve">
+        <value>Champ non valide</value>
+    </data>
+    <data name="ReportCtl_Show_SizeInvalid" xml:space="preserve">
+        <value>La valeur de taille de {0} n'est pas valide.</value>
+    </data>
+    <data name="ReportNames_DescriptionDuplicateNameError" xml:space="preserve">
+        <value>NameError : nom du duplicata : {0}, nom du nœud : {1}</value>
+    </data>
+    <data name="ReportParameterCtl_bDefaultValues_Click_Default_Values" xml:space="preserve">
+        <value>Valeurs par défaut</value>
+    </data>
+    <data name="ReportXmlCtl_bOpenXsl_Click_XslFilerTitle" xml:space="preserve">
+        <value>Spécifier le nom du fichier DataTransform</value>
+    </data>
+    <data name="ReportXmlCtl_bOpenXsl_Click_XSLFilesFilter" xml:space="preserve">
+        <value>Fichiers XSL (*.xsl)|*.xsl|Tous les fichiers (*.*)|*.*</value>
+    </data>
+    <data name="SingleCtlDialog_Undo_AppearanceChange" xml:space="preserve">
+        <value>Changement d'apparence</value>
+    </data>
+    <data name="SingleCtlDialog_Undo_BackgroundChange" xml:space="preserve">
+        <value>Changement d'arrière-plan</value>
+    </data>
+    <data name="SingleCtlDialog_Undo_BorderChange" xml:space="preserve">
+        <value>Changement de frontière</value>
+    </data>
+    <data name="SingleCtlDialog_Undo_FiltersChange" xml:space="preserve">
+        <value>Changement de filtres</value>
+    </data>
+    <data name="SingleCtlDialog_Undo_GroupingChange" xml:space="preserve">
+        <value>Changement de regroupement</value>
+    </data>
+    <data name="SingleCtlDialog_Undo_ImageChange" xml:space="preserve">
+        <value>Changement d'image</value>
+    </data>
+    <data name="SingleCtlDialog_Undo_InteractivityChange" xml:space="preserve">
+        <value>Changement d'interactivité</value>
+    </data>
+    <data name="SingleCtlDialog_Undo_ReportCodeChange" xml:space="preserve">
+        <value>Signaler une modification de code</value>
+    </data>
+    <data name="SingleCtlDialog_Undo_ReportModules_ClassesChange" xml:space="preserve">
+        <value>Modification des modules/classes de rapport</value>
+    </data>
+    <data name="SingleCtlDialog_Undo_SortChange" xml:space="preserve">
+        <value>Trier le changement</value>
+    </data>
+    <data name="SingleCtlDialog_Undo_SubreportChange" xml:space="preserve">
+        <value>Modification du sous-rapport</value>
+    </data>
+    <data name="SingleCtlDialog_Undo_VisibilityChange" xml:space="preserve">
+        <value>Changement de visibilité</value>
+    </data>
+    <data name="StyleBorderCtl_Show_BottomWidth" xml:space="preserve">
+        <value>Largeur inférieure</value>
+    </data>
+    <data name="StyleBorderCtl_Show_DefaultWidth" xml:space="preserve">
+        <value>Largeur par défaut</value>
+    </data>
+    <data name="StyleBorderCtl_Show_LeftWidth" xml:space="preserve">
+        <value>Largeur gauche</value>
+    </data>
+    <data name="StyleBorderCtl_Show_RightWidth" xml:space="preserve">
+        <value>Largeur droite</value>
+    </data>
+    <data name="StyleBorderCtl_Show_SizeInvalid" xml:space="preserve">
+        <value>Taille invalide</value>
+    </data>
+    <data name="StyleBorderCtl_Show_TopWidth" xml:space="preserve">
+        <value>Largeur supérieure</value>
+    </data>
+    <data name="StyleCtl_Show_Bottom" xml:space="preserve">
+        <value>Fond</value>
+    </data>
+    <data name="StyleCtl_Show_Left" xml:space="preserve">
+        <value>Gauche</value>
+    </data>
+    <data name="StyleCtl_Show_PaddingInvalid" xml:space="preserve">
+        <value>{0} remplissage non valide</value>
+    </data>
+    <data name="StyleCtl_Show_Right" xml:space="preserve">
+        <value>Droite</value>
+    </data>
+    <data name="StyleCtl_Show_Top" xml:space="preserve">
+        <value>Retour au début</value>
+    </data>
+    <data name="StyleTextCtl_InitTextStyles_Caption" xml:space="preserve">
+        <value>Légende</value>
+    </data>
+    <data name="StyleTextCtl_Show_InvalidFontSize" xml:space="preserve">
+        <value>Taille de police non valide</value>
+    </data>
+    <data name="SubreportCtl_bFile_Click_ReportFilesFilter" xml:space="preserve">
+        <value>Fichiers de rapport (*.rdl)|*.rdl|Tous les fichiers (*.*)|*.*</value>
+    </data>
+    <data name="SubreportCtl_bFile_Click_ReportFilesTitle" xml:space="preserve">
+        <value>Spécifier le nom du fichier de rapport</value>
+    </data>
+    <data name="SubreportCtl_Show_ErrorReading" xml:space="preserve">
+        <value>Erreur lors de la lecture du fichier de rapport</value>
+    </data>
+    <data name="SubreportCtl_Show_ReportLoadFailed" xml:space="preserve">
+        <value>Échec du chargement du rapport</value>
+    </data>
+    <data name="SubreportCtl_Show_Subreport" xml:space="preserve">
+        <value>Sous-état</value>
+    </data>
+    <data name="SubreportCtl_Show_SubreportMustSpecified" xml:space="preserve">
+        <value>Le fichier de sous-rapport doit être spécifié.</value>
+    </data>
+    <data name="TableColumnCtl_Show_ExpressionTrueFalse" xml:space="preserve">
+        <value>{0} doit être une expression « vrai » ou « faux »</value>
+    </data>
+    <data name="TableColumnCtl_Show_HiddenInvalid" xml:space="preserve">
+        <value>Caché n'est pas valide</value>
+    </data>
+    <data name="TableColumnCtl_Show_WidthInvalid" xml:space="preserve">
+        <value>La largeur n'est pas valide</value>
+    </data>
+    <data name="TableCtl_Show_TableMustHaveRegions" xml:space="preserve">
+        <value>La table doit avoir au moins une ligne d'en-tête, de détails ou de pied de page définie.</value>
+    </data>
+    <data name="TableRowCtl_Show_ExpressionTrueFalse" xml:space="preserve">
+        <value>{0} doit être une expression « vrai » ou « faux »</value>
+    </data>
+    <data name="TableRowCtl_Show_HeightInvalid" xml:space="preserve">
+        <value>La hauteur n'est pas valide</value>
+    </data>
+    <data name="TableRowCtl_Show_HiddenInvalid" xml:space="preserve">
+        <value>Caché n'est pas valide</value>
+    </data>
+    <data name="Tabs_Background" xml:space="preserve">
+        <value>Arrière-plan</value>
+    </data>
+    <data name="Tabs_Borders" xml:space="preserve">
+        <value>Frontières</value>
+    </data>
+    <data name="Tabs_Filter" xml:space="preserve">
+        <value>Filtre</value>
+    </data>
+    <data name="Tabs_Font" xml:space="preserve">
+        <value>Police</value>
+    </data>
+    <data name="Tabs_Grouping" xml:space="preserve">
+        <value>Groupement</value>
+    </data>
+    <data name="Tabs_Interactivity" xml:space="preserve">
+        <value>Interactivité</value>
+    </data>
+    <data name="Tabs_ModulesAndClasses" xml:space="preserve">
+        <value>Modules et cours</value>
+    </data>
+    <data name="Tabs_ReportParameters" xml:space="preserve">
+        <value>Paramètres du rapport</value>
+    </data>
+    <data name="Tabs_Sorting" xml:space="preserve">
+        <value>Classement</value>
+    </data>
+    <data name="Tabs_Subreport" xml:space="preserve">
+        <value>Sous-état</value>
+    </data>
+    <data name="Tabs_Visibility" xml:space="preserve">
+        <value>Visibilité</value>
+    </data>
+    <data name="Undo_Error_EndGroupNotMatchStartGroup" xml:space="preserve">
+        <value>Erreur de logique interne : EndGroup ne correspond pas à StartGroup</value>
+    </data>
+    <data name="Undo_Error_UnknownAction" xml:space="preserve">
+        <value>Action inconnue</value>
+    </data>
+</root>
