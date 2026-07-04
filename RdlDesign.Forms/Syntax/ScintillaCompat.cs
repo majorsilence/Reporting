@@ -37,6 +37,7 @@ namespace Majorsilence.Reporting.RdlDesign.Syntax
         public Scintilla()
         {
             base.TextChanged += OnScintillaTextChanged;
+            base.Colorizer = ComputeColorSpans;
         }
 
         private void OnScintillaTextChanged(object sender, EventArgs e)
@@ -218,9 +219,55 @@ namespace Majorsilence.Reporting.RdlDesign.Syntax
             if (position < 0 || length <= 0 || position >= Text.Length) return string.Empty;
             return Text.Substring(position, Math.Min(length, Text.Length - position));
         }
-        public void StartStyling(int position) { }
-        public void SetStyling(int length, int style) { }
-        public int GetEndStyled() => 0;
+        // --- Real (D5): syntax coloring, driven through the same Styles[]/StyleNeeded/
+        // SetStyling surface RdlScriptLexer.StyleText and ScintillaExprStyle already use -- only
+        // these three members change from no-ops to actually recording what the lexer reports,
+        // which ComputeColorSpans (below) turns into Majorsilence.Forms.TextSpanStyle spans via
+        // the base RichTextBox/TextBox.Colorizer hook. RdlScriptLexer.cs and ScintillaExprStyle.cs
+        // themselves are unchanged from the mechanical D4 migration.
+        private int _stylingPos;
+        private readonly List<(int Start, int Length, int Style)> _styleRuns = new();
+
+        public void StartStyling(int position)
+        {
+            _stylingPos = position;
+            _styleRuns.Clear();
+        }
+
+        public void SetStyling(int length, int style)
+        {
+            if (length > 0)
+                _styleRuns.Add((_stylingPos, length, style));
+            _stylingPos += length;
+        }
+
+        public int GetEndStyled() => _stylingPos;
+
+        // Fires StyleNeeded (as real Scintilla does when it needs a range colored) covering the
+        // whole document, then converts whatever SetStyling calls that triggered into
+        // TextSpanStyle spans using each style index's configured Styles[] entry. No-op (empty
+        // result) when nothing is listening for StyleNeeded -- e.g. SQL/XML editors, which
+        // configure a built-in lexer instead of a Container one and never call StyleText.
+        private IEnumerable<TextSpanStyle> ComputeColorSpans(string text)
+        {
+            // Full recolor each call (not incremental like real Scintilla) -- reset so
+            // GetEndStyled() reports 0 and StyleText starts from the beginning of the document.
+            _stylingPos = 0;
+            _styleRuns.Clear();
+            RaiseStyleNeeded(text.Length);
+
+            foreach (var run in _styleRuns)
+            {
+                if (run.Start < 0 || run.Length <= 0 || run.Start + run.Length > text.Length)
+                    continue;
+
+                var style = Styles[run.Style];
+                var color = style.ForeColor.IsEmpty ? System.Drawing.Color.Black : style.ForeColor;
+                yield return new TextSpanStyle(run.Start, run.Length,
+                    new SkiaSharp.SKColor(color.R, color.G, color.B, color.A),
+                    style.Bold, style.Underline);
+            }
+        }
 
         public IndicatorCollection Indicators { get; } = new IndicatorCollection();
         public int IndicatorCurrent { get; set; }
