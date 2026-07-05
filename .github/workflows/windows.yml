@@ -3,6 +3,11 @@ name: windows
 on:
   push:
     branches: [main]
+    # Version tags additionally create a draft GitHub Release (see the release-draft job
+    # below) -- publishing that release's packages to nuget.org happens separately, in
+    # publish-nuget.yml, only when a human clicks "Publish release" on the draft.
+    tags:
+      - 'v*'
   pull_request:
     branches: [main]
 
@@ -11,6 +16,8 @@ jobs:
     permissions:
       contents: read
     runs-on: windows-latest
+    outputs:
+      version: ${{ steps.build_release.outputs.version }}
     steps:
       - uses: actions/checkout@v6
       - name: Setup .NET
@@ -52,3 +59,38 @@ jobs:
             Release-Builds/build-output/*.snupkg
             sbom.xml
           retention-days: 1
+
+  # ---------------------------------------------------------------------------
+  # On a version tag, collect everything build-release.ps1 produced into a draft
+  # GitHub Release. Publishing to nuget.org is a SEPARATE workflow
+  # (publish-nuget.yml), triggered only when a human clicks "Publish release" on
+  # this draft -- this job never touches nuget.org.
+  # ---------------------------------------------------------------------------
+  release-draft:
+    needs: windows-build
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v6
+        with:
+          path: artifacts
+
+      - name: Stage release files
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p release
+          find artifacts -type f \( -name '*.nupkg' -o -name '*.snupkg' -o -name '*.zip' \) \
+            -exec cp {} release/ \;
+          ls -lh release
+
+      - name: Create GitHub Release (draft)
+        uses: softprops/action-gh-release@v2
+        with:
+          name: Majorsilence Reporting ${{ needs.windows-build.outputs.version }}
+          generate_release_notes: true
+          draft: true
+          files: release/*
