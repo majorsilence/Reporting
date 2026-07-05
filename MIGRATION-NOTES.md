@@ -531,6 +531,72 @@ tests) before each pack:
   (stroke-to-fill via `SKPaint.GetFillPath`, needed so `path.IsVisible(pt)` can hit-test near a
   thin line — a path with zero area never contains any point otherwise).
 
+## D7: CI + packaging + transition messaging
+
+### CI: direct per-project builds, not the full solution, for Linux/macOS
+
+`linux.yml`/`mac.yml` both build the whole repo in one shot via `dotnet build -c Release-DrawingCompat
+MajorsilenceReporting.sln`. Investigating why that path felt risky for the new `.Forms` projects
+turned up a real, **pre-existing** (not introduced by Track D) quirk in `MajorsilenceReporting.sln`:
+`EncryptionProvider`'s `Release-DrawingCompat|Any CPU` solution-config entry has an `ActiveCfg` but
+no matching `Build.0` — the same gap exists for the original (Windows-only) `RdlViewer`'s entry too,
+git-blame confirms it predates this branch. In practice this had never mattered before, because
+nothing that builds under that configuration on Linux/macOS previously needed `EncryptionProvider`
+— the original WinForms `RdlViewer`/`RdlReader`/`RdlDesign`/`RdlMapFile` that reference it are
+Windows-only TFMs and were never actually built by that CI job in the first place. Track D's new
+`.Forms` projects are the first things that (a) build on Linux/macOS *and* (b) reference
+`EncryptionProvider`, surfacing the dormant gap for the first time. Locally reproduced: a plain
+`dotnet build -c Release-DrawingCompat MajorsilenceReporting.sln` on Linux fails resolving
+`EncryptionProvider` from `RdlViewer.Forms`; GitHub Actions' own historical runs are green, so
+whatever platform the runner's `dotnet build` resolves to isn't reproduced by a bare local
+invocation — the discrepancy wasn't fully run to ground, and hand-editing raw `.sln` GUID
+config-platform mappings blind is exactly the kind of "confident but wrong" fix that's worse than
+leaving it alone.
+
+**Decision:** rather than depend on that resolution, added a new CI step to `linux.yml`/`mac.yml`
+that builds and tests the `.Forms` track directly, bypassing the full-solution path entirely:
+
+```bash
+for proj in $(find . -maxdepth 2 -path "*.Forms/*.csproj" -not -path "*.Forms.Tests/*"); do
+  dotnet build -c Release "$proj"
+done
+for proj in $(find . -maxdepth 2 -path "*.Forms.Tests/*.csproj"); do
+  dotnet test -c Release "$proj"
+done
+```
+
+Plain `-c Release` (not `-c Release-DrawingCompat`) is enough — `Directory.Build.props` already
+defines `DRAWINGCOMPAT` unconditionally whenever `$(OS) != 'Windows_NT'`, independent of the
+configuration name, so Linux/macOS get the SkiaSharp code paths regardless. The `find`-based glob
+means every current `.Forms`/`.Forms.Tests` project pair is covered without listing them by name,
+and D8's future additions (if any) need no CI edits — matching the plan's own requirement. Verified
+locally: all 6 `.Forms` projects and all 4 `.Forms.Tests` projects build/pass cleanly this way.
+`windows.yml` needed no equivalent addition — its existing full-solution `build-release.ps1` +
+`dotnet test MajorsilenceReporting.sln` steps already cover the `.Forms` track fine on Windows,
+where the ambiguity above doesn't reproduce.
+
+### Packaging: `VersionSuffix=preview` already in place from D1-D4
+
+`Majorsilence.WinformUtils.Forms`, `Majorsilence.Reporting.RdlViewer.Forms`, and
+`Majorsilence.Reporting.ReportDesigner.Forms` (the three packable libraries) already carry
+`<PackageId>`/`<VersionSuffix>preview</VersionSuffix>`/a full `<Description>` from when each was
+built (D1/D2/D4) — nothing left to add here. `RdlReader.Forms`, `RdlMapFile.Forms`, and
+`ReportDesigner.Forms` (the three executable shells) are `IsPackable=false`, same as their
+Windows-only originals — they ship as zips via `build-release.ps1`, not NuGet packages, so
+`PackageId`/`VersionSuffix` don't apply to them.
+
+### Transition messaging: README package matrix
+
+Added four `Preview` rows to the root `Readme.md`'s package table (`RdlViewer.Forms`,
+`RdlReader.Forms`, `ReportDesigner.Forms`, `RdlMapFile.Forms`), reworded footnote ¹ from "a
+cross-platform successor ... is planned" to "... is in preview" (it exists now), and added a new
+footnote ³ explaining what "Preview" means here specifically: functionally complete, covered by
+headless CI, not yet parity-signed-off (that's D8), not yet on nuget.org, and not yet the
+recommended choice over the Windows-only originals until sign-off. Also updated the "Viewer
+choices" section and the Apache-2.0-licensed project list (the `.Forms` projects are direct
+derivative migrations of already-Apache-2.0 code, not novel new packages, so they belong in that
+list alongside their originals rather than the tri-licensed new-package list).
+
 ## Package/versioning conventions used (carry forward)
 
 - Package ID gets a `.Forms` suffix: `Majorsilence.WinformUtils.Forms` (folder matches: new

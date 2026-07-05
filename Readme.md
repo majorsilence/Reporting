@@ -62,16 +62,21 @@ Package IDs ending in `.SkiaSharp` render with a SkiaSharp-based drawing layer a
 | `Majorsilence.Reporting.RdlViewer` | WinForms viewer control | Windows | Active¹ |
 | `Majorsilence.Reporting.ReportDesigner` | WinForms drag-and-drop designer | Windows | Active¹ |
 | `Majorsilence.Reporting.EncryptionProvider` | Connection-string encryption for viewers/designers | any | Active |
+| `Majorsilence.Reporting.RdlViewer.Forms` | Cross-platform viewer control, built on [Majorsilence.Forms](https://github.com/majorsilence/Modern.Forms) | Linux, macOS, Windows | **Preview³** |
+| `Majorsilence.Reporting.RdlReader.Forms` | Cross-platform MDI viewer app, built on Majorsilence.Forms | Linux, macOS, Windows | **Preview³** |
+| `Majorsilence.Reporting.ReportDesigner.Forms` | Cross-platform drag-and-drop designer, built on Majorsilence.Forms | Linux, macOS, Windows | **Preview³** |
+| `Majorsilence.Reporting.RdlMapFile.Forms` | Cross-platform RDL Map shape-file editor, built on Majorsilence.Forms | Linux, macOS, Windows | **Preview³** |
 | `Majorsilence.Reporting.LibRdlWpfViewer` | WPF viewer wrapper | Windows | **Maintenance²** |
 | `Majorsilence.Reporting.RdlGtk3` | GTK3 viewer library | Linux | **Maintenance²** |
 
-¹ A cross-platform successor built on [Majorsilence.Forms](https://github.com/majorsilence/Modern.Forms) is planned.
+¹ A cross-platform successor built on [Majorsilence.Forms](https://github.com/majorsilence/Modern.Forms) is in preview — see the `.Forms` rows below.
 ² Maintenance mode: bug fixes only. For new work use the Avalonia viewer (`Majorsilence.Reporting.UI.RdlAvalonia`, in this repo) or render server-side and display in the browser.
+³ Preview: functionally complete and covered by headless CI tests, but not yet parity-signed-off against the Windows-only originals above. Not yet published to nuget.org. API may still change before the stable release; the Windows-only originals remain the supported choice on Windows until parity sign-off.
 
 ## Viewer choices
 
 - **Server-side / web** — render to PDF or HTML with `RdlEngine` and stream it from ASP.NET Core; the `WebDesigner` package includes preview endpoints.
-- **Cross-platform desktop** — the Avalonia viewer control in `Majorsilence.Reporting.UI.RdlAvalonia` (sample app in `Majorsilence.Reporting.UI`).
+- **Cross-platform desktop** — the Avalonia viewer control in `Majorsilence.Reporting.UI.RdlAvalonia` (sample app in `Majorsilence.Reporting.UI`), or the preview `RdlViewer.Forms`/`ReportDesigner.Forms` track (Linux, macOS, Windows).
 - **Windows desktop** — the WinForms `RdlViewer` control.
 - **Command line** — `RdlCmd` renders reports from scripts and cron jobs; Native AOT builds available on the [releases page](https://github.com/majorsilence/My-FyiReporting/releases).
 
@@ -271,18 +276,24 @@ The entire project is Apache 2.0 licensed with select sub projects tri-licensed.
 - EncryptionProver
 - LibRdlWpfViewer
 - Majorsilence.WinformUtils
+- Majorsilence.WinformUtils.Forms
 - RdlAsp.Mvc
 - RdlCmd
 - RdlCri
 - RdlDesign
+- RdlDesign.Forms
 - RdlDesktop
 - RdlEngine
 - RdlGtk3
 - RdlGtk3Viewer
 - RdlMapFile
+- RdlMapFile.Forms
 - RdlReader
+- RdlReader.Forms
 - RdlViewer
+- RdlViewer.Forms
 - ReportDesigner
+- ReportDesigner.Forms
 
 ## Tri Licensed
 - MIT License               — see LICENSE-MIT in sub folders
