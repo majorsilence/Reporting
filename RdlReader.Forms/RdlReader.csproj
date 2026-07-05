@@ -10,7 +10,7 @@
          gone), and importing it without either triggers NETSDK1106. Majorsilence.Forms.Avalonia
          handles windowing itself, no WindowsDesktop SDK import needed. -->
     <EnableDefaultEmbeddedResourceItems>false</EnableDefaultEmbeddedResourceItems>
-    <Configurations>Debug;Release;Debug-DrawingCompat</Configurations>
+    <Configurations>Debug;Release;Debug-DrawingCompat;Release-DrawingCompat</Configurations>
     <!-- net48 dropped: Majorsilence.Forms itself only targets net8.0/net10.0. -->
     <TargetFrameworks>net8.0;net10.0</TargetFrameworks>
     <WarningsAsErrors>4014</WarningsAsErrors>

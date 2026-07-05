@@ -2,6 +2,9 @@
   <PropertyGroup>
     <!-- net48 dropped: Majorsilence.Forms itself only targets net8.0/net10.0. -->
     <TargetFrameworks>net8.0;net10.0</TargetFrameworks>
+    <!-- Declared explicitly so it matches the rest of the solution's 4-config set; see
+         RdlViewer.Forms/RdlViewer.csproj's identical comment for why this matters. -->
+    <Configurations>Debug;Release;Debug-DrawingCompat;Release-DrawingCompat</Configurations>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
