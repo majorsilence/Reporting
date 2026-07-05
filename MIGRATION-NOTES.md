@@ -442,6 +442,95 @@ test projects), 4 tests exercising the real behavior end to end — not just "it
 produces zero spans, an unknown field name is styled as an error (red), and a `Scintilla` with no
 `ScintillaExprStyle` attached is a safe no-op.
 
+## D6: Designer parity + ReportDesigner shell + RdlMapFile
+
+### Designer round-trip verified end to end, not just compiled
+
+D1-D5 verified "builds clean" and (from D2 onward) "renders a fixture report headlessly." D6 adds
+the missing link for RdlDesign.Forms specifically: does the *designer itself* work end to end —
+open a report, edit it, save it, and have the result actually render? `RdlDesign.Forms.Tests/
+DesignerRoundTripTests.cs` drives exactly that loop on the Headless backend. It doesn't simulate
+real mouse-drag report-item placement (would need Majorsilence.Forms' drag-drop machinery driven
+interactively — better verified manually, per the plan's own "on Linux desktop, create/save/
+preview a report end-to-end" note) — instead it edits the design surface's underlying RDL XML
+directly (via `MDIChild.SourceRdl`), which is exactly what a completed drag-drop placement itself
+produces, then confirms the design surface retains the edit and the saved result renders through
+RdlEngine independently.
+
+Building this one test found two real **runtime** bugs that "0 compile errors" from D4 had no way
+to catch:
+
+1. **`TabControl.Controls.Add(TabPage)` didn't register a tab** (Modern.Forms fix, 26.0.14). In
+   real WinForms, `TabControl.Controls` and `TabControl.TabPages` are the same collection — ported
+   designer-generated `InitializeComponent()` code commonly does `tabControl1.Controls.Add
+   (tabPage1)`. Majorsilence.Forms kept them as two separate collections (`TabPages` drives the
+   real tab strip), so that call silently added the page as an invisible plain child with no tab
+   registered — the very next generated line, an unconditional `SelectedIndex = 0`, then threw
+   `ArgumentOutOfRangeException` because the tab strip was still empty. This broke construction of
+   *any* migrated Form/UserControl with a `TabControl` whose Designer.cs used `Controls.Add`
+   instead of `TabPages.Add` — at least 6 files in RdlDesign.Forms alone use this pattern. Fixed
+   upstream via a custom `ControlCollection` override that detects a `TabPage` being added directly
+   and redirects to `TabPages.Insert`.
+2. **`DesignCtl.ReportSource`'s getter read an uninitialized instance field through a
+   confusingly-named type reference.** `RdlDesigner.XmlNewLine` inside `DesignCtl.ReportSource`
+   doesn't resolve to the static-looking call it reads as — `RdlDesigner` is `DesignCtl`'s own
+   instance field of that name (only ever assigned when hosted inside the full MDI shell, via
+   `RdlDesigner.CreateMDIChildAsync`). A `DesignCtl`/`MDIChild` constructed any other way (any
+   test, or any future embedding of the design surface outside the MDI shell) hit a
+   `NullReferenceException` here — silently swallowed by the getter's own `catch`, surfacing only
+   as an unexplained empty `ReportSource` and a `MessageBox` nobody watching a Headless test could
+   ever see. Null-guarded with `RdlDesigner?.XmlNewLine`, falling back to Windows-style newlines.
+
+Both bugs pre-date D6 (the field/type-shadowing bug is D4-era migrated code; the TabControl gap is
+Modern.Forms's own architecture) but were invisible until something actually *exercised* the
+designer's real behavior rather than just checking it compiles — the concrete argument for writing
+this kind of test at every migration stage, not just at the end.
+
+### ReportDesigner.Forms: a genuinely trivial shell
+
+Unlike RdlReader/RdlDesign, `ReportDesigner`'s original `Program.cs` (109 lines total in the whole
+project) needed **zero logic changes** — single-instance mutex, culture setup, and
+`Application.Run(new RdlDesigner(...))` all have exact Majorsilence.Forms equivalents
+(`Application.EnableVisualStyles`/`DoEvents`/`Run` all exist with the same shape). Built clean on
+the first attempt.
+
+### RdlMapFile.Forms: same catalogue of fixes as D1-D5, no new categories
+
+28 files migrated (13 needed hand-copying — the migrator's usual zero-textual-diff blind spot,
+plus binary assets: `App.ico`, four `.gif` toolbar icons). Every fix category was already
+catalogued from earlier Track D work — no new gap types surfaced:
+- `EventHandler`/`CancelEventHandler`/`ScrollEventHandler`/`LinkLabelLinkClickedEventHandler`
+  wrapper mismatches (`new XxxEventHandler(this.Method)` → bare `this.Method`) — bulk-fixed via
+  `sed` across four files, following the exact same D1-established pattern.
+- `FileDialog.ShowDialog(Form)` async-await threading (`SaveAs()` → `SaveAsAsync()`, bridged
+  synchronously for `Save()`'s synchronous callers via `Task.Run(...).GetAwaiter().GetResult()`,
+  identical to D4's `MDIChild.FileSave()`).
+- Dead Windows-only P/Invoke mousewheel routing (`MapFile.PreFilterMessage`) gutted to a no-op,
+  same as D3/D4.
+- `MouseEventArgs.Delta` is a `Point` (not `int`) — same fix as D4's `DesignCtl.cs`.
+- `ToolStripMenuItem(text, null, handler)` ambiguity — same `(Image)` cast fix as D2/D4.
+- `ColorTranslator` ambiguity (`Majorsilence.Forms.Drawing` vs `System.Drawing`, both in scope via
+  `using`) — fully-qualified at the one call site, same fix as D4.
+- `DoubleBuffered` designer-cruft assignment removed, same as D1.
+- `System.Drawing.Design`/`Majorsilence.Forms.Design` using was present in `PropertyBase.cs` but
+  actually unused (no `UITypeEditor`/`IWindowsFormsEditorService` reference in this file, unlike
+  RdlDesign.Forms) — removed the dead using rather than pulling in D4's `DesignCompat.cs` shim.
+
+### Upstream additions to `../Modern.Forms` this pass required (26.0.14 → 26.0.15)
+
+Verified against the full test suite (2515 tests after 26.0.14's 3 new `TabControl` regression
+tests) before each pack:
+- **26.0.14**: the `TabControl.Controls.Add(TabPage)` fix described above (a real bug fix, not an
+  API-gap addition).
+- **26.0.15**: `GridItem` gained `Label`/`Parent`/`GridItems`/`Expanded` (tree-navigation shape,
+  for code that walks `PropertyGrid.SelectedGridItem` up to its root or searches children by
+  label — still non-functional stubs, since `PropertyGrid` never actually builds a `GridItem` tree;
+  making that real is D6-adjacent future work, not attempted here); `ToolStripComboBox` gained
+  `DropDownWidth`/`TextChanged`; `FontFamily` gained `GetName(int language)` (always returns
+  `Name`, no per-language localized metadata); `GraphicsPath` gained a real `Widen(Pen)`
+  (stroke-to-fill via `SKPaint.GetFillPath`, needed so `path.IsVisible(pt)` can hit-test near a
+  thin line — a path with zero area never contains any point otherwise).
+
 ## Package/versioning conventions used (carry forward)
 
 - Package ID gets a `.Forms` suffix: `Majorsilence.WinformUtils.Forms` (folder matches: new
