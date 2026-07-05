@@ -59,17 +59,16 @@
     <PackageVersion Include="XamlNameReferenceGenerator" Version="1.3.4" />
   </ItemGroup>
   <ItemGroup>
-    <!-- Majorsilence.Forms migration track (Track D). 26.0.14 is packed locally from
+    <!-- Majorsilence.Forms migration track (Track D). 26.0.15 is packed locally from
          ../Modern.Forms source (see nuget.config and MIGRATION-NOTES.md); none of 26.0.1
-         through 26.0.14 is in the 26.0.0 published on nuget.org yet. Full per-patch breakdown of
+         through 26.0.15 is in the 26.0.0 published on nuget.org yet. Full per-patch breakdown of
          what each version added is in ../Modern.Forms's git log (one commit per patch) and in
          MIGRATION-NOTES.md's D2/D4/D5/D6 sections; not repeated here to keep this file readable.
-         26.0.14 fixed TabControl.Controls.Add(TabPage) to register a real tab (previously added
-         an invisible plain child with no tab strip entry, so a subsequent SelectedIndex = 0
-         threw; a real runtime bug caught by D6's designer round-trip test, not just a compile
-         gap). -->
-    <PackageVersion Include="Majorsilence.Forms" Version="26.0.14" />
-    <PackageVersion Include="Majorsilence.Forms.Avalonia" Version="26.0.14" />
-    <PackageVersion Include="Majorsilence.Forms.Headless" Version="26.0.14" />
+         26.0.15 added GridItem tree navigation (Label/Parent/GridItems/Expanded),
+         ToolStripComboBox.DropDownWidth/TextChanged, FontFamily.GetName(int), and
+         GraphicsPath.Widen(Pen) (real stroke-to-fill outlining, for line hit-testing). -->
+    <PackageVersion Include="Majorsilence.Forms" Version="26.0.15" />
+    <PackageVersion Include="Majorsilence.Forms.Avalonia" Version="26.0.15" />
+    <PackageVersion Include="Majorsilence.Forms.Headless" Version="26.0.15" />
   </ItemGroup>
 </Project>
