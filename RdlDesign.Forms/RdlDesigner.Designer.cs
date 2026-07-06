@@ -1477,7 +1477,11 @@ namespace Majorsilence.Reporting.RdlDesign
 			// 
 			resources.ApplyResources(this.mainTC, "mainTC");
 			this.mainTC.Name = "mainTC";
-			this.mainTC.SelectedIndex = 0;
+			// SelectedIndex = 0 removed: mainTC has 0 tabs at this point (report tabs are added
+			// dynamically at runtime via mainTC.Controls.Add) -- Majorsilence.Forms.TabStrip
+			// throws ArgumentOutOfRangeException setting SelectedIndex on an empty tab strip
+			// (unlike classic WinForms, which tolerated this). Not needed anyway: Majorsilence.
+			// Forms.TabStripItemCollection.InsertItem already auto-selects the first tab added.
 			this.mainTC.SelectedIndexChanged += this.mainTC_SelectedIndexChanged;
 			this.mainTC.MouseClick += this.mainTC_MouseClick;
 			// 

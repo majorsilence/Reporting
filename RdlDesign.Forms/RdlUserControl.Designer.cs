@@ -533,8 +533,9 @@ namespace Majorsilence.Reporting.RdlDesign
 			// 
 			resources.ApplyResources(this.mainTC, "mainTC");
 			this.mainTC.Name = "mainTC";
-			this.mainTC.SelectedIndex = 0;
-			// 
+			// SelectedIndex = 0 removed: mainTC has 0 tabs at this point, same gap as
+			// RdlDesigner.Designer.cs's identical mainTC -- see that file's comment.
+			//
 			// RdlUserControl
 			// 
 			resources.ApplyResources(this, "$this");

@@ -69,8 +69,10 @@ private System.ComponentModel.Container components = null;
             resources.ApplyResources(this.tcProps, "tcProps");
             this.tcProps.Multiline = true;
             this.tcProps.Name = "tcProps";
-            this.tcProps.SelectedIndex = 0;
-            // 
+            // SelectedIndex = 0 removed: tcProps has 0 tabs at this point (property tabs are
+            // added dynamically at runtime via tcProps.Controls.Add), same gap as
+            // RdlDesigner.Designer.cs's mainTC -- see that file's comment.
+            //
             // PropertyDialog
             // 
             this.AcceptButton = this.bOK;
