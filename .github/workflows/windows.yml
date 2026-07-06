@@ -37,7 +37,7 @@ jobs:
           path: Release-Builds/build-output/*-windows-*.zip
           retention-days: 1
       - name: Test
-        run: dotnet test -c Release MajorsilenceReporting.sln --verbosity normal --collect:"XPlat Code Coverage" --logger:"trx"
+        run: dotnet test -c Release MajorsilenceReporting.slnx --verbosity normal --collect:"XPlat Code Coverage" --logger:"trx"
       - name: Test Report
         uses: dorny/test-reporter@v2
         if: success() || failure() # run this step even if previous step failed
@@ -48,7 +48,7 @@ jobs:
       - name: SBOM
         uses: CycloneDX/gh-dotnet-generate-sbom@v1
         with:
-          path: ./MajorsilenceReporting.sln
+          path: ./MajorsilenceReporting.slnx
       - name: Archive artifacts
         uses: actions/upload-artifact@v6
         with:

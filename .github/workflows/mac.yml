@@ -19,13 +19,13 @@ jobs:
         with:
           dotnet-version: 10.0.x
       - name: Restore dependencies
-        run: dotnet restore MajorsilenceReporting-Linux-GtkViewer.sln
+        run: dotnet restore MajorsilenceReporting-Linux-GtkViewer.slnx
       - name: Build GtkViewer
-        run: dotnet build -c Release-DrawingCompat MajorsilenceReporting-Linux-GtkViewer.sln
+        run: dotnet build -c Release-DrawingCompat MajorsilenceReporting-Linux-GtkViewer.slnx
       - name: Build MajorsilenceReporting DrawingCompat
-        run: dotnet build -c Release-DrawingCompat MajorsilenceReporting.sln
+        run: dotnet build -c Release-DrawingCompat MajorsilenceReporting.slnx
       - name: Test
-        run: dotnet test -c Release-DrawingCompat MajorsilenceReporting.sln --verbosity normal --collect:"XPlat Code Coverage" --logger:"trx"
+        run: dotnet test -c Release-DrawingCompat MajorsilenceReporting.slnx --verbosity normal --collect:"XPlat Code Coverage" --logger:"trx"
       - name: Test Report
         uses: dorny/test-reporter@v2
         if: success() || failure() # run this step even if previous step failed

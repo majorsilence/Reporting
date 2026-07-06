@@ -22,7 +22,7 @@ if ($env:GITHUB_OUTPUT) {
     "version=$Version" | Out-File -Append -FilePath $env:GITHUB_OUTPUT
 }
 
-$solutionPath = Join-Path $CURRENTPATH "MajorsilenceReporting.sln"
+$solutionPath = Join-Path $CURRENTPATH "MajorsilenceReporting.slnx"
 dotnet restore $solutionPath
 dotnet build $solutionPath --configuration $pConfiguration --verbosity minimal -p:GeneratePackageOnBuild=false
 

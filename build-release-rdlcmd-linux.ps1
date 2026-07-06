@@ -15,7 +15,7 @@ function BuildRdlCmd{
 	$Version=""
 	GetVersions([ref]$Version)
 	Write-Host  $Version
-	dotnet restore "./MajorsilenceReporting.sln"
+	dotnet restore "./MajorsilenceReporting.slnx"
 
 	Write-Output "Linux x64 rdlcmd build"
 
