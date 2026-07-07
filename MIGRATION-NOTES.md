@@ -609,7 +609,7 @@ list alongside their originals rather than the tri-licensed new-package list).
 ## D6.x: Runtime-parity punch list (plan for the next session)
 
 Everything below was discovered by actually running `ReportDesigner.Forms` on a Linux desktop and
-fixing what broke, one bug at a time. Fixed so far (Majorsilence.Forms 26.0.16–26.0.21, one commit
+fixing what broke, one bug at a time. Fixed so far (Majorsilence.Forms 26.0.16–26.0.22, one commit
 each in `../Modern.Forms` on `win-compat`, all with regression tests):
 
 1. `TabControl.SelectedIndex = 0` on an empty tab strip crashed at startup (26.0.16).
@@ -625,9 +625,16 @@ each in `../Modern.Forms` on `win-compat`, all with regression tests):
    dismissed it. First attempt (26.0.20, defer flag reset one dispatcher tick) was insufficient
    because the WM delivers focus-loss on its own schedule; real fix (26.0.21) makes popup windows
    non-activating (`ShowActivated=false` on the Avalonia popup host) — how native menus work.
-   **Caveat: unverifiable in the dev sandbox (bare X server, no WM); needs desktop confirmation.**
+   **Confirmed fixed on a real desktop** (user report after 26.0.21: toolbars visible, no mention
+   of menus misbehaving — previously called out explicitly). Former P3 below is resolved; kept as
+   a fallback-suspects list only in case it regresses.
 6. `ToolStrip.Items` was a facade that never mirrored into the base `MenuBase` collection that
-   layout/render/hit-testing consume → both designer toolbars rendered empty (26.0.21).
+   layout/render/hit-testing consume → both designer toolbars rendered empty (26.0.21). **Confirmed
+   fixed on a real desktop** (user screenshot shows both toolbars fully populated).
+7. `SplitContainer`/`PictureBox` didn't implement `ISupportInitialize`, which every designer-
+   generated `InitializeComponent` casts to (`((ISupportInitialize)(this.splitContainer1))
+   .BeginInit()`) — crashed `DialogDatabase` and every other dialog containing either control,
+   including plain File > New (26.0.22).
 
 ### Remaining gaps, in priority order
 
@@ -656,22 +663,30 @@ recomputes. Fix in `Label`: when `AutoSize` is true, recompute preferred size fr
 Text/Font/AutoSize change (there's already `GetPreferredSize` machinery; wire it like WinForms'
 `CommonProperties`+layout path or simply set bounds from measured text).
 
-**P3 — Verify menus on a real desktop.** If dropdowns still dismiss with 26.0.21, the next
-suspects, in order: (a) clicking a dropdown *item* — `MenuDropDown` popups chain
-(`parent_form.Deactivated += Hide`), check nested dropdown focus behavior; (b)
-`MenuBase.OnClick`'s release-on-click toggle (`IsReleaseOnClick && clicked_item == SelectedItem`)
-firing from a stray duplicated click event; (c) X11 `override-redirect` — Avalonia maps popups as
-normal WM windows; if the WM force-focuses even non-activating windows, consider Avalonia's
-`Popup`/`PopupRoot` primitives instead of a `Window` for the popup host.
+**P3 — (resolved; fallback suspects only) if menus ever dismiss again.** In order: (a) clicking a
+dropdown *item* — `MenuDropDown` popups chain (`parent_form.Deactivated += Hide`), check nested
+dropdown focus behavior; (b) `MenuBase.OnClick`'s release-on-click toggle
+(`IsReleaseOnClick && clicked_item == SelectedItem`) firing from a stray duplicated click event;
+(c) X11 `override-redirect` — Avalonia maps popups as normal WM windows; if some WM force-focuses
+even non-activating windows, consider Avalonia's `Popup`/`PopupRoot` primitives instead of a
+`Window` for the popup host.
 
 **P4 — `ToolStripComboBox` inside toolbars** (font family / font size / zoom in `toolStrip1`):
 after P1/P2, check they render and drop down; they're `ToolStripItem`-hosted controls, and the
 hosting path (item → child Control) may need the same mirroring treatment as ToolStrip items.
 
-**P5 — Continue the real smoke loop:** File → New → design surface → preview → save. Each step
-will likely surface the next runtime gap (candidates: `DialogDatabase` construction,
-`RdlEditPreview` tab wiring, design-surface paint). Use the established loop: reproduce
-headlessly (`HeadlessRenderer.CapturePng` + control-tree dump — remember bounds are only valid
-after a render pass), fix in Modern.Forms with a regression test, bump patch version, repack to
-`.local-nuget-feed`, clear the `majorsilence.forms*` nuget cache, rebuild, re-verify, commit both
-repos, push `win-compat`.
+**P5 — Continue the real smoke loop:** File → New now constructs `DialogDatabase` without
+crashing (verified headlessly); next is actually completing that dialog → design surface →
+preview → save. Each step will likely surface the next runtime gap (candidates: `RdlEditPreview`
+tab wiring, design-surface paint, the `ScintillaCompat` expression editor). Use the established
+loop: reproduce headlessly (`HeadlessRenderer.CapturePng` + control-tree dump — remember bounds
+are only valid after a render pass), fix in Modern.Forms with a regression test, bump patch
+version, repack to `.local-nuget-feed`, clear the `majorsilence.forms*` nuget cache, rebuild,
+re-verify, commit both repos, push `win-compat`.
+
+Note: `ISupportInitialize` was the *only* `System.ComponentModel`/`System.Windows.Forms` interface
+cast pattern found across all of RdlDesign.Forms/RdlViewer.Forms/RdlReader.Forms's `*.Designer.cs`
+files (grepped explicitly during the 26.0.22 fix), and all four types it targets
+(`SplitContainer`, `DataGridView`, `PictureBox`, `NumericUpDown`) now implement it — this specific
+class of crash should be fully closed out, not just patched for the one dialog that happened to
+crash first.

@@ -59,23 +59,25 @@
     <PackageVersion Include="XamlNameReferenceGenerator" Version="1.3.4" />
   </ItemGroup>
   <ItemGroup>
-    <!-- Majorsilence.Forms migration track (Track D). 26.0.21 is packed locally from
+    <!-- Majorsilence.Forms migration track (Track D). 26.0.22 is packed locally from
          ../Modern.Forms source (see nuget.config and MIGRATION-NOTES.md); none of 26.0.1
-         through 26.0.21 is in the 26.0.0 published on nuget.org yet. Full per-patch breakdown of
+         through 26.0.22 is in the 26.0.0 published on nuget.org yet. Full per-patch breakdown of
          what each version added is in ../Modern.Forms's git log (one commit per patch) and in
          MIGRATION-NOTES.md's D2/D4/D5/D6 + runtime-parity sections; not repeated here to keep this
-         file readable. In short, 26.0.16-26.0.21 fixed six ReportDesigner.Forms-blocking runtime
+         file readable. In short, 26.0.16-26.0.22 fixed seven ReportDesigner.Forms-blocking runtime
          bugs found one after another from the same live bug report (blank window -> chrome without
-         labels -> labels without toolbars -> toolbars, working menus): empty-TabControl
-         SelectedIndex crash; ComponentResourceManager not reading compiled .resources; MDI client
-         covering docked siblings; sub-line-height text rendering nothing; menu popups dismissed by
-         their own activation (twice: dispatch-tick race, then the real WM-timing fix via
-         non-activating popups); and ToolStrip's facade Items never reaching the layout/render/
-         hit-test pipeline. Also note: win-compat was rebased onto Modern.Forms main during this
-         pass, which split Form.ShowDialog/ShowDialogAsync (RdlDesign.Forms call sites updated in
-         the 26.0.19 bump commit). -->
-    <PackageVersion Include="Majorsilence.Forms" Version="26.0.21" />
-    <PackageVersion Include="Majorsilence.Forms.Avalonia" Version="26.0.21" />
-    <PackageVersion Include="Majorsilence.Forms.Headless" Version="26.0.21" />
+         labels -> labels without toolbars -> toolbars, working menus -> File > New crash):
+         empty-TabControl SelectedIndex crash; ComponentResourceManager not reading compiled
+         .resources; MDI client covering docked siblings; sub-line-height text rendering nothing;
+         menu popups dismissed by their own activation (twice: dispatch-tick race, then the real
+         WM-timing fix via non-activating popups); ToolStrip's facade Items never reaching the
+         layout/render/hit-test pipeline; and SplitContainer/PictureBox missing
+         ISupportInitialize (every designer-generated dialog casts to it in InitializeComponent,
+         so this crashed File > New and several other dialogs outright). Also note: win-compat was
+         rebased onto Modern.Forms main during this pass, which split Form.ShowDialog/
+         ShowDialogAsync (RdlDesign.Forms call sites updated in the 26.0.19 bump commit). -->
+    <PackageVersion Include="Majorsilence.Forms" Version="26.0.22" />
+    <PackageVersion Include="Majorsilence.Forms.Avalonia" Version="26.0.22" />
+    <PackageVersion Include="Majorsilence.Forms.Headless" Version="26.0.22" />
   </ItemGroup>
 </Project>
