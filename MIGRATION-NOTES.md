@@ -605,3 +605,73 @@ list alongside their originals rather than the tri-licensed new-package list).
 - `<VersionSuffix>preview</VersionSuffix>` until D8's parity sign-off flips it.
 - `Description` explicitly says what it's a preview successor to and why (cross-platform vs.
   Windows-only), so anyone browsing NuGet understands the relationship without reading this file.
+
+## D6.x: Runtime-parity punch list (plan for the next session)
+
+Everything below was discovered by actually running `ReportDesigner.Forms` on a Linux desktop and
+fixing what broke, one bug at a time. Fixed so far (Majorsilence.Forms 26.0.16–26.0.21, one commit
+each in `../Modern.Forms` on `win-compat`, all with regression tests):
+
+1. `TabControl.SelectedIndex = 0` on an empty tab strip crashed at startup (26.0.16).
+2. `ComponentResourceManager` never read a normal project's compiled `.resources` binary — every
+   `ApplyResources` call was a silent no-op, so no `Dock`/`Size`/`Text` ever applied → totally
+   blank window (26.0.17). Reads via `DeserializingResourceReader` now; WinForms-only enum types
+   (`DockStyle` etc.) bridge through the embedded `Majorsilence.Forms.WinFormsEnumShims` assembly.
+3. `IsMdiContainer`'s MDI client docked over the menu/toolbars/status strip instead of yielding
+   (z-order; missing `BringToFront`) (26.0.18).
+4. Text in controls shorter than one line's natural height (13px designer-default labels) laid out
+   zero lines instead of clipping → invisible label text (26.0.19).
+5. Menu dropdowns opened then instantly closed: popup stole activation → parent deactivation
+   dismissed it. First attempt (26.0.20, defer flag reset one dispatcher tick) was insufficient
+   because the WM delivers focus-loss on its own schedule; real fix (26.0.21) makes popup windows
+   non-activating (`ShowActivated=false` on the Avalonia popup host) — how native menus work.
+   **Caveat: unverifiable in the dev sandbox (bare X server, no WM); needs desktop confirmation.**
+6. `ToolStrip.Items` was a facade that never mirrored into the base `MenuBase` collection that
+   layout/render/hit-testing consume → both designer toolbars rendered empty (26.0.21).
+
+### Remaining gaps, in priority order
+
+**P1 — Toolbar/menu images never load on Linux (buttons currently render text-only).**
+The resx entries are typed `System.Drawing.Bitmap`; `System.Drawing.Common` throws
+`PlatformNotSupportedException` on all Linux since .NET 7, so `DeserializingResourceReader`'s
+per-entry deserialization always fails for them (~74 entries in RdlDesigner.resources alone,
+skipped gracefully). Fix in `../Modern.Forms/src/Majorsilence.Forms/ComponentResourceManager.cs`:
+recover the raw image bytes without instantiating System.Drawing types, then materialize as
+`Majorsilence.Forms.Drawing.Image` (SkiaSharp), the same output type the raw-XML-resx path already
+produces (see `BuildImage`). Two implementation options: (a) parse the .resources binary directly —
+format is documented in dotnet/runtime `ResourceReader.cs`/`DeserializingResourceReader.cs`
+(header → name table → data section; each entry: 7-bit-encoded type index, then for
+DeserializingResourceReader v2 user-types a 1-byte `SerializationFormat` + length-prefixed payload;
+`ActivatorStream`/`TypeConverterByteArray` payloads for Bitmap/Icon are just the image file bytes);
+or (b) reflection into `DeserializingResourceReader` internals (`FindPosForResource`, `_store`) —
+acceptable only because `System.Resources.Extensions` is pinned at 8.0.0, but (a) is preferred.
+Precedent for (a): `NrbfResourceReader` already hand-parses the NRBF wire format in the same
+codebase. Then confirm `TryConvert` bridges `Majorsilence.Forms.Drawing.Image` to
+`MenuItem.Image`'s property type, and re-render RdlDesigner headlessly to see icons.
+
+**P2 — `Label.AutoSize` doesn't grow to fit text** ("Fore Colo|" truncation next to the color
+pickers). WinForms: an `AutoSize=true` label ignores designer-set `Size` and grows to its text.
+Majorsilence.Forms: resx applies both `AutoSize=true` and the stale designed `Size`; nothing
+recomputes. Fix in `Label`: when `AutoSize` is true, recompute preferred size from text on
+Text/Font/AutoSize change (there's already `GetPreferredSize` machinery; wire it like WinForms'
+`CommonProperties`+layout path or simply set bounds from measured text).
+
+**P3 — Verify menus on a real desktop.** If dropdowns still dismiss with 26.0.21, the next
+suspects, in order: (a) clicking a dropdown *item* — `MenuDropDown` popups chain
+(`parent_form.Deactivated += Hide`), check nested dropdown focus behavior; (b)
+`MenuBase.OnClick`'s release-on-click toggle (`IsReleaseOnClick && clicked_item == SelectedItem`)
+firing from a stray duplicated click event; (c) X11 `override-redirect` — Avalonia maps popups as
+normal WM windows; if the WM force-focuses even non-activating windows, consider Avalonia's
+`Popup`/`PopupRoot` primitives instead of a `Window` for the popup host.
+
+**P4 — `ToolStripComboBox` inside toolbars** (font family / font size / zoom in `toolStrip1`):
+after P1/P2, check they render and drop down; they're `ToolStripItem`-hosted controls, and the
+hosting path (item → child Control) may need the same mirroring treatment as ToolStrip items.
+
+**P5 — Continue the real smoke loop:** File → New → design surface → preview → save. Each step
+will likely surface the next runtime gap (candidates: `DialogDatabase` construction,
+`RdlEditPreview` tab wiring, design-surface paint). Use the established loop: reproduce
+headlessly (`HeadlessRenderer.CapturePng` + control-tree dump — remember bounds are only valid
+after a render pass), fix in Modern.Forms with a regression test, bump patch version, repack to
+`.local-nuget-feed`, clear the `majorsilence.forms*` nuget cache, rebuild, re-verify, commit both
+repos, push `win-compat`.
