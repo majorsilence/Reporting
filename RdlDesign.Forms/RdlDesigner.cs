@@ -629,7 +629,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			using (DialogExprEditor de = new DialogExprEditor(mc.DrawCtl, ctlEditTextbox.Text, tn))
 			{
 				// Display the UI editor dialog
-				if (await de.ShowDialog(this) == DialogResult.OK)
+				if (await de.ShowDialogAsync(this) == DialogResult.OK)
 				{
 					ctlEditTextbox.Text = de.Expression;
 					mc.Editor.SetSelectedText(de.Expression);
@@ -825,7 +825,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			ofd.Multiselect = true;
 			try
 			{
-				if (await ofd.ShowDialog(this) == DialogResult.OK)
+				if (await ofd.ShowDialogAsync(this) == DialogResult.OK)
 				{
 					foreach (string file in ofd.FileNames)
 					{
@@ -1617,7 +1617,7 @@ namespace Majorsilence.Reporting.RdlDesign
 				Filter = "PDF files (*.pdf)|*.pdf",
 				FileName = Path.GetFileNameWithoutExtension(mc.SourceFile.LocalPath) + ".pdf",
 			};
-			if (await sfd.ShowDialog(this) == DialogResult.OK)
+			if (await sfd.ShowDialogAsync(this) == DialogResult.OK)
 			{
 				try
 				{

@@ -117,7 +117,7 @@ namespace Majorsilence.Reporting.RdlDesign
             ofd.Multiselect = true;
             try
             {
-                if (await ofd.ShowDialog(this) != DialogResult.OK)
+                if (await ofd.ShowDialogAsync(this) != DialogResult.OK)
                     return;
 
                 // need to create a new embedded image(s)

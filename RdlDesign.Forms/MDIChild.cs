@@ -309,7 +309,7 @@ namespace Majorsilence.Reporting.RdlDesign
 
             try
             {
-                if (await sfd.ShowDialog(this) != DialogResult.OK)
+                if (await sfd.ShowDialogAsync(this) != DialogResult.OK)
                     return false;
 
                 // save the report in the requested rendered format 
@@ -350,7 +350,7 @@ namespace Majorsilence.Reporting.RdlDesign
             sfd.FileName = file == null ? "*.rdl" : file.LocalPath;
             try
             {
-                if (await sfd.ShowDialog(this) != DialogResult.OK)
+                if (await sfd.ShowDialogAsync(this) != DialogResult.OK)
                     return false;
 
                 // User wants to save!

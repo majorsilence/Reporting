@@ -491,7 +491,7 @@ namespace Majorsilence.Reporting.RdlDesign
 
             try
             {
-                if (await fbd.ShowDialog(this) == DialogResult.Cancel)
+                if (await fbd.ShowDialogAsync(this) == DialogResult.Cancel)
                     return;
 
                 tbDirectory.Text = fbd.SelectedPath;
@@ -564,7 +564,7 @@ namespace Majorsilence.Reporting.RdlDesign
             ofd.Multiselect = true;
             try
             {
-                if (await ofd.ShowDialog(this) == DialogResult.OK)
+                if (await ofd.ShowDialogAsync(this) == DialogResult.OK)
                 {
                     foreach (string file in ofd.FileNames)
                     {

@@ -1140,7 +1140,7 @@ namespace Majorsilence.Reporting.RdlDesign
                     Filter = "PDF files (*.pdf)|*.pdf",
                     FileName = Path.GetFileNameWithoutExtension(SourceFile.LocalPath) + ".pdf",
                 };
-                if (await sfd.ShowDialog(this.FindForm()) == DialogResult.OK)
+                if (await sfd.ShowDialogAsync(this.FindForm()) == DialogResult.OK)
                 {
                     await SaveAsAsync(sfd.FileName, OutputPresentationType.PDF);
                 }

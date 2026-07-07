@@ -1474,7 +1474,7 @@ namespace Majorsilence.Reporting.RdlDesign
                 
                 try
                 {
-                    if (await ofd.ShowDialog(this) != DialogResult.OK)
+                    if (await ofd.ShowDialogAsync(this) != DialogResult.OK)
                     {
                         return;
                     }

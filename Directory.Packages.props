@@ -59,26 +59,25 @@
     <PackageVersion Include="XamlNameReferenceGenerator" Version="1.3.4" />
   </ItemGroup>
   <ItemGroup>
-    <!-- Majorsilence.Forms migration track (Track D). 26.0.18 is packed locally from
+    <!-- Majorsilence.Forms migration track (Track D). 26.0.19 is packed locally from
          ../Modern.Forms source (see nuget.config and MIGRATION-NOTES.md); none of 26.0.1
-         through 26.0.18 is in the 26.0.0 published on nuget.org yet. Full per-patch breakdown of
+         through 26.0.19 is in the 26.0.0 published on nuget.org yet. Full per-patch breakdown of
          what each version added is in ../Modern.Forms's git log (one commit per patch) and in
          MIGRATION-NOTES.md's D2/D4/D5/D6 sections; not repeated here to keep this file readable.
-         26.0.16 made TabControl.SelectedIndex tolerate an empty tab strip (matches WinForms;
-         designer-generated code unconditionally emits SelectedIndex = 0 even for TabControls
-         whose tabs are added dynamically at runtime, found via a real ReportDesigner.Forms
-         startup crash). 26.0.17 fixed ComponentResourceManager to actually read the standard
-         SDK-compiled .resources binary format (it only ever looked for a raw XML .resx before,
-         which normal projects don't produce), so Dock/Size/Location/Text etc. driven by designer
-         resx now apply. 26.0.18 fixed IsMdiContainer's MDI client covering already-docked
-         siblings instead of yielding to their claimed space (missing BringToFront; the client
-         was appended to the back of z-order, so its Dock=Fill got computed first, against the
-         whole window, before the menu/toolbar/status strip claimed their own slice). Both found
-         via ReportDesigner.Forms rendering as a totally blank window with no menu/toolbar/panels
-         visible; 26.0.17 alone wasn't sufficient, since it fixed Dock resolving correctly but not
-         this separate MDI z-order bug in how Dock=Fill get applied. -->
-    <PackageVersion Include="Majorsilence.Forms" Version="26.0.18" />
-    <PackageVersion Include="Majorsilence.Forms.Avalonia" Version="26.0.18" />
-    <PackageVersion Include="Majorsilence.Forms.Headless" Version="26.0.18" />
+         26.0.16-26.0.19 fixed, in turn: TabControl.SelectedIndex throwing on an empty tab strip;
+         ComponentResourceManager never actually reading a normal project's compiled .resources
+         (it only looked for a raw XML .resx); IsMdiContainer's MDI client covering already-docked
+         menu/toolbar/status strip siblings instead of yielding to their claimed space; and
+         text-drawing controls shorter than one line's natural height (13px, the WinForms designer's
+         own AutoSize Label default) rendering nothing at all. All four found via the exact same
+         real bug report: ReportDesigner.Forms rendering first as a totally blank window, then
+         progressively closer to correct as each was found and fixed in turn. Also note: win-compat
+         was rebased onto Modern.Forms main during this same pass, which independently changed
+         Form.ShowDialog(IWin32Window)/ShowDialogAsync(Form)'s split (see the ShowDialogAsync call
+         sites in RdlDesign.Forms's Dialog*.cs/RdlDesigner.cs/RdlUserControl.cs/MDIChild.cs, updated
+         to match in the same commit as this version bump). -->
+    <PackageVersion Include="Majorsilence.Forms" Version="26.0.19" />
+    <PackageVersion Include="Majorsilence.Forms.Avalonia" Version="26.0.19" />
+    <PackageVersion Include="Majorsilence.Forms.Headless" Version="26.0.19" />
   </ItemGroup>
 </Project>
