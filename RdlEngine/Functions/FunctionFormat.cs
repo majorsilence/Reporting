@@ -96,7 +96,12 @@ namespace Majorsilence.Reporting.Rdl
 			string result=null;
 			try
 			{
-				result = String.Format("{0:" + format + "}", o);
+				// Resolve the report's language the same way Style.GetFormatedString does, so
+				// that locale-sensitive formats (C, N, P, etc.) honour the RDL <Language> element
+				// instead of falling back to the ambient/thread culture (which is the invariant
+				// culture -- generic "¤" currency symbol -- in many server/container deployments).
+				string language = rpt != null ? await rpt.ReportDefinition.EvalLanguage(rpt, row) : null;
+				result = Style.FormatValue(o, Convert.GetTypeCode(o), format, language);
 			}
 			catch (Exception ex) 		// invalid format string specified
 			{           //    treat as a weak error
