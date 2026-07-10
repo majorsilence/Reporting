@@ -15,8 +15,8 @@
     <AssemblyVersion>26.0.0</AssemblyVersion>
 
     <!-- year.release.build, increase release.build for each release in the same year -->
-    <FileVersion>26.0.2</FileVersion>
-    <Version>26.0.2</Version>
+    <FileVersion>26.0.3</FileVersion>
+    <Version>26.0.3</Version>
     <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
     <Product>Majorsilence Reporting</Product>
     <Copyright>Copyright © 2004-2008  fyiReporting Software, LLC, Majorsilence Reporting Devs 2026</Copyright>
