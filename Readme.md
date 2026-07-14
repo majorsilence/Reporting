@@ -4,9 +4,9 @@ If you have any question about Majorsilence Reporting or do you want to contribu
 
 https://github.com/majorsilence/Reporting/discussions
 
-|         |Linux |Mac | Win | Win(AppeyVeyor) |
-|---------|:------:|:------:|:------:|:------:|
-|**main**| [![linux](https://github.com/majorsilence/Reporting/actions/workflows/linux.yml/badge.svg?branch=main)](https://github.com/majorsilence/Reporting/actions/workflows/linux.yml) | [![mac](https://github.com/majorsilence/Reporting/actions/workflows/mac.yml/badge.svg?branch=main)](https://github.com/majorsilence/Reporting/actions/workflows/mac.yml) | [![.github/workflows/windows.yml](https://github.com/majorsilence/Reporting/actions/workflows/windows.yml/badge.svg?branch=main)](https://github.com/majorsilence/Reporting/actions/workflows/windows.yml) | [![Build status appveyor](https://ci.appveyor.com/api/projects/status/a44n015bli95rmpw?svg=true)](https://ci.appveyor.com/project/majorsilence/my-fyireporting) | 
+|         |Linux |Mac | Win |
+|---------|:------:|:------:|:------:|
+|**main**| [![linux](https://github.com/majorsilence/Reporting/actions/workflows/linux.yml/badge.svg?branch=main)](https://github.com/majorsilence/Reporting/actions/workflows/linux.yml) | [![mac](https://github.com/majorsilence/Reporting/actions/workflows/mac.yml/badge.svg?branch=main)](https://github.com/majorsilence/Reporting/actions/workflows/mac.yml) | [![.github/workflows/windows.yml](https://github.com/majorsilence/Reporting/actions/workflows/windows.yml/badge.svg?branch=main)](https://github.com/majorsilence/Reporting/actions/workflows/windows.yml) |
 
 
 
