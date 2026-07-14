@@ -2,12 +2,11 @@
 
 If you have any question about Majorsilence Reporting or do you want to contribute a discussion group for Majorsilence Reporting is available here:
 
-https://groups.google.com/d/forum/myfyireporting
-
+https://github.com/majorsilence/Reporting/discussions
 
 |         |Linux |Mac | Win | Win(AppeyVeyor) |
 |---------|:------:|:------:|:------:|:------:|
-|**Master**| [![linux](https://github.com/majorsilence/My-FyiReporting/actions/workflows/linux.yml/badge.svg?branch=master)](https://github.com/majorsilence/My-FyiReporting/actions/workflows/linux.yml) | [![mac](https://github.com/majorsilence/My-FyiReporting/actions/workflows/mac.yml/badge.svg?branch=master)](https://github.com/majorsilence/My-FyiReporting/actions/workflows/mac.yml) | [![.github/workflows/windows.yml](https://github.com/majorsilence/My-FyiReporting/actions/workflows/windows.yml/badge.svg?branch=master)](https://github.com/majorsilence/My-FyiReporting/actions/workflows/windows.yml) | [![Build status appveyor](https://ci.appveyor.com/api/projects/status/a44n015bli95rmpw?svg=true)](https://ci.appveyor.com/project/majorsilence/my-fyireporting) | 
+|**main**| [![linux](https://github.com/majorsilence/Reporting/actions/workflows/linux.yml/badge.svg?branch=main)](https://github.com/majorsilence/Reporting/actions/workflows/linux.yml) | [![mac](https://github.com/majorsilence/Reporting/actions/workflows/mac.yml/badge.svg?branch=main)](https://github.com/majorsilence/Reporting/actions/workflows/mac.yml) | [![.github/workflows/windows.yml](https://github.com/majorsilence/Reporting/actions/workflows/windows.yml/badge.svg?branch=main)](https://github.com/majorsilence/Reporting/actions/workflows/windows.yml) | [![Build status appveyor](https://ci.appveyor.com/api/projects/status/a44n015bli95rmpw?svg=true)](https://ci.appveyor.com/project/majorsilence/my-fyireporting) | 
 
 
 
@@ -20,10 +19,12 @@ See the [downloads page](https://github.com/majorsilence/My-FyiReporting/wiki/Do
 
 Alternatively if you want keep up with the latest version you can always use Git
 
-    git clone https://github.com/majorsilence/My-FyiReporting.git
+```bash
+git clone https://github.com/majorsilence/Reporting.git
+```
 
 # Introduction
-Majorsilence Reporting is a powerful, open-source .NET reporting framework designed for developers who need to create, design, and deliver rich, reports. Supporting modern .NET versions (8.0), it provides a flexible and extensible platform for building reports from a variety of data sources. With a drag-and-drop designer, multiple viewer options, and cross-platform support, Majorsilence Reporting is ideal for both desktop and web applications. Whether you need to generate reports programmatically or empower users with a visual designer (windows only), this project offers the tools and documentation to get you started quickly.
+Majorsilence Reporting is a powerful, open-source .NET reporting framework designed for developers who need to create, design, and deliver rich, reports. Supporting modern .NET versions (8.0, 10.0), it provides a flexible and extensible platform for building reports from a variety of data sources. With a drag-and-drop designer, multiple viewer options, and cross-platform support, Majorsilence Reporting is ideal for both desktop and web applications. Whether you need to generate reports programmatically or empower users with a visual designer (windows only), this project offers the tools and documentation to get you started quickly.
 
 **The core of Majorsilence Reporting supports Linux and macOS for server-side application report generation. Only the WinForms-based designer and viewer are Windows-only.**
 
