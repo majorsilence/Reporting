@@ -227,7 +227,7 @@ namespace Majorsilence.Reporting.RdlMapFile
             bool rc = false;
             try
             {
-                if (await sfd.ShowDialog(this) == DialogResult.OK)
+                if ( sfd.ShowDialog(this) == DialogResult.OK)
                 {
                     map.File = sfd.FileName;
                     rc = true;
@@ -272,7 +272,7 @@ namespace Majorsilence.Reporting.RdlMapFile
 
             try
             {
-                if (await ofd.ShowDialog(this) == DialogResult.OK)
+                if ( ofd.ShowDialog(this) == DialogResult.OK)
                 {
                     map.SetMapFile(ofd.FileName);
                     SetTitle(false);
@@ -297,7 +297,7 @@ namespace Majorsilence.Reporting.RdlMapFile
             ofd.CheckFileExists = true;
             try
             {
-                if (await ofd.ShowDialog(this) == DialogResult.OK)
+                if ( ofd.ShowDialog(this) == DialogResult.OK)
                 {
                     map.SetBackgroundImage(ofd.FileName);
                 }
@@ -455,7 +455,7 @@ namespace Majorsilence.Reporting.RdlMapFile
             ofd.CheckFileExists = true;
             try
             {
-                if (await ofd.ShowDialog(this) == DialogResult.OK)
+                if ( ofd.ShowDialog(this) == DialogResult.OK)
                 {
                     map.ClearUndo();
                     ShapeFile sf = new ShapeFile();

@@ -76,8 +76,8 @@
          so this crashed File > New and several other dialogs outright). Also note: win-compat was
          rebased onto Modern.Forms main during this pass, which split Form.ShowDialog/
          ShowDialogAsync (RdlDesign.Forms call sites updated in the 26.0.19 bump commit). -->
-    <PackageVersion Include="Majorsilence.Forms" Version="26.0.22" />
-    <PackageVersion Include="Majorsilence.Forms.Avalonia" Version="26.0.22" />
-    <PackageVersion Include="Majorsilence.Forms.Headless" Version="26.0.22" />
+    <PackageVersion Include="Majorsilence.Forms" Version="26.0.24" />
+    <PackageVersion Include="Majorsilence.Forms.Avalonia" Version="26.0.24" />
+    <PackageVersion Include="Majorsilence.Forms.Headless" Version="26.0.24" />
   </ItemGroup>
 </Project>

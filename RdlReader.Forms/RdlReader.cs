@@ -322,7 +322,7 @@ namespace Majorsilence.Reporting.RdlReader
             ofd.FilterIndex = 1;
             ofd.CheckFileExists = true;
             ofd.Multiselect = true;
-            if (await ofd.ShowDialog(this) == DialogResult.OK)
+            if (ofd.ShowDialog(this) == DialogResult.OK)
             {
                 foreach (string file in ofd.FileNames)
                 {
@@ -391,7 +391,7 @@ namespace Majorsilence.Reporting.RdlReader
                 Filter = "PDF files (*.pdf)|*.pdf",
                 FileName = Path.GetFileNameWithoutExtension(mc.SourceFile.LocalPath) + ".pdf",
             };
-            if (await sfd.ShowDialog(this) == DialogResult.OK)
+            if ( sfd.ShowDialog(this) == DialogResult.OK)
             {
                 try
                 {
@@ -429,7 +429,7 @@ namespace Majorsilence.Reporting.RdlReader
             else
                 sfd.FileName = "*.pdf";
 
-            if (await sfd.ShowDialog(this) != DialogResult.OK)
+            if ( sfd.ShowDialog(this) != DialogResult.OK)
                 return;
 
             // save the report in a rendered format 
