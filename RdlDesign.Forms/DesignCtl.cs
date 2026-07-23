@@ -1076,29 +1076,25 @@ namespace Majorsilence.Reporting.RdlDesign
         }
 
         private Bitmap _buffer;
-        // HACK: async shenanigans
-        bool doGraphicsDraw;
-        private async void DrawPanelPaint(object sender, Majorsilence.Forms.PaintEventArgs e)
+        // PaintEventArgs.Graphics isn't valid past the synchronous portion of a paint call, so the
+        // report is rendered asynchronously into an offscreen buffer and blitted on a later,
+        // synchronous paint. The previous version alternated strictly between "render" and "blit"
+        // calls, assuming every paint was the self-chained follow-up -- but any OTHER trigger (a
+        // resize, a repaint cascading down from an ancestor, etc.) landing on a "render" turn drew
+        // nothing at all that frame, flashing blank/stale content whenever it also happened to be a
+        // frame where the back buffer had just been reallocated (e.g. a resize). Now every paint call
+        // draws whatever buffer is currently available -- kept around instead of disposed immediately
+        // after use -- and only swaps in a freshly rendered one once it's actually ready, so there is
+        // never a call that paints nothing.
+        private void DrawPanelPaint(object sender, Majorsilence.Forms.PaintEventArgs e)
         {
-            // HACK: async shenanigans
-            if (doGraphicsDraw && _buffer != null)
-            {
+            if (_buffer != null)
                 e.Graphics.DrawImage(_buffer, 0, 0);
-                _buffer.Dispose();
-                _buffer = null;
-                doGraphicsDraw = false;
-            }
-            else
-            {
-                // HACK: async shenanigans
-                await Internal_DrawPanelPaint();
-                doGraphicsDraw = true;
-                // HACK: async shenanigans, force a repaint where e.Graphics is still valid
-                _DrawPanel.Invalidate();       
-            }
+
+            _ = Internal_DrawPanelPaintAsync();
         }
 
-        private async Task Internal_DrawPanelPaint()
+        private async Task Internal_DrawPanelPaintAsync()
         {
             // Only handle one paint at a time
             lock (this)
@@ -1108,33 +1104,44 @@ namespace Majorsilence.Reporting.RdlDesign
                 _InPaint = true;
             }
 
-            // Create a self-contained Graphics object
-            _buffer = new Bitmap(Math.Max(1, _DrawPanel.Width), Math.Max(1, _DrawPanel.Height));
-            using (Graphics g = Graphics.FromImage(_buffer))
+            try
             {
-                try // never want to die in here
+                // Create a self-contained Graphics object
+                var newBuffer = new Bitmap(Math.Max(1, _DrawPanel.Width), Math.Max(1, _DrawPanel.Height));
+                using (Graphics g = Graphics.FromImage(newBuffer))
                 {
-                    if (this._ReportDoc == null) // if no report force the simplest one
-                        CreateEmptyReportDoc();
+                    try // never want to die in here
+                    {
+                        if (this._ReportDoc == null) // if no report force the simplest one
+                            CreateEmptyReportDoc();
 
-                    //g.ClipBounds;
-                    var clip = new Rectangle(PixelsX(_hScroll.Value), PixelsY(_vScroll.Value),
-                        PixelsX(_DrawPanel.Width), PixelsY(_DrawPanel.Height));
-                    // Draw the report asynchronously
-                    await _DrawPanel.Draw(g, PointsX(_hScroll.Value), PointsY(_vScroll.Value), clip);
+                        //g.ClipBounds;
+                        var clip = new Rectangle(PixelsX(_hScroll.Value), PixelsY(_vScroll.Value),
+                            PixelsX(_DrawPanel.Width), PixelsY(_DrawPanel.Height));
+                        // Draw the report asynchronously
+                        await _DrawPanel.Draw(g, PointsX(_hScroll.Value), PointsY(_vScroll.Value), clip);
+                    }
+                    catch (Exception ex)
+                    { // don't want to kill process if we die -- put up some kind of error message
+                        StringFormat format = new StringFormat();
+                        string msg = string.Format("Error drawing report. Likely error in syntax. Switch to syntax and correct report syntax.{0}{1}{0}{2}",
+                            Environment.NewLine, ex.Message, ex.StackTrace);
+                        g.DrawString(msg, this.Font, Brushes.Black, new Rectangle(2, 2, this.Width, this.Height), format);
+                    }
                 }
-                catch (Exception ex)
-                { // don't want to kill process if we die -- put up some kind of error message
-                    StringFormat format = new StringFormat();
-                    string msg = string.Format("Error drawing report. Likely error in syntax. Switch to syntax and correct report syntax.{0}{1}{0}{2}",
-                        Environment.NewLine, ex.Message, ex.StackTrace);
-                    g.DrawString(msg, this.Font, Brushes.Black, new Rectangle(2, 2, this.Width, this.Height), format);
-                }
+
+                var oldBuffer = _buffer;
+                _buffer = newBuffer;
+                oldBuffer?.Dispose();
+                // Force a repaint where e.Graphics is still valid, to actually show the new buffer.
+                _DrawPanel.Invalidate();
             }
-
-            lock (this)
+            finally
             {
-                _InPaint = false;
+                lock (this)
+                {
+                    _InPaint = false;
+                }
             }
         }
 
