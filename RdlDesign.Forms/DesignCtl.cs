@@ -1078,18 +1078,26 @@ namespace Majorsilence.Reporting.RdlDesign
         private Bitmap _buffer;
         // PaintEventArgs.Graphics isn't valid past the synchronous portion of a paint call, so the
         // report is rendered asynchronously into an offscreen buffer and blitted on a later,
-        // synchronous paint. The previous version alternated strictly between "render" and "blit"
-        // calls, assuming every paint was the self-chained follow-up -- but any OTHER trigger (a
-        // resize, a repaint cascading down from an ancestor, etc.) landing on a "render" turn drew
-        // nothing at all that frame, flashing blank/stale content whenever it also happened to be a
-        // frame where the back buffer had just been reallocated (e.g. a resize). Now every paint call
-        // draws whatever buffer is currently available -- kept around instead of disposed immediately
-        // after use -- and only swaps in a freshly rendered one once it's actually ready, so there is
-        // never a call that paints nothing.
+        // synchronous paint. Every paint call draws whatever buffer is currently available -- kept
+        // around instead of disposed immediately after use -- so there is never a call that paints
+        // nothing (that was the old flicker: a resize reallocates a blank back buffer, and a call
+        // that only *started* a render rather than drawing left it on screen for a frame).
+        //
+        // _awaitingFollowUpPaint distinguishes "this paint is the one we ourselves requested to show
+        // a just-finished render" from "something external wants a redraw" -- without it, that
+        // self-requested paint would kick off another render, which finishes and requests another
+        // paint, forever, pegging a CPU core even completely idle.
+        private bool _awaitingFollowUpPaint;
         private void DrawPanelPaint(object sender, Majorsilence.Forms.PaintEventArgs e)
         {
             if (_buffer != null)
                 e.Graphics.DrawImage(_buffer, 0, 0);
+
+            if (_awaitingFollowUpPaint)
+            {
+                _awaitingFollowUpPaint = false;
+                return;
+            }
 
             _ = Internal_DrawPanelPaintAsync();
         }
@@ -1134,6 +1142,7 @@ namespace Majorsilence.Reporting.RdlDesign
                 _buffer = newBuffer;
                 oldBuffer?.Dispose();
                 // Force a repaint where e.Graphics is still valid, to actually show the new buffer.
+                _awaitingFollowUpPaint = true;
                 _DrawPanel.Invalidate();
             }
             finally
