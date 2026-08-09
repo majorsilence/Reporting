@@ -116,6 +116,15 @@ namespace Majorsilence.Reporting.Rdl
 			
 			ReportLog rl = new ReportLog();		// create a report log
 
+			// RDL 2008 and later replaced Table/Matrix/List with Tablix and gave Textbox a
+			// rich-text model; the definition classes below only know the 2005 shape. Rewrite the
+			// document first so they -- and every renderer behind them -- stay unchanged.
+			if (Rdl2008Normalizer.NeedsNormalizing(_RdlDocument))
+			{
+				Rdl2008Normalizer.Normalize(_RdlDocument, rl);
+				xNode = _RdlDocument.LastChild;
+			}
+
 			ReportDefn rd = new ReportDefn(xNode, rl, this._Folder, this._DataSourceReferencePassword, oc, OnSubReportGetContent, OverwriteConnectionString, OverwriteInSubreport, SkipDatabaseSchemaValidation);
 			await rd.InitializeAsync();
 			_Report = new Report(rd);
