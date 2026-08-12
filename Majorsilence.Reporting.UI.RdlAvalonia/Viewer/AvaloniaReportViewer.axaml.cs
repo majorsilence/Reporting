@@ -25,6 +25,7 @@ namespace Majorsilence.Reporting.UI.RdlAvalonia.Viewer
         private Pages? _pages;
         private Uri? _sourceFile;
         private string? _sourceRdl;
+        private Report? _externalReport;
         private IDictionary _parameters = new Dictionary<string, string>();
         private IList? _errorMessages;
         private int _pageCurrent = 1;
@@ -63,11 +64,21 @@ namespace Majorsilence.Reporting.UI.RdlAvalonia.Viewer
 
         public event EventHandler<SubreportDataRetrievalEventArgs>? SubreportDataRetrieval;
 
+        /// <summary>
+        /// Raised once per successful <see cref="RebuildAsync"/> — after the report has
+        /// been parsed/fetched (or supplied via <see cref="SetReportAsync"/>), pages have
+        /// been built, and the canvas/toolbar/parameter UI have all been updated.
+        /// </summary>
+        public event EventHandler? ReportLoaded;
+
         public string? ConnectionStringOverride { get; private set; }
 
         public bool OverwriteSubreportConnection { get; private set; }
 
         public string? WorkingDirectory { get; set; }
+
+        /// <summary>The pages built by the most recent successful <see cref="RebuildAsync"/> call.</summary>
+        public Pages? CurrentPages => _pages;
 
         /// <summary>
         /// Optional PDF encryption/permissions to apply when exporting to PDF.
@@ -96,6 +107,23 @@ namespace Majorsilence.Reporting.UI.RdlAvalonia.Viewer
             await RebuildAsync();
         }
 
+        /// <summary>
+        /// Loads an already-parsed, already-populated <see cref="Report"/> directly —
+        /// e.g. one whose <c>DataSets</c> were fed via <c>SetData(DataTable)</c> rather
+        /// than a live query. Bypasses <see cref="GetReportAsync"/>'s own parse/fetch
+        /// entirely; <see cref="RebuildAsync"/> still runs <c>RunGetData</c>/<c>BuildPages</c>
+        /// against it normally (safe: it does not overwrite data already pushed onto a
+        /// dataset), and Reload/parameter-apply continue to reuse this same instance.
+        /// </summary>
+        public async Task SetReportAsync(Report report)
+        {
+            _sourceFile = null;
+            _sourceRdl = null;
+            _externalReport = report;
+            report.SubreportDataRetrieval += (_, args) => SubreportDataRetrieval?.Invoke(this, args);
+            await RebuildAsync();
+        }
+
         public void SetReportParametersAmpersandSeparated(string parameterString)
         {
             _parameters = new Dictionary<string, string>();
@@ -119,7 +147,7 @@ namespace Majorsilence.Reporting.UI.RdlAvalonia.Viewer
 
         public async Task RebuildAsync()
         {
-            if (_sourceFile == null && string.IsNullOrWhiteSpace(_sourceRdl))
+            if (_sourceFile == null && string.IsNullOrWhiteSpace(_sourceRdl) && _externalReport == null)
             {
                 return;
             }
@@ -146,6 +174,7 @@ namespace Majorsilence.Reporting.UI.RdlAvalonia.Viewer
                 _thumbnailsDirty = true;
                 if (ThumbnailPanel.IsVisible)
                     await BuildThumbnailsAsync();
+                ReportLoaded?.Invoke(this, EventArgs.Empty);
             }
             catch (Exception ex)
             {
@@ -521,6 +550,11 @@ namespace Majorsilence.Reporting.UI.RdlAvalonia.Viewer
 
         private async Task<Report?> GetReportAsync()
         {
+            if (_externalReport != null)
+            {
+                return _externalReport;
+            }
+
             string source;
             if (!string.IsNullOrWhiteSpace(_sourceRdl))
             {
