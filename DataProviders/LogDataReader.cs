@@ -56,7 +56,7 @@ namespace Majorsilence.Reporting.Data
 			if (_IndexFile == null)
 				_IndexFile = "";
 
-			if (behavior != CommandBehavior.SchemaOnly)
+			if (!CommandBehaviorSupport.IsSchemaOnly(behavior))
 				_sr = new MultipleStreamReader(_lcmd.Url);	// get the main stream
 
 			_Data = new object[_Names.Length];			// allocate enough room for data

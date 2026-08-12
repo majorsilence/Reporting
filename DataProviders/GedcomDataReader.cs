@@ -45,7 +45,7 @@ namespace Majorsilence.Reporting.Data
 			
 			string fname = _lcmd.Url;
 
-			if (behavior != CommandBehavior.SchemaOnly)
+			if (!CommandBehaviorSupport.IsSchemaOnly(behavior))
 				_sr = new MultipleStreamReader(_lcmd.Url);	// get the main stream
 
 			_Data = new object[_Names.Length];			// allocate enough room for data

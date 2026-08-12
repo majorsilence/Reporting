@@ -53,7 +53,7 @@ namespace Majorsilence.Reporting.Data
 			// build the structure of the result
 			BuildMetaData(wsw);
 
-			if (_behavior == CommandBehavior.SchemaOnly)
+			if (CommandBehaviorSupport.IsSchemaOnly(_behavior))
 				return;
 
 			// build the array that will hold the data

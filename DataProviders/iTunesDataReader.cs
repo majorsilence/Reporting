@@ -120,7 +120,7 @@ namespace Majorsilence.Reporting.Data
 
             _Data = new object[_Names.Length];			// allocate enough room for data
 
-            if (behavior == CommandBehavior.SchemaOnly)
+            if (CommandBehaviorSupport.IsSchemaOnly(behavior))
                 return;
 
             // create an iterator to the selected rows

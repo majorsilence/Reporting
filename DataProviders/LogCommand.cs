@@ -100,9 +100,7 @@ namespace Majorsilence.Reporting.Data
 
 		public IDataReader ExecuteReader(System.Data.CommandBehavior behavior)
 		{
-			if (!(behavior == CommandBehavior.SingleResult || 
-				  behavior == CommandBehavior.SchemaOnly))
-				throw new ArgumentException("ExecuteReader supports SingleResult and SchemaOnly only.");
+			CommandBehaviorSupport.Validate(behavior);
 			return new LogDataReader(behavior, _lc, this);
 		}
 
