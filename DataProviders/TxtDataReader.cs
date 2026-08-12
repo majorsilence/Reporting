@@ -103,7 +103,7 @@ namespace Majorsilence.Reporting.Data
                     _Types[ci] = tstring;
             }
 
-            if (behavior == CommandBehavior.SchemaOnly)
+            if (CommandBehaviorSupport.IsSchemaOnly(behavior))
             {
                 _sr.Close();
                 _sr = null;

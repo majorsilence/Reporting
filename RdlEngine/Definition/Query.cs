@@ -122,7 +122,8 @@ namespace Majorsilence.Reporting.Rdl
                     cmSQL.CommandType = CommandType.StoredProcedure;
 
                 await AddParameters(null, cnSQL, cmSQL, false);
-                using var dr = await CreateDataReader(cmSQL).ConfigureAwait(false);
+                // Schema pass: only column metadata is needed, the query must not be executed at compile time.
+                using var dr = await CreateDataReader(cmSQL, CommandBehavior.SchemaOnly).ConfigureAwait(false);
 
                 if (dr.FieldCount < 10)
                     _Columns = new ListDictionary(); // Hashtable is overkill for small lists
@@ -151,16 +152,16 @@ namespace Majorsilence.Reporting.Rdl
             }
         }
 
-        private static async Task<IDataReader> CreateDataReader(IDbCommand cmSQL)
+        private static async Task<IDataReader> CreateDataReader(IDbCommand cmSQL, CommandBehavior behavior)
         {
             IDataReader dr;
             if (cmSQL is DbCommand dbCommand)
             {
-                dr = await dbCommand.ExecuteReaderAsync(CommandBehavior.SchemaOnly).ConfigureAwait(false);
+                dr = await dbCommand.ExecuteReaderAsync(behavior).ConfigureAwait(false);
             }
             else
             {
-                dr = cmSQL.ExecuteReader(CommandBehavior.SchemaOnly);
+                dr = cmSQL.ExecuteReader(behavior);
             }
 
             return dr;
@@ -203,7 +204,12 @@ namespace Majorsilence.Reporting.Rdl
                     cmSQL.CommandTimeout = this._Timeout;
 
                 await AddParameters(rpt, cnSQL, cmSQL, true);
-                using var dr = await CreateDataReader(cmSQL);
+                // Data pass: rows are required, so the reader must not be opened with SchemaOnly.
+                // SingleResult (not Default) is what this call site used before CreateDataReader
+                // was extracted: only one result set is ever read, and the bundled file-based
+                // providers (JSON, XML, text, web service, ...) accept SingleResult or SchemaOnly
+                // and reject anything else.
+                using var dr = await CreateDataReader(cmSQL, CommandBehavior.SingleResult);
 
                 List<Row> ar = new List<Row>();
                 _Data.Data = ar;
