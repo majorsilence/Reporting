@@ -38,6 +38,14 @@ namespace Majorsilence.Reporting.Rdl
 			// mm -> millimeters (.001 meters)
 			// pt -> points (1 point = 1/72.27 inches)
 			// pc -> Picas (1 pica = 12 points)
+			if (t == null)		// e.g. an expression that evaluated to no result
+			{
+				if (r != null)
+					r.rl.LogError(4, "No size specified, assuming 0 length.");
+				_Original = string.Empty;
+				_Size = 0;
+				return;
+			}
 			_Original = t;					// Save original string for recreation
 			t = t.Trim();
 			int space = t.LastIndexOf(' '); 
@@ -66,7 +74,8 @@ namespace Majorsilence.Reporting.Rdl
 				}
 				if (!Regex.IsMatch(n, @"\A[ ]*[-]?[0-9]*[.]?[0-9]*[ ]*\Z"))
 				{
-					r.rl.LogError(4, string.Format("Unknown characters in '{0}' specified.  Number must be of form '###.##'.  Local conversion will be attempted.", t));
+                    if (r != null)
+					    r.rl.LogError(4, string.Format("Unknown characters in '{0}' specified.  Number must be of form '###.##'.  Local conversion will be attempted.", t));
 					d = Convert.ToDecimal(n, NumberFormatInfo.CurrentInfo);		// initial number
 				}
 				else

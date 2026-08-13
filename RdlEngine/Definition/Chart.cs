@@ -260,6 +260,9 @@ namespace Majorsilence.Reporting.Rdl
 			if (await IsHidden(pgs.Report, row))
 				return;
 
+			if (_ChartMatrix == null)	// FinalPass skips building this when the report already has other errors
+				return;
+
 			_ChartMatrix.RunReset(rpt);
 			Rows _Data = await GetFilteredData(rpt, row);
 			SetMyData(rpt, _Data);

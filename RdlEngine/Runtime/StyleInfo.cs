@@ -256,7 +256,7 @@ namespace Majorsilence.Reporting.Rdl
 		/// <returns></returns>
 		static public Draw.FontFamily GetFontFamily(string fface)
 		{
-			string[] choices = fface.Split(',');
+			string[] choices = (fface ?? "Arial").Split(',');	// null: e.g. an expression that evaluated to no result
 			Draw.FontFamily ff=null;
 			foreach (string val in choices)
 			{

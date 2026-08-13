@@ -703,7 +703,7 @@ namespace Majorsilence.Reporting.Rdl
 			// FAMILY
 			string ff;
 			if (this.FontFamily != null)
-				ff = await this.FontFamily.EvaluateString(rpt, r);
+				ff = await this.FontFamily.EvaluateString(rpt, r) ?? "Arial";	// null: e.g. an expression that evaluated to no result
 			else
 				ff = "Arial";
 
@@ -738,7 +738,7 @@ namespace Majorsilence.Reporting.Rdl
 			if (this.FontWeight != null)
 			{
 				string weight = await this.FontWeight.EvaluateString(rpt, r);
-				switch(weight.ToLower())
+				switch(weight?.ToLower())		// null: e.g. an expression that evaluated to no result
 				{
 					case "bold":
 					case "bolder":
@@ -766,8 +766,13 @@ namespace Majorsilence.Reporting.Rdl
 			if (this.FontSize != null)
 			{
 				string lsize = await this.FontSize.EvaluateString(rpt, r);
-				RSize rs = new RSize(this.OwnerReport, lsize);
-				size = rs.Points;
+				if (lsize == null)		// e.g. an expression that evaluated to no result
+					size = 10;
+				else
+				{
+					RSize rs = new RSize(this.OwnerReport, lsize);
+					size = rs.Points > 0 ? rs.Points : 10;
+				}
 			}
 			else
 				size = 10;
@@ -802,7 +807,7 @@ namespace Majorsilence.Reporting.Rdl
 			if (this.TextAlign != null)
 			{
 				string ta = await this.TextAlign.EvaluateString(rpt, r);
-				switch (ta.ToLower())
+				switch (ta?.ToLower())		// null: e.g. an expression that evaluated to no result
 				{
 					case "left":
 						drawFormat.Alignment = Draw2.StringAlignment.Near;
@@ -1382,7 +1387,7 @@ namespace Majorsilence.Reporting.Rdl
 			if (_FontFamily == null)
 				return "Arial";
 
-			return await _FontFamily.EvaluateString(rpt, row);
+			return await _FontFamily.EvaluateString(rpt, row) ?? "Arial";	// null: e.g. an expression that evaluated to no result
 		}
 
 		internal Expression FontSize
@@ -1398,6 +1403,8 @@ namespace Majorsilence.Reporting.Rdl
 
 			string pts;
 			pts = await _FontSize.EvaluateString(rpt, row);
+			if (pts == null)		// e.g. an expression that evaluated to no result
+				return 10;
 			RSize sz = new RSize(this.OwnerReport, pts);
 
 			return sz.Points;
@@ -1681,7 +1688,7 @@ namespace Majorsilence.Reporting.Rdl
 			if (_Language == null)
 				return await OwnerReport.EvalLanguage(rpt, r);
 
-			return await _Language.EvaluateString(rpt, r);
+			return await _Language.EvaluateString(rpt, r) ?? await OwnerReport.EvalLanguage(rpt, r);
 		}
 
 		internal Expression UnicodeBiDirectional
@@ -1725,7 +1732,7 @@ namespace Majorsilence.Reporting.Rdl
 			if (_NumeralLanguage == null)
 				return await EvalLanguage(rpt, r);
 
-			return await _NumeralLanguage.EvaluateString(rpt, r);
+			return await _NumeralLanguage.EvaluateString(rpt, r) ?? await EvalLanguage(rpt, r);
 		}
 
 		internal Expression NumeralVariant
