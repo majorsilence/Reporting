@@ -1,0 +1,47 @@
+<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<OutputType>Library</OutputType>
+		<Configurations>Debug;Release;Debug-DrawingCompat;Release-DrawingCompat</Configurations>
+		<!-- Deliberately no net48: Testcontainers and the Oracle/MySQL clients stay out of the
+		     Windows .NET Framework build, which has no use for them. -->
+		<TargetFrameworks>net8.0;net10.0</TargetFrameworks>
+		<WarningsAsErrors>4014</WarningsAsErrors>
+		<Platforms>AnyCPU</Platforms>
+		<IsPackable>false</IsPackable>
+	</PropertyGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\DataProviders\Majorsilence.Reporting.DataProviders.csproj" />
+		<ProjectReference Include="..\Majorsilence.Drawing.Common\Majorsilence.Drawing.Common.csproj" />
+		<ProjectReference Include="..\RdlEngine\Majorsilence.Reporting.RdlEngine.csproj" />
+	</ItemGroup>
+	<ItemGroup>
+		<!-- The engine reads its provider table from the working directory. -->
+		<None Include="..\RdlEngine\RdlEngineConfig.xml">
+			<Link>RdlEngineConfig.xml</Link>
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+	</ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Microsoft.NET.Test.Sdk" />
+		<PackageReference Include="NUnit" />
+		<PackageReference Include="NUnit3TestAdapter" />
+		<PackageReference Include="coverlet.collector">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+	</ItemGroup>
+	<ItemGroup>
+		<!-- ADO.NET providers. These have to land in the output directory: RdlEngineConfig
+		     resolves each <DataProvider> by loading its <CodeModule> dll from there. -->
+		<PackageReference Include="Microsoft.Data.SqlClient" />
+		<PackageReference Include="MySql.Data" />
+		<PackageReference Include="Npgsql" />
+		<PackageReference Include="Oracle.ManagedDataAccess.Core" />
+	</ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Testcontainers.MsSql" />
+		<PackageReference Include="Testcontainers.MySql" />
+		<PackageReference Include="Testcontainers.Oracle" />
+		<PackageReference Include="Testcontainers.PostgreSql" />
+	</ItemGroup>
+</Project>

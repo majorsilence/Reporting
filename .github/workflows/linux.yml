@@ -25,7 +25,7 @@ jobs:
       - name: Build MajorsilenceReporting DrawingCompat
         run: dotnet build -c Release-DrawingCompat MajorsilenceReporting.sln
       - name: Test
-        run: dotnet test -c Release-DrawingCompat MajorsilenceReporting.sln --verbosity normal --collect:"XPlat Code Coverage" --logger:"trx"
+        run: dotnet test -c Release-DrawingCompat MajorsilenceReporting.sln --filter "TestCategory!=Containers" --verbosity normal --collect:"XPlat Code Coverage" --logger:"trx"
       - name: Test Report
         uses: dorny/test-reporter@v2
         if: success() || failure()

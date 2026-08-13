@@ -1,0 +1,36 @@
+name: container-backed database tests
+
+# Off by default. The regular linux/mac/windows workflows exclude the "Containers"
+# category; this one runs only that category, and only when triggered by hand, until the
+# approach has had more review.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  container-tests:
+    # ubuntu-latest is the only hosted runner with a usable Docker daemon for Linux images.
+    runs-on: ubuntu-latest
+    # Oracle alone takes a couple of minutes to become healthy on a cold image pull.
+    timeout-minutes: 45
+    env:
+      REPORTING_CONTAINER_TESTS: "1"
+    steps:
+      - uses: actions/checkout@v6
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 10.0.x
+      - name: Build
+        run: dotnet build -c Release-DrawingCompat ReportTests.Containers/ReportTests.Containers.csproj
+      - name: Test
+        run: dotnet test -c Release-DrawingCompat ReportTests.Containers/ReportTests.Containers.csproj --no-build --filter "TestCategory=Containers" --verbosity normal --logger:"trx"
+      - name: Test Report
+        uses: dorny/test-reporter@v2
+        if: success() || failure()
+        with:
+          name: container-backed database tests
+          path: "**/TestResults/*.trx"
+          reporter: dotnet-trx
