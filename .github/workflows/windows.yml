@@ -30,7 +30,7 @@ jobs:
           path: Release-Builds/build-output/*-windows-*.zip
           retention-days: 1
       - name: Test
-        run: dotnet test -c Release MajorsilenceReporting.sln --verbosity normal --collect:"XPlat Code Coverage" --logger:"trx"
+        run: dotnet test -c Release MajorsilenceReporting.sln --filter "TestCategory!=Containers" --verbosity normal --collect:"XPlat Code Coverage" --logger:"trx"
       - name: Test Report
         uses: dorny/test-reporter@v2
         if: success() || failure() # run this step even if previous step failed

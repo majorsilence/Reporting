@@ -140,6 +140,13 @@ namespace Majorsilence.Reporting.Rdl
 			<Interface>SQL</Interface>
 		</DataSource>
 		<DataSource>
+			<DataProvider>Oracle.ManagedDataAccess</DataProvider>
+			<CodeModule>Oracle.ManagedDataAccess.dll</CodeModule>
+			<ClassName>Oracle.ManagedDataAccess.Client.OracleConnection</ClassName>
+			<TableSelect>select OWNER || '.' || TABLE_NAME from ALL_TABLES WHERE TABLESPACE_NAME NOT IN ('SYSTEM', 'SYSAUX')</TableSelect>
+			<Interface>SQL</Interface>
+		</DataSource>
+		<DataSource>
 			<DataProvider>MySQL.NET</DataProvider>
 			<CodeModule>MySql.Data.dll</CodeModule>
 			<ClassName>MySql.Data.MySqlClient.MySqlConnection</ClassName>

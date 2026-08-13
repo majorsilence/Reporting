@@ -24,7 +24,11 @@ namespace ReportTests.Utils
         public const string ProviderName = "StrictBehaviorTest";
 
         private static readonly List<CommandBehavior> _behaviors = new();
+        private static readonly List<ObservedParameter> _parameters = new();
         private static readonly object _sync = new();
+
+        /// <summary>A parameter as the engine handed it over, captured at ExecuteReader time.</summary>
+        public readonly record struct ObservedParameter(string Name, DbType DbType, object Value);
 
         /// <summary>Every CommandBehavior the engine has asked a reader for since <see cref="Reset"/>.</summary>
         public static IReadOnlyList<CommandBehavior> ObservedBehaviors
@@ -32,14 +36,33 @@ namespace ReportTests.Utils
             get { lock (_sync) { return _behaviors.ToArray(); } }
         }
 
+        /// <summary>Every parameter the engine has bound since <see cref="Reset"/>, in order.</summary>
+        public static IReadOnlyList<ObservedParameter> ObservedParameters
+        {
+            get { lock (_sync) { return _parameters.ToArray(); } }
+        }
+
         internal static void RecordBehavior(CommandBehavior behavior)
         {
             lock (_sync) { _behaviors.Add(behavior); }
         }
 
+        internal static void RecordParameters(DbParameterCollection parameters)
+        {
+            lock (_sync)
+            {
+                foreach (DbParameter p in parameters)
+                    _parameters.Add(new ObservedParameter(p.ParameterName, p.DbType, p.Value));
+            }
+        }
+
         public static void Reset()
         {
-            lock (_sync) { _behaviors.Clear(); }
+            lock (_sync)
+            {
+                _behaviors.Clear();
+                _parameters.Clear();
+            }
         }
 
         /// <summary>
@@ -161,6 +184,7 @@ namespace ReportTests.Utils
         protected override DbDataReader ExecuteDbDataReader(CommandBehavior behavior)
         {
             StrictBehaviorProvider.RecordBehavior(behavior);
+            StrictBehaviorProvider.RecordParameters(_inner.Parameters);
 
             // Strip SchemaOnly before handing the behaviour to SQLite: it ignores the flag, and
             // the point here is to apply the documented semantics ourselves.

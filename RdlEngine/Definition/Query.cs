@@ -643,6 +643,23 @@ namespace Majorsilence.Reporting.Rdl
                 IDbDataParameter dp = cmSQL.CreateParameter();
 
                 dp.ParameterName = paramName;
+                if (!bValue)
+                {   // Issue #312. The schema pass has no real value to bind, and an untyped
+                    // null is not something every provider can work with: Npgsql cannot pick a
+                    // wire format from it, Microsoft.Data.Sqlite rejects it outright with
+                    // "Value must be set". Either way the report failed to parse, because this
+                    // runs inside FinalPass.
+                    //
+                    // Give it a typed placeholder instead. The query is not executed here -
+                    // the reader is opened with CommandBehavior.SchemaOnly - so the value is
+                    // never used for anything; it only has to be bindable. This mirrors what
+                    // AddParametersAsLiterals already substitutes for the replacement
+                    // providers, right down to the type codes it recognises.
+                    SchemaPassPlaceholder(qp.Value?.GetTypeCode() ?? TypeCode.Object,
+                        out DbType dbType, out pvalue);
+                    dp.DbType = dbType;
+                }
+
                 if (pvalue is ArrayList)    // Probably a MultiValue Report parameter result
                 {
                     ArrayList ar = (ArrayList)pvalue;
@@ -651,6 +668,49 @@ namespace Majorsilence.Reporting.Rdl
                 else
                     dp.Value = pvalue;
                 cmSQL.Parameters.Add(dp);
+            }
+        }
+
+        /// <summary>
+        /// The type and stand-in value a query parameter carries on the compile-time schema
+        /// pass, where the real value is not evaluated. Mirrors the placeholder literals
+        /// AddParametersAsLiterals substitutes for the replacement providers, including its
+        /// treatment of an unknown type as text.
+        /// </summary>
+        private static void SchemaPassPlaceholder(TypeCode tc, out DbType dbType, out object value)
+        {
+            switch (tc)
+            {
+                case TypeCode.Boolean:
+                    dbType = DbType.Boolean; value = false; break;
+                case TypeCode.Byte:
+                    dbType = DbType.Byte; value = (byte)0; break;
+                case TypeCode.SByte:
+                    dbType = DbType.SByte; value = (sbyte)0; break;
+                case TypeCode.Int16:
+                    dbType = DbType.Int16; value = (short)0; break;
+                case TypeCode.UInt16:
+                    dbType = DbType.UInt16; value = (ushort)0; break;
+                case TypeCode.Int32:
+                    dbType = DbType.Int32; value = 0; break;
+                case TypeCode.UInt32:
+                    dbType = DbType.UInt32; value = 0u; break;
+                case TypeCode.Int64:
+                    dbType = DbType.Int64; value = 0L; break;
+                case TypeCode.UInt64:
+                    dbType = DbType.UInt64; value = 0ul; break;
+                case TypeCode.Single:
+                    dbType = DbType.Single; value = 0f; break;
+                case TypeCode.Double:
+                    dbType = DbType.Double; value = 0d; break;
+                case TypeCode.Decimal:
+                    dbType = DbType.Decimal; value = 0m; break;
+                case TypeCode.DateTime:
+                    dbType = DbType.DateTime; value = new DateTime(1900, 1, 1); break;
+                case TypeCode.Char:
+                case TypeCode.String:
+                default:
+                    dbType = DbType.String; value = string.Empty; break;
             }
         }
 
