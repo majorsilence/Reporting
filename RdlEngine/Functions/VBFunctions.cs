@@ -500,6 +500,17 @@ namespace Majorsilence.Reporting.Rdl
         /// </summary>
         /// <param name="v"></param>
         /// <returns></returns>
+        /// <summary>
+        /// Returns whether an expression contains no valid data (VB.NET's IsNothing).
+        /// Field values from a null database column surface here as .NET null or DBNull.
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        static public bool IsNothing(object value)
+        {
+            return value == null || value is DBNull;
+        }
+
         static public bool IsNumeric(object expression)
         {
             if (expression == null)
