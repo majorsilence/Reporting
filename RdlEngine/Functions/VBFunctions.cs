@@ -17,6 +17,32 @@ namespace Majorsilence.Reporting.Rdl
 	sealed public class VBFunctions
 	{
 		/// <summary>
+		/// Converts an expression to Decimal (VB.NET's CDec).
+		/// </summary>
+		/// <param name="value"></param>
+		/// <returns></returns>
+		static public decimal CDec(object value)
+		{
+			return Convert.ToDecimal(value);
+		}
+
+		/// <summary>
+		/// Builds a "#RRGGBB" color string from RGB components (Crystal's Color(r,g,b)
+		/// conditional-formatting function). Returned as a string, the same convention
+		/// this codebase's own Crystal-color-constant mapping already uses (crRed ->
+		/// "Red", etc.), rather than a System.Drawing/Majorsilence.Drawing Color value —
+		/// BackColor/ForeColor style expressions are evaluated as strings.
+		/// </summary>
+		/// <param name="r"></param>
+		/// <param name="g"></param>
+		/// <param name="b"></param>
+		/// <returns></returns>
+		static public string Color(object r, object g, object b)
+		{
+			return $"#{Convert.ToInt32(r):X2}{Convert.ToInt32(g):X2}{Convert.ToInt32(b):X2}";
+		}
+
+		/// <summary>
 		/// Obtains the year
 		/// </summary>
 		/// <param name="dt"></param>
@@ -107,6 +133,18 @@ namespace Majorsilence.Reporting.Rdl
 			string wdn = bAbbreviation? string.Format("{0:ddd}", dt):string.Format("{0:dddd}", dt);
 			return wdn;
 		}
+		/// <summary>
+		/// Returns a Date value for a specified year, month, and day (VB.NET's DateSerial).
+		/// </summary>
+		/// <param name="year"></param>
+		/// <param name="month"></param>
+		/// <param name="day"></param>
+		/// <returns></returns>
+		static public DateTime DateSerial(object year, object month, object day)
+		{
+			return new DateTime(Convert.ToInt32(year), Convert.ToInt32(month), Convert.ToInt32(day));
+		}
+
 		/// <summary>
 		/// Get the day of the month.
 		/// </summary>
@@ -282,6 +320,22 @@ namespace Majorsilence.Reporting.Rdl
 		static public string CStr(object o)
 		{
 			return Convert.ToString(o);
+		}
+		/// <summary>
+		/// Crystal's own 2-argument CStr — formats a value either to a fixed number of
+		/// decimal places (numeric second argument, e.g. CStr(123.456, 2) -> "123.46") or
+		/// with a .NET format string (string second argument, e.g. CStr(x, "#")). VB.NET's
+		/// CStr only ever takes one argument; this overload exists purely for that Crystal
+		/// usage.
+		/// </summary>
+		/// <param name="value"></param>
+		/// <param name="format"></param>
+		/// <returns></returns>
+		static public string CStr(object value, object format)
+		{
+			if (format is string fmt)
+				return value is IFormattable formattable ? formattable.ToString(fmt, null) : Convert.ToString(value);
+			return Convert.ToDouble(value).ToString("F" + Convert.ToInt32(format));
 		}
 		/// <summary>
 		/// Returns the hexadecimal value of a specified number
