@@ -51,7 +51,7 @@ namespace ReportTests.Containers.Fixtures
         {
             string html = await RenderAsync(
                 SelectFilteredByMinAmount,
-                new[] { new KeyValuePair<string, string>("MinAmount", "200") });
+                new[] { new KeyValuePair<string, string>("MinAmount", "=200") });
 
             AssertRenderedRows(html, "Widget B", "Widget C");
             Assert.That(html, Does.Not.Contain("Widget A"),

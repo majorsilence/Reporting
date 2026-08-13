@@ -42,19 +42,17 @@ namespace ReportTests.Containers.Fixtures
             AssertRenderedRows(html, "Widget A", "Widget B", "Widget C");
         }
 
-        // KNOWN FAILURE - see issue #312. This test currently throws out of RDLParser.Parse().
-        // Query.FinalPass runs the schema pass with AddParameters(bValue: false), which sets
-        // dp.Value = null and never sets a DbType (Query.cs:642-652). SQL Server tolerates an
-        // untyped null; Npgsql cannot infer a type and throws from ResolveTypeInfo before the
-        // statement is sent. The effect is that any PostgreSQL report with a <QueryParameter>
-        // fails to parse at all. Left failing deliberately: it documents the defect, and the
-        // Containers category is excluded from the default pipeline.
+        // Regression test for issue #312. Query.FinalPass runs the schema pass with
+        // AddParameters(bValue: false), which supplied a null value and no DbType. SQL Server
+        // infers a type from that; Npgsql cannot, and threw from ResolveTypeInfo before the
+        // statement was sent - so every PostgreSQL report with a <QueryParameter> failed to
+        // parse at all, never reaching the render.
         [Test]
         public async Task Renders_rows_with_query_parameter()
         {
             string html = await RenderAsync(
                 SelectFilteredByMinAmount,
-                new[] { new KeyValuePair<string, string>("MinAmount", "200") });
+                new[] { new KeyValuePair<string, string>("MinAmount", "=200") });
 
             AssertRenderedRows(html, "Widget B", "Widget C");
             Assert.That(html, Does.Not.Contain("Widget A"),

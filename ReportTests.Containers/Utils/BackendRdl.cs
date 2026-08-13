@@ -19,7 +19,10 @@ namespace ReportTests.Containers.Utils
         /// <param name="providerName">The &lt;DataProvider&gt; name, as registered in RdlEngineConfig.</param>
         /// <param name="connectString">Provider-specific connection string.</param>
         /// <param name="commandText">The SELECT to run. Placeholder syntax is the backend's own.</param>
-        /// <param name="queryParameters">QueryParameter name to value expression, in declaration order.</param>
+        /// <param name="queryParameters">QueryParameter name to value, in declaration order.
+        /// These are RDL values: a bare "200" is a string literal, "=200" is an expression
+        /// typing as Int32. The distinction matters - a strictly typed backend will reject
+        /// "integer >= text" if the parameter is declared as a string.</param>
         internal static string Build(
             string providerName,
             string connectString,
