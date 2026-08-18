@@ -338,6 +338,48 @@ namespace Majorsilence.Reporting.Rdl
 			return Convert.ToDouble(value).ToString("F" + Convert.ToInt32(format));
 		}
 		/// <summary>
+		/// Crystal's 3- and 4-argument CStr/ToText: value, decimal places, thousands
+		/// separator, and optionally the decimal separator — CStr(x, 5, ",", ".") or
+		/// CStr(x, 0, "") for a plain ungrouped integer. An empty thousands separator
+		/// means "no grouping". Crystal also allows a format string in the second
+		/// position with the separators along for the ride; that wins when present.
+		/// </summary>
+		/// <param name="value"></param>
+		/// <param name="places"></param>
+		/// <param name="thousandsSeparator"></param>
+		/// <returns></returns>
+		static public string CStr(object value, object places, object thousandsSeparator)
+		{
+			return CStr(value, places, thousandsSeparator, ".");
+		}
+		/// <summary>
+		/// See the 3-argument overload.
+		/// </summary>
+		/// <param name="value"></param>
+		/// <param name="places"></param>
+		/// <param name="thousandsSeparator"></param>
+		/// <param name="decimalSeparator"></param>
+		/// <returns></returns>
+		static public string CStr(object value, object places, object thousandsSeparator, object decimalSeparator)
+		{
+			if (places is string fmt)
+				return value is IFormattable formattable ? formattable.ToString(fmt, null) : Convert.ToString(value);
+
+			string thousands = Convert.ToString(thousandsSeparator) ?? "";
+			string point = Convert.ToString(decimalSeparator);
+			if (string.IsNullOrEmpty(point))
+				point = ".";
+
+			string s = Convert.ToDouble(value).ToString(
+				(thousands.Length == 0 ? "F" : "N") + (int)Convert.ToDouble(places),
+				System.Globalization.CultureInfo.InvariantCulture);
+			// Invariant formatting groups with "," and points with "."; rebuild around
+			// the decimal point so a "," decimal separator cannot collide with grouping.
+			int dot = s.LastIndexOf('.');
+			string whole = (dot < 0 ? s : s.Substring(0, dot)).Replace(",", thousands);
+			return dot < 0 ? whole : whole + point + s.Substring(dot + 1);
+		}
+		/// <summary>
 		/// Returns the hexadecimal value of a specified number
 		/// </summary>
 		/// <param name="o"></param>
@@ -1081,5 +1123,245 @@ namespace Majorsilence.Reporting.Rdl
 		{
 			return Environment.NewLine;
 		}
+
+        // ── Object-typed overloads of existing string functions ──────────────────
+        // The expression parser resolves functions by *exact* runtime argument type
+        // (XmlUtil.GetMethod). A field or parameter whose type the parser could not
+        // infer arrives as Object, so the String-typed overloads above never bind and
+        // the call surfaces as "Function X is not known". These mirror them for that
+        // case — same reasoning as Abs(object)/IsNothing(object).
+
+        static public string Trim(object str)
+        {
+            return str == null || str is DBNull ? "" : Convert.ToString(str).Trim(' ');
+        }
+
+        static public string LTrim(object str)
+        {
+            return str == null || str is DBNull ? "" : Convert.ToString(str).TrimStart(' ');
+        }
+
+        static public string RTrim(object str)
+        {
+            return str == null || str is DBNull ? "" : Convert.ToString(str).TrimEnd(' ');
+        }
+
+        static public string Mid(object str, object start)
+        {
+            return Mid(Convert.ToString(str), (int)Convert.ToDouble(start));
+        }
+
+        static public string Mid(object str, object start, object length)
+        {
+            return Mid(Convert.ToString(str), (int)Convert.ToDouble(start), (int)Convert.ToDouble(length));
+        }
+
+        static public int InStr(object string1, object string2)
+        {
+            return InStr(1, Convert.ToString(string1), Convert.ToString(string2), 0);
+        }
+
+        static public string Replace(object str, object find, object replacewith)
+        {
+            return Replace(Convert.ToString(str), Convert.ToString(find), Convert.ToString(replacewith));
+        }
+
+        static public DateTime CDate(object value)
+        {
+            return value is DateTime d ? d : Convert.ToDateTime(value);
+        }
+
+        /// <summary>
+        /// Crystal also spells the year/month/day constructor CDate, alongside DateSerial.
+        /// </summary>
+        static public DateTime CDate(object year, object month, object day)
+        {
+            return new DateTime(Convert.ToInt32(year), Convert.ToInt32(month), Convert.ToInt32(day));
+        }
+
+        /// <summary>
+        /// Crystal's CDateTime conversion — the full value, unlike DateValue, which keeps
+        /// only the date part. Crystal's synonym DateTime() is mapped to this name by the
+        /// converter rather than declared here: a method called DateTime would shadow the
+        /// type of the same name for every member access in this class.
+        /// </summary>
+        static public DateTime CDateTime(object value)
+        {
+            return value is DateTime d ? d : Convert.ToDateTime(value);
+        }
+
+        /// <summary>
+        /// Crystal/VB's Int: rounds toward negative infinity, unlike Fix, which truncates
+        /// toward zero — they differ only for negative values (Int(-2.5) = -3, Fix = -2).
+        /// </summary>
+        static public double Int(object value)
+        {
+            return Math.Floor(Convert.ToDouble(value));
+        }
+
+        // ── Functions Crystal has that VB.NET does not ───────────────────────────
+
+        /// <summary>
+        /// Current local date and time. VB.NET spells this as a property rather than a
+        /// function, so it is absent from the reflection-visible surface until declared.
+        /// </summary>
+        static public DateTime Now()
+        {
+            return DateTime.Now;
+        }
+
+        /// <summary>
+        /// Crystal/VB's Val: the value of the longest leading numeric prefix of a string,
+        /// ignoring embedded spaces, or 0 when there isn't one. Never throws — Val's whole
+        /// purpose in these reports is coercing free-text columns to numbers safely.
+        /// </summary>
+        static public double Val(object value)
+        {
+            if (value == null || value is DBNull)
+                return 0;
+
+            if (value is string s)
+            {
+                var sb = new StringBuilder();
+                bool seenPoint = false;
+                foreach (char c in s)
+                {
+                    if (c == ' ')
+                        continue;
+                    if (char.IsDigit(c))
+                        sb.Append(c);
+                    else if ((c == '-' || c == '+') && sb.Length == 0)
+                        sb.Append(c);
+                    else if (c == '.' && !seenPoint)
+                    {
+                        seenPoint = true;
+                        sb.Append(c);
+                    }
+                    else
+                        break;
+                }
+                return double.TryParse(sb.ToString(), System.Globalization.NumberStyles.Float,
+                    System.Globalization.CultureInfo.InvariantCulture, out double d) ? d : 0;
+            }
+
+            try { return Convert.ToDouble(value); }
+            catch { return 0; }
+        }
+
+        /// <summary>
+        /// Crystal's NumericText: whether a string holds a number (and so can be converted
+        /// without error). Typically guards a CDbl in the same expression.
+        /// </summary>
+        static public bool NumericText(object value)
+        {
+            if (value == null || value is DBNull)
+                return false;
+            if (value is string s)
+                return s.Trim().Length > 0
+                    && double.TryParse(s.Trim(), System.Globalization.NumberStyles.Any,
+                        System.Globalization.CultureInfo.InvariantCulture, out _);
+            return IsNumeric(value);
+        }
+
+        /// <summary>
+        /// Whether a value is, or parses as, a date/time (Crystal's IsDateTime).
+        /// </summary>
+        static public bool IsDateTime(object value)
+        {
+            if (value == null || value is DBNull)
+                return false;
+            if (value is DateTime)
+                return true;
+            return DateTime.TryParse(Convert.ToString(value), out _);
+        }
+
+        /// <summary>
+        /// Truncates toward zero (VB's Fix). Crystal's second argument keeps that many
+        /// decimal places rather than truncating to a whole number.
+        /// </summary>
+        static public double Fix(object value)
+        {
+            return Math.Truncate(Convert.ToDouble(value));
+        }
+
+        static public double Fix(object value, object places)
+        {
+            double factor = Math.Pow(10, (int)Convert.ToDouble(places));
+            return Math.Truncate(Convert.ToDouble(value) * factor) / factor;
+        }
+
+        /// <summary>
+        /// Rounds down; Crystal's second argument rounds down to the nearest multiple of
+        /// it instead of to a whole number (Floor(1250, 100) -> 1200).
+        /// </summary>
+        static public double Floor(object value)
+        {
+            return Math.Floor(Convert.ToDouble(value));
+        }
+
+        static public double Floor(object value, object multiple)
+        {
+            double m = Convert.ToDouble(multiple);
+            double v = Convert.ToDouble(value);
+            return m == 0 ? v : Math.Floor(v / m) * m;
+        }
+
+        /// <summary>
+        /// Rounds up; Crystal's second argument rounds up to the nearest multiple of it
+        /// instead of to a whole number (Ceiling(102.8, 100) -> 200).
+        /// </summary>
+        static public double Ceiling(object value)
+        {
+            return Math.Ceiling(Convert.ToDouble(value));
+        }
+
+        static public double Ceiling(object value, object multiple)
+        {
+            double m = Convert.ToDouble(multiple);
+            double v = Convert.ToDouble(value);
+            return m == 0 ? v : Math.Ceiling(v / m) * m;
+        }
+
+        /// <summary>
+        /// Crystal's Remainder — the modulus. Yields 0 rather than throwing on a zero
+        /// divisor, matching how Crystal degrades rather than failing the whole report.
+        /// </summary>
+        static public double Remainder(object numerator, object denominator)
+        {
+            double d = Convert.ToDouble(denominator);
+            return d == 0 ? 0 : Convert.ToDouble(numerator) % d;
+        }
+
+        /// <summary>
+        /// Crystal's DateValue: the date part of a value, or a date built from
+        /// year/month/day components.
+        /// </summary>
+        static public DateTime DateValue(object value)
+        {
+            return (value is DateTime d ? d : Convert.ToDateTime(value)).Date;
+        }
+
+        static public DateTime DateValue(object year, object month, object day)
+        {
+            return new DateTime(Convert.ToInt32(year), Convert.ToInt32(month), Convert.ToInt32(day));
+        }
+
+        /// <summary>
+        /// Unicode character for a code point. Returned as a string (not a char) because
+        /// every observed use concatenates it — ChrW(13) building multi-line text.
+        /// </summary>
+        static public string ChrW(object code)
+        {
+            return ((char)Convert.ToInt32(code)).ToString();
+        }
+
+        /// <summary>
+        /// Unicode code point of a value's first character; 0 when empty.
+        /// </summary>
+        static public int AscW(object value)
+        {
+            string s = Convert.ToString(value);
+            return string.IsNullOrEmpty(s) ? 0 : s[0];
+        }
     }
 }
