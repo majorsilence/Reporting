@@ -452,11 +452,11 @@ namespace Majorsilence.Reporting.Rdl
                 }
                 try
                 {
-                    drawFont = new Draw2.Font(si.GetFontFamily(), si.FontSize, fs);   // si.FontSize already in points
+                    drawFont = new Draw2.Font(si.GetFontFamily(), Style.CompatFontSize(si.FontSize), fs);   // si.FontSize is in points
                 }
                 catch (ArgumentException)
                 {
-                    drawFont = new Draw2.Font("Arial", si.FontSize, fs);   // if this fails we'll let the error pass thru
+                    drawFont = new Draw2.Font("Arial", Style.CompatFontSize(si.FontSize), fs);   // if this fails we'll let the error pass thru
                 }
                 // ALIGNMENT
                 drawFormat = new Draw2.StringFormat();

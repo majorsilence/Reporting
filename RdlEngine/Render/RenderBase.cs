@@ -434,7 +434,7 @@ namespace Majorsilence.Reporting.Rdl
                         break;
                 }
 
-                drawFont = new Draw2.Font(StyleInfo.GetFontFamily(si.FontFamilyFull), si.FontSize, fs);
+                drawFont = new Draw2.Font(StyleInfo.GetFontFamily(si.FontFamilyFull), Style.CompatFontSize(si.FontSize), fs);
                 drawFormat = new Draw2.StringFormat();
                 drawFormat.Alignment = Draw2.StringAlignment.Near;
 

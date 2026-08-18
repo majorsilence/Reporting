@@ -619,7 +619,7 @@ namespace Majorsilence.Reporting.Rdl
 		static internal void DrawStringDefaults(Draw2.Graphics g, object o, System.Drawing.Rectangle rect)
 		{
 			// Just use defaults to Create font and brush.
-			using (var drawFont = new Draw2.Font("Arial", 10))
+			using (var drawFont = new Draw2.Font("Arial", CompatFontSize(10)))
 			using (var drawBrush = new Draw2.SolidBrush(System.Drawing.Color.Black)) 
 			// Set format of string.
 			using (var drawFormat = new Draw2.StringFormat())
@@ -667,7 +667,7 @@ namespace Majorsilence.Reporting.Rdl
 			string s = await Style.GetFormatedString(rpt, null, r, o, tc); // the string to draw
 
 			System.Drawing.Size size = System.Drawing.Size.Empty;
-			using (Draw2.Font drawFont = new Draw2.Font("Arial", 10)) // Font we'll draw with
+			using (Draw2.Font drawFont = new Draw2.Font("Arial", CompatFontSize(10))) // Font we'll draw with
 			using (Draw2.StringFormat drawFormat = new Draw2.StringFormat()) // StringFormat we'll draw with
 			{
 				drawFormat.Alignment = Draw2.StringAlignment.Near;
@@ -778,7 +778,23 @@ namespace Majorsilence.Reporting.Rdl
 				size = 10;
 			
 			Draw2.FontFamily fFamily = StyleInfo.GetFontFamily(ff);
-			return new Draw2.Font(fFamily, size, fs);
+			return new Draw2.Font(fFamily, CompatFontSize(size), fs);
+		}
+
+		/// <summary>
+		/// Majorsilence.Forms.Drawing hands Font.Size straight to SkiaSharp's SKFont, which is sized
+		/// in device pixels; System.Drawing treats it as points and scales by the DPI itself. The
+		/// engine works in points everywhere, so every place that builds a Font from a report's
+		/// FontSize converts through here; everything downstream (MeasureString,
+		/// MeasureCharacterRanges, DrawString) then agrees with the System.Drawing path.
+		/// </summary>
+		internal static float CompatFontSize(float points)
+		{
+#if DRAWINGCOMPAT
+			return points * 96f / 72f;
+#else
+			return points;
+#endif
 		}
         
         internal async Task<Draw2.StringFormat> GetStringFormat(Report rpt, Row r)
