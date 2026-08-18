@@ -420,6 +420,92 @@ namespace Majorsilence.Reporting.Rdl
         }
 
         /// <summary>
+        /// Absolute value. Object-typed so the expression parser's exact-type reflection
+        /// lookup binds any numeric runtime value (same reasoning as IsNothing(object)).
+        /// </summary>
+        static public double Abs(object value)
+        {
+            return Math.Abs(Convert.ToDouble(value));
+        }
+
+        /// <summary>
+        /// Repeats a string. Accepts either argument order — VB.NET's StrDup takes
+        /// (count, character) while Crystal's ReplicateString, which converters map to
+        /// this name, takes (text, count).
+        /// </summary>
+        static public string StrDup(object a, object b)
+        {
+            bool aIsCount = a is not string s1 || double.TryParse(s1, out _);
+            object count = aIsCount ? a : b;
+            object text = aIsCount ? b : a;
+            int n = (int)Convert.ToDouble(count);
+            if (n <= 0) return string.Empty;
+            var sb = new System.Text.StringBuilder();
+            for (int i = 0; i < n; i++) sb.Append(Convert.ToString(text));
+            return sb.ToString();
+        }
+
+        /// <summary>
+        /// Crystal's ToWords: spells a number in English words, cheque-style, with the
+        /// fractional part as "and NN / 100". Optional second argument sets the number
+        /// of fractional digits (default 2).
+        /// </summary>
+        static public string ToWords(object value)
+        {
+            return ToWords(value, 2);
+        }
+
+        static public string ToWords(object value, object decimals)
+        {
+            double v = Convert.ToDouble(value);
+            int dec = (int)Convert.ToDouble(decimals);
+            string sign = v < 0 ? "negative " : "";
+            v = Math.Abs(v);
+            long whole = (long)Math.Floor(v);
+            string words = SpellNumber(whole);
+            if (dec <= 0)
+                return sign + words;
+            long frac = (long)Math.Round((v - whole) * Math.Pow(10, dec));
+            return string.Format("{0}{1} and {2} / {3}", sign, words,
+                frac.ToString(new string('0', dec)), Math.Pow(10, dec));
+        }
+
+        static private readonly string[] WordsOnes =
+        {
+            "zero", "one", "two", "three", "four", "five", "six", "seven", "eight",
+            "nine", "ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen",
+            "sixteen", "seventeen", "eighteen", "nineteen"
+        };
+        static private readonly string[] WordsTens =
+        {
+            "", "", "twenty", "thirty", "forty", "fifty", "sixty", "seventy",
+            "eighty", "ninety"
+        };
+
+        static private string SpellNumber(long n)
+        {
+            if (n < 20) return WordsOnes[n];
+            if (n < 100) return WordsTens[n / 10] + (n % 10 != 0 ? "-" + WordsOnes[n % 10] : "");
+            if (n < 1000) return WordsOnes[n / 100] + " hundred" + (n % 100 != 0 ? " " + SpellNumber(n % 100) : "");
+            if (n < 1000000) return SpellNumber(n / 1000) + " thousand" + (n % 1000 != 0 ? " " + SpellNumber(n % 1000) : "");
+            if (n < 1000000000) return SpellNumber(n / 1000000) + " million" + (n % 1000000 != 0 ? " " + SpellNumber(n % 1000000) : "");
+            return SpellNumber(n / 1000000000) + " billion" + (n % 1000000000 != 0 ? " " + SpellNumber(n % 1000000000) : "");
+        }
+
+        /// <summary>
+        /// Date-part accessors, object-typed for reflection binding when the argument's
+        /// inferred TypeCode isn't DateTime (String-typed DataSet fields most commonly).
+        /// </summary>
+        static public int Year(object dt) { return ToDate(dt).Year; }
+        static public int Month(object dt) { return ToDate(dt).Month; }
+        static public int Day(object dt) { return ToDate(dt).Day; }
+
+        static private DateTime ToDate(object o)
+        {
+            return o is DateTime d ? d : DateTime.Parse(Convert.ToString(o));
+        }
+
+        /// <summary>
         /// Returns the number of intervals between two dates (VB.NET DateDiff).
         /// Same interval codes as DateAdd above. Arguments are object-typed so the
         /// expression parser's exact-type reflection lookup (XmlUtil.GetMethod) binds
