@@ -11,13 +11,15 @@ namespace ReportTests
             ("Red", System.Drawing.Color.FromArgb(255, 0, 0)),
             ("#F00", System.Drawing.Color.FromArgb(255, 0, 0)),
             ("#FF0000", System.Drawing.Color.FromArgb(255, 0, 0)),
-            ("#80FF0000", System.Drawing.Color.FromArgb(128, 255, 0)),
+            // 8 hex digits are #AARRGGBB, so the leading 80 is alpha, not red. The compat layer
+            // this repo used to ship read them as #RRGGBBAA and reported R=128 here.
+            ("#80FF0000", System.Drawing.Color.FromArgb(128, 255, 0, 0)),
             ("#FF5733", System.Drawing.Color.FromArgb(255, 87, 51)),
             ("#80FF5733", System.Drawing.Color.FromArgb(128, 255, 87, 51)),
             ("#000000", System.Drawing.Color.FromArgb(0, 0, 0)),
             ("#FFFFFFFF", System.Drawing.Color.FromArgb(255, 255, 255)),
             ("#123456", System.Drawing.Color.FromArgb(18, 52, 86)),
-            ("#7F123456", System.Drawing.Color.FromArgb(127, 18, 52))
+            ("#7F123456", System.Drawing.Color.FromArgb(127, 18, 52, 86))
         };
         
         [Test, TestCaseSource(nameof(TestColors))]
