@@ -30,7 +30,7 @@ namespace Majorsilence.Reporting.Rdl
 		/// Builds a "#RRGGBB" color string from RGB components (Crystal's Color(r,g,b)
 		/// conditional-formatting function). Returned as a string, the same convention
 		/// this codebase's own Crystal-color-constant mapping already uses (crRed ->
-		/// "Red", etc.), rather than a System.Drawing/Majorsilence.Drawing Color value —
+		/// "Red", etc.), rather than a System.Drawing/Majorsilence.Forms.Drawing Color value —
 		/// BackColor/ForeColor style expressions are evaluated as strings.
 		/// </summary>
 		/// <param name="r"></param>

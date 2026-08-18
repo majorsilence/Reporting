@@ -16,10 +16,10 @@ namespace Majorsilence.Pdf.Tests
     {
         // ── helpers ──────────────────────────────────────────────────────────
 
-        private static string BundledFontsDir => Path.GetFullPath(
-            Path.Combine(TestContext.CurrentContext.TestDirectory,
-                "..", "..", "..", "..", "..",
-                "Majorsilence.Drawing.Common", "Fonts"));
+        // The fallback fonts ship embedded in Majorsilence.Forms.Drawing.Common; the loader
+        // extracts them to a temp directory on first use.
+        private static string BundledFontsDir =>
+            Majorsilence.Forms.Drawing.FontResourceLoader.GetFontDirectory();
 
         private static bool BundledFontsExist => Directory.Exists(BundledFontsDir);
 

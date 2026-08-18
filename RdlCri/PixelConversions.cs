@@ -1,5 +1,6 @@
 ﻿#if DRAWINGCOMPAT
-using Majorsilence.Drawing;
+using Majorsilence.Forms.Drawing;
+using System.Drawing;  // value types (Color, Point, Size, Rectangle, ...) come from System.Drawing.Primitives
 #else
 using System.Drawing;
 #endif

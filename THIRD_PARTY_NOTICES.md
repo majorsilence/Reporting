@@ -7,13 +7,14 @@ notices are listed below.
 
 ## Bundled Fonts
 
-The following fonts are embedded in the `Majorsilence.Drawing.Common` assembly
-as cross-platform fallback fonts. They are used automatically when a font
-requested by a report is not installed on the host system.
+The following fonts are embedded in the `Majorsilence.Forms.Drawing.Common`
+assembly, which this project consumes as a NuGet package, as cross-platform
+fallback fonts. They are used automatically when a font requested by a report is
+not installed on the host system.
 
-Full copyright notices and the complete OFL 1.1 license text are in
-`Majorsilence.Drawing.Common/Fonts/NOTICE.md` and
-`Majorsilence.Drawing.Common/Fonts/OFL-1.1.txt`.
+Full copyright notices and the complete OFL 1.1 license text ship with that
+package, in `src/Majorsilence.Forms.Drawing.Common/Fonts/` of
+<https://github.com/majorsilence/Majorsilence.Forms>.
 
 All bundled fonts are distributed under the **SIL Open Font License, Version 1.1**.
 
@@ -35,4 +36,6 @@ including bundled with or embedded in software, provided that:
 - Each copy includes the copyright notice and this license.
 - Modified versions do not use the Reserved Font Names listed above.
 
-The full license text is at `Majorsilence.Drawing.Common/Fonts/OFL-1.1.txt`.
+The full license text is at
+`src/Majorsilence.Forms.Drawing.Common/Fonts/OFL-1.1.txt` in
+<https://github.com/majorsilence/Majorsilence.Forms>.

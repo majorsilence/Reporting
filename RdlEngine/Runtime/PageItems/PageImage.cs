@@ -1,7 +1,7 @@
 using System;
 using System.Diagnostics;
 #if DRAWINGCOMPAT
-using Majorsilence.Drawing.Imaging;
+using Majorsilence.Forms.Drawing.Imaging;
 #else
 using System.Drawing.Imaging;
 #endif

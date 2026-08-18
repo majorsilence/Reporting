@@ -19,8 +19,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 #if DRAWINGCOMPAT
-using Draw2 = Majorsilence.Drawing;
-using Imaging = Majorsilence.Drawing.Imaging;
+using Draw2 = Majorsilence.Forms.Drawing;
+using Imaging = Majorsilence.Forms.Drawing.Imaging;
 #else
 using Draw2 = System.Drawing;
 using Imaging = System.Drawing.Imaging;
@@ -103,7 +103,7 @@ namespace Majorsilence.Reporting.Rdl
         // ── lines ─────────────────────────────────────────────────────────────
 
         protected internal override void AddLine(float x, float y, float x2, float y2,
-            float width, Draw2.Color c, BorderStyleEnum ls)
+            float width, System.Drawing.Color c, BorderStyleEnum ls)
         {
             if (width <= 0) return;
             _currentPage.DrawLine(x, y, x2, y2,
@@ -117,7 +117,7 @@ namespace Majorsilence.Reporting.Rdl
 
         protected internal override void AddImage(string name, StyleInfo si,
             Imaging.ImageFormat imf, float x, float y, float width, float height,
-            Draw2.RectangleF clipRect, byte[] im, int samplesW, int samplesH,
+            System.Drawing.RectangleF clipRect, byte[] im, int samplesW, int samplesH,
             string url, string tooltip)
         {
             if (im == null || im.Length == 0) return;
@@ -133,7 +133,7 @@ namespace Majorsilence.Reporting.Rdl
 
         // ── shapes ────────────────────────────────────────────────────────────
 
-        protected internal override void AddPolygon(Draw2.PointF[] pts, StyleInfo si, string url)
+        protected internal override void AddPolygon(System.Drawing.PointF[] pts, StyleInfo si, string url)
         {
             if (si.BackgroundColor.IsEmpty || pts.Length < 2) return;
             var c = si.BackgroundColor;
@@ -161,7 +161,7 @@ namespace Majorsilence.Reporting.Rdl
             AddAnnotations(x, y, height, width, url, tooltip);
         }
 
-        protected internal override void AddCurve(Draw2.PointF[] pts, StyleInfo si)
+        protected internal override void AddCurve(System.Drawing.PointF[] pts, StyleInfo si)
         {
             if (pts.Length < 2) return;
             var points = new List<(float x, float y)>(pts.Length);
@@ -355,9 +355,9 @@ namespace Majorsilence.Reporting.Rdl
             string sysFolder = FontFolder;
             var reg = new FontRegistry();
 
-            // ── bundled fonts (always available via Majorsilence.Drawing.Common) ──
+            // ── bundled fonts (always available via Majorsilence.Forms.Drawing.Common) ──
 #if DRAWINGCOMPAT
-            string embDir = Majorsilence.Drawing.FontResourceLoader.GetFontDirectory();
+            string embDir = Majorsilence.Forms.Drawing.FontResourceLoader.GetFontDirectory();
             if (Directory.Exists(embDir))
                 reg.AddDirectory(embDir);
 #endif
@@ -545,7 +545,7 @@ namespace Majorsilence.Reporting.Rdl
 
         // ── private drawing helpers ───────────────────────────────────────────
 
-        private void iAddFillRect(float x, float y, float width, float height, Draw2.Color c)
+        private void iAddFillRect(float x, float y, float width, float height, System.Drawing.Color c)
         {
             _currentPage.DrawRectangle(x, y, width, height,
                 ShapeStyle.Filled(PdfColor.FromRgb(c.R, c.G, c.B)));
@@ -618,7 +618,7 @@ namespace Majorsilence.Reporting.Rdl
                     { _dejavuFonts = true; return "/usr/share/fonts/truetype/dejavu"; }
                     _liberationFonts = true;
 #if DRAWINGCOMPAT
-                    return Majorsilence.Drawing.FontResourceLoader.GetFontDirectory();
+                    return Majorsilence.Forms.Drawing.FontResourceLoader.GetFontDirectory();
 #else
                     return "/usr/share/fonts";
 #endif
@@ -638,7 +638,7 @@ namespace Majorsilence.Reporting.Rdl
             {
                 using var ms  = new MemoryStream(data);
 #if DRAWINGCOMPAT
-                using var img = new Majorsilence.Drawing.Bitmap(ms);
+                using var img = new Majorsilence.Forms.Drawing.Bitmap(ms);
 #else
                 using var img = new Draw2.Bitmap(Draw2.Image.FromStream(ms));
 #endif

@@ -3,13 +3,13 @@ using System.Collections;
 using System.Text;
 using System.Text.RegularExpressions;
 #if DRAWINGCOMPAT
-using Draw = Majorsilence.Drawing;
+using Draw = Majorsilence.Forms.Drawing;
 #else
 using Draw = System.Drawing;
 #endif
 
 #if DRAWINGCOMPAT
-namespace Majorsilence.Drawing
+namespace Majorsilence.Forms.Drawing
 #else
 namespace System.Drawing
 #endif
@@ -18,14 +18,14 @@ namespace System.Drawing
     {
         //drawstring justified without paragraph format
         public static void DrawStringJustified(Draw.Graphics graphics, string s, 
-            Draw.Font font, Draw.Brush brush, Draw.RectangleF layoutRectangle)
+            Draw.Font font, Draw.Brush brush, System.Drawing.RectangleF layoutRectangle)
         {
             DrawStringJustified(graphics, s, font, brush, layoutRectangle, ' ');
         }
 
         //drawstring justified with paragraph format
         public static void DrawStringJustified(Draw.Graphics graphics, string s, Draw.Font font, Draw.Brush brush, 
-            Draw.RectangleF layoutRectangle, char paragraphFormat)
+            System.Drawing.RectangleF layoutRectangle, char paragraphFormat)
         {
             try
             {
@@ -61,14 +61,14 @@ namespace System.Drawing
                 rightAlignHandle.LineAlignment = Draw.StringAlignment.Far;
 
                 //measure space for the given font
-                Draw.SizeF stringSize = graphics.MeasureString(" ", font, layoutRectangle.Size, stringFormat);
+                System.Drawing.SizeF stringSize = graphics.MeasureString(" ", font, layoutRectangle.Size, stringFormat);
                 double spaceWidth = stringSize.Width + 1;
 
                 //measure paragraph format for the given font
                 double paragraphFormatWidth = 0;
                 if (paragraphFormat != ' ')
                 {
-                    Draw.SizeF paragraphFormatSize = graphics.MeasureString(paragraphFormat.ToString(), 
+                    System.Drawing.SizeF paragraphFormatSize = graphics.MeasureString(paragraphFormat.ToString(), 
                         new Draw.Font(font.FontFamily, font.Size, Draw.FontStyle.Regular), layoutRectangle.Size, stringFormat);
                     paragraphFormatWidth = paragraphFormatSize.Width;
                 }
@@ -104,7 +104,7 @@ namespace System.Drawing
                     currentWord.StopItalic = word.ToLower().Contains("</i>");
 
                     //size of the word
-                    Draw.SizeF wordSize = graphics.MeasureString(currentWord.String, font, layoutRectangle.Size, stringFormat);
+                    System.Drawing.SizeF wordSize = graphics.MeasureString(currentWord.String, font, layoutRectangle.Size, stringFormat);
                     float wordWidth = wordSize.Width;
 
                     if (wordWidth > layoutRectangle.Width && currentWord.String != "<CR>")
@@ -228,18 +228,18 @@ namespace System.Drawing
                                 lastWord = false;
                             }
 
-                            Draw.RectangleF rectangleF;
+                            System.Drawing.RectangleF rectangleF;
                             Draw.StringFormat stringFormatHandle;
 
                             if (lastWord)
                             {
-                                rectangleF = new Draw.RectangleF(layoutRectangle.Left, (float)currentTop, layoutRectangle.Width, (float)(currentTop + lineHeight));
+                                rectangleF = new System.Drawing.RectangleF(layoutRectangle.Left, (float)currentTop, layoutRectangle.Width, (float)(currentTop + lineHeight));
                                 stringFormatHandle = rightAlignHandle;
                             }
                             else
                             {
                                 //lets zero size for word to drawstring auto-size de word
-                                rectangleF = new Draw.RectangleF((float)currentLeft, (float)currentTop, 0, 0);
+                                rectangleF = new System.Drawing.RectangleF((float)currentLeft, (float)currentTop, 0, 0);
                                 stringFormatHandle = leftAlignHandle;
                             }
 
@@ -269,7 +269,7 @@ namespace System.Drawing
                                 //draw until end of line
                                 while (currentLeft + paragraphFormatWidth <= layoutRectangle.Left + layoutRectangle.Width)
                                 {
-                                    rectangleF = new Draw.RectangleF((float)currentLeft, (float)currentTop, 0, 0);
+                                    rectangleF = new System.Drawing.RectangleF((float)currentLeft, (float)currentTop, 0, 0);
                                     //draw the paragraph format
                                     graphics.DrawString(paragraphFormat.ToString(), font, brush, rectangleF, stringFormatHandle);
                                     currentLeft += paragraphFormatWidth;

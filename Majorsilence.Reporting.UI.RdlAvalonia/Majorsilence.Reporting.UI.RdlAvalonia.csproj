@@ -34,7 +34,8 @@
         <ProjectReference Include="..\RdlEngine\Majorsilence.Reporting.RdlEngine.csproj" />
     </ItemGroup>
     <ItemGroup>
-        <ProjectReference Include="..\Majorsilence.Drawing.Common\Majorsilence.Drawing.Common.csproj" />
+        <PackageReference Include="Majorsilence.Forms" />
+        <PackageReference Include="Majorsilence.Forms.Drawing.Common" />
     </ItemGroup>
     <ItemGroup>
       <AdditionalFiles Include="Viewer\AvaloniaReportViewer.axaml" />

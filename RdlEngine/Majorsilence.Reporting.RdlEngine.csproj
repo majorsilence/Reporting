@@ -62,7 +62,8 @@
 		<ProjectReference Include="..\Majorsilence.Pdf.Security\Majorsilence.Pdf.Security.csproj" />
 	</ItemGroup>
 	<ItemGroup Condition="'$(DefineConstants.Contains(DRAWINGCOMPAT))' == True">
-		<ProjectReference Include="..\Majorsilence.Drawing.Common\Majorsilence.Drawing.Common.csproj" />
+		<PackageReference Include="Majorsilence.Forms" />
+		<PackageReference Include="Majorsilence.Forms.Drawing.Common" />
 	</ItemGroup>
 	<ItemGroup>
 		<EmbeddedResource Update="Resources\Strings.resx">

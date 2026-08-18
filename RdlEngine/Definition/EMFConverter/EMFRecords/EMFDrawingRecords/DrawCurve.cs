@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.IO;
 #if DRAWINGCOMPAT
-using Draw2 = Majorsilence.Drawing;
+using Draw2 = Majorsilence.Forms.Drawing;
 #else
 using Draw2 = System.Drawing;
 #endif
@@ -82,7 +82,7 @@ namespace Majorsilence.Reporting.Rdl
 
         private void DoFloat(UInt32 NumberOfSegments, BinaryReader _br, Draw2.Pen p, UInt32 Offset, UInt32 NumberOfPoints, float Tension)
         {
-            Draw2.PointF[] Points = null;
+            System.Drawing.PointF[] Points = null;
             //bool first = true;
             for (int i = 0; i < NumberOfPoints; i++)
             {
@@ -96,7 +96,7 @@ namespace Majorsilence.Reporting.Rdl
         private void DoCompressed(UInt32 NumberOfSegments, BinaryReader _br, Draw2.Pen p, UInt32 Offset, UInt32 NumberOfPoints, float Tension)
         {
             //bool first = true;
-            Draw2.PointF[] Points = new Draw2.PointF[NumberOfPoints];
+            System.Drawing.PointF[] Points = new System.Drawing.PointF[NumberOfPoints];
             for (int i = 0; i < NumberOfPoints; i++)
             {
                 Points[i].X = (float) _br.ReadInt16();
@@ -105,7 +105,7 @@ namespace Majorsilence.Reporting.Rdl
             DoInstructions(Points, p, Offset, NumberOfSegments, Tension);
         }
 
-        private void DoInstructions(Draw2.PointF[] points, Draw2.Pen p, UInt32 Offset, UInt32 NumberOfPoints, float Tension)
+        private void DoInstructions(System.Drawing.PointF[] points, Draw2.Pen p, UInt32 Offset, UInt32 NumberOfPoints, float Tension)
         {
             BorderStyleEnum ls = getLineStyle(p);
             //Well we only draw lines at the moment.... 

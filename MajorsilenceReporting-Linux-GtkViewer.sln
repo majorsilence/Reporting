@@ -13,8 +13,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Majorsilence.Reporting.RdlC
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RdlGtk3Viewer", "RdlGtk3Viewer\RdlGtk3Viewer.csproj", "{72133ED0-23A1-47BB-B811-EF87C5D188C7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Majorsilence.Drawing.Common", "Majorsilence.Drawing.Common\Majorsilence.Drawing.Common.csproj", "{882E5F2E-4F0E-419E-9170-AD72B200FC06}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -107,22 +105,6 @@ Global
 		{72133ED0-23A1-47BB-B811-EF87C5D188C7}.Release-DrawingCompat|Any CPU.Build.0 = Release-DrawingCompat|Any CPU
 		{72133ED0-23A1-47BB-B811-EF87C5D188C7}.Release-DrawingCompat|x86.ActiveCfg = Release-DrawingCompat|Any CPU
 		{72133ED0-23A1-47BB-B811-EF87C5D188C7}.Release-DrawingCompat|x86.Build.0 = Release-DrawingCompat|Any CPU
-		{882E5F2E-4F0E-419E-9170-AD72B200FC06}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{882E5F2E-4F0E-419E-9170-AD72B200FC06}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{882E5F2E-4F0E-419E-9170-AD72B200FC06}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{882E5F2E-4F0E-419E-9170-AD72B200FC06}.Debug|x86.Build.0 = Debug|Any CPU
-		{882E5F2E-4F0E-419E-9170-AD72B200FC06}.Debug-DrawingCompat|Any CPU.ActiveCfg = Debug-DrawingCompat|Any CPU
-		{882E5F2E-4F0E-419E-9170-AD72B200FC06}.Debug-DrawingCompat|Any CPU.Build.0 = Debug-DrawingCompat|Any CPU
-		{882E5F2E-4F0E-419E-9170-AD72B200FC06}.Debug-DrawingCompat|x86.ActiveCfg = Debug-DrawingCompat|Any CPU
-		{882E5F2E-4F0E-419E-9170-AD72B200FC06}.Debug-DrawingCompat|x86.Build.0 = Debug-DrawingCompat|Any CPU
-		{882E5F2E-4F0E-419E-9170-AD72B200FC06}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{882E5F2E-4F0E-419E-9170-AD72B200FC06}.Release|Any CPU.Build.0 = Release|Any CPU
-		{882E5F2E-4F0E-419E-9170-AD72B200FC06}.Release|x86.ActiveCfg = Release|Any CPU
-		{882E5F2E-4F0E-419E-9170-AD72B200FC06}.Release|x86.Build.0 = Release|Any CPU
-		{882E5F2E-4F0E-419E-9170-AD72B200FC06}.Release-DrawingCompat|Any CPU.ActiveCfg = Release-DrawingCompat|Any CPU
-		{882E5F2E-4F0E-419E-9170-AD72B200FC06}.Release-DrawingCompat|Any CPU.Build.0 = Release-DrawingCompat|Any CPU
-		{882E5F2E-4F0E-419E-9170-AD72B200FC06}.Release-DrawingCompat|x86.ActiveCfg = Release-DrawingCompat|Any CPU
-		{882E5F2E-4F0E-419E-9170-AD72B200FC06}.Release-DrawingCompat|x86.Build.0 = Release-DrawingCompat|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

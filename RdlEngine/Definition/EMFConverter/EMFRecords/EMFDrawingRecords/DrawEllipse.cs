@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.IO;
 #if DRAWINGCOMPAT
-using Draw2 = Majorsilence.Drawing;
+using Draw2 = Majorsilence.Forms.Drawing;
 #else
 using Draw2 = System.Drawing;
 #endif
@@ -82,7 +82,7 @@ namespace Majorsilence.Reporting.Rdl
         {
             BorderStyleEnum ls = getLineStyle(p);
 
-            Draw2.Color col = Draw2.Color.Black;
+            System.Drawing.Color col = System.Drawing.Color.Black;
 
             if (p.Brush.GetType().Name.Equals("SolidBrush"))
             {

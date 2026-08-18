@@ -15,12 +15,9 @@ string outputDir = Path.Combine(AppContext.BaseDirectory, "output");
 Directory.CreateDirectory(outputDir);
 
 // ── shared font registry ──────────────────────────────────────────────────────
-// Scan the bundled fonts that ship with Majorsilence.Drawing.Common.
+// Scan the bundled fonts that ship with Majorsilence.Forms.Drawing.Common.
 // NotoSans is the fallback for any glyph the primary font is missing.
-string fontsDir = Path.GetFullPath(
-    Path.Combine(AppContext.BaseDirectory,
-        "..", "..", "..", "..", "..",
-        "Majorsilence.Drawing.Common", "Fonts"));
+string fontsDir = Majorsilence.Forms.Drawing.FontResourceLoader.GetFontDirectory();
 
 FontRegistry registry;
 if (Directory.Exists(fontsDir))
@@ -864,9 +861,7 @@ static void UnicodeExample(string name, FontRegistry fonts, PdfVersion version)
     FontRegistry reg = fonts;
     if (emojiFont != null)
         reg = new FontRegistry().AddDirectory(
-                Path.GetFullPath(Path.Combine(AppContext.BaseDirectory,
-                    "..", "..", "..", "..", "..",
-                    "Majorsilence.Drawing.Common", "Fonts")))
+                Majorsilence.Forms.Drawing.FontResourceLoader.GetFontDirectory())
             .AddFamily("Emoji", regular: emojiFont)
             .AddFallback("NotoSans")
             .AddFallback("Emoji");
@@ -1079,10 +1074,7 @@ static void RightToLeftExample(string name, FontRegistry fonts, PdfVersion versi
 
     // Build a local registry that extends the shared one with the script-specific
     // Noto families that ship in the bundled fonts directory.
-    string fontsDir = Path.GetFullPath(
-        Path.Combine(AppContext.BaseDirectory,
-            "..", "..", "..", "..", "..",
-            "Majorsilence.Drawing.Common", "Fonts"));
+    string fontsDir = Majorsilence.Forms.Drawing.FontResourceLoader.GetFontDirectory();
 
     // Build a local registry from the bundled fonts dir.
     // NotoSansHebrew / NotoSansArabic / NotoSansSymbols are all picked up by
@@ -1363,7 +1355,7 @@ static (byte[] data, int width, int height) LoadJpeg(string path)
 static (byte[] rgb, int width, int height) LoadPngAsRgb(string path)
 {
     // System.Drawing is available in net6+ via System.Drawing.Common on Windows,
-    // or via Majorsilence.Drawing.Common (SkiaSharp-backed) on Linux/macOS.
+    // or via Majorsilence.Forms.Drawing.Common (SkiaSharp-backed) on Linux/macOS.
     // Here we parse the PNG ourselves to stay zero-dependency in this example.
     byte[] png = File.ReadAllBytes(path);
 

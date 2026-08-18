@@ -4,8 +4,8 @@ using System.Collections.Generic;
 using System.Text;
 using System.IO;
 #if DRAWINGCOMPAT
-using Draw2 = Majorsilence.Drawing;
-using Drawing2D = Majorsilence.Drawing.Drawing2D;
+using Draw2 = Majorsilence.Forms.Drawing;
+using Drawing2D = Majorsilence.Forms.Drawing.Drawing2D;
 #else
 using Draw2 = System.Drawing;
 using Drawing2D = System.Drawing.Drawing2D;
@@ -54,7 +54,7 @@ namespace Majorsilence.Reporting.Rdl
                     G = _br.ReadByte();
                     R = _br.ReadByte();
                     A = _br.ReadByte();
-                    b = new Draw2.SolidBrush(Draw2.Color.FromArgb(A, R, G, B));
+                    b = new Draw2.SolidBrush(System.Drawing.Color.FromArgb(A, R, G, B));
                 }
                 else
                 {
@@ -88,7 +88,7 @@ namespace Majorsilence.Reporting.Rdl
 
         private void DoFloat(UInt32 NumberOfPoints, BinaryReader _br, Draw2.Brush b)
         {
-            Draw2.PointF[] Ps = new Draw2.PointF[NumberOfPoints];
+            System.Drawing.PointF[] Ps = new System.Drawing.PointF[NumberOfPoints];
             for (int i = 0; i < NumberOfPoints; i++)
             {
                   
@@ -100,7 +100,7 @@ namespace Majorsilence.Reporting.Rdl
 
         private void DoCompressed(UInt32 NumberOfPoints, BinaryReader _br, Draw2.Brush b)
         {
-            Draw2.PointF[] Ps = new Draw2.PointF[NumberOfPoints];
+            System.Drawing.PointF[] Ps = new System.Drawing.PointF[NumberOfPoints];
             for (int i = 0; i < NumberOfPoints; i++)
             { 
                 Int16 px = _br.ReadInt16();
@@ -111,7 +111,7 @@ namespace Majorsilence.Reporting.Rdl
             DoInstructions(Ps, b);
         }
 
-        private void DoInstructions(Draw2.PointF[] Ps, Draw2.Brush b)
+        private void DoInstructions(System.Drawing.PointF[] Ps, Draw2.Brush b)
         {
             PagePolygon pl = new PagePolygon();
             //pl.X = X * SCALEFACTOR;

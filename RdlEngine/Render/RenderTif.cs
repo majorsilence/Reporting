@@ -29,7 +29,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 
 #if DRAWINGCOMPAT
-using Draw2 = Majorsilence.Drawing;
+using Draw2 = Majorsilence.Forms.Drawing;
 #else
 using Draw2 = System.Drawing;
 using System.Drawing.Imaging;
@@ -98,13 +98,15 @@ namespace Majorsilence.Reporting.Rdl
             int pageNo = 1;
 
 #if DRAWINGCOMPAT
-            using var tiffWriter = new Majorsilence.Drawing.Imaging.TiffWriter(tw);
+            using var tiffWriter = new Majorsilence.Forms.Drawing.Imaging.TiffWriter(tw);
             foreach (Page p in pgs)
             {
-                Draw2.Bitmap bm = CreateObjectBitmap();
-                Draw2.Graphics g = bm.GetGraphics();
-                g.DpiX = DpiX;
-                g.DpiY = DpiY;
+                // Majorsilence.Forms.Drawing.Image keeps its backing SKBitmap internal, and
+                // TiffWriter.WritePage wants one, so own the SKBitmap here and wrap it as the
+                // Image that gets drawn onto - the implicit conversion wraps without copying.
+                using var skBitmap = CreateObjectSkBitmap();
+                Draw2.Image bm = skBitmap;
+                using Draw2.Graphics g = Draw2.Graphics.FromImage(bm);
                 g.PageUnit = Draw2.GraphicsUnit.Pixel;
                 g.ScaleTransform(1, 1);
 
@@ -112,7 +114,7 @@ namespace Majorsilence.Reporting.Rdl
 
                 await ProcessPage(g, p);
 
-                tiffWriter.WritePage(bm.SkiaBitmap, _RenderColor, DpiX, DpiY);
+                tiffWriter.WritePage(skBitmap, _RenderColor, DpiX, DpiY);
 
                 pageNo++;
             }
@@ -183,7 +185,7 @@ namespace Majorsilence.Reporting.Rdl
                     continue;
                 }
 
-                Draw2.RectangleF rect = new Draw2.RectangleF(PixelsX(pi.X), PixelsY(pi.Y), PixelsX(pi.W), PixelsY(pi.H));
+                System.Drawing.RectangleF rect = new System.Drawing.RectangleF(PixelsX(pi.X), PixelsY(pi.Y), PixelsX(pi.W), PixelsY(pi.H));
 
                 if (pi.SI.BackgroundImage != null)
                 {   // put out any background image
@@ -237,7 +239,7 @@ namespace Majorsilence.Reporting.Rdl
             await this.ProcessPage(g, pth);
         }
 
-        private void DrawLine(Draw2.Color c, BorderStyleEnum bs, float w, Draw2.Graphics g, float x, float y, float x2, float y2)
+        private void DrawLine(System.Drawing.Color c, BorderStyleEnum bs, float w, Draw2.Graphics g, float x, float y, float x2, float y2)
         {
             if (bs == BorderStyleEnum.None || c.IsEmpty || w <= 0)   // nothing to draw
                 return;
@@ -275,8 +277,8 @@ namespace Majorsilence.Reporting.Rdl
             }
         }
 
-        private void DrawCurve(Draw2.Color c, BorderStyleEnum bs, float w, Draw2.Graphics g,
-            Draw2.PointF[] points, int Offset, float Tension)
+        private void DrawCurve(System.Drawing.Color c, BorderStyleEnum bs, float w, Draw2.Graphics g,
+            System.Drawing.PointF[] points, int Offset, float Tension)
         {
             if (bs == BorderStyleEnum.None || c.IsEmpty || w <= 0)	// nothing to draw
                 return;
@@ -304,7 +306,7 @@ namespace Majorsilence.Reporting.Rdl
                         p.DashStyle = Draw2.Drawing2D.DashStyle.Solid;
                         break;
                 }
-                Draw2.PointF[] tmp = new Draw2.PointF[points.Length];
+                System.Drawing.PointF[] tmp = new System.Drawing.PointF[points.Length];
                 for (int i = 0; i < points.Length; i++)
                 {
 
@@ -322,7 +324,7 @@ namespace Majorsilence.Reporting.Rdl
 
         }
 
-        private void DrawEllipse(PageEllipse pe, Draw2.Graphics g, Draw2.RectangleF r)
+        private void DrawEllipse(PageEllipse pe, Draw2.Graphics g, System.Drawing.RectangleF r)
         {
             StyleInfo si = pe.SI;
             if (!si.BackgroundColor.IsEmpty)
@@ -355,11 +357,11 @@ namespace Majorsilence.Reporting.Rdl
             }
         }
 
-        private void FillPolygon(PagePolygon pp, Draw2.Graphics g, Draw2.RectangleF r)
+        private void FillPolygon(PagePolygon pp, Draw2.Graphics g, System.Drawing.RectangleF r)
         {
 
             StyleInfo si = pp.SI;
-            Draw2.PointF[] tmp = new Draw2.PointF[pp.Points.Length];
+            System.Drawing.PointF[] tmp = new System.Drawing.PointF[pp.Points.Length];
             if (!si.BackgroundColor.IsEmpty)
             {
                 for (int i = 0; i < pp.Points.Length; i++)
@@ -371,7 +373,7 @@ namespace Majorsilence.Reporting.Rdl
             }
         }
 
-        private void DrawPie(PagePie pp, Draw2.Graphics g, Draw2.RectangleF r)
+        private void DrawPie(PagePie pp, Draw2.Graphics g, System.Drawing.RectangleF r)
         {
             StyleInfo si = pp.SI;
             if (!si.BackgroundColor.IsEmpty)
@@ -405,7 +407,7 @@ namespace Majorsilence.Reporting.Rdl
             }
         }
 
-        private void DrawString(PageText pt, Draw2.Graphics g, Draw2.RectangleF r)
+        private void DrawString(PageText pt, Draw2.Graphics g, System.Drawing.RectangleF r)
         {
             StyleInfo si = pt.SI;
             string s = pt.Text;
@@ -493,7 +495,7 @@ namespace Majorsilence.Reporting.Rdl
                 DrawBackground(g, r, si);
 
                 // adjust drawing rectangle based on padding
-                Draw2.RectangleF r2 = new Draw2.RectangleF(r.Left + si.PaddingLeft,
+                System.Drawing.RectangleF r2 = new System.Drawing.RectangleF(r.Left + si.PaddingLeft,
                                                r.Top + si.PaddingTop,
                                                r.Width - si.PaddingLeft - si.PaddingRight,
                                                r.Height - si.PaddingTop - si.PaddingBottom);
@@ -501,7 +503,7 @@ namespace Majorsilence.Reporting.Rdl
                 drawBrush = new Draw2.SolidBrush(si.Color);
                 if (pt.NoClip)   // request not to clip text
                 {
-                    g.DrawString(pt.Text, drawFont, drawBrush, new Draw2.PointF(r.Left, r.Top), drawFormat);
+                    g.DrawString(pt.Text, drawFont, drawBrush, new System.Drawing.PointF(r.Left, r.Top), drawFormat);
                 }
                 else
                 {
@@ -520,7 +522,7 @@ namespace Majorsilence.Reporting.Rdl
             }
         }
 
-        private void DrawImage(PageImage pi, Draw2.Graphics g, Draw2.RectangleF r)
+        private void DrawImage(PageImage pi, Draw2.Graphics g, System.Drawing.RectangleF r)
         {
             Stream strm = null;
             Draw2.Image im = null;
@@ -540,56 +542,55 @@ namespace Majorsilence.Reporting.Rdl
 
         }
 
-        private void DrawImageSized(PageImage pi, Draw2.Image im, Draw2.Graphics g, Draw2.RectangleF r)
+        private void DrawImageSized(PageImage pi, Draw2.Image im, Draw2.Graphics g, System.Drawing.RectangleF r)
         {
             float height, width;      // some work variables
             StyleInfo si = pi.SI;
 
             // adjust drawing rectangle based on padding
-            Draw2.RectangleF r2 = new Draw2.RectangleF(r.Left + PixelsX(si.PaddingLeft),
+            System.Drawing.RectangleF r2 = new System.Drawing.RectangleF(r.Left + PixelsX(si.PaddingLeft),
                 r.Top + PixelsY(si.PaddingTop),
                 r.Width - PixelsX(si.PaddingLeft + si.PaddingRight),
                 r.Height - PixelsY(si.PaddingTop + si.PaddingBottom));
 
-            Draw2.Rectangle ir;   // int work rectangle
+            System.Drawing.Rectangle ir;   // int work rectangle
             switch (pi.Sizing)
             {
                 case ImageSizingEnum.AutoSize:
-                    if (g.DpiX == im.HorizontalResolution &&
-                        g.DpiY == im.VerticalResolution)
+                    if (DpiX == im.HorizontalResolution &&
+                        DpiY == im.VerticalResolution)
                     {
-                        ir = new Draw2.Rectangle(Convert.ToInt32(r2.Left), Convert.ToInt32(r2.Top),
+                        ir = new System.Drawing.Rectangle(Convert.ToInt32(r2.Left), Convert.ToInt32(r2.Top),
                                                         im.Width, im.Height);
                     }
                     else
-                        ir = new Draw2.Rectangle(Convert.ToInt32(r2.Left), Convert.ToInt32(r2.Top),
+                        ir = new System.Drawing.Rectangle(Convert.ToInt32(r2.Left), Convert.ToInt32(r2.Top),
                                            Convert.ToInt32(r2.Width), Convert.ToInt32(r2.Height));
                     g.DrawImage(im, ir);
                     break;
                 case ImageSizingEnum.Clip:
 #if DRAWINGCOMPAT
-                    var skCanvas = g.GetSkCanvas();
-                    int saveCount = skCanvas.Save();
-                    skCanvas.ClipRect(new SkiaSharp.SKRect(r2.X, r2.Y, r2.Right, r2.Bottom));
-                    if (g.DpiX == im.HorizontalResolution && g.DpiY == im.VerticalResolution)
-                        ir = new Draw2.Rectangle(Convert.ToInt32(r2.Left), Convert.ToInt32(r2.Top), im.Width, im.Height);
+                    var clipState = g.Save();
+                    g.IntersectClip(r2);
+                    if (DpiX == im.HorizontalResolution && DpiY == im.VerticalResolution)
+                        ir = new System.Drawing.Rectangle(Convert.ToInt32(r2.Left), Convert.ToInt32(r2.Top), im.Width, im.Height);
                     else
-                        ir = new Draw2.Rectangle(Convert.ToInt32(r2.Left), Convert.ToInt32(r2.Top), Convert.ToInt32(r2.Width), Convert.ToInt32(r2.Height));
+                        ir = new System.Drawing.Rectangle(Convert.ToInt32(r2.Left), Convert.ToInt32(r2.Top), Convert.ToInt32(r2.Width), Convert.ToInt32(r2.Height));
                     g.DrawImage(im, ir);
-                    skCanvas.RestoreToCount(saveCount);
+                    g.Restore(clipState);
 #else
                     Draw2.Region saveRegion = g.Clip;
                     Draw2.Region clipRegion = new Draw2.Region(g.Clip.GetRegionData());
                     clipRegion.Intersect(r2);
                     g.Clip = clipRegion;
-                    if (g.DpiX == im.HorizontalResolution &&
-                        g.DpiY == im.VerticalResolution)
+                    if (DpiX == im.HorizontalResolution &&
+                        DpiY == im.VerticalResolution)
                     {
-                        ir = new Draw2.Rectangle(Convert.ToInt32(r2.Left), Convert.ToInt32(r2.Top),
+                        ir = new System.Drawing.Rectangle(Convert.ToInt32(r2.Left), Convert.ToInt32(r2.Top),
                                                         im.Width, im.Height);
                     }
                     else
-                        ir = new Draw2.Rectangle(Convert.ToInt32(r2.Left), Convert.ToInt32(r2.Top),
+                        ir = new System.Drawing.Rectangle(Convert.ToInt32(r2.Left), Convert.ToInt32(r2.Top),
                                            Convert.ToInt32(r2.Width), Convert.ToInt32(r2.Height));
                     g.DrawImage(im, ir);
                     g.Clip = saveRegion;
@@ -608,7 +609,7 @@ namespace Majorsilence.Reporting.Rdl
                     {   // this means the ractangle height must be corrected
                         height = width * ratioIm;
                     }
-                    r2 = new Draw2.RectangleF(r2.X, r2.Y, width, height);
+                    r2 = new System.Drawing.RectangleF(r2.X, r2.Y, width, height);
                     g.DrawImage(im, r2);
                     break;
                 case ImageSizingEnum.Fit:
@@ -619,7 +620,7 @@ namespace Majorsilence.Reporting.Rdl
             return;
         }
 
-        private void DrawBackground(Draw2.Graphics g, Draw2.RectangleF rect, StyleInfo si)
+        private void DrawBackground(Draw2.Graphics g, System.Drawing.RectangleF rect, StyleInfo si)
         {
             Draw2.Drawing2D.LinearGradientBrush linGrBrush = null;
             Draw2.SolidBrush sb = null;
@@ -629,8 +630,8 @@ namespace Majorsilence.Reporting.Rdl
                     !si.BackgroundGradientEndColor.IsEmpty &&
                     !si.BackgroundColor.IsEmpty)
                 {
-                    Draw2.Color c = si.BackgroundColor;
-                    Draw2.Color ec = si.BackgroundGradientEndColor;
+                    System.Drawing.Color c = si.BackgroundColor;
+                    System.Drawing.Color ec = si.BackgroundGradientEndColor;
 
                     switch (si.BackgroundGradientType)
                     {
@@ -682,7 +683,7 @@ namespace Majorsilence.Reporting.Rdl
             return;
         }
 
-        private void DrawBorder(PageItem pi, Draw2.Graphics g, Draw2.RectangleF r)
+        private void DrawBorder(PageItem pi, Draw2.Graphics g, System.Drawing.RectangleF r)
         {
             if (r.Height <= 0 || r.Width <= 0)      // no bounding box to use
                 return;
@@ -702,14 +703,17 @@ namespace Majorsilence.Reporting.Rdl
         }
 
         #region TIFF image handler
-        private Draw2.Bitmap CreateObjectBitmap()
-        {
 #if DRAWINGCOMPAT
-            return new Draw2.Bitmap(
+        private SkiaSharp.SKBitmap CreateObjectSkBitmap()
+        {
+            return new SkiaSharp.SKBitmap(
                 Convert.ToInt32(r.ReportDefinition.PageWidth.Size / 2540F * DpiX),
                 Convert.ToInt32(r.ReportDefinition.PageHeight.Size / 2540F * DpiY)
             );
+        }
 #else
+        private Draw2.Bitmap CreateObjectBitmap()
+        {
             float dpiX = 200F;
             float dpiY = 200F;
 
@@ -718,12 +722,12 @@ namespace Majorsilence.Reporting.Rdl
                 Convert.ToInt32(r.ReportDefinition.PageHeight.Size / 2540F * dpiY)
             );
 
-            bm.MakeTransparent(Draw2.Color.White);
+            bm.MakeTransparent(System.Drawing.Color.White);
             bm.SetResolution(dpiX, dpiY);
 
             return bm;
-#endif
         }
+#endif
 
 #if !DRAWINGCOMPAT
         private Draw2.Bitmap ConvertToBitonal(Draw2.Bitmap original)
@@ -749,7 +753,7 @@ namespace Majorsilence.Reporting.Rdl
             }
 
             // Lock source bitmap in memory
-            Draw2.Imaging.BitmapData sourceData = source.LockBits(new Draw2.Rectangle(0, 0, source.Width, source.Height),
+            Draw2.Imaging.BitmapData sourceData = source.LockBits(new System.Drawing.Rectangle(0, 0, source.Width, source.Height),
                 Draw2.Imaging.ImageLockMode.ReadOnly,
                 Draw2.Imaging.PixelFormat.Format32bppArgb);
 
@@ -768,7 +772,7 @@ namespace Majorsilence.Reporting.Rdl
             destination.SetResolution(source.HorizontalResolution, source.VerticalResolution);
 
             // Lock destination bitmap in memory
-            Draw2.Imaging.BitmapData destinationData = destination.LockBits(new Draw2.Rectangle(0, 0, destination.Width, destination.Height),
+            Draw2.Imaging.BitmapData destinationData = destination.LockBits(new System.Drawing.Rectangle(0, 0, destination.Width, destination.Height),
                 Draw2.Imaging.ImageLockMode.WriteOnly, Draw2.Imaging.PixelFormat.Format1bppIndexed);
 
             // Create destination buffer

@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
 #if DRAWINGCOMPAT
-using Draw2 = Majorsilence.Drawing;
+using Draw2 = Majorsilence.Forms.Drawing;
 #else
 using Draw2 = System.Drawing;
 #endif
@@ -37,7 +37,7 @@ namespace Majorsilence.Reporting.Rdl
                     _aStream = new System.IO.MemoryStream();
                     IntPtr HDC = g1.GetHdc();
                     _mf = new Draw2.Imaging.Metafile(_aStream, HDC,
-                        new Draw2.RectangleF(0, 0, _bm.Width, _bm.Height), Draw2.Imaging.MetafileFrameUnit.Pixel);
+                        new System.Drawing.RectangleF(0, 0, _bm.Width, _bm.Height), Draw2.Imaging.MetafileFrameUnit.Pixel);
                     g1.ReleaseHdc(HDC);
                 }
             }
@@ -55,7 +55,7 @@ namespace Majorsilence.Reporting.Rdl
                 g.CompositingQuality = Draw2.Drawing2D.CompositingQuality.HighQuality;
 
                 // Adjust the top margin to depend on the title height
-                Draw2.Size titleSize = await DrawTitleMeasure(rpt, g, ChartDefn.Title);
+                System.Drawing.Size titleSize = await DrawTitleMeasure(rpt, g, ChartDefn.Title);
                 Layout.TopMargin = titleSize.Height;
 
                 double max = 0, min = 0;    // Get the max and min values
@@ -65,18 +65,18 @@ namespace Majorsilence.Reporting.Rdl
                 await DrawChartStyle(rpt, g);
 
                 // Draw title; routine determines if necessary
-                await DrawTitle(rpt, g, ChartDefn.Title, new Draw2.Rectangle(0, 0, _bm.Width, Layout.TopMargin));
+                await DrawTitle(rpt, g, ChartDefn.Title, new System.Drawing.Rectangle(0, 0, _bm.Width, Layout.TopMargin));
 
                 // Adjust the left margin to depend on the Category Axis
-                Draw2.Size caSize = await CategoryAxisSize(rpt, g);
+                System.Drawing.Size caSize = await CategoryAxisSize(rpt, g);
                 Layout.LeftMargin = caSize.Width;
 
                 // Adjust the bottom margin to depend on the Value Axis
-                Draw2.Size vaSize = await ValueAxisSize(rpt, g, min, max);
+                System.Drawing.Size vaSize = await ValueAxisSize(rpt, g, min, max);
                 Layout.BottomMargin = vaSize.Height;
 
                 // Draw legend
-                Draw2.Rectangle lRect = await DrawLegend(rpt, g, false, true);
+                System.Drawing.Rectangle lRect = await DrawLegend(rpt, g, false, true);
                 // 20022008 AJM GJL - Requires Rpt and Graphics
                 AdjustMargins(lRect, rpt, g);       // Adjust margins based on legend.
 
@@ -86,12 +86,12 @@ namespace Majorsilence.Reporting.Rdl
                 // Draw Value Axis
                 if (vaSize.Width > 0)   // If we made room for the axis - we need to draw it
                     await DrawValueAxis(rpt, g, min, max,
-                        new Draw2.Rectangle(Layout.LeftMargin, _bm.Height - Layout.BottomMargin, _bm.Width - Layout.LeftMargin - Layout.RightMargin, vaSize.Height), Layout.TopMargin, _bm.Height - Layout.BottomMargin);
+                        new System.Drawing.Rectangle(Layout.LeftMargin, _bm.Height - Layout.BottomMargin, _bm.Width - Layout.LeftMargin - Layout.RightMargin, vaSize.Height), Layout.TopMargin, _bm.Height - Layout.BottomMargin);
 
                 // Draw Category Axis
                 if (caSize.Height > 0)
                     await DrawCategoryAxis(rpt, g,
-                        new Draw2.Rectangle(Layout.LeftMargin - caSize.Width, Layout.TopMargin, caSize.Width, _bm.Height - Layout.TopMargin - Layout.BottomMargin));
+                        new System.Drawing.Rectangle(Layout.LeftMargin - caSize.Width, Layout.TopMargin, caSize.Width, _bm.Height - Layout.TopMargin - Layout.BottomMargin));
 
                 if ((ChartSubTypeEnum)Enum.Parse(typeof(ChartSubTypeEnum), await _ChartDefn.Subtype.EvaluateString(rpt, _row)) == ChartSubTypeEnum.Stacked)
                     await DrawPlotAreaStacked(rpt, g, min, max);
@@ -136,8 +136,8 @@ namespace Majorsilence.Reporting.Rdl
 
                     int x = (int)((Math.Min(v / sum, max) / max) * maxBarWidth);
 
-                    Draw2.Rectangle rect;
-                    rect = new Draw2.Rectangle(Layout.PlotArea.Left + saveX, barLoc, x - saveX, heightBar);
+                    System.Drawing.Rectangle rect;
+                    rect = new System.Drawing.Rectangle(Layout.PlotArea.Left + saveX, barLoc, x - saveX, heightBar);
 
                     await DrawColumnBar(rpt, g,
                         await GetSeriesBrush(rpt, iRow, iCol),
@@ -177,7 +177,7 @@ namespace Majorsilence.Reporting.Rdl
                     int x = (int)(((Math.Min(v, max) - min) / (max - min)) * maxBarWidth);
 
                     await DrawColumnBar(rpt, g, await GetSeriesBrush(rpt, iRow, iCol),
-                        new Draw2.Rectangle(Layout.PlotArea.Left, barLoc, x, heightBar), iRow, iCol);
+                        new System.Drawing.Rectangle(Layout.PlotArea.Left, barLoc, x, heightBar), iRow, iCol);
                     //Add a metafilecomment to use as a tooltip GJL 26092008
                     if (_showToolTips)
                     {
@@ -215,8 +215,8 @@ namespace Majorsilence.Reporting.Rdl
 
                     int x = (int)(((Math.Min(v, max) - min) / (max - min)) * maxBarWidth);
 
-                    Draw2.Rectangle rect;
-                    rect = new Draw2.Rectangle(Layout.PlotArea.Left + saveX, barLoc, x - saveX, heightBar);
+                    System.Drawing.Rectangle rect;
+                    rect = new System.Drawing.Rectangle(Layout.PlotArea.Left + saveX, barLoc, x - saveX, heightBar);
 
                     await DrawColumnBar(rpt, g, await GetSeriesBrush(rpt, iRow, iCol), rect, iRow, iCol);
 
@@ -233,11 +233,11 @@ namespace Majorsilence.Reporting.Rdl
         }
 
         // Calculate the size of the category axis
-        async Task<Draw2.Size> CategoryAxisSize(Report rpt, Draw2.Graphics g)
+        async Task<System.Drawing.Size> CategoryAxisSize(Report rpt, Draw2.Graphics g)
         {
             _LastCategoryWidth = 0;
 
-            Draw2.Size size = Draw2.Size.Empty;
+            System.Drawing.Size size = System.Drawing.Size.Empty;
             if (this.ChartDefn.CategoryAxis == null)
                 return size;
             Axis a = this.ChartDefn.CategoryAxis.Axis;
@@ -257,7 +257,7 @@ namespace Majorsilence.Reporting.Rdl
             for (int iRow = 1; iRow <= CategoryCount; iRow++)
             {
                 (object v, tc) = await this.GetCategoryValue(rpt, iRow);
-                Draw2.Size tSize;
+                System.Drawing.Size tSize;
                 if (s == null)
                     tSize = await Style.MeasureStringDefaults(rpt, g, v, tc, null, int.MaxValue);
 
@@ -277,7 +277,7 @@ namespace Majorsilence.Reporting.Rdl
         }
 
         // DrawCategoryAxis 
-        async Task DrawCategoryAxis(Report rpt, Draw2.Graphics g, Draw2.Rectangle rect)
+        async Task DrawCategoryAxis(Report rpt, Draw2.Graphics g, System.Drawing.Rectangle rect)
         {
             if (this.ChartDefn.CategoryAxis == null)
                 return;
@@ -286,9 +286,9 @@ namespace Majorsilence.Reporting.Rdl
                 return;
             Style s = a.Style;
 
-            Draw2.Size tSize = await DrawTitleMeasure(rpt, g, a.Title);
+            System.Drawing.Size tSize = await DrawTitleMeasure(rpt, g, a.Title);
             await DrawTitle(rpt, g, a.Title,
-                new Draw2.Rectangle(rect.Left, rect.Top, tSize.Width, rect.Height));
+                new System.Drawing.Rectangle(rect.Left, rect.Top, tSize.Width, rect.Height));
 
             int drawHeight = rect.Height / CategoryCount;
             TypeCode tc;
@@ -301,35 +301,35 @@ namespace Majorsilence.Reporting.Rdl
                 // Draw the category text
                 if (a.Visible)
                 {
-                    Draw2.Rectangle drawRect = new Draw2.Rectangle(rect.Left + tSize.Width, drawLoc, rect.Width - tSize.Width, drawHeight);
+                    System.Drawing.Rectangle drawRect = new System.Drawing.Rectangle(rect.Left + tSize.Width, drawLoc, rect.Width - tSize.Width, drawHeight);
                     if (s == null)
                         Style.DrawStringDefaults(g, v, drawRect);
                     else
                         await s.DrawString(rpt, g, v, tc, null, drawRect);
                 }
                 // Draw the Major Tick Marks (if necessary)
-                DrawCategoryAxisTick(g, true, a.MajorTickMarks, new Draw2.Point(rect.Right, drawLoc));
+                DrawCategoryAxisTick(g, true, a.MajorTickMarks, new System.Drawing.Point(rect.Right, drawLoc));
             }
 
             // Draw the end on (if necessary)
-            DrawCategoryAxisTick(g, true, a.MajorTickMarks, new Draw2.Point(rect.Right, rect.Bottom));
+            DrawCategoryAxisTick(g, true, a.MajorTickMarks, new System.Drawing.Point(rect.Right, rect.Bottom));
 
             return;
         }
 
-        protected void DrawCategoryAxisTick(Draw2.Graphics g, bool bMajor, AxisTickMarksEnum tickType, Draw2.Point p)
+        protected void DrawCategoryAxisTick(Draw2.Graphics g, bool bMajor, AxisTickMarksEnum tickType, System.Drawing.Point p)
         {
             int len = bMajor ? AxisTickMarkMajorLen : AxisTickMarkMinorLen;
             switch (tickType)
             {
                 case AxisTickMarksEnum.Outside:
-                    g.DrawLine(Draw2.Pens.Black, new Draw2.Point(p.X, p.Y), new Draw2.Point(p.X - len, p.Y));
+                    g.DrawLine(Draw2.Pens.Black, new System.Drawing.Point(p.X, p.Y), new System.Drawing.Point(p.X - len, p.Y));
                     break;
                 case AxisTickMarksEnum.Inside:
-                    g.DrawLine(Draw2.Pens.Black, new Draw2.Point(p.X, p.Y), new Draw2.Point(p.X + len, p.Y));
+                    g.DrawLine(Draw2.Pens.Black, new System.Drawing.Point(p.X, p.Y), new System.Drawing.Point(p.X + len, p.Y));
                     break;
                 case AxisTickMarksEnum.Cross:
-                    g.DrawLine(Draw2.Pens.Black, new Draw2.Point(p.X - len, p.Y), new Draw2.Point(p.X + len, p.Y));
+                    g.DrawLine(Draw2.Pens.Black, new System.Drawing.Point(p.X - len, p.Y), new System.Drawing.Point(p.X + len, p.Y));
                     break;
                 case AxisTickMarksEnum.None:
                 default:
@@ -338,7 +338,7 @@ namespace Majorsilence.Reporting.Rdl
             return;
         }
 
-        async Task DrawColumnBar(Report rpt, Draw2.Graphics g, Draw2.Brush brush, Draw2.Rectangle rect, int iRow, int iCol)
+        async Task DrawColumnBar(Report rpt, Draw2.Graphics g, Draw2.Brush brush, System.Drawing.Rectangle rect, int iRow, int iCol)
         {
             g.FillRectangle(brush, rect);
             g.DrawRectangle(Draw2.Pens.Black, rect);
@@ -350,8 +350,8 @@ namespace Majorsilence.Reporting.Rdl
             }
             else
             {
-                Draw2.Point p;
-                p = new Draw2.Point(rect.Right, rect.Top);
+                System.Drawing.Point p;
+                p = new System.Drawing.Point(rect.Right, rect.Top);
                 await DrawDataPoint(rpt, g, p, iRow, iCol);
             }
 
@@ -359,7 +359,7 @@ namespace Majorsilence.Reporting.Rdl
             return;
         }
 
-        protected async Task DrawValueAxis(Report rpt, Draw2.Graphics g, double min, double max, Draw2.Rectangle rect, int plotTop, int plotBottom)
+        protected async Task DrawValueAxis(Report rpt, Draw2.Graphics g, double min, double max, System.Drawing.Rectangle rect, int plotTop, int plotBottom)
         {
             if (this.ChartDefn.ValueAxis == null)
                 return;
@@ -383,7 +383,7 @@ namespace Majorsilence.Reporting.Rdl
 
             int maxValueHeight = 0;
             double v = min;
-            Draw2.Size size = Draw2.Size.Empty;
+            System.Drawing.Size size = System.Drawing.Size.Empty;
 
             for (int i = 0; i < intervalCount + 1; i++)
             {
@@ -396,40 +396,40 @@ namespace Majorsilence.Reporting.Rdl
                 else if (s != null)
                 {
                     size = await s.MeasureString(rpt, g, v, TypeCode.Double, null, int.MaxValue);
-                    Draw2.Rectangle vRect =
-                        new Draw2.Rectangle(rect.Left + x - (size.Width / 2), rect.Top + tickSize, size.Width, size.Height);
+                    System.Drawing.Rectangle vRect =
+                        new System.Drawing.Rectangle(rect.Left + x - (size.Width / 2), rect.Top + tickSize, size.Width, size.Height);
                     await s.DrawString(rpt, g, v, TypeCode.Double, null, vRect);
                 }
                 else
                 {
                     size = await Style.MeasureStringDefaults(rpt, g, v, TypeCode.Double, null, int.MaxValue);
-                    Draw2.Rectangle vRect =
-                        new Draw2.Rectangle(rect.Left + x - (size.Width / 2), rect.Top + tickSize, size.Width, size.Height);
+                    System.Drawing.Rectangle vRect =
+                        new System.Drawing.Rectangle(rect.Left + x - (size.Width / 2), rect.Top + tickSize, size.Width, size.Height);
                     Style.DrawStringDefaults(g, v, vRect);
                 }
                 if (size.Height > maxValueHeight)       // Need to keep track of the maximum height
                     maxValueHeight = size.Height;       //   this is probably overkill since it should always be the same??
 
-                await DrawValueAxisGrid(rpt, g, a.MajorGridLines, new Draw2.Point(rect.Left + x, plotTop), new Draw2.Point(rect.Left + x, plotBottom));
-                await DrawValueAxisTick(rpt, g, true, a.MajorTickMarks, a.MajorGridLines, new Draw2.Point(rect.Left + x, plotBottom));
+                await DrawValueAxisGrid(rpt, g, a.MajorGridLines, new System.Drawing.Point(rect.Left + x, plotTop), new System.Drawing.Point(rect.Left + x, plotBottom));
+                await DrawValueAxisTick(rpt, g, true, a.MajorTickMarks, a.MajorGridLines, new System.Drawing.Point(rect.Left + x, plotBottom));
 
                 v += incr;
             }
 
             // Draw the end points of the major grid lines
-            await DrawValueAxisGrid(rpt, g, a.MajorGridLines, new Draw2.Point(rect.Left, plotTop), new Draw2.Point(rect.Left, plotBottom));
-            await DrawValueAxisTick(rpt, g, true, a.MajorTickMarks, a.MajorGridLines, new Draw2.Point(rect.Left, plotBottom));
-            await DrawValueAxisGrid(rpt, g, a.MajorGridLines, new Draw2.Point(rect.Right, plotTop), new Draw2.Point(rect.Right, plotBottom));
-            await DrawValueAxisTick(rpt, g, true, a.MajorTickMarks, a.MajorGridLines, new Draw2.Point(rect.Right, plotBottom));
+            await DrawValueAxisGrid(rpt, g, a.MajorGridLines, new System.Drawing.Point(rect.Left, plotTop), new System.Drawing.Point(rect.Left, plotBottom));
+            await DrawValueAxisTick(rpt, g, true, a.MajorTickMarks, a.MajorGridLines, new System.Drawing.Point(rect.Left, plotBottom));
+            await DrawValueAxisGrid(rpt, g, a.MajorGridLines, new System.Drawing.Point(rect.Right, plotTop), new System.Drawing.Point(rect.Right, plotBottom));
+            await DrawValueAxisTick(rpt, g, true, a.MajorTickMarks, a.MajorGridLines, new System.Drawing.Point(rect.Right, plotBottom));
 
-            Draw2.Size tSize = await DrawTitleMeasure(rpt, g, a.Title);
+            System.Drawing.Size tSize = await DrawTitleMeasure(rpt, g, a.Title);
             await DrawTitle(rpt, g, a.Title,
-                new Draw2.Rectangle(rect.Left, rect.Top + maxValueHeight + tickSize, rect.Width, tSize.Height));
+                new System.Drawing.Rectangle(rect.Left, rect.Top + maxValueHeight + tickSize, rect.Width, tSize.Height));
 
             return;
         }
 
-        protected async Task DrawValueAxisGrid(Report rpt, Draw2.Graphics g, ChartGridLines gl, Draw2.Point s, Draw2.Point e)
+        protected async Task DrawValueAxisGrid(Report rpt, Draw2.Graphics g, ChartGridLines gl, System.Drawing.Point s, System.Drawing.Point e)
         {
             if (gl == null || !gl.ShowGridLines)
                 return;
@@ -442,27 +442,27 @@ namespace Majorsilence.Reporting.Rdl
             return;
         }
 
-        protected async Task DrawValueAxisTick(Report rpt, Draw2.Graphics g, bool bMajor, AxisTickMarksEnum tickType, ChartGridLines gl, Draw2.Point p)
+        protected async Task DrawValueAxisTick(Report rpt, Draw2.Graphics g, bool bMajor, AxisTickMarksEnum tickType, ChartGridLines gl, System.Drawing.Point p)
         {
             if (tickType == AxisTickMarksEnum.None)
                 return;
 
             int len = bMajor ? AxisTickMarkMajorLen : AxisTickMarkMinorLen;
-            Draw2.Point s, e;
+            System.Drawing.Point s, e;
             switch (tickType)
             {
                 case AxisTickMarksEnum.Inside:
-                    s = new Draw2.Point(p.X, p.Y);
-                    e = new Draw2.Point(p.X, p.Y - len);
+                    s = new System.Drawing.Point(p.X, p.Y);
+                    e = new System.Drawing.Point(p.X, p.Y - len);
                     break;
                 case AxisTickMarksEnum.Cross:
-                    s = new Draw2.Point(p.X, p.Y - len);
-                    e = new Draw2.Point(p.X, p.Y + len);
+                    s = new System.Drawing.Point(p.X, p.Y - len);
+                    e = new System.Drawing.Point(p.X, p.Y + len);
                     break;
                 case AxisTickMarksEnum.Outside:
                 default:
-                    s = new Draw2.Point(p.X, p.Y + len);
-                    e = new Draw2.Point(p.X, p.Y);
+                    s = new System.Drawing.Point(p.X, p.Y + len);
+                    e = new System.Drawing.Point(p.X, p.Y);
                     break;
             }
             Style style = gl.Style;
@@ -477,20 +477,20 @@ namespace Majorsilence.Reporting.Rdl
 
         // Calculate the size of the value axis; width is max value width + title width
         //										 height is max value height
-        protected async Task<Draw2.Size> ValueAxisSize(Report rpt, Draw2.Graphics g, double min, double max)
+        protected async Task<System.Drawing.Size> ValueAxisSize(Report rpt, Draw2.Graphics g, double min, double max)
         {
-            Draw2.Size size = Draw2.Size.Empty;
+            System.Drawing.Size size = System.Drawing.Size.Empty;
             if (ChartDefn.ValueAxis == null)
                 return size;
             Axis a = ChartDefn.ValueAxis.Axis;
             if (a == null)
                 return size;
 
-            Draw2.Size minSize;
-            Draw2.Size maxSize;
+            System.Drawing.Size minSize;
+            System.Drawing.Size maxSize;
             if (!a.Visible)
             {
-                minSize = maxSize = Draw2.Size.Empty;
+                minSize = maxSize = System.Drawing.Size.Empty;
             }
             else if (a.Style != null)
             {
@@ -507,7 +507,7 @@ namespace Majorsilence.Reporting.Rdl
             size.Height = Math.Max(minSize.Height, maxSize.Height);
 
             // Now we need to add in the height of the title (if any)
-            Draw2.Size titleSize = await DrawTitleMeasure(rpt, g, a.Title);
+            System.Drawing.Size titleSize = await DrawTitleMeasure(rpt, g, a.Title);
             size.Height += titleSize.Height;
 
             if (a.MajorTickMarks == AxisTickMarksEnum.Cross ||

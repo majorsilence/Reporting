@@ -11,8 +11,9 @@ using System.Globalization;
 using System.Threading.Tasks;
 
 #if DRAWINGCOMPAT
-using Majorsilence.Drawing;
-using Majorsilence.Drawing.Imaging;
+using Majorsilence.Forms.Drawing;
+using System.Drawing;  // value types (Color, Point, Size, Rectangle, ...) come from System.Drawing.Primitives
+using Majorsilence.Forms.Drawing.Imaging;
 #else
 using System.Drawing;
 using System.Drawing.Imaging;

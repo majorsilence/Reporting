@@ -7,8 +7,8 @@ using System.Text;
 using System.Threading.Tasks;
 
 #if DRAWINGCOMPAT
-using Draw2 = Majorsilence.Drawing;
-using Drawing2D = Majorsilence.Drawing.Drawing2D;
+using Draw2 = Majorsilence.Forms.Drawing;
+using Drawing2D = Majorsilence.Forms.Drawing.Drawing2D;
 #else
 using Draw2 = System.Drawing;
 using Drawing2D = System.Drawing.Drawing2D;
@@ -295,7 +295,7 @@ namespace Majorsilence.Reporting.Rdl
 			return;
 		}
 
-		internal async Task DrawBackground(Report rpt, Draw2.Graphics g, Row r, Draw2.Rectangle rect)
+		internal async Task DrawBackground(Report rpt, Draw2.Graphics g, Row r, System.Drawing.Rectangle rect)
 		{
 			Drawing2D.LinearGradientBrush linGrBrush = null;
 
@@ -306,10 +306,10 @@ namespace Majorsilence.Reporting.Rdl
 				string bgt = await this.BackgroundGradientType.EvaluateString(rpt, r);
 				string bgc = await this.BackgroundColor.EvaluateString(rpt, r);
 				
-				Draw2.Color c = XmlUtil.ColorFromHtml(bgc, Draw2.Color.White, rpt);
+				System.Drawing.Color c = XmlUtil.ColorFromHtml(bgc, System.Drawing.Color.White, rpt);
 
 				string bgec = await this.BackgroundGradientEndColor.EvaluateString(rpt, r);
-				Draw2.Color ec = XmlUtil.ColorFromHtml(bgec, Draw2.Color.White, rpt);
+				System.Drawing.Color ec = XmlUtil.ColorFromHtml(bgec, System.Drawing.Color.White, rpt);
 
 				switch (bgt)
 				{
@@ -350,7 +350,7 @@ namespace Majorsilence.Reporting.Rdl
 				if (this.BackgroundColor != null)
 				{
 					string bgc = await this.BackgroundColor.EvaluateString(rpt, r);
-					Draw2.Color c = XmlUtil.ColorFromHtml(bgc, Draw2.Color.White, rpt);
+					System.Drawing.Color c = XmlUtil.ColorFromHtml(bgc, System.Drawing.Color.White, rpt);
 
 					using (Draw2.SolidBrush sb = new Draw2.SolidBrush(c)) {
 						g.FillRectangle(sb, rect);
@@ -359,14 +359,14 @@ namespace Majorsilence.Reporting.Rdl
 			}
 		}
  
-		internal async Task DrawBackgroundCircle(Report rpt, Draw2.Graphics g, Row r, Draw2.Rectangle rect)
+		internal async Task DrawBackgroundCircle(Report rpt, Draw2.Graphics g, Row r, System.Drawing.Rectangle rect)
 		{
 			// Don't use the gradient in this case (since it won't match) the rest of the 
 			//    background.  (Routine is only used by ChartPie in the doughnut case.)
 			if (this.BackgroundColor != null)
 			{
 				string bgc = await this.BackgroundColor.EvaluateString(rpt, r);
-				Draw2.Color c = XmlUtil.ColorFromHtml(bgc, Draw2.Color.White, rpt);
+				System.Drawing.Color c = XmlUtil.ColorFromHtml(bgc, System.Drawing.Color.White, rpt);
 
 				using (Draw2.SolidBrush sb = new Draw2.SolidBrush(c)) {
 					g.FillEllipse(sb, rect);
@@ -376,7 +376,7 @@ namespace Majorsilence.Reporting.Rdl
 		}
 
 		// Draw a border using the current style
-		internal async Task DrawBorder(Report rpt, Draw2.Graphics g, Row r, Draw2.Rectangle rect)
+		internal async Task DrawBorder(Report rpt, Draw2.Graphics g, Row r, System.Drawing.Rectangle rect)
 		{
 			if (this.BorderStyle == null)
 				return;
@@ -384,10 +384,10 @@ namespace Majorsilence.Reporting.Rdl
 			StyleBorderStyle bs = this.BorderStyle;
 
 			// Create points for each part of rectangular border
-			Draw2.Point tl = new Draw2.Point(rect.Left, rect.Top);
-			Draw2.Point tr = new Draw2.Point(rect.Right, rect.Top);
-			Draw2.Point bl = new Draw2.Point(rect.Left, rect.Bottom);
-			Draw2.Point br = new Draw2.Point(rect.Right, rect.Bottom);
+			System.Drawing.Point tl = new System.Drawing.Point(rect.Left, rect.Top);
+			System.Drawing.Point tr = new System.Drawing.Point(rect.Right, rect.Top);
+			System.Drawing.Point bl = new System.Drawing.Point(rect.Left, rect.Bottom);
+			System.Drawing.Point br = new System.Drawing.Point(rect.Right, rect.Bottom);
 			// Determine characteristics for each line to be drawn
 			BorderStyleEnum topBS, bottomBS, leftBS, rightBS;
 			topBS = bottomBS = leftBS = rightBS = BorderStyleEnum.None;
@@ -421,35 +421,35 @@ namespace Majorsilence.Reporting.Rdl
 				}
 			}
 
-			Draw2.Color topColor, bottomColor, leftColor, rightColor;
-			topColor = bottomColor = leftColor = rightColor = Draw2.Color.Black;
+			System.Drawing.Color topColor, bottomColor, leftColor, rightColor;
+			topColor = bottomColor = leftColor = rightColor = System.Drawing.Color.Black;
 			if (BorderColor != null)
 			{
 				if (BorderColor.Default != null)
 				{
 					v = await BorderColor.Default.EvaluateString(rpt, r);
 					topColor = bottomColor = leftColor = rightColor = 
-						XmlUtil.ColorFromHtml(v, Draw2.Color.Black, rpt);
+						XmlUtil.ColorFromHtml(v, System.Drawing.Color.Black, rpt);
 				}
 				if (BorderColor.Top != null)
 				{
 					v = await BorderColor.Top.EvaluateString(rpt, r);
-					topColor = XmlUtil.ColorFromHtml(v, Draw2.Color.Black, rpt);
+					topColor = XmlUtil.ColorFromHtml(v, System.Drawing.Color.Black, rpt);
 				}
 				if (BorderColor.Bottom != null)
 				{
 					v = await BorderColor.Bottom.EvaluateString(rpt, r);
-					bottomColor = XmlUtil.ColorFromHtml(v, Draw2.Color.Black, rpt);
+					bottomColor = XmlUtil.ColorFromHtml(v, System.Drawing.Color.Black, rpt);
 				}
 				if (BorderColor.Left != null)
 				{
 					v = await BorderColor.Left.EvaluateString(rpt, r);
-					leftColor = XmlUtil.ColorFromHtml(v, Draw2.Color.Black, rpt);
+					leftColor = XmlUtil.ColorFromHtml(v, System.Drawing.Color.Black, rpt);
 				}
 				if (BorderColor.Right != null)
 				{
 					v = await BorderColor.Right.EvaluateString(rpt, r);
-					rightColor = XmlUtil.ColorFromHtml(v, Draw2.Color.Black, rpt);
+					rightColor = XmlUtil.ColorFromHtml(v, System.Drawing.Color.Black, rpt);
 				}
 			}
 
@@ -562,10 +562,10 @@ namespace Majorsilence.Reporting.Rdl
 		}
 
 		// Draw a line into the specified graphics object using the current style
-		internal async Task DrawStyleLine(Report rpt, Draw2.Graphics g, Row r, Draw2.Point s, Draw2.Point e)
+		internal async Task DrawStyleLine(Report rpt, Draw2.Graphics g, Row r, System.Drawing.Point s, System.Drawing.Point e)
 		{
 			int width;
-			Draw2.Color color;
+			System.Drawing.Color color;
 			BorderStyleEnum bs;
 
 			// Border Width default is used for the line width
@@ -578,10 +578,10 @@ namespace Majorsilence.Reporting.Rdl
 			if (BorderColor != null && BorderColor.Default != null)
 			{
 				string v = await BorderColor.Default.EvaluateString(rpt, r);
-				color = XmlUtil.ColorFromHtml(v, Draw2.Color.Black, rpt);
+				color = XmlUtil.ColorFromHtml(v, System.Drawing.Color.Black, rpt);
 			}
 			else
-				color = Draw2.Color.Black;
+				color = System.Drawing.Color.Black;
 			
 			if (BorderStyle != null && BorderStyle.Default != null)
 			{
@@ -601,7 +601,7 @@ namespace Majorsilence.Reporting.Rdl
 
 		// Draw a string into the specified graphics object using the current style
 		//  information
-		internal async Task DrawString(Report rpt, Draw2.Graphics g, object o, TypeCode tc, Row r, Draw2.Rectangle rect)
+		internal async Task DrawString(Report rpt, Draw2.Graphics g, object o, TypeCode tc, Row r, System.Drawing.Rectangle rect)
 		{
 			// the string to draw
 			var s = await Style.GetFormatedString(rpt, this, r, o, tc);
@@ -616,11 +616,11 @@ namespace Majorsilence.Reporting.Rdl
 			}
 		}
 
-		static internal void DrawStringDefaults(Draw2.Graphics g, object o, Draw2.Rectangle rect)
+		static internal void DrawStringDefaults(Draw2.Graphics g, object o, System.Drawing.Rectangle rect)
 		{
 			// Just use defaults to Create font and brush.
 			using (var drawFont = new Draw2.Font("Arial", 10))
-			using (var drawBrush = new Draw2.SolidBrush(Draw2.Color.Black)) 
+			using (var drawBrush = new Draw2.SolidBrush(System.Drawing.Color.Black)) 
 			// Set format of string.
 			using (var drawFormat = new Draw2.StringFormat())
 			{
@@ -628,11 +628,11 @@ namespace Majorsilence.Reporting.Rdl
 
 				// 06122007AJM Fixed so that long names are written vertically
 				// need to add w to make slightly bigger
-				Draw2.SizeF len = g.MeasureString(o.ToString() + "w", drawFont);
+				System.Drawing.SizeF len = g.MeasureString(o.ToString() + "w", drawFont);
 				if (len.Width > rect.Width)
 				{
 					drawFormat.FormatFlags = Draw2.StringFormatFlags.DirectionVertical;
-					rect = (new Draw2.Rectangle(rect.X, rect.Y, rect.Width, (int)len.Width));
+					rect = (new System.Drawing.Rectangle(rect.X, rect.Y, rect.Width, (int)len.Width));
 					drawFormat.Alignment = Draw2.StringAlignment.Near;
 				}
 
@@ -643,7 +643,7 @@ namespace Majorsilence.Reporting.Rdl
 
 		// Calc size of a string with the specified graphics object using the current style
 		//  information
-		internal async Task<Draw2.Size> MeasureString(Report rpt, Draw2.Graphics g, object o, TypeCode tc, Row r, int maxWidth)
+		internal async Task<System.Drawing.Size> MeasureString(Report rpt, Draw2.Graphics g, object o, TypeCode tc, Row r, int maxWidth)
 		{
 			string s = await Style.GetFormatedString(rpt, this, r, o, tc); // the string to draw
 
@@ -655,18 +655,18 @@ namespace Majorsilence.Reporting.Rdl
 					drawFormat.FormatFlags |= Draw2.StringFormatFlags.NoWrap;
 
 				// 06122007AJM need to add w to make slightly bigger
-				Draw2.SizeF ms = g.MeasureString(s + "w", drawFont, maxWidth, drawFormat);
-				return new Draw2.Size((int) Math.Ceiling(ms.Width), 
+				System.Drawing.SizeF ms = g.MeasureString(s + "w", drawFont, maxWidth, drawFormat);
+				return new System.Drawing.Size((int) Math.Ceiling(ms.Width), 
 					(int) Math.Ceiling(ms.Height));
 			}
 		}
 
 		// Measure a string using the defaults for a Style font
-		static internal async Task<Draw2.Size> MeasureStringDefaults(Report rpt, Draw2.Graphics g, object o, TypeCode tc, Row r, int maxWidth)
+		static internal async Task<System.Drawing.Size> MeasureStringDefaults(Report rpt, Draw2.Graphics g, object o, TypeCode tc, Row r, int maxWidth)
 		{
 			string s = await Style.GetFormatedString(rpt, null, r, o, tc); // the string to draw
 
-			Draw2.Size size = Draw2.Size.Empty;
+			System.Drawing.Size size = System.Drawing.Size.Empty;
 			using (Draw2.Font drawFont = new Draw2.Font("Arial", 10)) // Font we'll draw with
 			using (Draw2.StringFormat drawFormat = new Draw2.StringFormat()) // StringFormat we'll draw with
 			{
@@ -676,8 +676,8 @@ namespace Majorsilence.Reporting.Rdl
 				if (maxWidth == int.MaxValue)
 					drawFormat.FormatFlags |= Draw2.StringFormatFlags.NoWrap;
                 // 06122007AJM need to add w to make slightly bigger
-                Draw2.SizeF ms = g.MeasureString(s + "w", drawFont, maxWidth, drawFormat);
-				return new Draw2.Size((int) Math.Ceiling(ms.Width), 
+                System.Drawing.SizeF ms = g.MeasureString(s + "w", drawFont, maxWidth, drawFormat);
+				return new System.Drawing.Size((int) Math.Ceiling(ms.Width), 
 					(int) Math.Ceiling(ms.Height));
 			}
 		}
@@ -689,11 +689,11 @@ namespace Majorsilence.Reporting.Rdl
 			if (this.Color != null)
 			{
 				string c = await this.Color.EvaluateString(rpt, r);
-				Draw2.Color color = XmlUtil.ColorFromHtml(c, Draw2.Color.Black, rpt);
+				System.Drawing.Color color = XmlUtil.ColorFromHtml(c, System.Drawing.Color.Black, rpt);
 				drawBrush = new Draw2.SolidBrush(color);
 			}
 			else
-				drawBrush = new Draw2.SolidBrush(Draw2.Color.Black);
+				drawBrush = new Draw2.SolidBrush(System.Drawing.Color.Black);
 			return drawBrush;
 		}
 
@@ -1014,7 +1014,7 @@ namespace Majorsilence.Reporting.Rdl
 			si.BackgroundColor = await this.EvalBackgroundColor(rpt, r);
 			// When background color not specified; and reportitem part of table
 			//   use the tables background color
-			if (si.BackgroundColor == Draw2.Color.Empty)
+			if (si.BackgroundColor == System.Drawing.Color.Empty)
 			{
 				ReportItem ri = this.Parent as ReportItem;
 				if (ri != null)
@@ -1262,19 +1262,19 @@ namespace Majorsilence.Reporting.Rdl
 			return rc;
 		}
 
-		internal async Task<Draw2.Rectangle> PaddingAdjust(Report rpt, Row r, Draw2.Rectangle rect, bool bAddIn)
+		internal async Task<System.Drawing.Rectangle> PaddingAdjust(Report rpt, Row r, System.Drawing.Rectangle rect, bool bAddIn)
 		{
 			int pbottom = await this.EvalPaddingBottomPx(rpt, r);
 			int ptop = await this.EvalPaddingTopPx(rpt, r);
 			int pleft = await this.EvalPaddingLeftPx(rpt, r);
 			int pright = await this.EvalPaddingRightPx(rpt, r);
 
-			Draw2.Rectangle rt;
+			System.Drawing.Rectangle rt;
 			if (bAddIn)		// add in when trying to size the object
-				rt = new Draw2.Rectangle(rect.Left - pleft, rect.Top - ptop, 
+				rt = new System.Drawing.Rectangle(rect.Left - pleft, rect.Top - ptop, 
 					rect.Width + pleft + pright, rect.Height + ptop + pbottom);
 			else			// otherwise you want the rectangle of the embedded object
-				rt = new Draw2.Rectangle(rect.Left + pleft, rect.Top + ptop, 
+				rt = new System.Drawing.Rectangle(rect.Left + pleft, rect.Top + ptop, 
 					rect.Width - pleft - pright, rect.Height - ptop - pbottom);
 			return rt;
 		}
@@ -1303,13 +1303,13 @@ namespace Majorsilence.Reporting.Rdl
 			set {  _BackgroundColor = value; }
 		}
 
-		internal async Task<Draw2.Color> EvalBackgroundColor(Report rpt, Row row)
+		internal async Task<System.Drawing.Color> EvalBackgroundColor(Report rpt, Row row)
 		{
 			if (_BackgroundColor == null)
-				return Draw2.Color.Empty;
+				return System.Drawing.Color.Empty;
 
 			string c = await _BackgroundColor.EvaluateString(rpt, row);
-			return XmlUtil.ColorFromHtml(c, Draw2.Color.Empty, rpt);
+			return XmlUtil.ColorFromHtml(c, System.Drawing.Color.Empty, rpt);
 		}
 
 		internal Expression BackgroundGradientType
@@ -1333,13 +1333,13 @@ namespace Majorsilence.Reporting.Rdl
 			set {  _BackgroundGradientEndColor = value; }
 		}
 
-		internal async Task<Draw2.Color> EvalBackgroundGradientEndColor(Report rpt, Row r)
+		internal async Task<System.Drawing.Color> EvalBackgroundGradientEndColor(Report rpt, Row r)
 		{
 			if (_BackgroundGradientEndColor == null)
-				return Draw2.Color.Empty;
+				return System.Drawing.Color.Empty;
 
 			string c = await _BackgroundGradientEndColor.EvaluateString(rpt, r);
-			return XmlUtil.ColorFromHtml(c, Draw2.Color.Empty, rpt);
+			return XmlUtil.ColorFromHtml(c, System.Drawing.Color.Empty, rpt);
 		}
 
 		internal StyleBackgroundImage BackgroundImage
@@ -1517,13 +1517,13 @@ namespace Majorsilence.Reporting.Rdl
 			set {  _Color = value; }
 		}
 
-		internal async Task<Draw2.Color> EvalColor(Report rpt, Row row)
+		internal async Task<System.Drawing.Color> EvalColor(Report rpt, Row row)
 		{
 			if (_Color == null)
-				return Draw2.Color.Black;
+				return System.Drawing.Color.Black;
 
 			string c = await _Color.EvaluateString(rpt, row);
-			return XmlUtil.ColorFromHtml(c, Draw2.Color.Black, rpt);
+			return XmlUtil.ColorFromHtml(c, System.Drawing.Color.Black, rpt);
 		}
 
 		internal Expression PaddingLeft

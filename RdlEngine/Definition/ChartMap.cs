@@ -6,8 +6,8 @@ using System.Collections;
 using System.Collections.Generic;
 
 #if DRAWINGCOMPAT
-using Draw2 = Majorsilence.Drawing;
-using Imaging = Majorsilence.Drawing.Imaging;
+using Draw2 = Majorsilence.Forms.Drawing;
+using Imaging = Majorsilence.Forms.Drawing.Imaging;
 #else
 using Draw2 = System.Drawing;
 using Imaging = System.Drawing.Imaging;
@@ -42,7 +42,7 @@ namespace Majorsilence.Reporting.Rdl
 					_aStream = new System.IO.MemoryStream();
 					IntPtr HDC = g1.GetHdc();
 					//_mf = new System.Draw2.Imaging.Metafile(_aStream, HDC);
-					_mf = new Imaging.Metafile(_aStream, HDC, new Draw2.RectangleF(0, 0, _bm.Width, _bm.Height),
+					_mf = new Imaging.Metafile(_aStream, HDC, new System.Drawing.RectangleF(0, 0, _bm.Width, _bm.Height),
 						Imaging.MetafileFrameUnit.Pixel);
 					g1.ReleaseHdc(HDC);
 				}
@@ -60,7 +60,7 @@ namespace Majorsilence.Reporting.Rdl
                 g.CompositingQuality = Draw2.Drawing2D.CompositingQuality.HighQuality;
 
 				// Adjust the top margin to depend on the title height
-				Draw2.Size titleSize = await DrawTitleMeasure(rpt, g, ChartDefn.Title);
+				System.Drawing.Size titleSize = await DrawTitleMeasure(rpt, g, ChartDefn.Title);
 				Layout.TopMargin = titleSize.Height;
 
 				double max=0,min=0; // Get the max and min values
@@ -69,13 +69,13 @@ namespace Majorsilence.Reporting.Rdl
                 await DrawChartStyle(rpt, g);
 
                 // Draw title; routine determines if necessary
-                await DrawTitle(rpt, g, ChartDefn.Title, new Draw2.Rectangle(0, 0, _bm.Width, Layout.TopMargin));
+                await DrawTitle(rpt, g, ChartDefn.Title, new System.Drawing.Rectangle(0, 0, _bm.Width, Layout.TopMargin));
 
 				Layout.LeftMargin = 0;
                 Layout.RightMargin = 0;
 
 				// Draw legend
-				Draw2.Rectangle lRect = await DrawLegend(rpt, g, false, true);
+				System.Drawing.Rectangle lRect = await DrawLegend(rpt, g, false, true);
 
 				Layout.BottomMargin = 0;
 
@@ -117,15 +117,15 @@ namespace Majorsilence.Reporting.Rdl
                     List<MapPolygon> pl = mp.GetPolygon(sv);
                     if (pl == null)
                         continue;
-                    Draw2.Brush br = new Draw2.SolidBrush(XmlUtil.ColorFromHtml(c, Draw2.Color.Transparent));
+                    Draw2.Brush br = new Draw2.SolidBrush(XmlUtil.ColorFromHtml(c, System.Drawing.Color.Transparent));
                     foreach (MapPolygon mpoly in pl)
                     {
-	                    Draw2.PointF[] polygon = mpoly.Polygon;
-	                    Draw2.PointF[] drawpoly = new Draw2.PointF[polygon.Length];
+	                    System.Drawing.PointF[] polygon = mpoly.Polygon;
+	                    System.Drawing.PointF[] drawpoly = new System.Drawing.PointF[polygon.Length];
                         // make points relative to plotarea --- need to scale this as well
                         for (int ip = 0; ip < drawpoly.Length; ip++)
                         {
-                            drawpoly[ip] = new Draw2.PointF(Layout.PlotArea.X + (polygon[ip].X * scale), Layout.PlotArea.Y + (polygon[ip].Y * scale));
+                            drawpoly[ip] = new System.Drawing.PointF(Layout.PlotArea.X + (polygon[ip].X * scale), Layout.PlotArea.Y + (polygon[ip].Y * scale));
                         }
                         g.FillPolygon(br, drawpoly);
                         if (_showToolTips)
@@ -135,7 +135,7 @@ namespace Majorsilence.Reporting.Rdl
                             sb.Append(sv.Replace('|', '/'));        // we treat '|' as a separator character; don't allow in string
                             sb.Append(' ');
                             sb.Append(c.Replace('|', '/'));
-                            foreach (Draw2.PointF pf in drawpoly)
+                            foreach (System.Drawing.PointF pf in drawpoly)
                                 sb.AppendFormat(NumberFormatInfo.InvariantInfo, "|{0}|{1}", pf.X, pf.Y);
                             g.AddMetafileComment(new System.Text.ASCIIEncoding().GetBytes(sb.ToString()));
                         }

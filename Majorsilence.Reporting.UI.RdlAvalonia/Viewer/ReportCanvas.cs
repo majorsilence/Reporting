@@ -522,17 +522,22 @@ namespace Majorsilence.Reporting.UI.RdlAvalonia.Viewer
             var canvas = surface.Canvas;
             canvas.Clear(SKColors.White);
 
-            using var g = new Majorsilence.Drawing.Graphics(canvas)
+            // Majorsilence.Forms.Drawing.Graphics can only be built over an Image it owns the canvas
+            // for -- there is no public constructor taking an SKCanvas -- so the page is drawn into
+            // an offscreen bitmap and blitted onto the framebuffer surface.
+            using var pageBitmap = new SKBitmap(framebuffer.Size.Width, framebuffer.Size.Height);
+            Majorsilence.Forms.Drawing.Image pageImage = pageBitmap;
+            using (var g = Majorsilence.Forms.Drawing.Graphics.FromImage(pageImage))
             {
-                DpiX = (float)dpi,
-                DpiY = (float)dpi,
-                PageUnit = Majorsilence.Drawing.GraphicsUnit.Pixel
-            };
+                g.PageUnit = Majorsilence.Forms.Drawing.GraphicsUnit.Pixel;
 
-            // Items are in points; scale to physical pixels: points * (dpi/72) * zoom
-            var effectiveZoom = (float)(_zoom * dpi / 72.0);
-            var renderer = new SkiaPageDrawing(_pages, effectiveZoom);
-            renderer.Draw(g, pageIndex);
+                // Items are in points; scale to physical pixels: points * (dpi/72) * zoom
+                var effectiveZoom = (float)(_zoom * dpi / 72.0);
+                var renderer = new SkiaPageDrawing(_pages, effectiveZoom);
+                renderer.Draw(g, pageIndex);
+            }
+
+            canvas.DrawBitmap(pageBitmap, 0, 0);
 
             // Build hit list for selection
             BuildHitList(pageIndex);
@@ -634,13 +639,19 @@ namespace Majorsilence.Reporting.UI.RdlAvalonia.Viewer
             if (surface == null) return null;
 
             surface.Canvas.Clear(SKColors.White);
-            using var g = new Majorsilence.Drawing.Graphics(surface.Canvas)
+
+            // See RenderToBitmap: Graphics has no public SKCanvas constructor, so draw offscreen
+            // and blit.
+            using var pageBitmap = new SKBitmap(pixelWidth, pixelHeight);
+            Majorsilence.Forms.Drawing.Image pageImage = pageBitmap;
+            using (var g = Majorsilence.Forms.Drawing.Graphics.FromImage(pageImage))
             {
-                DpiX = (float)dpi,
-                DpiY = (float)dpi
-            };
-            var effectiveZoom = (float)(zoom * dpi / 72.0);
-            new SkiaPageDrawing(pages, effectiveZoom).Draw(g, pageIndex);
+                g.PageUnit = Majorsilence.Forms.Drawing.GraphicsUnit.Pixel;
+                var effectiveZoom = (float)(zoom * dpi / 72.0);
+                new SkiaPageDrawing(pages, effectiveZoom).Draw(g, pageIndex);
+            }
+
+            surface.Canvas.DrawBitmap(pageBitmap, 0, 0);
             surface.Flush();
 
             using var img  = surface.Snapshot();

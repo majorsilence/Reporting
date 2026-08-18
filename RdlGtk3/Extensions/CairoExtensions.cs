@@ -29,7 +29,7 @@ using Gdk;
 using Color = Cairo.Color;
 using Rectangle = Cairo.Rectangle;
 #if DRAWINGCOMPAT
-using Draw2 = Majorsilence.Drawing;
+using Draw2 = Majorsilence.Forms.Drawing;
 
 #else
 using Draw2 = System.Drawing;
@@ -67,7 +67,7 @@ namespace Majorsilence.Reporting.RdlGtk3
             return newsurf;
         }
 
-        public static Color ToCairoColor(this Draw2.Color color)
+        public static Color ToCairoColor(this System.Drawing.Color color)
         {
             return new Color(color.R / 255f, color.G / 255f, color.B / 255f, color.A / 255f);
         }

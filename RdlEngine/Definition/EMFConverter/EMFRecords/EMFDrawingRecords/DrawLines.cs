@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.IO;
 #if DRAWINGCOMPAT
-using Draw2 = Majorsilence.Drawing;
+using Draw2 = Majorsilence.Forms.Drawing;
 #else
 using Draw2 = System.Drawing;
 #endif
@@ -86,15 +86,15 @@ namespace Majorsilence.Reporting.Rdl
 
         private void DoFloat(UInt32 NumberOfPoints, BinaryReader _br, Draw2.Pen p)
         {
-            Draw2.PointF[] Points = new Draw2.PointF[NumberOfPoints];
+            System.Drawing.PointF[] Points = new System.Drawing.PointF[NumberOfPoints];
             bool first = true;
             for (int i = 0; i < NumberOfPoints; i++)
             {
                 Points[i].X = _br.ReadSingle();
                 Points[i].Y = _br.ReadSingle();
             }
-            Draw2.PointF PointA = new Draw2.PointF();
-            Draw2.PointF PointB = new Draw2.PointF();
+            System.Drawing.PointF PointA = new System.Drawing.PointF();
+            System.Drawing.PointF PointB = new System.Drawing.PointF();
             for (int i = 0; i < NumberOfPoints; i++)
             {
                 if (first)
@@ -119,14 +119,14 @@ namespace Majorsilence.Reporting.Rdl
         private void DoCompressed(UInt32 NumberOfPoints, BinaryReader _br, Draw2.Pen p)
         {
             bool first = true;
-            Draw2.Point[] Points = new Draw2.Point[NumberOfPoints];            
+            System.Drawing.Point[] Points = new System.Drawing.Point[NumberOfPoints];            
             for (int i = 0; i < NumberOfPoints; i++)
             {
                 Points[i].X = _br.ReadInt16();
                 Points[i].Y = _br.ReadInt16();
             }
-            Draw2.Point PointA= new Draw2.Point();
-            Draw2.Point PointB = new Draw2.Point();
+            System.Drawing.Point PointA= new System.Drawing.Point();
+            System.Drawing.Point PointB = new System.Drawing.Point();
             for (int i = 0; i < NumberOfPoints; i++)
             {
                 if (first)

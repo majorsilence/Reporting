@@ -5,7 +5,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
-  <!-- if not windows define DRAWINGCOMPAT to use Majorsilence.Drawing instead of System.Drawing -->
+  <!-- if not windows define DRAWINGCOMPAT to use Majorsilence.Forms.Drawing instead of System.Drawing -->
   <PropertyGroup Condition="'$(OS)' != 'Windows_NT'">
     <DefineConstants>DRAWINGCOMPAT</DefineConstants>
   </PropertyGroup>

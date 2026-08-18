@@ -37,7 +37,8 @@ using Context = Cairo.Context;
 using Layout = Pango.Layout;
 using Rectangle = Cairo.Rectangle;
 #if DRAWINGCOMPAT
-using Majorsilence.Drawing;
+using Majorsilence.Forms.Drawing;
+using System.Drawing;  // value types (Color, Point, Size, Rectangle, ...) come from System.Drawing.Primitives
 #else
 using System.Drawing;
 #endif

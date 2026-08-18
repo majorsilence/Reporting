@@ -4,7 +4,8 @@ using System.Collections.Generic;
 using Majorsilence.Reporting.Cri;
 using ZXing;
 #if DRAWINGCOMPAT
-using Majorsilence.Drawing;
+using Majorsilence.Forms.Drawing;
+using System.Drawing;  // value types (Color, Point, Size, Rectangle, ...) come from System.Drawing.Primitives
 using ZXing.SkiaSharp;
 #else
 using System.Drawing;
@@ -49,7 +50,17 @@ namespace ReportTests
             using var bm = Render(width, height, out string expectedPrefix);
 
             var reader = new BarcodeReader();
+#if DRAWINGCOMPAT
+            // Majorsilence.Forms.Drawing.Bitmap keeps its SKBitmap internal, and ZXing's SkiaSharp
+            // reader wants one; a PNG round-trip is lossless, so the pixels the decoder sees are
+            // the pixels that were rendered.
+            using var pngStream = new System.IO.MemoryStream();
+            bm.Save(pngStream, Majorsilence.Forms.Drawing.Imaging.ImageFormat.Png);
+            using var skBitmap = SkiaSharp.SKBitmap.Decode(pngStream.ToArray());
+            var result = reader.Decode(skBitmap);
+#else
             var result = reader.Decode(bm);
+#endif
 
             Assert.That(result, Is.Not.Null, $"EAN-13 barcode at {width}x{height} could not be decoded");
             Assert.That(result.BarcodeFormat, Is.EqualTo(BarcodeFormat.EAN_13));

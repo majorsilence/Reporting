@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Majorsilence.Reporting.Rdl;
-using Drawing = Majorsilence.Drawing;
+using Drawing = Majorsilence.Forms.Drawing;
 
 namespace Majorsilence.Reporting.UI.RdlAvalonia.Viewer
 {
@@ -20,25 +20,25 @@ namespace Majorsilence.Reporting.UI.RdlAvalonia.Viewer
         }
 
         /// <summary>
-        /// Converts a color from the RdlEngine (which may be System.Drawing.Color or Majorsilence.Drawing.Color
-        /// depending on build configuration) to Majorsilence.Drawing.Color
+        /// Converts a color from the RdlEngine (which may be System.System.Drawing.Color or Majorsilence.Forms.System.Drawing.Color
+        /// depending on build configuration) to Majorsilence.Forms.System.Drawing.Color
         /// </summary>
-        private static Drawing.Color ToDrawingColor(dynamic color)
+        private static System.Drawing.Color ToDrawingColor(dynamic color)
         {
-            return Drawing.Color.FromArgb(color.A, color.R, color.G, color.B);
+            return System.Drawing.Color.FromArgb(color.A, color.R, color.G, color.B);
         }
         
         /// <summary>
         /// Gets a default black color
         /// </summary>
-        private static Drawing.Color DefaultBlack => Drawing.Color.Black;
+        private static System.Drawing.Color DefaultBlack => System.Drawing.Color.Black;
         
         /// <summary>
         /// Gets a default empty/transparent color
         /// </summary>
-        private static Drawing.Color DefaultEmpty => Drawing.Color.Empty;
+        private static System.Drawing.Color DefaultEmpty => System.Drawing.Color.Empty;
 
-        public void Draw(Majorsilence.Drawing.Graphics g, int pageIndex)
+        public void Draw(Majorsilence.Forms.Drawing.Graphics g, int pageIndex)
         {
             if (_pages == null || pageIndex < 0 || pageIndex >= _pages.PageCount)
             {
@@ -76,7 +76,7 @@ namespace Majorsilence.Reporting.UI.RdlAvalonia.Viewer
                     continue;
                 }
 
-                var rect = new Drawing.Rectangle(
+                var rect = new System.Drawing.Rectangle(
                     (int)ConvertXtoPixels(pi.X),
                     (int)ConvertYtoPixels(pi.Y),
                     (int)ConvertXtoPixels(pi.W),
@@ -125,13 +125,13 @@ namespace Majorsilence.Reporting.UI.RdlAvalonia.Viewer
             }
         }
 
-        private void DrawRectBackground(StyleInfo? si, Drawing.Graphics g, Drawing.Rectangle rect)
+        private void DrawRectBackground(StyleInfo? si, Drawing.Graphics g, System.Drawing.Rectangle rect)
         {
             if (si == null)
                 return;
 
             var bgColor = ToDrawingColor(si.BackgroundColor);
-            if (bgColor != Drawing.Color.Empty)
+            if (bgColor != System.Drawing.Color.Empty)
             {
                 using var brush = new Drawing.SolidBrush(bgColor);
                 g.FillRectangle(brush, rect);
@@ -141,29 +141,29 @@ namespace Majorsilence.Reporting.UI.RdlAvalonia.Viewer
                 DrawImage(si.BackgroundImage, g, rect);
         }
 
-        private void DrawItemBorders(StyleInfo? si, Drawing.Graphics g, Drawing.Rectangle rect)
+        private void DrawItemBorders(StyleInfo? si, Drawing.Graphics g, System.Drawing.Rectangle rect)
         {
             if (si == null)
                 return;
 
             DrawBorderLine(g, si.BStyleLeft,   ToDrawingColor(si.BColorLeft),   si.BWidthLeft,
-                new Drawing.Point(rect.Left,  rect.Top),    new Drawing.Point(rect.Left,  rect.Bottom));
+                new System.Drawing.Point(rect.Left,  rect.Top),    new System.Drawing.Point(rect.Left,  rect.Bottom));
             DrawBorderLine(g, si.BStyleRight,  ToDrawingColor(si.BColorRight),  si.BWidthRight,
-                new Drawing.Point(rect.Right, rect.Top),    new Drawing.Point(rect.Right, rect.Bottom));
+                new System.Drawing.Point(rect.Right, rect.Top),    new System.Drawing.Point(rect.Right, rect.Bottom));
             DrawBorderLine(g, si.BStyleTop,    ToDrawingColor(si.BColorTop),    si.BWidthTop,
-                new Drawing.Point(rect.Left,  rect.Top),    new Drawing.Point(rect.Right, rect.Top));
+                new System.Drawing.Point(rect.Left,  rect.Top),    new System.Drawing.Point(rect.Right, rect.Top));
             DrawBorderLine(g, si.BStyleBottom, ToDrawingColor(si.BColorBottom), si.BWidthBottom,
-                new Drawing.Point(rect.Left,  rect.Bottom), new Drawing.Point(rect.Right, rect.Bottom));
+                new System.Drawing.Point(rect.Left,  rect.Bottom), new System.Drawing.Point(rect.Right, rect.Bottom));
         }
 
-        private void DrawBorderLine(Drawing.Graphics g, BorderStyleEnum style, Drawing.Color color,
-            float width, Drawing.Point from, Drawing.Point to)
+        private void DrawBorderLine(Drawing.Graphics g, BorderStyleEnum style, System.Drawing.Color color,
+            float width, System.Drawing.Point from, System.Drawing.Point to)
         {
             if (style == BorderStyleEnum.None)
                 return;
 
             // Default to black when the RDL omits an explicit border colour
-            var effectiveColor = (color == Drawing.Color.Empty) ? Drawing.Color.Black : color;
+            var effectiveColor = (color == System.Drawing.Color.Empty) ? System.Drawing.Color.Black : color;
             var pen = CreatePen(effectiveColor, style, width);
             if (pen != null)
             {
@@ -183,7 +183,7 @@ namespace Majorsilence.Reporting.UI.RdlAvalonia.Viewer
             // Draw the text content if available
             if (!string.IsNullOrEmpty(pth.Text))
             {
-                var rect = new Drawing.Rectangle(
+                var rect = new System.Drawing.Rectangle(
                     (int)ConvertXtoPixels(pth.X),
                     (int)ConvertYtoPixels(pth.Y),
                     (int)ConvertXtoPixels(pth.W),
@@ -214,13 +214,13 @@ namespace Majorsilence.Reporting.UI.RdlAvalonia.Viewer
             if (pen != null)
             {
                 g.DrawLine(pen,
-                    new Drawing.Point((int)ConvertXtoPixels(pl.X), (int)ConvertYtoPixels(pl.Y)),
-                    new Drawing.Point((int)ConvertXtoPixels(pl.X2), (int)ConvertYtoPixels(pl.Y2)));
+                    new System.Drawing.Point((int)ConvertXtoPixels(pl.X), (int)ConvertYtoPixels(pl.Y)),
+                    new System.Drawing.Point((int)ConvertXtoPixels(pl.X2), (int)ConvertYtoPixels(pl.Y2)));
                 pen.Dispose();
             }
         }
 
-        private void DrawString(PageText? pt, Drawing.Graphics g, Drawing.Rectangle rect)
+        private void DrawString(PageText? pt, Drawing.Graphics g, System.Drawing.Rectangle rect)
         {
             if (pt == null || string.IsNullOrEmpty(pt.Text))
             {
@@ -240,7 +240,7 @@ namespace Majorsilence.Reporting.UI.RdlAvalonia.Viewer
             }
         }
 
-        private Drawing.Rectangle ApplyPadding(Drawing.Rectangle rect, StyleInfo? si)
+        private System.Drawing.Rectangle ApplyPadding(System.Drawing.Rectangle rect, StyleInfo? si)
         {
             if (si == null)
                 return rect;
@@ -250,14 +250,14 @@ namespace Majorsilence.Reporting.UI.RdlAvalonia.Viewer
             int right  = (int)ConvertXtoPixels(si.PaddingRight);
             int bottom = (int)ConvertYtoPixels(si.PaddingBottom);
 
-            return new Drawing.Rectangle(
+            return new System.Drawing.Rectangle(
                 rect.X + left,
                 rect.Y + top,
                 Math.Max(0, rect.Width  - left - right),
                 Math.Max(0, rect.Height - top  - bottom));
         }
 
-        private void DrawImage(PageImage? pi, Drawing.Graphics g, Drawing.Rectangle rect)
+        private void DrawImage(PageImage? pi, Drawing.Graphics g, System.Drawing.Rectangle rect)
         {
             if (pi == null)
             {
@@ -284,7 +284,7 @@ namespace Majorsilence.Reporting.UI.RdlAvalonia.Viewer
             }
         }
 
-        private void DrawEllipse(PageEllipse? pe, Drawing.Graphics g, Drawing.Rectangle rect)
+        private void DrawEllipse(PageEllipse? pe, Drawing.Graphics g, System.Drawing.Rectangle rect)
         {
             if (pe == null || pe.SI == null)
             {
@@ -306,7 +306,7 @@ namespace Majorsilence.Reporting.UI.RdlAvalonia.Viewer
             }
         }
 
-        private void DrawPie(PagePie? pp, Drawing.Graphics g, Drawing.Rectangle rect)
+        private void DrawPie(PagePie? pp, Drawing.Graphics g, System.Drawing.Rectangle rect)
         {
             if (pp == null || pp.SI == null)
             {
@@ -328,17 +328,17 @@ namespace Majorsilence.Reporting.UI.RdlAvalonia.Viewer
             }
         }
 
-        private void DrawPolygon(PagePolygon? ppo, Drawing.Graphics g, Drawing.Rectangle rect)
+        private void DrawPolygon(PagePolygon? ppo, Drawing.Graphics g, System.Drawing.Rectangle rect)
         {
             if (ppo == null || ppo.Points == null || ppo.Points.Length < 3)
             {
                 return;
             }
 
-            var points = new List<Drawing.PointF>();
+            var points = new List<System.Drawing.PointF>();
             foreach (var pt in ppo.Points)
             {
-                points.Add(new Drawing.PointF(
+                points.Add(new System.Drawing.PointF(
                     ConvertXtoPixels(pt.X),
                     ConvertYtoPixels(pt.Y)
                 ));
@@ -359,17 +359,17 @@ namespace Majorsilence.Reporting.UI.RdlAvalonia.Viewer
             }
         }
 
-        private void DrawCurve(PageCurve? pc, Drawing.Graphics g, Drawing.Rectangle rect)
+        private void DrawCurve(PageCurve? pc, Drawing.Graphics g, System.Drawing.Rectangle rect)
         {
             if (pc == null || pc.Points == null || pc.Points.Length < 2)
             {
                 return;
             }
 
-            var points = new List<Drawing.Point>();
+            var points = new List<System.Drawing.Point>();
             foreach (var pt in pc.Points)
             {
-                points.Add(new Drawing.Point(
+                points.Add(new System.Drawing.Point(
                     (int)ConvertXtoPixels(pt.X),
                     (int)ConvertYtoPixels(pt.Y)
                 ));
@@ -393,9 +393,9 @@ namespace Majorsilence.Reporting.UI.RdlAvalonia.Viewer
             return y * _zoom;
         }
 
-        private Drawing.Pen? CreatePen(Drawing.Color color, BorderStyleEnum? style, float width)
+        private Drawing.Pen? CreatePen(System.Drawing.Color color, BorderStyleEnum? style, float width)
         {
-            if (color == Drawing.Color.Empty)
+            if (color == System.Drawing.Color.Empty)
             {
                 return null;
             }
@@ -424,9 +424,9 @@ namespace Majorsilence.Reporting.UI.RdlAvalonia.Viewer
             return pen;
         }
 
-        private Drawing.Brush? GetBrush(Drawing.Color color)
+        private Drawing.Brush? GetBrush(System.Drawing.Color color)
         {
-            if (color == Drawing.Color.Empty)
+            if (color == System.Drawing.Color.Empty)
             {
                 return null;
             }

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.IO;
 #if DRAWINGCOMPAT
-using Draw2 = Majorsilence.Drawing;
+using Draw2 = Majorsilence.Forms.Drawing;
 #else
 using Draw2 = System.Drawing;
 #endif
@@ -47,7 +47,7 @@ namespace Majorsilence.Reporting.Rdl
             //put the Data into a stream and use a binary reader to read the data
             MemoryStream _ms = new MemoryStream(RecordData);
             BinaryReader _br = new BinaryReader(_ms);
-            myPen = new Draw2.Pen(Draw2.Color.Black); //default just for now..
+            myPen = new Draw2.Pen(System.Drawing.Color.Black); //default just for now..
             UInt32 Version = _br.ReadUInt32();
             UInt32 Unknown = _br.ReadUInt32();
             UInt32 Flags = _br.ReadUInt32();

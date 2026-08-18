@@ -1,6 +1,6 @@
 using System;
 #if DRAWINGCOMPAT
-using Drawing = Majorsilence.Drawing;
+using Drawing = Majorsilence.Forms.Drawing;
 #else
 using Drawing = System.Drawing;
 #endif
@@ -43,10 +43,10 @@ namespace RdlEngine.Render.ExcelConverter
             fmt.Italic = _fontStyle == FontStyleEnum.Italic;
             fmt.Strikeout = _textDecoration == TextDecorationEnum.LineThrough;
             fmt.Underline = _textDecoration == TextDecorationEnum.Underline;
-            fmt.FontColor = ColorToTuple(_fontColor.IsEmpty ? Drawing.Color.Black : _fontColor);
+            fmt.FontColor = ColorToTuple(_fontColor.IsEmpty ? System.Drawing.Color.Black : _fontColor);
 
             fmt.HasBackground = !_backgroundColor.IsEmpty;
-            fmt.BackgroundColor = ColorToTuple(_backgroundColor.IsEmpty ? Drawing.Color.White : _backgroundColor);
+            fmt.BackgroundColor = ColorToTuple(_backgroundColor.IsEmpty ? System.Drawing.Color.White : _backgroundColor);
 
             fmt.BorderTop = ConvertSide(_borderTop, _borderTopWidth, _borderTopColor);
             fmt.BorderRight = ConvertSide(_borderRight, _borderRightWidth, _borderRightColor);
@@ -71,7 +71,7 @@ namespace RdlEngine.Render.ExcelConverter
         private short _fontWeight = 400;
         private FontStyleEnum _fontStyle;
         private TextDecorationEnum _textDecoration;
-        private Drawing.Color _fontColor;
+        private System.Drawing.Color _fontColor;
         private WritingModeEnum _writingMode;
 
         public float FontSize { get; set; }
@@ -80,40 +80,40 @@ namespace RdlEngine.Render.ExcelConverter
         public void SetFontWeight(FontWeightEnum weight) => _fontWeight = ConvertFontWeight(weight);
         public void SetFontStyle(FontStyleEnum style) => _fontStyle = style;
         public void SetTextDecoration(TextDecorationEnum td) => _textDecoration = td;
-        public void SetFontColor(Drawing.Color color) => _fontColor = color;
+        public void SetFontColor(System.Drawing.Color color) => _fontColor = color;
         public void SetWritingMode(WritingModeEnum wm) => _writingMode = wm;
 
         // Background
-        private Drawing.Color _backgroundColor;
-        public void SetBackgroundColor(Drawing.Color color) => _backgroundColor = color;
+        private System.Drawing.Color _backgroundColor;
+        public void SetBackgroundColor(System.Drawing.Color color) => _backgroundColor = color;
 
         // Borders
         private BorderStyleEnum _borderTop;
-        private Drawing.Color _borderTopColor;
+        private System.Drawing.Color _borderTopColor;
         private short _borderTopWidth;
 
         private BorderStyleEnum _borderRight;
-        private Drawing.Color _borderRightColor;
+        private System.Drawing.Color _borderRightColor;
         private short _borderRightWidth;
 
         private BorderStyleEnum _borderBottom;
-        private Drawing.Color _borderBottomColor;
+        private System.Drawing.Color _borderBottomColor;
         private short _borderBottomWidth;
 
         private BorderStyleEnum _borderLeft;
-        private Drawing.Color _borderLeftColor;
+        private System.Drawing.Color _borderLeftColor;
         private short _borderLeftWidth;
 
-        public void SetBorderTop(BorderStyleEnum style, float width, Drawing.Color color)
+        public void SetBorderTop(BorderStyleEnum style, float width, System.Drawing.Color color)
         { _borderTop = style; _borderTopWidth = (short)width; _borderTopColor = color; }
 
-        public void SetBorderRight(BorderStyleEnum style, float width, Drawing.Color color)
+        public void SetBorderRight(BorderStyleEnum style, float width, System.Drawing.Color color)
         { _borderRight = style; _borderRightWidth = (short)width; _borderRightColor = color; }
 
-        public void SetBorderBottom(BorderStyleEnum style, float width, Drawing.Color color)
+        public void SetBorderBottom(BorderStyleEnum style, float width, System.Drawing.Color color)
         { _borderBottom = style; _borderBottomWidth = (short)width; _borderBottomColor = color; }
 
-        public void SetBorderLeft(BorderStyleEnum style, float width, Drawing.Color color)
+        public void SetBorderLeft(BorderStyleEnum style, float width, System.Drawing.Color color)
         { _borderLeft = style; _borderLeftWidth = (short)width; _borderLeftColor = color; }
 
         // Alignment
@@ -124,14 +124,14 @@ namespace RdlEngine.Render.ExcelConverter
         public void SetVerticalAlign(VerticalAlignEnum va) => _verticalAlign = va;
 
         // Converters
-        private static XlsxBorderSide ConvertSide(BorderStyleEnum style, short width, Drawing.Color color)
+        private static XlsxBorderSide ConvertSide(BorderStyleEnum style, short width, System.Drawing.Color color)
         {
             string s = ConvertBorderStyle(style, width);
             if (string.IsNullOrEmpty(s)) return new XlsxBorderSide();
             return new XlsxBorderSide
             {
                 Style = s,
-                Color = ColorToTuple(color.IsEmpty ? Drawing.Color.Black : color)
+                Color = ColorToTuple(color.IsEmpty ? System.Drawing.Color.Black : color)
             };
         }
 
@@ -191,7 +191,7 @@ namespace RdlEngine.Render.ExcelConverter
             }
         }
 
-        private static (byte R, byte G, byte B) ColorToTuple(Drawing.Color c)
+        private static (byte R, byte G, byte B) ColorToTuple(System.Drawing.Color c)
             => (c.R, c.G, c.B);
     }
 }

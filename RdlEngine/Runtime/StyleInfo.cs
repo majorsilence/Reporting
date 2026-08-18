@@ -5,8 +5,8 @@ using System.Xml;
 using System.IO;
 using System.Text;
 #if DRAWINGCOMPAT
-using Draw = Majorsilence.Drawing;
-using Drawing2D = Majorsilence.Drawing.Drawing2D;
+using Draw = Majorsilence.Forms.Drawing;
+using Drawing2D = Majorsilence.Forms.Drawing.Drawing2D;
 #else
 using Draw = System.Drawing;
 using Drawing2D = System.Drawing.Drawing2D;
@@ -25,19 +25,19 @@ namespace Majorsilence.Reporting.Rdl
 		/// <summary>
 		/// Color of the left border
 		/// </summary>
-		public Draw.Color BColorLeft;		// (Color) Color of the left border
+		public System.Drawing.Color BColorLeft;		// (Color) Color of the left border
 		/// <summary>
 		/// Color of the right border
 		/// </summary>
-		public Draw.Color BColorRight;		// (Color) Color of the right border
+		public System.Drawing.Color BColorRight;		// (Color) Color of the right border
 		/// <summary>
 		/// Color of the top border
 		/// </summary>
-		public Draw.Color BColorTop;		// (Color) Color of the top border
+		public System.Drawing.Color BColorTop;		// (Color) Color of the top border
 		/// <summary>
 		/// Color of the bottom border
 		/// </summary>
-		public Draw.Color BColorBottom;	// (Color) Color of the bottom border
+		public System.Drawing.Color BColorBottom;	// (Color) Color of the bottom border
 		// _BorderStyle
 		/// <summary>
 		/// Style of the left border
@@ -76,7 +76,7 @@ namespace Majorsilence.Reporting.Rdl
 		/// <summary>
 		/// Color of the background
 		/// </summary>
-		public Draw.Color BackgroundColor;			//(Color) Color of the background
+		public System.Drawing.Color BackgroundColor;			//(Color) Color of the background
         public string BackgroundColorText;		//(Textual Color) Color of the background
         /// <summary>
 		/// The type of background gradient
@@ -91,7 +91,7 @@ namespace Majorsilence.Reporting.Rdl
 		/// </summary>
 		public patternTypeEnum PatternType;
 		
-		public Draw.Color BackgroundGradientEndColor;	//(Color) End color for the background gradient.
+		public System.Drawing.Color BackgroundGradientEndColor;	//(Color) End color for the background gradient.
 		/// <summary>
 		/// A background image for the report item.
 		/// </summary>
@@ -131,7 +131,7 @@ namespace Majorsilence.Reporting.Rdl
 		/// <summary>
 		/// The foreground color	Default: Black
 		/// </summary>
-		public Draw.Color Color;			// (Color) The foreground color	Default: Black
+		public System.Drawing.Color Color;			// (Color) The foreground color	Default: Black
         public string ColorText;    // (Color-text)
         /// <summary>
 		/// Padding between the left edge of the report item.
@@ -187,15 +187,15 @@ namespace Majorsilence.Reporting.Rdl
 		/// </summary>
 		public StyleInfo()
 		{
-			BColorLeft = BColorRight = BColorTop = BColorBottom = Draw.Color.Black;	// (Color) Color of the bottom border
+			BColorLeft = BColorRight = BColorTop = BColorBottom = System.Drawing.Color.Black;	// (Color) Color of the bottom border
 			BStyleLeft = BStyleRight = BStyleTop = BStyleBottom = BorderStyleEnum.None;
 			// _BorderWdith
 			BWidthLeft = BWidthRight = BWidthTop = BWidthBottom = 1;
 
-			BackgroundColor = Draw.Color.Empty;
+			BackgroundColor = System.Drawing.Color.Empty;
             BackgroundColorText = string.Empty;
 			BackgroundGradientType = BackgroundGradientTypeEnum.None;
-			BackgroundGradientEndColor = Draw.Color.Empty;
+			BackgroundGradientEndColor = System.Drawing.Color.Empty;
 			BackgroundImage = null;
 
 			FontStyle = FontStyleEnum.Normal;
@@ -210,7 +210,7 @@ namespace Majorsilence.Reporting.Rdl
 			TextDecoration = TextDecorationEnum.None;
 			TextAlign = TextAlignEnum.General;
 			VerticalAlign = VerticalAlignEnum.Top;
-			Color = Draw.Color.Black;
+			Color = System.Drawing.Color.Black;
             ColorText = "Black";
             PaddingLeft = PaddingRight = PaddingTop = PaddingBottom = 0;
 			LineHeight = 0;

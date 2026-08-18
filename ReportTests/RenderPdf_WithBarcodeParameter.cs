@@ -11,7 +11,8 @@ using ReportTests.Utils;
 using UglyToad.PdfPig;
 using ZXing;
 #if DRAWINGCOMPAT
-using Majorsilence.Drawing;
+using Majorsilence.Forms.Drawing;
+using System.Drawing;  // value types (Color, Point, Size, Rectangle, ...) come from System.Drawing.Primitives
 using ZXing.SkiaSharp;
 #else
 using System.Drawing;
@@ -85,8 +86,14 @@ namespace ReportTests.Utils
                     var reader = new ZXing.BarcodeReader();
 #endif
                     var imageBytes = image.TryGetPng(out var pngBytes) ? pngBytes : image.RawBytes.ToArray();
+#if DRAWINGCOMPAT
+                    // ZXing's SkiaSharp reader decodes an SKBitmap, and Majorsilence.Forms.Drawing
+                    // does not hand out the one behind its Bitmap.
+                    using var barcodeBitmap = SkiaSharp.SKBitmap.Decode(imageBytes);
+#else
                     using var ms = new MemoryStream(imageBytes);
                     using var barcodeBitmap = new Bitmap(ms);
+#endif
                     var result = reader.Decode(barcodeBitmap);
 
                     Assert.That(result, Is.Not.Null);
