@@ -18,10 +18,16 @@ namespace Majorsilence.Reporting.Rdl
 		internal Fields(ReportDefn r, ReportLink p, XmlNode xNode) : base(r, p)
 		{
 			Field f;
+			// Case-insensitive lookups: expressions frequently reach this collection with
+			// a different casing than the <Field Name> declaration (reports converted from
+			// other products carry e.g. a "TotalFeeLC" reference against a "TotalFeeLc"
+			// column), and a case-mismatch here is a hard "Field not found" parse error.
+			// Nothing legitimately declares two fields differing only by case — that
+			// already logs "has duplicates" below.
 			if (xNode.ChildNodes.Count < 10)
-				_Items = new ListDictionary();	// Hashtable is overkill for small lists
+				_Items = new ListDictionary(StringComparer.OrdinalIgnoreCase);
 			else
-				_Items = new Hashtable(xNode.ChildNodes.Count);
+				_Items = new Hashtable(xNode.ChildNodes.Count, StringComparer.OrdinalIgnoreCase);
 
 			// Loop thru all the child nodes
 			int iCol=0;
@@ -62,10 +68,45 @@ namespace Majorsilence.Reporting.Rdl
 		
 		async override internal Task FinalPass()
 		{
+			// Parse order matters for calculated (<Value>) fields that reference other
+			// calculated fields: a referencing expression's type check (e.g. AND/OR's
+			// boolean requirement) calls FunctionField.GetTypeCode -> Field.Type ->
+			// _Value.Expr.GetTypeCode(), which is only meaningful once the referenced
+			// field's own Value has been through FinalPass — before that Expr is null and
+			// the type comes back Object, failing checks that would pass a moment later.
+			// _Items is a Hashtable and .NET randomizes string hashing per process, so the
+			// old unordered walk made those failures a per-run coin flip. Order the walk:
+			// DataField-bound fields first (no dependencies), then Value fields
+			// topologically by scanning their source for Fields!Name references. Cycles
+			// (already guarded elsewhere) and unknown names just fall back to the
+			// leftover order.
+			var done = new System.Collections.Generic.HashSet<Field>();
+			var byName = new System.Collections.Generic.Dictionary<string, Field>(StringComparer.OrdinalIgnoreCase);
 			foreach (Field f in _Items.Values)
+				if (f.Name?.Nm != null && !byName.ContainsKey(f.Name.Nm))
+					byName[f.Name.Nm] = f;
+
+			async Task Visit(Field f, System.Collections.Generic.HashSet<Field> path)
 			{
-                await f.FinalPass();
+				if (done.Contains(f) || path.Contains(f))
+					return;
+				path.Add(f);
+				string src = f.Value?.Source;
+				if (src != null)
+					foreach (System.Text.RegularExpressions.Match m in
+						System.Text.RegularExpressions.Regex.Matches(src, @"Fields!(\w+)"))
+						if (byName.TryGetValue(m.Groups[1].Value, out Field dep) && dep != f)
+							await Visit(dep, path);
+				path.Remove(f);
+				if (done.Add(f))
+					await f.FinalPass();
 			}
+
+			foreach (Field f in _Items.Values)
+				if (f.Value == null && done.Add(f))
+					await f.FinalPass();
+			foreach (Field f in _Items.Values)
+				await Visit(f, new System.Collections.Generic.HashSet<Field>());
 			return;
 		}
 

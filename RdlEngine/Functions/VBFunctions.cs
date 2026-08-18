@@ -410,13 +410,45 @@ namespace Majorsilence.Reporting.Rdl
                 case "w":           // weekday 
                     date = date.AddDays(number);
                     break;
-                case "ww":          // week of year 
+                case "ww":          // week of year
                     date = date.AddDays((int)Math.Round(number, 0) * 7);
                     break;
                 default:
                     throw new ArgumentException(string.Format("Interval '{0}' is invalid or unsupported.", interval));
             }
             return date;
+        }
+
+        /// <summary>
+        /// Returns the number of intervals between two dates (VB.NET DateDiff).
+        /// Same interval codes as DateAdd above. Arguments are object-typed so the
+        /// expression parser's exact-type reflection lookup (XmlUtil.GetMethod) binds
+        /// regardless of whether the runtime values arrive as DateTime, string, or a
+        /// boxed field value of unknown TypeCode — the same reasoning as IsNothing(object).
+        /// </summary>
+        /// <param name="interval">Interval code: yyyy, q, m, y, d, w, ww, h, n, s.</param>
+        /// <param name="date1">Start date.</param>
+        /// <param name="date2">End date; result is positive when date2 is later.</param>
+        static public double DateDiff(object interval, object date1, object date2)
+        {
+            DateTime d1 = date1 is DateTime dt1 ? dt1 : DateTime.Parse(Convert.ToString(date1));
+            DateTime d2 = date2 is DateTime dt2 ? dt2 : DateTime.Parse(Convert.ToString(date2));
+            switch (Convert.ToString(interval))
+            {
+                case "yyyy": return d2.Year - d1.Year;
+                case "q":    return (d2.Year - d1.Year) * 4 + (d2.Month - 1) / 3 - (d1.Month - 1) / 3;
+                case "m":    return (d2.Year - d1.Year) * 12 + d2.Month - d1.Month;
+                case "y":                    // day of year — same day count as "d" for a diff
+                case "d":
+                case "w":                    // weekday-interval count = whole days
+                    return Math.Floor((d2.Date - d1.Date).TotalDays);
+                case "ww":   return Math.Floor((d2.Date - d1.Date).TotalDays / 7);
+                case "h":    return Math.Floor((d2 - d1).TotalHours);
+                case "n":    return Math.Floor((d2 - d1).TotalMinutes);
+                case "s":    return Math.Floor((d2 - d1).TotalSeconds);
+                default:
+                    throw new ArgumentException(string.Format("Interval '{0}' is invalid or unsupported.", interval));
+            }
         }
 
 		/// <summary>
