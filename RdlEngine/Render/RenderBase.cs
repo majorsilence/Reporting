@@ -581,8 +581,12 @@ namespace Majorsilence.Reporting.Rdl
                 int ticra = icra;
                 for (int j = 0; j < cra32.Length; j++)
                 {
-                    cra32[j] = cra[ticra++];
-                    cra32[j].First -= cra[icra].First;	// adjust relative offsets of strings
+                    // Build a fresh range rather than copy-then-adjust: CharacterRange is a struct in
+                    // System.Drawing but a class in the compat layer, so assigning and then mutating
+                    // .First would rewrite the caller's cra entry and corrupt every range past the
+                    // first 32-word chunk.
+                    cra32[j] = new Draw2.CharacterRange(cra[ticra].First - cra[icra].First, cra[ticra].Length);
+                    ticra++;
                 }
 
                 // measure the word locations (in the new string)
@@ -608,8 +612,12 @@ namespace Majorsilence.Reporting.Rdl
                 int ticra = icra;
                 for (int j = 0; j < cra32.Length; j++)
                 {
-                    cra32[j] = cra[ticra++];
-                    cra32[j].First -= cra[icra].First;	// adjust relative offsets of strings
+                    // Build a fresh range rather than copy-then-adjust: CharacterRange is a struct in
+                    // System.Drawing but a class in the compat layer, so assigning and then mutating
+                    // .First would rewrite the caller's cra entry and corrupt every range past the
+                    // first 32-word chunk.
+                    cra32[j] = new Draw2.CharacterRange(cra[ticra].First - cra[icra].First, cra[ticra].Length);
+                    ticra++;
                 }
                 // measure the word locations (in the new string)
                 // ???? should I put a blank in front of it?? 
