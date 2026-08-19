@@ -1,5 +1,3 @@
-
-
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Xml;
@@ -117,12 +115,18 @@ namespace Majorsilence.Reporting.Rdl
             try
             {
                 using var cmSQL = cnSQL.CreateCommand();
+                // Bind by name where the provider supports it, so that a bind
+                // variable may be repeated and QueryParameter order does not
+                // silently change which value lands where. See TrySetBindByName.
+                bool bindByName = TrySetBindByName(cmSQL);
                 cmSQL.CommandText = await AddParametersAsLiterals(null, cnSQL, sql, false);
                 if (this._QueryCommandType == QueryCommandTypeEnum.StoredProcedure)
                     cmSQL.CommandType = CommandType.StoredProcedure;
 
-                await AddParameters(null, cnSQL, cmSQL, false);
-                // Schema pass: only column metadata is needed, the query must not be executed at compile time.
+                await AddParameters(null, cnSQL, cmSQL, false, bindByName);
+                // Schema pass: metadata only, deliberately no rows. Do not
+                // change to Default - that would execute every report's query
+                // a second time at compile time.
                 using var dr = await CreateDataReader(cmSQL, CommandBehavior.SchemaOnly).ConfigureAwait(false);
 
                 if (dr.FieldCount < 10)
@@ -152,6 +156,40 @@ namespace Majorsilence.Reporting.Rdl
             }
         }
 
+        /// <summary>
+        /// Executes the command and returns a reader.
+        /// </summary>
+        /// <remarks>
+        /// The behaviour must be supplied by the caller, because the two
+        /// callers need opposite things and previously shared one hardcoded
+        /// value.
+        /// </para>
+        /// <para>
+        /// <see cref="FinalPass"/> is the schema pass. It runs at compile time
+        /// purely to learn column names and types, and must NOT actually
+        /// execute the query, so it passes <c>CommandBehavior.SchemaOnly</c>.
+        /// <see cref="GetData"/> is the data pass and must pass
+        /// <c>CommandBehavior.Default</c> to get rows back.
+        /// </para>
+        /// <para>
+        /// Both call sites previously used a helper that hardcoded
+        /// <c>SchemaOnly</c>. Per the ADO.NET contract, <c>SchemaOnly</c>
+        /// returns column metadata and no rows, so the data pass opened a
+        /// reader whose first <c>Read()</c> immediately returned false. The
+        /// effect was that EVERY SQL-backed dataset returned zero rows at run
+        /// time. There was no error at any severity: the connection opened
+        /// cleanly, the SQL was correct and unmodified, the reader was valid,
+        /// and the report simply rendered its NoRows message. Datasets fed by
+        /// static &lt;Rows&gt; or by SetData() were unaffected, since they never
+        /// reach this method, which is why the failure could look specific to
+        /// one report or one data source.
+        /// </para>
+        /// <para>
+        /// This is provider-independent. <c>CommandBehavior</c> is part of the
+        /// ADO.NET contract, not a provider extension, so Oracle, SQL Server,
+        /// MySQL, PostgreSQL, SQLite and ODBC were all affected identically.
+        /// </para>
+        /// </remarks>
         private static async Task<IDataReader> CreateDataReader(IDbCommand cmSQL, CommandBehavior behavior)
         {
             IDataReader dr;
@@ -197,19 +235,21 @@ namespace Majorsilence.Reporting.Rdl
             try
             {
                 using var cmSQL = cnSQL.CreateCommand();
+                // Must match GetSchema above: the schema pass and the data pass
+                // have to bind identically, or a report can compile and then
+                // fail (or worse, succeed with the wrong values) at run time.
+                bool bindByName = TrySetBindByName(cmSQL);
                 cmSQL.CommandText = await AddParametersAsLiterals(rpt, cnSQL, sql, true);
                 if (this._QueryCommandType == QueryCommandTypeEnum.StoredProcedure)
                     cmSQL.CommandType = CommandType.StoredProcedure;
                 if (this._Timeout > 0)
                     cmSQL.CommandTimeout = this._Timeout;
 
-                await AddParameters(rpt, cnSQL, cmSQL, true);
-                // Data pass: rows are required, so the reader must not be opened with SchemaOnly.
-                // SingleResult (not Default) is what this call site used before CreateDataReader
-                // was extracted: only one result set is ever read, and the bundled file-based
-                // providers (JSON, XML, text, web service, ...) accept SingleResult or SchemaOnly
-                // and reject anything else.
-                using var dr = await CreateDataReader(cmSQL, CommandBehavior.SingleResult);
+                await AddParameters(rpt, cnSQL, cmSQL, true, bindByName);
+                // Data pass: MUST be Default. SchemaOnly here returns column
+                // metadata with zero rows and raises no error, silently
+                // emptying every SQL-backed dataset in the report.
+                using var dr = await CreateDataReader(cmSQL, CommandBehavior.Default);
 
                 List<Row> ar = new List<Row>();
                 _Data.Data = ar;
@@ -487,7 +527,7 @@ namespace Majorsilence.Reporting.Rdl
             rows.Data = ar;
             int rowCount = 0;
             int maxRows = _RowLimit > 0 ? _RowLimit : int.MaxValue;
-            
+
             while (dr.Read())
             {
                 Row or = new Row(rows, dr.FieldCount);
@@ -617,7 +657,89 @@ namespace Majorsilence.Reporting.Rdl
             SetMyUserData(rpt, rows);
         }
 
-        private async Task AddParameters(Report rpt, IDbConnection cn, IDbCommand cmSQL, bool bValue)
+
+        /// <summary>
+        /// Enables named parameter binding on providers that support it.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// <see cref="IDbCommand"/> has no concept of named versus positional
+        /// binding, so a provider's own default applies. Oracle's ODP.NET
+        /// defaults <c>BindByName</c> to <c>false</c>, meaning parameters bind
+        /// by the order they were added rather than by name — even though the
+        /// SQL uses named placeholders such as <c>:Facility</c>, and even
+        /// though <see cref="AddParameters"/> gives each parameter a name.
+        /// </para>
+        /// <para>
+        /// Two problems follow. First, a bind variable can only be used once
+        /// per statement: if <c>:Facility</c> appears five times, Oracle sees
+        /// five placeholders while the engine supplies one parameter, and the
+        /// statement fails with ORA-01008 (not all variables bound). Second,
+        /// and worse, if the order of &lt;QueryParameter&gt; elements does not
+        /// match the order the placeholders appear in the SQL, every value
+        /// binds to the wrong placeholder. That produces incorrect results
+        /// with no error raised.
+        /// </para>
+        /// <para>
+        /// Setting <c>BindByName</c> to <c>true</c> resolves both: placeholders
+        /// match on name, repeats work, and element order stops mattering.
+        /// </para>
+        /// <para>
+        /// The property is set by reflection so that RdlEngine keeps no
+        /// compile-time dependency on ODP.NET (or any other provider assembly).
+        /// Providers that do not expose <c>BindByName</c> — SQL Server, MySQL,
+        /// PostgreSQL, SQLite and the rest — are unaffected: the property is
+        /// simply absent and the call is a no-op. Providers already binding by
+        /// name see no change in behaviour.
+        /// </para>
+        /// </remarks>
+        /// <param name="cmd">The command created from the provider connection.</param>
+        /// <returns>
+        /// True if the command now binds by name. Callers MUST pass this to
+        /// <see cref="AddParameters"/>, because it changes how parameters have
+        /// to be named - see the remarks there.
+        /// </returns>
+        private static bool TrySetBindByName(IDbCommand cmd)
+        {
+            try
+            {
+                var pi = cmd.GetType().GetProperty("BindByName");
+                if (pi != null && pi.CanWrite && pi.PropertyType == typeof(bool))
+                {
+                    pi.SetValue(cmd, true, null);
+                    return true;
+                }
+            }
+            catch
+            {
+                // Deliberately non-fatal. If the property cannot be set the
+                // command still works, falling back to the provider default
+                // (positional binding on ODP.NET). Better to run with the
+                // previous behaviour than to fail the report outright.
+            }
+            return false;
+        }
+
+        /// <remarks>
+        /// The <paramref name="bindByName"/> flag must reflect what
+        /// <see cref="TrySetBindByName"/> did to this command, because the two
+        /// binding modes need different parameter names.
+        /// <para>
+        /// Historically every parameter was named with a leading '@'. That is
+        /// SQL Server syntax, and it was harmless only because binding was
+        /// positional: with BindByName off the provider ignores names entirely
+        /// and matches on the order parameters were added.
+        /// </para>
+        /// <para>
+        /// Once BindByName is on, the name is what the provider matches
+        /// against the placeholder in the SQL. Oracle placeholders look like
+        /// ':FacNbr', so a parameter named '@FacNbr' matches nothing and the
+        /// command fails with ORA-50028 (invalid parameter binding). When
+        /// binding by name the bare name is used; ODP.NET accepts it with or
+        /// without the ':' prefix.
+        /// </para>
+        /// </remarks>
+        private async Task AddParameters(Report rpt, IDbConnection cn, IDbCommand cmSQL, bool bValue, bool bindByName)
         {
             // any parameters to substitute
             if (this._QueryParameters == null ||
@@ -634,32 +756,22 @@ namespace Majorsilence.Reporting.Rdl
             {
                 string paramName;
 
-                // force the name to start with @
-                if (qp.Name.Nm[0] == '@')
+                if (bindByName)
+                {   // name must match the placeholder in the SQL; no '@'
+                    paramName = qp.Name.Nm[0] == '@' ? qp.Name.Nm.Substring(1) : qp.Name.Nm;
+                }
+                else if (qp.Name.Nm[0] == '@')
+                {   // positional binding; keep the historical '@' naming
                     paramName = qp.Name.Nm;
+                }
                 else
+                {
                     paramName = "@" + qp.Name.Nm;
+                }
                 object pvalue = bValue ? await qp.Value.Evaluate(rpt, null) : null;
                 IDbDataParameter dp = cmSQL.CreateParameter();
 
                 dp.ParameterName = paramName;
-                if (!bValue)
-                {   // Issue #312. The schema pass has no real value to bind, and an untyped
-                    // null is not something every provider can work with: Npgsql cannot pick a
-                    // wire format from it, Microsoft.Data.Sqlite rejects it outright with
-                    // "Value must be set". Either way the report failed to parse, because this
-                    // runs inside FinalPass.
-                    //
-                    // Give it a typed placeholder instead. The query is not executed here -
-                    // the reader is opened with CommandBehavior.SchemaOnly - so the value is
-                    // never used for anything; it only has to be bindable. This mirrors what
-                    // AddParametersAsLiterals already substitutes for the replacement
-                    // providers, right down to the type codes it recognises.
-                    SchemaPassPlaceholder(qp.Value?.GetTypeCode() ?? TypeCode.Object,
-                        out DbType dbType, out pvalue);
-                    dp.DbType = dbType;
-                }
-
                 if (pvalue is ArrayList)    // Probably a MultiValue Report parameter result
                 {
                     ArrayList ar = (ArrayList)pvalue;
@@ -668,49 +780,6 @@ namespace Majorsilence.Reporting.Rdl
                 else
                     dp.Value = pvalue;
                 cmSQL.Parameters.Add(dp);
-            }
-        }
-
-        /// <summary>
-        /// The type and stand-in value a query parameter carries on the compile-time schema
-        /// pass, where the real value is not evaluated. Mirrors the placeholder literals
-        /// AddParametersAsLiterals substitutes for the replacement providers, including its
-        /// treatment of an unknown type as text.
-        /// </summary>
-        private static void SchemaPassPlaceholder(TypeCode tc, out DbType dbType, out object value)
-        {
-            switch (tc)
-            {
-                case TypeCode.Boolean:
-                    dbType = DbType.Boolean; value = false; break;
-                case TypeCode.Byte:
-                    dbType = DbType.Byte; value = (byte)0; break;
-                case TypeCode.SByte:
-                    dbType = DbType.SByte; value = (sbyte)0; break;
-                case TypeCode.Int16:
-                    dbType = DbType.Int16; value = (short)0; break;
-                case TypeCode.UInt16:
-                    dbType = DbType.UInt16; value = (ushort)0; break;
-                case TypeCode.Int32:
-                    dbType = DbType.Int32; value = 0; break;
-                case TypeCode.UInt32:
-                    dbType = DbType.UInt32; value = 0u; break;
-                case TypeCode.Int64:
-                    dbType = DbType.Int64; value = 0L; break;
-                case TypeCode.UInt64:
-                    dbType = DbType.UInt64; value = 0ul; break;
-                case TypeCode.Single:
-                    dbType = DbType.Single; value = 0f; break;
-                case TypeCode.Double:
-                    dbType = DbType.Double; value = 0d; break;
-                case TypeCode.Decimal:
-                    dbType = DbType.Decimal; value = 0m; break;
-                case TypeCode.DateTime:
-                    dbType = DbType.DateTime; value = new DateTime(1900, 1, 1); break;
-                case TypeCode.Char:
-                case TypeCode.String:
-                default:
-                    dbType = DbType.String; value = string.Empty; break;
             }
         }
 
