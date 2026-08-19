@@ -1199,6 +1199,25 @@ namespace Majorsilence.Reporting.Rdl
             return Math.Floor(Convert.ToDouble(value));
         }
 
+        /// <summary>
+        /// VB's StrConv, which Crystal's ProperCase maps onto. The conversion is VB's
+        /// numeric constant — 1 upper, 2 lower, 3 proper — rather than the VbStrConv enum,
+        /// because the expression parser resolves a bare dotted name as an identifier and
+        /// has no way to reach an enum member. Unknown codes pass the value through.
+        /// </summary>
+        static public string StrConv(object value, object conversion)
+        {
+            string s = Convert.ToString(value) ?? "";
+            switch ((int)Convert.ToDouble(conversion))
+            {
+                case 1: return s.ToUpperInvariant();
+                case 2: return s.ToLowerInvariant();
+                case 3: return System.Globalization.CultureInfo.InvariantCulture
+                                 .TextInfo.ToTitleCase(s.ToLowerInvariant());
+                default: return s;
+            }
+        }
+
         // ── Functions Crystal has that VB.NET does not ───────────────────────────
 
         /// <summary>
