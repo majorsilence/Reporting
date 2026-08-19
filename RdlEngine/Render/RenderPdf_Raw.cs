@@ -192,8 +192,12 @@ namespace Majorsilence.Reporting.Rdl
             // RenderBase.MeasureString wraps text using System.Drawing/SkiaSharp metrics, which
             // can differ from Majorsilence.Pdf's embedded TrueType metrics.  Re-wrap here using
             // the actual PDF font metrics so that text fits within cell boundaries.
+            // Vertical (tb-rl) text is always kept as RenderBase.MeasureString's single unwrapped
+            // line (see its own WritingMode check) -- the box's width is the rotated run's
+            // thickness, not its available length, so wrapping against it here would split one
+            // rotated line into several that then get drawn on top of each other.
             float availableW = width - si.PaddingLeft - si.PaddingRight;
-            if (!bNoClip && availableW > 0)
+            if (!bNoClip && availableW > 0 && si.WritingMode != WritingModeEnum.tb_rl)
                 sa = RewrapLines(sa, baseStyle, availableW);
 
             if (!si.BackgroundColor.IsEmpty && height > 0 && width > 0)
