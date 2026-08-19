@@ -1,0 +1,23 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+title: "Majorsilence Reporting"
+abstract: >-
+  Open-source .NET reporting framework (formerly My-FyiReporting) for
+  building, rendering, and viewing RDL-based reports -- a self-hosted
+  alternative to SQL Server Reporting Services (SSRS) and Crystal Reports.
+authors:
+  - family-names: Gill
+    given-names: Peter
+    email: peter@majorsilence.com
+repository-code: "https://github.com/majorsilence/Reporting"
+url: "https://reporting.majorsilence.com/"
+license: Apache-2.0
+version: 26.0.3
+date-released: "2026-07-10"
+keywords:
+  - reporting
+  - rdl
+  - pdf-generation
+  - report-builder
+  - dotnet
+  - csharp
