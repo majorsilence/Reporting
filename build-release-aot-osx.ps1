@@ -1,7 +1,9 @@
 #!/usr/bin/env pwsh
 # AOT builds for macOS — run this on a macOS runner/machine.
 $ErrorActionPreference = "Stop"
-$PSNativeCommandErrorActionPreference = 'Stop'
+# Correct name is $PSNativeCommandUseErrorActionPreference; the 'Stop'-valued misspelling below
+# was a no-op, so a failing dotnet build let the script carry on and fail later somewhere odd.
+$PSNativeCommandUseErrorActionPreference = $true
 $CURRENTPATH=$pwd.Path
 
 $pConfigurationCompat="Release-DrawingCompat"
@@ -11,7 +13,9 @@ function GetVersions([ref]$theVersion)
 {
 	$csprojPath = Join-Path $CURRENTPATH "Directory.Build.props"
 	$xml = [xml](Get-Content $csprojPath)
-	$theVersion.Value = $xml.Project.PropertyGroup.Version
+	# Directory.Build.props has several PropertyGroups; only one carries Version, so the rest
+	# contribute empty entries that would stringify into a leading-whitespace version.
+	$theVersion.Value = @($xml.Project.PropertyGroup.Version | Where-Object { $_ }) | Select-Object -First 1
 }
 
 $Version=""

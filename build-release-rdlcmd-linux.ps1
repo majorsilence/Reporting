@@ -6,7 +6,9 @@ function GetVersions([ref]$theVersion)
 {
 	$csprojPath = Join-Path $CURRENTPATH "./RdlEngine/RdlEngine.csproj"
 	$xml = [xml](Get-Content $csprojPath)
-	$theVersion.Value = $xml.Project.PropertyGroup.Version
+	# Directory.Build.props has several PropertyGroups; only one carries Version, so the rest
+	# contribute empty entries that would stringify into a leading-whitespace version.
+	$theVersion.Value = @($xml.Project.PropertyGroup.Version | Where-Object { $_ }) | Select-Object -First 1
 }
 
 function BuildRdlCmd{

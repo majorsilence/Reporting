@@ -27,10 +27,10 @@
     <ItemGroup>
         <PackageReference Include="ZXing.Net" />
     </ItemGroup>
-	<ItemGroup Condition="('$(Configuration)' != 'Debug-DrawingCompat' And '$(Configuration)' != 'Release-DrawingCompat') And '$(OS)' == 'Windows_NT'">
+	<ItemGroup Condition="'$(DrawingCompat)' != 'true' And '$(OS)' == 'Windows_NT'">
 		<PackageReference Include="ZXing.Net.Bindings.Windows.Compatibility" />
 	</ItemGroup>
-	<ItemGroup Condition="'$(Configuration)' == 'Debug-DrawingCompat' Or '$(Configuration)' == 'Release-DrawingCompat' Or '$(OS)' != 'Windows_NT'">
+	<ItemGroup Condition="'$(DrawingCompat)' == 'true'">
 		<PackageReference Include="ZXing.Net.Bindings.SkiaSharp" />
 	</ItemGroup>
 		

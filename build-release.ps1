@@ -1,6 +1,8 @@
 #!/usr/bin/env pwsh
 $ErrorActionPreference = "Stop"
-$PSNativeCommandErrorActionPreference = 'Stop'
+# Correct name is $PSNativeCommandUseErrorActionPreference; the 'Stop'-valued misspelling below
+# was a no-op, so a failing dotnet build let the script carry on and fail later somewhere odd.
+$PSNativeCommandUseErrorActionPreference = $true
 $CURRENTPATH=$pwd.Path
 
 # /p:Configuration="Debug", "Debug-DrawingCompat", "Release", "Release-DrawingCompat"
@@ -21,7 +23,9 @@ function GetVersions([ref]$theVersion)
 {
 	$csprojPath = Join-Path $CURRENTPATH ".\Directory.Build.props"
 	$xml = [xml](Get-Content $csprojPath)
-	$theVersion.Value = $xml.Project.PropertyGroup.Version
+	# Directory.Build.props has several PropertyGroups; only one carries Version, so the rest
+	# contribute empty entries that would stringify into a leading-whitespace version.
+	$theVersion.Value = @($xml.Project.PropertyGroup.Version | Where-Object { $_ }) | Select-Object -First 1
 }
 
 Get-ChildItem .\ -include bin,obj,build-output -Recurse | foreach ($_) { remove-item $_.fullname -Force -Recurse }
@@ -105,7 +109,7 @@ cd Release-Builds
 cd build-output
 ..\7za.exe a -tzip $Version-majorsilence-reporting-designer-$pTargetFramework-anycpu.zip @7zaExclude majorsilence-reporting-designer-$pTargetFramework-anycpu\
 ..\7za.exe a -tzip $Version-majorsilence-reporting-desktop-$pTargetFrameworkGeneric-anycpu.zip @7zaExclude majorsilence-reporting-desktop-$pTargetFrameworkGeneric-anycpu\
-..\7za.exe a -tzip $Version-majorsilence-reporting-mapfile-$pTargetFrameworkGeneric-anycpu.zip @7zaExclude majorsilence-reporting-mapfile-$pTargetFrameworkGeneric-anycpu\
+..\7za.exe a -tzip $Version-majorsilence-reporting-mapfile-$pTargetFramework-anycpu.zip @7zaExclude majorsilence-reporting-mapfile-$pTargetFramework-anycpu\
 
 ..\7za.exe a -tzip "$Version-majorsilence-reporting-rdlcmd-$pTargetFrameworkGeneric-anycpu.zip" `
   -x!"majorsilence-reporting-rdlcmd-$pTargetFrameworkGeneric-anycpu\$pTargetFrameworkGeneric\win-arm64\" `
