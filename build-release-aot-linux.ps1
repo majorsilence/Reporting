@@ -41,22 +41,19 @@ $buildoutputpath_rdlnative  = Join-Path $CURRENTPATH "Release-Builds" "build-out
 $buildoutputpath_pdfnative  = Join-Path $CURRENTPATH "Release-Builds" "build-output" "majorsilence-pdfnative"
 
 Remove-Item $buildoutputpath_rdlcmd_aot -Recurse -ErrorAction Ignore
-mkdir $buildoutputpath_rdlcmd_aot
 $rdlcmd_arch = Join-Path $buildoutputpath_rdlcmd_aot $rid
-mkdir $rdlcmd_arch
+New-Item -ItemType Directory -Force -Path $rdlcmd_arch | Out-Null
 Copy-Item (Join-Path $CURRENTPATH "RdlCmd" "bin" $pConfigurationCompat $pTargetFrameworkGeneric "$rid-aot" "publish") -Destination $rdlcmd_arch -Recurse
 
 Remove-Item $buildoutputpath_rdlnative -Recurse -ErrorAction Ignore
-mkdir $buildoutputpath_rdlnative
 $rdlnative_arch = Join-Path $buildoutputpath_rdlnative $rid
-mkdir $rdlnative_arch
+New-Item -ItemType Directory -Force -Path $rdlnative_arch | Out-Null
 Copy-Item (Join-Path $CURRENTPATH "RdlNative" "bin" $pConfigurationCompat $pTargetFrameworkGeneric "$rid-aot" "publish") -Destination $rdlnative_arch -Recurse
 Copy-Item (Join-Path $CURRENTPATH "RdlNative" "rdlnative.h") (Join-Path $buildoutputpath_rdlnative "rdlnative.h")
 
 Remove-Item $buildoutputpath_pdfnative -Recurse -ErrorAction Ignore
-mkdir $buildoutputpath_pdfnative
 $pdfnative_arch = Join-Path $buildoutputpath_pdfnative $rid
-mkdir $pdfnative_arch
+New-Item -ItemType Directory -Force -Path $pdfnative_arch | Out-Null
 Copy-Item (Join-Path $CURRENTPATH "PdfNative" "bin" $pConfigurationCompat $pTargetFrameworkGeneric "$rid-aot" "publish") -Destination $pdfnative_arch -Recurse
 Copy-Item (Join-Path $CURRENTPATH "PdfNative" "pdfnative.h") (Join-Path $buildoutputpath_pdfnative "pdfnative.h")
 
