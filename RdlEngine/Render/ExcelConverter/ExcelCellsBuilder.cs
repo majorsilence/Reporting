@@ -5,8 +5,9 @@ using Majorsilence.Reporting.Rdl;
 using System.Threading.Tasks;
 
 #if DRAWINGCOMPAT
-using Majorsilence.Drawing;
-using Majorsilence.Drawing.Drawing2D;
+using Majorsilence.Forms.Drawing;
+using System.Drawing;  // value types (Color, Point, Size, Rectangle, ...) come from System.Drawing.Primitives
+using Majorsilence.Forms.Drawing.Drawing2D;
 #else
 using System.Drawing;
 using System.Drawing.Drawing2D;

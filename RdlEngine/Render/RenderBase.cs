@@ -32,9 +32,9 @@ using System.IO;
 using System.Collections;
 using System.Collections.Generic;
 #if DRAWINGCOMPAT
-using Draw2 = Majorsilence.Drawing;
-using Drawing2D = Majorsilence.Drawing.Imaging;
-using Majorsilence.Drawing.Imaging;
+using Draw2 = Majorsilence.Forms.Drawing;
+using Drawing2D = Majorsilence.Forms.Drawing.Imaging;
+using Majorsilence.Forms.Drawing.Imaging;
 #else
 using Draw2 = System.Drawing;
 using Drawing2D = System.Drawing.Imaging;
@@ -91,7 +91,7 @@ namespace Majorsilence.Reporting.Rdl
         internal abstract protected void AfterProcessPage();
         internal abstract protected void AddBookmark(PageText pt);
 
-        internal abstract protected void AddLine(float x, float y, float x2, float y2, float width, Draw2.Color c, BorderStyleEnum ls);
+        internal abstract protected void AddLine(float x, float y, float x2, float y2, float width, System.Drawing.Color c, BorderStyleEnum ls);
 
 
         /// <summary>
@@ -99,7 +99,7 @@ namespace Majorsilence.Reporting.Rdl
         /// </summary>
         /// <returns>string Image name</returns>
         internal abstract protected void AddImage(string name, StyleInfo si,
-            Drawing2D.ImageFormat imf, float x, float y, float width, float height, Draw2.RectangleF clipRect,
+            Drawing2D.ImageFormat imf, float x, float y, float width, float height, System.Drawing.RectangleF clipRect,
             byte[] im, int samplesW, int samplesH, string url, string tooltip);
 
         /// <summary>
@@ -109,7 +109,7 @@ namespace Majorsilence.Reporting.Rdl
         /// <param name="si"></param>
         /// <param name="url"></param>
         /// <param name="patterns"></param>
-        internal abstract protected void AddPolygon(Draw2.PointF[] pts, StyleInfo si, string url);
+        internal abstract protected void AddPolygon(System.Drawing.PointF[] pts, StyleInfo si, string url);
 
 
         /// <summary>
@@ -127,7 +127,7 @@ namespace Majorsilence.Reporting.Rdl
         /// Draw a curve
         /// </summary>
         /// <returns></returns>
-        internal abstract protected void AddCurve(Draw2.PointF[] pts, StyleInfo si);
+        internal abstract protected void AddCurve(System.Drawing.PointF[] pts, StyleInfo si);
 
 
 
@@ -245,7 +245,7 @@ namespace Majorsilence.Reporting.Rdl
 
 
                             AddImage(bgImg.Name, bgImg.SI, bgImg.ImgFormat,
-                                            currX, currY, imW, imH, Draw2.RectangleF.Empty, bgImg.GetImageData(), bgImg.SamplesW, bgImg.SamplesH, null, pi.Tooltip);
+                                            currX, currY, imW, imH, System.Drawing.RectangleF.Empty, bgImg.GetImageData(), bgImg.SamplesW, bgImg.SamplesH, null, pi.Tooltip);
 
                         }
                     }
@@ -296,17 +296,17 @@ namespace Majorsilence.Reporting.Rdl
                     PageImage i = pi as PageImage;
 
                     //Duc Phan added 20 Dec, 2007 to support sized image 
-                    Draw2.RectangleF r2 = new Draw2.RectangleF(i.X + i.SI.PaddingLeft,
+                    System.Drawing.RectangleF r2 = new System.Drawing.RectangleF(i.X + i.SI.PaddingLeft,
                         i.Y + i.SI.PaddingTop,
                         PixelsX(i.W, pgs) - i.SI.PaddingLeft - i.SI.PaddingRight,
                         PixelsY(i.H, pgs) - i.SI.PaddingTop - i.SI.PaddingBottom);
 
-                    Draw2.RectangleF adjustedRect;   // work rectangle 
-                    Draw2.RectangleF clipRect = Draw2.RectangleF.Empty;
+                    System.Drawing.RectangleF adjustedRect;   // work rectangle 
+                    System.Drawing.RectangleF clipRect = System.Drawing.RectangleF.Empty;
                     switch (i.Sizing)
                     {
                         case ImageSizingEnum.AutoSize:
-                            adjustedRect = new Draw2.RectangleF(r2.Left, r2.Top,
+                            adjustedRect = new System.Drawing.RectangleF(r2.Left, r2.Top,
                                             r2.Width, r2.Height);
                             break;
                         case ImageSizingEnum.Clip:
@@ -315,8 +315,8 @@ namespace Majorsilence.Reporting.Rdl
                           
                             float originalWidth = Measurement.PointsFromPixels(im.Width, pgs.G.DpiX);
                             float originalHeight = Measurement.PointsFromPixels(im.Height, pgs.G.DpiY);
-                            adjustedRect = new Draw2.RectangleF(r2.Left, r2.Top, originalWidth, originalHeight);
-                            clipRect = new Draw2.RectangleF(r2.Left, r2.Top, originalWidth,originalHeight);
+                            adjustedRect = new System.Drawing.RectangleF(r2.Left, r2.Top, originalWidth, originalHeight);
+                            clipRect = new System.Drawing.RectangleF(r2.Left, r2.Top, originalWidth,originalHeight);
                             im.Dispose();
                             break;
                         case ImageSizingEnum.FitProportional:
@@ -334,7 +334,7 @@ namespace Majorsilence.Reporting.Rdl
                             {   // this means the rectangle height must be corrected 
                                 height = width * ratioIm;
                             }
-                            adjustedRect = new Draw2.RectangleF(r2.X, r2.Y, width, height);
+                            adjustedRect = new System.Drawing.RectangleF(r2.X, r2.Y, width, height);
                             break;
                         case ImageSizingEnum.Fit:
                         default:
@@ -408,7 +408,7 @@ namespace Majorsilence.Reporting.Rdl
 
             Draw2.Font drawFont = null;
             Draw2.StringFormat drawFormat = null;
-            Draw2.SizeF ms;
+            System.Drawing.SizeF ms;
             string[] sa = null;
             width = null;
             try
@@ -434,7 +434,7 @@ namespace Majorsilence.Reporting.Rdl
                         break;
                 }
 
-                drawFont = new Draw2.Font(StyleInfo.GetFontFamily(si.FontFamilyFull), si.FontSize, fs);
+                drawFont = new Draw2.Font(StyleInfo.GetFontFamily(si.FontFamilyFull), Style.CompatFontSize(si.FontSize), fs);
                 drawFormat = new Draw2.StringFormat();
                 drawFormat.Alignment = Draw2.StringAlignment.Near;
 
@@ -581,8 +581,12 @@ namespace Majorsilence.Reporting.Rdl
                 int ticra = icra;
                 for (int j = 0; j < cra32.Length; j++)
                 {
-                    cra32[j] = cra[ticra++];
-                    cra32[j].First -= cra[icra].First;	// adjust relative offsets of strings
+                    // Build a fresh range rather than copy-then-adjust: CharacterRange is a struct in
+                    // System.Drawing but a class in the compat layer, so assigning and then mutating
+                    // .First would rewrite the caller's cra entry and corrupt every range past the
+                    // first 32-word chunk.
+                    cra32[j] = new Draw2.CharacterRange(cra[ticra].First - cra[icra].First, cra[ticra].Length);
+                    ticra++;
                 }
 
                 // measure the word locations (in the new string)
@@ -608,8 +612,12 @@ namespace Majorsilence.Reporting.Rdl
                 int ticra = icra;
                 for (int j = 0; j < cra32.Length; j++)
                 {
-                    cra32[j] = cra[ticra++];
-                    cra32[j].First -= cra[icra].First;	// adjust relative offsets of strings
+                    // Build a fresh range rather than copy-then-adjust: CharacterRange is a struct in
+                    // System.Drawing but a class in the compat layer, so assigning and then mutating
+                    // .First would rewrite the caller's cra entry and corrupt every range past the
+                    // first 32-word chunk.
+                    cra32[j] = new Draw2.CharacterRange(cra[ticra].First - cra[icra].First, cra[ticra].Length);
+                    ticra++;
                 }
                 // measure the word locations (in the new string)
                 // ???? should I put a blank in front of it?? 
@@ -644,13 +652,13 @@ namespace Majorsilence.Reporting.Rdl
 
             drawFormat.SetMeasurableCharacterRanges(cra);
             Draw2.Region[] rs = new Draw2.Region[cra.Length];
-            rs = g.MeasureCharacterRanges(s, drawFont, new Draw2.RectangleF(0, 0, float.MaxValue, float.MaxValue),
+            rs = g.MeasureCharacterRanges(s, drawFont, new System.Drawing.RectangleF(0, 0, float.MaxValue, float.MaxValue),
                 drawFormat);
             WordStartFinish[] sz = new WordStartFinish[cra.Length];
             int isz = 0;
             foreach (Draw2.Region r in rs)
             {
-                Draw2.RectangleF mr = r.GetBounds(g);
+                System.Drawing.RectangleF mr = r.GetBounds(g);
                 sz[isz].start = Measurement.PointsFromPixels(mr.Left, g.DpiX);
                 sz[isz].end = Measurement.PointsFromPixels(mr.Right, g.DpiX);
                 isz++;
@@ -664,19 +672,19 @@ namespace Majorsilence.Reporting.Rdl
             internal float end;
         }
 
-        private Draw2.SizeF MeasureString(string s, Draw2.Graphics g, Draw2.Font drawFont, Draw2.StringFormat drawFormat)
+        private System.Drawing.SizeF MeasureString(string s, Draw2.Graphics g, Draw2.Font drawFont, Draw2.StringFormat drawFormat)
         {
             if (s == null || s.Length == 0)
-                return Draw2.SizeF.Empty;
+                return System.Drawing.SizeF.Empty;
 
             Draw2.CharacterRange[] cr = { new Draw2.CharacterRange(0, s.Length) };
             drawFormat.SetMeasurableCharacterRanges(cr);
             Draw2.Region[] rs = new Draw2.Region[1];
-            rs = g.MeasureCharacterRanges(s, drawFont, new Draw2.RectangleF(0, 0, float.MaxValue, float.MaxValue),
+            rs = g.MeasureCharacterRanges(s, drawFont, new System.Drawing.RectangleF(0, 0, float.MaxValue, float.MaxValue),
                 drawFormat);
-            Draw2.RectangleF mr = rs[0].GetBounds(g);
+            System.Drawing.RectangleF mr = rs[0].GetBounds(g);
 
-            return new Draw2.SizeF(mr.Width, mr.Height);
+            return new System.Drawing.SizeF(mr.Width, mr.Height);
         }
 
 

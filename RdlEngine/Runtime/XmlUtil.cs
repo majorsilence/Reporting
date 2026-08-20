@@ -7,7 +7,9 @@ using System.Xml.Xsl;
 using System.Text;
 using System.IO;
 #if DRAWINGCOMPAT
-using Majorsilence.Drawing;
+using System.Drawing;   // Color, and its ColorTranslator: Majorsilence.Forms.Drawing deliberately
+                        // does not reimplement the System.Drawing.Primitives value types
+using ColorTranslator = Majorsilence.Forms.Drawing.ColorTranslator;
 #else
 using System.Drawing;			// for Color class
 #endif

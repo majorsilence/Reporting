@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.IO;
 #if DRAWINGCOMPAT
-using Draw2 = Majorsilence.Drawing;
+using Draw2 = Majorsilence.Forms.Drawing;
 #else
 using Draw2 = System.Drawing;
 #endif
@@ -87,7 +87,7 @@ namespace Majorsilence.Reporting.Rdl
             Single Y = _br.ReadSingle();
             Single Width = _br.ReadSingle();
             Single Height = _br.ReadSingle();
-            Draw2.RectangleF rf = new Draw2.RectangleF(X,Y,Width,Height);
+            System.Drawing.RectangleF rf = new System.Drawing.RectangleF(X,Y,Width,Height);
 
             byte sA, sR, sG, sB;
             sB = _br.ReadByte();
@@ -103,7 +103,7 @@ namespace Majorsilence.Reporting.Rdl
 
             _br.ReadBytes(8);            
            Draw2.Drawing2D.LinearGradientBrush tmpB = new Draw2.Drawing2D.LinearGradientBrush(rf, 
-               Draw2.Color.FromArgb(sA, sR, sG, sB), Draw2.Color.FromArgb(eA, eR, eG, eB), 0f);
+               System.Drawing.Color.FromArgb(sA, sR, sG, sB), System.Drawing.Color.FromArgb(eA, eR, eG, eB), 0f);
             tmpB.WrapMode = (Draw2.Drawing2D.WrapMode)WrapMode;
             
 
@@ -171,7 +171,7 @@ namespace Majorsilence.Reporting.Rdl
             bA = _br.ReadByte(); 
             
             myBrush = new Draw2.Drawing2D.HatchBrush((Draw2.Drawing2D.HatchStyle) HatchStyle,
-                Draw2.Color.FromArgb(fA,fR,fG,fB),Draw2.Color.FromArgb(bA,bR,bG,bB));
+                System.Drawing.Color.FromArgb(fA,fR,fG,fB),System.Drawing.Color.FromArgb(bA,bR,bG,bB));
             
             
     		
@@ -182,7 +182,7 @@ namespace Majorsilence.Reporting.Rdl
     {        
         public EmfSolidBrush(byte A, byte R, byte G, byte B)
         {            
-            myBrush = new Draw2.SolidBrush(Draw2.Color.FromArgb(A, R, G, B));
+            myBrush = new Draw2.SolidBrush(System.Drawing.Color.FromArgb(A, R, G, B));
         }
         public EmfSolidBrush(BinaryReader _br)
         {            
@@ -191,7 +191,7 @@ namespace Majorsilence.Reporting.Rdl
             G = _br.ReadByte();
             R = _br.ReadByte();
             A = _br.ReadByte();   
-            myBrush = new Draw2.SolidBrush(Draw2.Color.FromArgb(A,R,G,B));
+            myBrush = new Draw2.SolidBrush(System.Drawing.Color.FromArgb(A,R,G,B));
         }
     }
 }

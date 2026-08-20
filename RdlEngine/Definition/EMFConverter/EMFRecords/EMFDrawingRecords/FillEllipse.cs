@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.IO;
 #if DRAWINGCOMPAT
-using Draw2 = Majorsilence.Drawing;
+using Draw2 = Majorsilence.Forms.Drawing;
 #else
 using Draw2 = System.Drawing;
 #endif
@@ -56,7 +56,7 @@ namespace Majorsilence.Reporting.Rdl
                     G = _br.ReadByte();
                     R = _br.ReadByte();
                     A = _br.ReadByte();
-                    b = new Draw2.SolidBrush(Draw2.Color.FromArgb(A, R, G, B));
+                    b = new Draw2.SolidBrush(System.Drawing.Color.FromArgb(A, R, G, B));
                 }
                 else
                 {
@@ -101,7 +101,7 @@ namespace Majorsilence.Reporting.Rdl
             {
                 case "SolidBrush":
                    Draw2.SolidBrush theBrush = (Draw2.SolidBrush)b;
-                   Draw2.Color col = theBrush.Color;  
+                   System.Drawing.Color col = theBrush.Color;  
                     PageEllipse pl = new PageEllipse();
                     pl.X = X + (Xp * SCALEFACTOR);
                     pl.Y = Y + (Yp * SCALEFACTOR);

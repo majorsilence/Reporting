@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 #if DRAWINGCOMPAT
-using Draw2 = Majorsilence.Drawing;
+using Draw2 = Majorsilence.Forms.Drawing;
 #else
 using Draw2 = System.Drawing;
 #endif

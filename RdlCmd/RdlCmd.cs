@@ -4,8 +4,8 @@ using System.Collections;
 using System.Collections.Specialized;
 using System.Reflection;
 #if DRAWINGCOMPAT
-using Draw2 = Majorsilence.Drawing;
-using Majorsilence.Drawing.Imaging;
+using Draw2 = Majorsilence.Forms.Drawing;
+using Majorsilence.Forms.Drawing.Imaging;
 #else
 using Draw2 = System.Drawing;
 using System.Drawing.Imaging;

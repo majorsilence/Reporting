@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
 #if DRAWINGCOMPAT
-using Draw2 = Majorsilence.Drawing;
+using Draw2 = Majorsilence.Forms.Drawing;
 #else
 using Draw2 = System.Drawing;
 #endif
@@ -37,7 +37,7 @@ namespace Majorsilence.Reporting.Rdl
                     _aStream = new System.IO.MemoryStream();
                     IntPtr HDC = g1.GetHdc();
                     _mf = new Draw2.Imaging.Metafile(_aStream, HDC,
-                        new Draw2.RectangleF(0, 0, _bm.Width, _bm.Height), Draw2.Imaging.MetafileFrameUnit.Pixel);
+                        new System.Drawing.RectangleF(0, 0, _bm.Width, _bm.Height), Draw2.Imaging.MetafileFrameUnit.Pixel);
                     g1.ReleaseHdc(HDC);
                 }
             }
@@ -55,7 +55,7 @@ namespace Majorsilence.Reporting.Rdl
                 g.CompositingQuality = Draw2.Drawing2D.CompositingQuality.HighQuality;
 
                 // Adjust the top margin to depend on the title height
-                Draw2.Size titleSize = await DrawTitleMeasure(rpt, g, ChartDefn.Title);
+                System.Drawing.Size titleSize = await DrawTitleMeasure(rpt, g, ChartDefn.Title);
                 Layout.TopMargin = titleSize.Height;
 
                 // 20022008 AJM GJL - Added new required info 
@@ -65,17 +65,17 @@ namespace Majorsilence.Reporting.Rdl
                 await DrawChartStyle(rpt, g);
 
                 // Draw title; routine determines if necessary
-                await DrawTitle(rpt, g, ChartDefn.Title, new Draw2.Rectangle(0, 0, Layout.Width, Layout.TopMargin));
+                await DrawTitle(rpt, g, ChartDefn.Title, new System.Drawing.Rectangle(0, 0, Layout.Width, Layout.TopMargin));
 
                 // Adjust the left margin to depend on the Value Axis
-                Draw2.Size vaSize = await ValueAxisSize(rpt, g, min, max);
+                System.Drawing.Size vaSize = await ValueAxisSize(rpt, g, min, max);
                 Layout.LeftMargin = vaSize.Width;
 
                 // Draw legend
-                Draw2.Rectangle lRect = await DrawLegend(rpt, g, ChartDefn.Type == ChartTypeEnum.Area ? false : true, true);
+                System.Drawing.Rectangle lRect = await DrawLegend(rpt, g, ChartDefn.Type == ChartTypeEnum.Area ? false : true, true);
 
                 // Adjust the bottom margin to depend on the Category Axis
-                Draw2.Size caSize = await CategoryAxisSize(rpt, g);
+                System.Drawing.Size caSize = await CategoryAxisSize(rpt, g);
                 Layout.BottomMargin = caSize.Height;
 
                 AdjustMargins(lRect, rpt, g);       // Adjust margins based on legend.
@@ -87,13 +87,13 @@ namespace Majorsilence.Reporting.Rdl
                 // Draw Value Axis
                 if (vaSize.Width > 0)   // If we made room for the axis - we need to draw it
                     (incr, intervalCount) = await DrawValueAxis(rpt, g, min, max,
-                        new Draw2.Rectangle(Layout.LeftMargin - vaSize.Width, Layout.TopMargin, vaSize.Width, Layout.PlotArea.Height), Layout.LeftMargin, _bm.Width - Layout.RightMargin);
+                        new System.Drawing.Rectangle(Layout.LeftMargin - vaSize.Width, Layout.TopMargin, vaSize.Width, Layout.PlotArea.Height), Layout.LeftMargin, _bm.Width - Layout.RightMargin);
 
                 // Draw Category Axis
                 if (caSize.Height > 0)
                     //09052008ajm passing chart bounds int
                     await DrawCategoryAxis(rpt, g,
-                        new Draw2.Rectangle(Layout.LeftMargin, _bm.Height - Layout.BottomMargin, Layout.PlotArea.Width, caSize.Height), Layout.TopMargin,
+                        new System.Drawing.Rectangle(Layout.LeftMargin, _bm.Height - Layout.BottomMargin, Layout.PlotArea.Width, caSize.Height), Layout.TopMargin,
                         caSize.Width);
 
                 // Draw Plot area data 
@@ -119,7 +119,7 @@ namespace Majorsilence.Reporting.Rdl
             // Draw Plot area data 
             int maxPointHeight = (int)Layout.PlotArea.Height;
             double widthCat = ((double)(Layout.PlotArea.Width) / (CategoryCount - 1));
-            Draw2.Point[] saveP = new Draw2.Point[CategoryCount];   // used for drawing lines between points
+            System.Drawing.Point[] saveP = new System.Drawing.Point[CategoryCount];   // used for drawing lines between points
             for (int iCol = 1; iCol <= SeriesCount; iCol++)
             {
                 for (int iRow = 1; iRow <= CategoryCount; iRow++)
@@ -128,7 +128,7 @@ namespace Majorsilence.Reporting.Rdl
 
                     int x = (int)(Layout.PlotArea.Left + ((iRow - 1) * widthCat));
                     int y = (int)(((Math.Min(v, max) - min) / (max - min)) * maxPointHeight);
-                    Draw2.Point p = new Draw2.Point(x, Layout.PlotArea.Top + (maxPointHeight - y));
+                    System.Drawing.Point p = new System.Drawing.Point(x, Layout.PlotArea.Top + (maxPointHeight - y));
                     saveP[iRow - 1] = p;
                     await DrawLinePoint(rpt, g, await GetSeriesBrush(rpt, iRow, iCol), ChartMarkerEnum.None, p, iRow, iCol);
 
@@ -150,7 +150,7 @@ namespace Majorsilence.Reporting.Rdl
                                         // Draw Plot area data 
             int maxPointHeight = (int)Layout.PlotArea.Height;
             double widthCat = ((double)(Layout.PlotArea.Width) / (CategoryCount - 1));
-            Draw2.Point[,] saveAllP = new Draw2.Point[CategoryCount, SeriesCount];  // used to collect all data points
+            System.Drawing.Point[,] saveAllP = new System.Drawing.Point[CategoryCount, SeriesCount];  // used to collect all data points
 
             // Loop thru calculating all the data points
             for (int iRow = 1; iRow <= CategoryCount; iRow++)
@@ -167,14 +167,14 @@ namespace Majorsilence.Reporting.Rdl
                     v += await GetDataValue(rpt, iRow, iCol);
 
                     int y = (int)((Math.Min(v / sum, max) / max) * maxPointHeight);
-                    Draw2.Point p = new Draw2.Point(x, Layout.PlotArea.Top + (maxPointHeight - y));
+                    System.Drawing.Point p = new System.Drawing.Point(x, Layout.PlotArea.Top + (maxPointHeight - y));
                     saveAllP[iRow - 1, iCol - 1] = p;
                 }
             }
 
             // Now loop thru and plot all the points
-            Draw2.Point[] saveP = new Draw2.Point[CategoryCount];   // used for drawing lines between points
-            Draw2.Point[] priorSaveP = new Draw2.Point[CategoryCount];
+            System.Drawing.Point[] saveP = new System.Drawing.Point[CategoryCount];   // used for drawing lines between points
+            System.Drawing.Point[] priorSaveP = new System.Drawing.Point[CategoryCount];
             for (int iCol = 1; iCol <= SeriesCount; iCol++)
             {
                 for (int iRow = 1; iRow <= CategoryCount; iRow++)
@@ -183,7 +183,7 @@ namespace Majorsilence.Reporting.Rdl
 
                     int x = (int)(Layout.PlotArea.Left + ((iRow - 1) * widthCat));
                     int y = (int)((Math.Min(v, max) / max) * maxPointHeight);
-                    Draw2.Point p = new Draw2.Point(x, Layout.PlotArea.Top + (maxPointHeight - y));
+                    System.Drawing.Point p = new System.Drawing.Point(x, Layout.PlotArea.Top + (maxPointHeight - y));
                     saveP[iRow - 1] = saveAllP[iRow - 1, iCol - 1];
                     await DrawLinePoint(rpt, g, await GetSeriesBrush(rpt, iRow, iCol), ChartMarkerEnum.None, p, iRow, iCol);
 
@@ -207,7 +207,7 @@ namespace Majorsilence.Reporting.Rdl
             // Draw Plot area data 
             int maxPointHeight = (int)Layout.PlotArea.Height;
             double widthCat = ((double)(Layout.PlotArea.Width) / (CategoryCount - 1));
-            Draw2.Point[,] saveAllP = new Draw2.Point[CategoryCount, SeriesCount];  // used to collect all data points
+            System.Drawing.Point[,] saveAllP = new System.Drawing.Point[CategoryCount, SeriesCount];  // used to collect all data points
 
             // Loop thru calculating all the data points
             for (int iRow = 1; iRow <= CategoryCount; iRow++)
@@ -218,14 +218,14 @@ namespace Majorsilence.Reporting.Rdl
                 {
                     v += await GetDataValue(rpt, iRow, iCol);
                     int y = (int)(((Math.Min(v, max) - min) / (max - min)) * maxPointHeight);
-                    Draw2.Point p = new Draw2.Point(x, Layout.PlotArea.Top + (maxPointHeight - y));
+                    System.Drawing.Point p = new System.Drawing.Point(x, Layout.PlotArea.Top + (maxPointHeight - y));
                     saveAllP[iRow - 1, iCol - 1] = p;
                 }
             }
 
             // Now loop thru and plot all the points
-            Draw2.Point[] saveP = new Draw2.Point[CategoryCount];   // used for drawing lines between points
-            Draw2.Point[] priorSaveP = new Draw2.Point[CategoryCount];
+            System.Drawing.Point[] saveP = new System.Drawing.Point[CategoryCount];   // used for drawing lines between points
+            System.Drawing.Point[] priorSaveP = new System.Drawing.Point[CategoryCount];
             for (int iCol = 1; iCol <= SeriesCount; iCol++)
             {
                 for (int iRow = 1; iRow <= CategoryCount; iRow++)
@@ -234,7 +234,7 @@ namespace Majorsilence.Reporting.Rdl
 
                     int x = (int)(Layout.PlotArea.Left + ((iRow - 1) * widthCat));
                     int y = (int)(((Math.Min(v, max) - min) / (max - min)) * maxPointHeight);
-                    Draw2.Point p = new Draw2.Point(x, Layout.PlotArea.Top + (maxPointHeight - y));
+                    System.Drawing.Point p = new System.Drawing.Point(x, Layout.PlotArea.Top + (maxPointHeight - y));
                     saveP[iRow - 1] = saveAllP[iRow - 1, iCol - 1];
                     await DrawLinePoint(rpt, g, await GetSeriesBrush(rpt, iRow, iCol), ChartMarkerEnum.None, p, iRow, iCol);
                     //Add a metafilecomment to use as a tooltip GJL 26092008
@@ -259,7 +259,7 @@ namespace Majorsilence.Reporting.Rdl
             // Draw Plot area data 
             int maxPointHeight = (int)Layout.PlotArea.Height;
             double widthCat = ((double)(Layout.PlotArea.Width) / CategoryCount);
-            Draw2.Point[] saveP = new Draw2.Point[CategoryCount];   // used for drawing lines between points
+            System.Drawing.Point[] saveP = new System.Drawing.Point[CategoryCount];   // used for drawing lines between points
             for (int iCol = 1; iCol <= SeriesCount; iCol++)
             {
                 for (int iRow = 1; iRow <= CategoryCount; iRow++)
@@ -268,7 +268,7 @@ namespace Majorsilence.Reporting.Rdl
 
                     int x = (int)(Layout.PlotArea.Left + ((iRow - 1) * widthCat) + (widthCat / 2));
                     int y = (int)(((Math.Min(v, max) - min) / (max - min)) * maxPointHeight);
-                    Draw2.Point p = new Draw2.Point(x, Layout.PlotArea.Top + (maxPointHeight - y));
+                    System.Drawing.Point p = new System.Drawing.Point(x, Layout.PlotArea.Top + (maxPointHeight - y));
                     saveP[iRow - 1] = p;
                     bool DrawPoint = getNoMarkerVal(rpt, iCol, 1) == false;
                     //dont draw the point if I say not to!
@@ -307,7 +307,7 @@ namespace Majorsilence.Reporting.Rdl
             return;
         }
 
-        void DrawAreaBetweenPoints(Draw2.Graphics g, Draw2.Brush brush, Draw2.Point[] points, Draw2.Point[] previous)
+        void DrawAreaBetweenPoints(Draw2.Graphics g, Draw2.Brush brush, System.Drawing.Point[] points, System.Drawing.Point[] previous)
         {
             if (points.Length <= 1)     // Need at least 2 points
                 return;
@@ -317,24 +317,24 @@ namespace Majorsilence.Reporting.Rdl
             {
                 p = new Draw2.Pen(brush, 1);    // todo - use line from style ????
                 g.DrawLines(p, points);
-                Draw2.PointF[] poly;
+                System.Drawing.PointF[] poly;
                 if (previous == null)
                 {   // The bottom is the bottom of the chart
-                    poly = new Draw2.PointF[points.Length + 3];
+                    poly = new System.Drawing.PointF[points.Length + 3];
                     int i = 0;
-                    foreach (Draw2.Point pt in points)
+                    foreach (System.Drawing.Point pt in points)
                     {
                         poly[i++] = pt;
                     }
-                    poly[i++] = new Draw2.PointF(points[points.Length - 1].X, Layout.PlotArea.Bottom);
-                    poly[i++] = new Draw2.PointF(points[0].X, Layout.PlotArea.Bottom);
-                    poly[i] = new Draw2.PointF(points[0].X, points[0].Y);
+                    poly[i++] = new System.Drawing.PointF(points[points.Length - 1].X, Layout.PlotArea.Bottom);
+                    poly[i++] = new System.Drawing.PointF(points[0].X, Layout.PlotArea.Bottom);
+                    poly[i] = new System.Drawing.PointF(points[0].X, points[0].Y);
                 }
                 else
                 {   // The bottom is the previous line
-                    poly = new Draw2.PointF[(points.Length * 2) + 1];
+                    poly = new System.Drawing.PointF[(points.Length * 2) + 1];
                     int i = 0;
-                    foreach (Draw2.Point pt in points)
+                    foreach (System.Drawing.Point pt in points)
                     {
                         poly[i] = pt;
                         poly[points.Length + i] = previous[previous.Length - 1 - i];
@@ -352,12 +352,12 @@ namespace Majorsilence.Reporting.Rdl
             return;
         }
 
-        async Task DrawLineBetweenPoints(Draw2.Graphics g, Report rpt, Draw2.Brush brush, Draw2.Point[] points)
+        async Task DrawLineBetweenPoints(Draw2.Graphics g, Report rpt, Draw2.Brush brush, System.Drawing.Point[] points)
         {
             await DrawLineBetweenPoints(g, rpt, brush, points, 2);
         }
 
-        async Task DrawLineBetweenPoints(Draw2.Graphics g, Report rpt, Draw2.Brush brush, Draw2.Point[] points, int intLineSize)
+        async Task DrawLineBetweenPoints(Draw2.Graphics g, Report rpt, Draw2.Brush brush, System.Drawing.Point[] points, int intLineSize)
         {
             if (points.Length <= 1)		// Need at least 2 points
                 return;
@@ -384,7 +384,7 @@ namespace Majorsilence.Reporting.Rdl
             return;
         }
 
-        async Task DrawLinePoint(Report rpt, Draw2.Graphics g, Draw2.Brush brush, ChartMarkerEnum marker, Draw2.Point p, int iRow, int iCol)
+        async Task DrawLinePoint(Report rpt, Draw2.Graphics g, Draw2.Brush brush, ChartMarkerEnum marker, System.Drawing.Point p, int iRow, int iCol)
         {
             Draw2.Pen pen = null;
             try
@@ -392,7 +392,7 @@ namespace Majorsilence.Reporting.Rdl
                 pen = new Draw2.Pen(brush);
                 // 20022008 AJM GJL - Added bigger points
                 DrawLegendMarker(g, brush, pen, marker, p.X - 5, p.Y - 5, 10);
-                await DrawDataPoint(rpt, g, new Draw2.Point(p.X - 5, p.Y + 5), iRow, iCol);
+                await DrawDataPoint(rpt, g, new System.Drawing.Point(p.X - 5, p.Y + 5), iRow, iCol);
             }
             finally
             {

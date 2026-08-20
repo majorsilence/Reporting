@@ -11,7 +11,8 @@
 	</PropertyGroup>
 	<ItemGroup>
 		<ProjectReference Include="..\DataProviders\Majorsilence.Reporting.DataProviders.csproj" />
-		<ProjectReference Include="..\Majorsilence.Drawing.Common\Majorsilence.Drawing.Common.csproj" />
+		<PackageReference Include="Majorsilence.Forms" />
+		<PackageReference Include="Majorsilence.Forms.Drawing.Common" />
 		<ProjectReference Include="..\RdlEngine\Majorsilence.Reporting.RdlEngine.csproj" />
 	</ItemGroup>
 	<ItemGroup>

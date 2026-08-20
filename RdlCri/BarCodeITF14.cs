@@ -2,7 +2,7 @@ using Majorsilence.Reporting.Rdl;
 using System;
 using System.Collections.Generic;
 #if DRAWINGCOMPAT
-using Draw2 = Majorsilence.Drawing;
+using Draw2 = Majorsilence.Forms.Drawing;
 #else
 using Draw2 = System.Drawing;
 #endif
@@ -52,7 +52,13 @@ namespace Majorsilence.Reporting.Cri
             catch (InvalidOperationException) { }
 #endif
 
+#if DRAWINGCOMPAT
+            // Majorsilence.Forms.Drawing declares the SKBitmap conversion on Image; the object it
+            // hands back is a Bitmap, so the ref parameter's type needs the downcast.
+            bm = (Draw2.Bitmap)(Draw2.Image)writer.Write(value);
+#else
             bm = writer.Write(value);
+#endif
         }
 
         public string GetCustomReportItemXml()

@@ -5,8 +5,8 @@ using System.Threading.Tasks;
 
 
 #if DRAWINGCOMPAT
-using Draw2 = Majorsilence.Drawing;
-using Imaging = Majorsilence.Drawing.Imaging;
+using Draw2 = Majorsilence.Forms.Drawing;
+using Imaging = Majorsilence.Forms.Drawing.Imaging;
 #else
 using Draw2 = System.Drawing;
 using Imaging = System.Drawing.Imaging;

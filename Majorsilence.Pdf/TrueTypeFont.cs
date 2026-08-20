@@ -394,6 +394,43 @@ namespace Majorsilence.Pdf
 
         // ── font subsetting ──────────────────────────────────────────────────
 
+        // Tables removed when subsetting. A PDF viewer positions every glyph from the content
+        // stream, so OpenType/AAT layout tables are never consulted; the rest are rasterizer
+        // hints, legacy metrics, or (DSIG) a signature that subsetting invalidates anyway.
+        // Left in, they dominate the embedded font: for NotoSans-Regular, GPOS alone is 67 KB
+        // and the version 2.0 post (glyph names) another 35 KB, against 660 bytes of outlines
+        // for a three-glyph subset.
+        private static readonly HashSet<string> DiscardedInSubset = new(StringComparer.Ordinal)
+        {
+            // OpenType layout
+            "GPOS", "GSUB", "GDEF", "BASE", "JSTF", "MATH",
+            // Apple Advanced Typography
+            "morx", "mort", "feat", "prop", "lcar", "opbd", "bsln", "just", "trak", "Zapf",
+            // device metrics and rasterizer hints
+            "hdmx", "LTSH", "VDMX", "gasp", "PCLT", "fdsc", "fmtx",
+            // kerning is applied by the producer, not the viewer
+            "kern",
+            // invalidated by any modification to the font
+            "DSIG",
+        };
+
+        // A version 3.0 post table: same header fields as version 2.0 but no glyph-name array.
+        // italicAngle/underline/isFixedPitch are zeroed - nothing in a PDF reads them, and the
+        // FontDescriptor carries the values that matter.
+        private static readonly byte[] PostVersion3 =
+        {
+            0x00, 0x03, 0x00, 0x00, // version 3.0
+            0x00, 0x00, 0x00, 0x00, // italicAngle
+            0x00, 0x00,             // underlinePosition
+            0x00, 0x00,             // underlineThickness
+            0x00, 0x00, 0x00, 0x00, // isFixedPitch
+            0x00, 0x00, 0x00, 0x00, // minMemType42
+            0x00, 0x00, 0x00, 0x00, // maxMemType42
+            0x00, 0x00, 0x00, 0x00, // minMemType1
+            0x00, 0x00, 0x00, 0x00, // maxMemType1
+        };
+
+
         // Returns a new font binary containing only the glyphs in usedGlyphIds
         // (plus glyph 0 / .notdef and any composite components).
         // All other glyph slots are present in loca/glyf as zero-length entries
@@ -482,8 +519,14 @@ namespace Majorsilence.Pdf
             Buffer.BlockCopy(_data, headEntry.offset, newHead, 0, headEntry.length);
             newHead[50] = 0; newHead[51] = 1;
 
-            // Assemble all tables: keep everything, replace glyf / loca / head
-            var tagList = new List<string>(tables.Keys);
+            // Assemble the tables: replace glyf / loca / head, stub out post, drop the ones a PDF
+            // consumer never reads. Dropping is by explicit list rather than keeping a fixed set,
+            // so tables this code does not know about - CBDT/CBLC colour bitmaps most importantly
+            // (see IsColorBitmapOnly) - survive untouched.
+            var tagList = new List<string>(tables.Keys.Count);
+            foreach (var tag in tables.Keys)
+                if (!DiscardedInSubset.Contains(tag))
+                    tagList.Add(tag);
             tagList.Sort(StringComparer.Ordinal);
             int nT = tagList.Count;
 
@@ -494,6 +537,7 @@ namespace Majorsilence.Pdf
                 if      (tag == "glyf") tableData[tag] = newGlyfData;
                 else if (tag == "loca") tableData[tag] = newLocaData;
                 else if (tag == "head") tableData[tag] = newHead;
+                else if (tag == "post") tableData[tag] = PostVersion3;
                 else
                 {
                     var (off, len) = tables[tag];

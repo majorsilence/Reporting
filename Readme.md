@@ -1,14 +1,24 @@
 # Majorsilence Reporting (formerly My-FyiReporting)
 
-If you have any question about Majorsilence Reporting or do you want to contribute a discussion group for Majorsilence Reporting is available here:
+Majorsilence Reporting is an open-source .NET reporting framework for building, rendering, and viewing RDL-based reports — a self-hosted alternative to SQL Server Reporting Services (SSRS) and Crystal Reports. It targets .NET 8 and .NET 10, renders reports to PDF and other formats from a variety of data sources, and ships both a fluent C# API for generating reports and a Windows drag-and-drop visual designer.
+
+[![NuGet](https://img.shields.io/nuget/v/Majorsilence.Reporting.RdlEngine.SkiaSharp.svg?label=NuGet)](https://www.nuget.org/packages/Majorsilence.Reporting.RdlEngine.SkiaSharp/)
+[![License](https://img.shields.io/github/license/majorsilence/Reporting.svg)](LICENSE.txt)
+[![linux](https://github.com/majorsilence/Reporting/actions/workflows/linux.yml/badge.svg?branch=main)](https://github.com/majorsilence/Reporting/actions/workflows/linux.yml)
+[![mac](https://github.com/majorsilence/Reporting/actions/workflows/mac.yml/badge.svg?branch=main)](https://github.com/majorsilence/Reporting/actions/workflows/mac.yml)
+[![windows](https://github.com/majorsilence/Reporting/actions/workflows/windows.yml/badge.svg?branch=main)](https://github.com/majorsilence/Reporting/actions/workflows/windows.yml)
+
+```bash
+dotnet add package Majorsilence.Reporting.RdlCreator.SkiaSharp
+dotnet add package Majorsilence.Reporting.RdlEngine.SkiaSharp
+dotnet add package Majorsilence.Reporting.RdlCri.SkiaSharp
+```
+
+**The core engine supports Linux, macOS, and Windows for server-side report generation. Only the WinForms-based designer and viewer are Windows-only.**
+
+If you have any question about Majorsilence Reporting or want to discuss it, a discussion group is available here:
 
 https://github.com/majorsilence/Reporting/discussions
-
-|         |Linux |Mac | Win |
-|---------|:------:|:------:|:------:|
-|**main**| [![linux](https://github.com/majorsilence/Reporting/actions/workflows/linux.yml/badge.svg?branch=main)](https://github.com/majorsilence/Reporting/actions/workflows/linux.yml) | [![mac](https://github.com/majorsilence/Reporting/actions/workflows/mac.yml/badge.svg?branch=main)](https://github.com/majorsilence/Reporting/actions/workflows/mac.yml) | [![.github/workflows/windows.yml](https://github.com/majorsilence/Reporting/actions/workflows/windows.yml/badge.svg?branch=main)](https://github.com/majorsilence/Reporting/actions/workflows/windows.yml) |
-
-
 
 # Documentation
 See the [projects wiki](https://github.com/majorsilence/My-FyiReporting/wiki).
@@ -23,20 +33,9 @@ Alternatively if you want keep up with the latest version you can always use Git
 git clone https://github.com/majorsilence/Reporting.git
 ```
 
-# Introduction
-Majorsilence Reporting is a powerful, open-source .NET reporting framework designed for developers who need to create, design, and deliver rich, reports. Supporting modern .NET versions (8.0, 10.0), it provides a flexible and extensible platform for building reports from a variety of data sources. With a drag-and-drop designer, multiple viewer options, and cross-platform support, Majorsilence Reporting is ideal for both desktop and web applications. Whether you need to generate reports programmatically or empower users with a visual designer (windows only), this project offers the tools and documentation to get you started quickly.
-
-**The core of Majorsilence Reporting supports Linux and macOS for server-side application report generation. Only the WinForms-based designer and viewer are Windows-only.**
-
 # Quick start
 
-Add these nuget packages to your project.
-
-```bash
-dotnet add package Majorsilence.Reporting.RdlCreator.SkiaSharp
-dotnet add package Majorsilence.Reporting.RdlEngine.SkiaSharp
-dotnet add package Majorsilence.Reporting.RdlCri.SkiaSharp
-```
+Add the [NuGet packages above](#majorsilence-reporting-formerly-my-fyireporting) to your project.
 
 If running on linux install the [required fonts](https://github.com/majorsilence/My-FyiReporting/wiki/Linux---PDF-export-and-Fonts).
 
@@ -248,7 +247,6 @@ The entire project is Apache 2.0 licensed with select sub projects tri-licensed.
 
 tri-licensed projects
 
-- Majorsilence.Drawing.Common
 - Majorsilence.Pdf
 - Majorsilence.Pdf.Security
 - Majorsilence.Reporting.UI

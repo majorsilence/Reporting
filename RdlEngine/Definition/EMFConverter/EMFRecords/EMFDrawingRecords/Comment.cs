@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.IO;
 #if DRAWINGCOMPAT
-using Draw2 = Majorsilence.Drawing;
+using Draw2 = Majorsilence.Forms.Drawing;
 #else
 using Draw2 = System.Drawing;
 #endif
@@ -58,7 +58,7 @@ namespace Majorsilence.Reporting.Rdl
                     pp.SI = si;
                     //si.BackgroundColor = Color.Blue;// Just a test to see where the tooltip is being drawn
                     string[] ttd = PData.Split('|');
-                    Draw2.PointF[] pts = new Draw2.PointF[(ttd.Length - 1) / 2];
+                    System.Drawing.PointF[] pts = new System.Drawing.PointF[(ttd.Length - 1) / 2];
                     pp.Points = pts;
                     pp.Tooltip = ttd[0].Split(':')[1];
                     for (int i = 0; i < pts.Length; i++)

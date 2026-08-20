@@ -4,7 +4,8 @@ using System.Collections.Generic;
 using System.Text;
 using System.IO;
 #if DRAWINGCOMPAT
-using Majorsilence.Drawing;
+using Majorsilence.Forms.Drawing;
+using System.Drawing;  // value types (Color, Point, Size, Rectangle, ...) come from System.Drawing.Primitives
 using System.DrawingCore.Imaging;
 #else
 using System.Drawing;

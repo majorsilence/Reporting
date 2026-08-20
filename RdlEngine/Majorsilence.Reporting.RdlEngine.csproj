@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
 		<ProjectType>Local</ProjectType>
 		<DelaySign>false</DelaySign>
@@ -61,8 +61,9 @@
 		<ProjectReference Include="..\Majorsilence.Pdf\Majorsilence.Pdf.csproj" />
 		<ProjectReference Include="..\Majorsilence.Pdf.Security\Majorsilence.Pdf.Security.csproj" />
 	</ItemGroup>
-	<ItemGroup Condition="'$(DefineConstants.Contains(DRAWINGCOMPAT))' == True">
-		<ProjectReference Include="..\Majorsilence.Drawing.Common\Majorsilence.Drawing.Common.csproj" />
+	<ItemGroup Condition="'$(DrawingCompat)' == 'true'">
+		<PackageReference Include="Majorsilence.Forms" />
+		<PackageReference Include="Majorsilence.Forms.Drawing.Common" />
 	</ItemGroup>
 	<ItemGroup>
 		<EmbeddedResource Update="Resources\Strings.resx">
@@ -99,7 +100,7 @@
 		<PackageReference Include="System.Data.OleDb" />
 		<!-- CodeDom/VBCodeProvider usage is guarded with RuntimeFeature.IsDynamicCodeSupported -->
 		<PackageReference Include="System.CodeDom" />
-		<PackageReference Condition="'$(DefineConstants.Contains(DRAWINGCOMPAT))' == False" Include="System.Drawing.Common" />
+		<PackageReference Condition="'$(DrawingCompat)' != 'true'" Include="System.Drawing.Common" />
 		<PackageReference Include="System.Security.Cryptography.Xml" />
 	</ItemGroup>
 	<ItemGroup>
@@ -107,7 +108,7 @@
 		<Compile Remove="RdlPrint.cs" />
 		<Compile Remove="Render\CompilationExtensions.cs" />
 	</ItemGroup>
-	<ItemGroup Condition="'$(DefineConstants.Contains(DRAWINGCOMPAT))'">
+	<ItemGroup Condition="'$(DrawingCompat)' == 'true'">
 		<Compile Remove="Definition\EMFConverter\**\**\*.cs" />
 	</ItemGroup>
     <ItemGroup Condition="'$(TargetFramework)' == 'net48'">

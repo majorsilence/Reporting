@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.IO;
 #if DRAWINGCOMPAT
-using Drawing = Majorsilence.Drawing;
+using Drawing = Majorsilence.Forms.Drawing;
 #else
 using Drawing = System.Drawing;
 #endif

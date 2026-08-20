@@ -41,6 +41,9 @@ namespace ReportTests
 
             double bottomOfPage = pgs.BottomOfPage;
 
+            // Chunks of the GrowBox textbox: every PageText except the TopMarker on page 1.
+            // A chunk may legitimately land right on a word boundary (e.g. just "ENDMARKER"
+            // alone on its own page), so chunks must not be filtered by their content.
             var chunks = new List<(int page, PageText pt)>();
             int pageCount = 0;
             foreach (Page p in pgs)
@@ -48,7 +51,7 @@ namespace ReportTests
                 pageCount++;
                 foreach (PageItem pi in p)
                 {
-                    if (pi is PageText pt && pt.Text != null && pt.Text.Contains("wraps here"))
+                    if (pi is PageText pt && pt.Text != null && pt.Text != "TOPMARKER")
                         chunks.Add((pageCount, pt));
                 }
             }

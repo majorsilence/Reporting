@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.IO;
 #if DRAWINGCOMPAT
-using Draw2 = Majorsilence.Drawing;
+using Draw2 = Majorsilence.Forms.Drawing;
 #else
 using Draw2 = System.Drawing;
 #endif
@@ -52,7 +52,7 @@ namespace Majorsilence.Reporting.Rdl
                     G = _br.ReadByte();
                     R = _br.ReadByte();
                     A = _br.ReadByte();
-                    b = new Draw2.SolidBrush(Draw2.Color.FromArgb(A, R, G, B));
+                    b = new Draw2.SolidBrush(System.Drawing.Color.FromArgb(A, R, G, B));
                 }
                 else
                 {

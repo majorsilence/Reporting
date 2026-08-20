@@ -1,5 +1,18 @@
 <Project>
-  <PropertyGroup Condition="'$(Configuration)' == 'Release-DrawingCompat' Or '$(Configuration)' == 'Debug-DrawingCompat' Or '$(OS)' != 'Windows_NT'">
+  <!--
+    The drawing compat layer is Majorsilence.Forms.Drawing (the Majorsilence.Forms /
+    Majorsilence.Forms.Drawing.Common packages), which ship net8.0/net10.0 only. net48 therefore
+    stays on the real System.Drawing (GDI+) - which is what it always did in plain Debug/Release
+    anyway, since net48 only builds on Windows. TargetFramework is a global property in the SDK's
+    per-TFM inner builds, so this correctly turns DRAWINGCOMPAT off for the net48 inner build alone.
+
+    DrawingCompat is the flag project files must test. Don't test DefineConstants with a substring
+    match: the SDK also defines the configuration name as a symbol, so in Release-DrawingCompat every
+    TFM - net48 included - gets RELEASE_DRAWINGCOMPAT, and $(DefineConstants.Contains(DRAWINGCOMPAT))
+    is therefore true even where DRAWINGCOMPAT itself is not defined.
+  -->
+  <PropertyGroup Condition="('$(Configuration)' == 'Release-DrawingCompat' Or '$(Configuration)' == 'Debug-DrawingCompat' Or '$(OS)' != 'Windows_NT') And '$(TargetFramework)' != 'net48'">
+    <DrawingCompat>true</DrawingCompat>
     <DefineConstants>DRAWINGCOMPAT</DefineConstants>
   </PropertyGroup>
 

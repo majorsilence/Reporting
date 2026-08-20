@@ -12,8 +12,8 @@ using System.Threading.Tasks;
 
 
 #if DRAWINGCOMPAT
-using Draw2 = Majorsilence.Drawing;
-using Majorsilence.Drawing.Imaging;
+using Draw2 = Majorsilence.Forms.Drawing;
+using Majorsilence.Forms.Drawing.Imaging;
 #else
 using Draw2 = System.Drawing;
 using System.Drawing.Imaging;
@@ -33,7 +33,7 @@ namespace Majorsilence.Reporting.Rdl
 		StringWriter tw;			// temporary location where the output is going
 		IStreamGen _sg;				// stream generater
         System.Collections.Generic.List<string> _Fonts;        // list of fonts used
-        System.Collections.Generic.List<Draw2.Color> _Colors;         // list of colors used
+        System.Collections.Generic.List<System.Drawing.Color> _Colors;         // list of colors used
         Draw2.Bitmap _bm=null;			// bm and
         Draw2.Graphics _g=null;			//		  g are needed when calculating string heights
 
@@ -52,7 +52,7 @@ namespace Majorsilence.Reporting.Rdl
 
 			tw = new StringWriter();	// will hold the bulk of the RTF until we generate
             _Fonts = new System.Collections.Generic.List<string>();
-            _Colors = new System.Collections.Generic.List<Draw2.Color>();
+            _Colors = new System.Collections.Generic.List<System.Drawing.Color>();
         }
         public void Dispose() 
 		{
@@ -144,7 +144,7 @@ namespace Majorsilence.Reporting.Rdl
         private void PutColorTable(TextWriter ftw)
         {
             ftw.Write(@"{\colortbl;");
-            foreach (Draw2.Color color in _Colors)
+            foreach (System.Drawing.Color color in _Colors)
             {
                 ftw.Write(@"\red{0}\green{1}\blue{2};", color.R, color.G, color.B);
             }

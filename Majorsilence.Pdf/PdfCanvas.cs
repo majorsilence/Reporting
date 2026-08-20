@@ -180,7 +180,12 @@ namespace Majorsilence.Pdf
                         {
                             sb.Append("BT\n");
                             if (style.IsVertical)
-                                sb.Append($"{F(0)} {F(style.FontSize)} Td\n");
+                                // The vertical CTM below already places (x, pdfY) at the local origin,
+                                // so Td 0 0 anchors the run there -- the same baseline-start convention
+                                // the horizontal branch uses. Td 0 FontSize used to shift the whole run
+                                // FontSize points off-axis, landing it FontSize points short of the box
+                                // it was measured and sized for.
+                                sb.Append($"{F(0)} {F(0)} Td\n");
                             else
                                 sb.Append($"{F(cursorX)} {F(pdfY)} Td\n");
                             inBt = true;
@@ -213,7 +218,9 @@ namespace Majorsilence.Pdf
                 sb.Append("BT\n");
                 sb.Append($"/{font.PdfName} {F(style.FontSize)} Tf\n");
                 if (style.IsVertical)
-                    sb.Append($"{F(0)} {F(style.FontSize)} Td\n");
+                    // See the matching comment in the TTF path above: Td 0 0 anchors at (x, pdfY)
+                    // through the vertical CTM, matching the horizontal branch's baseline-start.
+                    sb.Append($"{F(0)} {F(0)} Td\n");
                 else
                     sb.Append($"{F(x)} {F(pdfY)} Td\n");
                 sb.Append($"({PdfSerializer.PdfString(encoded)}) Tj\n");

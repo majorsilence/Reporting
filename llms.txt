@@ -1,0 +1,25 @@
+# Majorsilence Reporting
+
+> Open-source .NET reporting framework (formerly My-FyiReporting) for building, rendering, and viewing RDL-based reports — a self-hosted alternative to SQL Server Reporting Services (SSRS) and Crystal Reports. Targets .NET 8 and .NET 10; the core engine runs on Linux, macOS, and Windows, with a Windows-only WinForms drag-and-drop designer and viewer.
+
+Majorsilence Reporting lets developers generate reports two ways: programmatically, via a fluent C# API (`Majorsilence.Reporting.RdlCreator`) or by parsing an existing `.rdl` report definition (`Majorsilence.Reporting.Rdl`), or visually, with a Windows drag-and-drop designer. Reports render to PDF and other output formats, pulling data from providers including SQL Server, MySQL, PostgreSQL, SQLite, Firebird, and JSON. Licensed Apache 2.0 (select sub-projects are additionally tri-licensed MIT/Apache-2.0/BSD-2-Clause).
+
+## Docs
+
+- [README](https://github.com/majorsilence/Reporting/blob/main/Readme.md): install instructions, quick-start code samples, license and build status
+- [Wiki](https://github.com/majorsilence/My-FyiReporting/wiki): full documentation home
+- [Database Providers Howto](https://github.com/majorsilence/My-FyiReporting/wiki/Database-Providers-Howto): connecting reports to a data source
+- [Downloads](https://github.com/majorsilence/My-FyiReporting/wiki/Downloads): prebuilt designer/viewer downloads
+- [Contribute](https://github.com/majorsilence/My-FyiReporting/wiki/Contribute): contribution workflow
+- [Specification](https://github.com/majorsilence/Reporting/blob/main/Specification.md): the RDL report-definition format this project implements
+
+## Packages
+
+- [Majorsilence.Reporting.RdlEngine.SkiaSharp](https://www.nuget.org/packages/Majorsilence.Reporting.RdlEngine.SkiaSharp/): core RDL parsing and rendering engine
+- [Majorsilence.Reporting.RdlCreator.SkiaSharp](https://www.nuget.org/packages/Majorsilence.Reporting.RdlCreator.SkiaSharp/): fluent C# API for building RDL reports programmatically
+- [Majorsilence.Reporting.RdlCri.SkiaSharp](https://www.nuget.org/packages/Majorsilence.Reporting.RdlCri.SkiaSharp/): CustomReportItem (CRI) extension library for RDL reports
+
+## Optional
+
+- [Discussions](https://github.com/majorsilence/Reporting/discussions): questions and community discussion
+- [License](https://github.com/majorsilence/Reporting/blob/main/LICENSE.txt): Apache License 2.0

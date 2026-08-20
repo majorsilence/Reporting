@@ -4,9 +4,9 @@ using System.Collections;
 using System.Threading.Tasks;
 
 #if DRAWINGCOMPAT
-using Draw2 = Majorsilence.Drawing;
-using Drawing2D = Majorsilence.Drawing.Drawing2D;
-using Imaging = Majorsilence.Drawing.Imaging;
+using Draw2 = Majorsilence.Forms.Drawing;
+using Drawing2D = Majorsilence.Forms.Drawing.Drawing2D;
+using Imaging = Majorsilence.Forms.Drawing.Imaging;
 #else
 using Draw2 = System.Drawing;
 using Drawing2D = System.Drawing.Drawing2D;
@@ -172,7 +172,7 @@ namespace Majorsilence.Reporting.Rdl
 
         protected async Task DrawChartStyle(Report rpt, Draw2.Graphics g)
         {
-            Draw2.Rectangle rect = new Draw2.Rectangle(0, 0, Layout.Width, Layout.Height);
+            System.Drawing.Rectangle rect = new System.Drawing.Rectangle(0, 0, Layout.Width, Layout.Height);
             if (_ChartDefn.Style == null)
             {
                 g.FillRectangle(Draw2.Brushes.White, rect);
@@ -188,36 +188,36 @@ namespace Majorsilence.Reporting.Rdl
         }
 
         // Draws the Legend and then returns the rectangle it drew in
-        protected async Task<Draw2.Rectangle> DrawLegend(Report rpt, Draw2.Graphics g, bool bMarker, bool bBeforePlotDrawn)
+        protected async Task<System.Drawing.Rectangle> DrawLegend(Report rpt, Draw2.Graphics g, bool bMarker, bool bBeforePlotDrawn)
         {
             Legend l = _ChartDefn.Legend;
             if (l == null)
-                return Draw2.Rectangle.Empty;
+                return System.Drawing.Rectangle.Empty;
             if (!l.Visible)
-                return Draw2.Rectangle.Empty;
+                return System.Drawing.Rectangle.Empty;
             if (_ChartDefn.SeriesGroupings == null)
-                return Draw2.Rectangle.Empty;
+                return System.Drawing.Rectangle.Empty;
             if (bBeforePlotDrawn)
             {
                 if (this.IsLegendInsidePlotArea())
-                    return Draw2.Rectangle.Empty;
+                    return System.Drawing.Rectangle.Empty;
             }
             else if (!IsLegendInsidePlotArea())         // Only draw legend after if inside the plot
-                return Draw2.Rectangle.Empty;
+                return System.Drawing.Rectangle.Empty;
 
             Draw2.Font drawFont = null;
             Draw2.Brush drawBrush = null;
             Draw2.StringFormat drawFormat = null;
 
             // calculated bounding rectangle of the legend
-            Draw2.Rectangle rRect;
+            System.Drawing.Rectangle rRect;
             Style s = l.Style;
             try     // no matter what we want to dispose of the graphic resources
             {
                 if (s == null)
                 {
                     drawFont = new Draw2.Font("Arial", 10);
-                    drawBrush = new Draw2.SolidBrush(Draw2.Color.Black);
+                    drawBrush = new Draw2.SolidBrush(System.Drawing.Color.Black);
                     drawFormat = new Draw2.StringFormat();
                     drawFormat.Alignment = Draw2.StringAlignment.Near;
                 }
@@ -231,10 +231,10 @@ namespace Majorsilence.Reporting.Rdl
                 int x, y, h;
                 int maxTextWidth, maxTextHeight;
                 drawFormat.FormatFlags |= Draw2.StringFormatFlags.NoWrap;
-                Draw2.Size[] sizes;
+                System.Drawing.Size[] sizes;
 
                 (sizes, maxTextWidth, maxTextHeight) = await DrawLegendMeasure(rpt, g, drawFont, drawFormat,
-                 new Draw2.SizeF(Layout.Width, Layout.Height));
+                 new System.Drawing.SizeF(Layout.Width, Layout.Height));
                 int boxSize = (int)(maxTextHeight * .8);
                 int totalItemWidth = 0;         // width of a legend item
                 int totalWidth, totalHeight;    // final height and width of legend
@@ -356,7 +356,7 @@ namespace Majorsilence.Reporting.Rdl
                     }
 
                 // We now know enough to calc the bounding rectangle of the legend
-                rRect = new Draw2.Rectangle(x - 1, y - 1, totalWidth + 2, totalHeight + 2);
+                rRect = new System.Drawing.Rectangle(x - 1, y - 1, totalWidth + 2, totalHeight + 2);
                 if (s != null)
                 {
                     await s.DrawBackground(rpt, g, null, rRect);  // draw (or not draw) background 
@@ -370,7 +370,7 @@ namespace Majorsilence.Reporting.Rdl
                     string c = await GetSeriesValue(rpt, iCol);
                     if (c != "") //14052008WRP Cater for empty strings in the legend
                     {
-                        Draw2.Rectangle rect;
+                        System.Drawing.Rectangle rect;
                         // 20022008 AJM GJL - Draw correct legend icon (Column\Line)
                         Type t = null;
                         t = GetSeriesBrush(rpt, 1, iCol).GetType();
@@ -415,7 +415,7 @@ namespace Majorsilence.Reporting.Rdl
                         switch (l.Layout)
                         {
                             case LegendLayoutEnum.Row:
-                                rect = new Draw2.Rectangle(x + boxSize + (boxSize / 2), y, totalItemWidth - boxSize - (boxSize / 2), h);
+                                rect = new System.Drawing.Rectangle(x + boxSize + (boxSize / 2), y, totalItemWidth - boxSize - (boxSize / 2), h);
                                 if (c != "") //14052008WRP to cater for empty strings in the legend
                                 {
                                     g.DrawString(c, drawFont, drawBrush, rect, drawFormat);
@@ -439,7 +439,7 @@ namespace Majorsilence.Reporting.Rdl
                                 }
                                 break;
                             case LegendLayoutEnum.Table:
-                                rect = new Draw2.Rectangle(x + boxSize + (boxSize / 2), y, maxTextWidth, h);
+                                rect = new System.Drawing.Rectangle(x + boxSize + (boxSize / 2), y, maxTextWidth, h);
                                 g.DrawString(c, drawFont, drawBrush, rect, drawFormat);
 
                                 if (cm != ChartMarkerEnum.None && (t == typeof(Drawing2D.HatchBrush))) //GJL 110208 - Don't draw pattern for lines
@@ -466,7 +466,7 @@ namespace Majorsilence.Reporting.Rdl
                                 break;
                             case LegendLayoutEnum.Column:
                             default:
-                                rect = new Draw2.Rectangle(x + boxSize + (boxSize / 2), y, maxTextWidth, h);
+                                rect = new System.Drawing.Rectangle(x + boxSize + (boxSize / 2), y, maxTextWidth, h);
                                 g.DrawString(c, drawFont, drawBrush, rect, drawFormat);
 
 
@@ -521,7 +521,7 @@ namespace Majorsilence.Reporting.Rdl
                     p = new Draw2.Pen(b, intLineSize);
                     if (this.ChartDefn.Type != ChartTypeEnum.Scatter)
                     {
-                        g.DrawLine(p, new Draw2.Point(x, y + ((boxSize + 1) / 2)), new Draw2.Point(x + boxSize, y + ((boxSize + 1) / 2)));
+                        g.DrawLine(p, new System.Drawing.Point(x, y + ((boxSize + 1) / 2)), new System.Drawing.Point(x + boxSize, y + ((boxSize + 1) / 2)));
                     }
                     x = x + ((boxSize - mSize) / 2);
                     y = y + ((boxSize - mSize) / 2);
@@ -541,7 +541,7 @@ namespace Majorsilence.Reporting.Rdl
                 {
                     // this is only to draw lines for line plot types on scatter charts
                     p = new Draw2.Pen(b, intLineSize);
-                    g.DrawLine(p, new Draw2.Point(x, y + ((boxSize + 1) / 2)), new Draw2.Point(x + boxSize, y + ((boxSize + 1) / 2)));
+                    g.DrawLine(p, new System.Drawing.Point(x, y + ((boxSize + 1) / 2)), new System.Drawing.Point(x + boxSize, y + ((boxSize + 1) / 2)));
                 }
                 else
                 {
@@ -557,7 +557,7 @@ namespace Majorsilence.Reporting.Rdl
 
         internal void DrawLegendMarker(Draw2.Graphics g, Draw2.Brush b, Draw2.Pen p, ChartMarkerEnum marker, int x, int y, int mSize)
         {
-            Draw2.PointF[] points;
+            System.Drawing.PointF[] points;
             switch (marker)
             {
                 case ChartMarkerEnum.Bubble:
@@ -570,37 +570,37 @@ namespace Majorsilence.Reporting.Rdl
                 case ChartMarkerEnum.Plus:
                     // 20022008 AJM GJL - Changed to line - plus is hard to see
                     p = new Draw2.Pen(p.Brush, 2);
-                    g.DrawLine(p, new Draw2.Point(x + ((mSize + 1) / 2), y), new Draw2.Point(x + ((mSize + 1) / 2), y + mSize));
+                    g.DrawLine(p, new System.Drawing.Point(x + ((mSize + 1) / 2), y), new System.Drawing.Point(x + ((mSize + 1) / 2), y + mSize));
                     //g.DrawLine(p, new Point(x + (mSize + 1)/2, y + (mSize+1)/2), new Point(x + mSize, y + (mSize+1)/2));
                     break;
                 case ChartMarkerEnum.Diamond:
-                    points = new Draw2.PointF[5];
-                    points[0] = points[4] = new Draw2.Point(x + ((mSize + 1) / 2), y);    // starting and ending point
-                    points[1] = new Draw2.PointF(x, y + ((mSize + 1) / 2));
-                    points[2] = new Draw2.PointF(x + ((mSize + 1) / 2), y + mSize);
-                    points[3] = new Draw2.PointF(x + mSize, y + ((mSize + 1) / 2));
+                    points = new System.Drawing.PointF[5];
+                    points[0] = points[4] = new System.Drawing.Point(x + ((mSize + 1) / 2), y);    // starting and ending point
+                    points[1] = new System.Drawing.PointF(x, y + ((mSize + 1) / 2));
+                    points[2] = new System.Drawing.PointF(x + ((mSize + 1) / 2), y + mSize);
+                    points[3] = new System.Drawing.PointF(x + mSize, y + ((mSize + 1) / 2));
                     g.FillPolygon(b, points);
                     break;
                 case ChartMarkerEnum.Triangle:
-                    points = new Draw2.PointF[4];
-                    points[0] = points[3] = new Draw2.PointF(x + ((mSize + 1) / 2), y);   // starting and ending point
-                    points[1] = new Draw2.PointF(x, y + mSize);
-                    points[2] = new Draw2.PointF(x + mSize, y + mSize);
+                    points = new System.Drawing.PointF[4];
+                    points[0] = points[3] = new System.Drawing.PointF(x + ((mSize + 1) / 2), y);   // starting and ending point
+                    points[1] = new System.Drawing.PointF(x, y + mSize);
+                    points[2] = new System.Drawing.PointF(x + mSize, y + mSize);
                     g.FillPolygon(b, points);
                     break;
                 case ChartMarkerEnum.X:
                     p = new Draw2.Pen(p.Brush, 2);// 20022008 AJM GJL
-                    g.DrawLine(p, new Draw2.Point(x, y), new Draw2.Point(x + mSize, y + mSize));
-                    g.DrawLine(p, new Draw2.Point(x, y + mSize), new Draw2.Point(x + mSize, y));// 20022008 AJM GJL
+                    g.DrawLine(p, new System.Drawing.Point(x, y), new System.Drawing.Point(x + mSize, y + mSize));
+                    g.DrawLine(p, new System.Drawing.Point(x, y + mSize), new System.Drawing.Point(x + mSize, y));// 20022008 AJM GJL
                     break;
             }
             return;
         }
 
         // Measures the Legend and then returns the rectangle it drew in
-        protected async Task<(Draw2.Size[] sizes, int maxWidth, int maxHeight)> DrawLegendMeasure(Report rpt, Draw2.Graphics g, Draw2.Font f, Draw2.StringFormat sf, Draw2.SizeF maxSize)
+        protected async Task<(System.Drawing.Size[] sizes, int maxWidth, int maxHeight)> DrawLegendMeasure(Report rpt, Draw2.Graphics g, Draw2.Font f, Draw2.StringFormat sf, System.Drawing.SizeF maxSize)
         {
-            Draw2.Size[] sizes = new Draw2.Size[SeriesCount];
+            System.Drawing.Size[] sizes = new System.Drawing.Size[SeriesCount];
             int maxHeight = 0;
             int maxWidth = maxHeight = 0;
 
@@ -609,8 +609,8 @@ namespace Majorsilence.Reporting.Rdl
                 string c = await GetSeriesValue(rpt, iCol);
                 if (c != "")  //14052008WRP cater for empty strings in legend names
                 {
-                    Draw2.SizeF ms = g.MeasureString(c, f, maxSize, sf);
-                    sizes[iCol - 1] = new Draw2.Size((int)Math.Ceiling(ms.Width),
+                    System.Drawing.SizeF ms = g.MeasureString(c, f, maxSize, sf);
+                    sizes[iCol - 1] = new System.Drawing.Size((int)Math.Ceiling(ms.Width),
                                              (int)Math.Ceiling(ms.Height));
                     if (sizes[iCol - 1].Width > maxWidth)
                         maxWidth = sizes[iCol - 1].Width;
@@ -622,11 +622,11 @@ namespace Majorsilence.Reporting.Rdl
             return (sizes, maxWidth, maxHeight);
         }
 
-        protected async Task DrawPlotAreaStyle(Report rpt, Draw2.Graphics g, Draw2.Rectangle crect)
+        protected async Task DrawPlotAreaStyle(Report rpt, Draw2.Graphics g, System.Drawing.Rectangle crect)
         {
             if (_ChartDefn.PlotArea == null || _ChartDefn.PlotArea.Style == null)
                 return;
-            Draw2.Rectangle rect = Layout.PlotArea;
+            System.Drawing.Rectangle rect = Layout.PlotArea;
             Style s = _ChartDefn.PlotArea.Style;
 
             Row r = FirstChartRow(rpt);
@@ -657,7 +657,7 @@ namespace Majorsilence.Reporting.Rdl
             return;
         }
 
-        protected async Task DrawTitle(Report rpt, Draw2.Graphics g, Title t, Draw2.Rectangle rect)
+        protected async Task DrawTitle(Report rpt, Draw2.Graphics g, Title t, System.Drawing.Rectangle rect)
         {
             if (t == null)
                 return;
@@ -678,9 +678,9 @@ namespace Majorsilence.Reporting.Rdl
             return;
         }
 
-        protected async Task<Draw2.Size> DrawTitleMeasure(Report rpt, Draw2.Graphics g, Title t)
+        protected async Task<System.Drawing.Size> DrawTitleMeasure(Report rpt, Draw2.Graphics g, Title t)
         {
-            Draw2.Size size = Draw2.Size.Empty;
+            System.Drawing.Size size = System.Drawing.Size.Empty;
 
             if (t == null || t.Caption == null)
                 return size;
@@ -696,7 +696,7 @@ namespace Majorsilence.Reporting.Rdl
         }
 
         //15052008WRP - Draw category month labels
-        protected async Task DrawCategoryLabel(Report rpt, Draw2.Graphics g, string t, Style a, Draw2.Rectangle rect)
+        protected async Task DrawCategoryLabel(Report rpt, Draw2.Graphics g, string t, Style a, System.Drawing.Rectangle rect)
         {
 
             if (t == null)
@@ -715,9 +715,9 @@ namespace Majorsilence.Reporting.Rdl
         }
 
         //15052008WRP - Measure category title size
-        protected async Task<Draw2.Size> DrawCategoryTitleMeasure(Report rpt, Draw2.Graphics g, string t, Style a)
+        protected async Task<System.Drawing.Size> DrawCategoryTitleMeasure(Report rpt, Draw2.Graphics g, string t, Style a)
         {
-            Draw2.Size size = Draw2.Size.Empty;
+            System.Drawing.Size size = System.Drawing.Size.Empty;
             Row r = FirstChartRow(rpt);
 
             if (t == null || t == "")
@@ -904,24 +904,24 @@ namespace Majorsilence.Reporting.Rdl
             Style s = ce.DP.Style;
             string sc = await s.BackgroundColor.EvaluateString(rpt, lrow);
 
-            Draw2.Color rc = XmlUtil.ColorFromHtml(sc, Draw2.Color.Empty, rpt);
-            if (rc != Draw2.Color.Empty)
+            System.Drawing.Color rc = XmlUtil.ColorFromHtml(sc, System.Drawing.Color.Empty, rpt);
+            if (rc != System.Drawing.Color.Empty)
                 br = new Draw2.SolidBrush(rc);
 
             return br;
         }
 
-        protected async Task DrawDataPoint(Report rpt, Draw2.Graphics g, Draw2.Point p, int row, int col)
+        protected async Task DrawDataPoint(Report rpt, Draw2.Graphics g, System.Drawing.Point p, int row, int col)
         {
-            await DrawDataPoint(rpt, g, p, Draw2.Rectangle.Empty, row, col);
+            await DrawDataPoint(rpt, g, p, System.Drawing.Rectangle.Empty, row, col);
         }
 
-        protected async Task DrawDataPoint(Report rpt, Draw2.Graphics g, Draw2.Rectangle rect, int row, int col)
+        protected async Task DrawDataPoint(Report rpt, Draw2.Graphics g, System.Drawing.Rectangle rect, int row, int col)
         {
-            await DrawDataPoint(rpt, g, Draw2.Point.Empty, rect, row, col);
+            await DrawDataPoint(rpt, g, System.Drawing.Point.Empty, rect, row, col);
         }
 
-        async Task DrawDataPoint(Report rpt, Draw2.Graphics g, Draw2.Point p, Draw2.Rectangle rect, int row, int col)
+        async Task DrawDataPoint(Report rpt, Draw2.Graphics g, System.Drawing.Point p, System.Drawing.Rectangle rect, int row, int col)
         {
             MatrixCellEntry mce = _DataDefn[row, col];
             if (mce == null)
@@ -957,19 +957,19 @@ namespace Majorsilence.Reporting.Rdl
 
             if (dp.DataLabel.Style == null)
             {
-                if (rect == Draw2.Rectangle.Empty)
+                if (rect == System.Drawing.Rectangle.Empty)
                 {
-                    Draw2.Size size = await Style.MeasureStringDefaults(rpt, g, v, tc, lrow, int.MaxValue);
-                    rect = new Draw2.Rectangle(p, size);
+                    System.Drawing.Size size = await Style.MeasureStringDefaults(rpt, g, v, tc, lrow, int.MaxValue);
+                    rect = new System.Drawing.Rectangle(p, size);
                 }
                 Style.DrawStringDefaults(g, v, rect);
             }
             else
             {
-                if (rect == Draw2.Rectangle.Empty)
+                if (rect == System.Drawing.Rectangle.Empty)
                 {
-                    Draw2.Size size = await dp.DataLabel.Style.MeasureString(rpt, g, v, tc, lrow, int.MaxValue);
-                    rect = new Draw2.Rectangle(p, size);
+                    System.Drawing.Size size = await dp.DataLabel.Style.MeasureString(rpt, g, v, tc, lrow, int.MaxValue);
+                    rect = new System.Drawing.Rectangle(p, size);
                 }
                 await dp.DataLabel.Style.DrawString(rpt, g, v, tc, lrow, rect);
             }
@@ -1107,7 +1107,7 @@ namespace Majorsilence.Reporting.Rdl
                         b[i] = GetSeriesBrushesPatternedBlack(i); break;
                     case ChartPaletteEnum.Custom:
 
-                        b[i] = new Draw2.SolidBrush(Draw2.Color.FromName(getColour(rpt, 1, i + 1))); break;
+                        b[i] = new Draw2.SolidBrush(System.Drawing.Color.FromName(getColour(rpt, 1, i + 1))); break;
                     default:
                         b[i] = GetSeriesBrushesExcel(i); break;
                 }
@@ -1172,40 +1172,40 @@ namespace Majorsilence.Reporting.Rdl
             switch (i % 10)
             {
                 case 0:
-                    PatternBrush = new Drawing2D.HatchBrush(Drawing2D.HatchStyle.LargeConfetti, Draw2.Color.Blue, Draw2.Color.White);
+                    PatternBrush = new Drawing2D.HatchBrush(Drawing2D.HatchStyle.LargeConfetti, System.Drawing.Color.Blue, System.Drawing.Color.White);
                     break;
                 case 1:
-                    PatternBrush = new Drawing2D.HatchBrush(Drawing2D.HatchStyle.Cross, Draw2.Color.Red, Draw2.Color.White); // was weave... but I Especially didn't want to draw that in PDF - GJL
+                    PatternBrush = new Drawing2D.HatchBrush(Drawing2D.HatchStyle.Cross, System.Drawing.Color.Red, System.Drawing.Color.White); // was weave... but I Especially didn't want to draw that in PDF - GJL
                     break;
                 case 2:
-                    PatternBrush = new Drawing2D.HatchBrush(Drawing2D.HatchStyle.DarkDownwardDiagonal, Draw2.Color.Green, Draw2.Color.White);
+                    PatternBrush = new Drawing2D.HatchBrush(Drawing2D.HatchStyle.DarkDownwardDiagonal, System.Drawing.Color.Green, System.Drawing.Color.White);
                     break;
                 case 3:
-                    PatternBrush = new Drawing2D.HatchBrush(Drawing2D.HatchStyle.OutlinedDiamond, Draw2.Color.Purple, Draw2.Color.White);
+                    PatternBrush = new Drawing2D.HatchBrush(Drawing2D.HatchStyle.OutlinedDiamond, System.Drawing.Color.Purple, System.Drawing.Color.White);
                     break;
                 case 4:
-                    PatternBrush = new Drawing2D.HatchBrush(Drawing2D.HatchStyle.DarkHorizontal, Draw2.Color.DeepSkyBlue, Draw2.Color.White);
+                    PatternBrush = new Drawing2D.HatchBrush(Drawing2D.HatchStyle.DarkHorizontal, System.Drawing.Color.DeepSkyBlue, System.Drawing.Color.White);
                     break;
                 case 5:
-                    PatternBrush = new Drawing2D.HatchBrush(Drawing2D.HatchStyle.SmallConfetti, Draw2.Color.Orange, Draw2.Color.White);
+                    PatternBrush = new Drawing2D.HatchBrush(Drawing2D.HatchStyle.SmallConfetti, System.Drawing.Color.Orange, System.Drawing.Color.White);
                     break;
                 case 6:
-                    PatternBrush = new Drawing2D.HatchBrush(Drawing2D.HatchStyle.HorizontalBrick, Draw2.Color.Magenta, Draw2.Color.White);
+                    PatternBrush = new Drawing2D.HatchBrush(Drawing2D.HatchStyle.HorizontalBrick, System.Drawing.Color.Magenta, System.Drawing.Color.White);
                     break;
                 case 7:
-                    PatternBrush = new Drawing2D.HatchBrush(Drawing2D.HatchStyle.LargeCheckerBoard, Draw2.Color.Gold, Draw2.Color.White); // was wave... but I didn't want to draw that in PDF - GJL
+                    PatternBrush = new Drawing2D.HatchBrush(Drawing2D.HatchStyle.LargeCheckerBoard, System.Drawing.Color.Gold, System.Drawing.Color.White); // was wave... but I didn't want to draw that in PDF - GJL
                     break;
                 case 8:
-                    PatternBrush = new Drawing2D.HatchBrush(Drawing2D.HatchStyle.Vertical, Draw2.Color.Lime, Draw2.Color.White);
+                    PatternBrush = new Drawing2D.HatchBrush(Drawing2D.HatchStyle.Vertical, System.Drawing.Color.Lime, System.Drawing.Color.White);
                     break;
                 case 9:
-                    PatternBrush = new Drawing2D.HatchBrush(Drawing2D.HatchStyle.SolidDiamond, Draw2.Color.Teal, Draw2.Color.White);
+                    PatternBrush = new Drawing2D.HatchBrush(Drawing2D.HatchStyle.SolidDiamond, System.Drawing.Color.Teal, System.Drawing.Color.White);
                     break;
                 case 10:
-                    PatternBrush = new Drawing2D.HatchBrush(Drawing2D.HatchStyle.DiagonalBrick, Draw2.Color.Pink, Draw2.Color.White);
+                    PatternBrush = new Drawing2D.HatchBrush(Drawing2D.HatchStyle.DiagonalBrick, System.Drawing.Color.Pink, System.Drawing.Color.White);
                     break;
                 default:
-                    PatternBrush = new Drawing2D.HatchBrush(Drawing2D.HatchStyle.BackwardDiagonal, Draw2.Color.Blue, Draw2.Color.White);
+                    PatternBrush = new Drawing2D.HatchBrush(Drawing2D.HatchStyle.BackwardDiagonal, System.Drawing.Color.Blue, System.Drawing.Color.White);
                     break;
 
             }
@@ -1219,40 +1219,40 @@ namespace Majorsilence.Reporting.Rdl
             switch (i % 10)
             {
                 case 0:
-                    PatternBrush = new Drawing2D.HatchBrush(Drawing2D.HatchStyle.LargeConfetti, Draw2.Color.Black, Draw2.Color.White);
+                    PatternBrush = new Drawing2D.HatchBrush(Drawing2D.HatchStyle.LargeConfetti, System.Drawing.Color.Black, System.Drawing.Color.White);
                     break;
                 case 1:
-                    PatternBrush = new Drawing2D.HatchBrush(Drawing2D.HatchStyle.Weave, Draw2.Color.Black, Draw2.Color.White);
+                    PatternBrush = new Drawing2D.HatchBrush(Drawing2D.HatchStyle.Weave, System.Drawing.Color.Black, System.Drawing.Color.White);
                     break;
                 case 2:
-                    PatternBrush = new Drawing2D.HatchBrush(Drawing2D.HatchStyle.DarkDownwardDiagonal, Draw2.Color.Black, Draw2.Color.White);
+                    PatternBrush = new Drawing2D.HatchBrush(Drawing2D.HatchStyle.DarkDownwardDiagonal, System.Drawing.Color.Black, System.Drawing.Color.White);
                     break;
                 case 3:
-                    PatternBrush = new Drawing2D.HatchBrush(Drawing2D.HatchStyle.OutlinedDiamond, Draw2.Color.Black, Draw2.Color.White);
+                    PatternBrush = new Drawing2D.HatchBrush(Drawing2D.HatchStyle.OutlinedDiamond, System.Drawing.Color.Black, System.Drawing.Color.White);
                     break;
                 case 4:
-                    PatternBrush = new Drawing2D.HatchBrush(Drawing2D.HatchStyle.DarkHorizontal, Draw2.Color.Black, Draw2.Color.White);
+                    PatternBrush = new Drawing2D.HatchBrush(Drawing2D.HatchStyle.DarkHorizontal, System.Drawing.Color.Black, System.Drawing.Color.White);
                     break;
                 case 5:
-                    PatternBrush = new Drawing2D.HatchBrush(Drawing2D.HatchStyle.SmallConfetti, Draw2.Color.Black, Draw2.Color.White);
+                    PatternBrush = new Drawing2D.HatchBrush(Drawing2D.HatchStyle.SmallConfetti, System.Drawing.Color.Black, System.Drawing.Color.White);
                     break;
                 case 6:
-                    PatternBrush = new Drawing2D.HatchBrush(Drawing2D.HatchStyle.HorizontalBrick, Draw2.Color.Black, Draw2.Color.White);
+                    PatternBrush = new Drawing2D.HatchBrush(Drawing2D.HatchStyle.HorizontalBrick, System.Drawing.Color.Black, System.Drawing.Color.White);
                     break;
                 case 7:
-                    PatternBrush = new Drawing2D.HatchBrush(Drawing2D.HatchStyle.Wave, Draw2.Color.Black, Draw2.Color.White);
+                    PatternBrush = new Drawing2D.HatchBrush(Drawing2D.HatchStyle.Wave, System.Drawing.Color.Black, System.Drawing.Color.White);
                     break;
                 case 8:
-                    PatternBrush = new Drawing2D.HatchBrush(Drawing2D.HatchStyle.Vertical, Draw2.Color.Black, Draw2.Color.White);
+                    PatternBrush = new Drawing2D.HatchBrush(Drawing2D.HatchStyle.Vertical, System.Drawing.Color.Black, System.Drawing.Color.White);
                     break;
                 case 9:
-                    PatternBrush = new Drawing2D.HatchBrush(Drawing2D.HatchStyle.SolidDiamond, Draw2.Color.Black, Draw2.Color.White);
+                    PatternBrush = new Drawing2D.HatchBrush(Drawing2D.HatchStyle.SolidDiamond, System.Drawing.Color.Black, System.Drawing.Color.White);
                     break;
                 case 10:
-                    PatternBrush = new Drawing2D.HatchBrush(Drawing2D.HatchStyle.DiagonalBrick, Draw2.Color.Black, Draw2.Color.White);
+                    PatternBrush = new Drawing2D.HatchBrush(Drawing2D.HatchStyle.DiagonalBrick, System.Drawing.Color.Black, System.Drawing.Color.White);
                     break;
                 default:
-                    PatternBrush = new Drawing2D.HatchBrush(Drawing2D.HatchStyle.BackwardDiagonal, Draw2.Color.Black, Draw2.Color.White);
+                    PatternBrush = new Drawing2D.HatchBrush(Drawing2D.HatchStyle.BackwardDiagonal, System.Drawing.Color.Black, System.Drawing.Color.White);
                     break;
 
             }
@@ -1454,7 +1454,7 @@ namespace Majorsilence.Reporting.Rdl
             return (max, min);
         }
 
-        protected void AdjustMargins(Draw2.Rectangle legendRect, Report rpt, Draw2.Graphics g)
+        protected void AdjustMargins(System.Drawing.Rectangle legendRect, Report rpt, Draw2.Graphics g)
         {
             // //110208AJM GJL Making room for second y axis        
 

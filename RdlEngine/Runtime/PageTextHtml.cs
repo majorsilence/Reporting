@@ -4,8 +4,8 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 #if DRAWINGCOMPAT
-using Draw = Majorsilence.Drawing;
-using Majorsilence.Drawing.Imaging;
+using Draw = Majorsilence.Forms.Drawing;
+using Majorsilence.Forms.Drawing.Imaging;
 #else
 using Draw = System.Drawing;
 using System.Drawing.Imaging;
@@ -105,7 +105,7 @@ namespace Majorsilence.Reporting.Rdl
 			si.BStyleBottom = si.BStyleLeft = si.BStyleRight = si.BStyleTop = BorderStyleEnum.None;
 			pt.SI.TextAlign = TextAlignEnum.Left;
 			pt.SI.VerticalAlign = VerticalAlignEnum.Top;
-			si.BackgroundColor = Draw.Color.Empty;
+			si.BackgroundColor = System.Drawing.Color.Empty;
 			si.BackgroundGradientType = BackgroundGradientTypeEnum.None;
 			si.BackgroundImage = null;
 
@@ -117,7 +117,7 @@ namespace Majorsilence.Reporting.Rdl
 			float maxLineHeight=0;
 			float maxDescent=0;
 			float descent;				// working value for descent
-			Draw.SizeF ms;
+			System.Drawing.SizeF ms;
 			bool bWhiteSpace=false;
 			List<PageItem> lineItems = new List<PageItem>();
             bool bIsOrderedList = false;
@@ -413,7 +413,7 @@ namespace Majorsilence.Reporting.Rdl
 				return;
 			model.HyperLink = model.Tooltip = href;
 			si.TextDecoration = TextDecorationEnum.Underline;
-			si.Color = Draw.Color.Blue;
+			si.Color = System.Drawing.Color.Blue;
 		}
 
         private async Task<PageImage> BuildImage(Draw.Graphics g, string token, StyleInfo oldsi, PageText model)
@@ -776,11 +776,11 @@ namespace Majorsilence.Reporting.Rdl
 			return ht;
 		}
 
-		private Draw.SizeF MeasureString(string s, StyleInfo si, Draw.Graphics g, out float descent)
+		private System.Drawing.SizeF MeasureString(string s, StyleInfo si, Draw.Graphics g, out float descent)
 		{
 			Draw.Font drawFont=null;
 			Draw.StringFormat drawFormat=null;
-			Draw.SizeF ms = Draw.SizeF.Empty;
+			System.Drawing.SizeF ms = System.Drawing.SizeF.Empty;
 			descent = 0;				
 			if (s == null || s.Length == 0)
 				return ms;
@@ -825,9 +825,9 @@ namespace Majorsilence.Reporting.Rdl
 				Draw.CharacterRange[] cr = {new Draw.CharacterRange(0, s.Length)};
 				drawFormat.SetMeasurableCharacterRanges(cr);
 				Draw.Region[] rs = new Draw.Region[1];
-				rs = g.MeasureCharacterRanges(s, drawFont, new Draw.RectangleF(0,0,float.MaxValue,float.MaxValue),
+				rs = g.MeasureCharacterRanges(s, drawFont, new System.Drawing.RectangleF(0,0,float.MaxValue,float.MaxValue),
 					drawFormat);
-				Draw.RectangleF mr = rs[0].GetBounds(g);
+				System.Drawing.RectangleF mr = rs[0].GetBounds(g);
 
 				ms.Height = RSize.PointsFromPixels(g, mr.Height);	// convert to points from pixels
 				ms.Width = RSize.PointsFromPixels(g, mr.Width);		// convert to points from pixels

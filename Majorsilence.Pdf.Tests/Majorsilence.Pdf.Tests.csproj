@@ -10,6 +10,7 @@
     <ProjectReference Include="..\Majorsilence.Pdf.Security\Majorsilence.Pdf.Security.csproj" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="Majorsilence.Forms.Drawing.Common" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" />
     <PackageReference Include="NUnit" />
     <PackageReference Include="NUnit3TestAdapter" />
