@@ -588,7 +588,17 @@ namespace Majorsilence.Reporting.Rdl
 						continue;
 					}
 					if (tok.Type == TokenTypes.RPAREN)
+					{
 						level--;
+						// The aggregate's own closing paren. A scope argument can only appear
+						// inside the call, so the scan has to stop here: left unbounded it ran
+						// on into the enclosing expression and took whatever followed *its*
+						// next comma as this aggregate's scope. An aggregate with no arguments
+						// inside a conditional -- IIf(RowNumber() = CountRows(), a, b) -- then
+						// reported "a function's scope must be a constant".
+						if (level < 0)
+							break;
+					}
 					if (tok.Type == TokenTypes.LPAREN)
 						level++;
 				}
