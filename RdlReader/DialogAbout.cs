@@ -2,7 +2,7 @@ using RdlReader.Resources;
 
 using System;
 using System.Reflection;
-using System.Windows.Forms;
+using Majorsilence.Forms;
 
 namespace Majorsilence.Reporting.RdlReader
 {
