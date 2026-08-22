@@ -1,0 +1,18 @@
+<Solution>
+  <Configurations>
+    <BuildType Name="Debug" />
+    <BuildType Name="Debug-DrawingCompat" />
+    <BuildType Name="Release" />
+    <BuildType Name="Release-DrawingCompat" />
+    <Platform Name="Any CPU" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Project Path="DataProviders/Majorsilence.Reporting.DataProviders.csproj" />
+  <Project Path="RdlCri/Majorsilence.Reporting.RdlCri.csproj" />
+  <Project Path="RdlEngine/Majorsilence.Reporting.RdlEngine.csproj" />
+  <Project Path="RdlGtk3/Majorsilence.Reporting.RdlGtk3.csproj" />
+  <Project Path="RdlGtk3Viewer/RdlGtk3Viewer.csproj" />
+  <Properties Name="MonoDevelopProperties">
+    <Property Name="StartupItem" Value="RdlGtk3\RdlGtk3.csproj" />
+  </Properties>
+</Solution>

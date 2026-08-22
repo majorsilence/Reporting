@@ -8,7 +8,6 @@ $CURRENTPATH=$pwd.Path
 # /p:Configuration="Debug", "Debug-DrawingCompat", "Release", "Release-DrawingCompat"
 $pConfiguration="Release"
 $pConfigurationCompat="Release-DrawingCompat"
-$pTargetFramework="net10.0-windows"
 $pTargetFrameworkGeneric="net10.0"
 
 function delete_files([string]$path)
@@ -38,7 +37,7 @@ if ($env:GITHUB_OUTPUT) {
     "version=$Version" | Out-File -Append -FilePath $env:GITHUB_OUTPUT
 }
 
-$solutionPath = Join-Path $CURRENTPATH "MajorsilenceReporting.sln"
+$solutionPath = Join-Path $CURRENTPATH "MajorsilenceReporting.slnx"
 dotnet restore $solutionPath
 # ************* Begin anycpu *********************************************
 dotnet build $solutionPath --configuration Release-DrawingCompat --verbosity minimal -p:GeneratePackageOnBuild=false
@@ -51,12 +50,12 @@ dotnet build $solutionPath --configuration $pConfiguration --verbosity minimal -
 dotnet publish RdlCmd -c Release -r win-x64 -f $pTargetFrameworkGeneric --self-contained true -p:GeneratePackageOnBuild=false #-p:PublishSingleFile=true
 dotnet publish RdlCmd -c Release -r win-arm64 -f $pTargetFrameworkGeneric --self-contained true -p:GeneratePackageOnBuild=false #-p:PublishSingleFile=true
 
-$buildoutputpath_designer="$CURRENTPATH\Release-Builds\build-output\majorsilence-reporting-designer-$pTargetFramework-anycpu"
+$buildoutputpath_designer="$CURRENTPATH\Release-Builds\build-output\majorsilence-reporting-designer-$pTargetFrameworkGeneric-anycpu"
 $buildoutputpath_desktop="$CURRENTPATH\Release-Builds\build-output\majorsilence-reporting-desktop-$pTargetFrameworkGeneric-anycpu"
 $buildoutputpath_rdlcmd="$CURRENTPATH\Release-Builds\build-output\majorsilence-reporting-rdlcmd-$pTargetFrameworkGeneric-anycpu"
 $buildoutputpath_rdlcmd_selfcontained="$CURRENTPATH\Release-Builds\build-output\majorsilence-reporting-rdlcmd-self-contained"
-$buildoutputpath_reader="$CURRENTPATH\Release-Builds\build-output\majorsilence-reporting-reader-$pTargetFramework-anycpu"
-$buildoutputpath_mapfile="$CURRENTPATH\Release-Builds\build-output\majorsilence-reporting-mapfile-$pTargetFramework-anycpu"
+$buildoutputpath_reader="$CURRENTPATH\Release-Builds\build-output\majorsilence-reporting-reader-$pTargetFrameworkGeneric-anycpu"
+$buildoutputpath_mapfile="$CURRENTPATH\Release-Builds\build-output\majorsilence-reporting-mapfile-$pTargetFrameworkGeneric-anycpu"
 
 Remove-Item "$buildoutputpath_designer" -Recurse -ErrorAction Ignore
 mkdir "$buildoutputpath_designer"
@@ -71,7 +70,7 @@ mkdir "$buildoutputpath_reader"
 Remove-Item "$buildoutputpath_mapfile" -Recurse -ErrorAction Ignore
 mkdir "$buildoutputpath_mapfile"
 
-Copy-Item (Join-Path $CURRENTPATH "ReportDesigner" "bin" $pConfiguration $pTargetFramework) -Destination "$buildoutputpath_designer\" -Recurse
+Copy-Item (Join-Path $CURRENTPATH "ReportDesigner" "bin" $pConfiguration $pTargetFrameworkGeneric) -Destination "$buildoutputpath_designer\" -Recurse
 Copy-Item (Join-Path $CURRENTPATH "RdlDesign" "App.ico") -Destination "$buildoutputpath_designer\" -Recurse
 
 Copy-Item (Join-Path $CURRENTPATH "RdlDesktop" "bin" $pConfiguration $pTargetFrameworkGeneric) -Destination "$buildoutputpath_desktop\" -Recurse
@@ -99,17 +98,17 @@ Copy-Item (Join-Path $CURRENTPATH "RdlCmd" "bin" $pConfigurationCompat $pTargetF
 Copy-Item (Join-Path $CURRENTPATH "RdlCmd" "bin" $pConfigurationCompat $pTargetFrameworkGeneric "osx-arm64" "publish") -Destination "$rdlcmd_osx_arm64" -Recurse
 
 
-Copy-Item (Join-Path $CURRENTPATH "RdlReader" "bin" $pConfiguration $pTargetFramework) -Destination "$buildoutputpath_reader\" -Recurse
-Copy-Item (Join-Path $CURRENTPATH "RdlMapFile" "bin" $pConfiguration $pTargetFramework) -Destination "$buildoutputpath_mapfile\" -Recurse
+Copy-Item (Join-Path $CURRENTPATH "RdlReader" "bin" $pConfiguration $pTargetFrameworkGeneric) -Destination "$buildoutputpath_reader\" -Recurse
+Copy-Item (Join-Path $CURRENTPATH "RdlMapFile" "bin" $pConfiguration $pTargetFrameworkGeneric) -Destination "$buildoutputpath_mapfile\" -Recurse
 
 # Exclude debug symbols from all release zips
 $7zaExclude = "-xr!*.pdb", "-xr!*.dbg"
 
 cd Release-Builds
 cd build-output
-..\7za.exe a -tzip $Version-majorsilence-reporting-designer-$pTargetFramework-anycpu.zip @7zaExclude majorsilence-reporting-designer-$pTargetFramework-anycpu\
+..\7za.exe a -tzip $Version-majorsilence-reporting-designer-$pTargetFrameworkGeneric-anycpu.zip @7zaExclude majorsilence-reporting-designer-$pTargetFrameworkGeneric-anycpu\
 ..\7za.exe a -tzip $Version-majorsilence-reporting-desktop-$pTargetFrameworkGeneric-anycpu.zip @7zaExclude majorsilence-reporting-desktop-$pTargetFrameworkGeneric-anycpu\
-..\7za.exe a -tzip $Version-majorsilence-reporting-mapfile-$pTargetFramework-anycpu.zip @7zaExclude majorsilence-reporting-mapfile-$pTargetFramework-anycpu\
+..\7za.exe a -tzip $Version-majorsilence-reporting-mapfile-$pTargetFrameworkGeneric-anycpu.zip @7zaExclude majorsilence-reporting-mapfile-$pTargetFrameworkGeneric-anycpu\
 
 ..\7za.exe a -tzip "$Version-majorsilence-reporting-rdlcmd-$pTargetFrameworkGeneric-anycpu.zip" `
   -x!"majorsilence-reporting-rdlcmd-$pTargetFrameworkGeneric-anycpu\$pTargetFrameworkGeneric\win-arm64\" `
@@ -118,7 +117,7 @@ cd build-output
   "majorsilence-reporting-rdlcmd-$pTargetFrameworkGeneric-anycpu\"
 
 
-..\7za.exe a -tzip $Version-majorsilence-reporting-reader-$pTargetFramework-anycpu.zip @7zaExclude majorsilence-reporting-reader-$pTargetFramework-anycpu\
+..\7za.exe a -tzip $Version-majorsilence-reporting-reader-$pTargetFrameworkGeneric-anycpu.zip @7zaExclude majorsilence-reporting-reader-$pTargetFrameworkGeneric-anycpu\
 ..\7za.exe a -tzip $Version-majorsilence-reporting-rdlcmd-self-contained.zip @7zaExclude majorsilence-reporting-rdlcmd-self-contained\
 cd "$CURRENTPATH"
 
