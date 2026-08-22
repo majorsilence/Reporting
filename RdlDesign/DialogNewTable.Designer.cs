@@ -1,62 +1,61 @@
 using System;
-using System.Windows.Forms;
-using System.Drawing;
+using Majorsilence.Forms;
 using System.ComponentModel;
 using System.Collections;
 
 namespace Majorsilence.Reporting.RdlDesign
 {
-    internal partial class DialogNewTable : System.Windows.Forms.Form
+    internal partial class DialogNewTable : Majorsilence.Forms.Form
 	{
 		#region Windows Form Designer generated code
 		private DesignXmlDraw _Draw;
-private System.Windows.Forms.Button bOK;
-private System.Windows.Forms.Button bCancel;
-private System.Windows.Forms.Label label1;
-private System.Windows.Forms.ComboBox cbDataSets;
-private System.Windows.Forms.Label label2;
-private System.Windows.Forms.Label label3;
-private System.Windows.Forms.ListBox lbFields;
-private System.Windows.Forms.CheckedListBox lbTableColumns;
-private System.Windows.Forms.Button bUp;
-private System.Windows.Forms.Button bDown;
-private System.Windows.Forms.Button bRight;
-private System.Windows.Forms.Button bAllRight;
-private System.Windows.Forms.Button bLeft;
-private System.Windows.Forms.Button bAllLeft;
-private System.Windows.Forms.Label label4;
-private System.Windows.Forms.ComboBox cbGroupColumn;
-private System.Windows.Forms.CheckBox chkGrandTotals;
-private System.Windows.Forms.GroupBox groupBox1;
-private System.Windows.Forms.RadioButton rbHorz;
-private System.Windows.Forms.RadioButton rbVert;
-private System.Windows.Forms.RadioButton rbVertComp;
+private Majorsilence.Forms.Button bOK;
+private Majorsilence.Forms.Button bCancel;
+private Majorsilence.Forms.Label label1;
+private Majorsilence.Forms.ComboBox cbDataSets;
+private Majorsilence.Forms.Label label2;
+private Majorsilence.Forms.Label label3;
+private Majorsilence.Forms.ListBox lbFields;
+private Majorsilence.Forms.CheckedListBox lbTableColumns;
+private Majorsilence.Forms.Button bUp;
+private Majorsilence.Forms.Button bDown;
+private Majorsilence.Forms.Button bRight;
+private Majorsilence.Forms.Button bAllRight;
+private Majorsilence.Forms.Button bLeft;
+private Majorsilence.Forms.Button bAllLeft;
+private Majorsilence.Forms.Label label4;
+private Majorsilence.Forms.ComboBox cbGroupColumn;
+private Majorsilence.Forms.CheckBox chkGrandTotals;
+private Majorsilence.Forms.GroupBox groupBox1;
+private Majorsilence.Forms.RadioButton rbHorz;
+private Majorsilence.Forms.RadioButton rbVert;
+private Majorsilence.Forms.RadioButton rbVertComp;
 private System.ComponentModel.Container components = null;
 
 		private void InitializeComponent()
 		{
-			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(DialogNewTable));
-			this.bOK = new System.Windows.Forms.Button();
-			this.bCancel = new System.Windows.Forms.Button();
-			this.label1 = new System.Windows.Forms.Label();
-			this.cbDataSets = new System.Windows.Forms.ComboBox();
-			this.label2 = new System.Windows.Forms.Label();
-			this.label3 = new System.Windows.Forms.Label();
-			this.lbFields = new System.Windows.Forms.ListBox();
-			this.lbTableColumns = new System.Windows.Forms.CheckedListBox();
-			this.bUp = new System.Windows.Forms.Button();
-			this.bDown = new System.Windows.Forms.Button();
-			this.bRight = new System.Windows.Forms.Button();
-			this.bAllRight = new System.Windows.Forms.Button();
-			this.bLeft = new System.Windows.Forms.Button();
-			this.bAllLeft = new System.Windows.Forms.Button();
-			this.label4 = new System.Windows.Forms.Label();
-			this.cbGroupColumn = new System.Windows.Forms.ComboBox();
-			this.chkGrandTotals = new System.Windows.Forms.CheckBox();
-			this.groupBox1 = new System.Windows.Forms.GroupBox();
-			this.rbVertComp = new System.Windows.Forms.RadioButton();
-			this.rbVert = new System.Windows.Forms.RadioButton();
-			this.rbHorz = new System.Windows.Forms.RadioButton();
+			Majorsilence.Forms.ComponentResourceManager resources = new Majorsilence.Forms.ComponentResourceManager(typeof(DialogNewTable));
+			this.bOK = new Majorsilence.Forms.Button();
+			this.bCancel = new Majorsilence.Forms.Button();
+			this.label1 = new Majorsilence.Forms.Label();
+			this.cbDataSets = new Majorsilence.Forms.ComboBox();
+			this.label2 = new Majorsilence.Forms.Label();
+			this.label3 = new Majorsilence.Forms.Label();
+			this.lbFields = new Majorsilence.Forms.ListBox();
+			this.lbTableColumns = new Majorsilence.Forms.CheckedListBox();
+			this.bUp = new Majorsilence.Forms.Button();
+			this.bDown = new Majorsilence.Forms.Button();
+			this.bRight = new Majorsilence.Forms.Button();
+			this.bAllRight = new Majorsilence.Forms.Button();
+			this.bLeft = new Majorsilence.Forms.Button();
+			this.bAllLeft = new Majorsilence.Forms.Button();
+			this.label4 = new Majorsilence.Forms.Label();
+			this.cbGroupColumn = new Majorsilence.Forms.ComboBox();
+			this.chkGrandTotals = new Majorsilence.Forms.CheckBox();
+			this.groupBox1 = new Majorsilence.Forms.GroupBox();
+			this.rbVertComp = new Majorsilence.Forms.RadioButton();
+			this.rbVert = new Majorsilence.Forms.RadioButton();
+			this.rbHorz = new Majorsilence.Forms.RadioButton();
 			this.groupBox1.SuspendLayout();
 			this.SuspendLayout();
 			// 
@@ -64,12 +63,12 @@ private System.ComponentModel.Container components = null;
 			// 
 			resources.ApplyResources(this.bOK, "bOK");
 			this.bOK.Name = "bOK";
-			this.bOK.Click += new System.EventHandler(this.bOK_Click);
+			this.bOK.Click += this.bOK_Click;
 			// 
 			// bCancel
 			// 
 			resources.ApplyResources(this.bCancel, "bCancel");
-			this.bCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
+			this.bCancel.DialogResult = Majorsilence.Forms.DialogResult.Cancel;
 			this.bCancel.Name = "bCancel";
 			// 
 			// label1
@@ -80,9 +79,9 @@ private System.ComponentModel.Container components = null;
 			// cbDataSets
 			// 
 			resources.ApplyResources(this.cbDataSets, "cbDataSets");
-			this.cbDataSets.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+			this.cbDataSets.DropDownStyle = Majorsilence.Forms.ComboBoxStyle.DropDownList;
 			this.cbDataSets.Name = "cbDataSets";
-			this.cbDataSets.SelectedIndexChanged += new System.EventHandler(this.cbDataSets_SelectedIndexChanged);
+			this.cbDataSets.SelectedIndexChanged += this.cbDataSets_SelectedIndexChanged;
 			// 
 			// label2
 			// 
@@ -98,7 +97,7 @@ private System.ComponentModel.Container components = null;
 			// 
 			resources.ApplyResources(this.lbFields, "lbFields");
 			this.lbFields.Name = "lbFields";
-			this.lbFields.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
+			this.lbFields.SelectionMode = Majorsilence.Forms.SelectionMode.MultiExtended;
 			// 
 			// lbTableColumns
 			// 
@@ -109,37 +108,37 @@ private System.ComponentModel.Container components = null;
 			// 
 			resources.ApplyResources(this.bUp, "bUp");
 			this.bUp.Name = "bUp";
-			this.bUp.Click += new System.EventHandler(this.bUp_Click);
+			this.bUp.Click += this.bUp_Click;
 			// 
 			// bDown
 			// 
 			resources.ApplyResources(this.bDown, "bDown");
 			this.bDown.Name = "bDown";
-			this.bDown.Click += new System.EventHandler(this.bDown_Click);
+			this.bDown.Click += this.bDown_Click;
 			// 
 			// bRight
 			// 
 			resources.ApplyResources(this.bRight, "bRight");
 			this.bRight.Name = "bRight";
-			this.bRight.Click += new System.EventHandler(this.bRight_Click);
+			this.bRight.Click += this.bRight_Click;
 			// 
 			// bAllRight
 			// 
 			resources.ApplyResources(this.bAllRight, "bAllRight");
 			this.bAllRight.Name = "bAllRight";
-			this.bAllRight.Click += new System.EventHandler(this.bAllRight_Click);
+			this.bAllRight.Click += this.bAllRight_Click;
 			// 
 			// bLeft
 			// 
 			resources.ApplyResources(this.bLeft, "bLeft");
 			this.bLeft.Name = "bLeft";
-			this.bLeft.Click += new System.EventHandler(this.bLeft_Click);
+			this.bLeft.Click += this.bLeft_Click;
 			// 
 			// bAllLeft
 			// 
 			resources.ApplyResources(this.bAllLeft, "bAllLeft");
 			this.bAllLeft.Name = "bAllLeft";
-			this.bAllLeft.Click += new System.EventHandler(this.bAllLeft_Click);
+			this.bAllLeft.Click += this.bAllLeft_Click;
 			// 
 			// label4
 			// 
@@ -149,9 +148,9 @@ private System.ComponentModel.Container components = null;
 			// cbGroupColumn
 			// 
 			resources.ApplyResources(this.cbGroupColumn, "cbGroupColumn");
-			this.cbGroupColumn.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+			this.cbGroupColumn.DropDownStyle = Majorsilence.Forms.ComboBoxStyle.DropDownList;
 			this.cbGroupColumn.Name = "cbGroupColumn";
-			this.cbGroupColumn.Enter += new System.EventHandler(this.cbGroupColumn_Enter);
+			this.cbGroupColumn.Enter += this.cbGroupColumn_Enter;
 			// 
 			// chkGrandTotals
 			// 
@@ -181,7 +180,7 @@ private System.ComponentModel.Container components = null;
 			// 
 			resources.ApplyResources(this.rbHorz, "rbHorz");
 			this.rbHorz.Name = "rbHorz";
-			this.rbHorz.CheckedChanged += new System.EventHandler(this.rbHorz_CheckedChanged);
+			this.rbHorz.CheckedChanged += this.rbHorz_CheckedChanged;
 			// 
 			// DialogNewTable
 			// 
@@ -206,12 +205,12 @@ private System.ComponentModel.Container components = null;
 			this.Controls.Add(this.label1);
 			this.Controls.Add(this.bCancel);
 			this.Controls.Add(this.bOK);
-			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
+			this.FormBorderStyle = Majorsilence.Forms.FormBorderStyle.FixedDialog;
 			this.MaximizeBox = false;
 			this.MinimizeBox = false;
 			this.Name = "DialogNewTable";
 			this.ShowInTaskbar = false;
-			this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
+			this.SizeGripStyle = Majorsilence.Forms.SizeGripStyle.Hide;
 			this.groupBox1.ResumeLayout(false);
 			this.ResumeLayout(false);
 

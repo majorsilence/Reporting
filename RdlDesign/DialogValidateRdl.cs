@@ -1,8 +1,7 @@
 using System;
-using System.Drawing;
 using System.Collections;
 using System.ComponentModel;
-using System.Windows.Forms;
+using Majorsilence.Forms;
 using System.IO;
 using System.Xml;
 using System.Xml.Schema;
@@ -60,7 +59,7 @@ namespace Majorsilence.Reporting.RdlDesign
                 sr = new StringReader(syntax);
                 tr = new XmlTextReader(sr);
                 XmlReaderSettings xrs = new XmlReaderSettings();
-                xrs.ValidationEventHandler += new ValidationEventHandler(ValidationHandler);
+                xrs.ValidationEventHandler += ValidationHandler;
                 xrs.ValidationFlags = XmlSchemaValidationFlags.AllowXmlAttributes |
                                       XmlSchemaValidationFlags.ProcessIdentityConstraints |
                                       XmlSchemaValidationFlags.ProcessSchemaLocation |
@@ -151,7 +150,7 @@ namespace Majorsilence.Reporting.RdlDesign
             this.Close();
         }
 
-        private void DialogValidateRdl_Closing(object sender, System.Windows.Forms.FormClosingEventArgs e)
+        private void DialogValidateRdl_Closing(object sender, Majorsilence.Forms.FormClosingEventArgs e)
         {
             this._RdlDesigner.ValidateSchemaClosing();
         }

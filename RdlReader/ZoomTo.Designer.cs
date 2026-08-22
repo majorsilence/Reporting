@@ -1,29 +1,27 @@
 using System;
-using System.Windows.Forms;
-using System.Drawing;
+using Majorsilence.Forms;
 using System.ComponentModel;
 using System.Collections;
 
 namespace Majorsilence.Reporting.RdlReader
 {
-    public partial class ZoomTo : System.Windows.Forms.Form
+    public partial class ZoomTo : Majorsilence.Forms.Form
 	{
 		#region Windows Form Designer generated code
-		private System.Windows.Forms.Label label1;
-private System.Windows.Forms.ComboBox cbMagnify;
-private System.Windows.Forms.Button bOK;
-private System.Windows.Forms.Button bCancel;
+		private Majorsilence.Forms.Label label1;
+private Majorsilence.Forms.ComboBox cbMagnify;
+private Majorsilence.Forms.Button bOK;
+private Majorsilence.Forms.Button bCancel;
 private RdlViewer.RdlViewer _Viewer;
 private System.ComponentModel.Container components = null;
 
 		private void InitializeComponent()
 		{
-			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ZoomTo));
-            this.DoubleBuffered = true;
-			this.label1 = new System.Windows.Forms.Label();
-			this.cbMagnify = new System.Windows.Forms.ComboBox();
-			this.bOK = new System.Windows.Forms.Button();
-			this.bCancel = new System.Windows.Forms.Button();
+			Majorsilence.Forms.ComponentResourceManager resources = new Majorsilence.Forms.ComponentResourceManager(typeof(ZoomTo));
+			this.label1 = new Majorsilence.Forms.Label();
+			this.cbMagnify = new Majorsilence.Forms.ComboBox();
+			this.bOK = new Majorsilence.Forms.Button();
+			this.bCancel = new Majorsilence.Forms.Button();
 			this.SuspendLayout();
 			// 
 			// label1
@@ -51,14 +49,14 @@ private System.ComponentModel.Container components = null;
 			// bOK
 			// 
 			resources.ApplyResources(this.bOK, "bOK");
-			this.bOK.DialogResult = System.Windows.Forms.DialogResult.OK;
+			this.bOK.DialogResult = Majorsilence.Forms.DialogResult.OK;
 			this.bOK.Name = "bOK";
 			this.bOK.Click += new System.EventHandler(this.bOK_Click);
 			// 
 			// bCancel
 			// 
 			resources.ApplyResources(this.bCancel, "bCancel");
-			this.bCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
+			this.bCancel.DialogResult = Majorsilence.Forms.DialogResult.Cancel;
 			this.bCancel.Name = "bCancel";
 			this.bCancel.Click += new System.EventHandler(this.bCancel_Click);
 			// 
@@ -69,7 +67,7 @@ private System.ComponentModel.Container components = null;
 			this.Controls.Add(this.bOK);
 			this.Controls.Add(this.cbMagnify);
 			this.Controls.Add(this.label1);
-			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
+			this.FormBorderStyle = Majorsilence.Forms.FormBorderStyle.FixedDialog;
 			this.MaximizeBox = false;
 			this.MinimizeBox = false;
 			this.Name = "ZoomTo";

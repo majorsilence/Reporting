@@ -22,12 +22,12 @@ namespace Majorsilence.Reporting.RdlDesign
 		{ 
 			_doc = doc;
 			_UndoLevels = levels;				// we don't currently support; need to write special Stack
-			_doc.NodeChanging +=new XmlNodeChangedEventHandler(NodeChanging);
-			_doc.NodeChanged += new XmlNodeChangedEventHandler(NodeChanged);
-			_doc.NodeInserting +=new XmlNodeChangedEventHandler(NodeChanging);
-			_doc.NodeInserted += new XmlNodeChangedEventHandler(NodeChanged);
-			_doc.NodeRemoving +=new XmlNodeChangedEventHandler(NodeChanging);
-			_doc.NodeRemoved += new XmlNodeChangedEventHandler(NodeChanged);
+			_doc.NodeChanging += NodeChanging;
+			_doc.NodeChanged += NodeChanged;
+			_doc.NodeInserting += NodeChanging;
+			_doc.NodeInserted += NodeChanged;
+			_doc.NodeRemoving += NodeChanging;
+			_doc.NodeRemoved += NodeChanged;
 			_actions = new Stack();
 		}
 

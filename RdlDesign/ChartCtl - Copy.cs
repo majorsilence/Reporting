@@ -26,7 +26,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
 using System.Data;
-using System.Windows.Forms;
+using Majorsilence.Forms;
 using System.Xml;
 
 namespace fyiReporting.RdlDesign
@@ -34,7 +34,7 @@ namespace fyiReporting.RdlDesign
 	/// <summary>
 	/// Summary description for ChartCtl.
 	/// </summary>
-	internal class ChartCtl : System.Windows.Forms.UserControl, IProperty
+	internal class ChartCtl : Majorsilence.Forms.UserControl, IProperty
 	{
         private List<XmlNode> _ReportItems;
 		private DesignXmlDraw _Draw;
@@ -42,27 +42,27 @@ namespace fyiReporting.RdlDesign
 		bool fChartType, fVector, fSubtype, fPalette, fRenderElement, fPercentWidth;
 		bool fNoRows, fDataSet, fPageBreakStart, fPageBreakEnd;
 		bool fChartData;
-		private System.Windows.Forms.Label label1;
-		private System.Windows.Forms.Label label2;
-		private System.Windows.Forms.Label label3;
-		private System.Windows.Forms.Label label4;
-		private System.Windows.Forms.ComboBox cbChartType;
-		private System.Windows.Forms.ComboBox cbSubType;
-		private System.Windows.Forms.ComboBox cbPalette;
-		private System.Windows.Forms.ComboBox cbRenderElement;
-		private System.Windows.Forms.Label label5;
-		private System.Windows.Forms.NumericUpDown tbPercentWidth;
-		private System.Windows.Forms.Label label6;
-		private System.Windows.Forms.TextBox tbNoRows;
-		private System.Windows.Forms.Label label7;
-		private System.Windows.Forms.ComboBox cbDataSet;
-		private System.Windows.Forms.CheckBox chkPageBreakStart;
-		private System.Windows.Forms.CheckBox chkPageBreakEnd;
-        private System.Windows.Forms.ComboBox cbChartData;
+		private Majorsilence.Forms.Label label1;
+		private Majorsilence.Forms.Label label2;
+		private Majorsilence.Forms.Label label3;
+		private Majorsilence.Forms.Label label4;
+		private Majorsilence.Forms.ComboBox cbChartType;
+		private Majorsilence.Forms.ComboBox cbSubType;
+		private Majorsilence.Forms.ComboBox cbPalette;
+		private Majorsilence.Forms.ComboBox cbRenderElement;
+		private Majorsilence.Forms.Label label5;
+		private Majorsilence.Forms.NumericUpDown tbPercentWidth;
+		private Majorsilence.Forms.Label label6;
+		private Majorsilence.Forms.TextBox tbNoRows;
+		private Majorsilence.Forms.Label label7;
+		private Majorsilence.Forms.ComboBox cbDataSet;
+		private Majorsilence.Forms.CheckBox chkPageBreakStart;
+		private Majorsilence.Forms.CheckBox chkPageBreakEnd;
+        private Majorsilence.Forms.ComboBox cbChartData;
         private ComboBox cbDataLabel;
         private CheckBox chkDataLabel;
         private Button bDataLabelExpr;
-		private System.Windows.Forms.Label lData1;
+		private Majorsilence.Forms.Label lData1;
         private ComboBox cbChartData2;
         private Label lData2;
         private ComboBox cbChartData3;
@@ -235,40 +235,40 @@ namespace fyiReporting.RdlDesign
 		/// </summary>
 		private void InitializeComponent()
 		{
-            this.label1 = new System.Windows.Forms.Label();
-            this.label2 = new System.Windows.Forms.Label();
-            this.label3 = new System.Windows.Forms.Label();
-            this.label4 = new System.Windows.Forms.Label();
-            this.cbChartType = new System.Windows.Forms.ComboBox();
-            this.cbSubType = new System.Windows.Forms.ComboBox();
-            this.cbPalette = new System.Windows.Forms.ComboBox();
-            this.cbRenderElement = new System.Windows.Forms.ComboBox();
-            this.label5 = new System.Windows.Forms.Label();
-            this.tbPercentWidth = new System.Windows.Forms.NumericUpDown();
-            this.label6 = new System.Windows.Forms.Label();
-            this.tbNoRows = new System.Windows.Forms.TextBox();
-            this.label7 = new System.Windows.Forms.Label();
-            this.cbDataSet = new System.Windows.Forms.ComboBox();
-            this.chkPageBreakStart = new System.Windows.Forms.CheckBox();
-            this.chkPageBreakEnd = new System.Windows.Forms.CheckBox();
-            this.cbChartData = new System.Windows.Forms.ComboBox();
-            this.cbDataLabel = new System.Windows.Forms.ComboBox();
-            this.chkDataLabel = new System.Windows.Forms.CheckBox();
-            this.bDataLabelExpr = new System.Windows.Forms.Button();
-            this.lData1 = new System.Windows.Forms.Label();
-            this.cbChartData2 = new System.Windows.Forms.ComboBox();
-            this.lData2 = new System.Windows.Forms.Label();
-            this.cbChartData3 = new System.Windows.Forms.ComboBox();
-            this.lData3 = new System.Windows.Forms.Label();
-            this.bDataExpr = new System.Windows.Forms.Button();
-            this.bDataExpr3 = new System.Windows.Forms.Button();
-            this.bDataExpr2 = new System.Windows.Forms.Button();
-            this.cbVector = new System.Windows.Forms.ComboBox();
-            this.btnVectorExp = new System.Windows.Forms.Button();
-            this.label8 = new System.Windows.Forms.Label();
-            this.button1 = new System.Windows.Forms.Button();
-            this.button2 = new System.Windows.Forms.Button();
-            this.button3 = new System.Windows.Forms.Button();
+            this.label1 = new Majorsilence.Forms.Label();
+            this.label2 = new Majorsilence.Forms.Label();
+            this.label3 = new Majorsilence.Forms.Label();
+            this.label4 = new Majorsilence.Forms.Label();
+            this.cbChartType = new Majorsilence.Forms.ComboBox();
+            this.cbSubType = new Majorsilence.Forms.ComboBox();
+            this.cbPalette = new Majorsilence.Forms.ComboBox();
+            this.cbRenderElement = new Majorsilence.Forms.ComboBox();
+            this.label5 = new Majorsilence.Forms.Label();
+            this.tbPercentWidth = new Majorsilence.Forms.NumericUpDown();
+            this.label6 = new Majorsilence.Forms.Label();
+            this.tbNoRows = new Majorsilence.Forms.TextBox();
+            this.label7 = new Majorsilence.Forms.Label();
+            this.cbDataSet = new Majorsilence.Forms.ComboBox();
+            this.chkPageBreakStart = new Majorsilence.Forms.CheckBox();
+            this.chkPageBreakEnd = new Majorsilence.Forms.CheckBox();
+            this.cbChartData = new Majorsilence.Forms.ComboBox();
+            this.cbDataLabel = new Majorsilence.Forms.ComboBox();
+            this.chkDataLabel = new Majorsilence.Forms.CheckBox();
+            this.bDataLabelExpr = new Majorsilence.Forms.Button();
+            this.lData1 = new Majorsilence.Forms.Label();
+            this.cbChartData2 = new Majorsilence.Forms.ComboBox();
+            this.lData2 = new Majorsilence.Forms.Label();
+            this.cbChartData3 = new Majorsilence.Forms.ComboBox();
+            this.lData3 = new Majorsilence.Forms.Label();
+            this.bDataExpr = new Majorsilence.Forms.Button();
+            this.bDataExpr3 = new Majorsilence.Forms.Button();
+            this.bDataExpr2 = new Majorsilence.Forms.Button();
+            this.cbVector = new Majorsilence.Forms.ComboBox();
+            this.btnVectorExp = new Majorsilence.Forms.Button();
+            this.label8 = new Majorsilence.Forms.Label();
+            this.button1 = new Majorsilence.Forms.Button();
+            this.button2 = new Majorsilence.Forms.Button();
+            this.button3 = new Majorsilence.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.tbPercentWidth)).BeginInit();
             this.SuspendLayout();
             // 
@@ -306,7 +306,7 @@ namespace fyiReporting.RdlDesign
             // 
             // cbChartType
             // 
-            this.cbChartType.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cbChartType.DropDownStyle = Majorsilence.Forms.ComboBoxStyle.DropDownList;
             this.cbChartType.Items.AddRange(new object[] {
             "Area",
             "Bar",
@@ -321,7 +321,7 @@ namespace fyiReporting.RdlDesign
             this.cbChartType.Name = "cbChartType";
             this.cbChartType.Size = new System.Drawing.Size(121, 21);
             this.cbChartType.TabIndex = 0;
-            this.cbChartType.SelectedIndexChanged += new System.EventHandler(this.cbChartType_SelectedIndexChanged);
+            this.cbChartType.SelectedIndexChanged += this.cbChartType_SelectedIndexChanged;
             // 
             // cbSubType
             // 
@@ -329,9 +329,9 @@ namespace fyiReporting.RdlDesign
             this.cbSubType.Name = "cbSubType";
             this.cbSubType.Size = new System.Drawing.Size(80, 21);
             this.cbSubType.TabIndex = 1;
-            this.cbSubType.SelectedIndexChanged += new System.EventHandler(this.cbSubType_SelectedIndexChanged);
-            this.cbSubType.TextUpdate += new System.EventHandler(this.cbSubType_SelectedIndexChanged);
-            this.cbSubType.TextChanged += new System.EventHandler(this.cbSubType_SelectedIndexChanged);
+            this.cbSubType.SelectedIndexChanged += this.cbSubType_SelectedIndexChanged;
+            this.cbSubType.TextUpdate += this.cbSubType_SelectedIndexChanged;
+            this.cbSubType.TextChanged += this.cbSubType_SelectedIndexChanged;
             // 
             // cbPalette
             // 
@@ -349,11 +349,11 @@ namespace fyiReporting.RdlDesign
             this.cbPalette.Name = "cbPalette";
             this.cbPalette.Size = new System.Drawing.Size(121, 21);
             this.cbPalette.TabIndex = 2;
-            this.cbPalette.SelectedIndexChanged += new System.EventHandler(this.cbPalette_SelectedIndexChanged);
+            this.cbPalette.SelectedIndexChanged += this.cbPalette_SelectedIndexChanged;
             // 
             // cbRenderElement
             // 
-            this.cbRenderElement.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cbRenderElement.DropDownStyle = Majorsilence.Forms.ComboBoxStyle.DropDownList;
             this.cbRenderElement.Items.AddRange(new object[] {
             "Output",
             "NoOutput"});
@@ -361,7 +361,7 @@ namespace fyiReporting.RdlDesign
             this.cbRenderElement.Name = "cbRenderElement";
             this.cbRenderElement.Size = new System.Drawing.Size(121, 21);
             this.cbRenderElement.TabIndex = 3;
-            this.cbRenderElement.SelectedIndexChanged += new System.EventHandler(this.cbRenderElement_SelectedIndexChanged);
+            this.cbRenderElement.SelectedIndexChanged += this.cbRenderElement_SelectedIndexChanged;
             // 
             // label5
             // 
@@ -377,7 +377,7 @@ namespace fyiReporting.RdlDesign
             this.tbPercentWidth.Name = "tbPercentWidth";
             this.tbPercentWidth.Size = new System.Drawing.Size(48, 20);
             this.tbPercentWidth.TabIndex = 4;
-            this.tbPercentWidth.ValueChanged += new System.EventHandler(this.tbPercentWidth_ValueChanged);
+            this.tbPercentWidth.ValueChanged += this.tbPercentWidth_ValueChanged;
             // 
             // label6
             // 
@@ -393,7 +393,7 @@ namespace fyiReporting.RdlDesign
             this.tbNoRows.Name = "tbNoRows";
             this.tbNoRows.Size = new System.Drawing.Size(255, 20);
             this.tbNoRows.TabIndex = 5;
-            this.tbNoRows.TextChanged += new System.EventHandler(this.tbNoRows_TextChanged);
+            this.tbNoRows.TextChanged += this.tbNoRows_TextChanged;
             // 
             // label7
             // 
@@ -405,12 +405,12 @@ namespace fyiReporting.RdlDesign
             // 
             // cbDataSet
             // 
-            this.cbDataSet.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cbDataSet.DropDownStyle = Majorsilence.Forms.ComboBoxStyle.DropDownList;
             this.cbDataSet.Location = new System.Drawing.Point(156, 133);
             this.cbDataSet.Name = "cbDataSet";
             this.cbDataSet.Size = new System.Drawing.Size(255, 21);
             this.cbDataSet.TabIndex = 6;
-            this.cbDataSet.SelectedIndexChanged += new System.EventHandler(this.cbDataSet_SelectedIndexChanged);
+            this.cbDataSet.SelectedIndexChanged += this.cbDataSet_SelectedIndexChanged;
             // 
             // chkPageBreakStart
             // 
@@ -419,7 +419,7 @@ namespace fyiReporting.RdlDesign
             this.chkPageBreakStart.Size = new System.Drawing.Size(136, 24);
             this.chkPageBreakStart.TabIndex = 13;
             this.chkPageBreakStart.Text = "Page Break at Start";
-            this.chkPageBreakStart.CheckedChanged += new System.EventHandler(this.chkPageBreakStart_CheckedChanged);
+            this.chkPageBreakStart.CheckedChanged += this.chkPageBreakStart_CheckedChanged;
             // 
             // chkPageBreakEnd
             // 
@@ -428,7 +428,7 @@ namespace fyiReporting.RdlDesign
             this.chkPageBreakEnd.Size = new System.Drawing.Size(136, 24);
             this.chkPageBreakEnd.TabIndex = 14;
             this.chkPageBreakEnd.Text = "Page Break at End";
-            this.chkPageBreakEnd.CheckedChanged += new System.EventHandler(this.chkPageBreakEnd_CheckedChanged);
+            this.chkPageBreakEnd.CheckedChanged += this.chkPageBreakEnd_CheckedChanged;
             // 
             // cbChartData
             // 
@@ -436,7 +436,7 @@ namespace fyiReporting.RdlDesign
             this.cbChartData.Name = "cbChartData";
             this.cbChartData.Size = new System.Drawing.Size(255, 21);
             this.cbChartData.TabIndex = 7;
-            this.cbChartData.TextChanged += new System.EventHandler(this.cbChartData_Changed);
+            this.cbChartData.TextChanged += this.cbChartData_Changed;
             // 
             // cbDataLabel
             // 
@@ -445,7 +445,7 @@ namespace fyiReporting.RdlDesign
             this.cbDataLabel.Name = "cbDataLabel";
             this.cbDataLabel.Size = new System.Drawing.Size(254, 21);
             this.cbDataLabel.TabIndex = 17;
-            this.cbDataLabel.TextChanged += new System.EventHandler(this.cbChartData_Changed);
+            this.cbDataLabel.TextChanged += this.cbChartData_Changed;
             // 
             // chkDataLabel
             // 
@@ -456,19 +456,19 @@ namespace fyiReporting.RdlDesign
             this.chkDataLabel.TabIndex = 19;
             this.chkDataLabel.Text = "DataLabel";
             this.chkDataLabel.UseVisualStyleBackColor = true;
-            this.chkDataLabel.CheckedChanged += new System.EventHandler(this.chkDataLabel_CheckedChanged);
+            this.chkDataLabel.CheckedChanged += this.chkDataLabel_CheckedChanged;
             // 
             // bDataLabelExpr
             // 
             this.bDataLabelExpr.Enabled = false;
-            this.bDataLabelExpr.Font = new System.Drawing.Font("Arial", 8.25F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))));
+            this.bDataLabelExpr.Font = new Majorsilence.Forms.Drawing.Font("Arial", 8.25F, ((Majorsilence.Forms.Drawing.FontStyle)((Majorsilence.Forms.Drawing.FontStyle.Bold | Majorsilence.Forms.Drawing.FontStyle.Italic))));
             this.bDataLabelExpr.Location = new System.Drawing.Point(415, 237);
             this.bDataLabelExpr.Name = "bDataLabelExpr";
             this.bDataLabelExpr.Size = new System.Drawing.Size(22, 21);
             this.bDataLabelExpr.TabIndex = 20;
             this.bDataLabelExpr.Text = "fx";
             this.bDataLabelExpr.UseVisualStyleBackColor = true;
-            this.bDataLabelExpr.Click += new System.EventHandler(this.bDataLabelExpr_Click);
+            this.bDataLabelExpr.Click += this.bDataLabelExpr_Click;
             // 
             // lData1
             // 
@@ -484,7 +484,7 @@ namespace fyiReporting.RdlDesign
             this.cbChartData2.Name = "cbChartData2";
             this.cbChartData2.Size = new System.Drawing.Size(255, 21);
             this.cbChartData2.TabIndex = 9;
-            this.cbChartData2.TextChanged += new System.EventHandler(this.cbChartData_Changed);
+            this.cbChartData2.TextChanged += this.cbChartData_Changed;
             // 
             // lData2
             // 
@@ -500,7 +500,7 @@ namespace fyiReporting.RdlDesign
             this.cbChartData3.Name = "cbChartData3";
             this.cbChartData3.Size = new System.Drawing.Size(255, 21);
             this.cbChartData3.TabIndex = 11;
-            this.cbChartData3.TextChanged += new System.EventHandler(this.cbChartData_Changed);
+            this.cbChartData3.TextChanged += this.cbChartData_Changed;
             // 
             // lData3
             // 
@@ -512,39 +512,39 @@ namespace fyiReporting.RdlDesign
             // 
             // bDataExpr
             // 
-            this.bDataExpr.Font = new System.Drawing.Font("Arial", 8.25F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.bDataExpr.Font = new Majorsilence.Forms.Drawing.Font("Arial", 8.25F, ((Majorsilence.Forms.Drawing.FontStyle)((Majorsilence.Forms.Drawing.FontStyle.Bold | Majorsilence.Forms.Drawing.FontStyle.Italic))), Majorsilence.Forms.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.bDataExpr.Location = new System.Drawing.Point(415, 157);
             this.bDataExpr.Name = "bDataExpr";
             this.bDataExpr.Size = new System.Drawing.Size(22, 21);
             this.bDataExpr.TabIndex = 8;
             this.bDataExpr.Tag = "d1";
             this.bDataExpr.Text = "fx";
-            this.bDataExpr.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.bDataExpr.Click += new System.EventHandler(this.bDataExpr_Click);
+            this.bDataExpr.TextAlign = Majorsilence.Forms.ContentAlignment.MiddleLeft;
+            this.bDataExpr.Click += this.bDataExpr_Click;
             // 
             // bDataExpr3
             // 
-            this.bDataExpr3.Font = new System.Drawing.Font("Arial", 8.25F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.bDataExpr3.Font = new Majorsilence.Forms.Drawing.Font("Arial", 8.25F, ((Majorsilence.Forms.Drawing.FontStyle)((Majorsilence.Forms.Drawing.FontStyle.Bold | Majorsilence.Forms.Drawing.FontStyle.Italic))), Majorsilence.Forms.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.bDataExpr3.Location = new System.Drawing.Point(415, 207);
             this.bDataExpr3.Name = "bDataExpr3";
             this.bDataExpr3.Size = new System.Drawing.Size(22, 21);
             this.bDataExpr3.TabIndex = 12;
             this.bDataExpr3.Tag = "d3";
             this.bDataExpr3.Text = "fx";
-            this.bDataExpr3.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.bDataExpr3.Click += new System.EventHandler(this.bDataExpr_Click);
+            this.bDataExpr3.TextAlign = Majorsilence.Forms.ContentAlignment.MiddleLeft;
+            this.bDataExpr3.Click += this.bDataExpr_Click;
             // 
             // bDataExpr2
             // 
-            this.bDataExpr2.Font = new System.Drawing.Font("Arial", 8.25F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.bDataExpr2.Font = new Majorsilence.Forms.Drawing.Font("Arial", 8.25F, ((Majorsilence.Forms.Drawing.FontStyle)((Majorsilence.Forms.Drawing.FontStyle.Bold | Majorsilence.Forms.Drawing.FontStyle.Italic))), Majorsilence.Forms.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.bDataExpr2.Location = new System.Drawing.Point(415, 182);
             this.bDataExpr2.Name = "bDataExpr2";
             this.bDataExpr2.Size = new System.Drawing.Size(22, 21);
             this.bDataExpr2.TabIndex = 10;
             this.bDataExpr2.Tag = "d2";
             this.bDataExpr2.Text = "fx";
-            this.bDataExpr2.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.bDataExpr2.Click += new System.EventHandler(this.bDataExpr_Click);
+            this.bDataExpr2.TextAlign = Majorsilence.Forms.ContentAlignment.MiddleLeft;
+            this.bDataExpr2.Click += this.bDataExpr_Click;
             // 
             // cbVector
             // 
@@ -555,19 +555,19 @@ namespace fyiReporting.RdlDesign
             this.cbVector.Name = "cbVector";
             this.cbVector.Size = new System.Drawing.Size(80, 21);
             this.cbVector.TabIndex = 21;
-            this.cbVector.SelectedIndexChanged += new System.EventHandler(this.cbVector_SelectedIndexChanged);
+            this.cbVector.SelectedIndexChanged += this.cbVector_SelectedIndexChanged;
             // 
             // btnVectorExp
             // 
-            this.btnVectorExp.Font = new System.Drawing.Font("Arial", 8.25F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnVectorExp.Font = new Majorsilence.Forms.Drawing.Font("Arial", 8.25F, ((Majorsilence.Forms.Drawing.FontStyle)((Majorsilence.Forms.Drawing.FontStyle.Bold | Majorsilence.Forms.Drawing.FontStyle.Italic))), Majorsilence.Forms.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnVectorExp.Location = new System.Drawing.Point(415, 36);
             this.btnVectorExp.Name = "btnVectorExp";
             this.btnVectorExp.Size = new System.Drawing.Size(22, 21);
             this.btnVectorExp.TabIndex = 22;
             this.btnVectorExp.Tag = "d4";
             this.btnVectorExp.Text = "fx";
-            this.btnVectorExp.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.btnVectorExp.Click += new System.EventHandler(this.bDataExpr_Click);
+            this.btnVectorExp.TextAlign = Majorsilence.Forms.ContentAlignment.MiddleLeft;
+            this.btnVectorExp.Click += this.bDataExpr_Click;
             // 
             // label8
             // 
@@ -579,40 +579,40 @@ namespace fyiReporting.RdlDesign
             // 
             // button1
             // 
-            this.button1.Font = new System.Drawing.Font("Arial", 8.25F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.button1.Font = new Majorsilence.Forms.Drawing.Font("Arial", 8.25F, ((Majorsilence.Forms.Drawing.FontStyle)((Majorsilence.Forms.Drawing.FontStyle.Bold | Majorsilence.Forms.Drawing.FontStyle.Italic))), Majorsilence.Forms.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.button1.Location = new System.Drawing.Point(415, 9);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(22, 21);
             this.button1.TabIndex = 24;
             this.button1.Tag = "d7";
             this.button1.Text = "fx";
-            this.button1.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.button1.Click += new System.EventHandler(this.bDataExpr_Click);
+            this.button1.TextAlign = Majorsilence.Forms.ContentAlignment.MiddleLeft;
+            this.button1.Click += this.bDataExpr_Click;
             // 
             // button2
             // 
-            this.button2.Font = new System.Drawing.Font("Arial", 8.25F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.button2.Font = new Majorsilence.Forms.Drawing.Font("Arial", 8.25F, ((Majorsilence.Forms.Drawing.FontStyle)((Majorsilence.Forms.Drawing.FontStyle.Bold | Majorsilence.Forms.Drawing.FontStyle.Italic))), Majorsilence.Forms.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.button2.Location = new System.Drawing.Point(251, 9);
             this.button2.Name = "button2";
             this.button2.Size = new System.Drawing.Size(22, 21);
             this.button2.TabIndex = 25;
             this.button2.Tag = "d5";
             this.button2.Text = "fx";
-            this.button2.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.button2.TextAlign = Majorsilence.Forms.ContentAlignment.MiddleLeft;
             this.button2.Visible = false;
-            this.button2.Click += new System.EventHandler(this.bDataExpr_Click);
+            this.button2.Click += this.bDataExpr_Click;
             // 
             // button3
             // 
-            this.button3.Font = new System.Drawing.Font("Arial", 8.25F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.button3.Font = new Majorsilence.Forms.Drawing.Font("Arial", 8.25F, ((Majorsilence.Forms.Drawing.FontStyle)((Majorsilence.Forms.Drawing.FontStyle.Bold | Majorsilence.Forms.Drawing.FontStyle.Italic))), Majorsilence.Forms.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.button3.Location = new System.Drawing.Point(251, 32);
             this.button3.Name = "button3";
             this.button3.Size = new System.Drawing.Size(22, 21);
             this.button3.TabIndex = 26;
             this.button3.Tag = "d6";
             this.button3.Text = "fx";
-            this.button3.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.button3.Click += new System.EventHandler(this.bDataExpr_Click);
+            this.button3.TextAlign = Majorsilence.Forms.ContentAlignment.MiddleLeft;
+            this.button3.Click += this.bDataExpr_Click;
             // 
             // ChartCtl
             // 

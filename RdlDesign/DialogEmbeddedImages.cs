@@ -1,12 +1,12 @@
 using System;
-using System.Drawing;
+using Majorsilence.Forms.Drawing;
 using System.Collections;
 using System.ComponentModel;
-using System.Windows.Forms;
+using Majorsilence.Forms;
 using System.Text;
 using System.Xml;
 using System.IO;
-using System.Drawing.Imaging;
+using Majorsilence.Forms.Drawing.Imaging;
 using System.Text.RegularExpressions;
 using Majorsilence.Reporting.Rdl;
 using Majorsilence.Reporting.RdlDesign.Resources;
@@ -89,7 +89,7 @@ namespace Majorsilence.Reporting.RdlDesign
                 return;
             }
 
-            System.Drawing.Bitmap img = (System.Drawing.Bitmap)iData.GetData(DataFormats.Bitmap);
+            Majorsilence.Forms.Drawing.Bitmap img = (Majorsilence.Forms.Drawing.Bitmap)iData.GetData(DataFormats.Bitmap);
 
             // convert the image to the png format and create a base 64	string representation
             string imagedata = GetBase64Image(img);
@@ -108,7 +108,7 @@ namespace Majorsilence.Reporting.RdlDesign
             this.tbEIName.Focus();
         }
 
-        private void bImport_Click(object sender, System.EventArgs e)
+        private async void bImport_Click(object sender, System.EventArgs e)
         {
             OpenFileDialog ofd = new OpenFileDialog();
             ofd.Filter = Strings.DialogEmbeddedImages_bImport_Click_ImageFilesFilter;
@@ -117,7 +117,7 @@ namespace Majorsilence.Reporting.RdlDesign
             ofd.Multiselect = true;
             try
             {
-                if (ofd.ShowDialog(this) != DialogResult.OK)
+                if (await ofd.ShowDialogAsync(this) != DialogResult.OK)
                     return;
 
                 // need to create a new embedded image(s)
@@ -125,12 +125,12 @@ namespace Majorsilence.Reporting.RdlDesign
                 foreach (string filename in ofd.FileNames)
                 {
                     Stream strm = null;
-                    System.Drawing.Image im = null;
+                    Majorsilence.Forms.Drawing.Image im = null;
                     string imagedata = null;
                     try
                     {
                         strm = new FileStream(filename, FileMode.Open, FileAccess.Read, FileShare.Read);
-                        im = System.Drawing.Image.FromStream(strm);
+                        im = Majorsilence.Forms.Drawing.Image.FromStream(strm);
                         imagedata = this.GetBase64Image(im);
                     }
                     catch (Exception ex)
@@ -229,11 +229,11 @@ namespace Majorsilence.Reporting.RdlDesign
             byte[] ba = Convert.FromBase64String(imdata);
 
             Stream strm = null;
-            System.Drawing.Image im = null;
+            Majorsilence.Forms.Drawing.Image im = null;
             try
             {
                 strm = new MemoryStream(ba);
-                im = System.Drawing.Image.FromStream(strm);
+                im = Majorsilence.Forms.Drawing.Image.FromStream(strm);
             }
             catch (Exception e)
             {

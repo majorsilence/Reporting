@@ -1,57 +1,56 @@
 using System;
-using System.Windows.Forms;
-using System.Drawing;
+using Majorsilence.Forms;
 using System.ComponentModel;
 using System.Collections;
 
 namespace Majorsilence.Reporting.RdlDesign
 {
-    public partial class DialogDataSourceRef : System.Windows.Forms.Form
+    public partial class DialogDataSourceRef : Majorsilence.Forms.Form
 	{
 		#region Windows Form Designer generated code
-		private System.Windows.Forms.Label label1;
-private System.Windows.Forms.TextBox tbPassword;
-private System.Windows.Forms.Label label2;
-private System.Windows.Forms.TextBox tbFilename;
-private System.Windows.Forms.Button bGetFilename;
-private System.Windows.Forms.Label label3;
-private System.Windows.Forms.ComboBox cbDataProvider;
-private System.Windows.Forms.Label label4;
-private System.Windows.Forms.TextBox tbConnection;
-private System.Windows.Forms.CheckBox ckbIntSecurity;
-private System.Windows.Forms.Label label5;
-private System.Windows.Forms.TextBox tbPrompt;
-private System.Windows.Forms.Button bOK;
-private System.Windows.Forms.Button bCancel;
-private System.Windows.Forms.TextBox tbPassword2;
-private System.Windows.Forms.Label label6;
-private System.Windows.Forms.Button bTestConnection;
-private System.Windows.Forms.ComboBox cbOdbcNames;
-private System.Windows.Forms.Label lODBC;
+		private Majorsilence.Forms.Label label1;
+private Majorsilence.Forms.TextBox tbPassword;
+private Majorsilence.Forms.Label label2;
+private Majorsilence.Forms.TextBox tbFilename;
+private Majorsilence.Forms.Button bGetFilename;
+private Majorsilence.Forms.Label label3;
+private Majorsilence.Forms.ComboBox cbDataProvider;
+private Majorsilence.Forms.Label label4;
+private Majorsilence.Forms.TextBox tbConnection;
+private Majorsilence.Forms.CheckBox ckbIntSecurity;
+private Majorsilence.Forms.Label label5;
+private Majorsilence.Forms.TextBox tbPrompt;
+private Majorsilence.Forms.Button bOK;
+private Majorsilence.Forms.Button bCancel;
+private Majorsilence.Forms.TextBox tbPassword2;
+private Majorsilence.Forms.Label label6;
+private Majorsilence.Forms.Button bTestConnection;
+private Majorsilence.Forms.ComboBox cbOdbcNames;
+private Majorsilence.Forms.Label lODBC;
 private System.ComponentModel.Container components = null;
 
 		private void InitializeComponent()
 		{
-			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(DialogDataSourceRef));
-			this.label1 = new System.Windows.Forms.Label();
-			this.tbPassword = new System.Windows.Forms.TextBox();
-			this.label2 = new System.Windows.Forms.Label();
-			this.tbFilename = new System.Windows.Forms.TextBox();
-			this.bGetFilename = new System.Windows.Forms.Button();
-			this.label3 = new System.Windows.Forms.Label();
-			this.cbDataProvider = new System.Windows.Forms.ComboBox();
-			this.label4 = new System.Windows.Forms.Label();
-			this.tbConnection = new System.Windows.Forms.TextBox();
-			this.ckbIntSecurity = new System.Windows.Forms.CheckBox();
-			this.label5 = new System.Windows.Forms.Label();
-			this.tbPrompt = new System.Windows.Forms.TextBox();
-			this.bOK = new System.Windows.Forms.Button();
-			this.bCancel = new System.Windows.Forms.Button();
-			this.tbPassword2 = new System.Windows.Forms.TextBox();
-			this.label6 = new System.Windows.Forms.Label();
-			this.bTestConnection = new System.Windows.Forms.Button();
-			this.cbOdbcNames = new System.Windows.Forms.ComboBox();
-			this.lODBC = new System.Windows.Forms.Label();
+			Majorsilence.Forms.ComponentResourceManager resources = new Majorsilence.Forms.ComponentResourceManager(typeof(DialogDataSourceRef));
+			this.label1 = new Majorsilence.Forms.Label();
+			this.tbPassword = new Majorsilence.Forms.TextBox();
+			this.label2 = new Majorsilence.Forms.Label();
+			this.tbFilename = new Majorsilence.Forms.TextBox();
+			this.bGetFilename = new Majorsilence.Forms.Button();
+			this.label3 = new Majorsilence.Forms.Label();
+			this.cbDataProvider = new Majorsilence.Forms.ComboBox();
+			this.label4 = new Majorsilence.Forms.Label();
+			this.tbConnection = new Majorsilence.Forms.TextBox();
+			this.ckbIntSecurity = new Majorsilence.Forms.CheckBox();
+			this.label5 = new Majorsilence.Forms.Label();
+			this.tbPrompt = new Majorsilence.Forms.TextBox();
+			this.bOK = new Majorsilence.Forms.Button();
+			this.bCancel = new Majorsilence.Forms.Button();
+			this.tbPassword2 = new Majorsilence.Forms.TextBox();
+			this.label6 = new Majorsilence.Forms.Label();
+			this.bTestConnection = new Majorsilence.Forms.Button();
+			this.cbOdbcNames = new Majorsilence.Forms.ComboBox();
+			this.lODBC = new Majorsilence.Forms.Label();
 			this.SuspendLayout();
 			// 
 			// label1
@@ -63,7 +62,7 @@ private System.ComponentModel.Container components = null;
 			// 
 			resources.ApplyResources(this.tbPassword, "tbPassword");
 			this.tbPassword.Name = "tbPassword";
-			this.tbPassword.TextChanged += new System.EventHandler(this.validate_TextChanged);
+			this.tbPassword.TextChanged += this.validate_TextChanged;
 			// 
 			// label2
 			// 
@@ -74,13 +73,13 @@ private System.ComponentModel.Container components = null;
 			// 
 			resources.ApplyResources(this.tbFilename, "tbFilename");
 			this.tbFilename.Name = "tbFilename";
-			this.tbFilename.TextChanged += new System.EventHandler(this.validate_TextChanged);
+			this.tbFilename.TextChanged += this.validate_TextChanged;
 			// 
 			// bGetFilename
 			// 
 			resources.ApplyResources(this.bGetFilename, "bGetFilename");
 			this.bGetFilename.Name = "bGetFilename";
-			this.bGetFilename.Click += new System.EventHandler(this.bGetFilename_Click);
+			this.bGetFilename.Click += this.bGetFilename_Click;
 			// 
 			// label3
 			// 
@@ -90,9 +89,9 @@ private System.ComponentModel.Container components = null;
 			// cbDataProvider
 			// 
 			resources.ApplyResources(this.cbDataProvider, "cbDataProvider");
-			this.cbDataProvider.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+			this.cbDataProvider.DropDownStyle = Majorsilence.Forms.ComboBoxStyle.DropDownList;
 			this.cbDataProvider.Name = "cbDataProvider";
-			this.cbDataProvider.SelectedIndexChanged += new System.EventHandler(this.cbDataProvider_SelectedIndexChanged);
+			this.cbDataProvider.SelectedIndexChanged += this.cbDataProvider_SelectedIndexChanged;
 			// 
 			// label4
 			// 
@@ -103,7 +102,7 @@ private System.ComponentModel.Container components = null;
 			// 
 			resources.ApplyResources(this.tbConnection, "tbConnection");
 			this.tbConnection.Name = "tbConnection";
-			this.tbConnection.TextChanged += new System.EventHandler(this.validate_TextChanged);
+			this.tbConnection.TextChanged += this.validate_TextChanged;
 			// 
 			// ckbIntSecurity
 			// 
@@ -124,19 +123,19 @@ private System.ComponentModel.Container components = null;
 			// 
 			resources.ApplyResources(this.bOK, "bOK");
 			this.bOK.Name = "bOK";
-			this.bOK.Click += new System.EventHandler(this.bOK_Click);
+			this.bOK.Click += this.bOK_Click;
 			// 
 			// bCancel
 			// 
 			resources.ApplyResources(this.bCancel, "bCancel");
-			this.bCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
+			this.bCancel.DialogResult = Majorsilence.Forms.DialogResult.Cancel;
 			this.bCancel.Name = "bCancel";
 			// 
 			// tbPassword2
 			// 
 			resources.ApplyResources(this.tbPassword2, "tbPassword2");
 			this.tbPassword2.Name = "tbPassword2";
-			this.tbPassword2.TextChanged += new System.EventHandler(this.validate_TextChanged);
+			this.tbPassword2.TextChanged += this.validate_TextChanged;
 			// 
 			// label6
 			// 
@@ -147,15 +146,15 @@ private System.ComponentModel.Container components = null;
 			// 
 			resources.ApplyResources(this.bTestConnection, "bTestConnection");
 			this.bTestConnection.Name = "bTestConnection";
-			this.bTestConnection.Click += new System.EventHandler(this.bTestConnection_Click);
+			this.bTestConnection.Click += this.bTestConnection_Click;
 			// 
 			// cbOdbcNames
 			// 
 			resources.ApplyResources(this.cbOdbcNames, "cbOdbcNames");
-			this.cbOdbcNames.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+			this.cbOdbcNames.DropDownStyle = Majorsilence.Forms.ComboBoxStyle.DropDownList;
 			this.cbOdbcNames.Name = "cbOdbcNames";
 			this.cbOdbcNames.Sorted = true;
-			this.cbOdbcNames.SelectedIndexChanged += new System.EventHandler(this.cbOdbcNames_SelectedIndexChanged);
+			this.cbOdbcNames.SelectedIndexChanged += this.cbOdbcNames_SelectedIndexChanged;
 			// 
 			// lODBC
 			// 
@@ -186,12 +185,12 @@ private System.ComponentModel.Container components = null;
 			this.Controls.Add(this.label2);
 			this.Controls.Add(this.tbPassword);
 			this.Controls.Add(this.label1);
-			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
+			this.FormBorderStyle = Majorsilence.Forms.FormBorderStyle.FixedDialog;
 			this.MaximizeBox = false;
 			this.MinimizeBox = false;
 			this.Name = "DialogDataSourceRef";
 			this.ShowInTaskbar = false;
-			this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
+			this.SizeGripStyle = Majorsilence.Forms.SizeGripStyle.Hide;
 			this.ResumeLayout(false);
 			this.PerformLayout();
 

@@ -3,9 +3,10 @@ using System;
 using System.Collections;
 using System.ComponentModel;
 using System.Drawing;
-using System.Drawing.Drawing2D;
-using System.Drawing.Imaging;
-using System.Windows.Forms;
+using Majorsilence.Forms.Drawing;
+using Majorsilence.Forms.Drawing.Drawing2D;
+using Majorsilence.Forms.Drawing.Imaging;
+using Majorsilence.Forms;
 using System.Globalization;
 using System.Net;
 using System.Xml;
@@ -36,15 +37,15 @@ namespace Majorsilence.Reporting.RdlDesign
             this.DoubleBuffered = true;
 
             //editor = e;
-            //editor.TextChanged += new System.EventHandler(editor_TextChanged);
-            //editor.Resize += new System.EventHandler(editor_Resize);
-            //editor.VScroll += new System.EventHandler(editor_VScroll);
+            //editor.TextChanged += editor_TextChanged;
+            //editor.Resize += editor_Resize;
+            //editor.VScroll += editor_VScroll;
 
             //RegionInfo rinfo = new RegionInfo(CultureInfo.CurrentCulture.Name);
             //_IsMetric = rinfo.IsMetric;
             //_Intervals = _IsMetric ? 4 : 8;
 
-            this.Paint += new PaintEventHandler(DesignRulerPaint);
+            this.Paint += DesignRulerPaint;
         }
 
          [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
@@ -58,12 +59,12 @@ namespace Majorsilence.Reporting.RdlDesign
                     return;
                 if (_Vertical)
                 {
-                    _Design.VerticalScrollChanged += new System.EventHandler(ScrollChanged);
+                    _Design.VerticalScrollChanged += ScrollChanged;
                     // need to know when the various heights change as well
-                    _Design.HeightChanged += new DesignCtl.HeightEventHandler(HeightChanged);
+                    _Design.HeightChanged += HeightChanged;
                 }
                 else
-                    _Design.HorizontalScrollChanged += new System.EventHandler(ScrollChanged);
+                    _Design.HorizontalScrollChanged += ScrollChanged;
             }
         }
 
@@ -91,7 +92,7 @@ namespace Majorsilence.Reporting.RdlDesign
             }
         }
         
-		private void DesignRulerPaint(object sender, System.Windows.Forms.PaintEventArgs e)
+		private void DesignRulerPaint(object sender, Majorsilence.Forms.PaintEventArgs e)
         {
 
             _IsMetric = RdlDesign.RdlDesigner.MeasureUnits == "cm" ? true : false;

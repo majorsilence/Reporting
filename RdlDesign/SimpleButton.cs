@@ -2,8 +2,9 @@
 using System;
 using System.ComponentModel;
 using System.Drawing;
-using System.Drawing.Imaging;
-using System.Windows.Forms;
+using Majorsilence.Forms.Drawing;
+using Majorsilence.Forms.Drawing.Imaging;
+using Majorsilence.Forms;
 
 
 namespace Majorsilence.Reporting.RdlDesign
@@ -22,14 +23,14 @@ namespace Majorsilence.Reporting.RdlDesign
 
 			this.BackColor = parent.BackColor;
 			this.ForeColor = this.Enabled? Color.Black: Color.Gray;
-			this.MouseDown +=new MouseEventHandler(SimpleButton_MouseDown);
-			this.MouseUp +=new MouseEventHandler(SimpleButton_MouseUp);
-			this.MouseEnter +=new EventHandler(SimpleButton_MouseEnter);
-			this.MouseLeave +=new EventHandler(SimpleButton_MouseLeave);
-			this.Paint += new PaintEventHandler(this.DrawPanelPaint);
+			this.MouseDown += SimpleButton_MouseDown;
+			this.MouseUp += SimpleButton_MouseUp;
+			this.MouseEnter += SimpleButton_MouseEnter;
+			this.MouseLeave += SimpleButton_MouseLeave;
+			this.Paint += this.DrawPanelPaint;
 		}
 
-		private void DrawPanelPaint(object sender, System.Windows.Forms.PaintEventArgs e)
+		private void DrawPanelPaint(object sender, Majorsilence.Forms.PaintEventArgs e)
 		{
 
 			Graphics g = e.Graphics;
@@ -53,19 +54,13 @@ namespace Majorsilence.Reporting.RdlDesign
 						y += 1;
 					}
 
-					// Draw Image using the transparency color
-					ImageAttributes imageAttr = new ImageAttributes();
-					imageAttr.SetColorKey(_Transparency, _Transparency,
-						ColorAdjustType.Default);
-
-					g.DrawImage(this.Image,         // Image
-						new Rectangle(x, y, this.Image.Width, this.Image.Height),    // Dest. rect.
-						0,							// srcX
-						0,							// srcY
-						this.Image.Width,           // srcWidth
-						this.Image.Height,          // srcHeight
-						GraphicsUnit.Pixel,			// srcUnit
-						imageAttr);					// ImageAttributes
+					// ImageAttributes/SetColorKey (transparent-color-key drawing) has no
+					// Majorsilence.Forms equivalent -- would need per-pixel SkiaSharp color
+					// filtering to replicate properly. Draw the image directly instead; the
+					// _Transparency color-keying effect is a documented, dropped cosmetic
+					// feature (this control is already flagged as a migration candidate, same
+					// as ColorPicker.cs's "very crazy control, need replace it" note).
+					g.DrawImage(this.Image, new Rectangle(x, y, this.Image.Width, this.Image.Height));
 				}
 				else
 				{

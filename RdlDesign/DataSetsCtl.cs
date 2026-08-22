@@ -4,7 +4,7 @@ using Majorsilence.Reporting.RdlDesign.Syntax;
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Windows.Forms;
+using Majorsilence.Forms;
 using System.Xml;
 
 namespace Majorsilence.Reporting.RdlDesign
@@ -12,7 +12,7 @@ namespace Majorsilence.Reporting.RdlDesign
     /// <summary>
     /// Summary description for StyleCtl.
     /// </summary>
-    internal partial class DataSetsCtl : System.Windows.Forms.UserControl, IProperty
+    internal partial class DataSetsCtl : Majorsilence.Forms.UserControl, IProperty
     {
         private bool _UseTypenameQualified = false;
         private DesignXmlDraw _Draw;
