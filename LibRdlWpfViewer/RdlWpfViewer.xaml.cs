@@ -12,6 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using Majorsilence.Forms.WinForms;
 using Majorsilence.Pdf.Security;
 
 namespace LibRdlWpfViewer
@@ -21,9 +22,15 @@ namespace LibRdlWpfViewer
     /// </summary>
     public partial class RdlWpfViewer : UserControl
     {
+        private readonly Majorsilence.Reporting.RdlViewer.RdlViewer reportViewer = new()
+        {
+            Dock = Majorsilence.Forms.DockStyle.Fill,
+        };
+
         public RdlWpfViewer()
         {
             InitializeComponent();
+            windowsFormsHost1.Child = reportViewer.ToWinFormsControl();
         }
 
         public async Task Rebuild()
