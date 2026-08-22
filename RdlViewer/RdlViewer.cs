@@ -3,9 +3,10 @@ using System.Collections;
 using System.Collections.Specialized;
 using System.Collections.Generic;
 using System.Drawing;
+using Majorsilence.Forms.Drawing;
 using System.IO;
-using System.Windows.Forms;
-using System.Drawing.Printing;
+using Majorsilence.Forms;
+using Majorsilence.Forms.Printing;
 using System.Text;
 using EncryptionProvider;
 using EncryptionProvider.String;
@@ -23,7 +24,7 @@ namespace Majorsilence.Reporting.RdlViewer
     /// <summary>
     /// RdlViewer displays RDL files or syntax. 
     /// </summary>
-    public partial class RdlViewer : System.Windows.Forms.UserControl
+    public partial class RdlViewer : Majorsilence.Forms.UserControl
     {
         public delegate void HyperlinkEventHandler(object source, HyperlinkEventArgs e);
 
@@ -135,14 +136,6 @@ namespace Majorsilence.Reporting.RdlViewer
         /// Compensate for non-printable region
         /// </summary>
         private bool _UseTrueMargins = true;
-        /// <summary>
-        /// End page
-        /// </summary>
-        private int printEndPage;
-        /// <summary>
-        /// Current page to print
-        /// </summary>
-        private int printCurrentPage;
 
         #endregion Printing
 
@@ -219,13 +212,13 @@ namespace Majorsilence.Reporting.RdlViewer
 
             _DrawPanel.Parent = this;
 
-            _DrawPanel.MouseWheel += new MouseEventHandler(DrawPanelMouseWheel);
+            _DrawPanel.MouseWheel += DrawPanelMouseWheel;
 
             _WarningButton = new PictureBox();
             _WarningButton.Parent = this;
             _WarningButton.Width = 15;
             _WarningButton.Height = 15;
-            _WarningButton.Paint += new PaintEventHandler(_WarningButton_Paint);
+            _WarningButton.Paint += _WarningButton_Paint;
             _WarningButton.Click += new System.EventHandler(WarningClick);
             ToolTip tip = new ToolTip();
             tip.AutomaticDelay = 500;
@@ -240,7 +233,7 @@ namespace Majorsilence.Reporting.RdlViewer
             _FindCtl.Viewer = this;
             _FindCtl.Visible = false;
 
-            this.Layout += new LayoutEventHandler(RdlViewer_Layout);
+            this.Layout += RdlViewer_Layout;
             this.SuspendLayout();
 
             // Must be added in this order for DockStyle to work correctly
@@ -812,100 +805,20 @@ namespace Majorsilence.Reporting.RdlViewer
             }
         }
 
-        /// <summary>
-        /// Print the report.
-        /// </summary>
-        public async Task Print(PrintDocument pd)
-        {
-            await LoadPageIfNeeded();
-
-            pd.PrintPage += new PrintPageEventHandler(PrintPage);
-
-            // This is a work around where many printers do not support printing
-            // more then one copy.  This will cause a prompt for each copy if using XPS
-            //
-            // http://msdn.microsoft.com/en-us/library/system.drawing.printing.printersettings.copies.aspx
-            // "Not all printers support printing multiple copes. You can use the MaximumCopies property 
-            // to determine the maximum number of copies the printer supports. If the number of 
-            // copies is set higher than the maximum copies supported by the printer, only the 
-            // maximum number of copies will be printed, and no exception will occur."
-            // 
-            if (pd.PrinterSettings.MaximumCopies == 1 && pd.PrinterSettings.Copies > 1)
-            {
-                for (int i = 0; i < pd.PrinterSettings.Copies; i++)
-                {
-                    _Print(pd);
-                }
-            }
-            else
-            {
-                _Print(pd);
-            }
-        }
-
-        private void _Print(PrintDocument pd)
-        {
-            printCurrentPage = -1;
-            switch (pd.PrinterSettings.PrintRange)
-            {
-                case PrintRange.AllPages:
-                    printCurrentPage = 0;
-                    printEndPage = _pgs.PageCount - 1;
-                    break;
-                case PrintRange.Selection:
-                    printCurrentPage = pd.PrinterSettings.FromPage - 1;
-                    printEndPage = pd.PrinterSettings.FromPage - 1;
-                    break;
-                case PrintRange.SomePages:
-                    printCurrentPage = pd.PrinterSettings.FromPage - 1;
-                    if (printCurrentPage < 0)
-                        printCurrentPage = 0;
-                    printEndPage = pd.PrinterSettings.ToPage - 1;
-                    if (printEndPage >= _pgs.PageCount)
-                        printEndPage = _pgs.PageCount - 1;
-                    break;
-            }
-            pd.Print();
-        }
-
-        private async void PrintPage(object sender, PrintPageEventArgs e)
-        {
-            System.Drawing.Rectangle r = new System.Drawing.Rectangle(0, 0, int.MaxValue, int.MaxValue);
-            // account for the non-printable area of the paper
-            PointF pageOffset;
-            if (this.UseTrueMargins && this._Report != null)
-            {
-                // The page offset is set in pixels as the Draw method changes the graphics object to use pixels
-                // (the origin transform does not get changed by the change in units.  PrintableArea returns
-                // numbers in the hundredths of an inch.
-
-                float x = ((e.PageSettings.PrintableArea.X * e.Graphics.DpiX) / 100.0F) - e.Graphics.Transform.OffsetX;
-                float y = ((e.PageSettings.PrintableArea.Y * e.Graphics.DpiY) / 100.0F) - e.Graphics.Transform.OffsetY;
-
-                // Get the margins in printer pixels (don't use the function!)
-                // Points to pixels conversion ((double)x * DpiX / POINTSIZEF)
-                float lm = (float)((double)_Report.LeftMarginPoints * e.Graphics.DpiX / POINTSIZEF);
-                float tm = (float)((double)_Report.TopMarginPoints * e.Graphics.DpiY / POINTSIZEF);
-                // Correct based on the report margin
-                if (x > lm)      // left margin is less than the minimum left margin
-                    x = 0;
-                if (y > tm)      // top margin is less than the minimum top margin
-                    y = 0;
-                pageOffset = new PointF(-x, -y);
-            }
-            else
-            {
-                pageOffset = PointF.Empty;
-            }
-
-            await _DrawPanel.Draw(e.Graphics, printCurrentPage, r, false, pageOffset);
-
-            printCurrentPage++;
-            if (printCurrentPage > printEndPage)
-                e.HasMorePages = false;
-            else
-                e.HasMorePages = true;
-        }
+        // Print(PrintDocument) / _Print / PrintPage removed -- see MIGRATION-NOTES.md.
+        //
+        // Majorsilence.Forms.Printing.PrintPageEventArgs.Graphics is SkiaGraphics, a completely
+        // separate, much narrower type from the Majorsilence.Forms.Graphics PageDrawing.Draw is
+        // written against (no inheritance relationship, missing PageUnit/Transform/many
+        // overloads PageDrawing needs) -- reusing the screen-paint code for printing would need
+        // a large parallel rendering path. Majorsilence.Forms's own PrintDocument doesn't talk to
+        // an OS print spooler either; it always renders straight to a PDF file via SkiaSharp, and
+        // its PrintDialog is a no-op stub with no real UI. Given that, "printing" here means:
+        // SaveAs(path, OutputPresentationType.PDF) -- the same mature RunRenderPdf pipeline every
+        // other part of Majorsilence Reporting already uses -- and hand the file to the OS's own
+        // PDF viewer to actually print. Real OS print-spooler integration (printer selection,
+        // page ranges via a native dialog, duplex, etc.) is not implemented; see
+        // ViewerToolstrip.PrintClicked for the caller-side change.
 
 
         /// <summary>
@@ -1131,7 +1044,7 @@ namespace Majorsilence.Reporting.RdlViewer
         private Bitmap _buffer;
         // HACK: async shenanigans
         bool doGraphicsDraw;
-        private async void DrawPanelPaint(object sender, System.Windows.Forms.PaintEventArgs e)
+        private async void DrawPanelPaint(object sender, Majorsilence.Forms.PaintEventArgs e)
         {
             try         // never want to die in here
             {
@@ -1565,6 +1478,33 @@ namespace Majorsilence.Reporting.RdlViewer
             return prog;
         }
 
+        // EncryptionProvider.Prompt.ShowDialog is compiled only under `#if WINDOWS || NET48`
+        // (a raw System.Windows.Forms.Form, never migrated) -- unavailable to this project's
+        // plain net8.0/net10.0 TFM. A small local replacement using Majorsilence.Forms directly,
+        // using the default CenterScreen StartPosition instead of Prompt's manual
+        // Screen.FromControl/WorkingArea centering math.
+        private static string PromptForPasskey(string text, string caption)
+        {
+            using var prompt = new Majorsilence.Forms.Form
+            {
+                // Form has no separate Width/Height ints, only a settable Size (see D1's
+                // MIGRATION-NOTES.md "Form is not a Control" gotcha).
+                Size = new System.Drawing.Size(500, 200),
+                FormBorderStyle = Majorsilence.Forms.FormBorderStyle.FixedDialog,
+                Text = caption,
+            };
+            var textLabel = new Majorsilence.Forms.Label { Left = 50, Top = 20, Width = 400, Height = 60, Text = text };
+            var textBox = new Majorsilence.Forms.TextBox { Left = 50, Top = 100, Width = 400 };
+            var confirmation = new Majorsilence.Forms.Button { Text = "OK", Left = 350, Width = 100, Top = 120 };
+            confirmation.Click += (sender, e) => { prompt.Close(); };
+            prompt.Controls.Add(textBox);
+            prompt.Controls.Add(confirmation);
+            prompt.Controls.Add(textLabel);
+            prompt.AcceptButton = confirmation;
+            prompt.ShowDialog();
+            return textBox.Text;
+        }
+
         private String doPossibleDecryption(String rdl)
         {
 
@@ -1573,7 +1513,7 @@ namespace Majorsilence.Reporting.RdlViewer
 
                 try
                 {
-                    StringEncryption enc = new StringEncryption(Prompt.ShowDialog("Please enter the passkey", "Passkey?"));
+                    StringEncryption enc = new StringEncryption(PromptForPasskey("Please enter the passkey", "Passkey?"));
                     rdl = enc.Decrypt(rdl);
                 }
                 catch (Exception)
@@ -1664,7 +1604,9 @@ namespace Majorsilence.Reporting.RdlViewer
                 {
                     TextBox tb = new TextBox();
                     v = tb;
-                    tb.Height = tb.PreferredHeight;
+                    // TextBox.PreferredHeight (an auto-size convenience property) doesn't exist
+                    // on Majorsilence.Forms.TextBox; use a typical single-line height instead.
+                    tb.Height = 22;
                     tb.Validated += new System.EventHandler(ParametersTextValidated);
                 }
                 else
@@ -1914,7 +1856,7 @@ namespace Majorsilence.Reporting.RdlViewer
             return;
         }
 
-        private void OnHScroll(object sender, System.Windows.Forms.ScrollEventArgs e)
+        private void OnHScroll(object sender, Majorsilence.Forms.ScrollEventArgs e)
         {
             if (_hScroll.IsDisposed)
                 return;
@@ -1925,7 +1867,7 @@ namespace Majorsilence.Reporting.RdlViewer
             _DrawPanel.Invalidate();
         }
 
-        private void OnVScroll(object sender, System.Windows.Forms.ScrollEventArgs e)
+        private void OnVScroll(object sender, Majorsilence.Forms.ScrollEventArgs e)
         {
             if (_vScroll.IsDisposed)
                 return;

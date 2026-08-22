@@ -1,95 +1,55 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-	<PropertyGroup>
-		<ProjectType>Local</ProjectType>
-		<DelaySign>false</DelaySign>
-		<OutputType>Library</OutputType>
-		<RootNamespace>Majorsilence.Reporting.RdlViewer</RootNamespace>
-		<RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
-		<PublishUrl>publish\</PublishUrl>
-		<UseWindowsForms>true</UseWindowsForms>
-		<ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
-		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-		<AssemblyTitle>RDL Viewer</AssemblyTitle>
-		<DelaySign>false</DelaySign>
-		<PackageId>Majorsilence.Reporting.RdlViewer</PackageId>
-		<Description>WinForms report viewer control for Majorsilence Reporting (Windows only). Embed RDL/RDLC report viewing, printing, and export in desktop apps. Targets .NET 8 (Windows), .NET 10 (Windows), and .NET Framework 4.8.</Description>
-		<Configurations>Debug;Release;Debug-DrawingCompat</Configurations>
-		<TargetFrameworks>net48;net8.0-windows;net10.0-windows</TargetFrameworks>
-		<WarningsAsErrors>4014</WarningsAsErrors>
-        <GenerateResourceUsePreserializedResources>true</GenerateResourceUsePreserializedResources>
-        <IsPackable>true</IsPackable>
-    </PropertyGroup>
-	<ItemGroup>
-		<Compile Remove="RdlReader\bin\**" />
-		<Compile Remove="RdlReader\obj\**" />
-		<EmbeddedResource Remove="RdlReader\bin\**" />
-		<EmbeddedResource Remove="RdlReader\obj\**" />
-		<None Remove="RdlReader\bin\**" />
-		<None Remove="RdlReader\obj\**" />
-	</ItemGroup>
-	<ItemGroup>
-		<Reference Update="System">
-			<Name>System</Name>
-		</Reference>
-		<Reference Update="System.Data">
-			<Name>System.Data</Name>
-		</Reference>
-		<Reference Update="System.Drawing">
-			<Name>System.Drawing</Name>
-		</Reference>
-		<Reference Update="System.Xml">
-			<Name>System.XML</Name>
-		</Reference>
-	</ItemGroup>
-	<ItemGroup>
-		<Compile Update="PageDrawing.cs">
-			<SubType>UserControl</SubType>
-		</Compile>
-		<Compile Update="RdlViewer.cs">
-			<SubType>UserControl</SubType>
-		</Compile>
-		<Compile Update="RdlViewerFind.cs">
-			<SubType>UserControl</SubType>
-		</Compile>
-		<Compile Update="ViewerToolstrip.cs">
-			<SubType>Component</SubType>
-		</Compile>
-		<EmbeddedResource Include="Resources\document-print.png" />
-		<EmbeddedResource Include="Resources\document-open.png" />
-		<EmbeddedResource Include="Resources\document-save.png" />
-	</ItemGroup>
-	<ItemGroup>
-		<ProjectReference Include="..\EncryptionProvider\EncryptionProvider.csproj" />
-		<ProjectReference Include="..\Majorsilence.WinformUtils\Majorsilence.WinformUtils.csproj" />
-		<ProjectReference Include="..\RdlEngine\Majorsilence.Reporting.RdlEngine.csproj" />
-	</ItemGroup>
-	<ItemGroup>
-		<Compile Remove="RdlReader\AssemblyInfo.cs" />
-		<Compile Remove="RdlReader\DialogAbout.cs" />
-		<Compile Remove="RdlReader\DialogAbout.Designer.cs" />
-		<Compile Remove="RdlReader\MDIChild.cs" />
-		<Compile Remove="RdlReader\MDIChild.Designer.cs" />
-		<Compile Remove="RdlReader\Properties\Resources.Designer.cs" />
-		<Compile Remove="RdlReader\RdlReader.cs" />
-		<Compile Remove="RdlReader\RdlReader.Designer.cs" />
-		<Compile Remove="RdlReader\Resources\Strings.Designer.cs" />
-		<Compile Remove="RdlReader\ZoomTo.cs" />
-		<Compile Remove="RdlReader\ZoomTo.Designer.cs" />
-		<EmbeddedResource Remove="RdlReader\DialogAbout.resx" />
-		<EmbeddedResource Remove="RdlReader\DialogAbout.ru-RU.resx" />
-		<EmbeddedResource Remove="RdlReader\MDIChild.resx" />
-		<EmbeddedResource Remove="RdlReader\Properties\Resources.resx" />
-		<EmbeddedResource Remove="RdlReader\RdlReader.resx" />
-		<EmbeddedResource Remove="RdlReader\RdlReader.ru-RU.resx" />
-		<EmbeddedResource Remove="RdlReader\Resources\Strings.resx" />
-		<EmbeddedResource Remove="RdlReader\Resources\Strings.ru-RU.resx" />
-		<EmbeddedResource Remove="RdlReader\ZoomTo.resx" />
-		<EmbeddedResource Remove="RdlReader\ZoomTo.ru-RU.resx" />
-	</ItemGroup>
-	<ItemGroup>
-	  <PackageReference Include="System.Text.Json" />
-	</ItemGroup>
-    <ItemGroup Condition="'$(TargetFramework)' == 'net48'">
-        <PackageReference Include="System.Resources.Extensions" />
-    </ItemGroup>
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <ProjectType>Local</ProjectType>
+    <OutputType>Library</OutputType>
+    <RootNamespace>Majorsilence.Reporting.RdlViewer</RootNamespace>
+    <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
+    <PublishUrl>publish\</PublishUrl>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <AssemblyTitle>RDL Viewer (Majorsilence.Forms)</AssemblyTitle>
+    <DelaySign>false</DelaySign>
+    <PackageId>Majorsilence.Reporting.RdlViewer</PackageId>
+    <Description>Cross-platform report viewer control for Majorsilence Reporting, built on Majorsilence.Forms. Embed RDL/RDLC report viewing, printing (PDF only -- see MIGRATION-NOTES.md), and export in desktop apps. Targets .NET 8 and .NET 10, any OS Majorsilence.Forms.Avalonia supports. For System.Windows.Forms hosts, embed via Majorsilence.Forms.WinForms's ToWinFormsControl().</Description>
+    <!-- Declared explicitly (not just relying on MSBuild's implicit Debug;Release default) so it
+         matches the rest of the solution's 4-config set; an inconsistent/missing Configurations
+         list across referenced projects is what caused a real "ref assembly could not be found"
+         build failure for a project referencing this one under Debug-DrawingCompat/
+         Release-DrawingCompat in Visual Studio. -->
+    <Configurations>Debug;Release;Debug-DrawingCompat;Release-DrawingCompat</Configurations>
+    <!-- net48 dropped: Majorsilence.Forms itself only targets net8.0/net10.0. -->
+    <TargetFrameworks>net8.0;net10.0</TargetFrameworks>
+    <WarningsAsErrors>4014</WarningsAsErrors>
+    <GenerateResourceUsePreserializedResources>true</GenerateResourceUsePreserializedResources>
+    <IsPackable>true</IsPackable>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Update="PageDrawing.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="RdlViewer.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="RdlViewerFind.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="ViewerToolstrip.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <EmbeddedResource Include="Resources\document-print.png" />
+    <EmbeddedResource Include="Resources\document-open.png" />
+    <EmbeddedResource Include="Resources\document-save.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\EncryptionProvider\EncryptionProvider.csproj" />
+    <ProjectReference Include="..\Majorsilence.WinformUtils\Majorsilence.WinformUtils.csproj" />
+    <ProjectReference Include="..\RdlEngine\Majorsilence.Reporting.RdlEngine.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="System.Text.Json" />
+    <PackageReference Include="System.Resources.Extensions" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Majorsilence.Forms" />
+    <PackageReference Include="Majorsilence.Forms.Avalonia" />
+  </ItemGroup>
 </Project>
