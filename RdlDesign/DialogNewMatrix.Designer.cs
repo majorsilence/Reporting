@@ -1,72 +1,71 @@
 using System;
-using System.Windows.Forms;
-using System.Drawing;
+using Majorsilence.Forms;
 using System.ComponentModel;
 using System.Collections;
 
 namespace Majorsilence.Reporting.RdlDesign
 {
-    internal partial class DialogNewMatrix : System.Windows.Forms.Form
+    internal partial class DialogNewMatrix : Majorsilence.Forms.Form
 	{
 		#region Windows Form Designer generated code
 		private DesignXmlDraw _Draw;
-private System.Windows.Forms.Button bOK;
-private System.Windows.Forms.Button bCancel;
-private System.Windows.Forms.Label label1;
-private System.Windows.Forms.ComboBox cbDataSets;
-private System.Windows.Forms.Label label2;
-private System.Windows.Forms.Label label3;
-private System.Windows.Forms.ListBox lbFields;
-private System.Windows.Forms.CheckedListBox lbMatrixColumns;
-private System.Windows.Forms.Button bColumnUp;
-private System.Windows.Forms.Button bColumnDown;
-private System.Windows.Forms.Button bColumn;
-private System.Windows.Forms.Button bRowSelect;
-private System.Windows.Forms.CheckedListBox lbMatrixRows;
-private System.Windows.Forms.Button bColumnDelete;
-private System.Windows.Forms.Button bRowDelete;
-private System.Windows.Forms.Button bRowDown;
-private System.Windows.Forms.Button bRowUp;
-private System.Windows.Forms.Label label4;
-private System.Windows.Forms.Label label5;
-private System.Windows.Forms.ComboBox cbMatrixCell;
+private Majorsilence.Forms.Button bOK;
+private Majorsilence.Forms.Button bCancel;
+private Majorsilence.Forms.Label label1;
+private Majorsilence.Forms.ComboBox cbDataSets;
+private Majorsilence.Forms.Label label2;
+private Majorsilence.Forms.Label label3;
+private Majorsilence.Forms.ListBox lbFields;
+private Majorsilence.Forms.CheckedListBox lbMatrixColumns;
+private Majorsilence.Forms.Button bColumnUp;
+private Majorsilence.Forms.Button bColumnDown;
+private Majorsilence.Forms.Button bColumn;
+private Majorsilence.Forms.Button bRowSelect;
+private Majorsilence.Forms.CheckedListBox lbMatrixRows;
+private Majorsilence.Forms.Button bColumnDelete;
+private Majorsilence.Forms.Button bRowDelete;
+private Majorsilence.Forms.Button bRowDown;
+private Majorsilence.Forms.Button bRowUp;
+private Majorsilence.Forms.Label label4;
+private Majorsilence.Forms.Label label5;
+private Majorsilence.Forms.ComboBox cbMatrixCell;
 private System.ComponentModel.Container components = null;
 
 		private void InitializeComponent()
 		{
-			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(DialogNewMatrix));
-			this.bOK = new System.Windows.Forms.Button();
-			this.bCancel = new System.Windows.Forms.Button();
-			this.label1 = new System.Windows.Forms.Label();
-			this.cbDataSets = new System.Windows.Forms.ComboBox();
-			this.label2 = new System.Windows.Forms.Label();
-			this.label3 = new System.Windows.Forms.Label();
-			this.lbFields = new System.Windows.Forms.ListBox();
-			this.lbMatrixColumns = new System.Windows.Forms.CheckedListBox();
-			this.bColumnUp = new System.Windows.Forms.Button();
-			this.bColumnDown = new System.Windows.Forms.Button();
-			this.bColumn = new System.Windows.Forms.Button();
-			this.bRowSelect = new System.Windows.Forms.Button();
-			this.lbMatrixRows = new System.Windows.Forms.CheckedListBox();
-			this.bColumnDelete = new System.Windows.Forms.Button();
-			this.bRowDelete = new System.Windows.Forms.Button();
-			this.bRowDown = new System.Windows.Forms.Button();
-			this.bRowUp = new System.Windows.Forms.Button();
-			this.label4 = new System.Windows.Forms.Label();
-			this.label5 = new System.Windows.Forms.Label();
-			this.cbMatrixCell = new System.Windows.Forms.ComboBox();
+			Majorsilence.Forms.ComponentResourceManager resources = new Majorsilence.Forms.ComponentResourceManager(typeof(DialogNewMatrix));
+			this.bOK = new Majorsilence.Forms.Button();
+			this.bCancel = new Majorsilence.Forms.Button();
+			this.label1 = new Majorsilence.Forms.Label();
+			this.cbDataSets = new Majorsilence.Forms.ComboBox();
+			this.label2 = new Majorsilence.Forms.Label();
+			this.label3 = new Majorsilence.Forms.Label();
+			this.lbFields = new Majorsilence.Forms.ListBox();
+			this.lbMatrixColumns = new Majorsilence.Forms.CheckedListBox();
+			this.bColumnUp = new Majorsilence.Forms.Button();
+			this.bColumnDown = new Majorsilence.Forms.Button();
+			this.bColumn = new Majorsilence.Forms.Button();
+			this.bRowSelect = new Majorsilence.Forms.Button();
+			this.lbMatrixRows = new Majorsilence.Forms.CheckedListBox();
+			this.bColumnDelete = new Majorsilence.Forms.Button();
+			this.bRowDelete = new Majorsilence.Forms.Button();
+			this.bRowDown = new Majorsilence.Forms.Button();
+			this.bRowUp = new Majorsilence.Forms.Button();
+			this.label4 = new Majorsilence.Forms.Label();
+			this.label5 = new Majorsilence.Forms.Label();
+			this.cbMatrixCell = new Majorsilence.Forms.ComboBox();
 			this.SuspendLayout();
 			// 
 			// bOK
 			// 
 			resources.ApplyResources(this.bOK, "bOK");
 			this.bOK.Name = "bOK";
-			this.bOK.Click += new System.EventHandler(this.bOK_Click);
+			this.bOK.Click += this.bOK_Click;
 			// 
 			// bCancel
 			// 
 			resources.ApplyResources(this.bCancel, "bCancel");
-			this.bCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
+			this.bCancel.DialogResult = Majorsilence.Forms.DialogResult.Cancel;
 			this.bCancel.Name = "bCancel";
 			// 
 			// label1
@@ -77,9 +76,9 @@ private System.ComponentModel.Container components = null;
 			// cbDataSets
 			// 
 			resources.ApplyResources(this.cbDataSets, "cbDataSets");
-			this.cbDataSets.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+			this.cbDataSets.DropDownStyle = Majorsilence.Forms.ComboBoxStyle.DropDownList;
 			this.cbDataSets.Name = "cbDataSets";
-			this.cbDataSets.SelectedIndexChanged += new System.EventHandler(this.cbDataSets_SelectedIndexChanged);
+			this.cbDataSets.SelectedIndexChanged += this.cbDataSets_SelectedIndexChanged;
 			// 
 			// label2
 			// 
@@ -95,7 +94,7 @@ private System.ComponentModel.Container components = null;
 			// 
 			resources.ApplyResources(this.lbFields, "lbFields");
 			this.lbFields.Name = "lbFields";
-			this.lbFields.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
+			this.lbFields.SelectionMode = Majorsilence.Forms.SelectionMode.MultiExtended;
 			// 
 			// lbMatrixColumns
 			// 
@@ -106,25 +105,25 @@ private System.ComponentModel.Container components = null;
 			// 
 			resources.ApplyResources(this.bColumnUp, "bColumnUp");
 			this.bColumnUp.Name = "bColumnUp";
-			this.bColumnUp.Click += new System.EventHandler(this.bColumnUp_Click);
+			this.bColumnUp.Click += this.bColumnUp_Click;
 			// 
 			// bColumnDown
 			// 
 			resources.ApplyResources(this.bColumnDown, "bColumnDown");
 			this.bColumnDown.Name = "bColumnDown";
-			this.bColumnDown.Click += new System.EventHandler(this.bColumnDown_Click);
+			this.bColumnDown.Click += this.bColumnDown_Click;
 			// 
 			// bColumn
 			// 
 			resources.ApplyResources(this.bColumn, "bColumn");
 			this.bColumn.Name = "bColumn";
-			this.bColumn.Click += new System.EventHandler(this.bColumn_Click);
+			this.bColumn.Click += this.bColumn_Click;
 			// 
 			// bRowSelect
 			// 
 			resources.ApplyResources(this.bRowSelect, "bRowSelect");
 			this.bRowSelect.Name = "bRowSelect";
-			this.bRowSelect.Click += new System.EventHandler(this.bRow_Click);
+			this.bRowSelect.Click += this.bRow_Click;
 			// 
 			// lbMatrixRows
 			// 
@@ -135,25 +134,25 @@ private System.ComponentModel.Container components = null;
 			// 
 			resources.ApplyResources(this.bColumnDelete, "bColumnDelete");
 			this.bColumnDelete.Name = "bColumnDelete";
-			this.bColumnDelete.Click += new System.EventHandler(this.bColumnDelete_Click);
+			this.bColumnDelete.Click += this.bColumnDelete_Click;
 			// 
 			// bRowDelete
 			// 
 			resources.ApplyResources(this.bRowDelete, "bRowDelete");
 			this.bRowDelete.Name = "bRowDelete";
-			this.bRowDelete.Click += new System.EventHandler(this.bRowDelete_Click);
+			this.bRowDelete.Click += this.bRowDelete_Click;
 			// 
 			// bRowDown
 			// 
 			resources.ApplyResources(this.bRowDown, "bRowDown");
 			this.bRowDown.Name = "bRowDown";
-			this.bRowDown.Click += new System.EventHandler(this.bRowDown_Click);
+			this.bRowDown.Click += this.bRowDown_Click;
 			// 
 			// bRowUp
 			// 
 			resources.ApplyResources(this.bRowUp, "bRowUp");
 			this.bRowUp.Name = "bRowUp";
-			this.bRowUp.Click += new System.EventHandler(this.bRowUp_Click);
+			this.bRowUp.Click += this.bRowUp_Click;
 			// 
 			// label4
 			// 
@@ -169,8 +168,8 @@ private System.ComponentModel.Container components = null;
 			// 
 			resources.ApplyResources(this.cbMatrixCell, "cbMatrixCell");
 			this.cbMatrixCell.Name = "cbMatrixCell";
-			this.cbMatrixCell.TextChanged += new System.EventHandler(this.cbMatrixCell_TextChanged);
-			this.cbMatrixCell.Enter += new System.EventHandler(this.cbMatrixCell_Enter);
+			this.cbMatrixCell.TextChanged += this.cbMatrixCell_TextChanged;
+			this.cbMatrixCell.Enter += this.cbMatrixCell_Enter;
 			// 
 			// DialogNewMatrix
 			// 
@@ -197,12 +196,12 @@ private System.ComponentModel.Container components = null;
 			this.Controls.Add(this.label1);
 			this.Controls.Add(this.bCancel);
 			this.Controls.Add(this.bOK);
-			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
+			this.FormBorderStyle = Majorsilence.Forms.FormBorderStyle.FixedDialog;
 			this.MaximizeBox = false;
 			this.MinimizeBox = false;
 			this.Name = "DialogNewMatrix";
 			this.ShowInTaskbar = false;
-			this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
+			this.SizeGripStyle = Majorsilence.Forms.SizeGripStyle.Hide;
 			this.ResumeLayout(false);
 
 		}

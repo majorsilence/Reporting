@@ -2,8 +2,9 @@
 using System;
 using System.ComponentModel;
 using System.Drawing;
-using System.Drawing.Imaging;
-using System.Windows.Forms;
+using Majorsilence.Forms.Drawing;
+using Majorsilence.Forms.Drawing.Imaging;
+using Majorsilence.Forms;
 
 
 namespace Majorsilence.Reporting.RdlDesign
@@ -25,12 +26,12 @@ namespace Majorsilence.Reporting.RdlDesign
 
 			this.BackColor = this.Checked? this.DownColor: this.UpColor;
 			this.ForeColor = this.Enabled? Color.Black: Color.Gray;
-			this.Paint += new PaintEventHandler(this.DrawPanelPaint);
-			this.MouseEnter +=new EventHandler(SimpleToggle_MouseEnter);
-			this.MouseLeave +=new EventHandler(SimpleToggle_MouseLeave);
+			this.Paint += this.DrawPanelPaint;
+			this.MouseEnter += SimpleToggle_MouseEnter;
+			this.MouseLeave += SimpleToggle_MouseLeave;
 		}
 
-		private void DrawPanelPaint(object sender, System.Windows.Forms.PaintEventArgs e)
+		private void DrawPanelPaint(object sender, Majorsilence.Forms.PaintEventArgs e)
 		{
 
 			Graphics g = e.Graphics;
@@ -51,19 +52,11 @@ namespace Majorsilence.Reporting.RdlDesign
 					int x = (this.Width - this.Image.Width) / 2;
 					int y = (this.Height - this.Image.Height) / 2;
 
-					// Draw Image using the transparency color
-					ImageAttributes imageAttr = new ImageAttributes();
-					imageAttr.SetColorKey(_Transparency, _Transparency,
-						ColorAdjustType.Default);
-
-					g.DrawImage(this.Image,         // Image
-						new Rectangle(x, y, this.Image.Width, this.Image.Height),    // Dest. rect.
-						0,							// srcX
-						0,							// srcY
-						this.Image.Width,           // srcWidth
-						this.Image.Height,          // srcHeight
-						GraphicsUnit.Pixel,			// srcUnit
-						imageAttr);					// ImageAttributes
+					// ImageAttributes/SetColorKey (transparent-color-key drawing) has no
+					// Majorsilence.Forms equivalent -- see SimpleButton.cs for the same fix and
+					// rationale. Draw the image directly; the _Transparency color-keying effect
+					// is a documented, dropped cosmetic feature.
+					g.DrawImage(this.Image, new Rectangle(x, y, this.Image.Width, this.Image.Height));
 				}
 				else
 				{

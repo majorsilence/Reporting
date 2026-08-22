@@ -1,17 +1,16 @@
 
 using Majorsilence.Reporting.Rdl;
-using ScintillaNET;
+using Majorsilence.Reporting.RdlDesign.Syntax;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Drawing;
+using Majorsilence.Forms.Drawing;
 using System.Reflection;
 using System.Text;
-using System.Windows.Forms;
+using Majorsilence.Forms;
 using System.Xml;
 using System.Linq;
-using Majorsilence.Reporting.RdlDesign.Syntax;
 
 namespace Majorsilence.Reporting.RdlDesign
 {
@@ -457,7 +456,7 @@ namespace Majorsilence.Reporting.RdlDesign
             tvOp.SelectedNode.Nodes.Count > 0)
                 return; // this is the top level nodes (Fields, Parameters, ...)
 
-            TreeNode node = tvOp.SelectedNode;
+            TreeNode node = (TreeNode)tvOp.SelectedNode;
             string t = string.Empty;
             // Josh: 6:21:10 Changed to add parent node name for grouped nodes (eg: Convert.ToByte(value))
             // and not to add it for the root functions (the non grouped).

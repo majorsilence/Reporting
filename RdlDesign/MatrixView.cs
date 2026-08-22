@@ -4,7 +4,6 @@ using System.Xml;
 using System.IO;
 using System.Collections;
 using System.Text;
-using System.Drawing;
 
 
 namespace Majorsilence.Reporting.RdlDesign

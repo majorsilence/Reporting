@@ -1,6 +1,7 @@
 using System.Drawing;
+using Majorsilence.Forms.Drawing;
 
-using System.Windows.Forms;
+using Majorsilence.Forms;
 
 namespace Majorsilence.Reporting.RdlDesign
 {
@@ -27,7 +28,17 @@ namespace Majorsilence.Reporting.RdlDesign
 			{
 				Items.AddRange(StaticLists.ColorList);
 			}
+
+            // Majorsilence.Forms.ComboBox has no OnDrawItem virtual method to override -- only a
+            // DrawItem event, which is itself a no-op (`add { } remove { }`) since ComboBox
+            // doesn't support owner-draw rendering at all. Subscribing preserves the code's shape
+            // for whenever that gets real support; the swatch/fx rendering below simply won't
+            // paint until then (documented gap, same class the file's own header already flags:
+            // "It's very crazy control. Need replace it. TODO").
+            DrawItem += ColorPicker_DrawItem;
         }
+
+        private void ColorPicker_DrawItem(object sender, DrawItemEventArgs e) => OnDrawItem(e);
 
         public override string Text
         {
@@ -43,7 +54,7 @@ namespace Majorsilence.Reporting.RdlDesign
                 base.Text = v;
             }
         }
-        protected override void OnDrawItem(DrawItemEventArgs e)
+        private void OnDrawItem(DrawItemEventArgs e)
         {
             Graphics g = e.Graphics;
             Color BlockColor = Color.Empty;
@@ -66,11 +77,11 @@ namespace Majorsilence.Reporting.RdlDesign
                 g.FillRectangle(new SolidBrush(BlockColor), left, e.Bounds.Top + RECTCOLOR_TOP, RECTCOLOR_WIDTH,
                     ItemHeight - 2 * RECTCOLOR_TOP);
             }
-            base.OnDrawItem(e);
         }
 
-        protected override void OnDropDown(System.EventArgs e)
+        protected override void OnDropDownOpened(System.EventArgs e)
         {
+            base.OnDropDownOpened(e);
             _DropListBox.Location = this.PointToScreen(new Point(0, this.Height));
             _DropListBox.Show();
         }

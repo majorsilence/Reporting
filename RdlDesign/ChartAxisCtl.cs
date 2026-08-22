@@ -3,9 +3,8 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Drawing;
 using System.Data;
-using System.Windows.Forms;
+using Majorsilence.Forms;
 using System.Xml;
 
 namespace Majorsilence.Reporting.RdlDesign
@@ -13,7 +12,7 @@ namespace Majorsilence.Reporting.RdlDesign
 	/// <summary>
 	/// Summary description for ChartCtl.
 	/// </summary>
-	internal class ChartAxisCtl : System.Windows.Forms.UserControl, IProperty
+	internal class ChartAxisCtl : Majorsilence.Forms.UserControl, IProperty
 	{
         private List<XmlNode> _ReportItems;
 		private DesignXmlDraw _Draw;
@@ -24,47 +23,47 @@ namespace Majorsilence.Reporting.RdlDesign
 		bool fMajorInterval, fMinorInterval,fMax,fMin;
 		bool fMinorTickMarks,fScalar,fLogScale,fMajorGLShow, fMinorGLShow, fCanOmit;
 		
-		private System.Windows.Forms.Label label1;
-		private System.Windows.Forms.Label label2;
-        private System.Windows.Forms.CheckBox chkMonth;
-		private System.Windows.Forms.CheckBox chkVisible;
-		private System.Windows.Forms.ComboBox cbMajorTickMarks;
-		private System.Windows.Forms.CheckBox chkMargin;
-		private System.Windows.Forms.CheckBox chkReverse;
-		private System.Windows.Forms.CheckBox chkInterlaced;
-		private System.Windows.Forms.GroupBox groupBox1;
-		private System.Windows.Forms.TextBox tbMajorGLWidth;
-		private System.Windows.Forms.Button bMajorGLColor;
-		private System.Windows.Forms.ComboBox cbMajorGLColor;
-		private System.Windows.Forms.ComboBox cbMajorGLStyle;
-		private System.Windows.Forms.Label label7;
-		private System.Windows.Forms.Label label6;
-		private System.Windows.Forms.Label label3;
-		private System.Windows.Forms.GroupBox groupBox2;
-		private System.Windows.Forms.TextBox tbMinorGLWidth;
-		private System.Windows.Forms.Button bMinorGLColor;
-		private System.Windows.Forms.ComboBox cbMinorGLColor;
-		private System.Windows.Forms.ComboBox cbMinorGLStyle;
-		private System.Windows.Forms.Label label4;
-		private System.Windows.Forms.Label label5;
-		private System.Windows.Forms.Label label8;
-		private System.Windows.Forms.Label label9;
-		private System.Windows.Forms.TextBox tbMajorInterval;
-		private System.Windows.Forms.TextBox tbMinorInterval;
-		private System.Windows.Forms.Label label10;
-		private System.Windows.Forms.TextBox tbMax;
-		private System.Windows.Forms.Label label11;
-		private System.Windows.Forms.TextBox tbMin;
-		private System.Windows.Forms.Label label12;
-		private System.Windows.Forms.ComboBox cbMinorTickMarks;
-		private System.Windows.Forms.CheckBox chkScalar;
-		private System.Windows.Forms.CheckBox chkLogScale;
-		private System.Windows.Forms.CheckBox chkMajorGLShow;
-		private System.Windows.Forms.CheckBox chkMinorGLShow;
-		private System.Windows.Forms.Button bMinorIntervalExpr;
-		private System.Windows.Forms.Button bMajorIntervalExpr;
-		private System.Windows.Forms.Button bMinExpr;
-		private System.Windows.Forms.Button bMaxExpr;
+		private Majorsilence.Forms.Label label1;
+		private Majorsilence.Forms.Label label2;
+        private Majorsilence.Forms.CheckBox chkMonth;
+		private Majorsilence.Forms.CheckBox chkVisible;
+		private Majorsilence.Forms.ComboBox cbMajorTickMarks;
+		private Majorsilence.Forms.CheckBox chkMargin;
+		private Majorsilence.Forms.CheckBox chkReverse;
+		private Majorsilence.Forms.CheckBox chkInterlaced;
+		private Majorsilence.Forms.GroupBox groupBox1;
+		private Majorsilence.Forms.TextBox tbMajorGLWidth;
+		private Majorsilence.Forms.Button bMajorGLColor;
+		private Majorsilence.Forms.ComboBox cbMajorGLColor;
+		private Majorsilence.Forms.ComboBox cbMajorGLStyle;
+		private Majorsilence.Forms.Label label7;
+		private Majorsilence.Forms.Label label6;
+		private Majorsilence.Forms.Label label3;
+		private Majorsilence.Forms.GroupBox groupBox2;
+		private Majorsilence.Forms.TextBox tbMinorGLWidth;
+		private Majorsilence.Forms.Button bMinorGLColor;
+		private Majorsilence.Forms.ComboBox cbMinorGLColor;
+		private Majorsilence.Forms.ComboBox cbMinorGLStyle;
+		private Majorsilence.Forms.Label label4;
+		private Majorsilence.Forms.Label label5;
+		private Majorsilence.Forms.Label label8;
+		private Majorsilence.Forms.Label label9;
+		private Majorsilence.Forms.TextBox tbMajorInterval;
+		private Majorsilence.Forms.TextBox tbMinorInterval;
+		private Majorsilence.Forms.Label label10;
+		private Majorsilence.Forms.TextBox tbMax;
+		private Majorsilence.Forms.Label label11;
+		private Majorsilence.Forms.TextBox tbMin;
+		private Majorsilence.Forms.Label label12;
+		private Majorsilence.Forms.ComboBox cbMinorTickMarks;
+		private Majorsilence.Forms.CheckBox chkScalar;
+		private Majorsilence.Forms.CheckBox chkLogScale;
+		private Majorsilence.Forms.CheckBox chkMajorGLShow;
+		private Majorsilence.Forms.CheckBox chkMinorGLShow;
+		private Majorsilence.Forms.Button bMinorIntervalExpr;
+		private Majorsilence.Forms.Button bMajorIntervalExpr;
+		private Majorsilence.Forms.Button bMinExpr;
+		private Majorsilence.Forms.Button bMaxExpr;
         private CheckBox chkCanOmit;
         
 		/// <summary> 
@@ -165,50 +164,50 @@ namespace Majorsilence.Reporting.RdlDesign
 		/// </summary>
 		private void InitializeComponent()
 		{
-			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ChartAxisCtl));
+			Majorsilence.Forms.ComponentResourceManager resources = new Majorsilence.Forms.ComponentResourceManager(typeof(ChartAxisCtl));
             this.DoubleBuffered = true;
-			this.label1 = new System.Windows.Forms.Label();
-			this.label2 = new System.Windows.Forms.Label();
-			this.cbMajorTickMarks = new System.Windows.Forms.ComboBox();
-			this.cbMinorTickMarks = new System.Windows.Forms.ComboBox();
-			this.chkVisible = new System.Windows.Forms.CheckBox();
-			this.chkMargin = new System.Windows.Forms.CheckBox();
-			this.chkReverse = new System.Windows.Forms.CheckBox();
-			this.chkInterlaced = new System.Windows.Forms.CheckBox();
-			this.chkScalar = new System.Windows.Forms.CheckBox();
-			this.chkLogScale = new System.Windows.Forms.CheckBox();
-			this.groupBox1 = new System.Windows.Forms.GroupBox();
-			this.chkMajorGLShow = new System.Windows.Forms.CheckBox();
-			this.tbMajorGLWidth = new System.Windows.Forms.TextBox();
-			this.bMajorGLColor = new System.Windows.Forms.Button();
-			this.cbMajorGLColor = new System.Windows.Forms.ComboBox();
-			this.cbMajorGLStyle = new System.Windows.Forms.ComboBox();
-			this.label7 = new System.Windows.Forms.Label();
-			this.label6 = new System.Windows.Forms.Label();
-			this.label3 = new System.Windows.Forms.Label();
-			this.groupBox2 = new System.Windows.Forms.GroupBox();
-			this.chkMinorGLShow = new System.Windows.Forms.CheckBox();
-			this.tbMinorGLWidth = new System.Windows.Forms.TextBox();
-			this.bMinorGLColor = new System.Windows.Forms.Button();
-			this.cbMinorGLColor = new System.Windows.Forms.ComboBox();
-			this.cbMinorGLStyle = new System.Windows.Forms.ComboBox();
-			this.label4 = new System.Windows.Forms.Label();
-			this.label5 = new System.Windows.Forms.Label();
-			this.label8 = new System.Windows.Forms.Label();
-			this.label9 = new System.Windows.Forms.Label();
-			this.tbMajorInterval = new System.Windows.Forms.TextBox();
-			this.tbMinorInterval = new System.Windows.Forms.TextBox();
-			this.label10 = new System.Windows.Forms.Label();
-			this.tbMax = new System.Windows.Forms.TextBox();
-			this.label11 = new System.Windows.Forms.Label();
-			this.tbMin = new System.Windows.Forms.TextBox();
-			this.label12 = new System.Windows.Forms.Label();
-			this.bMinorIntervalExpr = new System.Windows.Forms.Button();
-			this.bMajorIntervalExpr = new System.Windows.Forms.Button();
-			this.bMinExpr = new System.Windows.Forms.Button();
-			this.bMaxExpr = new System.Windows.Forms.Button();
-			this.chkCanOmit = new System.Windows.Forms.CheckBox();
-			this.chkMonth = new System.Windows.Forms.CheckBox();
+			this.label1 = new Majorsilence.Forms.Label();
+			this.label2 = new Majorsilence.Forms.Label();
+			this.cbMajorTickMarks = new Majorsilence.Forms.ComboBox();
+			this.cbMinorTickMarks = new Majorsilence.Forms.ComboBox();
+			this.chkVisible = new Majorsilence.Forms.CheckBox();
+			this.chkMargin = new Majorsilence.Forms.CheckBox();
+			this.chkReverse = new Majorsilence.Forms.CheckBox();
+			this.chkInterlaced = new Majorsilence.Forms.CheckBox();
+			this.chkScalar = new Majorsilence.Forms.CheckBox();
+			this.chkLogScale = new Majorsilence.Forms.CheckBox();
+			this.groupBox1 = new Majorsilence.Forms.GroupBox();
+			this.chkMajorGLShow = new Majorsilence.Forms.CheckBox();
+			this.tbMajorGLWidth = new Majorsilence.Forms.TextBox();
+			this.bMajorGLColor = new Majorsilence.Forms.Button();
+			this.cbMajorGLColor = new Majorsilence.Forms.ComboBox();
+			this.cbMajorGLStyle = new Majorsilence.Forms.ComboBox();
+			this.label7 = new Majorsilence.Forms.Label();
+			this.label6 = new Majorsilence.Forms.Label();
+			this.label3 = new Majorsilence.Forms.Label();
+			this.groupBox2 = new Majorsilence.Forms.GroupBox();
+			this.chkMinorGLShow = new Majorsilence.Forms.CheckBox();
+			this.tbMinorGLWidth = new Majorsilence.Forms.TextBox();
+			this.bMinorGLColor = new Majorsilence.Forms.Button();
+			this.cbMinorGLColor = new Majorsilence.Forms.ComboBox();
+			this.cbMinorGLStyle = new Majorsilence.Forms.ComboBox();
+			this.label4 = new Majorsilence.Forms.Label();
+			this.label5 = new Majorsilence.Forms.Label();
+			this.label8 = new Majorsilence.Forms.Label();
+			this.label9 = new Majorsilence.Forms.Label();
+			this.tbMajorInterval = new Majorsilence.Forms.TextBox();
+			this.tbMinorInterval = new Majorsilence.Forms.TextBox();
+			this.label10 = new Majorsilence.Forms.Label();
+			this.tbMax = new Majorsilence.Forms.TextBox();
+			this.label11 = new Majorsilence.Forms.Label();
+			this.tbMin = new Majorsilence.Forms.TextBox();
+			this.label12 = new Majorsilence.Forms.Label();
+			this.bMinorIntervalExpr = new Majorsilence.Forms.Button();
+			this.bMajorIntervalExpr = new Majorsilence.Forms.Button();
+			this.bMinExpr = new Majorsilence.Forms.Button();
+			this.bMaxExpr = new Majorsilence.Forms.Button();
+			this.chkCanOmit = new Majorsilence.Forms.CheckBox();
+			this.chkMonth = new Majorsilence.Forms.CheckBox();
 			this.groupBox1.SuspendLayout();
 			this.groupBox2.SuspendLayout();
 			this.SuspendLayout();
@@ -226,62 +225,62 @@ namespace Majorsilence.Reporting.RdlDesign
 			// cbMajorTickMarks
 			// 
 			resources.ApplyResources(this.cbMajorTickMarks, "cbMajorTickMarks");
-			this.cbMajorTickMarks.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+			this.cbMajorTickMarks.DropDownStyle = Majorsilence.Forms.ComboBoxStyle.DropDownList;
 			this.cbMajorTickMarks.Items.AddRange(new object[] {
             resources.GetString("cbMajorTickMarks.Items"),
             resources.GetString("cbMajorTickMarks.Items1"),
             resources.GetString("cbMajorTickMarks.Items2"),
             resources.GetString("cbMajorTickMarks.Items3")});
 			this.cbMajorTickMarks.Name = "cbMajorTickMarks";
-			this.cbMajorTickMarks.SelectedIndexChanged += new System.EventHandler(this.cbMajorTickMarks_SelectedIndexChanged);
+			this.cbMajorTickMarks.SelectedIndexChanged += this.cbMajorTickMarks_SelectedIndexChanged;
 			// 
 			// cbMinorTickMarks
 			// 
 			resources.ApplyResources(this.cbMinorTickMarks, "cbMinorTickMarks");
-			this.cbMinorTickMarks.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+			this.cbMinorTickMarks.DropDownStyle = Majorsilence.Forms.ComboBoxStyle.DropDownList;
 			this.cbMinorTickMarks.Items.AddRange(new object[] {
             resources.GetString("cbMinorTickMarks.Items"),
             resources.GetString("cbMinorTickMarks.Items1"),
             resources.GetString("cbMinorTickMarks.Items2"),
             resources.GetString("cbMinorTickMarks.Items3")});
 			this.cbMinorTickMarks.Name = "cbMinorTickMarks";
-			this.cbMinorTickMarks.SelectedIndexChanged += new System.EventHandler(this.cbMinorTickMarks_SelectedIndexChanged);
+			this.cbMinorTickMarks.SelectedIndexChanged += this.cbMinorTickMarks_SelectedIndexChanged;
 			// 
 			// chkVisible
 			// 
 			resources.ApplyResources(this.chkVisible, "chkVisible");
 			this.chkVisible.Name = "chkVisible";
-			this.chkVisible.CheckedChanged += new System.EventHandler(this.chkVisible_CheckedChanged);
+			this.chkVisible.CheckedChanged += this.chkVisible_CheckedChanged;
 			// 
 			// chkMargin
 			// 
 			resources.ApplyResources(this.chkMargin, "chkMargin");
 			this.chkMargin.Name = "chkMargin";
-			this.chkMargin.CheckedChanged += new System.EventHandler(this.chkMargin_CheckedChanged);
+			this.chkMargin.CheckedChanged += this.chkMargin_CheckedChanged;
 			// 
 			// chkReverse
 			// 
 			resources.ApplyResources(this.chkReverse, "chkReverse");
 			this.chkReverse.Name = "chkReverse";
-			this.chkReverse.CheckedChanged += new System.EventHandler(this.chkReverse_CheckedChanged);
+			this.chkReverse.CheckedChanged += this.chkReverse_CheckedChanged;
 			// 
 			// chkInterlaced
 			// 
 			resources.ApplyResources(this.chkInterlaced, "chkInterlaced");
 			this.chkInterlaced.Name = "chkInterlaced";
-			this.chkInterlaced.CheckedChanged += new System.EventHandler(this.chkInterlaced_CheckedChanged);
+			this.chkInterlaced.CheckedChanged += this.chkInterlaced_CheckedChanged;
 			// 
 			// chkScalar
 			// 
 			resources.ApplyResources(this.chkScalar, "chkScalar");
 			this.chkScalar.Name = "chkScalar";
-			this.chkScalar.CheckedChanged += new System.EventHandler(this.chkScalar_CheckedChanged);
+			this.chkScalar.CheckedChanged += this.chkScalar_CheckedChanged;
 			// 
 			// chkLogScale
 			// 
 			resources.ApplyResources(this.chkLogScale, "chkLogScale");
 			this.chkLogScale.Name = "chkLogScale";
-			this.chkLogScale.CheckedChanged += new System.EventHandler(this.chkLogScale_CheckedChanged);
+			this.chkLogScale.CheckedChanged += this.chkLogScale_CheckedChanged;
 			// 
 			// groupBox1
 			// 
@@ -301,25 +300,25 @@ namespace Majorsilence.Reporting.RdlDesign
 			// 
 			resources.ApplyResources(this.chkMajorGLShow, "chkMajorGLShow");
 			this.chkMajorGLShow.Name = "chkMajorGLShow";
-			this.chkMajorGLShow.CheckedChanged += new System.EventHandler(this.chkMajorGLShow_CheckedChanged);
+			this.chkMajorGLShow.CheckedChanged += this.chkMajorGLShow_CheckedChanged;
 			// 
 			// tbMajorGLWidth
 			// 
 			resources.ApplyResources(this.tbMajorGLWidth, "tbMajorGLWidth");
 			this.tbMajorGLWidth.Name = "tbMajorGLWidth";
-			this.tbMajorGLWidth.TextChanged += new System.EventHandler(this.tbMajorGLWidth_TextChanged);
+			this.tbMajorGLWidth.TextChanged += this.tbMajorGLWidth_TextChanged;
 			// 
 			// bMajorGLColor
 			// 
 			resources.ApplyResources(this.bMajorGLColor, "bMajorGLColor");
 			this.bMajorGLColor.Name = "bMajorGLColor";
-			this.bMajorGLColor.Click += new System.EventHandler(this.bMajorGLColor_Click);
+			this.bMajorGLColor.Click += this.bMajorGLColor_Click;
 			// 
 			// cbMajorGLColor
 			// 
 			resources.ApplyResources(this.cbMajorGLColor, "cbMajorGLColor");
 			this.cbMajorGLColor.Name = "cbMajorGLColor";
-			this.cbMajorGLColor.SelectedIndexChanged += new System.EventHandler(this.cbMajorGLColor_SelectedIndexChanged);
+			this.cbMajorGLColor.SelectedIndexChanged += this.cbMajorGLColor_SelectedIndexChanged;
 			// 
 			// cbMajorGLStyle
 			// 
@@ -336,7 +335,7 @@ namespace Majorsilence.Reporting.RdlDesign
             resources.GetString("cbMajorGLStyle.Items8"),
             resources.GetString("cbMajorGLStyle.Items9")});
 			this.cbMajorGLStyle.Name = "cbMajorGLStyle";
-			this.cbMajorGLStyle.SelectedIndexChanged += new System.EventHandler(this.cbMajorGLStyle_SelectedIndexChanged);
+			this.cbMajorGLStyle.SelectedIndexChanged += this.cbMajorGLStyle_SelectedIndexChanged;
 			// 
 			// label7
 			// 
@@ -371,25 +370,25 @@ namespace Majorsilence.Reporting.RdlDesign
 			// 
 			resources.ApplyResources(this.chkMinorGLShow, "chkMinorGLShow");
 			this.chkMinorGLShow.Name = "chkMinorGLShow";
-			this.chkMinorGLShow.CheckedChanged += new System.EventHandler(this.chkMinorGLShow_CheckedChanged);
+			this.chkMinorGLShow.CheckedChanged += this.chkMinorGLShow_CheckedChanged;
 			// 
 			// tbMinorGLWidth
 			// 
 			resources.ApplyResources(this.tbMinorGLWidth, "tbMinorGLWidth");
 			this.tbMinorGLWidth.Name = "tbMinorGLWidth";
-			this.tbMinorGLWidth.TextChanged += new System.EventHandler(this.tbMinorGLWidth_TextChanged);
+			this.tbMinorGLWidth.TextChanged += this.tbMinorGLWidth_TextChanged;
 			// 
 			// bMinorGLColor
 			// 
 			resources.ApplyResources(this.bMinorGLColor, "bMinorGLColor");
 			this.bMinorGLColor.Name = "bMinorGLColor";
-			this.bMinorGLColor.Click += new System.EventHandler(this.bMinorGLColor_Click);
+			this.bMinorGLColor.Click += this.bMinorGLColor_Click;
 			// 
 			// cbMinorGLColor
 			// 
 			resources.ApplyResources(this.cbMinorGLColor, "cbMinorGLColor");
 			this.cbMinorGLColor.Name = "cbMinorGLColor";
-			this.cbMinorGLColor.SelectedIndexChanged += new System.EventHandler(this.cbMinorGLColor_SelectedIndexChanged);
+			this.cbMinorGLColor.SelectedIndexChanged += this.cbMinorGLColor_SelectedIndexChanged;
 			// 
 			// cbMinorGLStyle
 			// 
@@ -406,7 +405,7 @@ namespace Majorsilence.Reporting.RdlDesign
             resources.GetString("cbMinorGLStyle.Items8"),
             resources.GetString("cbMinorGLStyle.Items9")});
 			this.cbMinorGLStyle.Name = "cbMinorGLStyle";
-			this.cbMinorGLStyle.SelectedIndexChanged += new System.EventHandler(this.cbMinorGLStyle_SelectedIndexChanged);
+			this.cbMinorGLStyle.SelectedIndexChanged += this.cbMinorGLStyle_SelectedIndexChanged;
 			// 
 			// label4
 			// 
@@ -432,13 +431,13 @@ namespace Majorsilence.Reporting.RdlDesign
 			// 
 			resources.ApplyResources(this.tbMajorInterval, "tbMajorInterval");
 			this.tbMajorInterval.Name = "tbMajorInterval";
-			this.tbMajorInterval.TextChanged += new System.EventHandler(this.tbMajorInterval_TextChanged);
+			this.tbMajorInterval.TextChanged += this.tbMajorInterval_TextChanged;
 			// 
 			// tbMinorInterval
 			// 
 			resources.ApplyResources(this.tbMinorInterval, "tbMinorInterval");
 			this.tbMinorInterval.Name = "tbMinorInterval";
-			this.tbMinorInterval.TextChanged += new System.EventHandler(this.tbMinorInterval_TextChanged);
+			this.tbMinorInterval.TextChanged += this.tbMinorInterval_TextChanged;
 			// 
 			// label10
 			// 
@@ -449,7 +448,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			// 
 			resources.ApplyResources(this.tbMax, "tbMax");
 			this.tbMax.Name = "tbMax";
-			this.tbMax.TextChanged += new System.EventHandler(this.tbMax_TextChanged);
+			this.tbMax.TextChanged += this.tbMax_TextChanged;
 			// 
 			// label11
 			// 
@@ -460,7 +459,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			// 
 			resources.ApplyResources(this.tbMin, "tbMin");
 			this.tbMin.Name = "tbMin";
-			this.tbMin.TextChanged += new System.EventHandler(this.tbMin_TextChanged);
+			this.tbMin.TextChanged += this.tbMin_TextChanged;
 			// 
 			// label12
 			// 
@@ -472,40 +471,40 @@ namespace Majorsilence.Reporting.RdlDesign
 			resources.ApplyResources(this.bMinorIntervalExpr, "bMinorIntervalExpr");
 			this.bMinorIntervalExpr.Name = "bMinorIntervalExpr";
 			this.bMinorIntervalExpr.Tag = "minorinterval";
-			this.bMinorIntervalExpr.Click += new System.EventHandler(this.bExpr_Click);
+			this.bMinorIntervalExpr.Click += this.bExpr_Click;
 			// 
 			// bMajorIntervalExpr
 			// 
 			resources.ApplyResources(this.bMajorIntervalExpr, "bMajorIntervalExpr");
 			this.bMajorIntervalExpr.Name = "bMajorIntervalExpr";
 			this.bMajorIntervalExpr.Tag = "majorinterval";
-			this.bMajorIntervalExpr.Click += new System.EventHandler(this.bExpr_Click);
+			this.bMajorIntervalExpr.Click += this.bExpr_Click;
 			// 
 			// bMinExpr
 			// 
 			resources.ApplyResources(this.bMinExpr, "bMinExpr");
 			this.bMinExpr.Name = "bMinExpr";
 			this.bMinExpr.Tag = "min";
-			this.bMinExpr.Click += new System.EventHandler(this.bExpr_Click);
+			this.bMinExpr.Click += this.bExpr_Click;
 			// 
 			// bMaxExpr
 			// 
 			resources.ApplyResources(this.bMaxExpr, "bMaxExpr");
 			this.bMaxExpr.Name = "bMaxExpr";
 			this.bMaxExpr.Tag = "max";
-			this.bMaxExpr.Click += new System.EventHandler(this.bExpr_Click);
+			this.bMaxExpr.Click += this.bExpr_Click;
 			// 
 			// chkCanOmit
 			// 
 			resources.ApplyResources(this.chkCanOmit, "chkCanOmit");
 			this.chkCanOmit.Name = "chkCanOmit";
-			this.chkCanOmit.CheckedChanged += new System.EventHandler(this.chkCanOmit_CheckedChanged);
+			this.chkCanOmit.CheckedChanged += this.chkCanOmit_CheckedChanged;
 			// 
 			// chkMonth
 			// 
 			resources.ApplyResources(this.chkMonth, "chkMonth");
 			this.chkMonth.Name = "chkMonth";
-			this.chkMonth.CheckedChanged += new System.EventHandler(this.chkMonth_CheckedChanged);
+			this.chkMonth.CheckedChanged += this.chkMonth_CheckedChanged;
 			// 
 			// ChartAxisCtl
 			// 
@@ -800,7 +799,7 @@ namespace Majorsilence.Reporting.RdlDesign
                     return;
 
                 RdlDesigner.SetCustomColors(cd.CustomColors);
-                cbColor.Text = ColorTranslator.ToHtml(cd.Color);
+                cbColor.Text = Majorsilence.Forms.ColorTranslator.ToHtml(cd.Color);
             }
             finally
             {

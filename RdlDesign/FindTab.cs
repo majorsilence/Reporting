@@ -1,9 +1,8 @@
 
 using System;
-using System.Drawing;
 using System.Collections;
 using System.ComponentModel;
-using System.Windows.Forms;
+using Majorsilence.Forms;
 using Majorsilence.Reporting.RdlDesign.Resources;
 
 namespace Majorsilence.Reporting.RdlDesign

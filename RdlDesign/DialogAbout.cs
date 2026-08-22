@@ -2,7 +2,7 @@ using Majorsilence.Reporting.RdlDesign.Resources;
 
 using System;
 using System.Reflection;
-using System.Windows.Forms;
+using Majorsilence.Forms;
 
 namespace Majorsilence.Reporting.RdlDesign
 {

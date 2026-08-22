@@ -5,10 +5,11 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.Design;
 using System.Drawing;
-using System.Drawing.Drawing2D;
+using Majorsilence.Forms.Drawing;
+using Majorsilence.Forms.Drawing.Drawing2D;
 using System.Data;
-using System.Windows.Forms;
-using System.Windows.Forms.Design;
+using Majorsilence.Forms;
+using Majorsilence.Forms.Design;
 using System.Xml;
 
 namespace Majorsilence.Reporting.RdlDesign
@@ -47,7 +48,7 @@ namespace Majorsilence.Reporting.RdlDesign
                 // force this to 16x16 to work around a Beta2 PropertyGrid
                 // issue.
                 System.Resources.ResourceManager resources = new System.Resources.ResourceManager(typeof(RdlDesigner));
-                System.Drawing.Image i = ((System.Drawing.Image)(resources.GetObject("bTable.Image")));
+                Majorsilence.Forms.Drawing.Image i = ((Majorsilence.Forms.Drawing.Image)(resources.GetObject("bTable.Image")));
 
                 return new Bitmap(i, new Size(16, 16));
             }

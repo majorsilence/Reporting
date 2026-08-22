@@ -3,9 +3,8 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Drawing;
 using System.Data;
-using System.Windows.Forms;
+using Majorsilence.Forms;
 using System.Xml;
 
 namespace Majorsilence.Reporting.RdlDesign
@@ -13,7 +12,7 @@ namespace Majorsilence.Reporting.RdlDesign
 	/// <summary>
 	/// Summary description for ChartCtl.
 	/// </summary>
-	internal class ChartCtl : System.Windows.Forms.UserControl, IProperty
+	internal class ChartCtl : Majorsilence.Forms.UserControl, IProperty
 	{
         private List<XmlNode> _ReportItems;
 		private DesignXmlDraw _Draw;
@@ -22,27 +21,27 @@ namespace Majorsilence.Reporting.RdlDesign
         bool fNoRows, fDataSet, fPageBreakStart, fPageBreakEnd, tooltipYFormat, tooltipXFormat;
 		bool fChartData;
         
-		private System.Windows.Forms.Label label1;
-		private System.Windows.Forms.Label label2;
-		private System.Windows.Forms.Label label3;
-		private System.Windows.Forms.Label label4;
-		private System.Windows.Forms.ComboBox cbChartType;
-		private System.Windows.Forms.ComboBox cbSubType;
-		private System.Windows.Forms.ComboBox cbPalette;
-		private System.Windows.Forms.ComboBox cbRenderElement;
-		private System.Windows.Forms.Label label5;
-		private System.Windows.Forms.NumericUpDown tbPercentWidth;
-		private System.Windows.Forms.Label label6;
-		private System.Windows.Forms.TextBox tbNoRows;
-		private System.Windows.Forms.Label label7;
-		private System.Windows.Forms.ComboBox cbDataSet;
-		private System.Windows.Forms.CheckBox chkPageBreakStart;
-		private System.Windows.Forms.CheckBox chkPageBreakEnd;
-        private System.Windows.Forms.ComboBox cbChartData;
+		private Majorsilence.Forms.Label label1;
+		private Majorsilence.Forms.Label label2;
+		private Majorsilence.Forms.Label label3;
+		private Majorsilence.Forms.Label label4;
+		private Majorsilence.Forms.ComboBox cbChartType;
+		private Majorsilence.Forms.ComboBox cbSubType;
+		private Majorsilence.Forms.ComboBox cbPalette;
+		private Majorsilence.Forms.ComboBox cbRenderElement;
+		private Majorsilence.Forms.Label label5;
+		private Majorsilence.Forms.NumericUpDown tbPercentWidth;
+		private Majorsilence.Forms.Label label6;
+		private Majorsilence.Forms.TextBox tbNoRows;
+		private Majorsilence.Forms.Label label7;
+		private Majorsilence.Forms.ComboBox cbDataSet;
+		private Majorsilence.Forms.CheckBox chkPageBreakStart;
+		private Majorsilence.Forms.CheckBox chkPageBreakEnd;
+        private Majorsilence.Forms.ComboBox cbChartData;
         private ComboBox cbDataLabel;
         private CheckBox chkDataLabel;
         private Button bDataLabelExpr;
-		private System.Windows.Forms.Label lData1;
+		private Majorsilence.Forms.Label lData1;
         private ComboBox cbChartData2;
         private Label lData2;
         private ComboBox cbChartData3;
@@ -230,48 +229,48 @@ namespace Majorsilence.Reporting.RdlDesign
 		/// </summary>
 		private void InitializeComponent()
 		{
-			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ChartCtl));
+			Majorsilence.Forms.ComponentResourceManager resources = new Majorsilence.Forms.ComponentResourceManager(typeof(ChartCtl));
             this.DoubleBuffered = true;
-			this.label1 = new System.Windows.Forms.Label();
-			this.label2 = new System.Windows.Forms.Label();
-			this.label3 = new System.Windows.Forms.Label();
-			this.label4 = new System.Windows.Forms.Label();
-			this.cbChartType = new System.Windows.Forms.ComboBox();
-			this.cbSubType = new System.Windows.Forms.ComboBox();
-			this.cbPalette = new System.Windows.Forms.ComboBox();
-			this.cbRenderElement = new System.Windows.Forms.ComboBox();
-			this.label5 = new System.Windows.Forms.Label();
-			this.tbPercentWidth = new System.Windows.Forms.NumericUpDown();
-			this.label6 = new System.Windows.Forms.Label();
-			this.tbNoRows = new System.Windows.Forms.TextBox();
-			this.label7 = new System.Windows.Forms.Label();
-			this.cbDataSet = new System.Windows.Forms.ComboBox();
-			this.chkPageBreakStart = new System.Windows.Forms.CheckBox();
-			this.chkPageBreakEnd = new System.Windows.Forms.CheckBox();
-			this.cbChartData = new System.Windows.Forms.ComboBox();
-			this.cbDataLabel = new System.Windows.Forms.ComboBox();
-			this.chkDataLabel = new System.Windows.Forms.CheckBox();
-			this.bDataLabelExpr = new System.Windows.Forms.Button();
-			this.lData1 = new System.Windows.Forms.Label();
-			this.cbChartData2 = new System.Windows.Forms.ComboBox();
-			this.lData2 = new System.Windows.Forms.Label();
-			this.cbChartData3 = new System.Windows.Forms.ComboBox();
-			this.lData3 = new System.Windows.Forms.Label();
-			this.bDataExpr = new System.Windows.Forms.Button();
-			this.bDataExpr3 = new System.Windows.Forms.Button();
-			this.bDataExpr2 = new System.Windows.Forms.Button();
-			this.cbVector = new System.Windows.Forms.ComboBox();
-			this.btnVectorExp = new System.Windows.Forms.Button();
-			this.label8 = new System.Windows.Forms.Label();
-			this.button1 = new System.Windows.Forms.Button();
-			this.button2 = new System.Windows.Forms.Button();
-			this.button3 = new System.Windows.Forms.Button();
-			this.chkToolTip = new System.Windows.Forms.CheckBox();
-			this.checkBox1 = new System.Windows.Forms.CheckBox();
-			this.txtYToolFormat = new System.Windows.Forms.TextBox();
-			this.txtXToolFormat = new System.Windows.Forms.TextBox();
-			this.label9 = new System.Windows.Forms.Label();
-			this.label10 = new System.Windows.Forms.Label();
+			this.label1 = new Majorsilence.Forms.Label();
+			this.label2 = new Majorsilence.Forms.Label();
+			this.label3 = new Majorsilence.Forms.Label();
+			this.label4 = new Majorsilence.Forms.Label();
+			this.cbChartType = new Majorsilence.Forms.ComboBox();
+			this.cbSubType = new Majorsilence.Forms.ComboBox();
+			this.cbPalette = new Majorsilence.Forms.ComboBox();
+			this.cbRenderElement = new Majorsilence.Forms.ComboBox();
+			this.label5 = new Majorsilence.Forms.Label();
+			this.tbPercentWidth = new Majorsilence.Forms.NumericUpDown();
+			this.label6 = new Majorsilence.Forms.Label();
+			this.tbNoRows = new Majorsilence.Forms.TextBox();
+			this.label7 = new Majorsilence.Forms.Label();
+			this.cbDataSet = new Majorsilence.Forms.ComboBox();
+			this.chkPageBreakStart = new Majorsilence.Forms.CheckBox();
+			this.chkPageBreakEnd = new Majorsilence.Forms.CheckBox();
+			this.cbChartData = new Majorsilence.Forms.ComboBox();
+			this.cbDataLabel = new Majorsilence.Forms.ComboBox();
+			this.chkDataLabel = new Majorsilence.Forms.CheckBox();
+			this.bDataLabelExpr = new Majorsilence.Forms.Button();
+			this.lData1 = new Majorsilence.Forms.Label();
+			this.cbChartData2 = new Majorsilence.Forms.ComboBox();
+			this.lData2 = new Majorsilence.Forms.Label();
+			this.cbChartData3 = new Majorsilence.Forms.ComboBox();
+			this.lData3 = new Majorsilence.Forms.Label();
+			this.bDataExpr = new Majorsilence.Forms.Button();
+			this.bDataExpr3 = new Majorsilence.Forms.Button();
+			this.bDataExpr2 = new Majorsilence.Forms.Button();
+			this.cbVector = new Majorsilence.Forms.ComboBox();
+			this.btnVectorExp = new Majorsilence.Forms.Button();
+			this.label8 = new Majorsilence.Forms.Label();
+			this.button1 = new Majorsilence.Forms.Button();
+			this.button2 = new Majorsilence.Forms.Button();
+			this.button3 = new Majorsilence.Forms.Button();
+			this.chkToolTip = new Majorsilence.Forms.CheckBox();
+			this.checkBox1 = new Majorsilence.Forms.CheckBox();
+			this.txtYToolFormat = new Majorsilence.Forms.TextBox();
+			this.txtXToolFormat = new Majorsilence.Forms.TextBox();
+			this.label9 = new Majorsilence.Forms.Label();
+			this.label10 = new Majorsilence.Forms.Label();
 			((System.ComponentModel.ISupportInitialize)(this.tbPercentWidth)).BeginInit();
 			this.SuspendLayout();
 			// 
@@ -298,7 +297,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			// cbChartType
 			// 
 			resources.ApplyResources(this.cbChartType, "cbChartType");
-			this.cbChartType.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+			this.cbChartType.DropDownStyle = Majorsilence.Forms.ComboBoxStyle.DropDownList;
 			this.cbChartType.Items.AddRange(new object[] {
             resources.GetString("cbChartType.Items"),
             resources.GetString("cbChartType.Items1"),
@@ -310,13 +309,13 @@ namespace Majorsilence.Reporting.RdlDesign
             resources.GetString("cbChartType.Items7"),
             resources.GetString("cbChartType.Items8")});
 			this.cbChartType.Name = "cbChartType";
-			this.cbChartType.SelectedIndexChanged += new System.EventHandler(this.cbChartType_SelectedIndexChanged);
+			this.cbChartType.SelectedIndexChanged += this.cbChartType_SelectedIndexChanged;
 			// 
 			// cbSubType
 			// 
 			resources.ApplyResources(this.cbSubType, "cbSubType");
 			this.cbSubType.Name = "cbSubType";
-			this.cbSubType.SelectedIndexChanged += new System.EventHandler(this.cbSubType_SelectedIndexChanged);
+			this.cbSubType.SelectedIndexChanged += this.cbSubType_SelectedIndexChanged;
 			// 
 			// cbPalette
 			// 
@@ -333,17 +332,17 @@ namespace Majorsilence.Reporting.RdlDesign
             resources.GetString("cbPalette.Items8"),
             resources.GetString("cbPalette.Items9")});
 			this.cbPalette.Name = "cbPalette";
-			this.cbPalette.SelectedIndexChanged += new System.EventHandler(this.cbPalette_SelectedIndexChanged);
+			this.cbPalette.SelectedIndexChanged += this.cbPalette_SelectedIndexChanged;
 			// 
 			// cbRenderElement
 			// 
 			resources.ApplyResources(this.cbRenderElement, "cbRenderElement");
-			this.cbRenderElement.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+			this.cbRenderElement.DropDownStyle = Majorsilence.Forms.ComboBoxStyle.DropDownList;
 			this.cbRenderElement.Items.AddRange(new object[] {
             resources.GetString("cbRenderElement.Items"),
             resources.GetString("cbRenderElement.Items1")});
 			this.cbRenderElement.Name = "cbRenderElement";
-			this.cbRenderElement.SelectedIndexChanged += new System.EventHandler(this.cbRenderElement_SelectedIndexChanged);
+			this.cbRenderElement.SelectedIndexChanged += this.cbRenderElement_SelectedIndexChanged;
 			// 
 			// label5
 			// 
@@ -354,7 +353,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			// 
 			resources.ApplyResources(this.tbPercentWidth, "tbPercentWidth");
 			this.tbPercentWidth.Name = "tbPercentWidth";
-			this.tbPercentWidth.ValueChanged += new System.EventHandler(this.tbPercentWidth_ValueChanged);
+			this.tbPercentWidth.ValueChanged += this.tbPercentWidth_ValueChanged;
 			// 
 			// label6
 			// 
@@ -365,7 +364,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			// 
 			resources.ApplyResources(this.tbNoRows, "tbNoRows");
 			this.tbNoRows.Name = "tbNoRows";
-			this.tbNoRows.TextChanged += new System.EventHandler(this.tbNoRows_TextChanged);
+			this.tbNoRows.TextChanged += this.tbNoRows_TextChanged;
 			// 
 			// label7
 			// 
@@ -375,47 +374,47 @@ namespace Majorsilence.Reporting.RdlDesign
 			// cbDataSet
 			// 
 			resources.ApplyResources(this.cbDataSet, "cbDataSet");
-			this.cbDataSet.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+			this.cbDataSet.DropDownStyle = Majorsilence.Forms.ComboBoxStyle.DropDownList;
 			this.cbDataSet.Name = "cbDataSet";
-			this.cbDataSet.SelectedIndexChanged += new System.EventHandler(this.cbDataSet_SelectedIndexChanged);
+			this.cbDataSet.SelectedIndexChanged += this.cbDataSet_SelectedIndexChanged;
 			// 
 			// chkPageBreakStart
 			// 
 			resources.ApplyResources(this.chkPageBreakStart, "chkPageBreakStart");
 			this.chkPageBreakStart.Name = "chkPageBreakStart";
-			this.chkPageBreakStart.CheckedChanged += new System.EventHandler(this.chkPageBreakStart_CheckedChanged);
+			this.chkPageBreakStart.CheckedChanged += this.chkPageBreakStart_CheckedChanged;
 			// 
 			// chkPageBreakEnd
 			// 
 			resources.ApplyResources(this.chkPageBreakEnd, "chkPageBreakEnd");
 			this.chkPageBreakEnd.Name = "chkPageBreakEnd";
-			this.chkPageBreakEnd.CheckedChanged += new System.EventHandler(this.chkPageBreakEnd_CheckedChanged);
+			this.chkPageBreakEnd.CheckedChanged += this.chkPageBreakEnd_CheckedChanged;
 			// 
 			// cbChartData
 			// 
 			resources.ApplyResources(this.cbChartData, "cbChartData");
 			this.cbChartData.Name = "cbChartData";
-			this.cbChartData.TextChanged += new System.EventHandler(this.cbChartData_Changed);
+			this.cbChartData.TextChanged += this.cbChartData_Changed;
 			// 
 			// cbDataLabel
 			// 
 			resources.ApplyResources(this.cbDataLabel, "cbDataLabel");
 			this.cbDataLabel.Name = "cbDataLabel";
-			this.cbDataLabel.TextChanged += new System.EventHandler(this.cbChartData_Changed);
+			this.cbDataLabel.TextChanged += this.cbChartData_Changed;
 			// 
 			// chkDataLabel
 			// 
 			resources.ApplyResources(this.chkDataLabel, "chkDataLabel");
 			this.chkDataLabel.Name = "chkDataLabel";
 			this.chkDataLabel.UseVisualStyleBackColor = true;
-			this.chkDataLabel.CheckedChanged += new System.EventHandler(this.chkDataLabel_CheckedChanged);
+			this.chkDataLabel.CheckedChanged += this.chkDataLabel_CheckedChanged;
 			// 
 			// bDataLabelExpr
 			// 
 			resources.ApplyResources(this.bDataLabelExpr, "bDataLabelExpr");
 			this.bDataLabelExpr.Name = "bDataLabelExpr";
 			this.bDataLabelExpr.UseVisualStyleBackColor = true;
-			this.bDataLabelExpr.Click += new System.EventHandler(this.bDataLabelExpr_Click);
+			this.bDataLabelExpr.Click += this.bDataLabelExpr_Click;
 			// 
 			// lData1
 			// 
@@ -426,7 +425,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			// 
 			resources.ApplyResources(this.cbChartData2, "cbChartData2");
 			this.cbChartData2.Name = "cbChartData2";
-			this.cbChartData2.TextChanged += new System.EventHandler(this.cbChartData_Changed);
+			this.cbChartData2.TextChanged += this.cbChartData_Changed;
 			// 
 			// lData2
 			// 
@@ -437,7 +436,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			// 
 			resources.ApplyResources(this.cbChartData3, "cbChartData3");
 			this.cbChartData3.Name = "cbChartData3";
-			this.cbChartData3.TextChanged += new System.EventHandler(this.cbChartData_Changed);
+			this.cbChartData3.TextChanged += this.cbChartData_Changed;
 			// 
 			// lData3
 			// 
@@ -449,21 +448,21 @@ namespace Majorsilence.Reporting.RdlDesign
 			resources.ApplyResources(this.bDataExpr, "bDataExpr");
 			this.bDataExpr.Name = "bDataExpr";
 			this.bDataExpr.Tag = "d1";
-			this.bDataExpr.Click += new System.EventHandler(this.bDataExpr_Click);
+			this.bDataExpr.Click += this.bDataExpr_Click;
 			// 
 			// bDataExpr3
 			// 
 			resources.ApplyResources(this.bDataExpr3, "bDataExpr3");
 			this.bDataExpr3.Name = "bDataExpr3";
 			this.bDataExpr3.Tag = "d3";
-			this.bDataExpr3.Click += new System.EventHandler(this.bDataExpr_Click);
+			this.bDataExpr3.Click += this.bDataExpr_Click;
 			// 
 			// bDataExpr2
 			// 
 			resources.ApplyResources(this.bDataExpr2, "bDataExpr2");
 			this.bDataExpr2.Name = "bDataExpr2";
 			this.bDataExpr2.Tag = "d2";
-			this.bDataExpr2.Click += new System.EventHandler(this.bDataExpr_Click);
+			this.bDataExpr2.Click += this.bDataExpr_Click;
 			// 
 			// cbVector
 			// 
@@ -472,14 +471,14 @@ namespace Majorsilence.Reporting.RdlDesign
             resources.GetString("cbVector.Items"),
             resources.GetString("cbVector.Items1")});
 			this.cbVector.Name = "cbVector";
-			this.cbVector.SelectedIndexChanged += new System.EventHandler(this.cbVector_SelectedIndexChanged);
+			this.cbVector.SelectedIndexChanged += this.cbVector_SelectedIndexChanged;
 			// 
 			// btnVectorExp
 			// 
 			resources.ApplyResources(this.btnVectorExp, "btnVectorExp");
 			this.btnVectorExp.Name = "btnVectorExp";
 			this.btnVectorExp.Tag = "d4";
-			this.btnVectorExp.Click += new System.EventHandler(this.bDataExpr_Click);
+			this.btnVectorExp.Click += this.bDataExpr_Click;
 			// 
 			// label8
 			// 
@@ -491,47 +490,47 @@ namespace Majorsilence.Reporting.RdlDesign
 			resources.ApplyResources(this.button1, "button1");
 			this.button1.Name = "button1";
 			this.button1.Tag = "d7";
-			this.button1.Click += new System.EventHandler(this.bDataExpr_Click);
+			this.button1.Click += this.bDataExpr_Click;
 			// 
 			// button2
 			// 
 			resources.ApplyResources(this.button2, "button2");
 			this.button2.Name = "button2";
 			this.button2.Tag = "d5";
-			this.button2.Click += new System.EventHandler(this.bDataExpr_Click);
+			this.button2.Click += this.bDataExpr_Click;
 			// 
 			// button3
 			// 
 			resources.ApplyResources(this.button3, "button3");
 			this.button3.Name = "button3";
 			this.button3.Tag = "d6";
-			this.button3.Click += new System.EventHandler(this.bDataExpr_Click);
+			this.button3.Click += this.bDataExpr_Click;
 			// 
 			// chkToolTip
 			// 
 			resources.ApplyResources(this.chkToolTip, "chkToolTip");
 			this.chkToolTip.Name = "chkToolTip";
 			this.chkToolTip.UseVisualStyleBackColor = true;
-			this.chkToolTip.CheckedChanged += new System.EventHandler(this.chkToolTip_CheckedChanged);
+			this.chkToolTip.CheckedChanged += this.chkToolTip_CheckedChanged;
 			// 
 			// checkBox1
 			// 
 			resources.ApplyResources(this.checkBox1, "checkBox1");
 			this.checkBox1.Name = "checkBox1";
 			this.checkBox1.UseVisualStyleBackColor = true;
-			this.checkBox1.CheckedChanged += new System.EventHandler(this.checkBox1_CheckedChanged);
+			this.checkBox1.CheckedChanged += this.checkBox1_CheckedChanged;
 			// 
 			// txtYToolFormat
 			// 
 			resources.ApplyResources(this.txtYToolFormat, "txtYToolFormat");
 			this.txtYToolFormat.Name = "txtYToolFormat";
-			this.txtYToolFormat.TextChanged += new System.EventHandler(this.txtYToolFormat_TextChanged);
+			this.txtYToolFormat.TextChanged += this.txtYToolFormat_TextChanged;
 			// 
 			// txtXToolFormat
 			// 
 			resources.ApplyResources(this.txtXToolFormat, "txtXToolFormat");
 			this.txtXToolFormat.Name = "txtXToolFormat";
-			this.txtXToolFormat.TextChanged += new System.EventHandler(this.txtXToolFormat_TextChanged);
+			this.txtXToolFormat.TextChanged += this.txtXToolFormat_TextChanged;
 			// 
 			// label9
 			// 

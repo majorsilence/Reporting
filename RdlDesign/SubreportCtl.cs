@@ -2,9 +2,9 @@
 using System;
 using System.Collections;
 using System.ComponentModel;
-using System.Drawing;
+using Majorsilence.Forms.Drawing;
 using System.Data;
-using System.Windows.Forms;
+using Majorsilence.Forms;
 using System.Xml;
 using System.Text;
 using System.IO;
@@ -17,19 +17,19 @@ namespace Majorsilence.Reporting.RdlDesign
 	/// <summary>
 	/// Filters specification: used for DataRegions (List, Chart, Table, Matrix), DataSets, group instances
 	/// </summary>
-	internal class SubreportCtl : System.Windows.Forms.UserControl, IProperty
+	internal class SubreportCtl : Majorsilence.Forms.UserControl, IProperty
 	{
 		private DesignXmlDraw _Draw;
 		private XmlNode _Subreport;
 		private DataTable _DataTable;
-		private System.Windows.Forms.Label label1;
-		private System.Windows.Forms.Button bFile;
-		private System.Windows.Forms.TextBox tbReportFile;
-		private System.Windows.Forms.TextBox tbNoRows;
-		private System.Windows.Forms.Label label2;
-		private System.Windows.Forms.CheckBox chkMergeTrans;
-		private System.Windows.Forms.DataGridView dgParms;
-		private System.Windows.Forms.Button bRefreshParms;
+		private Majorsilence.Forms.Label label1;
+		private Majorsilence.Forms.Button bFile;
+		private Majorsilence.Forms.TextBox tbReportFile;
+		private Majorsilence.Forms.TextBox tbNoRows;
+		private Majorsilence.Forms.Label label2;
+		private Majorsilence.Forms.CheckBox chkMergeTrans;
+		private Majorsilence.Forms.DataGridView dgParms;
+		private Majorsilence.Forms.Button bRefreshParms;
 		/// <summary> 
 		/// Required designer variable.
 		/// </summary>
@@ -106,16 +106,16 @@ namespace Majorsilence.Reporting.RdlDesign
 		/// </summary>
 		private void InitializeComponent()
 		{
-			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(SubreportCtl));
+			Majorsilence.Forms.ComponentResourceManager resources = new Majorsilence.Forms.ComponentResourceManager(typeof(SubreportCtl));
             this.DoubleBuffered = true;
-			this.dgParms = new System.Windows.Forms.DataGridView();
-			this.label1 = new System.Windows.Forms.Label();
-			this.tbReportFile = new System.Windows.Forms.TextBox();
-			this.bFile = new System.Windows.Forms.Button();
-			this.tbNoRows = new System.Windows.Forms.TextBox();
-			this.label2 = new System.Windows.Forms.Label();
-			this.chkMergeTrans = new System.Windows.Forms.CheckBox();
-			this.bRefreshParms = new System.Windows.Forms.Button();
+			this.dgParms = new Majorsilence.Forms.DataGridView();
+			this.label1 = new Majorsilence.Forms.Label();
+			this.tbReportFile = new Majorsilence.Forms.TextBox();
+			this.bFile = new Majorsilence.Forms.Button();
+			this.tbNoRows = new Majorsilence.Forms.TextBox();
+			this.label2 = new Majorsilence.Forms.Label();
+			this.chkMergeTrans = new Majorsilence.Forms.CheckBox();
+			this.bRefreshParms = new Majorsilence.Forms.Button();
 			((System.ComponentModel.ISupportInitialize)(this.dgParms)).BeginInit();
 			this.SuspendLayout();
 			// 
@@ -139,7 +139,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			// 
 			resources.ApplyResources(this.bFile, "bFile");
 			this.bFile.Name = "bFile";
-			this.bFile.Click += new System.EventHandler(this.bFile_Click);
+			this.bFile.Click += this.bFile_Click;
 			// 
 			// tbNoRows
 			// 
@@ -160,7 +160,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			// 
 			resources.ApplyResources(this.bRefreshParms, "bRefreshParms");
 			this.bRefreshParms.Name = "bRefreshParms";
-			this.bRefreshParms.Click += new System.EventHandler(this.bRefreshParms_Click);
+			this.bRefreshParms.Click += this.bRefreshParms_Click;
 			// 
 			// SubreportCtl
 			// 

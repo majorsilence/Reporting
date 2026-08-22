@@ -2,9 +2,8 @@
 using System;
 using System.Collections;
 using System.ComponentModel;
-using System.Drawing;
 using System.Data;
-using System.Windows.Forms;
+using Majorsilence.Forms;
 using System.Xml;
 using System.Text;
 
@@ -13,18 +12,18 @@ namespace Majorsilence.Reporting.RdlDesign
 	/// <summary>
 	/// Sorting specification
 	/// </summary>
-	internal class SortingCtl : System.Windows.Forms.UserControl, IProperty
+	internal class SortingCtl : Majorsilence.Forms.UserControl, IProperty
 	{
 		private DesignXmlDraw _Draw;
 		private XmlNode _SortingParent;
 		private DataGridViewTextBoxColumn dgtbExpr;
 		private DataGridViewCheckBoxColumn dgtbDir;
 
-		private System.Windows.Forms.Button bDelete;
-		private System.Windows.Forms.Button bUp;
-		private System.Windows.Forms.Button bDown;
-		private System.Windows.Forms.DataGridView dgSorting;
-		private System.Windows.Forms.Button bValueExpr;
+		private Majorsilence.Forms.Button bDelete;
+		private Majorsilence.Forms.Button bUp;
+		private Majorsilence.Forms.Button bDown;
+		private Majorsilence.Forms.DataGridView dgSorting;
+		private Majorsilence.Forms.Button bValueExpr;
 		/// <summary> 
 		/// Required designer variable.
 		/// </summary>
@@ -107,12 +106,12 @@ namespace Majorsilence.Reporting.RdlDesign
 		/// </summary>
 		private void InitializeComponent()
 		{
-			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(SortingCtl));
-			this.dgSorting = new System.Windows.Forms.DataGridView();
-			this.bDelete = new System.Windows.Forms.Button();
-			this.bUp = new System.Windows.Forms.Button();
-			this.bDown = new System.Windows.Forms.Button();
-			this.bValueExpr = new System.Windows.Forms.Button();
+			Majorsilence.Forms.ComponentResourceManager resources = new Majorsilence.Forms.ComponentResourceManager(typeof(SortingCtl));
+			this.dgSorting = new Majorsilence.Forms.DataGridView();
+			this.bDelete = new Majorsilence.Forms.Button();
+			this.bUp = new Majorsilence.Forms.Button();
+			this.bDown = new Majorsilence.Forms.Button();
+			this.bValueExpr = new Majorsilence.Forms.Button();
 			((System.ComponentModel.ISupportInitialize)(this.dgSorting)).BeginInit();
 			this.SuspendLayout();
 			// 
@@ -125,26 +124,26 @@ namespace Majorsilence.Reporting.RdlDesign
 			// 
 			resources.ApplyResources(this.bDelete, "bDelete");
 			this.bDelete.Name = "bDelete";
-			this.bDelete.Click += new System.EventHandler(this.bDelete_Click);
+			this.bDelete.Click += this.bDelete_Click;
 			// 
 			// bUp
 			// 
 			resources.ApplyResources(this.bUp, "bUp");
 			this.bUp.Name = "bUp";
-			this.bUp.Click += new System.EventHandler(this.bUp_Click);
+			this.bUp.Click += this.bUp_Click;
 			// 
 			// bDown
 			// 
 			resources.ApplyResources(this.bDown, "bDown");
 			this.bDown.Name = "bDown";
-			this.bDown.Click += new System.EventHandler(this.bDown_Click);
+			this.bDown.Click += this.bDown_Click;
 			// 
 			// bValueExpr
 			// 
 			resources.ApplyResources(this.bValueExpr, "bValueExpr");
 			this.bValueExpr.Name = "bValueExpr";
 			this.bValueExpr.Tag = "value";
-			this.bValueExpr.Click += new System.EventHandler(this.bValueExpr_Click);
+			this.bValueExpr.Click += this.bValueExpr_Click;
 			// 
 			// SortingCtl
 			// 

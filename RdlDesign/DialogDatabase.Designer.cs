@@ -1,6 +1,6 @@
 namespace Majorsilence.Reporting.RdlDesign
 {
-    public partial class DialogDatabase : System.Windows.Forms.Form
+    public partial class DialogDatabase : Majorsilence.Forms.Form
 	{
 				
 
@@ -19,68 +19,68 @@ namespace Majorsilence.Reporting.RdlDesign
         #region Windows Form Designer generated code
         private void InitializeComponent()
 		{
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(DialogDatabase));
-            this.splitContainer1 = new System.Windows.Forms.SplitContainer();
-            this.tvTablesColumns = new System.Windows.Forms.TreeView();
-            this.tbSQL = new System.Windows.Forms.TextBox();
-            this.bMove = new System.Windows.Forms.Button();
-            this.tcDialog = new System.Windows.Forms.TabControl();
-            this.ReportType = new System.Windows.Forms.TabPage();
-            this.groupBox2 = new System.Windows.Forms.GroupBox();
-            this.rbSchema2005 = new System.Windows.Forms.RadioButton();
-            this.rbSchema2003 = new System.Windows.Forms.RadioButton();
-            this.rbSchemaNo = new System.Windows.Forms.RadioButton();
-            this.cbOrientation = new System.Windows.Forms.ComboBox();
-            this.label6 = new System.Windows.Forms.Label();
-            this.tbReportAuthor = new System.Windows.Forms.TextBox();
-            this.tbReportDescription = new System.Windows.Forms.TextBox();
-            this.tbReportName = new System.Windows.Forms.TextBox();
-            this.label3 = new System.Windows.Forms.Label();
-            this.label2 = new System.Windows.Forms.Label();
-            this.label1 = new System.Windows.Forms.Label();
-            this.groupBox1 = new System.Windows.Forms.GroupBox();
-            this.rbChart = new System.Windows.Forms.RadioButton();
-            this.rbMatrix = new System.Windows.Forms.RadioButton();
-            this.rbList = new System.Windows.Forms.RadioButton();
-            this.rbTable = new System.Windows.Forms.RadioButton();
-            this.DBConnection = new System.Windows.Forms.TabPage();
-            this.groupBoxSqlServer = new System.Windows.Forms.GroupBox();
-            this.textBoxSqlPassword = new System.Windows.Forms.TextBox();
-            this.label11 = new System.Windows.Forms.Label();
-            this.textBoxSqlUser = new System.Windows.Forms.TextBox();
-            this.label10 = new System.Windows.Forms.Label();
-            this.label8 = new System.Windows.Forms.Label();
-            this.buttonDatabaseSearch = new System.Windows.Forms.Button();
-            this.comboServerList = new System.Windows.Forms.ComboBox();
-            this.label9 = new System.Windows.Forms.Label();
-            this.buttonSearchSqlServers = new System.Windows.Forms.Button();
-            this.comboDatabaseList = new System.Windows.Forms.ComboBox();
-            this.buttonSqliteSelectDatabase = new System.Windows.Forms.Button();
-            this.bShared = new System.Windows.Forms.Button();
-            this.bTestConnection = new System.Windows.Forms.Button();
-            this.cbOdbcNames = new System.Windows.Forms.ComboBox();
-            this.lODBC = new System.Windows.Forms.Label();
-            this.lConnection = new System.Windows.Forms.Label();
-            this.cbConnectionTypes = new System.Windows.Forms.ComboBox();
-            this.label7 = new System.Windows.Forms.Label();
-            this.tbConnection = new System.Windows.Forms.TextBox();
-            this.ReportParameters = new System.Windows.Forms.TabPage();
-            this.DBSql = new System.Windows.Forms.TabPage();
-            this.panel2 = new System.Windows.Forms.Panel();
-            this.TabularGroup = new System.Windows.Forms.TabPage();
-            this.clbSubtotal = new System.Windows.Forms.CheckedListBox();
-            this.ckbGrandTotal = new System.Windows.Forms.CheckBox();
-            this.label5 = new System.Windows.Forms.Label();
-            this.label4 = new System.Windows.Forms.Label();
-            this.cbColumnList = new System.Windows.Forms.ComboBox();
-            this.ReportSyntax = new System.Windows.Forms.TabPage();
-            this.tbReportSyntax = new System.Windows.Forms.TextBox();
-            this.ReportPreview = new System.Windows.Forms.TabPage();
+            Majorsilence.Forms.ComponentResourceManager resources = new Majorsilence.Forms.ComponentResourceManager(typeof(DialogDatabase));
+            this.splitContainer1 = new Majorsilence.Forms.SplitContainer();
+            this.tvTablesColumns = new Majorsilence.Forms.TreeView();
+            this.tbSQL = new Majorsilence.Forms.TextBox();
+            this.bMove = new Majorsilence.Forms.Button();
+            this.tcDialog = new Majorsilence.Forms.TabControl();
+            this.ReportType = new Majorsilence.Forms.TabPage();
+            this.groupBox2 = new Majorsilence.Forms.GroupBox();
+            this.rbSchema2005 = new Majorsilence.Forms.RadioButton();
+            this.rbSchema2003 = new Majorsilence.Forms.RadioButton();
+            this.rbSchemaNo = new Majorsilence.Forms.RadioButton();
+            this.cbOrientation = new Majorsilence.Forms.ComboBox();
+            this.label6 = new Majorsilence.Forms.Label();
+            this.tbReportAuthor = new Majorsilence.Forms.TextBox();
+            this.tbReportDescription = new Majorsilence.Forms.TextBox();
+            this.tbReportName = new Majorsilence.Forms.TextBox();
+            this.label3 = new Majorsilence.Forms.Label();
+            this.label2 = new Majorsilence.Forms.Label();
+            this.label1 = new Majorsilence.Forms.Label();
+            this.groupBox1 = new Majorsilence.Forms.GroupBox();
+            this.rbChart = new Majorsilence.Forms.RadioButton();
+            this.rbMatrix = new Majorsilence.Forms.RadioButton();
+            this.rbList = new Majorsilence.Forms.RadioButton();
+            this.rbTable = new Majorsilence.Forms.RadioButton();
+            this.DBConnection = new Majorsilence.Forms.TabPage();
+            this.groupBoxSqlServer = new Majorsilence.Forms.GroupBox();
+            this.textBoxSqlPassword = new Majorsilence.Forms.TextBox();
+            this.label11 = new Majorsilence.Forms.Label();
+            this.textBoxSqlUser = new Majorsilence.Forms.TextBox();
+            this.label10 = new Majorsilence.Forms.Label();
+            this.label8 = new Majorsilence.Forms.Label();
+            this.buttonDatabaseSearch = new Majorsilence.Forms.Button();
+            this.comboServerList = new Majorsilence.Forms.ComboBox();
+            this.label9 = new Majorsilence.Forms.Label();
+            this.buttonSearchSqlServers = new Majorsilence.Forms.Button();
+            this.comboDatabaseList = new Majorsilence.Forms.ComboBox();
+            this.buttonSqliteSelectDatabase = new Majorsilence.Forms.Button();
+            this.bShared = new Majorsilence.Forms.Button();
+            this.bTestConnection = new Majorsilence.Forms.Button();
+            this.cbOdbcNames = new Majorsilence.Forms.ComboBox();
+            this.lODBC = new Majorsilence.Forms.Label();
+            this.lConnection = new Majorsilence.Forms.Label();
+            this.cbConnectionTypes = new Majorsilence.Forms.ComboBox();
+            this.label7 = new Majorsilence.Forms.Label();
+            this.tbConnection = new Majorsilence.Forms.TextBox();
+            this.ReportParameters = new Majorsilence.Forms.TabPage();
+            this.DBSql = new Majorsilence.Forms.TabPage();
+            this.panel2 = new Majorsilence.Forms.Panel();
+            this.TabularGroup = new Majorsilence.Forms.TabPage();
+            this.clbSubtotal = new Majorsilence.Forms.CheckedListBox();
+            this.ckbGrandTotal = new Majorsilence.Forms.CheckBox();
+            this.label5 = new Majorsilence.Forms.Label();
+            this.label4 = new Majorsilence.Forms.Label();
+            this.cbColumnList = new Majorsilence.Forms.ComboBox();
+            this.ReportSyntax = new Majorsilence.Forms.TabPage();
+            this.tbReportSyntax = new Majorsilence.Forms.TextBox();
+            this.ReportPreview = new Majorsilence.Forms.TabPage();
             this.rdlViewer1 = new Majorsilence.Reporting.RdlViewer.RdlViewer();
-            this.btnCancel = new System.Windows.Forms.Button();
-            this.panel1 = new System.Windows.Forms.Panel();
-            this.btnOK = new System.Windows.Forms.Button();
-            this.rbEmpty = new System.Windows.Forms.RadioButton();
+            this.btnCancel = new Majorsilence.Forms.Button();
+            this.panel1 = new Majorsilence.Forms.Panel();
+            this.btnOK = new Majorsilence.Forms.Button();
+            this.rbEmpty = new Majorsilence.Forms.RadioButton();
             this.reportParameterCtl1 = new Majorsilence.Reporting.RdlDesign.ReportParameterCtl();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
@@ -120,21 +120,21 @@ namespace Majorsilence.Reporting.RdlDesign
             resources.ApplyResources(this.tvTablesColumns, "tvTablesColumns");
             this.tvTablesColumns.FullRowSelect = true;
             this.tvTablesColumns.Name = "tvTablesColumns";
-            this.tvTablesColumns.BeforeExpand += new System.Windows.Forms.TreeViewCancelEventHandler(this.tvTablesColumns_BeforeExpand);
+            this.tvTablesColumns.BeforeExpand += this.tvTablesColumns_BeforeExpand;
             // 
             // tbSQL
             // 
             this.tbSQL.AllowDrop = true;
             resources.ApplyResources(this.tbSQL, "tbSQL");
             this.tbSQL.Name = "tbSQL";
-            this.tbSQL.TextChanged += new System.EventHandler(this.tbSQL_TextChanged);
-            this.tbSQL.KeyDown += new System.Windows.Forms.KeyEventHandler(this.tbSQL_KeyDown);
+            this.tbSQL.TextChanged += this.tbSQL_TextChanged;
+            this.tbSQL.KeyDown += this.tbSQL_KeyDown;
             // 
             // bMove
             // 
             resources.ApplyResources(this.bMove, "bMove");
             this.bMove.Name = "bMove";
-            this.bMove.Click += new System.EventHandler(this.bMove_Click);
+            this.bMove.Click += this.bMove_Click;
             // 
             // tcDialog
             // 
@@ -148,7 +148,7 @@ namespace Majorsilence.Reporting.RdlDesign
             resources.ApplyResources(this.tcDialog, "tcDialog");
             this.tcDialog.Name = "tcDialog";
             this.tcDialog.SelectedIndex = 0;
-            this.tcDialog.SelectedIndexChanged += new System.EventHandler(this.tabControl1_SelectedIndexChanged);
+            this.tcDialog.SelectedIndexChanged += this.tabControl1_SelectedIndexChanged;
             // 
             // ReportType
             // 
@@ -194,13 +194,13 @@ namespace Majorsilence.Reporting.RdlDesign
             // 
             // cbOrientation
             // 
-            this.cbOrientation.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cbOrientation.DropDownStyle = Majorsilence.Forms.ComboBoxStyle.DropDownList;
             this.cbOrientation.Items.AddRange(new object[] {
             resources.GetString("cbOrientation.Items"),
             resources.GetString("cbOrientation.Items1")});
             resources.ApplyResources(this.cbOrientation, "cbOrientation");
             this.cbOrientation.Name = "cbOrientation";
-            this.cbOrientation.SelectedIndexChanged += new System.EventHandler(this.emptyReportSyntax);
+            this.cbOrientation.SelectedIndexChanged += this.emptyReportSyntax;
             // 
             // label6
             // 
@@ -211,19 +211,19 @@ namespace Majorsilence.Reporting.RdlDesign
             // 
             resources.ApplyResources(this.tbReportAuthor, "tbReportAuthor");
             this.tbReportAuthor.Name = "tbReportAuthor";
-            this.tbReportAuthor.TextChanged += new System.EventHandler(this.tbReportAuthor_TextChanged);
+            this.tbReportAuthor.TextChanged += this.tbReportAuthor_TextChanged;
             // 
             // tbReportDescription
             // 
             resources.ApplyResources(this.tbReportDescription, "tbReportDescription");
             this.tbReportDescription.Name = "tbReportDescription";
-            this.tbReportDescription.TextChanged += new System.EventHandler(this.tbReportDescription_TextChanged);
+            this.tbReportDescription.TextChanged += this.tbReportDescription_TextChanged;
             // 
             // tbReportName
             // 
             resources.ApplyResources(this.tbReportName, "tbReportName");
             this.tbReportName.Name = "tbReportName";
-            this.tbReportName.TextChanged += new System.EventHandler(this.tbReportName_TextChanged);
+            this.tbReportName.TextChanged += this.tbReportName_TextChanged;
             // 
             // label3
             // 
@@ -255,19 +255,19 @@ namespace Majorsilence.Reporting.RdlDesign
             // 
             resources.ApplyResources(this.rbChart, "rbChart");
             this.rbChart.Name = "rbChart";
-            this.rbChart.CheckedChanged += new System.EventHandler(this.rbChart_CheckedChanged);
+            this.rbChart.CheckedChanged += this.rbChart_CheckedChanged;
             // 
             // rbMatrix
             // 
             resources.ApplyResources(this.rbMatrix, "rbMatrix");
             this.rbMatrix.Name = "rbMatrix";
-            this.rbMatrix.CheckedChanged += new System.EventHandler(this.rbMatrix_CheckedChanged);
+            this.rbMatrix.CheckedChanged += this.rbMatrix_CheckedChanged;
             // 
             // rbList
             // 
             resources.ApplyResources(this.rbList, "rbList");
             this.rbList.Name = "rbList";
-            this.rbList.CheckedChanged += new System.EventHandler(this.rbList_CheckedChanged);
+            this.rbList.CheckedChanged += this.rbList_CheckedChanged;
             // 
             // rbTable
             // 
@@ -275,7 +275,7 @@ namespace Majorsilence.Reporting.RdlDesign
             resources.ApplyResources(this.rbTable, "rbTable");
             this.rbTable.Name = "rbTable";
             this.rbTable.TabStop = true;
-            this.rbTable.CheckedChanged += new System.EventHandler(this.rbTable_CheckedChanged);
+            this.rbTable.CheckedChanged += this.rbTable_CheckedChanged;
             // 
             // DBConnection
             // 
@@ -293,7 +293,7 @@ namespace Majorsilence.Reporting.RdlDesign
             resources.ApplyResources(this.DBConnection, "DBConnection");
             this.DBConnection.Name = "DBConnection";
             this.DBConnection.Tag = "connect";
-            this.DBConnection.Validating += new System.ComponentModel.CancelEventHandler(this.DBConnection_Validating);
+            this.DBConnection.Validating += this.DBConnection_Validating;
             // 
             // groupBoxSqlServer
             // 
@@ -341,7 +341,7 @@ namespace Majorsilence.Reporting.RdlDesign
             resources.ApplyResources(this.buttonDatabaseSearch, "buttonDatabaseSearch");
             this.buttonDatabaseSearch.Name = "buttonDatabaseSearch";
             this.buttonDatabaseSearch.UseVisualStyleBackColor = true;
-            this.buttonDatabaseSearch.Click += new System.EventHandler(this.buttonDatabaseSearch_Click);
+            this.buttonDatabaseSearch.Click += this.buttonDatabaseSearch_Click;
             // 
             // comboServerList
             // 
@@ -359,7 +359,7 @@ namespace Majorsilence.Reporting.RdlDesign
             resources.ApplyResources(this.buttonSearchSqlServers, "buttonSearchSqlServers");
             this.buttonSearchSqlServers.Name = "buttonSearchSqlServers";
             this.buttonSearchSqlServers.UseVisualStyleBackColor = true;
-            this.buttonSearchSqlServers.Click += new System.EventHandler(this.buttonSearchSqlServers_Click);
+            this.buttonSearchSqlServers.Click += this.buttonSearchSqlServers_Click;
             // 
             // comboDatabaseList
             // 
@@ -372,27 +372,27 @@ namespace Majorsilence.Reporting.RdlDesign
             resources.ApplyResources(this.buttonSqliteSelectDatabase, "buttonSqliteSelectDatabase");
             this.buttonSqliteSelectDatabase.Name = "buttonSqliteSelectDatabase";
             this.buttonSqliteSelectDatabase.UseVisualStyleBackColor = true;
-            this.buttonSqliteSelectDatabase.Click += new System.EventHandler(this.buttonSqliteSelectDatabase_Click);
+            this.buttonSqliteSelectDatabase.Click += this.buttonSqliteSelectDatabase_Click;
             // 
             // bShared
             // 
             resources.ApplyResources(this.bShared, "bShared");
             this.bShared.Name = "bShared";
-            this.bShared.Click += new System.EventHandler(this.bShared_Click);
+            this.bShared.Click += this.bShared_Click;
             // 
             // bTestConnection
             // 
             resources.ApplyResources(this.bTestConnection, "bTestConnection");
             this.bTestConnection.Name = "bTestConnection";
-            this.bTestConnection.Click += new System.EventHandler(this.bTestConnection_Click);
+            this.bTestConnection.Click += this.bTestConnection_Click;
             // 
             // cbOdbcNames
             // 
-            this.cbOdbcNames.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cbOdbcNames.DropDownStyle = Majorsilence.Forms.ComboBoxStyle.DropDownList;
             resources.ApplyResources(this.cbOdbcNames, "cbOdbcNames");
             this.cbOdbcNames.Name = "cbOdbcNames";
             this.cbOdbcNames.Sorted = true;
-            this.cbOdbcNames.SelectedIndexChanged += new System.EventHandler(this.cbOdbcNames_SelectedIndexChanged);
+            this.cbOdbcNames.SelectedIndexChanged += this.cbOdbcNames_SelectedIndexChanged;
             // 
             // lODBC
             // 
@@ -406,10 +406,10 @@ namespace Majorsilence.Reporting.RdlDesign
             // 
             // cbConnectionTypes
             // 
-            this.cbConnectionTypes.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cbConnectionTypes.DropDownStyle = Majorsilence.Forms.ComboBoxStyle.DropDownList;
             resources.ApplyResources(this.cbConnectionTypes, "cbConnectionTypes");
             this.cbConnectionTypes.Name = "cbConnectionTypes";
-            this.cbConnectionTypes.SelectedIndexChanged += new System.EventHandler(this.cbConnectionTypes_SelectedIndexChanged);
+            this.cbConnectionTypes.SelectedIndexChanged += this.cbConnectionTypes_SelectedIndexChanged;
             // 
             // label7
             // 
@@ -420,7 +420,7 @@ namespace Majorsilence.Reporting.RdlDesign
             // 
             resources.ApplyResources(this.tbConnection, "tbConnection");
             this.tbConnection.Name = "tbConnection";
-            this.tbConnection.TextChanged += new System.EventHandler(this.tbConnection_TextChanged);
+            this.tbConnection.TextChanged += this.tbConnection_TextChanged;
             // 
             // ReportParameters
             // 
@@ -458,13 +458,13 @@ namespace Majorsilence.Reporting.RdlDesign
             this.clbSubtotal.CheckOnClick = true;
             resources.ApplyResources(this.clbSubtotal, "clbSubtotal");
             this.clbSubtotal.Name = "clbSubtotal";
-            this.clbSubtotal.SelectedIndexChanged += new System.EventHandler(this.emptyReportSyntax);
+            this.clbSubtotal.SelectedIndexChanged += this.emptyReportSyntax;
             // 
             // ckbGrandTotal
             // 
             resources.ApplyResources(this.ckbGrandTotal, "ckbGrandTotal");
             this.ckbGrandTotal.Name = "ckbGrandTotal";
-            this.ckbGrandTotal.CheckedChanged += new System.EventHandler(this.emptyReportSyntax);
+            this.ckbGrandTotal.CheckedChanged += this.emptyReportSyntax;
             // 
             // label5
             // 
@@ -478,10 +478,10 @@ namespace Majorsilence.Reporting.RdlDesign
             // 
             // cbColumnList
             // 
-            this.cbColumnList.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cbColumnList.DropDownStyle = Majorsilence.Forms.ComboBoxStyle.DropDownList;
             resources.ApplyResources(this.cbColumnList, "cbColumnList");
             this.cbColumnList.Name = "cbColumnList";
-            this.cbColumnList.SelectedIndexChanged += new System.EventHandler(this.emptyReportSyntax);
+            this.cbColumnList.SelectedIndexChanged += this.emptyReportSyntax;
             // 
             // ReportSyntax
             // 
@@ -505,7 +505,7 @@ namespace Majorsilence.Reporting.RdlDesign
             // 
             // rdlViewer1
             // 
-            this.rdlViewer1.Cursor = System.Windows.Forms.Cursors.Default;
+            this.rdlViewer1.Cursor = Majorsilence.Forms.Cursors.Default;
             resources.ApplyResources(this.rdlViewer1, "rdlViewer1");
             this.rdlViewer1.dSubReportGetContent = null;
             this.rdlViewer1.Folder = null;
@@ -532,7 +532,7 @@ namespace Majorsilence.Reporting.RdlDesign
             // 
             resources.ApplyResources(this.btnCancel, "btnCancel");
             this.btnCancel.CausesValidation = false;
-            this.btnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
+            this.btnCancel.DialogResult = Majorsilence.Forms.DialogResult.Cancel;
             this.btnCancel.Name = "btnCancel";
             // 
             // panel1
@@ -546,13 +546,13 @@ namespace Majorsilence.Reporting.RdlDesign
             // 
             resources.ApplyResources(this.btnOK, "btnOK");
             this.btnOK.Name = "btnOK";
-            this.btnOK.Click += new System.EventHandler(this.btnOK_Click);
+            this.btnOK.Click += this.btnOK_Click;
             // 
             // rbEmpty
             // 
             resources.ApplyResources(this.rbEmpty, "rbEmpty");
             this.rbEmpty.Name = "rbEmpty";
-            this.rbEmpty.CheckedChanged += new System.EventHandler(this.rbEmpty_CheckedChanged);
+            this.rbEmpty.CheckedChanged += this.rbEmpty_CheckedChanged;
             // 
             // reportParameterCtl1
             // 
@@ -570,7 +570,7 @@ namespace Majorsilence.Reporting.RdlDesign
             this.MinimizeBox = false;
             this.Name = "DialogDatabase";
             this.ShowInTaskbar = false;
-            this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.DialogDatabase_Closed);
+            this.FormClosed += this.DialogDatabase_Closed;
             this.splitContainer1.Panel1.ResumeLayout(false);
             this.splitContainer1.Panel2.ResumeLayout(false);
             this.splitContainer1.Panel2.PerformLayout();
@@ -599,68 +599,68 @@ namespace Majorsilence.Reporting.RdlDesign
 		#endregion		
 
 
-        private System.Windows.Forms.Button btnCancel;
-        private System.Windows.Forms.Panel panel1;
-        private System.Windows.Forms.Button btnOK;
-        private System.Windows.Forms.TabPage DBConnection;
-        private System.Windows.Forms.TabPage DBSql;
-        private System.Windows.Forms.TabPage ReportType;
+        private Majorsilence.Forms.Button btnCancel;
+        private Majorsilence.Forms.Panel panel1;
+        private Majorsilence.Forms.Button btnOK;
+        private Majorsilence.Forms.TabPage DBConnection;
+        private Majorsilence.Forms.TabPage DBSql;
+        private Majorsilence.Forms.TabPage ReportType;
         private System.ComponentModel.Container components = null;
-        private System.Windows.Forms.GroupBox groupBox1;
-        private System.Windows.Forms.RadioButton rbTable;
-        private System.Windows.Forms.RadioButton rbList;
-        private System.Windows.Forms.RadioButton rbMatrix;
-        private System.Windows.Forms.RadioButton rbChart;
-        private System.Windows.Forms.TextBox tbConnection;
-        private System.Windows.Forms.TabPage ReportSyntax;
-        private System.Windows.Forms.TextBox tbReportSyntax;
-        private System.Windows.Forms.TabPage ReportPreview;
-        private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.Label label2;
-        private System.Windows.Forms.Label label3;
-        private System.Windows.Forms.TextBox tbReportName;
-        private System.Windows.Forms.TextBox tbReportDescription;
-        private System.Windows.Forms.TextBox tbReportAuthor;
-        private System.Windows.Forms.Panel panel2;
+        private Majorsilence.Forms.GroupBox groupBox1;
+        private Majorsilence.Forms.RadioButton rbTable;
+        private Majorsilence.Forms.RadioButton rbList;
+        private Majorsilence.Forms.RadioButton rbMatrix;
+        private Majorsilence.Forms.RadioButton rbChart;
+        private Majorsilence.Forms.TextBox tbConnection;
+        private Majorsilence.Forms.TabPage ReportSyntax;
+        private Majorsilence.Forms.TextBox tbReportSyntax;
+        private Majorsilence.Forms.TabPage ReportPreview;
+        private Majorsilence.Forms.Label label1;
+        private Majorsilence.Forms.Label label2;
+        private Majorsilence.Forms.Label label3;
+        private Majorsilence.Forms.TextBox tbReportName;
+        private Majorsilence.Forms.TextBox tbReportDescription;
+        private Majorsilence.Forms.TextBox tbReportAuthor;
+        private Majorsilence.Forms.Panel panel2;
         private Majorsilence.Reporting.RdlViewer.RdlViewer rdlViewer1;
-        private System.Windows.Forms.TabPage ReportParameters;
-        private System.Windows.Forms.TabControl tcDialog;
-        private System.Windows.Forms.TabPage TabularGroup;
-        private System.Windows.Forms.ComboBox cbColumnList;
-        private System.Windows.Forms.Label label4;
-        private System.Windows.Forms.Label label5;
-        private System.Windows.Forms.CheckBox ckbGrandTotal;
-        private System.Windows.Forms.CheckedListBox clbSubtotal;
-        private System.Windows.Forms.Label label6;
-        private System.Windows.Forms.ComboBox cbOrientation;
-        private System.Windows.Forms.Label label7;
-        private System.Windows.Forms.ComboBox cbConnectionTypes;
-        private System.Windows.Forms.Label lODBC;
-        private System.Windows.Forms.ComboBox cbOdbcNames;
-        private System.Windows.Forms.Button bTestConnection;
-        private System.Windows.Forms.Label lConnection;
-        private System.Windows.Forms.Button bShared;
-        private System.Windows.Forms.GroupBox groupBox2;
-        private System.Windows.Forms.RadioButton rbSchemaNo;
-        private System.Windows.Forms.RadioButton rbSchema2003;
-        private System.Windows.Forms.RadioButton rbSchema2005;
-        private System.Windows.Forms.SplitContainer splitContainer1;
-        private System.Windows.Forms.TreeView tvTablesColumns;
-        private System.Windows.Forms.Button bMove;
-        private System.Windows.Forms.TextBox tbSQL;
-        private System.Windows.Forms.Button buttonSqliteSelectDatabase;
-        internal System.Windows.Forms.Button buttonSearchSqlServers;
-        internal System.Windows.Forms.ComboBox comboServerList;
-        internal System.Windows.Forms.Label label8;
-        internal System.Windows.Forms.Button buttonDatabaseSearch;
-        internal System.Windows.Forms.Label label9;
-        internal System.Windows.Forms.ComboBox comboDatabaseList;
-        private System.Windows.Forms.GroupBox groupBoxSqlServer;
-        private System.Windows.Forms.Label label10;
-        private System.Windows.Forms.TextBox textBoxSqlPassword;
-        private System.Windows.Forms.Label label11;
-        private System.Windows.Forms.TextBox textBoxSqlUser;
+        private Majorsilence.Forms.TabPage ReportParameters;
+        private Majorsilence.Forms.TabControl tcDialog;
+        private Majorsilence.Forms.TabPage TabularGroup;
+        private Majorsilence.Forms.ComboBox cbColumnList;
+        private Majorsilence.Forms.Label label4;
+        private Majorsilence.Forms.Label label5;
+        private Majorsilence.Forms.CheckBox ckbGrandTotal;
+        private Majorsilence.Forms.CheckedListBox clbSubtotal;
+        private Majorsilence.Forms.Label label6;
+        private Majorsilence.Forms.ComboBox cbOrientation;
+        private Majorsilence.Forms.Label label7;
+        private Majorsilence.Forms.ComboBox cbConnectionTypes;
+        private Majorsilence.Forms.Label lODBC;
+        private Majorsilence.Forms.ComboBox cbOdbcNames;
+        private Majorsilence.Forms.Button bTestConnection;
+        private Majorsilence.Forms.Label lConnection;
+        private Majorsilence.Forms.Button bShared;
+        private Majorsilence.Forms.GroupBox groupBox2;
+        private Majorsilence.Forms.RadioButton rbSchemaNo;
+        private Majorsilence.Forms.RadioButton rbSchema2003;
+        private Majorsilence.Forms.RadioButton rbSchema2005;
+        private Majorsilence.Forms.SplitContainer splitContainer1;
+        private Majorsilence.Forms.TreeView tvTablesColumns;
+        private Majorsilence.Forms.Button bMove;
+        private Majorsilence.Forms.TextBox tbSQL;
+        private Majorsilence.Forms.Button buttonSqliteSelectDatabase;
+        internal Majorsilence.Forms.Button buttonSearchSqlServers;
+        internal Majorsilence.Forms.ComboBox comboServerList;
+        internal Majorsilence.Forms.Label label8;
+        internal Majorsilence.Forms.Button buttonDatabaseSearch;
+        internal Majorsilence.Forms.Label label9;
+        internal Majorsilence.Forms.ComboBox comboDatabaseList;
+        private Majorsilence.Forms.GroupBox groupBoxSqlServer;
+        private Majorsilence.Forms.Label label10;
+        private Majorsilence.Forms.TextBox textBoxSqlPassword;
+        private Majorsilence.Forms.Label label11;
+        private Majorsilence.Forms.TextBox textBoxSqlUser;
         private Majorsilence.Reporting.RdlDesign.ReportParameterCtl reportParameterCtl1;
-        private System.Windows.Forms.RadioButton rbEmpty;
+        private Majorsilence.Forms.RadioButton rbEmpty;
     }
 }

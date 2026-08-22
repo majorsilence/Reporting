@@ -6,13 +6,14 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
+using Majorsilence.Forms.Drawing;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Windows.Forms;
+using Majorsilence.Forms;
 using System.Xml;
 using System.Xml.Linq;
 
@@ -81,25 +82,25 @@ namespace Majorsilence.Reporting.RdlDesign
 
 			// Handle the controls
 			_vScroll = new VScrollBar();
-			_vScroll.Scroll += new ScrollEventHandler(this.VerticalScroll);
+			_vScroll.Scroll += this.VerticalScroll;
 			_vScroll.Enabled = false;
 
 			_hScroll = new HScrollBar();
-			_hScroll.Scroll += new ScrollEventHandler(this.HorizontalScroll);
+			_hScroll.Scroll += this.HorizontalScroll;
 			_hScroll.Enabled = false;
 
 			_DrawPanel = new DesignXmlDraw();
 
-			_DrawPanel.Paint += new PaintEventHandler(this.DrawPanelPaint);
-			_DrawPanel.MouseUp += new MouseEventHandler(this.DrawPanelMouseUp);
-			_DrawPanel.MouseDown += new MouseEventHandler(this.DrawPanelMouseDown);
-			_DrawPanel.Resize += new EventHandler(this.DrawPanelResize); 
-			_DrawPanel.MouseWheel +=new MouseEventHandler(DrawPanelMouseWheel);
-			_DrawPanel.KeyDown += new KeyEventHandler(DrawPanelKeyDown);
-			_DrawPanel.MouseMove += new MouseEventHandler(DrawPanelMouseMove);
-			_DrawPanel.DoubleClick += new EventHandler(DrawPanelDoubleClick);
+			_DrawPanel.Paint += this.DrawPanelPaint;
+			_DrawPanel.MouseUp += this.DrawPanelMouseUp;
+			_DrawPanel.MouseDown += this.DrawPanelMouseDown;
+			_DrawPanel.Resize += this.DrawPanelResize; 
+			_DrawPanel.MouseWheel += DrawPanelMouseWheel;
+			_DrawPanel.KeyDown += DrawPanelKeyDown;
+			_DrawPanel.MouseMove += DrawPanelMouseMove;
+			_DrawPanel.DoubleClick += DrawPanelDoubleClick;
 
-			this.Layout +=new LayoutEventHandler(DesignCtl_Layout);
+			this.Layout += DesignCtl_Layout;
 			this.SuspendLayout();		 
 
 			// Must be added in this order for DockStyle to work correctly
@@ -205,7 +206,13 @@ namespace Majorsilence.Reporting.RdlDesign
 					StringWriter sw = new StringWriter();
                     var settings = new XmlWriterSettings
                     {
-                        NewLineChars = RdlDesigner.XmlNewLine == NewLineChar.Unix ? "\n" : "\r\n",
+                        // RdlDesigner is only wired up when this DesignCtl is hosted inside the
+                        // full MDI RdlDesigner shell (see RdlDesigner.CreateMDIChildAsync); guard
+                        // against it being null (e.g. a standalone/test-hosted DesignCtl) instead
+                        // of throwing here -- this was a silent NullReferenceException swallowed
+                        // by the catch below, surfacing only as an empty ReportSource with no
+                        // indication why (found via D6's designer round-trip test).
+                        NewLineChars = RdlDesigner?.XmlNewLine == NewLineChar.Unix ? "\n" : "\r\n",
                         Indent = true,
                         IndentChars = "  "
                     };
@@ -1027,7 +1034,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			BuildContextMenusCustom(MenuDefaultInsert);
 		}
         
-        private void BuildContextMenusCustom(ToolStripDropDownItem menuItem)
+        private void BuildContextMenusCustom(ToolStripMenuItem menuItem)
         {
             try
             {
@@ -1069,29 +1076,33 @@ namespace Majorsilence.Reporting.RdlDesign
         }
 
         private Bitmap _buffer;
-        // HACK: async shenanigans
-        bool doGraphicsDraw;
-        private async void DrawPanelPaint(object sender, System.Windows.Forms.PaintEventArgs e)
+        // PaintEventArgs.Graphics isn't valid past the synchronous portion of a paint call, so the
+        // report is rendered asynchronously into an offscreen buffer and blitted on a later,
+        // synchronous paint. Every paint call draws whatever buffer is currently available -- kept
+        // around instead of disposed immediately after use -- so there is never a call that paints
+        // nothing (that was the old flicker: a resize reallocates a blank back buffer, and a call
+        // that only *started* a render rather than drawing left it on screen for a frame).
+        //
+        // _awaitingFollowUpPaint distinguishes "this paint is the one we ourselves requested to show
+        // a just-finished render" from "something external wants a redraw" -- without it, that
+        // self-requested paint would kick off another render, which finishes and requests another
+        // paint, forever, pegging a CPU core even completely idle.
+        private bool _awaitingFollowUpPaint;
+        private void DrawPanelPaint(object sender, Majorsilence.Forms.PaintEventArgs e)
         {
-            // HACK: async shenanigans
-            if (doGraphicsDraw && _buffer != null)
-            {
+            if (_buffer != null)
                 e.Graphics.DrawImage(_buffer, 0, 0);
-                _buffer.Dispose();
-                _buffer = null;
-                doGraphicsDraw = false;
-            }
-            else
+
+            if (_awaitingFollowUpPaint)
             {
-                // HACK: async shenanigans
-                await Internal_DrawPanelPaint();
-                doGraphicsDraw = true;
-                // HACK: async shenanigans, force a repaint where e.Graphics is still valid
-                _DrawPanel.Invalidate();       
+                _awaitingFollowUpPaint = false;
+                return;
             }
+
+            _ = Internal_DrawPanelPaintAsync();
         }
 
-        private async Task Internal_DrawPanelPaint()
+        private async Task Internal_DrawPanelPaintAsync()
         {
             // Only handle one paint at a time
             lock (this)
@@ -1101,33 +1112,45 @@ namespace Majorsilence.Reporting.RdlDesign
                 _InPaint = true;
             }
 
-            // Create a self-contained Graphics object
-            _buffer = new Bitmap(Math.Max(1, _DrawPanel.Width), Math.Max(1, _DrawPanel.Height));
-            using (Graphics g = Graphics.FromImage(_buffer))
+            try
             {
-                try // never want to die in here
+                // Create a self-contained Graphics object
+                var newBuffer = new Bitmap(Math.Max(1, _DrawPanel.Width), Math.Max(1, _DrawPanel.Height));
+                using (Graphics g = Graphics.FromImage(newBuffer))
                 {
-                    if (this._ReportDoc == null) // if no report force the simplest one
-                        CreateEmptyReportDoc();
+                    try // never want to die in here
+                    {
+                        if (this._ReportDoc == null) // if no report force the simplest one
+                            CreateEmptyReportDoc();
 
-                    //g.ClipBounds;
-                    var clip = new Rectangle(PixelsX(_hScroll.Value), PixelsY(_vScroll.Value),
-                        PixelsX(_DrawPanel.Width), PixelsY(_DrawPanel.Height));
-                    // Draw the report asynchronously
-                    await _DrawPanel.Draw(g, PointsX(_hScroll.Value), PointsY(_vScroll.Value), clip);
+                        //g.ClipBounds;
+                        var clip = new Rectangle(PixelsX(_hScroll.Value), PixelsY(_vScroll.Value),
+                            PixelsX(_DrawPanel.Width), PixelsY(_DrawPanel.Height));
+                        // Draw the report asynchronously
+                        await _DrawPanel.Draw(g, PointsX(_hScroll.Value), PointsY(_vScroll.Value), clip);
+                    }
+                    catch (Exception ex)
+                    { // don't want to kill process if we die -- put up some kind of error message
+                        StringFormat format = new StringFormat();
+                        string msg = string.Format("Error drawing report. Likely error in syntax. Switch to syntax and correct report syntax.{0}{1}{0}{2}",
+                            Environment.NewLine, ex.Message, ex.StackTrace);
+                        g.DrawString(msg, this.Font, Brushes.Black, new Rectangle(2, 2, this.Width, this.Height), format);
+                    }
                 }
-                catch (Exception ex)
-                { // don't want to kill process if we die -- put up some kind of error message
-                    StringFormat format = new StringFormat();
-                    string msg = string.Format("Error drawing report. Likely error in syntax. Switch to syntax and correct report syntax.{0}{1}{0}{2}",
-                        Environment.NewLine, ex.Message, ex.StackTrace);
-                    g.DrawString(msg, this.Font, Brushes.Black, new Rectangle(2, 2, this.Width, this.Height), format);
-                }
+
+                var oldBuffer = _buffer;
+                _buffer = newBuffer;
+                oldBuffer?.Dispose();
+                // Force a repaint where e.Graphics is still valid, to actually show the new buffer.
+                _awaitingFollowUpPaint = true;
+                _DrawPanel.Invalidate();
             }
-
-            lock (this)
+            finally
             {
-                _InPaint = false;
+                lock (this)
+                {
+                    _InPaint = false;
+                }
             }
         }
 
@@ -1240,7 +1263,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			return;
 		}
 
-		private new void HorizontalScroll(object sender, System.Windows.Forms.ScrollEventArgs e)
+		private new void HorizontalScroll(object sender, Majorsilence.Forms.ScrollEventArgs e)
 		{
 			if (e.NewValue == _hScroll.Value)	// don't need to scroll if already there
 				return;
@@ -1250,7 +1273,7 @@ namespace Majorsilence.Reporting.RdlDesign
                 HorizontalScrollChanged(this, new EventArgs());
         }
 
-		private new void VerticalScroll(object sender, System.Windows.Forms.ScrollEventArgs e)
+		private new void VerticalScroll(object sender, Majorsilence.Forms.ScrollEventArgs e)
 		{
 			if (e.NewValue == _vScroll.Value)	// don't need to scroll if already there
 				return;
@@ -1810,19 +1833,12 @@ namespace Majorsilence.Reporting.RdlDesign
 			menuProperties_Click();		// treat double click like a property menu click
 		}
 
+		// ControlPaint.DrawReversibleFrame doesn't exist in Majorsilence.Forms -- classic GDI+
+		// XOR-mode direct-to-screen drawing with no equivalent in a SkiaSharp/compositing-based
+		// renderer. Same documented gap and fix as RdlViewer.Forms/PageDrawing.cs's RubberBand
+		// (D2): the selection logic is unaffected, only the live-drag visual feedback is gone.
 		private void DrawPanelRubberBand(Point p1, Point p2)
 		{
-			// Convert the points to screen coordinates
-			p1 = PointToScreen(p1);
-			p2 = PointToScreen(p2);
-			
-			// Get a rectangle from the two points
-			Rectangle rc = DrawPanelRectFromPoints(p1, p2);
-
-			// Draw reversibleFrame
-			ControlPaint.DrawReversibleFrame(rc, Color.Red,	FrameStyle.Dashed);
-
-			return;
 		}
 
 		private Rectangle DrawPanelRectFromPoints(Point p1, Point p2)
@@ -2182,7 +2198,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			{
 				// Build the xml string for an image; but we also need to put an
 				//   embedded image into the report.
-				System.Drawing.Bitmap bo = (System.Drawing.Bitmap) iData.GetData(DataFormats.Bitmap);
+				Majorsilence.Forms.Drawing.Bitmap bo = (Majorsilence.Forms.Drawing.Bitmap) iData.GetData(DataFormats.Bitmap);
 
 				_DrawPanel.PasteImage(lNode, bo, p);
 			}

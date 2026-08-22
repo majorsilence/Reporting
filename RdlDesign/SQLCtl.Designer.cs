@@ -1,18 +1,17 @@
 using System;
-using System.Windows.Forms;
-using System.Drawing;
+using Majorsilence.Forms;
 using System.ComponentModel;
 using System.Collections;
 
 namespace Majorsilence.Reporting.RdlDesign
 {
-    internal partial class SQLCtl : System.Windows.Forms.Form
+    internal partial class SQLCtl : Majorsilence.Forms.Form
 	{
 		#region Windows Form Designer generated code
 		DesignXmlDraw _Draw;
-private System.Windows.Forms.Panel panel1;
-private System.Windows.Forms.Button bOK;
-private System.Windows.Forms.Button bCancel;
+private Majorsilence.Forms.Panel panel1;
+private Majorsilence.Forms.Button bOK;
+private Majorsilence.Forms.Button bCancel;
 private SplitContainer splitContainer1;
 private TreeView tvTablesColumns;
 private TextBox tbSQL;
@@ -21,14 +20,14 @@ private System.ComponentModel.Container components = null;
 
 		private void InitializeComponent()
 		{
-			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(SQLCtl));
-			this.splitContainer1 = new System.Windows.Forms.SplitContainer();
-			this.tvTablesColumns = new System.Windows.Forms.TreeView();
-			this.tbSQL = new System.Windows.Forms.TextBox();
-			this.bMove = new System.Windows.Forms.Button();
-			this.panel1 = new System.Windows.Forms.Panel();
-			this.bOK = new System.Windows.Forms.Button();
-			this.bCancel = new System.Windows.Forms.Button();
+			Majorsilence.Forms.ComponentResourceManager resources = new Majorsilence.Forms.ComponentResourceManager(typeof(SQLCtl));
+			this.splitContainer1 = new Majorsilence.Forms.SplitContainer();
+			this.tvTablesColumns = new Majorsilence.Forms.TreeView();
+			this.tbSQL = new Majorsilence.Forms.TextBox();
+			this.bMove = new Majorsilence.Forms.Button();
+			this.panel1 = new Majorsilence.Forms.Panel();
+			this.bOK = new Majorsilence.Forms.Button();
+			this.bCancel = new Majorsilence.Forms.Button();
 			((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
 			this.splitContainer1.Panel1.SuspendLayout();
 			this.splitContainer1.Panel2.SuspendLayout();
@@ -55,7 +54,7 @@ private System.ComponentModel.Container components = null;
 			resources.ApplyResources(this.tvTablesColumns, "tvTablesColumns");
 			this.tvTablesColumns.FullRowSelect = true;
 			this.tvTablesColumns.Name = "tvTablesColumns";
-			this.tvTablesColumns.BeforeExpand += new System.Windows.Forms.TreeViewCancelEventHandler(this.tvTablesColumns_BeforeExpand);
+			this.tvTablesColumns.BeforeExpand += this.tvTablesColumns_BeforeExpand;
 			// 
 			// tbSQL
 			// 
@@ -64,13 +63,13 @@ private System.ComponentModel.Container components = null;
 			this.tbSQL.AllowDrop = true;
 			resources.ApplyResources(this.tbSQL, "tbSQL");
 			this.tbSQL.Name = "tbSQL";
-			this.tbSQL.KeyDown += new System.Windows.Forms.KeyEventHandler(this.tbSQL_KeyDown);
+			this.tbSQL.KeyDown += this.tbSQL_KeyDown;
 			// 
 			// bMove
 			// 
 			resources.ApplyResources(this.bMove, "bMove");
 			this.bMove.Name = "bMove";
-			this.bMove.Click += new System.EventHandler(this.bMove_Click);
+			this.bMove.Click += this.bMove_Click;
 			// 
 			// panel1
 			// 
@@ -83,13 +82,13 @@ private System.ComponentModel.Container components = null;
 			// 
 			resources.ApplyResources(this.bOK, "bOK");
 			this.bOK.Name = "bOK";
-			this.bOK.Click += new System.EventHandler(this.bOK_Click);
+			this.bOK.Click += this.bOK_Click;
 			// 
 			// bCancel
 			// 
 			resources.ApplyResources(this.bCancel, "bCancel");
 			this.bCancel.CausesValidation = false;
-			this.bCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
+			this.bCancel.DialogResult = Majorsilence.Forms.DialogResult.Cancel;
 			this.bCancel.Name = "bCancel";
 			// 
 			// SQLCtl
@@ -104,7 +103,7 @@ private System.ComponentModel.Container components = null;
 			this.MinimizeBox = false;
 			this.Name = "SQLCtl";
 			this.ShowInTaskbar = false;
-			this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Show;
+			this.SizeGripStyle = Majorsilence.Forms.SizeGripStyle.Show;
 			this.splitContainer1.Panel1.ResumeLayout(false);
 			this.splitContainer1.Panel2.ResumeLayout(false);
 			this.splitContainer1.Panel2.PerformLayout();

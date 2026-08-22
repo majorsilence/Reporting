@@ -1,12 +1,13 @@
 using System;
-using System.Windows.Forms;
+using Majorsilence.Forms;
 using System.Drawing;
+using Majorsilence.Forms.Drawing;
 using System.ComponentModel;
 using System.Collections;
 
 namespace Majorsilence.Reporting.RdlDesign
 {
-	public partial class RdlDesigner : System.Windows.Forms.Form
+	public partial class RdlDesigner : Majorsilence.Forms.Form
 	{
 		#region Windows Form Designer generated code
         private MDIChild printChild=null;
@@ -16,192 +17,191 @@ namespace Majorsilence.Reporting.RdlDesign
 		private void InitializeComponent()
 		{
 			this.components = new System.ComponentModel.Container();
-			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(RdlDesigner));
-            this.DoubleBuffered = true;
-			this.menuStrip1 = new System.Windows.Forms.MenuStrip();
-			this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.newReportToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.openToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.closeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
-			this.saveToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.saveAsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.printToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.exportToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.pDFToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.pDFOldStyleToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.tIFFToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.cSVToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.excelToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.Excel2007ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.dOCToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.rTFDOCToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.xMLToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.webPageHTMLToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.webArchiveSingleFileMHTToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
-			this.recentFilesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
-			this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.editToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.undoToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.redoToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.toolStripSeparator4 = new System.Windows.Forms.ToolStripSeparator();
-			this.cutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.copyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.pasteToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.deleteToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.toolStripSeparator5 = new System.Windows.Forms.ToolStripSeparator();
-			this.selectAllToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.toolStripSeparator6 = new System.Windows.Forms.ToolStripSeparator();
-			this.findToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.findNextToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.replaceToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.goToToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.toolStripSeparator7 = new System.Windows.Forms.ToolStripSeparator();
-			this.formatXMLToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.viewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.designerToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.rDLTextToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.previewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.showReportInBrowserToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.propertiesWindowsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.insertToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.chartToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.gridToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.imageToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.lineToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.listToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.matrixToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.rectangleToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.subReportToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.tableToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.textboxToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.dataToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.dataSetsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.dataSourcesToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
-			this.toolStripSeparator8 = new System.Windows.Forms.ToolStripSeparator();
-			this.embeddedImagesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.toolStripSeparator9 = new System.Windows.Forms.ToolStripSeparator();
-			this.createSharedDataSourceToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.formatToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.alignToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.leftsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.centersToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.rightsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.toolStripSeparator10 = new System.Windows.Forms.ToolStripSeparator();
-			this.topsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.middlesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.bottomsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.sizeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.widthToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.heightToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.bothToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.horizontalSpacingToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.makeEqualToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.increaseToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.decreaseToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.zeroToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.verticalSpacingToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.makeEqualToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
-			this.increaseToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
-			this.decreaseToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
-			this.zeroToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
-			this.toolStripSeparator11 = new System.Windows.Forms.ToolStripSeparator();
-			this.paddingLeftToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.increaseToolStripMenuItem2 = new System.Windows.Forms.ToolStripMenuItem();
-			this.decreaseToolStripMenuItem2 = new System.Windows.Forms.ToolStripMenuItem();
-			this.zeroToolStripMenuItem2 = new System.Windows.Forms.ToolStripMenuItem();
-			this.paddingRightToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.increaseToolStripMenuItem3 = new System.Windows.Forms.ToolStripMenuItem();
-			this.decreaseToolStripMenuItem3 = new System.Windows.Forms.ToolStripMenuItem();
-			this.zeroToolStripMenuItem3 = new System.Windows.Forms.ToolStripMenuItem();
-			this.paddintTopToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.increaseToolStripMenuItem4 = new System.Windows.Forms.ToolStripMenuItem();
-			this.decreaseToolStripMenuItem4 = new System.Windows.Forms.ToolStripMenuItem();
-			this.zeroToolStripMenuItem4 = new System.Windows.Forms.ToolStripMenuItem();
-			this.paddingBottomToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.increaseToolStripMenuItem5 = new System.Windows.Forms.ToolStripMenuItem();
-			this.decreaseToolStripMenuItem5 = new System.Windows.Forms.ToolStripMenuItem();
-			this.zeroToolStripMenuItem5 = new System.Windows.Forms.ToolStripMenuItem();
-			this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripSeparator();
-			this.centerInContainerToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.centerHorizontallyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.centerVerticallyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.centerBothToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.toolsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.validateRDLToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.toolStripSeparator12 = new System.Windows.Forms.ToolStripSeparator();
-			this.startDesktopServerToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.toolStripSeparator13 = new System.Windows.Forms.ToolStripSeparator();
-			this.optionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.windowToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.cascadeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.tileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.horizontalToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.verticallyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.closeAllToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.helpToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
-			this.supportToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.mainTB = new System.Windows.Forms.ToolStrip();
-			this.newToolStripButton1 = new System.Windows.Forms.ToolStripButton();
-			this.openToolStripButton1 = new System.Windows.Forms.ToolStripButton();
-			this.saveToolStripButton1 = new System.Windows.Forms.ToolStripButton();
-			this.cutToolStripButton1 = new System.Windows.Forms.ToolStripButton();
-			this.copyToolStripButton1 = new System.Windows.Forms.ToolStripButton();
-			this.pasteToolStripButton1 = new System.Windows.Forms.ToolStripButton();
-			this.undoToolStripButton1 = new System.Windows.Forms.ToolStripButton();
-			this.textboxToolStripButton1 = new System.Windows.Forms.ToolStripButton();
-			this.chartToolStripButton1 = new System.Windows.Forms.ToolStripButton();
-			this.tableToolStripButton1 = new System.Windows.Forms.ToolStripButton();
-			this.listToolStripButton1 = new System.Windows.Forms.ToolStripButton();
-			this.imageToolStripButton1 = new System.Windows.Forms.ToolStripButton();
-			this.matrixToolStripButton1 = new System.Windows.Forms.ToolStripButton();
-			this.subreportToolStripButton1 = new System.Windows.Forms.ToolStripButton();
-			this.rectangleToolStripButton1 = new System.Windows.Forms.ToolStripButton();
-			this.lineToolStripButton1 = new System.Windows.Forms.ToolStripButton();
-			this.fxToolStripLabel1 = new System.Windows.Forms.ToolStripLabel();
-			this.ctlEditTextbox = new System.Windows.Forms.ToolStripTextBox();
+			Majorsilence.Forms.ComponentResourceManager resources = new Majorsilence.Forms.ComponentResourceManager(typeof(RdlDesigner));
+			this.menuStrip1 = new Majorsilence.Forms.MenuStrip();
+			this.fileToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
+			this.newReportToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
+			this.openToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
+			this.closeToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
+			this.toolStripSeparator1 = new Majorsilence.Forms.ToolStripSeparator();
+			this.saveToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
+			this.saveAsToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
+			this.printToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
+			this.exportToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
+			this.pDFToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
+			this.pDFOldStyleToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
+			this.tIFFToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
+			this.cSVToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
+			this.excelToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
+			this.Excel2007ToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
+			this.dOCToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
+			this.rTFDOCToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
+			this.xMLToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
+			this.webPageHTMLToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
+			this.webArchiveSingleFileMHTToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
+			this.toolStripSeparator2 = new Majorsilence.Forms.ToolStripSeparator();
+			this.recentFilesToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
+			this.toolStripSeparator3 = new Majorsilence.Forms.ToolStripSeparator();
+			this.exitToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
+			this.editToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
+			this.undoToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
+			this.redoToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
+			this.toolStripSeparator4 = new Majorsilence.Forms.ToolStripSeparator();
+			this.cutToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
+			this.copyToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
+			this.pasteToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
+			this.deleteToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
+			this.toolStripSeparator5 = new Majorsilence.Forms.ToolStripSeparator();
+			this.selectAllToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
+			this.toolStripSeparator6 = new Majorsilence.Forms.ToolStripSeparator();
+			this.findToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
+			this.findNextToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
+			this.replaceToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
+			this.goToToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
+			this.toolStripSeparator7 = new Majorsilence.Forms.ToolStripSeparator();
+			this.formatXMLToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
+			this.viewToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
+			this.designerToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
+			this.rDLTextToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
+			this.previewToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
+			this.showReportInBrowserToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
+			this.propertiesWindowsToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
+			this.insertToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
+			this.chartToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
+			this.gridToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
+			this.imageToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
+			this.lineToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
+			this.listToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
+			this.matrixToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
+			this.rectangleToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
+			this.subReportToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
+			this.tableToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
+			this.textboxToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
+			this.dataToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
+			this.dataSetsToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
+			this.dataSourcesToolStripMenuItem1 = new Majorsilence.Forms.ToolStripMenuItem();
+			this.toolStripSeparator8 = new Majorsilence.Forms.ToolStripSeparator();
+			this.embeddedImagesToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
+			this.toolStripSeparator9 = new Majorsilence.Forms.ToolStripSeparator();
+			this.createSharedDataSourceToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
+			this.formatToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
+			this.alignToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
+			this.leftsToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
+			this.centersToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
+			this.rightsToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
+			this.toolStripSeparator10 = new Majorsilence.Forms.ToolStripSeparator();
+			this.topsToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
+			this.middlesToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
+			this.bottomsToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
+			this.sizeToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
+			this.widthToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
+			this.heightToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
+			this.bothToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
+			this.horizontalSpacingToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
+			this.makeEqualToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
+			this.increaseToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
+			this.decreaseToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
+			this.zeroToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
+			this.verticalSpacingToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
+			this.makeEqualToolStripMenuItem1 = new Majorsilence.Forms.ToolStripMenuItem();
+			this.increaseToolStripMenuItem1 = new Majorsilence.Forms.ToolStripMenuItem();
+			this.decreaseToolStripMenuItem1 = new Majorsilence.Forms.ToolStripMenuItem();
+			this.zeroToolStripMenuItem1 = new Majorsilence.Forms.ToolStripMenuItem();
+			this.toolStripSeparator11 = new Majorsilence.Forms.ToolStripSeparator();
+			this.paddingLeftToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
+			this.increaseToolStripMenuItem2 = new Majorsilence.Forms.ToolStripMenuItem();
+			this.decreaseToolStripMenuItem2 = new Majorsilence.Forms.ToolStripMenuItem();
+			this.zeroToolStripMenuItem2 = new Majorsilence.Forms.ToolStripMenuItem();
+			this.paddingRightToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
+			this.increaseToolStripMenuItem3 = new Majorsilence.Forms.ToolStripMenuItem();
+			this.decreaseToolStripMenuItem3 = new Majorsilence.Forms.ToolStripMenuItem();
+			this.zeroToolStripMenuItem3 = new Majorsilence.Forms.ToolStripMenuItem();
+			this.paddintTopToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
+			this.increaseToolStripMenuItem4 = new Majorsilence.Forms.ToolStripMenuItem();
+			this.decreaseToolStripMenuItem4 = new Majorsilence.Forms.ToolStripMenuItem();
+			this.zeroToolStripMenuItem4 = new Majorsilence.Forms.ToolStripMenuItem();
+			this.paddingBottomToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
+			this.increaseToolStripMenuItem5 = new Majorsilence.Forms.ToolStripMenuItem();
+			this.decreaseToolStripMenuItem5 = new Majorsilence.Forms.ToolStripMenuItem();
+			this.zeroToolStripMenuItem5 = new Majorsilence.Forms.ToolStripMenuItem();
+			this.toolStripMenuItem1 = new Majorsilence.Forms.ToolStripSeparator();
+			this.centerInContainerToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
+			this.centerHorizontallyToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
+			this.centerVerticallyToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
+			this.centerBothToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
+			this.toolsToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
+			this.validateRDLToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
+			this.toolStripSeparator12 = new Majorsilence.Forms.ToolStripSeparator();
+			this.startDesktopServerToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
+			this.toolStripSeparator13 = new Majorsilence.Forms.ToolStripSeparator();
+			this.optionsToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
+			this.windowToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
+			this.cascadeToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
+			this.tileToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
+			this.horizontalToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
+			this.verticallyToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
+			this.closeAllToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
+			this.helpToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
+			this.helpToolStripMenuItem1 = new Majorsilence.Forms.ToolStripMenuItem();
+			this.supportToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
+			this.aboutToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
+			this.mainTB = new Majorsilence.Forms.ToolStrip();
+			this.newToolStripButton1 = new Majorsilence.Forms.ToolStripButton();
+			this.openToolStripButton1 = new Majorsilence.Forms.ToolStripButton();
+			this.saveToolStripButton1 = new Majorsilence.Forms.ToolStripButton();
+			this.cutToolStripButton1 = new Majorsilence.Forms.ToolStripButton();
+			this.copyToolStripButton1 = new Majorsilence.Forms.ToolStripButton();
+			this.pasteToolStripButton1 = new Majorsilence.Forms.ToolStripButton();
+			this.undoToolStripButton1 = new Majorsilence.Forms.ToolStripButton();
+			this.textboxToolStripButton1 = new Majorsilence.Forms.ToolStripButton();
+			this.chartToolStripButton1 = new Majorsilence.Forms.ToolStripButton();
+			this.tableToolStripButton1 = new Majorsilence.Forms.ToolStripButton();
+			this.listToolStripButton1 = new Majorsilence.Forms.ToolStripButton();
+			this.imageToolStripButton1 = new Majorsilence.Forms.ToolStripButton();
+			this.matrixToolStripButton1 = new Majorsilence.Forms.ToolStripButton();
+			this.subreportToolStripButton1 = new Majorsilence.Forms.ToolStripButton();
+			this.rectangleToolStripButton1 = new Majorsilence.Forms.ToolStripButton();
+			this.lineToolStripButton1 = new Majorsilence.Forms.ToolStripButton();
+			this.fxToolStripLabel1 = new Majorsilence.Forms.ToolStripLabel();
+			this.ctlEditTextbox = new Majorsilence.Forms.ToolStripTextBox();
 			this.zoomControl = new Majorsilence.Reporting.RdlDesign.ToolStripUserZoomControl();
-			this.toolStrip1 = new System.Windows.Forms.ToolStrip();
-			this.boldToolStripButton1 = new System.Windows.Forms.ToolStripButton();
-			this.italiacToolStripButton1 = new System.Windows.Forms.ToolStripButton();
-			this.underlineToolStripButton2 = new System.Windows.Forms.ToolStripButton();
-			this.leftAlignToolStripButton2 = new System.Windows.Forms.ToolStripButton();
-			this.centerAlignToolStripButton2 = new System.Windows.Forms.ToolStripButton();
-			this.rightAlignToolStripButton3 = new System.Windows.Forms.ToolStripButton();
-			this.fontToolStripComboBox1 = new System.Windows.Forms.ToolStripComboBox();
-			this.fontSizeToolStripComboBox1 = new System.Windows.Forms.ToolStripComboBox();
-			this.printToolStripButton2 = new System.Windows.Forms.ToolStripButton();
-			this.zoomToolStripComboBox1 = new System.Windows.Forms.ToolStripComboBox();
-			this.selectToolStripButton2 = new System.Windows.Forms.ToolStripButton();
-			this.pdfToolStripButton2 = new System.Windows.Forms.ToolStripButton();
-			this.htmlToolStripButton2 = new System.Windows.Forms.ToolStripButton();
-			this.excelToolStripButton2 = new System.Windows.Forms.ToolStripButton();
-			this.XmlToolStripButton2 = new System.Windows.Forms.ToolStripButton();
-			this.MhtToolStripButton2 = new System.Windows.Forms.ToolStripButton();
-			this.CsvToolStripButton2 = new System.Windows.Forms.ToolStripButton();
-			this.RtfToolStripButton2 = new System.Windows.Forms.ToolStripButton();
-			this.TifToolStripButton2 = new System.Windows.Forms.ToolStripButton();
-			this.toolStripSeparator14 = new System.Windows.Forms.ToolStripSeparator();
-			this.AlignmentGridEnable = new System.Windows.Forms.ToolStripButton();
-			this.mainTC = new System.Windows.Forms.TabControl();
-			this.label1 = new System.Windows.Forms.Label();
-			this.label2 = new System.Windows.Forms.Label();
-			this.panel1 = new System.Windows.Forms.Panel();
+			this.toolStrip1 = new Majorsilence.Forms.ToolStrip();
+			this.boldToolStripButton1 = new Majorsilence.Forms.ToolStripButton();
+			this.italiacToolStripButton1 = new Majorsilence.Forms.ToolStripButton();
+			this.underlineToolStripButton2 = new Majorsilence.Forms.ToolStripButton();
+			this.leftAlignToolStripButton2 = new Majorsilence.Forms.ToolStripButton();
+			this.centerAlignToolStripButton2 = new Majorsilence.Forms.ToolStripButton();
+			this.rightAlignToolStripButton3 = new Majorsilence.Forms.ToolStripButton();
+			this.fontToolStripComboBox1 = new Majorsilence.Forms.ToolStripComboBox();
+			this.fontSizeToolStripComboBox1 = new Majorsilence.Forms.ToolStripComboBox();
+			this.printToolStripButton2 = new Majorsilence.Forms.ToolStripButton();
+			this.zoomToolStripComboBox1 = new Majorsilence.Forms.ToolStripComboBox();
+			this.selectToolStripButton2 = new Majorsilence.Forms.ToolStripButton();
+			this.pdfToolStripButton2 = new Majorsilence.Forms.ToolStripButton();
+			this.htmlToolStripButton2 = new Majorsilence.Forms.ToolStripButton();
+			this.excelToolStripButton2 = new Majorsilence.Forms.ToolStripButton();
+			this.XmlToolStripButton2 = new Majorsilence.Forms.ToolStripButton();
+			this.MhtToolStripButton2 = new Majorsilence.Forms.ToolStripButton();
+			this.CsvToolStripButton2 = new Majorsilence.Forms.ToolStripButton();
+			this.RtfToolStripButton2 = new Majorsilence.Forms.ToolStripButton();
+			this.TifToolStripButton2 = new Majorsilence.Forms.ToolStripButton();
+			this.toolStripSeparator14 = new Majorsilence.Forms.ToolStripSeparator();
+			this.AlignmentGridEnable = new Majorsilence.Forms.ToolStripButton();
+			this.mainTC = new Majorsilence.Forms.TabControl();
+			this.label1 = new Majorsilence.Forms.Label();
+			this.label2 = new Majorsilence.Forms.Label();
+			this.panel1 = new Majorsilence.Forms.Panel();
 			this.foreColorPicker1 = new Majorsilence.Reporting.RdlDesign.ColorPicker();
 			this.backColorPicker1 = new Majorsilence.Reporting.RdlDesign.ColorPicker();
-			this.statusStrip1 = new System.Windows.Forms.StatusStrip();
-			this.statusSelected = new System.Windows.Forms.ToolStripStatusLabel();
-			this.toolStripStatusLabel2 = new System.Windows.Forms.ToolStripStatusLabel();
-			this.statusPosition = new System.Windows.Forms.ToolStripStatusLabel();
-			this.mainSP = new System.Windows.Forms.Splitter();
-			this.ContextMenuTB = new System.Windows.Forms.ContextMenuStrip(this.components);
-			this.MenuTBClose = new System.Windows.Forms.ToolStripMenuItem();
-			this.MenuTBSave = new System.Windows.Forms.ToolStripMenuItem();
-			this.MenuTBCloseAllButThis = new System.Windows.Forms.ToolStripMenuItem();
+			this.statusStrip1 = new Majorsilence.Forms.StatusStrip();
+			this.statusSelected = new Majorsilence.Forms.ToolStripStatusLabel();
+			this.toolStripStatusLabel2 = new Majorsilence.Forms.ToolStripStatusLabel();
+			this.statusPosition = new Majorsilence.Forms.ToolStripStatusLabel();
+			this.mainSP = new Majorsilence.Forms.Splitter();
+			this.ContextMenuTB = new Majorsilence.Forms.ContextMenuStrip();
+			this.MenuTBClose = new Majorsilence.Forms.ToolStripMenuItem();
+			this.MenuTBSave = new Majorsilence.Forms.ToolStripMenuItem();
+			this.MenuTBCloseAllButThis = new Majorsilence.Forms.ToolStripMenuItem();
 			this.mainProperties = new Majorsilence.Reporting.RdlDesign.PropertyCtl();
 			this.menuStrip1.SuspendLayout();
 			this.mainTB.SuspendLayout();
@@ -214,7 +214,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			// menuStrip1
 			// 
 			this.menuStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
-			this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+			this.menuStrip1.Items.AddRange(new Majorsilence.Forms.ToolStripItem[] {
             this.fileToolStripMenuItem,
             this.editToolStripMenuItem,
             this.viewToolStripMenuItem,
@@ -229,7 +229,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			// 
 			// fileToolStripMenuItem
 			// 
-			this.fileToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+			this.fileToolStripMenuItem.DropDownItems.AddRange(new Majorsilence.Forms.ToolStripItem[] {
             this.newReportToolStripMenuItem,
             this.openToolStripMenuItem,
             this.closeToolStripMenuItem,
@@ -244,25 +244,25 @@ namespace Majorsilence.Reporting.RdlDesign
             this.exitToolStripMenuItem});
 			this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
 			resources.ApplyResources(this.fileToolStripMenuItem, "fileToolStripMenuItem");
-			this.fileToolStripMenuItem.DropDownOpening += new System.EventHandler(this.menuFile_Popup);
+			this.fileToolStripMenuItem.DropDownOpening += this.menuFile_Popup;
 			// 
 			// newReportToolStripMenuItem
 			// 
 			this.newReportToolStripMenuItem.Name = "newReportToolStripMenuItem";
 			resources.ApplyResources(this.newReportToolStripMenuItem, "newReportToolStripMenuItem");
-			this.newReportToolStripMenuItem.Click += new System.EventHandler(this.menuFileNewReport_Click);
+			this.newReportToolStripMenuItem.Click += this.menuFileNewReport_Click;
 			// 
 			// openToolStripMenuItem
 			// 
 			this.openToolStripMenuItem.Name = "openToolStripMenuItem";
 			resources.ApplyResources(this.openToolStripMenuItem, "openToolStripMenuItem");
-			this.openToolStripMenuItem.Click += new System.EventHandler(this.menuFileOpen_Click);
+			this.openToolStripMenuItem.Click += this.menuFileOpen_Click;
 			// 
 			// closeToolStripMenuItem
 			// 
 			this.closeToolStripMenuItem.Name = "closeToolStripMenuItem";
 			resources.ApplyResources(this.closeToolStripMenuItem, "closeToolStripMenuItem");
-			this.closeToolStripMenuItem.Click += new System.EventHandler(this.menuFileClose_Click);
+			this.closeToolStripMenuItem.Click += this.menuFileClose_Click;
 			// 
 			// toolStripSeparator1
 			// 
@@ -273,23 +273,23 @@ namespace Majorsilence.Reporting.RdlDesign
 			// 
 			resources.ApplyResources(this.saveToolStripMenuItem, "saveToolStripMenuItem");
 			this.saveToolStripMenuItem.Name = "saveToolStripMenuItem";
-			this.saveToolStripMenuItem.Click += new System.EventHandler(this.menuFileSave_Click);
+			this.saveToolStripMenuItem.Click += this.menuFileSave_Click;
 			// 
 			// saveAsToolStripMenuItem
 			// 
 			resources.ApplyResources(this.saveAsToolStripMenuItem, "saveAsToolStripMenuItem");
 			this.saveAsToolStripMenuItem.Name = "saveAsToolStripMenuItem";
-			this.saveAsToolStripMenuItem.Click += new System.EventHandler(this.menuFileSaveAs_Click);
+			this.saveAsToolStripMenuItem.Click += this.menuFileSaveAs_Click;
 			// 
 			// printToolStripMenuItem
 			// 
 			resources.ApplyResources(this.printToolStripMenuItem, "printToolStripMenuItem");
 			this.printToolStripMenuItem.Name = "printToolStripMenuItem";
-			this.printToolStripMenuItem.Click += new System.EventHandler(this.menuFilePrint_Click);
+			this.printToolStripMenuItem.Click += this.menuFilePrint_Click;
 			// 
 			// exportToolStripMenuItem
 			// 
-			this.exportToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+			this.exportToolStripMenuItem.DropDownItems.AddRange(new Majorsilence.Forms.ToolStripItem[] {
             this.pDFToolStripMenuItem,
             this.pDFOldStyleToolStripMenuItem,
             this.tIFFToolStripMenuItem,
@@ -308,68 +308,68 @@ namespace Majorsilence.Reporting.RdlDesign
 			// 
 			this.pDFToolStripMenuItem.Name = "pDFToolStripMenuItem";
 			resources.ApplyResources(this.pDFToolStripMenuItem, "pDFToolStripMenuItem");
-			this.pDFToolStripMenuItem.Click += new System.EventHandler(this.pDFToolStripMenuItem_Click);
+			this.pDFToolStripMenuItem.Click += this.pDFToolStripMenuItem_Click;
 			// 
 			// pDFOldStyleToolStripMenuItem
 			// 
 			this.pDFOldStyleToolStripMenuItem.Name = "pDFOldStyleToolStripMenuItem";
 			resources.ApplyResources(this.pDFOldStyleToolStripMenuItem, "pDFOldStyleToolStripMenuItem");
-			this.pDFOldStyleToolStripMenuItem.Click += new System.EventHandler(this.pDFOldStyleToolStripMenuItem_Click);
+			this.pDFOldStyleToolStripMenuItem.Click += this.pDFOldStyleToolStripMenuItem_Click;
 			// 
 			// tIFFToolStripMenuItem
 			// 
 			this.tIFFToolStripMenuItem.Name = "tIFFToolStripMenuItem";
 			resources.ApplyResources(this.tIFFToolStripMenuItem, "tIFFToolStripMenuItem");
-			this.tIFFToolStripMenuItem.Click += new System.EventHandler(this.tIFFToolStripMenuItem_Click);
+			this.tIFFToolStripMenuItem.Click += this.tIFFToolStripMenuItem_Click;
 			// 
 			// cSVToolStripMenuItem
 			// 
 			this.cSVToolStripMenuItem.Name = "cSVToolStripMenuItem";
 			resources.ApplyResources(this.cSVToolStripMenuItem, "cSVToolStripMenuItem");
-			this.cSVToolStripMenuItem.Click += new System.EventHandler(this.cSVToolStripMenuItem_Click);
+			this.cSVToolStripMenuItem.Click += this.cSVToolStripMenuItem_Click;
 			// 
 			// excelToolStripMenuItem
 			// 
 			this.excelToolStripMenuItem.Name = "excelToolStripMenuItem";
 			resources.ApplyResources(this.excelToolStripMenuItem, "excelToolStripMenuItem");
-			this.excelToolStripMenuItem.Click += new System.EventHandler(this.excelToolStripMenuItem_Click);
+			this.excelToolStripMenuItem.Click += this.excelToolStripMenuItem_Click;
 			// 
 			// Excel2007ToolStripMenuItem
 			// 
 			this.Excel2007ToolStripMenuItem.Name = "Excel2007ToolStripMenuItem";
 			resources.ApplyResources(this.Excel2007ToolStripMenuItem, "Excel2007ToolStripMenuItem");
 			this.Excel2007ToolStripMenuItem.Tag = "Excel2007";
-			this.Excel2007ToolStripMenuItem.Click += new System.EventHandler(this.Excel2007ToolStripMenuItem_Click);
+			this.Excel2007ToolStripMenuItem.Click += this.Excel2007ToolStripMenuItem_Click;
 			// 
 			// dOCToolStripMenuItem
 			// 
 			this.dOCToolStripMenuItem.Name = "dOCToolStripMenuItem";
 			resources.ApplyResources(this.dOCToolStripMenuItem, "dOCToolStripMenuItem");
-			this.dOCToolStripMenuItem.Click += new System.EventHandler(this.dOCToolStripMenuItem_Click);
+			this.dOCToolStripMenuItem.Click += this.dOCToolStripMenuItem_Click;
 			// 
 			// rTFDOCToolStripMenuItem
 			// 
 			this.rTFDOCToolStripMenuItem.Name = "rTFDOCToolStripMenuItem";
 			resources.ApplyResources(this.rTFDOCToolStripMenuItem, "rTFDOCToolStripMenuItem");
-			this.rTFDOCToolStripMenuItem.Click += new System.EventHandler(this.rTFDOCToolStripMenuItem_Click);
+			this.rTFDOCToolStripMenuItem.Click += this.rTFDOCToolStripMenuItem_Click;
 			// 
 			// xMLToolStripMenuItem
 			// 
 			this.xMLToolStripMenuItem.Name = "xMLToolStripMenuItem";
 			resources.ApplyResources(this.xMLToolStripMenuItem, "xMLToolStripMenuItem");
-			this.xMLToolStripMenuItem.Click += new System.EventHandler(this.xMLToolStripMenuItem_Click);
+			this.xMLToolStripMenuItem.Click += this.xMLToolStripMenuItem_Click;
 			// 
 			// webPageHTMLToolStripMenuItem
 			// 
 			this.webPageHTMLToolStripMenuItem.Name = "webPageHTMLToolStripMenuItem";
 			resources.ApplyResources(this.webPageHTMLToolStripMenuItem, "webPageHTMLToolStripMenuItem");
-			this.webPageHTMLToolStripMenuItem.Click += new System.EventHandler(this.webPageHTMLToolStripMenuItem_Click);
+			this.webPageHTMLToolStripMenuItem.Click += this.webPageHTMLToolStripMenuItem_Click;
 			// 
 			// webArchiveSingleFileMHTToolStripMenuItem
 			// 
 			this.webArchiveSingleFileMHTToolStripMenuItem.Name = "webArchiveSingleFileMHTToolStripMenuItem";
 			resources.ApplyResources(this.webArchiveSingleFileMHTToolStripMenuItem, "webArchiveSingleFileMHTToolStripMenuItem");
-			this.webArchiveSingleFileMHTToolStripMenuItem.Click += new System.EventHandler(this.webArchiveSingleFileMHTToolStripMenuItem_Click);
+			this.webArchiveSingleFileMHTToolStripMenuItem.Click += this.webArchiveSingleFileMHTToolStripMenuItem_Click;
 			// 
 			// toolStripSeparator2
 			// 
@@ -390,11 +390,11 @@ namespace Majorsilence.Reporting.RdlDesign
 			// 
 			this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
 			resources.ApplyResources(this.exitToolStripMenuItem, "exitToolStripMenuItem");
-			this.exitToolStripMenuItem.Click += new System.EventHandler(this.ExitToolStripMenuItem_Click);
+			this.exitToolStripMenuItem.Click += this.ExitToolStripMenuItem_Click;
 			// 
 			// editToolStripMenuItem
 			// 
-			this.editToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+			this.editToolStripMenuItem.DropDownItems.AddRange(new Majorsilence.Forms.ToolStripItem[] {
             this.undoToolStripMenuItem,
             this.redoToolStripMenuItem,
             this.toolStripSeparator4,
@@ -413,19 +413,19 @@ namespace Majorsilence.Reporting.RdlDesign
             this.formatXMLToolStripMenuItem});
 			this.editToolStripMenuItem.Name = "editToolStripMenuItem";
 			resources.ApplyResources(this.editToolStripMenuItem, "editToolStripMenuItem");
-			this.editToolStripMenuItem.DropDownOpening += new System.EventHandler(this.menuEdit_Popup);
+			this.editToolStripMenuItem.DropDownOpening += this.menuEdit_Popup;
 			// 
 			// undoToolStripMenuItem
 			// 
 			this.undoToolStripMenuItem.Name = "undoToolStripMenuItem";
 			resources.ApplyResources(this.undoToolStripMenuItem, "undoToolStripMenuItem");
-			this.undoToolStripMenuItem.Click += new System.EventHandler(this.menuEditUndo_Click);
+			this.undoToolStripMenuItem.Click += this.menuEditUndo_Click;
 			// 
 			// redoToolStripMenuItem
 			// 
 			this.redoToolStripMenuItem.Name = "redoToolStripMenuItem";
 			resources.ApplyResources(this.redoToolStripMenuItem, "redoToolStripMenuItem");
-			this.redoToolStripMenuItem.Click += new System.EventHandler(this.menuEditRedo_Click);
+			this.redoToolStripMenuItem.Click += this.menuEditRedo_Click;
 			// 
 			// toolStripSeparator4
 			// 
@@ -436,25 +436,25 @@ namespace Majorsilence.Reporting.RdlDesign
 			// 
 			this.cutToolStripMenuItem.Name = "cutToolStripMenuItem";
 			resources.ApplyResources(this.cutToolStripMenuItem, "cutToolStripMenuItem");
-			this.cutToolStripMenuItem.Click += new System.EventHandler(this.menuEditCut_Click);
+			this.cutToolStripMenuItem.Click += this.menuEditCut_Click;
 			// 
 			// copyToolStripMenuItem
 			// 
 			this.copyToolStripMenuItem.Name = "copyToolStripMenuItem";
 			resources.ApplyResources(this.copyToolStripMenuItem, "copyToolStripMenuItem");
-			this.copyToolStripMenuItem.Click += new System.EventHandler(this.menuEditCopy_Click);
+			this.copyToolStripMenuItem.Click += this.menuEditCopy_Click;
 			// 
 			// pasteToolStripMenuItem
 			// 
 			this.pasteToolStripMenuItem.Name = "pasteToolStripMenuItem";
 			resources.ApplyResources(this.pasteToolStripMenuItem, "pasteToolStripMenuItem");
-			this.pasteToolStripMenuItem.Click += new System.EventHandler(this.menuEditPaste_Click);
+			this.pasteToolStripMenuItem.Click += this.menuEditPaste_Click;
 			// 
 			// deleteToolStripMenuItem
 			// 
 			this.deleteToolStripMenuItem.Name = "deleteToolStripMenuItem";
 			resources.ApplyResources(this.deleteToolStripMenuItem, "deleteToolStripMenuItem");
-			this.deleteToolStripMenuItem.Click += new System.EventHandler(this.menuEditDelete_Click);
+			this.deleteToolStripMenuItem.Click += this.menuEditDelete_Click;
 			// 
 			// toolStripSeparator5
 			// 
@@ -465,7 +465,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			// 
 			this.selectAllToolStripMenuItem.Name = "selectAllToolStripMenuItem";
 			resources.ApplyResources(this.selectAllToolStripMenuItem, "selectAllToolStripMenuItem");
-			this.selectAllToolStripMenuItem.Click += new System.EventHandler(this.menuEditSelectAll_Click);
+			this.selectAllToolStripMenuItem.Click += this.menuEditSelectAll_Click;
 			// 
 			// toolStripSeparator6
 			// 
@@ -476,25 +476,25 @@ namespace Majorsilence.Reporting.RdlDesign
 			// 
 			this.findToolStripMenuItem.Name = "findToolStripMenuItem";
 			resources.ApplyResources(this.findToolStripMenuItem, "findToolStripMenuItem");
-			this.findToolStripMenuItem.Click += new System.EventHandler(this.menuEditFind_Click);
+			this.findToolStripMenuItem.Click += this.menuEditFind_Click;
 			// 
 			// findNextToolStripMenuItem
 			// 
 			this.findNextToolStripMenuItem.Name = "findNextToolStripMenuItem";
 			resources.ApplyResources(this.findNextToolStripMenuItem, "findNextToolStripMenuItem");
-			this.findNextToolStripMenuItem.Click += new System.EventHandler(this.menuEditFindNext_Click);
+			this.findNextToolStripMenuItem.Click += this.menuEditFindNext_Click;
 			// 
 			// replaceToolStripMenuItem
 			// 
 			this.replaceToolStripMenuItem.Name = "replaceToolStripMenuItem";
 			resources.ApplyResources(this.replaceToolStripMenuItem, "replaceToolStripMenuItem");
-			this.replaceToolStripMenuItem.Click += new System.EventHandler(this.menuEditReplace_Click);
+			this.replaceToolStripMenuItem.Click += this.menuEditReplace_Click;
 			// 
 			// goToToolStripMenuItem
 			// 
 			this.goToToolStripMenuItem.Name = "goToToolStripMenuItem";
 			resources.ApplyResources(this.goToToolStripMenuItem, "goToToolStripMenuItem");
-			this.goToToolStripMenuItem.Click += new System.EventHandler(this.menuEditGoto_Click);
+			this.goToToolStripMenuItem.Click += this.menuEditGoto_Click;
 			// 
 			// toolStripSeparator7
 			// 
@@ -505,11 +505,11 @@ namespace Majorsilence.Reporting.RdlDesign
 			// 
 			this.formatXMLToolStripMenuItem.Name = "formatXMLToolStripMenuItem";
 			resources.ApplyResources(this.formatXMLToolStripMenuItem, "formatXMLToolStripMenuItem");
-			this.formatXMLToolStripMenuItem.Click += new System.EventHandler(this.menuEdit_FormatXml);
+			this.formatXMLToolStripMenuItem.Click += this.menuEdit_FormatXml;
 			// 
 			// viewToolStripMenuItem
 			// 
-			this.viewToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+			this.viewToolStripMenuItem.DropDownItems.AddRange(new Majorsilence.Forms.ToolStripItem[] {
             this.designerToolStripMenuItem,
             this.rDLTextToolStripMenuItem,
             this.previewToolStripMenuItem,
@@ -517,41 +517,41 @@ namespace Majorsilence.Reporting.RdlDesign
             this.propertiesWindowsToolStripMenuItem});
 			this.viewToolStripMenuItem.Name = "viewToolStripMenuItem";
 			resources.ApplyResources(this.viewToolStripMenuItem, "viewToolStripMenuItem");
-			this.viewToolStripMenuItem.DropDownOpening += new System.EventHandler(this.menuView_Popup);
+			this.viewToolStripMenuItem.DropDownOpening += this.menuView_Popup;
 			// 
 			// designerToolStripMenuItem
 			// 
 			this.designerToolStripMenuItem.Name = "designerToolStripMenuItem";
 			resources.ApplyResources(this.designerToolStripMenuItem, "designerToolStripMenuItem");
-			this.designerToolStripMenuItem.Click += new System.EventHandler(this.menuViewDesigner_Click);
+			this.designerToolStripMenuItem.Click += this.menuViewDesigner_Click;
 			// 
 			// rDLTextToolStripMenuItem
 			// 
 			this.rDLTextToolStripMenuItem.Name = "rDLTextToolStripMenuItem";
 			resources.ApplyResources(this.rDLTextToolStripMenuItem, "rDLTextToolStripMenuItem");
-			this.rDLTextToolStripMenuItem.Click += new System.EventHandler(this.menuViewRDL_Click);
+			this.rDLTextToolStripMenuItem.Click += this.menuViewRDL_Click;
 			// 
 			// previewToolStripMenuItem
 			// 
 			this.previewToolStripMenuItem.Name = "previewToolStripMenuItem";
 			resources.ApplyResources(this.previewToolStripMenuItem, "previewToolStripMenuItem");
-			this.previewToolStripMenuItem.Click += new System.EventHandler(this.menuViewPreview_Click);
+			this.previewToolStripMenuItem.Click += this.menuViewPreview_Click;
 			// 
 			// showReportInBrowserToolStripMenuItem
 			// 
 			this.showReportInBrowserToolStripMenuItem.Name = "showReportInBrowserToolStripMenuItem";
 			resources.ApplyResources(this.showReportInBrowserToolStripMenuItem, "showReportInBrowserToolStripMenuItem");
-			this.showReportInBrowserToolStripMenuItem.Click += new System.EventHandler(this.menuViewBrowser_Click);
+			this.showReportInBrowserToolStripMenuItem.Click += this.menuViewBrowser_Click;
 			// 
 			// propertiesWindowsToolStripMenuItem
 			// 
 			this.propertiesWindowsToolStripMenuItem.Name = "propertiesWindowsToolStripMenuItem";
 			resources.ApplyResources(this.propertiesWindowsToolStripMenuItem, "propertiesWindowsToolStripMenuItem");
-			this.propertiesWindowsToolStripMenuItem.Click += new System.EventHandler(this.menuEditProperties_Click);
+			this.propertiesWindowsToolStripMenuItem.Click += this.menuEditProperties_Click;
 			// 
 			// insertToolStripMenuItem
 			// 
-			this.insertToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+			this.insertToolStripMenuItem.DropDownItems.AddRange(new Majorsilence.Forms.ToolStripItem[] {
             this.chartToolStripMenuItem,
             this.gridToolStripMenuItem,
             this.imageToolStripMenuItem,
@@ -570,73 +570,73 @@ namespace Majorsilence.Reporting.RdlDesign
 			this.chartToolStripMenuItem.Name = "chartToolStripMenuItem";
 			resources.ApplyResources(this.chartToolStripMenuItem, "chartToolStripMenuItem");
 			this.chartToolStripMenuItem.Tag = "Chart";
-			this.chartToolStripMenuItem.Click += new System.EventHandler(this.InsertToolStripMenuItem_Click);
+			this.chartToolStripMenuItem.Click += this.InsertToolStripMenuItem_Click;
 			// 
 			// gridToolStripMenuItem
 			// 
 			this.gridToolStripMenuItem.Name = "gridToolStripMenuItem";
 			resources.ApplyResources(this.gridToolStripMenuItem, "gridToolStripMenuItem");
-			this.gridToolStripMenuItem.Click += new System.EventHandler(this.InsertToolStripMenuItem_Click);
+			this.gridToolStripMenuItem.Click += this.InsertToolStripMenuItem_Click;
 			// 
 			// imageToolStripMenuItem
 			// 
 			this.imageToolStripMenuItem.Name = "imageToolStripMenuItem";
 			resources.ApplyResources(this.imageToolStripMenuItem, "imageToolStripMenuItem");
 			this.imageToolStripMenuItem.Tag = "Image";
-			this.imageToolStripMenuItem.Click += new System.EventHandler(this.InsertToolStripMenuItem_Click);
+			this.imageToolStripMenuItem.Click += this.InsertToolStripMenuItem_Click;
 			// 
 			// lineToolStripMenuItem
 			// 
 			this.lineToolStripMenuItem.Name = "lineToolStripMenuItem";
 			resources.ApplyResources(this.lineToolStripMenuItem, "lineToolStripMenuItem");
 			this.lineToolStripMenuItem.Tag = "Line";
-			this.lineToolStripMenuItem.Click += new System.EventHandler(this.InsertToolStripMenuItem_Click);
+			this.lineToolStripMenuItem.Click += this.InsertToolStripMenuItem_Click;
 			// 
 			// listToolStripMenuItem
 			// 
 			this.listToolStripMenuItem.Name = "listToolStripMenuItem";
 			resources.ApplyResources(this.listToolStripMenuItem, "listToolStripMenuItem");
 			this.listToolStripMenuItem.Tag = "List";
-			this.listToolStripMenuItem.Click += new System.EventHandler(this.InsertToolStripMenuItem_Click);
+			this.listToolStripMenuItem.Click += this.InsertToolStripMenuItem_Click;
 			// 
 			// matrixToolStripMenuItem
 			// 
 			this.matrixToolStripMenuItem.Name = "matrixToolStripMenuItem";
 			resources.ApplyResources(this.matrixToolStripMenuItem, "matrixToolStripMenuItem");
 			this.matrixToolStripMenuItem.Tag = "Matrix";
-			this.matrixToolStripMenuItem.Click += new System.EventHandler(this.InsertToolStripMenuItem_Click);
+			this.matrixToolStripMenuItem.Click += this.InsertToolStripMenuItem_Click;
 			// 
 			// rectangleToolStripMenuItem
 			// 
 			this.rectangleToolStripMenuItem.Name = "rectangleToolStripMenuItem";
 			resources.ApplyResources(this.rectangleToolStripMenuItem, "rectangleToolStripMenuItem");
 			this.rectangleToolStripMenuItem.Tag = "Rectangle";
-			this.rectangleToolStripMenuItem.Click += new System.EventHandler(this.InsertToolStripMenuItem_Click);
+			this.rectangleToolStripMenuItem.Click += this.InsertToolStripMenuItem_Click;
 			// 
 			// subReportToolStripMenuItem
 			// 
 			this.subReportToolStripMenuItem.Name = "subReportToolStripMenuItem";
 			resources.ApplyResources(this.subReportToolStripMenuItem, "subReportToolStripMenuItem");
 			this.subReportToolStripMenuItem.Tag = "Subreport";
-			this.subReportToolStripMenuItem.Click += new System.EventHandler(this.InsertToolStripMenuItem_Click);
+			this.subReportToolStripMenuItem.Click += this.InsertToolStripMenuItem_Click;
 			// 
 			// tableToolStripMenuItem
 			// 
 			this.tableToolStripMenuItem.Name = "tableToolStripMenuItem";
 			resources.ApplyResources(this.tableToolStripMenuItem, "tableToolStripMenuItem");
 			this.tableToolStripMenuItem.Tag = "Table";
-			this.tableToolStripMenuItem.Click += new System.EventHandler(this.InsertToolStripMenuItem_Click);
+			this.tableToolStripMenuItem.Click += this.InsertToolStripMenuItem_Click;
 			// 
 			// textboxToolStripMenuItem
 			// 
 			this.textboxToolStripMenuItem.Name = "textboxToolStripMenuItem";
 			resources.ApplyResources(this.textboxToolStripMenuItem, "textboxToolStripMenuItem");
 			this.textboxToolStripMenuItem.Tag = "Textbox";
-			this.textboxToolStripMenuItem.Click += new System.EventHandler(this.InsertToolStripMenuItem_Click);
+			this.textboxToolStripMenuItem.Click += this.InsertToolStripMenuItem_Click;
 			// 
 			// dataToolStripMenuItem
 			// 
-			this.dataToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+			this.dataToolStripMenuItem.DropDownItems.AddRange(new Majorsilence.Forms.ToolStripItem[] {
             this.dataSetsToolStripMenuItem,
             this.dataSourcesToolStripMenuItem1,
             this.toolStripSeparator8,
@@ -645,7 +645,7 @@ namespace Majorsilence.Reporting.RdlDesign
             this.createSharedDataSourceToolStripMenuItem});
 			this.dataToolStripMenuItem.Name = "dataToolStripMenuItem";
 			resources.ApplyResources(this.dataToolStripMenuItem, "dataToolStripMenuItem");
-			this.dataToolStripMenuItem.DropDownOpening += new System.EventHandler(this.menuData_Popup);
+			this.dataToolStripMenuItem.DropDownOpening += this.menuData_Popup;
 			// 
 			// dataSetsToolStripMenuItem
 			// 
@@ -656,7 +656,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			// 
 			this.dataSourcesToolStripMenuItem1.Name = "dataSourcesToolStripMenuItem1";
 			resources.ApplyResources(this.dataSourcesToolStripMenuItem1, "dataSourcesToolStripMenuItem1");
-			this.dataSourcesToolStripMenuItem1.Click += new System.EventHandler(this.dataSourcesToolStripMenuItem1_Click);
+			this.dataSourcesToolStripMenuItem1.Click += this.dataSourcesToolStripMenuItem1_Click;
 			// 
 			// toolStripSeparator8
 			// 
@@ -667,7 +667,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			// 
 			this.embeddedImagesToolStripMenuItem.Name = "embeddedImagesToolStripMenuItem";
 			resources.ApplyResources(this.embeddedImagesToolStripMenuItem, "embeddedImagesToolStripMenuItem");
-			this.embeddedImagesToolStripMenuItem.Click += new System.EventHandler(this.embeddedImagesToolStripMenuItem_Click);
+			this.embeddedImagesToolStripMenuItem.Click += this.embeddedImagesToolStripMenuItem_Click;
 			// 
 			// toolStripSeparator9
 			// 
@@ -678,11 +678,11 @@ namespace Majorsilence.Reporting.RdlDesign
 			// 
 			this.createSharedDataSourceToolStripMenuItem.Name = "createSharedDataSourceToolStripMenuItem";
 			resources.ApplyResources(this.createSharedDataSourceToolStripMenuItem, "createSharedDataSourceToolStripMenuItem");
-			this.createSharedDataSourceToolStripMenuItem.Click += new System.EventHandler(this.menuFileNewDataSourceRef_Click);
+			this.createSharedDataSourceToolStripMenuItem.Click += this.menuFileNewDataSourceRef_Click;
 			// 
 			// formatToolStripMenuItem
 			// 
-			this.formatToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+			this.formatToolStripMenuItem.DropDownItems.AddRange(new Majorsilence.Forms.ToolStripItem[] {
             this.alignToolStripMenuItem,
             this.sizeToolStripMenuItem,
             this.horizontalSpacingToolStripMenuItem,
@@ -696,11 +696,11 @@ namespace Majorsilence.Reporting.RdlDesign
             this.centerInContainerToolStripMenuItem});
 			this.formatToolStripMenuItem.Name = "formatToolStripMenuItem";
 			resources.ApplyResources(this.formatToolStripMenuItem, "formatToolStripMenuItem");
-			this.formatToolStripMenuItem.DropDownOpening += new System.EventHandler(this.menuFormat_Popup);
+			this.formatToolStripMenuItem.DropDownOpening += this.menuFormat_Popup;
 			// 
 			// alignToolStripMenuItem
 			// 
-			this.alignToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+			this.alignToolStripMenuItem.DropDownItems.AddRange(new Majorsilence.Forms.ToolStripItem[] {
             this.leftsToolStripMenuItem,
             this.centersToolStripMenuItem,
             this.rightsToolStripMenuItem,
@@ -715,19 +715,19 @@ namespace Majorsilence.Reporting.RdlDesign
 			// 
 			this.leftsToolStripMenuItem.Name = "leftsToolStripMenuItem";
 			resources.ApplyResources(this.leftsToolStripMenuItem, "leftsToolStripMenuItem");
-			this.leftsToolStripMenuItem.Click += new System.EventHandler(this.menuFormatAlignL_Click);
+			this.leftsToolStripMenuItem.Click += this.menuFormatAlignL_Click;
 			// 
 			// centersToolStripMenuItem
 			// 
 			this.centersToolStripMenuItem.Name = "centersToolStripMenuItem";
 			resources.ApplyResources(this.centersToolStripMenuItem, "centersToolStripMenuItem");
-			this.centersToolStripMenuItem.Click += new System.EventHandler(this.menuFormatAlignC_Click);
+			this.centersToolStripMenuItem.Click += this.menuFormatAlignC_Click;
 			// 
 			// rightsToolStripMenuItem
 			// 
 			this.rightsToolStripMenuItem.Name = "rightsToolStripMenuItem";
 			resources.ApplyResources(this.rightsToolStripMenuItem, "rightsToolStripMenuItem");
-			this.rightsToolStripMenuItem.Click += new System.EventHandler(this.menuFormatAlignR_Click);
+			this.rightsToolStripMenuItem.Click += this.menuFormatAlignR_Click;
 			// 
 			// toolStripSeparator10
 			// 
@@ -738,23 +738,23 @@ namespace Majorsilence.Reporting.RdlDesign
 			// 
 			this.topsToolStripMenuItem.Name = "topsToolStripMenuItem";
 			resources.ApplyResources(this.topsToolStripMenuItem, "topsToolStripMenuItem");
-			this.topsToolStripMenuItem.Click += new System.EventHandler(this.menuFormatAlignT_Click);
+			this.topsToolStripMenuItem.Click += this.menuFormatAlignT_Click;
 			// 
 			// middlesToolStripMenuItem
 			// 
 			this.middlesToolStripMenuItem.Name = "middlesToolStripMenuItem";
 			resources.ApplyResources(this.middlesToolStripMenuItem, "middlesToolStripMenuItem");
-			this.middlesToolStripMenuItem.Click += new System.EventHandler(this.menuFormatAlignM_Click);
+			this.middlesToolStripMenuItem.Click += this.menuFormatAlignM_Click;
 			// 
 			// bottomsToolStripMenuItem
 			// 
 			this.bottomsToolStripMenuItem.Name = "bottomsToolStripMenuItem";
 			resources.ApplyResources(this.bottomsToolStripMenuItem, "bottomsToolStripMenuItem");
-			this.bottomsToolStripMenuItem.Click += new System.EventHandler(this.menuFormatAlignB_Click);
+			this.bottomsToolStripMenuItem.Click += this.menuFormatAlignB_Click;
 			// 
 			// sizeToolStripMenuItem
 			// 
-			this.sizeToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+			this.sizeToolStripMenuItem.DropDownItems.AddRange(new Majorsilence.Forms.ToolStripItem[] {
             this.widthToolStripMenuItem,
             this.heightToolStripMenuItem,
             this.bothToolStripMenuItem});
@@ -765,23 +765,23 @@ namespace Majorsilence.Reporting.RdlDesign
 			// 
 			this.widthToolStripMenuItem.Name = "widthToolStripMenuItem";
 			resources.ApplyResources(this.widthToolStripMenuItem, "widthToolStripMenuItem");
-			this.widthToolStripMenuItem.Click += new System.EventHandler(this.menuFormatSizeW_Click);
+			this.widthToolStripMenuItem.Click += this.menuFormatSizeW_Click;
 			// 
 			// heightToolStripMenuItem
 			// 
 			this.heightToolStripMenuItem.Name = "heightToolStripMenuItem";
 			resources.ApplyResources(this.heightToolStripMenuItem, "heightToolStripMenuItem");
-			this.heightToolStripMenuItem.Click += new System.EventHandler(this.menuFormatSizeH_Click);
+			this.heightToolStripMenuItem.Click += this.menuFormatSizeH_Click;
 			// 
 			// bothToolStripMenuItem
 			// 
 			this.bothToolStripMenuItem.Name = "bothToolStripMenuItem";
 			resources.ApplyResources(this.bothToolStripMenuItem, "bothToolStripMenuItem");
-			this.bothToolStripMenuItem.Click += new System.EventHandler(this.menuFormatSizeB_Click);
+			this.bothToolStripMenuItem.Click += this.menuFormatSizeB_Click;
 			// 
 			// horizontalSpacingToolStripMenuItem
 			// 
-			this.horizontalSpacingToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+			this.horizontalSpacingToolStripMenuItem.DropDownItems.AddRange(new Majorsilence.Forms.ToolStripItem[] {
             this.makeEqualToolStripMenuItem,
             this.increaseToolStripMenuItem,
             this.decreaseToolStripMenuItem,
@@ -793,29 +793,29 @@ namespace Majorsilence.Reporting.RdlDesign
 			// 
 			this.makeEqualToolStripMenuItem.Name = "makeEqualToolStripMenuItem";
 			resources.ApplyResources(this.makeEqualToolStripMenuItem, "makeEqualToolStripMenuItem");
-			this.makeEqualToolStripMenuItem.Click += new System.EventHandler(this.menuFormatHorzE_Click);
+			this.makeEqualToolStripMenuItem.Click += this.menuFormatHorzE_Click;
 			// 
 			// increaseToolStripMenuItem
 			// 
 			this.increaseToolStripMenuItem.Name = "increaseToolStripMenuItem";
 			resources.ApplyResources(this.increaseToolStripMenuItem, "increaseToolStripMenuItem");
-			this.increaseToolStripMenuItem.Click += new System.EventHandler(this.menuFormatHorzI_Click);
+			this.increaseToolStripMenuItem.Click += this.menuFormatHorzI_Click;
 			// 
 			// decreaseToolStripMenuItem
 			// 
 			this.decreaseToolStripMenuItem.Name = "decreaseToolStripMenuItem";
 			resources.ApplyResources(this.decreaseToolStripMenuItem, "decreaseToolStripMenuItem");
-			this.decreaseToolStripMenuItem.Click += new System.EventHandler(this.menuFormatHorzD_Click);
+			this.decreaseToolStripMenuItem.Click += this.menuFormatHorzD_Click;
 			// 
 			// zeroToolStripMenuItem
 			// 
 			this.zeroToolStripMenuItem.Name = "zeroToolStripMenuItem";
 			resources.ApplyResources(this.zeroToolStripMenuItem, "zeroToolStripMenuItem");
-			this.zeroToolStripMenuItem.Click += new System.EventHandler(this.menuFormatHorzZ_Click);
+			this.zeroToolStripMenuItem.Click += this.menuFormatHorzZ_Click;
 			// 
 			// verticalSpacingToolStripMenuItem
 			// 
-			this.verticalSpacingToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+			this.verticalSpacingToolStripMenuItem.DropDownItems.AddRange(new Majorsilence.Forms.ToolStripItem[] {
             this.makeEqualToolStripMenuItem1,
             this.increaseToolStripMenuItem1,
             this.decreaseToolStripMenuItem1,
@@ -827,25 +827,25 @@ namespace Majorsilence.Reporting.RdlDesign
 			// 
 			this.makeEqualToolStripMenuItem1.Name = "makeEqualToolStripMenuItem1";
 			resources.ApplyResources(this.makeEqualToolStripMenuItem1, "makeEqualToolStripMenuItem1");
-			this.makeEqualToolStripMenuItem1.Click += new System.EventHandler(this.menuFormatVertE_Click);
+			this.makeEqualToolStripMenuItem1.Click += this.menuFormatVertE_Click;
 			// 
 			// increaseToolStripMenuItem1
 			// 
 			this.increaseToolStripMenuItem1.Name = "increaseToolStripMenuItem1";
 			resources.ApplyResources(this.increaseToolStripMenuItem1, "increaseToolStripMenuItem1");
-			this.increaseToolStripMenuItem1.Click += new System.EventHandler(this.menuFormatVertI_Click);
+			this.increaseToolStripMenuItem1.Click += this.menuFormatVertI_Click;
 			// 
 			// decreaseToolStripMenuItem1
 			// 
 			this.decreaseToolStripMenuItem1.Name = "decreaseToolStripMenuItem1";
 			resources.ApplyResources(this.decreaseToolStripMenuItem1, "decreaseToolStripMenuItem1");
-			this.decreaseToolStripMenuItem1.Click += new System.EventHandler(this.menuFormatVertD_Click);
+			this.decreaseToolStripMenuItem1.Click += this.menuFormatVertD_Click;
 			// 
 			// zeroToolStripMenuItem1
 			// 
 			this.zeroToolStripMenuItem1.Name = "zeroToolStripMenuItem1";
 			resources.ApplyResources(this.zeroToolStripMenuItem1, "zeroToolStripMenuItem1");
-			this.zeroToolStripMenuItem1.Click += new System.EventHandler(this.menuFormatVertZ_Click);
+			this.zeroToolStripMenuItem1.Click += this.menuFormatVertZ_Click;
 			// 
 			// toolStripSeparator11
 			// 
@@ -854,7 +854,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			// 
 			// paddingLeftToolStripMenuItem
 			// 
-			this.paddingLeftToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+			this.paddingLeftToolStripMenuItem.DropDownItems.AddRange(new Majorsilence.Forms.ToolStripItem[] {
             this.increaseToolStripMenuItem2,
             this.decreaseToolStripMenuItem2,
             this.zeroToolStripMenuItem2});
@@ -865,23 +865,23 @@ namespace Majorsilence.Reporting.RdlDesign
 			// 
 			this.increaseToolStripMenuItem2.Name = "increaseToolStripMenuItem2";
 			resources.ApplyResources(this.increaseToolStripMenuItem2, "increaseToolStripMenuItem2");
-			this.increaseToolStripMenuItem2.Click += new System.EventHandler(this.menuFormatPadding_Click);
+			this.increaseToolStripMenuItem2.Click += this.menuFormatPadding_Click;
 			// 
 			// decreaseToolStripMenuItem2
 			// 
 			this.decreaseToolStripMenuItem2.Name = "decreaseToolStripMenuItem2";
 			resources.ApplyResources(this.decreaseToolStripMenuItem2, "decreaseToolStripMenuItem2");
-			this.decreaseToolStripMenuItem2.Click += new System.EventHandler(this.menuFormatPadding_Click);
+			this.decreaseToolStripMenuItem2.Click += this.menuFormatPadding_Click;
 			// 
 			// zeroToolStripMenuItem2
 			// 
 			this.zeroToolStripMenuItem2.Name = "zeroToolStripMenuItem2";
 			resources.ApplyResources(this.zeroToolStripMenuItem2, "zeroToolStripMenuItem2");
-			this.zeroToolStripMenuItem2.Click += new System.EventHandler(this.menuFormatPadding_Click);
+			this.zeroToolStripMenuItem2.Click += this.menuFormatPadding_Click;
 			// 
 			// paddingRightToolStripMenuItem
 			// 
-			this.paddingRightToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+			this.paddingRightToolStripMenuItem.DropDownItems.AddRange(new Majorsilence.Forms.ToolStripItem[] {
             this.increaseToolStripMenuItem3,
             this.decreaseToolStripMenuItem3,
             this.zeroToolStripMenuItem3});
@@ -892,23 +892,23 @@ namespace Majorsilence.Reporting.RdlDesign
 			// 
 			this.increaseToolStripMenuItem3.Name = "increaseToolStripMenuItem3";
 			resources.ApplyResources(this.increaseToolStripMenuItem3, "increaseToolStripMenuItem3");
-			this.increaseToolStripMenuItem3.Click += new System.EventHandler(this.menuFormatPadding_Click);
+			this.increaseToolStripMenuItem3.Click += this.menuFormatPadding_Click;
 			// 
 			// decreaseToolStripMenuItem3
 			// 
 			this.decreaseToolStripMenuItem3.Name = "decreaseToolStripMenuItem3";
 			resources.ApplyResources(this.decreaseToolStripMenuItem3, "decreaseToolStripMenuItem3");
-			this.decreaseToolStripMenuItem3.Click += new System.EventHandler(this.menuFormatPadding_Click);
+			this.decreaseToolStripMenuItem3.Click += this.menuFormatPadding_Click;
 			// 
 			// zeroToolStripMenuItem3
 			// 
 			this.zeroToolStripMenuItem3.Name = "zeroToolStripMenuItem3";
 			resources.ApplyResources(this.zeroToolStripMenuItem3, "zeroToolStripMenuItem3");
-			this.zeroToolStripMenuItem3.Click += new System.EventHandler(this.menuFormatPadding_Click);
+			this.zeroToolStripMenuItem3.Click += this.menuFormatPadding_Click;
 			// 
 			// paddintTopToolStripMenuItem
 			// 
-			this.paddintTopToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+			this.paddintTopToolStripMenuItem.DropDownItems.AddRange(new Majorsilence.Forms.ToolStripItem[] {
             this.increaseToolStripMenuItem4,
             this.decreaseToolStripMenuItem4,
             this.zeroToolStripMenuItem4});
@@ -919,23 +919,23 @@ namespace Majorsilence.Reporting.RdlDesign
 			// 
 			this.increaseToolStripMenuItem4.Name = "increaseToolStripMenuItem4";
 			resources.ApplyResources(this.increaseToolStripMenuItem4, "increaseToolStripMenuItem4");
-			this.increaseToolStripMenuItem4.Click += new System.EventHandler(this.menuFormatPadding_Click);
+			this.increaseToolStripMenuItem4.Click += this.menuFormatPadding_Click;
 			// 
 			// decreaseToolStripMenuItem4
 			// 
 			this.decreaseToolStripMenuItem4.Name = "decreaseToolStripMenuItem4";
 			resources.ApplyResources(this.decreaseToolStripMenuItem4, "decreaseToolStripMenuItem4");
-			this.decreaseToolStripMenuItem4.Click += new System.EventHandler(this.menuFormatPadding_Click);
+			this.decreaseToolStripMenuItem4.Click += this.menuFormatPadding_Click;
 			// 
 			// zeroToolStripMenuItem4
 			// 
 			this.zeroToolStripMenuItem4.Name = "zeroToolStripMenuItem4";
 			resources.ApplyResources(this.zeroToolStripMenuItem4, "zeroToolStripMenuItem4");
-			this.zeroToolStripMenuItem4.Click += new System.EventHandler(this.menuFormatPadding_Click);
+			this.zeroToolStripMenuItem4.Click += this.menuFormatPadding_Click;
 			// 
 			// paddingBottomToolStripMenuItem
 			// 
-			this.paddingBottomToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+			this.paddingBottomToolStripMenuItem.DropDownItems.AddRange(new Majorsilence.Forms.ToolStripItem[] {
             this.increaseToolStripMenuItem5,
             this.decreaseToolStripMenuItem5,
             this.zeroToolStripMenuItem5});
@@ -946,19 +946,19 @@ namespace Majorsilence.Reporting.RdlDesign
 			// 
 			this.increaseToolStripMenuItem5.Name = "increaseToolStripMenuItem5";
 			resources.ApplyResources(this.increaseToolStripMenuItem5, "increaseToolStripMenuItem5");
-			this.increaseToolStripMenuItem5.Click += new System.EventHandler(this.menuFormatPadding_Click);
+			this.increaseToolStripMenuItem5.Click += this.menuFormatPadding_Click;
 			// 
 			// decreaseToolStripMenuItem5
 			// 
 			this.decreaseToolStripMenuItem5.Name = "decreaseToolStripMenuItem5";
 			resources.ApplyResources(this.decreaseToolStripMenuItem5, "decreaseToolStripMenuItem5");
-			this.decreaseToolStripMenuItem5.Click += new System.EventHandler(this.menuFormatPadding_Click);
+			this.decreaseToolStripMenuItem5.Click += this.menuFormatPadding_Click;
 			// 
 			// zeroToolStripMenuItem5
 			// 
 			this.zeroToolStripMenuItem5.Name = "zeroToolStripMenuItem5";
 			resources.ApplyResources(this.zeroToolStripMenuItem5, "zeroToolStripMenuItem5");
-			this.zeroToolStripMenuItem5.Click += new System.EventHandler(this.menuFormatPadding_Click);
+			this.zeroToolStripMenuItem5.Click += this.menuFormatPadding_Click;
 			// 
 			// toolStripMenuItem1
 			// 
@@ -967,7 +967,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			// 
 			// centerInContainerToolStripMenuItem
 			// 
-			this.centerInContainerToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+			this.centerInContainerToolStripMenuItem.DropDownItems.AddRange(new Majorsilence.Forms.ToolStripItem[] {
             this.centerHorizontallyToolStripMenuItem,
             this.centerVerticallyToolStripMenuItem,
             this.centerBothToolStripMenuItem});
@@ -978,23 +978,23 @@ namespace Majorsilence.Reporting.RdlDesign
 			// 
 			this.centerHorizontallyToolStripMenuItem.Name = "centerHorizontallyToolStripMenuItem";
 			resources.ApplyResources(this.centerHorizontallyToolStripMenuItem, "centerHorizontallyToolStripMenuItem");
-			this.centerHorizontallyToolStripMenuItem.Click += new System.EventHandler(this.CenterHorizontallyToolStripMenuItem_Click);
+			this.centerHorizontallyToolStripMenuItem.Click += this.CenterHorizontallyToolStripMenuItem_Click;
 			// 
 			// centerVerticallyToolStripMenuItem
 			// 
 			this.centerVerticallyToolStripMenuItem.Name = "centerVerticallyToolStripMenuItem";
 			resources.ApplyResources(this.centerVerticallyToolStripMenuItem, "centerVerticallyToolStripMenuItem");
-			this.centerVerticallyToolStripMenuItem.Click += new System.EventHandler(this.CenterVerticallyToolStripMenuItem_Click);
+			this.centerVerticallyToolStripMenuItem.Click += this.CenterVerticallyToolStripMenuItem_Click;
 			// 
 			// centerBothToolStripMenuItem
 			// 
 			this.centerBothToolStripMenuItem.Name = "centerBothToolStripMenuItem";
 			resources.ApplyResources(this.centerBothToolStripMenuItem, "centerBothToolStripMenuItem");
-			this.centerBothToolStripMenuItem.Click += new System.EventHandler(this.CenterBothToolStripMenu_Click);
+			this.centerBothToolStripMenuItem.Click += this.CenterBothToolStripMenu_Click;
 			// 
 			// toolsToolStripMenuItem
 			// 
-			this.toolsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+			this.toolsToolStripMenuItem.DropDownItems.AddRange(new Majorsilence.Forms.ToolStripItem[] {
             this.validateRDLToolStripMenuItem,
             this.toolStripSeparator12,
             this.startDesktopServerToolStripMenuItem,
@@ -1002,13 +1002,13 @@ namespace Majorsilence.Reporting.RdlDesign
             this.optionsToolStripMenuItem});
 			this.toolsToolStripMenuItem.Name = "toolsToolStripMenuItem";
 			resources.ApplyResources(this.toolsToolStripMenuItem, "toolsToolStripMenuItem");
-			this.toolsToolStripMenuItem.DropDownOpening += new System.EventHandler(this.menuTools_Popup);
+			this.toolsToolStripMenuItem.DropDownOpening += this.menuTools_Popup;
 			// 
 			// validateRDLToolStripMenuItem
 			// 
 			this.validateRDLToolStripMenuItem.Name = "validateRDLToolStripMenuItem";
 			resources.ApplyResources(this.validateRDLToolStripMenuItem, "validateRDLToolStripMenuItem");
-			this.validateRDLToolStripMenuItem.Click += new System.EventHandler(this.menuToolsValidateSchema_Click);
+			this.validateRDLToolStripMenuItem.Click += this.menuToolsValidateSchema_Click;
 			// 
 			// toolStripSeparator12
 			// 
@@ -1019,7 +1019,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			// 
 			this.startDesktopServerToolStripMenuItem.Name = "startDesktopServerToolStripMenuItem";
 			resources.ApplyResources(this.startDesktopServerToolStripMenuItem, "startDesktopServerToolStripMenuItem");
-			this.startDesktopServerToolStripMenuItem.Click += new System.EventHandler(this.menuToolsProcess_Click);
+			this.startDesktopServerToolStripMenuItem.Click += this.menuToolsProcess_Click;
 			// 
 			// toolStripSeparator13
 			// 
@@ -1030,27 +1030,27 @@ namespace Majorsilence.Reporting.RdlDesign
 			// 
 			this.optionsToolStripMenuItem.Name = "optionsToolStripMenuItem";
 			resources.ApplyResources(this.optionsToolStripMenuItem, "optionsToolStripMenuItem");
-			this.optionsToolStripMenuItem.Click += new System.EventHandler(this.menuToolsOptions_Click);
+			this.optionsToolStripMenuItem.Click += this.menuToolsOptions_Click;
 			// 
 			// windowToolStripMenuItem
 			// 
-			this.windowToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+			this.windowToolStripMenuItem.DropDownItems.AddRange(new Majorsilence.Forms.ToolStripItem[] {
             this.cascadeToolStripMenuItem,
             this.tileToolStripMenuItem,
             this.closeAllToolStripMenuItem});
 			this.windowToolStripMenuItem.Name = "windowToolStripMenuItem";
 			resources.ApplyResources(this.windowToolStripMenuItem, "windowToolStripMenuItem");
-			this.windowToolStripMenuItem.DropDownOpening += new System.EventHandler(this.menuWnd_Popup);
+			this.windowToolStripMenuItem.DropDownOpening += this.menuWnd_Popup;
 			// 
 			// cascadeToolStripMenuItem
 			// 
 			this.cascadeToolStripMenuItem.Name = "cascadeToolStripMenuItem";
 			resources.ApplyResources(this.cascadeToolStripMenuItem, "cascadeToolStripMenuItem");
-			this.cascadeToolStripMenuItem.Click += new System.EventHandler(this.menuWndCascade_Click);
+			this.cascadeToolStripMenuItem.Click += this.menuWndCascade_Click;
 			// 
 			// tileToolStripMenuItem
 			// 
-			this.tileToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+			this.tileToolStripMenuItem.DropDownItems.AddRange(new Majorsilence.Forms.ToolStripItem[] {
             this.horizontalToolStripMenuItem,
             this.verticallyToolStripMenuItem});
 			this.tileToolStripMenuItem.Name = "tileToolStripMenuItem";
@@ -1060,23 +1060,23 @@ namespace Majorsilence.Reporting.RdlDesign
 			// 
 			this.horizontalToolStripMenuItem.Name = "horizontalToolStripMenuItem";
 			resources.ApplyResources(this.horizontalToolStripMenuItem, "horizontalToolStripMenuItem");
-			this.horizontalToolStripMenuItem.Click += new System.EventHandler(this.menuWndTileH_Click);
+			this.horizontalToolStripMenuItem.Click += this.menuWndTileH_Click;
 			// 
 			// verticallyToolStripMenuItem
 			// 
 			this.verticallyToolStripMenuItem.Name = "verticallyToolStripMenuItem";
 			resources.ApplyResources(this.verticallyToolStripMenuItem, "verticallyToolStripMenuItem");
-			this.verticallyToolStripMenuItem.Click += new System.EventHandler(this.menuWndTileV_Click);
+			this.verticallyToolStripMenuItem.Click += this.menuWndTileV_Click;
 			// 
 			// closeAllToolStripMenuItem
 			// 
 			this.closeAllToolStripMenuItem.Name = "closeAllToolStripMenuItem";
 			resources.ApplyResources(this.closeAllToolStripMenuItem, "closeAllToolStripMenuItem");
-			this.closeAllToolStripMenuItem.Click += new System.EventHandler(this.menuWndCloseAll_Click);
+			this.closeAllToolStripMenuItem.Click += this.menuWndCloseAll_Click;
 			// 
 			// helpToolStripMenuItem
 			// 
-			this.helpToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+			this.helpToolStripMenuItem.DropDownItems.AddRange(new Majorsilence.Forms.ToolStripItem[] {
             this.helpToolStripMenuItem1,
             this.supportToolStripMenuItem,
             this.aboutToolStripMenuItem});
@@ -1087,24 +1087,24 @@ namespace Majorsilence.Reporting.RdlDesign
 			// 
 			this.helpToolStripMenuItem1.Name = "helpToolStripMenuItem1";
 			resources.ApplyResources(this.helpToolStripMenuItem1, "helpToolStripMenuItem1");
-			this.helpToolStripMenuItem1.Click += new System.EventHandler(this.menuHelpHelp_Click);
+			this.helpToolStripMenuItem1.Click += this.menuHelpHelp_Click;
 			// 
 			// supportToolStripMenuItem
 			// 
 			this.supportToolStripMenuItem.Name = "supportToolStripMenuItem";
 			resources.ApplyResources(this.supportToolStripMenuItem, "supportToolStripMenuItem");
-			this.supportToolStripMenuItem.Click += new System.EventHandler(this.menuHelpSupport_Click);
+			this.supportToolStripMenuItem.Click += this.menuHelpSupport_Click;
 			// 
 			// aboutToolStripMenuItem
 			// 
 			this.aboutToolStripMenuItem.Name = "aboutToolStripMenuItem";
 			resources.ApplyResources(this.aboutToolStripMenuItem, "aboutToolStripMenuItem");
-			this.aboutToolStripMenuItem.Click += new System.EventHandler(this.menuHelpAbout_Click);
+			this.aboutToolStripMenuItem.Click += this.menuHelpAbout_Click;
 			// 
 			// mainTB
 			// 
 			this.mainTB.ImageScalingSize = new System.Drawing.Size(20, 20);
-			this.mainTB.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+			this.mainTB.Items.AddRange(new Majorsilence.Forms.ToolStripItem[] {
             this.newToolStripButton1,
             this.openToolStripButton1,
             this.saveToolStripButton1,
@@ -1129,59 +1129,59 @@ namespace Majorsilence.Reporting.RdlDesign
 			// 
 			// newToolStripButton1
 			// 
-			this.newToolStripButton1.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+			this.newToolStripButton1.DisplayStyle = Majorsilence.Forms.ToolStripItemDisplayStyle.Image;
 			resources.ApplyResources(this.newToolStripButton1, "newToolStripButton1");
 			this.newToolStripButton1.Name = "newToolStripButton1";
 			this.newToolStripButton1.Tag = "New";
-			this.newToolStripButton1.Click += new System.EventHandler(this.menuFileNewReport_Click);
+			this.newToolStripButton1.Click += this.menuFileNewReport_Click;
 			// 
 			// openToolStripButton1
 			// 
-			this.openToolStripButton1.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+			this.openToolStripButton1.DisplayStyle = Majorsilence.Forms.ToolStripItemDisplayStyle.Image;
 			resources.ApplyResources(this.openToolStripButton1, "openToolStripButton1");
 			this.openToolStripButton1.Name = "openToolStripButton1";
 			this.openToolStripButton1.Tag = "Open";
-			this.openToolStripButton1.Click += new System.EventHandler(this.menuFileOpen_Click);
+			this.openToolStripButton1.Click += this.menuFileOpen_Click;
 			// 
 			// saveToolStripButton1
 			// 
-			this.saveToolStripButton1.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+			this.saveToolStripButton1.DisplayStyle = Majorsilence.Forms.ToolStripItemDisplayStyle.Image;
 			resources.ApplyResources(this.saveToolStripButton1, "saveToolStripButton1");
 			this.saveToolStripButton1.Name = "saveToolStripButton1";
 			this.saveToolStripButton1.Tag = "Save";
-			this.saveToolStripButton1.Click += new System.EventHandler(this.menuFileSave_Click);
+			this.saveToolStripButton1.Click += this.menuFileSave_Click;
 			// 
 			// cutToolStripButton1
 			// 
-			this.cutToolStripButton1.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+			this.cutToolStripButton1.DisplayStyle = Majorsilence.Forms.ToolStripItemDisplayStyle.Image;
 			resources.ApplyResources(this.cutToolStripButton1, "cutToolStripButton1");
 			this.cutToolStripButton1.Name = "cutToolStripButton1";
 			this.cutToolStripButton1.Tag = "Cut";
-			this.cutToolStripButton1.Click += new System.EventHandler(this.menuEditCut_Click);
+			this.cutToolStripButton1.Click += this.menuEditCut_Click;
 			// 
 			// copyToolStripButton1
 			// 
-			this.copyToolStripButton1.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+			this.copyToolStripButton1.DisplayStyle = Majorsilence.Forms.ToolStripItemDisplayStyle.Image;
 			resources.ApplyResources(this.copyToolStripButton1, "copyToolStripButton1");
 			this.copyToolStripButton1.Name = "copyToolStripButton1";
 			this.copyToolStripButton1.Tag = "Copy";
-			this.copyToolStripButton1.Click += new System.EventHandler(this.menuEditCopy_Click);
+			this.copyToolStripButton1.Click += this.menuEditCopy_Click;
 			// 
 			// pasteToolStripButton1
 			// 
-			this.pasteToolStripButton1.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+			this.pasteToolStripButton1.DisplayStyle = Majorsilence.Forms.ToolStripItemDisplayStyle.Image;
 			resources.ApplyResources(this.pasteToolStripButton1, "pasteToolStripButton1");
 			this.pasteToolStripButton1.Name = "pasteToolStripButton1";
 			this.pasteToolStripButton1.Tag = "Paste";
-			this.pasteToolStripButton1.Click += new System.EventHandler(this.menuEditPaste_Click);
+			this.pasteToolStripButton1.Click += this.menuEditPaste_Click;
 			// 
 			// undoToolStripButton1
 			// 
-			this.undoToolStripButton1.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+			this.undoToolStripButton1.DisplayStyle = Majorsilence.Forms.ToolStripItemDisplayStyle.Image;
 			resources.ApplyResources(this.undoToolStripButton1, "undoToolStripButton1");
 			this.undoToolStripButton1.Name = "undoToolStripButton1";
 			this.undoToolStripButton1.Tag = "Undo";
-			this.undoToolStripButton1.Click += new System.EventHandler(this.menuEditUndo_Click);
+			this.undoToolStripButton1.Click += this.menuEditUndo_Click;
 			// 
 			// textboxToolStripButton1
 			// 
@@ -1189,7 +1189,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			resources.ApplyResources(this.textboxToolStripButton1, "textboxToolStripButton1");
 			this.textboxToolStripButton1.Name = "textboxToolStripButton1";
 			this.textboxToolStripButton1.Tag = "Textbox";
-			this.textboxToolStripButton1.Click += new System.EventHandler(this.Insert_Click);
+			this.textboxToolStripButton1.Click += this.Insert_Click;
 			// 
 			// chartToolStripButton1
 			// 
@@ -1197,7 +1197,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			resources.ApplyResources(this.chartToolStripButton1, "chartToolStripButton1");
 			this.chartToolStripButton1.Name = "chartToolStripButton1";
 			this.chartToolStripButton1.Tag = "Chart";
-			this.chartToolStripButton1.Click += new System.EventHandler(this.Insert_Click);
+			this.chartToolStripButton1.Click += this.Insert_Click;
 			// 
 			// tableToolStripButton1
 			// 
@@ -1205,7 +1205,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			resources.ApplyResources(this.tableToolStripButton1, "tableToolStripButton1");
 			this.tableToolStripButton1.Name = "tableToolStripButton1";
 			this.tableToolStripButton1.Tag = "Table";
-			this.tableToolStripButton1.Click += new System.EventHandler(this.Insert_Click);
+			this.tableToolStripButton1.Click += this.Insert_Click;
 			// 
 			// listToolStripButton1
 			// 
@@ -1213,7 +1213,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			resources.ApplyResources(this.listToolStripButton1, "listToolStripButton1");
 			this.listToolStripButton1.Name = "listToolStripButton1";
 			this.listToolStripButton1.Tag = "List";
-			this.listToolStripButton1.Click += new System.EventHandler(this.Insert_Click);
+			this.listToolStripButton1.Click += this.Insert_Click;
 			// 
 			// imageToolStripButton1
 			// 
@@ -1221,7 +1221,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			resources.ApplyResources(this.imageToolStripButton1, "imageToolStripButton1");
 			this.imageToolStripButton1.Name = "imageToolStripButton1";
 			this.imageToolStripButton1.Tag = "Image";
-			this.imageToolStripButton1.Click += new System.EventHandler(this.Insert_Click);
+			this.imageToolStripButton1.Click += this.Insert_Click;
 			// 
 			// matrixToolStripButton1
 			// 
@@ -1229,7 +1229,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			resources.ApplyResources(this.matrixToolStripButton1, "matrixToolStripButton1");
 			this.matrixToolStripButton1.Name = "matrixToolStripButton1";
 			this.matrixToolStripButton1.Tag = "Matrix";
-			this.matrixToolStripButton1.Click += new System.EventHandler(this.Insert_Click);
+			this.matrixToolStripButton1.Click += this.Insert_Click;
 			// 
 			// subreportToolStripButton1
 			// 
@@ -1237,7 +1237,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			resources.ApplyResources(this.subreportToolStripButton1, "subreportToolStripButton1");
 			this.subreportToolStripButton1.Name = "subreportToolStripButton1";
 			this.subreportToolStripButton1.Tag = "Subreport";
-			this.subreportToolStripButton1.Click += new System.EventHandler(this.Insert_Click);
+			this.subreportToolStripButton1.Click += this.Insert_Click;
 			// 
 			// rectangleToolStripButton1
 			// 
@@ -1245,7 +1245,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			resources.ApplyResources(this.rectangleToolStripButton1, "rectangleToolStripButton1");
 			this.rectangleToolStripButton1.Name = "rectangleToolStripButton1";
 			this.rectangleToolStripButton1.Tag = "Rectangle";
-			this.rectangleToolStripButton1.Click += new System.EventHandler(this.Insert_Click);
+			this.rectangleToolStripButton1.Click += this.Insert_Click;
 			// 
 			// lineToolStripButton1
 			// 
@@ -1253,23 +1253,23 @@ namespace Majorsilence.Reporting.RdlDesign
 			resources.ApplyResources(this.lineToolStripButton1, "lineToolStripButton1");
 			this.lineToolStripButton1.Name = "lineToolStripButton1";
 			this.lineToolStripButton1.Tag = "Line";
-			this.lineToolStripButton1.Click += new System.EventHandler(this.Insert_Click);
+			this.lineToolStripButton1.Click += this.Insert_Click;
 			// 
 			// fxToolStripLabel1
 			// 
 			resources.ApplyResources(this.fxToolStripLabel1, "fxToolStripLabel1");
 			this.fxToolStripLabel1.Name = "fxToolStripLabel1";
 			this.fxToolStripLabel1.Tag = "fx";
-			this.fxToolStripLabel1.Click += new System.EventHandler(this.fxExpr_Click);
-			this.fxToolStripLabel1.MouseEnter += new System.EventHandler(this.fxExpr_MouseEnter);
-			this.fxToolStripLabel1.MouseLeave += new System.EventHandler(this.fxExpr_MouseLeave);
+			this.fxToolStripLabel1.Click += this.fxExpr_Click;
+			this.fxToolStripLabel1.MouseEnter += this.fxExpr_MouseEnter;
+			this.fxToolStripLabel1.MouseLeave += this.fxExpr_MouseLeave;
 			// 
 			// ctlEditTextbox
 			// 
 			this.ctlEditTextbox.Name = "ctlEditTextbox";
 			resources.ApplyResources(this.ctlEditTextbox, "ctlEditTextbox");
-			this.ctlEditTextbox.KeyDown += new System.Windows.Forms.KeyEventHandler(this.EditTextBox_KeyDown);
-			this.ctlEditTextbox.Validated += new System.EventHandler(this.EditTextbox_Validated);
+			this.ctlEditTextbox.KeyDown += this.EditTextBox_KeyDown;
+			this.ctlEditTextbox.Validated += this.EditTextbox_Validated;
 			// 
 			// zoomControl
 			// 
@@ -1281,7 +1281,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			// toolStrip1
 			// 
 			this.toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
-			this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+			this.toolStrip1.Items.AddRange(new Majorsilence.Forms.ToolStripItem[] {
             this.boldToolStripButton1,
             this.italiacToolStripButton1,
             this.underlineToolStripButton2,
@@ -1309,7 +1309,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			// boldToolStripButton1
 			// 
 			this.boldToolStripButton1.CheckOnClick = true;
-			this.boldToolStripButton1.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+			this.boldToolStripButton1.DisplayStyle = Majorsilence.Forms.ToolStripItemDisplayStyle.Image;
 			resources.ApplyResources(this.boldToolStripButton1, "boldToolStripButton1");
 			this.boldToolStripButton1.Name = "boldToolStripButton1";
 			this.boldToolStripButton1.Tag = "bold";
@@ -1317,148 +1317,148 @@ namespace Majorsilence.Reporting.RdlDesign
 			// italiacToolStripButton1
 			// 
 			this.italiacToolStripButton1.CheckOnClick = true;
-			this.italiacToolStripButton1.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+			this.italiacToolStripButton1.DisplayStyle = Majorsilence.Forms.ToolStripItemDisplayStyle.Image;
 			resources.ApplyResources(this.italiacToolStripButton1, "italiacToolStripButton1");
 			this.italiacToolStripButton1.Name = "italiacToolStripButton1";
 			this.italiacToolStripButton1.Tag = "italic";
-			this.italiacToolStripButton1.Click += new System.EventHandler(this.ctlItalic_Click);
+			this.italiacToolStripButton1.Click += this.ctlItalic_Click;
 			// 
 			// underlineToolStripButton2
 			// 
 			this.underlineToolStripButton2.CheckOnClick = true;
-			this.underlineToolStripButton2.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+			this.underlineToolStripButton2.DisplayStyle = Majorsilence.Forms.ToolStripItemDisplayStyle.Image;
 			resources.ApplyResources(this.underlineToolStripButton2, "underlineToolStripButton2");
 			this.underlineToolStripButton2.Name = "underlineToolStripButton2";
 			this.underlineToolStripButton2.Tag = "underline";
-			this.underlineToolStripButton2.Click += new System.EventHandler(this.ctlUnderline_Click);
+			this.underlineToolStripButton2.Click += this.ctlUnderline_Click;
 			// 
 			// leftAlignToolStripButton2
 			// 
-			this.leftAlignToolStripButton2.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+			this.leftAlignToolStripButton2.DisplayStyle = Majorsilence.Forms.ToolStripItemDisplayStyle.Image;
 			resources.ApplyResources(this.leftAlignToolStripButton2, "leftAlignToolStripButton2");
 			this.leftAlignToolStripButton2.Name = "leftAlignToolStripButton2";
 			this.leftAlignToolStripButton2.Tag = "Left Align";
-			this.leftAlignToolStripButton2.Click += new System.EventHandler(this.bottomsToolStripMenuItemutton_Click);
+			this.leftAlignToolStripButton2.Click += this.bottomsToolStripMenuItemutton_Click;
 			// 
 			// centerAlignToolStripButton2
 			// 
-			this.centerAlignToolStripButton2.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+			this.centerAlignToolStripButton2.DisplayStyle = Majorsilence.Forms.ToolStripItemDisplayStyle.Image;
 			resources.ApplyResources(this.centerAlignToolStripButton2, "centerAlignToolStripButton2");
 			this.centerAlignToolStripButton2.Name = "centerAlignToolStripButton2";
 			this.centerAlignToolStripButton2.Tag = "Center Align";
-			this.centerAlignToolStripButton2.Click += new System.EventHandler(this.bottomsToolStripMenuItemutton_Click);
+			this.centerAlignToolStripButton2.Click += this.bottomsToolStripMenuItemutton_Click;
 			// 
 			// rightAlignToolStripButton3
 			// 
-			this.rightAlignToolStripButton3.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+			this.rightAlignToolStripButton3.DisplayStyle = Majorsilence.Forms.ToolStripItemDisplayStyle.Image;
 			resources.ApplyResources(this.rightAlignToolStripButton3, "rightAlignToolStripButton3");
 			this.rightAlignToolStripButton3.Name = "rightAlignToolStripButton3";
 			this.rightAlignToolStripButton3.Tag = "Right Align";
-			this.rightAlignToolStripButton3.Click += new System.EventHandler(this.bottomsToolStripMenuItemutton_Click);
+			this.rightAlignToolStripButton3.Click += this.bottomsToolStripMenuItemutton_Click;
 			// 
 			// fontToolStripComboBox1
 			// 
 			this.fontToolStripComboBox1.Name = "fontToolStripComboBox1";
 			resources.ApplyResources(this.fontToolStripComboBox1, "fontToolStripComboBox1");
 			this.fontToolStripComboBox1.Tag = "Font";
-			this.fontToolStripComboBox1.SelectedIndexChanged += new System.EventHandler(this.ctlFont_Change);
-			this.fontToolStripComboBox1.Validated += new System.EventHandler(this.ctlFont_Change);
+			this.fontToolStripComboBox1.SelectedIndexChanged += this.ctlFont_Change;
+			this.fontToolStripComboBox1.Validated += this.ctlFont_Change;
 			// 
 			// fontSizeToolStripComboBox1
 			// 
 			this.fontSizeToolStripComboBox1.Name = "fontSizeToolStripComboBox1";
 			resources.ApplyResources(this.fontSizeToolStripComboBox1, "fontSizeToolStripComboBox1");
 			this.fontSizeToolStripComboBox1.Tag = "Font Size";
-			this.fontSizeToolStripComboBox1.SelectedIndexChanged += new System.EventHandler(this.ctlFontSize_Change);
-			this.fontSizeToolStripComboBox1.Validated += new System.EventHandler(this.ctlFontSize_Change);
+			this.fontSizeToolStripComboBox1.SelectedIndexChanged += this.ctlFontSize_Change;
+			this.fontSizeToolStripComboBox1.Validated += this.ctlFontSize_Change;
 			// 
 			// printToolStripButton2
 			// 
-			this.printToolStripButton2.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+			this.printToolStripButton2.DisplayStyle = Majorsilence.Forms.ToolStripItemDisplayStyle.Image;
 			resources.ApplyResources(this.printToolStripButton2, "printToolStripButton2");
 			this.printToolStripButton2.Name = "printToolStripButton2";
 			this.printToolStripButton2.Tag = "Print";
-			this.printToolStripButton2.Click += new System.EventHandler(this.menuFilePrint_Click);
+			this.printToolStripButton2.Click += this.menuFilePrint_Click;
 			// 
 			// zoomToolStripComboBox1
 			// 
 			this.zoomToolStripComboBox1.Name = "zoomToolStripComboBox1";
 			resources.ApplyResources(this.zoomToolStripComboBox1, "zoomToolStripComboBox1");
 			this.zoomToolStripComboBox1.Tag = "Zoom";
-			this.zoomToolStripComboBox1.SelectedIndexChanged += new System.EventHandler(this.ctlZoom_Change);
-			this.zoomToolStripComboBox1.Validated += new System.EventHandler(this.ctlZoom_Change);
+			this.zoomToolStripComboBox1.SelectedIndexChanged += this.ctlZoom_Change;
+			this.zoomToolStripComboBox1.Validated += this.ctlZoom_Change;
 			// 
 			// selectToolStripButton2
 			// 
-			this.selectToolStripButton2.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+			this.selectToolStripButton2.DisplayStyle = Majorsilence.Forms.ToolStripItemDisplayStyle.Image;
 			resources.ApplyResources(this.selectToolStripButton2, "selectToolStripButton2");
 			this.selectToolStripButton2.Name = "selectToolStripButton2";
 			this.selectToolStripButton2.Tag = "Select Tool";
-			this.selectToolStripButton2.Click += new System.EventHandler(this.ctlSelectTool_Click);
+			this.selectToolStripButton2.Click += this.ctlSelectTool_Click;
 			// 
 			// pdfToolStripButton2
 			// 
-			this.pdfToolStripButton2.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+			this.pdfToolStripButton2.DisplayStyle = Majorsilence.Forms.ToolStripItemDisplayStyle.Image;
 			resources.ApplyResources(this.pdfToolStripButton2, "pdfToolStripButton2");
 			this.pdfToolStripButton2.Name = "pdfToolStripButton2";
 			this.pdfToolStripButton2.Tag = "PDF";
-			this.pdfToolStripButton2.Click += new System.EventHandler(this.exportToolStripMenuItemPdf_Click);
+			this.pdfToolStripButton2.Click += this.exportToolStripMenuItemPdf_Click;
 			// 
 			// htmlToolStripButton2
 			// 
-			this.htmlToolStripButton2.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+			this.htmlToolStripButton2.DisplayStyle = Majorsilence.Forms.ToolStripItemDisplayStyle.Image;
 			resources.ApplyResources(this.htmlToolStripButton2, "htmlToolStripButton2");
 			this.htmlToolStripButton2.Name = "htmlToolStripButton2";
 			this.htmlToolStripButton2.Tag = "HTML";
-			this.htmlToolStripButton2.Click += new System.EventHandler(this.exportToolStripMenuItemHtml_Click);
+			this.htmlToolStripButton2.Click += this.exportToolStripMenuItemHtml_Click;
 			// 
 			// excelToolStripButton2
 			// 
-			this.excelToolStripButton2.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+			this.excelToolStripButton2.DisplayStyle = Majorsilence.Forms.ToolStripItemDisplayStyle.Image;
 			resources.ApplyResources(this.excelToolStripButton2, "excelToolStripButton2");
 			this.excelToolStripButton2.Name = "excelToolStripButton2";
 			this.excelToolStripButton2.Tag = "Excel";
-			this.excelToolStripButton2.Click += new System.EventHandler(this.exportToolStripMenuItemExcel_Click);
+			this.excelToolStripButton2.Click += this.exportToolStripMenuItemExcel_Click;
 			// 
 			// XmlToolStripButton2
 			// 
-			this.XmlToolStripButton2.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+			this.XmlToolStripButton2.DisplayStyle = Majorsilence.Forms.ToolStripItemDisplayStyle.Image;
 			resources.ApplyResources(this.XmlToolStripButton2, "XmlToolStripButton2");
 			this.XmlToolStripButton2.Name = "XmlToolStripButton2";
 			this.XmlToolStripButton2.Tag = "XML";
-			this.XmlToolStripButton2.Click += new System.EventHandler(this.exportToolStripMenuItemXml_Click);
+			this.XmlToolStripButton2.Click += this.exportToolStripMenuItemXml_Click;
 			// 
 			// MhtToolStripButton2
 			// 
-			this.MhtToolStripButton2.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+			this.MhtToolStripButton2.DisplayStyle = Majorsilence.Forms.ToolStripItemDisplayStyle.Image;
 			resources.ApplyResources(this.MhtToolStripButton2, "MhtToolStripButton2");
 			this.MhtToolStripButton2.Name = "MhtToolStripButton2";
 			this.MhtToolStripButton2.Tag = "MHT";
-			this.MhtToolStripButton2.Click += new System.EventHandler(this.exportToolStripMenuItemMHtml_Click);
+			this.MhtToolStripButton2.Click += this.exportToolStripMenuItemMHtml_Click;
 			// 
 			// CsvToolStripButton2
 			// 
-			this.CsvToolStripButton2.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+			this.CsvToolStripButton2.DisplayStyle = Majorsilence.Forms.ToolStripItemDisplayStyle.Image;
 			resources.ApplyResources(this.CsvToolStripButton2, "CsvToolStripButton2");
 			this.CsvToolStripButton2.Name = "CsvToolStripButton2";
 			this.CsvToolStripButton2.Tag = "CSV";
-			this.CsvToolStripButton2.Click += new System.EventHandler(this.exportToolStripMenuItemCsv_Click);
+			this.CsvToolStripButton2.Click += this.exportToolStripMenuItemCsv_Click;
 			// 
 			// RtfToolStripButton2
 			// 
-			this.RtfToolStripButton2.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+			this.RtfToolStripButton2.DisplayStyle = Majorsilence.Forms.ToolStripItemDisplayStyle.Image;
 			resources.ApplyResources(this.RtfToolStripButton2, "RtfToolStripButton2");
 			this.RtfToolStripButton2.Name = "RtfToolStripButton2";
 			this.RtfToolStripButton2.Tag = "RTF";
-			this.RtfToolStripButton2.Click += new System.EventHandler(this.exportToolStripMenuItemRtf_Click);
+			this.RtfToolStripButton2.Click += this.exportToolStripMenuItemRtf_Click;
 			// 
 			// TifToolStripButton2
 			// 
-			this.TifToolStripButton2.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+			this.TifToolStripButton2.DisplayStyle = Majorsilence.Forms.ToolStripItemDisplayStyle.Image;
 			resources.ApplyResources(this.TifToolStripButton2, "TifToolStripButton2");
 			this.TifToolStripButton2.Name = "TifToolStripButton2";
 			this.TifToolStripButton2.Tag = "TIF";
-			this.TifToolStripButton2.Click += new System.EventHandler(this.exportToolStripMenuItemTif_Click);
+			this.TifToolStripButton2.Click += this.exportToolStripMenuItemTif_Click;
 			// 
 			// toolStripSeparator14
 			// 
@@ -1468,18 +1468,22 @@ namespace Majorsilence.Reporting.RdlDesign
 			// AlignmentGridEnable
 			// 
 			this.AlignmentGridEnable.CheckOnClick = true;
-			this.AlignmentGridEnable.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+			this.AlignmentGridEnable.DisplayStyle = Majorsilence.Forms.ToolStripItemDisplayStyle.Text;
 			resources.ApplyResources(this.AlignmentGridEnable, "AlignmentGridEnable");
 			this.AlignmentGridEnable.Name = "AlignmentGridEnable";
-			this.AlignmentGridEnable.CheckStateChanged += new System.EventHandler(this.AlignmentGridEnable_CheckStateChanged);
+			this.AlignmentGridEnable.CheckStateChanged += this.AlignmentGridEnable_CheckStateChanged;
 			// 
 			// mainTC
 			// 
 			resources.ApplyResources(this.mainTC, "mainTC");
 			this.mainTC.Name = "mainTC";
-			this.mainTC.SelectedIndex = 0;
-			this.mainTC.SelectedIndexChanged += new System.EventHandler(this.mainTC_SelectedIndexChanged);
-			this.mainTC.MouseClick += new System.Windows.Forms.MouseEventHandler(this.mainTC_MouseClick);
+			// SelectedIndex = 0 removed: mainTC has 0 tabs at this point (report tabs are added
+			// dynamically at runtime via mainTC.Controls.Add) -- Majorsilence.Forms.TabStrip
+			// throws ArgumentOutOfRangeException setting SelectedIndex on an empty tab strip
+			// (unlike classic WinForms, which tolerated this). Not needed anyway: Majorsilence.
+			// Forms.TabStripItemCollection.InsertItem already auto-selects the first tab added.
+			this.mainTC.SelectedIndexChanged += this.mainTC_SelectedIndexChanged;
+			this.mainTC.MouseClick += this.mainTC_MouseClick;
 			// 
 			// label1
 			// 
@@ -1503,9 +1507,9 @@ namespace Majorsilence.Reporting.RdlDesign
 			// 
 			// foreColorPicker1
 			// 
-			this.foreColorPicker1.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed;
+			this.foreColorPicker1.DrawMode = Majorsilence.Forms.DrawMode.OwnerDrawFixed;
 			this.foreColorPicker1.DropDownHeight = 1;
-			this.foreColorPicker1.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+			this.foreColorPicker1.DropDownStyle = Majorsilence.Forms.ComboBoxStyle.DropDownList;
 			resources.ApplyResources(this.foreColorPicker1, "foreColorPicker1");
 			this.foreColorPicker1.FormattingEnabled = true;
 			this.foreColorPicker1.Items.AddRange(new object[] {
@@ -4031,14 +4035,14 @@ namespace Majorsilence.Reporting.RdlDesign
             resources.GetString("foreColorPicker1.Items2519")});
 			this.foreColorPicker1.Name = "foreColorPicker1";
 			this.foreColorPicker1.Tag = "Fore Color";
-			this.foreColorPicker1.SelectedValueChanged += new System.EventHandler(this.ctlForeColor_Change);
-			this.foreColorPicker1.Validated += new System.EventHandler(this.ctlForeColor_Change);
+			this.foreColorPicker1.SelectedValueChanged += this.ctlForeColor_Change;
+			this.foreColorPicker1.Validated += this.ctlForeColor_Change;
 			// 
 			// backColorPicker1
 			// 
-			this.backColorPicker1.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed;
+			this.backColorPicker1.DrawMode = Majorsilence.Forms.DrawMode.OwnerDrawFixed;
 			this.backColorPicker1.DropDownHeight = 1;
-			this.backColorPicker1.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+			this.backColorPicker1.DropDownStyle = Majorsilence.Forms.ComboBoxStyle.DropDownList;
 			resources.ApplyResources(this.backColorPicker1, "backColorPicker1");
 			this.backColorPicker1.FormattingEnabled = true;
 			this.backColorPicker1.Items.AddRange(new object[] {
@@ -6564,13 +6568,13 @@ namespace Majorsilence.Reporting.RdlDesign
             resources.GetString("backColorPicker1.Items2519")});
 			this.backColorPicker1.Name = "backColorPicker1";
 			this.backColorPicker1.Tag = "Back Color";
-			this.backColorPicker1.SelectedValueChanged += new System.EventHandler(this.ctlBackColor_Change);
-			this.backColorPicker1.Validated += new System.EventHandler(this.ctlBackColor_Change);
+			this.backColorPicker1.SelectedValueChanged += this.ctlBackColor_Change;
+			this.backColorPicker1.Validated += this.ctlBackColor_Change;
 			// 
 			// statusStrip1
 			// 
 			this.statusStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
-			this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+			this.statusStrip1.Items.AddRange(new Majorsilence.Forms.ToolStripItem[] {
             this.statusSelected,
             this.toolStripStatusLabel2,
             this.statusPosition});
@@ -6602,7 +6606,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			// ContextMenuTB
 			// 
 			this.ContextMenuTB.ImageScalingSize = new System.Drawing.Size(20, 20);
-			this.ContextMenuTB.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+			this.ContextMenuTB.Items.AddRange(new Majorsilence.Forms.ToolStripItem[] {
             this.MenuTBClose,
             this.MenuTBSave,
             this.MenuTBCloseAllButThis});
@@ -6613,19 +6617,19 @@ namespace Majorsilence.Reporting.RdlDesign
 			// 
 			this.MenuTBClose.Name = "MenuTBClose";
 			resources.ApplyResources(this.MenuTBClose, "MenuTBClose");
-			this.MenuTBClose.Click += new System.EventHandler(this.menuFileClose_Click);
+			this.MenuTBClose.Click += this.menuFileClose_Click;
 			// 
 			// MenuTBSave
 			// 
 			this.MenuTBSave.Name = "MenuTBSave";
 			resources.ApplyResources(this.MenuTBSave, "MenuTBSave");
-			this.MenuTBSave.Click += new System.EventHandler(this.menuFileSave_Click);
+			this.MenuTBSave.Click += this.menuFileSave_Click;
 			// 
 			// MenuTBCloseAllButThis
 			// 
 			this.MenuTBCloseAllButThis.Name = "MenuTBCloseAllButThis";
 			resources.ApplyResources(this.MenuTBCloseAllButThis, "MenuTBCloseAllButThis");
-			this.MenuTBCloseAllButThis.Click += new System.EventHandler(this.menuWndCloseAllButCurrent_Click);
+			this.MenuTBCloseAllButThis.Click += this.menuWndCloseAllButCurrent_Click;
 			// 
 			// mainProperties
 			// 
@@ -6645,11 +6649,11 @@ namespace Majorsilence.Reporting.RdlDesign
 			this.Controls.Add(this.menuStrip1);
 			this.MainMenuStrip = this.menuStrip1;
 			this.Name = "RdlDesigner";
-			this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
-			this.WindowState = System.Windows.Forms.FormWindowState.Maximized;
-			this.Load += new System.EventHandler(this.RdlDesigner_Load);
-			this.DragDrop += new System.Windows.Forms.DragEventHandler(this.RdlDesigner_DragDrop);
-			this.DragEnter += new System.Windows.Forms.DragEventHandler(this.RdlDesigner_DragEnter);
+			this.SizeGripStyle = Majorsilence.Forms.SizeGripStyle.Hide;
+			this.WindowState = Majorsilence.Forms.FormWindowState.Maximized;
+			this.Load += this.RdlDesigner_Load;
+			this.DragDrop += this.RdlDesigner_DragDrop;
+			this.DragEnter += this.RdlDesigner_DragEnter;
 			this.menuStrip1.ResumeLayout(false);
 			this.menuStrip1.PerformLayout();
 			this.mainTB.ResumeLayout(false);
