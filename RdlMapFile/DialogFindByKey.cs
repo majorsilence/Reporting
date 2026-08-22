@@ -1,10 +1,9 @@
 
 using System;
-using System.Drawing;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Windows.Forms;
+using Majorsilence.Forms;
 using System.Reflection;
 
 namespace Majorsilence.Reporting.RdlMapFile
@@ -32,7 +31,9 @@ namespace Majorsilence.Reporting.RdlMapFile
 
         private void bOK_Click(object sender, EventArgs e)
         {
-            List<string> select = new List<string>(lbKeyList.SelectedIndices.Count);
+            // ListBox.SelectedIndices is IEnumerable<int> in Majorsilence.Forms (no .Count) --
+            // the capacity hint isn't worth materializing the sequence just to size the list.
+            List<string> select = new List<string>();
             foreach (int si in lbKeyList.SelectedIndices)
             {
                 select.Add(lbKeyList.Items[si].ToString());
