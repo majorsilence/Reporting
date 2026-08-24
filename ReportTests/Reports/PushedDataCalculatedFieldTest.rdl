@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Report Name="PushedDataCalculatedFieldTest">
+  <Description>A DataSet holding a calculated field (Value, no DataField) and a second DataField that the query returns but the pushed table does not supply. Pushing a DataTable used to throw from DataColumnCollection on the first of those and on the second, so a report with even one calculated field could not be given data at all.</Description>
+  <DataSources>
+    <DataSource Name="DS1">
+      <ConnectionProperties>
+        <DataProvider>Microsoft.Data.Sqlite</DataProvider>
+        <ConnectString>Data Source=northwindEF.db</ConnectString>
+        <IntegratedSecurity>false</IntegratedSecurity>
+      </ConnectionProperties>
+    </DataSource>
+  </DataSources>
+  <DataSets>
+    <DataSet Name="Data">
+      <Query>
+        <DataSourceName>DS1</DataSourceName>
+        <CommandText>SELECT DISTINCT CustomerID, CustomerID AS AlsoCustomerID FROM Orders ORDER BY CustomerID LIMIT 6</CommandText>
+      </Query>
+      <Fields>
+        <Field Name="CustomerID">
+          <DataField>CustomerID</DataField>
+        </Field>
+        <Field Name="Shouted">
+          <Value>=Fields!CustomerID.Value &amp; "!"</Value>
+        </Field>
+        <Field Name="AlsoCustomerID">
+          <DataField>AlsoCustomerID</DataField>
+        </Field>
+      </Fields>
+    </DataSet>
+  </DataSets>
+  <Body>
+    <Height>4in</Height>
+    <ReportItems>
+      <Table Name="Table1">
+        <DataSetName>Data</DataSetName>
+        <Top>0in</Top>
+        <Left>0in</Left>
+        <Height>4in</Height>
+        <Width>6in</Width>
+        <TableColumns>
+          <TableColumn>
+            <Width>2in</Width>
+          </TableColumn>
+          <TableColumn>
+            <Width>2in</Width>
+          </TableColumn>
+          <TableColumn>
+            <Width>2in</Width>
+          </TableColumn>
+        </TableColumns>
+        <Details>
+          <TableRows>
+            <TableRow>
+              <Height>0.25in</Height>
+              <TableCells>
+                <TableCell>
+                  <ReportItems>
+                    <Textbox Name="CustomerIdCell">
+                      <Value>=Fields!CustomerID.Value</Value>
+                    </Textbox>
+                  </ReportItems>
+                </TableCell>
+                <TableCell>
+                  <ReportItems>
+                    <Textbox Name="ShoutedCell">
+                      <Value>=Fields!Shouted.Value</Value>
+                    </Textbox>
+                  </ReportItems>
+                </TableCell>
+                <TableCell>
+                  <ReportItems>
+                    <Textbox Name="AlsoCustomerIdCell">
+                      <Value>=Fields!AlsoCustomerID.Value</Value>
+                    </Textbox>
+                  </ReportItems>
+                </TableCell>
+              </TableCells>
+            </TableRow>
+          </TableRows>
+        </Details>
+      </Table>
+    </ReportItems>
+  </Body>
+  <Width>6in</Width>
+  <PageWidth>8.5in</PageWidth>
+  <PageHeight>11in</PageHeight>
+</Report>

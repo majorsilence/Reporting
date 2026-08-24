@@ -533,6 +533,18 @@ namespace Majorsilence.Reporting.Rdl
                 // Loop thru the columns obtaining the data values by name
                 foreach (Field fld in flds.Items.Values)
                 {
+                    // A calculated field has no DataField to read - its value comes from
+                    // its Value expression - and a pushed table is the caller's own, so it
+                    // need not carry every column the report declares. Either way there is
+                    // no source column, and the field is left null for the expression pass
+                    // to fill or the report to render empty. This is what the query path
+                    // above already does; without it, pushing data into a report whose
+                    // DataSet holds even one calculated field threw from inside
+                    // DataColumnCollection instead of rendering.
+                    if (fld.Value != null || fld.DataField == null)
+                        continue;
+                    if (!dt.Columns.Contains(fld.DataField))
+                        continue;
                     or.Data[fld.ColumnNumber] = dr[fld.DataField];
                 }
                 // Apply the filters 

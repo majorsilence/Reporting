@@ -58,6 +58,9 @@
 		<None Update="Reports\SetDataRebuildTest.rdl">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
+		<None Update="Reports\PushedDataCalculatedFieldTest.rdl">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
 		<None Update="Reports\CanGrowPageTest.rdl">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
