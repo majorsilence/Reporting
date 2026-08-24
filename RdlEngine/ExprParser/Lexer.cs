@@ -1,4 +1,4 @@
-
+﻿
 using System;
 using System.IO;
 using System.Collections;
@@ -324,6 +324,8 @@ namespace Majorsilence.Reporting.Rdl
 				return new Token(identifier.ToString(), reader.Line, reader.Column, reader.Line, reader.Column, TokenTypes.OR);
             else if (key == "not")
                 return new Token(identifier.ToString(), reader.Line, reader.Column, reader.Line, reader.Column, TokenTypes.NOT);
+			else if (key == "like")
+				return new Token(identifier.ToString(), reader.Line, reader.Column, reader.Line, reader.Column, TokenTypes.LIKE);
 			else if (key == "mod")
                 return new Token(identifier.ToString(), reader.Line, reader.Column, reader.Line, reader.Column, TokenTypes.MODULUS);
 
@@ -351,28 +353,12 @@ namespace Majorsilence.Reporting.Rdl
 			while(!reader.EndOfInput())
 			{
 				ch = reader.GetNext();
-				if (ch == '\\')
-                {
-                    char pChar = reader.Peek();
-                    if (pChar == qChar)
-                        ch = reader.GetNext();			// got one skip escape char
-                    else if (pChar == 'n')
-                    {
-                        ch = '\n';
-                        reader.GetNext();               // skip the character
-                    }
-                    else if (pChar == 'r')
-                    {
-                        ch = '\r';
-                        reader.GetNext();               // skip the character
-                    }
-					else if (pChar == '\\')
-					{
-						ch = '\\';
-						reader.GetNext();
-					}
-                }
-                else if (ch == qChar)
+				// A backslash is an ordinary character here. RDL expressions are VB.NET,
+				// which has no backslash escapes at all - the only escape is the doubled
+				// quote handled below. Treating it as an escape swallowed the closing quote
+				// of any literal ending in one, so a Windows path or a hierarchy separator
+				// failed to lex and was reported as an unterminated string.
+				if (ch == qChar)
                 {
                     if (reader.Peek() == ch)            // did user double the quote?
                         ch = reader.GetNext();          //  yes, we just append one character

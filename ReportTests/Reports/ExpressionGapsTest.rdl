@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Report Name="ExpressionGapsTest">
+  <Description>Expression features that were missing or mis-lexed: a string literal ending in a backslash, the Like operator, Picture and RoundUp.</Description>
+  <Body>
+    <Height>3in</Height>
+    <ReportItems>
+      <Textbox Name="BackslashBox">
+        <Top>0in</Top>
+        <Left>0in</Left>
+        <Height>0.4in</Height>
+        <Width>5in</Width>
+        <Value>="PATH:" &amp; "C:\Temp\"</Value>
+        <Style><FontSize>10pt</FontSize></Style>
+      </Textbox>
+      <Textbox Name="LikeBox">
+        <Top>0.5in</Top>
+        <Left>0in</Left>
+        <Height>0.4in</Height>
+        <Width>5in</Width>
+        <Value>=IIf("AB123" Like "AB*", "LIKEMATCH", "LIKEMISS") &amp; "/" &amp; IIf("ZZ" Like "AB*", "LIKEMATCH", "LIKEMISS")</Value>
+        <Style><FontSize>10pt</FontSize></Style>
+      </Textbox>
+      <Textbox Name="LikeClassBox">
+        <Top>1in</Top>
+        <Left>0in</Left>
+        <Height>0.4in</Height>
+        <Width>5in</Width>
+        <Value>=IIf("A7" Like "[A-C]#", "CLASSMATCH", "CLASSMISS")</Value>
+        <Style><FontSize>10pt</FontSize></Style>
+      </Textbox>
+      <Textbox Name="PictureBox">
+        <Top>1.5in</Top>
+        <Left>0in</Left>
+        <Height>0.4in</Height>
+        <Width>5in</Width>
+        <Value>="PIC:" &amp; Picture("20250824", "xx-xx-xx-xx")</Value>
+        <Style><FontSize>10pt</FontSize></Style>
+      </Textbox>
+      <Textbox Name="RoundUpBox">
+        <Top>2in</Top>
+        <Left>0in</Left>
+        <Height>0.4in</Height>
+        <Width>5in</Width>
+        <Value>="UP:" &amp; CStr(RoundUp(102.3)) &amp; "/" &amp; IIf(RoundUp(12.34, 1) &gt; 12.35 And RoundUp(12.34, 1) &lt; 12.45, "DEC", "BADDEC")</Value>
+        <Style><FontSize>10pt</FontSize></Style>
+      </Textbox>
+    </ReportItems>
+  </Body>
+  <Width>5in</Width>
+  <PageWidth>8.5in</PageWidth>
+  <PageHeight>11in</PageHeight>
+</Report>

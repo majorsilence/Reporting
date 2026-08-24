@@ -1,4 +1,4 @@
-
+﻿
 using System;
 
 namespace Majorsilence.Reporting.Rdl
@@ -29,6 +29,7 @@ namespace Majorsilence.Reporting.Rdl
 		GREATERTHANOREQUAL,
 		LESSTHAN,
 		LESSTHANOREQUAL,
+		LIKE,
 		FORWARDSLASH,
 		BACKSLASH,
 		STAR,

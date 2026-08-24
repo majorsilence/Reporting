@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Report Name="NullableParameterTest">
+  <Description>A report that relays its own unsupplied parameter to a subreport. The value arrives as null; because the subreport's parameter is Nullable the render must continue rather than fail converting nothing to a number.</Description>
+  <ReportParameters>
+    <ReportParameter Name="Amount">
+      <DataType>Float</DataType>
+      <Nullable>true</Nullable>
+      <Prompt>Amount</Prompt>
+    </ReportParameter>
+  </ReportParameters>
+  <Body>
+    <Height>1.2in</Height>
+    <ReportItems>
+      <Textbox Name="ParentBox">
+        <Top>0in</Top>
+        <Left>0in</Left>
+        <Height>0.4in</Height>
+        <Width>4in</Width>
+        <Value>="PARENTRENDERED"</Value>
+        <Style><FontSize>10pt</FontSize></Style>
+      </Textbox>
+      <Subreport Name="Sub1">
+        <Top>0.5in</Top>
+        <Left>0in</Left>
+        <Height>0.5in</Height>
+        <Width>4in</Width>
+        <ReportName>NullableParameterSub</ReportName>
+        <Parameters>
+          <Parameter Name="Amount">
+            <Value>=Parameters!Amount.Value</Value>
+          </Parameter>
+        </Parameters>
+      </Subreport>
+    </ReportItems>
+  </Body>
+  <Width>4in</Width>
+  <PageWidth>8.5in</PageWidth>
+  <PageHeight>11in</PageHeight>
+</Report>

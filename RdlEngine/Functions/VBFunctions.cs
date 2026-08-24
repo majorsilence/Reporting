@@ -1,4 +1,4 @@
-
+﻿
 using System;
 using System.Collections;
 using System.IO;
@@ -1161,6 +1161,64 @@ namespace Majorsilence.Reporting.Rdl
             return InStr(1, Convert.ToString(string1), Convert.ToString(string2), 0);
         }
 
+        static public int Len(object str)
+        {
+            return str == null ? 0 : Convert.ToString(str).Length;
+        }
+
+        /// <summary>
+        /// The VB "Like" operator, used by the expression parser. The pattern language is
+        /// VB's, not SQL's: "*" matches any run of characters, "?" a single one, "#" a
+        /// single digit, and "[abc]" / "[!abc]" a character in or not in a set. It is
+        /// translated to a regular expression rather than matched by hand so the set and
+        /// range forms come out right, and the whole pattern is anchored because Like
+        /// matches the entire string.
+        /// </summary>
+        static public bool Like(object text, object pattern)
+        {
+            string s = text == null ? "" : Convert.ToString(text);
+            string p = pattern == null ? "" : Convert.ToString(pattern);
+
+            var re = new StringBuilder("^");
+            for (int i = 0; i < p.Length; i++)
+            {
+                char c = p[i];
+                if (c == '*')
+                    re.Append(".*");
+                else if (c == '?')
+                    re.Append('.');
+                else if (c == '#')
+                    re.Append("[0-9]");
+                else if (c == '[')
+                {
+                    int close = p.IndexOf(']', i + 1);
+                    if (close < 0)                      // an unclosed set is a literal '['
+                        re.Append("\\[");
+                    else
+                    {
+                        string set = p.Substring(i + 1, close - i - 1);
+                        re.Append('[');
+                        if (set.StartsWith("!"))
+                        {
+                            re.Append('^');
+                            set = set.Substring(1);
+                        }
+                        // Only ']' and '\' need escaping inside a character class; '-'
+                        // stays as written so ranges like [a-z] keep working.
+                        re.Append(set.Replace("\\", "\\\\").Replace("]", "\\]"));
+                        re.Append(']');
+                        i = close;
+                    }
+                }
+                else
+                    re.Append(System.Text.RegularExpressions.Regex.Escape(c.ToString()));
+            }
+            re.Append('$');
+
+            return System.Text.RegularExpressions.Regex.IsMatch(s, re.ToString(),
+                System.Text.RegularExpressions.RegexOptions.Singleline);
+        }
+
         static public string Replace(object str, object find, object replacewith)
         {
             return Replace(Convert.ToString(str), Convert.ToString(find), Convert.ToString(replacewith));
@@ -1342,6 +1400,50 @@ namespace Majorsilence.Reporting.Rdl
         }
 
         /// <summary>
+        /// Crystal's Roundup. The one-argument form is Ceiling; the two-argument form
+        /// rounds up at a number of decimal places, which is not what Ceiling's second
+        /// argument means (a multiple), so it gets its own function rather than a
+        /// caller-side conversion that would be easy to get subtly wrong. A negative
+        /// count rounds up to tens, hundreds and so on, as Crystal does.
+        /// </summary>
+        static public double RoundUp(object value)
+        {
+            return Math.Ceiling(Convert.ToDouble(value));
+        }
+
+        static public double RoundUp(object value, object decimals)
+        {
+            double v = Convert.ToDouble(value);
+            double scale = Math.Pow(10, Convert.ToInt32(decimals));
+            return scale == 0 ? v : Math.Ceiling(v * scale) / scale;
+        }
+
+        /// <summary>
+        /// Crystal's Picture(text, template): walks the template, replacing each 'x'
+        /// with the next character of the text and copying every other character
+        /// through unchanged. Once the text runs out the remaining placeholders are
+        /// dropped while the literal characters still emit, matching Crystal.
+        /// </summary>
+        static public string Picture(object text, object template)
+        {
+            string s = text == null ? "" : Convert.ToString(text);
+            string t = template == null ? "" : Convert.ToString(template);
+            var sb = new StringBuilder(t.Length);
+            int next = 0;
+            foreach (char c in t)
+            {
+                if (c == 'x' || c == 'X')
+                {
+                    if (next < s.Length)
+                        sb.Append(s[next++]);
+                }
+                else
+                    sb.Append(c);
+            }
+            return sb.ToString();
+        }
+
+        /// <summary>
         /// Crystal's Remainder — the modulus. Yields 0 rather than throwing on a zero
         /// divisor, matching how Crystal degrades rather than failing the whole report.
         /// </summary>
@@ -1372,6 +1474,24 @@ namespace Majorsilence.Reporting.Rdl
         static public string ChrW(object code)
         {
             return ((char)Convert.ToInt32(code)).ToString();
+        }
+
+        /// <summary>
+        /// One field of a delimited string, 1-based — Crystal's Split(text, delimiter)[n].
+        /// Split itself returns an array, which this expression language has no way to
+        /// index, so converters collapse the pair into this single call. Out-of-range
+        /// indexes yield an empty string rather than throwing, matching how Crystal treats
+        /// a short row.
+        /// </summary>
+        static public string SplitPart(object text, object delimiter, object index)
+        {
+            string s = Convert.ToString(text) ?? "";
+            string d = Convert.ToString(delimiter) ?? "";
+            int n = (int)Convert.ToDouble(index);
+            if (d.Length == 0 || n < 1)
+                return n == 1 ? s : "";
+            string[] parts = s.Split(new string[] { d }, StringSplitOptions.None);
+            return n <= parts.Length ? parts[n - 1] : "";
         }
 
         /// <summary>
