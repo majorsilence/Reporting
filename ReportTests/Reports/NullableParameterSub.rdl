@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Report Name="NullableParameterSub">
+  <Description>Subreport half of the nullable-parameter test: takes a numeric parameter that is allowed to arrive empty.</Description>
+  <ReportParameters>
+    <ReportParameter Name="Amount">
+      <DataType>Float</DataType>
+      <Nullable>true</Nullable>
+      <Prompt>Amount</Prompt>
+    </ReportParameter>
+  </ReportParameters>
+  <Body>
+    <Height>0.5in</Height>
+    <ReportItems>
+      <Textbox Name="SubBox">
+        <Top>0in</Top>
+        <Left>0in</Left>
+        <Height>0.4in</Height>
+        <Width>4in</Width>
+        <Value>="SUBRENDERED"</Value>
+        <Style><FontSize>10pt</FontSize></Style>
+      </Textbox>
+    </ReportItems>
+  </Body>
+  <Width>4in</Width>
+  <PageWidth>8.5in</PageWidth>
+  <PageHeight>11in</PageHeight>
+</Report>

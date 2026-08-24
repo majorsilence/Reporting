@@ -1,4 +1,4 @@
-
+﻿
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -187,7 +187,8 @@ namespace Majorsilence.Reporting.Rdl
 				t == TokenTypes.GREATERTHAN ||
 				t == TokenTypes.GREATERTHANOREQUAL ||
 				t == TokenTypes.LESSTHAN ||
-				t == TokenTypes.LESSTHANOREQUAL)
+				t == TokenTypes.LESSTHANOREQUAL ||
+				t == TokenTypes.LIKE)
 			{
 				curToken = tokens.Extract();
 				IExpr rhs;
@@ -212,6 +213,9 @@ namespace Majorsilence.Reporting.Rdl
 						break;
 					case TokenTypes.LESSTHANOREQUAL:
 						result = new FunctionRelopLTE(lhs, rhs);
+						break;
+					case TokenTypes.LIKE:
+						result = new FunctionRelopLike(lhs, rhs);
 						break;
 				}
 				lhs = result;		// in case we continue the loop

@@ -1,4 +1,4 @@
-
+﻿
 
 using System;
 using System.Xml;
@@ -213,6 +213,17 @@ namespace Majorsilence.Reporting.Rdl
             }
 
 			object rtv;
+			// A null value is only an error when the parameter says it is. Nullable was
+			// parsed and exposed but never consulted, so a report rendered without values
+			// - the normal case for one converted from a format that prompts for them -
+			// died converting null to the declared type instead of leaving the parameter
+			// empty.
+			if (v == null && _Nullable)
+			{
+				rpt.Cache.AddReplace(this, "runtimevalue", null);
+				return;
+			}
+
             if (v is Guid)
             {
                 v = ((Guid)v).ToString("B"); 
@@ -227,13 +238,16 @@ namespace Majorsilence.Reporting.Rdl
 			}
 			catch (Exception e)
 			{
-				// illegal parameter passed
-                string err = "Illegal parameter value for '" + Name.Nm + "' provided.  Value =" + v.ToString();
+				// illegal parameter passed. The value can be null - a subreport parameter
+				// whose expression evaluated to nothing - and reporting it must not
+				// dereference it, or the diagnostic throws in place of the real error
+				// and the whole render dies with an unexplained NullReferenceException.
+                string err = "Illegal parameter value for '" + Name.Nm + "' provided.  Value =" + (v == null ? "(null)" : v.ToString());
                 if (rpt == null)
                     OwnerReport.rl.LogError(4, err);
                 else
                     rpt.rl.LogError(4, err);
-				throw new ArgumentException(string.Format("Unable to convert '{0}' to {1} for {2}", v, _dt, Name.Nm),e);
+				throw new ArgumentException(string.Format("Unable to convert '{0}' to {1} for {2}", v ?? "(null)", _dt, Name.Nm),e);
 			}
 			rpt.Cache.AddReplace(this, "runtimevalue", rtv);
 		}
