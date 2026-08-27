@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Report xmlns="http://schemas.microsoft.com/sqlserver/reporting/2005/01/reportdefinition">
+  <!-- A 40x20 image in a 2in x 1in box: the same aspect, so FitProportional has nothing
+       to correct and the picture must come out exactly 2in x 1in. -->
+  <PageWidth>8.5in</PageWidth>
+  <PageHeight>11in</PageHeight>
+  <LeftMargin>0.5in</LeftMargin>
+  <RightMargin>0.5in</RightMargin>
+  <TopMargin>0.5in</TopMargin>
+  <BottomMargin>0.5in</BottomMargin>
+  <Width>7.5in</Width>
+  <EmbeddedImages>
+    <EmbeddedImage Name="Checker">
+      <MIMEType>image/png</MIMEType>
+      <ImageData>iVBORw0KGgoAAAANSUhEUgAAACgAAAAUCAIAAABwJOjsAAAAKklEQVR42mNgQAX/UQHdZEctHo4Wj4btqMU0s3g05EctHi25Ri0echYDAAyxq43b4WZiAAAAAElFTkSuQmCC</ImageData>
+    </EmbeddedImage>
+  </EmbeddedImages>
+  <Body>
+    <Height>3in</Height>
+    <ReportItems>
+      <Image Name="Picture1">
+        <Top>0.25in</Top>
+        <Left>0.25in</Left>
+        <Width>2in</Width>
+        <Height>1in</Height>
+        <Source>Embedded</Source>
+        <Value>Checker</Value>
+        <Sizing>FitProportional</Sizing>
+      </Image>
+    </ReportItems>
+  </Body>
+</Report>

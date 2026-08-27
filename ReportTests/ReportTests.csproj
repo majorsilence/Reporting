@@ -28,6 +28,9 @@
 		<PackageReference Include="Majorsilence.Forms.Drawing.Common" />
 	</ItemGroup>
 	<ItemGroup>
+		<None Update="Reports\ImageSizing.rdl">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
 		<None Update="Reports\ExpressionGapsTest.rdl">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
