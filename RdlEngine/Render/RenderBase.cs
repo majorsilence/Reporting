@@ -295,11 +295,16 @@ namespace Majorsilence.Reporting.Rdl
                 {
                     PageImage i = pi as PageImage;
 
-                    //Duc Phan added 20 Dec, 2007 to support sized image 
+                    // Points, like every other coordinate handed to AddImage. The width
+                    // and height used to be converted to pixels while the x and y beside
+                    // them stayed in points, so an image came out DpiX/72 too large - a
+                    // third over at the usual 96 dpi - anchored at the correct top-left
+                    // corner. The padding subtracted from them is in points too, which is
+                    // the other half of the same mismatch.
                     System.Drawing.RectangleF r2 = new System.Drawing.RectangleF(i.X + i.SI.PaddingLeft,
                         i.Y + i.SI.PaddingTop,
-                        PixelsX(i.W, pgs) - i.SI.PaddingLeft - i.SI.PaddingRight,
-                        PixelsY(i.H, pgs) - i.SI.PaddingTop - i.SI.PaddingBottom);
+                        i.W - i.SI.PaddingLeft - i.SI.PaddingRight,
+                        i.H - i.SI.PaddingTop - i.SI.PaddingBottom);
 
                     System.Drawing.RectangleF adjustedRect;   // work rectangle 
                     System.Drawing.RectangleF clipRect = System.Drawing.RectangleF.Empty;
@@ -310,8 +315,12 @@ namespace Majorsilence.Reporting.Rdl
                                             r2.Width, r2.Height);
                             break;
                         case ImageSizingEnum.Clip:
-                            //Set samples size
-                            var im = Draw2.Image.FromStream(new MemoryStream(i.GetImageData((int)r2.Width, (int)r2.Height)));
+                            // Pixels, not points: this argument is a sample count, asking a
+                            // generated image - a barcode, say - for a bitmap that many
+                            // samples across. Ask for three quarters as many and a dense
+                            // symbology stops being readable at all.
+                            var im = Draw2.Image.FromStream(new MemoryStream(
+                                i.GetImageData((int)PixelsX(r2.Width, pgs), (int)PixelsY(r2.Height, pgs))));
                           
                             float originalWidth = Measurement.PointsFromPixels(im.Width, pgs.G.DpiX);
                             float originalHeight = Measurement.PointsFromPixels(im.Height, pgs.G.DpiY);
