@@ -64,6 +64,7 @@ private System.ComponentModel.Container components = null;
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tpGeneral = new System.Windows.Forms.TabPage();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.radioButtonMm = new System.Windows.Forms.RadioButton();
             this.radioButtonCm = new System.Windows.Forms.RadioButton();
             this.radioButtonInches = new System.Windows.Forms.RadioButton();
             this.label12 = new System.Windows.Forms.Label();
@@ -165,6 +166,7 @@ private System.ComponentModel.Container components = null;
             // 
             // groupBox1
             // 
+            this.groupBox1.Controls.Add(this.radioButtonMm);
             this.groupBox1.Controls.Add(this.radioButtonCm);
             this.groupBox1.Controls.Add(this.radioButtonInches);
             resources.ApplyResources(this.groupBox1, "groupBox1");
@@ -177,6 +179,13 @@ private System.ComponentModel.Container components = null;
             this.radioButtonCm.Name = "radioButtonCm";
             this.radioButtonCm.UseVisualStyleBackColor = true;
             this.radioButtonCm.CheckedChanged += new System.EventHandler(this.RadioButtonCm_CheckedChanged);
+            // 
+            // radioButtonMm
+            // 
+            resources.ApplyResources(this.radioButtonMm, "radioButtonMm");
+            this.radioButtonMm.Name = "radioButtonMm";
+            this.radioButtonMm.UseVisualStyleBackColor = true;
+            this.radioButtonMm.CheckedChanged += new System.EventHandler(this.RadioButtonMm_CheckedChanged);
             // 
             // radioButtonInches
             // 
@@ -519,6 +528,7 @@ private System.ComponentModel.Container components = null;
         private Label label12;
         private ComboBox comboXmlEndingLine;
         private GroupBox groupBox1;
+        private RadioButton radioButtonMm;
         private RadioButton radioButtonCm;
         private RadioButton radioButtonInches;
     }
