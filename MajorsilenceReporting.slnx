@@ -27,6 +27,7 @@
       <BuildType Solution="Debug-DrawingCompat|Any CPU" Project="Debug" />
     </Project>
     <Project Path="RdlCreator.Tests/RdlCreator.Tests.csproj" />
+    <Project Path="RdlMcp.Tests/RdlMcp.Tests.csproj" />
     <Project Path="RdlViewer.Tests/RdlViewer.Tests.csproj">
       <BuildType Solution="Debug-DrawingCompat|Any CPU" Project="Debug" />
       <BuildType Solution="Release-DrawingCompat|Any CPU" Project="Debug" />
@@ -123,6 +124,7 @@
   </Project>
   <Project Path="RdlEngine/Majorsilence.Reporting.RdlEngine.csproj" />
   <Project Path="RdlGtk3/Majorsilence.Reporting.RdlGtk3.csproj" />
+  <Project Path="RdlMcp/Majorsilence.Reporting.Mcp.csproj" />
   <Project Path="RdlGtk3Viewer/RdlGtk3Viewer.csproj" />
   <Project Path="RdlNative/Majorsilence.Reporting.RdlNative.csproj" />
   <Project Path="RdlReader.Tests/RdlReader.Tests.csproj">

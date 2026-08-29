@@ -1,0 +1,52 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>Majorsilence.Reporting.Mcp</RootNamespace>
+    <AssemblyName>majorsilence-report-mcp</AssemblyName>
+    <!-- The referenced engine projects carry these; match them so the solution's DrawingCompat
+         configurations resolve for this project too. -->
+    <Configurations>Debug;Release;Debug-DrawingCompat;Release-DrawingCompat</Configurations>
+
+    <!-- Ships to nuget.org as a .NET global tool:
+           dotnet tool install -g Majorsilence.Reporting.Mcp
+         then `majorsilence-report-mcp`, launched by an MCP client over stdio. ToolCommandName
+         matches AssemblyName so the generated entry point and the documented command stay aligned. -->
+    <IsPackable>true</IsPackable>
+    <PackAsTool>true</PackAsTool>
+    <ToolCommandName>majorsilence-report-mcp</ToolCommandName>
+    <PackageId>Majorsilence.Reporting.Mcp</PackageId>
+    <Title>Majorsilence Reporting MCP Server</Title>
+    <Description>A Model Context Protocol (MCP) server that lets AI assistants work with RDL/RDLC reports — render them to PDF/HTML/XLSX/CSV/image, inspect their structure, lint them for engine compatibility, and scaffold new ones — through Majorsilence Reporting's engine.</Description>
+    <PackageTags>rdl;rdlc;ssrs;reporting;mcp;modelcontextprotocol;ai;agent;dotnet-tool</PackageTags>
+    <PackageReadmeFile>Readme.md</PackageReadmeFile>
+
+    <!-- A tool package carries no lib/ref assets (everything lands under tools/); NU5128 is expected. -->
+    <NoWarn>$(NoWarn);NU5128</NoWarn>
+    <!-- MCP clients launch this on whatever machine the developer uses, which may have a newer
+         runtime than the one it was built against. Roll forward rather than fail to launch. -->
+    <RollForward>latestMajor</RollForward>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="Readme.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="ModelContextProtocol" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- The whole point of the tool: drive the engine and the authoring / lint APIs directly,
+         in-process. (Designer-GUI automation is a separate concern — see Readme.md: compose with
+         Majorsilence.Forms.Mcp pointed at the designer's WebDriver endpoint.) -->
+    <ProjectReference Include="..\RdlEngine\Majorsilence.Reporting.RdlEngine.csproj" />
+    <ProjectReference Include="..\RdlCreator\Majorsilence.Reporting.RdlCreator.csproj" />
+    <ProjectReference Include="..\RdlDoctor\RdlDoctor.csproj" />
+  </ItemGroup>
+
+</Project>
