@@ -32,12 +32,6 @@
       <BuildType Solution="Debug-DrawingCompat|Any CPU" Project="Debug" />
       <BuildType Solution="Release-DrawingCompat|Any CPU" Project="Debug" />
     </Project>
-    <Project Path="ReportTests.Windows/ReportTests.Windows.csproj">
-      <BuildType Solution="Debug-DrawingCompat|Any CPU" Project="Debug" />
-      <BuildType Solution="Release-DrawingCompat|Any CPU" Project="Release" />
-      <Build Solution="Debug-DrawingCompat|Any CPU" Project="false" />
-      <Build Solution="Release-DrawingCompat|Any CPU" Project="false" />
-    </Project>
     <Project Path="ReportTests/ReportTests.csproj" />
     <Project Path="ReportTests.Containers/ReportTests.Containers.csproj" />
   </Folder>
