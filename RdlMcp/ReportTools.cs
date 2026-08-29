@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT OR Apache-2.0 OR BSD-2-Clause
+
 using System.Collections;
 using System.ComponentModel;
 using System.Text;

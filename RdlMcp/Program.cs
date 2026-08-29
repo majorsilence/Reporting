@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT OR Apache-2.0 OR BSD-2-Clause
+
 using Majorsilence.Reporting.Mcp;
 using Majorsilence.Reporting.Rdl;
 using Microsoft.Extensions.DependencyInjection;

@@ -24,6 +24,11 @@
     <PackageTags>rdl;rdlc;ssrs;reporting;mcp;modelcontextprotocol;ai;agent;dotnet-tool</PackageTags>
     <PackageReadmeFile>Readme.md</PackageReadmeFile>
 
+    <!-- Tri-licensed (take your pick), overriding the repo-wide Apache-2.0 default: the chooser and
+         the three full texts are LICENSE / LICENSE-MIT / LICENSE-APACHE / LICENSE-BSD in this folder,
+         and all four are packed. -->
+    <PackageLicenseExpression>MIT OR Apache-2.0 OR BSD-2-Clause</PackageLicenseExpression>
+
     <!-- A tool package carries no lib/ref assets (everything lands under tools/); NU5128 is expected. -->
     <NoWarn>$(NoWarn);NU5128</NoWarn>
     <!-- MCP clients launch this on whatever machine the developer uses, which may have a newer
@@ -33,6 +38,10 @@
 
   <ItemGroup>
     <None Include="Readme.md" Pack="true" PackagePath="\" />
+    <None Include="LICENSE" Pack="true" PackagePath="\" />
+    <None Include="LICENSE-MIT" Pack="true" PackagePath="\" />
+    <None Include="LICENSE-APACHE" Pack="true" PackagePath="\" />
+    <None Include="LICENSE-BSD" Pack="true" PackagePath="\" />
   </ItemGroup>
 
   <ItemGroup>

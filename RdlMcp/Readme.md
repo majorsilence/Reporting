@@ -100,4 +100,12 @@ claude mcp add majorsilence-designer  -- majorsilence-mcp --port 4444
 - `report_render` connects to the report's data source. Pass `connectionStringOverride` to point it
   somewhere else, or scaffold/inspect without ever connecting.
 
-Apache-2.0. Part of [Majorsilence Reporting](https://github.com/majorsilence/Reporting).
+Part of [Majorsilence Reporting](https://github.com/majorsilence/Reporting).
+
+## License
+
+Tri-licensed — take your pick:
+
+- **MIT License** — see [`LICENSE-MIT`](LICENSE-MIT)
+- **Apache License 2.0** — see [`LICENSE-APACHE`](LICENSE-APACHE)
+- **BSD 2-Clause License** — see [`LICENSE-BSD`](LICENSE-BSD)
