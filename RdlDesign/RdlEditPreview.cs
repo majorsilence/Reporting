@@ -880,6 +880,12 @@ namespace Majorsilence.Reporting.RdlDesign
 			{
 				if (rdlPreview.SourceRdl != scintilla1.Text)			// sync up preview
 					await this.rdlPreview.SetSourceRdl(scintilla1.Text);
+
+				// SetSourceRdl only renders when the viewer is already Visible; on the tab switch
+				// that reveals this pane it is not yet, and the lazy first-paint load does not
+				// arrive inside the MDI child -- so force it here or the preview stays blank until
+				// Run Report.
+				await this.rdlPreview.EnsureRendered();
 			}
 			else if (tag == DesignTabs.Design)
 			{

@@ -766,3 +766,161 @@ controls in Designer.cs-generated markup. They're standalone `.sln` files, not p
 `MajorsilenceReporting.slnx`/CI, and now reference project folders that no longer contain a
 WinForms `Control` subclass — they're stale and won't build as-is. If revisited, they'd need the
 same `ToWinFormsControl()` rewrite as `LibRdlWpfViewer`.
+
+## D9: ReportDesigner runtime smoke — dialog/menu parity (2026-08-28)
+
+Resumed the "run the real `ReportDesigner` on a Linux desktop, fix what breaks" loop from D6.x.
+`Majorsilence.Forms` work was on branch `windowbase-compat` (was `win-compat` in the older
+notes; that branch turned out to be a stale orphan — 1 commit ahead of a ~320-commit-old base, and
+that 1 commit, `48692a6` "modal dialogs shown with no explicit owner", never merged to `main`;
+forward-ported here). That branch has since merged to `main` and shipped: everything below is in
+**`Majorsilence.Forms` `26.0.50` on nuget.org** (`Majorsilence.Forms.WinForms` `26.0.50` too), so
+`.local-nuget-feed` is no longer needed for these versions — `Directory.Packages.props` points the
+whole family at `26.0.50`. Avalonia also bumped `12.1.0 → 12.1.1` (current stable) in both repos as part
+of this — a clean central-package bump; `Avalonia.Controls.WebView` stays `12.1.0` (no 12.1.1
+release). NB: Rider, if open on `Majorsilence.Forms`, will rewrite `Directory.Packages.props` into
+a broken state (duplicate `PackageVersion` entries) — close it or disable its NuGet auto-sync
+while iterating.
+
+Framework bugs found by driving **File → New Report from Database** through to a rendered preview.
+Every one *looked* like a frozen app; every one was something else — `dotnet-stack` / a `dotnet-dump`
++ `dumpasync` on the live process showed the modal loop pumping fine and the actual work either
+finished or not started:
+
+1. **`26.0.35`** — a `MessageBox`/`FileDialog`/`ShowDialog()` raised with no explicit owner from
+   *inside* an already-modal dialog parented to `Application.OpenForms` `[0]` (the main window,
+   behind the dialog) instead of the dialog the user was looking at → rendered off-screen, no
+   taskbar entry. Added `Application.ModalStack` / `ActiveModalForm` (push in `Form.ShowDialogAsync`,
+   pop in `Form.CompleteClose`); the four no-owner call sites prefer it. This is the forward-port of
+   the orphaned `48692a6`.
+2. **`26.0.36`** — one physical click on a drop-down leaf item raised its `Click` **twice** (opened
+   two stacked "New Report" dialogs). On X11 a single button release is delivered to *both* the menu
+   bar's window and the drop-down popup's window (separate `MajorsilenceFormsWindowHost`s), each
+   routing it through its own `OnMouseClick` to the same leaf. Does **not** reproduce headlessly.
+   `MenuBase.TryBeginLeafClick`/`EndLeafClick` collapse the duplicate — re-entrant (modal handler,
+   depth counter) and fast-return (same item within 50ms) cases both covered; submenu-openers not
+   gated; keyboard `PerformClick` doesn't go through `OnMouseClick` and is unaffected.
+3. **`26.0.37`** — the modal dialog was shown with a plain `Backend.Show ()` — a detached top-level
+   with no native owner, so no `WM_TRANSIENT_FOR` on X11. Alt-tab away, click the app back from the
+   taskbar → the WM raised only the main window and buried the (taskbar-skipping) dialog behind it,
+   unreachable. `WindowBase.ShowDialog (parent)` now routes through `Backend.ShowDialog
+   (parentBackend)`; the Avalonia backend does `Window.Show (owner)` (owned, native owner link) —
+   deliberately **not** Avalonia's own `Window.ShowDialog`, which would spin a second nested
+   dispatcher loop on top of `RunModalLoop`.
+4. **`26.0.39`** — `TreeNode.Expand ()` raised `BeforeExpand` before checking the node had children,
+   and the "nothing to expand" guard only applied off-tree. So double-clicking a **leaf** column
+   node in `DialogDatabase`'s table tree fired the lazy column-loader, which dereferences
+   `node.FirstNode` (null for a leaf) → unhandled `NullReferenceException`, app down (SIGABRT).
+   `Expand ()` now returns early (no event, no state change) for a childless node, matching WinForms;
+   the invisible root's constructor sets the `expanded` field directly since it has no children when
+   built. Also a defensive `FirstNode == null` guard added in `RdlDesign/DialogDatabase.cs`.
+5. **`26.0.41`** — the preview "took 30–60 s and drew nothing but a black box". It didn't: a
+   `dotnet-dump` showed the report **finished fast** (`_pgs` populated, 4 rows rendered) and **five**
+   `Majorsilence.WinformUtils.WaitForm` windows stacked on screen, black, one timer per instance
+   ticking the "N Seconds" counter up forever over the finished preview. Two Reporting-side bugs
+   (`Majorsilence.WinformUtils`, migrated in D1): `WaitForm`'s elapsed-time/bounds tracking ran off
+   a **50ms** `System.Threading.Timer` that `BeginInvoke`'d back to the UI thread to reset `Bounds`,
+   build a fresh `ComponentResourceManager`, and pump `Application.DoEvents ()` — 20×/s — and kept
+   firing after `Close ()`; and `HideWaiter` only closed `OwnedForms.OfType<WaitForm>().FirstOrDefault
+   ()` (the same earliest instance every call), leaking the rest. Fixed: `WaitForm` now uses a plain
+   250ms UI-thread `Majorsilence.Forms.Timer` stopped in `FormClosed`, no `DoEvents`; `HideWaiter`
+   closes all. Framework side, `Form.Location`/`Size`/`Bounds` setters now no-op when `IsDisposed`
+   (a stale `Bounds =` from a torn-down window's callback was re-realizing the Avalonia window — the
+   resurrection that produced the stack of dead windows).
+6. **`26.0.42`** — two bugs on the in-designer Preview tab. (a) Switching to the Preview tab
+   rendered nothing until "Run Report" was clicked: `Control.SetVisibleCore` laid a newly-revealed
+   subtree out but never `Invalidate`d it, so it was never painted (WinForms shows the window
+   handle, which paints it — no handle here). Now a control that becomes visible invalidates
+   itself. (b) Clicking OK on the report-warnings dialog opened *another* copy instead of closing:
+   the ⚠️ button captured the mouse on mouse-down, its Click handler opened the modal and blocked,
+   so the mouse-up that releases capture never ran — and every release inside the modal was routed
+   by `RoutedToCaptureHolder` back to the still-captured button. `HandlePointerReleased` now raises
+   MouseUp (which drops capture) **before** Click, matching WinForms.
+7. **`26.0.43`** — the "SimpleTest1.rdl / barcode.rdl" document-tab strip above the MDI area did
+   nothing when clicked. `RdlDesigner`'s `mainTC_SelectedIndexChanged` calls `child.Activate()`, and
+   `Form.Activate()` was `Focus()` only — for a frame-hosted MDI child that moves keyboard focus but
+   doesn't raise the frame or make it the active child. `Activate()` now calls `BringToFront()`
+   first for a hosted form (which routes to `MdiClient.Activate`).
+8. **`26.0.44`** — the design-surface insert-tool buttons (Text Box, Chart, Table, ...) did nothing.
+   Each is a `ToolStripButton` with `CheckOnClick = true`, and `Insert_Click` does
+   `ctlInsertCurrent = ctl.Checked ? ctl : null`. But `CheckOnClick` was a stored-only bool —
+   nothing toggled `Checked` on click — so `ctl.Checked` was always `false`, `CurrentInsert` was
+   always `null`, and the design surface had no tool armed. `ToolStripButton` and `ToolStripMenuItem`
+   now toggle `Checked` before raising `Click`, as WinForms does.
+9. **`26.0.45`** — a visible lag after every edit on the design surface. `DesignXmlDraw` repaints the
+   whole layout on every change, and `Majorsilence.Forms.Drawing.Common`'s `Font.GetSKFont` called
+   `SKTypeface.FromFamilyName` — a fontconfig round-trip, a few ms even warm, returning a disposable
+   `SKTypeface` — every time. A `new Font` per text run meant dozens of those per repaint (plus the
+   allocations and their finalizers). `Font` now resolves system typefaces through a process-wide
+   `(family, weight, slant)` cache and never disposes a shared face. NB: a `dotnet-trace` of 25s of
+   active editing showed the process ~65% idle-waiting — the remaining lag is the two-frame
+   invalidate→paint-old→async-render→invalidate→paint-new cycle `DesignCtl.DrawPanelPaint` uses to
+   avoid flicker, which was left as-is.
+10. **`26.0.46`** — neither the scrollbar nor the mouse wheel scrolled the preview / design surface.
+    `ScrollBar` raised `Scroll` only for a thumb drag, and only *after* committing `Value` (so
+    `e.NewValue == Value`); arrow/track clicks and the wheel raised nothing. `RdlViewer.OnVScroll`
+    and `DesignCtl.VerticalScroll` both bail on `e.NewValue == _vScroll.Value`, so they never ran.
+    All four `ScrollBar` interactions now go through `PerformScroll` — raise `Scroll` with the
+    proposed value while `Value` still holds the old one (handler can read the delta and veto via
+    `e.NewValue`), then commit; thumb drag raises `ThumbTrack` then `EndScroll`. No Reporting-side
+    change needed.
+
+11. **`26.0.47`** — trackpad two-finger scroll (and the mouse wheel) still did nothing over the
+    preview / design surface even after `26.0.46`. Diagnostics: the gesture arrives as a normal
+    `PointerWheelChanged` (type=Mouse), gets accumulated to 120-unit deltas, and reaches
+    `WindowBase.HandlePointerWheel` fine. The wheel walk in `Control.RaiseMouseWheel` then descends
+    `ControlAdapter → FormClientArea → MdiClient → MdiChildWindow` **and stops** — a hosted MDI child
+    form is not a child `Control`, and `MdiChildWindow` forwarded `OnMouseDown/Move/Up` into the child
+    but had no `OnMouseWheel` forward, so the wheel never reached `RdlViewer._DrawPanel` /
+    `DrawPanelMouseWheel`. That is why the scrollbar (a real child control) worked and the wheel did
+    not. Fix: `MdiChildWindow.OnMouseWheel` now forwards to the hosted form via `HandlePointerWheel`,
+    and `HandlePointerWheel` converts device→logical coordinates like every other pointer handler.
+    No Reporting-side change needed.
+
+12. **`26.0.48`** — the toolbar font-family picker's drop-down list clipped every font whose name
+    was longer than the (narrow) combo: "Times New Ro…". `ComboBox` hard-coded the popup to
+    `Size(Width, 102)`. It now sizes via `ComputePopupSize` — `DropDownWidth` when set, otherwise the
+    widest item text (never narrower than the control, capped at `max(3×Width, 480)`), and height
+    from `MaxDropDownItems` rather than the magic 102. No Reporting-side change needed.
+
+13. **`26.0.49`** — the "fx" expression bar on the main toolbar (`ctlEditTextbox`, a 250px
+    `ToolStripTextBox` from the resx) rendered as a sliver a few characters wide. `ToolStripControlHost`
+    inherited `MenuItem.GetPreferredSize`, which measures the item's *Text* — a control host draws no
+    text, so it returned only its padding and `StackLayoutEngine` squeezed the editor to that. The host
+    now records the size assigned through its `Size` property (the path `ApplyResources` takes) and
+    returns it from a `GetPreferredSize` override, falling back to the hosted control's own size. Fixes
+    `ToolStripComboBox` widths too. No Reporting-side change needed.
+
+### RdlViewer async/paint hacks — Reporting side (`RdlViewer.cs`, `RdlEditPreview.cs`)
+
+Not framework bugs — the viewer's own "HACK: async" workarounds, exposed by Avalonia painting
+more often / differently than WinForms:
+- **`DrawPanelPaint` re-rendered on every spurious paint.** It disposed the render buffer after a
+  single paint and re-rendered on the next, so a drag (many paints, unchanged content) was a full
+  re-render loop that starved the drag and pegged the UI thread. Now the buffer is cached against a
+  view-state key (`_pgs`, zoom, scroll, size, highlight); a paint whose state matches just blits it.
+- **Blank preview until Run Report** (the `26.0.42(a)` framework fix backs this, but the Reporting
+  side is cleaner): `SetSourceRdl`/`SetSourceFile` only load `if (this.Visible)`, and on the tab
+  switch that reveals the pane the viewer is briefly not-Visible. New `RdlViewer.EnsureRendered()`
+  forces the load+paint; `RdlEditPreview` calls it after `SetSourceRdl`. `RdlViewer.Tests` updated
+  to call it explicitly rather than relying on a getter's side effect.
+- **Six property getters** (`PageWidth/Height/Count`, `ReportDescription/Author`,
+  `ShowParameterPanel`) did `Task.Run(LoadPageIfNeeded).GetAwaiter().GetResult()` — a blocking
+  sync-over-async that froze the UI thread (and re-ran the whole render) whenever one was read from
+  a layout/paint/status path. They now return the cached value.
+
+Method notes for continuing this loop:
+- GNOME/Wayland here blocks screenshotting the real window (no `grim`/`flameshot` support); the user
+  drives the GUI and drops screenshots in `~/Pictures`. `xwininfo -root -tree` / `xprop -id <win>`
+  are the way to inspect window state (map state, stacking, `WM_TRANSIENT_FOR`, `_NET_WM_STATE`).
+- `dotnet-stack report -p <pid>` on the live process is the fastest "is it actually hung, or is a
+  modal loop just pumping with nothing visible" check — every "hang" this session was the latter.
+  When `dotnet-stack` shows nothing running, `dotnet-dump collect` + `dumpasync --stats` (are the
+  report async state machines even on the heap?) + `dumpheap -type <T>` on the suspect objects
+  (there were 5 `WaitForm`s, and `RdlViewer._pgs` was already populated) is the next step.
+- Intermittent `SIGSEGV`/`SIGABRT` on **startup** — roughly 1 in 3–4 cold launches, native (no
+  managed stack), always fine on relaunch. Predates all of this session's work and the Avalonia
+  bump; looks like an Avalonia/X11 GL-context init race. Not chased.
+- Pre-existing unrelated failure on `windowbase-compat`: `SelectedTextClipTests.DropDownList_
+  TooShortForFont_KeepsCapsInsteadOfSlicingTop` (there's a `w517-harden-cliptest` branch for it).
+  Present on a clean tree; not caused by this work.

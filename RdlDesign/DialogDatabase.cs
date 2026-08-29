@@ -974,6 +974,9 @@ namespace Majorsilence.Reporting.RdlDesign
             if (tNode.Parent == null)	// Check for Tables or Views
                 return;
 
+            if (tNode.FirstNode == null)	// A leaf (e.g. a column node) -- nothing to expand
+                return;
+
             if (tNode.FirstNode.Text != "")	// Have we already filled it out?
                 return;
 

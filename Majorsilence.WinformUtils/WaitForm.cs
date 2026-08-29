@@ -8,15 +8,21 @@ namespace Majorsilence.WinformUtils
     // top-level-window abstraction. That means several members the original WinForms code relied
     // on don't exist here: no int Width/Height (only the settable Size struct), no SizeChanged/
     // Move events, no HandleCreated event, no DoubleBuffered property, and Refresh() is
-    // Invalidate() instead. The single poll timer below now also re-syncs Bounds against the
-    // parent every tick, replacing the SizeChanged/Move event subscriptions this class used to
-    // need -- see MIGRATION-NOTES.md for the full writeup of this gap.
+    // Invalidate() instead.
+    //
+    // The elapsed-time / bounds-tracking used to run off a 50ms System.Threading.Timer that
+    // BeginInvoke'd back to the UI thread, reset Bounds, built a fresh ComponentResourceManager
+    // and pumped Application.DoEvents() -- every tick, 20x a second. Worse, that pool-thread
+    // timer kept firing after Close()/Dispose(), and a queued Bounds= landing on a torn-down
+    // window resurrected it: ReportDesigner ended up with a stack of black "N Seconds" windows
+    // that never went away over a preview that had actually finished. Now a plain UI-thread
+    // Majorsilence.Forms.Timer at 250ms, stopped in FormClosed, with no DoEvents.
     internal class WaitForm : Form
     {
         private DateTime Started;
         private Majorsilence.Forms.ProgressBar progressBar1 = null!;
         private Majorsilence.Forms.Label lblTimeTaken = null!;
-        private System.Threading.Timer? timer1;
+        private readonly Majorsilence.Forms.Timer timer1 = new() { Interval = 250 };
         private readonly Func<Rectangle> _getTrackedBounds;
         public delegate bool CheckStopWaitDialog();
 
@@ -34,21 +40,18 @@ namespace Majorsilence.WinformUtils
             this.BackColor = Color.Black;
 
             Started = DateTime.Now;
-            this.Shown += (_, __) =>
+
+            timer1.Tick += (_, __) =>
             {
-                timer1 = new System.Threading.Timer(_ =>
-                {
-                    try
-                    {
-                        this.BeginInvoke(new Action(async () =>
-                        {
-                            SyncToTracked();
-                            await timer1_Tick(null, null);
-                        }));
-                    }
-                    catch (ObjectDisposedException) { }
-                }, null, 0, 50);
+                if (IsDisposed)
+                    return;
+
+                SyncToTracked();
+                UpdateElapsedText();
             };
+
+            this.Shown += (_, __) => timer1.Start();
+            this.FormClosed += (_, __) => timer1.Stop();
         }
 
         private void SyncToTracked()
@@ -65,29 +68,23 @@ namespace Majorsilence.WinformUtils
                 (this.Size.Height - this.lblTimeTaken.Size.Height) / 2 + 50);
         }
 
-        private async Task timer1_Tick(object? sender, EventArgs? e)
+        private void UpdateElapsedText()
         {
-            Majorsilence.Forms.ComponentResourceManager resources =
-                new Majorsilence.Forms.ComponentResourceManager(typeof(Strings));
             var time = DateTime.Now - Started;
-            if (time.TotalMinutes < 1)
-                lblTimeTaken.Text = string.Format("{0} {1}", time.Seconds, resources.GetString("WaitForm_Seconds"));
-            else
-                lblTimeTaken.Text = string.Format("{0} {1} {2} {3}", (int)time.TotalMinutes,
-                    resources.GetString("WaitForm_Minutes"),
-                    time.Seconds, resources.GetString("WaitForm_Seconds"));
-
-            Application.DoEvents();
+            lblTimeTaken.Text = time.TotalMinutes < 1
+                ? $"{time.Seconds} {Strings.WaitForm_Seconds}"
+                : $"{(int)time.TotalMinutes} {Strings.WaitForm_Minutes} {time.Seconds} {Strings.WaitForm_Seconds}";
         }
 
         private System.ComponentModel.IContainer? components;
 
         protected override void Dispose(bool disposing)
         {
-            timer1?.Dispose();
-            if (disposing && (components != null))
+            if (disposing)
             {
-                components.Dispose();
+                timer1.Stop();
+                timer1.Dispose();
+                components?.Dispose();
             }
             base.Dispose(disposing);
         }
@@ -95,8 +92,6 @@ namespace Majorsilence.WinformUtils
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            Majorsilence.Forms.ComponentResourceManager resources =
-                new Majorsilence.Forms.ComponentResourceManager(typeof(Strings));
             this.progressBar1 = new Majorsilence.Forms.ProgressBar();
             this.lblTimeTaken = new Majorsilence.Forms.Label();
             this.SuspendLayout();

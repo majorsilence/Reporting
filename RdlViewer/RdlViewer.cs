@@ -276,8 +276,10 @@ namespace Majorsilence.Reporting.RdlViewer
         {
             get
             {
-                // HACK: async
-                Task.Run(async () => await LoadPageIfNeeded()).GetAwaiter().GetResult();
+                // Was: a blocking Task.Run(LoadPageIfNeeded).GetAwaiter().GetResult() to force the
+                // report to load. That froze the UI thread (and re-ran the whole render) whenever
+                // one of these was read from a layout / paint / status path -- e.g. dragging the
+                // window. Return what is known now; the report loads on paint or via EnsureRendered.
                 return _ShowParameters;
             }
             set
@@ -399,8 +401,10 @@ namespace Majorsilence.Reporting.RdlViewer
         {
             get
             {
-                // HACK: async
-                Task.Run(async () => await LoadPageIfNeeded()).GetAwaiter().GetResult();
+                // Was: a blocking Task.Run(LoadPageIfNeeded).GetAwaiter().GetResult() to force the
+                // report to load. That froze the UI thread (and re-ran the whole render) whenever
+                // one of these was read from a layout / paint / status path -- e.g. dragging the
+                // window. Return what is known now; the report loads on paint or via EnsureRendered.
                 if (_pgs == null)
                     return 0;
                 else
@@ -600,13 +604,28 @@ namespace Majorsilence.Reporting.RdlViewer
                 _SourceFileName = null;
             _pgs = null;                // reset pages
             _DrawPanel.Pgs = null;
-            _loadFailed = false;            // attempt to load the report	
+            _loadFailed = false;            // attempt to load the report
             _vScroll.Value = _hScroll.Value = 0;
             if (this.Visible)
             {
                 await LoadPageIfNeeded();
                 this._DrawPanel.Invalidate();
             }
+        }
+
+        /// <summary>
+        /// Forces the report to load and the view to repaint now, regardless of whether the control
+        /// currently reports itself as Visible. <see cref="SetSourceRdl"/> / <see cref="SetSourceFile"/>
+        /// skip the load when the control is not Visible, on the theory that the first paint will do
+        /// it lazily -- but on the tab switch that reveals a preview pane (notably inside an MDI
+        /// child) the control is briefly not-Visible and that first paint never arrives, so the
+        /// preview stays blank until Run Report is pressed. Callers that reveal the viewer should
+        /// await this straight after setting the source.
+        /// </summary>
+        public async Task EnsureRendered()
+        {
+            await LoadPageIfNeeded();
+            _DrawPanel.Invalidate();
         }
 
         /// <summary>
@@ -715,8 +734,10 @@ namespace Majorsilence.Reporting.RdlViewer
         {
             get
             {
-                // HACK: async
-                Task.Run(async () => await LoadPageIfNeeded()).GetAwaiter().GetResult();
+                // Was: a blocking Task.Run(LoadPageIfNeeded).GetAwaiter().GetResult() to force the
+                // report to load. That froze the UI thread (and re-ran the whole render) whenever
+                // one of these was read from a layout / paint / status path -- e.g. dragging the
+                // window. Return what is known now; the report loads on paint or via EnsureRendered.
                 return _PageHeight;
             }
         }
@@ -728,8 +749,10 @@ namespace Majorsilence.Reporting.RdlViewer
         {
             get
             {
-                // HACK: async
-                Task.Run(async () => await LoadPageIfNeeded()).GetAwaiter().GetResult();
+                // Was: a blocking Task.Run(LoadPageIfNeeded).GetAwaiter().GetResult() to force the
+                // report to load. That froze the UI thread (and re-ran the whole render) whenever
+                // one of these was read from a layout / paint / status path -- e.g. dragging the
+                // window. Return what is known now; the report loads on paint or via EnsureRendered.
                 return _PageWidth;
             }
         }
@@ -741,8 +764,10 @@ namespace Majorsilence.Reporting.RdlViewer
         {
             get
             {
-                // HACK: async
-                Task.Run(async () => await LoadPageIfNeeded()).GetAwaiter().GetResult();
+                // Was: a blocking Task.Run(LoadPageIfNeeded).GetAwaiter().GetResult() to force the
+                // report to load. That froze the UI thread (and re-ran the whole render) whenever
+                // one of these was read from a layout / paint / status path -- e.g. dragging the
+                // window. Return what is known now; the report loads on paint or via EnsureRendered.
                 return _ReportDescription;
             }
         }
@@ -754,8 +779,10 @@ namespace Majorsilence.Reporting.RdlViewer
         {
             get
             {
-                // HACK: async
-                Task.Run(async () => await LoadPageIfNeeded()).GetAwaiter().GetResult();
+                // Was: a blocking Task.Run(LoadPageIfNeeded).GetAwaiter().GetResult() to force the
+                // report to load. That froze the UI thread (and re-ran the whole render) whenever
+                // one of these was read from a layout / paint / status path -- e.g. dragging the
+                // window. Return what is known now; the report loads on paint or via EnsureRendered.
                 return _ReportAuthor;
             }
         }
@@ -1042,38 +1069,69 @@ namespace Majorsilence.Reporting.RdlViewer
         }
 
         private Bitmap _buffer;
-        // HACK: async shenanigans
-        bool doGraphicsDraw;
+        // The view state _buffer was rendered for. A paint whose state matches just blits the
+        // cached bitmap; only a real change (report, zoom, scroll, size, highlight) re-runs the
+        // (expensive, async) page render. The old code disposed _buffer after every single paint
+        // and re-rendered on the next one, so spurious repaints -- of which Avalonia raises many,
+        // e.g. every frame while an MDI child is dragged -- turned into a full report re-render
+        // loop that starved the drag and pegged the UI thread.
+        private (object Pgs, float Zoom, int H, int V, int W, int Ht, object HiItem,
+                 string HiText, bool HiCase, bool HiAll)? _bufferKey;
+        private bool _renderInProgress;
+
+        private (object, float, int, int, int, int, object, string, bool, bool) CurrentRenderKey()
+            => (_pgs, _zoom, _hScroll.Value, _vScroll.Value,
+                Math.Max(1, _DrawPanel.Width), Math.Max(1, _DrawPanel.Height),
+                _HighlightItem, _HighlightText, _HighlightCaseSensitive, _HighlightAll);
+
         private async void DrawPanelPaint(object sender, Majorsilence.Forms.PaintEventArgs e)
         {
             try         // never want to die in here
             {
-                if (doGraphicsDraw && _buffer != null)
-                {            
-                    e.Graphics.DrawImage(_buffer, 0, 0);
-                    _buffer.Dispose();
-                    _buffer = null;            
+                var key = CurrentRenderKey();
+
+                if (_buffer != null && _bufferKey.HasValue && _bufferKey.Value.Equals(key))
+                {
+                    e.Graphics.DrawImage(_buffer, 0, 0);   // nothing changed -- blit the cache
+                    return;
                 }
-                else
+
+                if (_buffer != null)
+                    e.Graphics.DrawImage(_buffer, 0, 0);   // show the stale frame while we re-render
+
+                if (_renderInProgress)
+                    return;                                // a render is already queued; don't stack them
+
+                _renderInProgress = true;
+                try
                 {
                     await LoadPageIfNeeded();             // make sure we have something to show
 
                     if (_zoom < 0)
                         CalcZoom();             // new report or resize client requires new zoom factor
 
-                    // Draw the page
-                    _buffer = new Bitmap(Math.Max(1, _DrawPanel.Width), Math.Max(1, _DrawPanel.Height));
-                    using (Graphics g = Graphics.FromImage(_buffer))
+                    // Re-read: LoadPageIfNeeded / CalcZoom above may have moved zoom or scroll.
+                    key = CurrentRenderKey();
+
+                    var next = new Bitmap(Math.Max(1, _DrawPanel.Width), Math.Max(1, _DrawPanel.Height));
+                    using (Graphics g = Graphics.FromImage(next))
                     {
                         await _DrawPanel.Draw(g, _zoom, _leftMargin, _pageGap,
                                 PointsX(_hScroll.Value), PointsY(_vScroll.Value),
-                                e.ClipRectangle,
-                                _HighlightItem, _HighlightText, _HighlightCaseSensitive, _HighlightAll);                         
+                                new System.Drawing.Rectangle(0, 0, next.Width, next.Height),
+                                _HighlightItem, _HighlightText, _HighlightCaseSensitive, _HighlightAll);
                     }
 
-                    doGraphicsDraw = true;
-                    _DrawPanel.Invalidate();       // force a redraw
-                }         
+                    _buffer?.Dispose();
+                    _buffer = next;
+                    _bufferKey = key;
+                }
+                finally
+                {
+                    _renderInProgress = false;
+                }
+
+                _DrawPanel.Invalidate();       // paint again -- this time the cache blits
             }
             catch (Exception ex)
             {   // don't want to kill process if we die

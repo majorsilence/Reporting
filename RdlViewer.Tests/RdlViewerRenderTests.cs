@@ -52,6 +52,11 @@ namespace Majorsilence.Reporting.RdlViewer.Tests
 
                 await viewer.SetSourceFile(new System.Uri(tempRdlPath));
 
+                // SetSourceFile only renders when the viewer is Visible (it is not, here -- never
+                // shown); EnsureRendered forces the load. PageCount no longer blocks on a hidden
+                // Task.Run to do it as a side effect of being read.
+                await viewer.EnsureRendered();
+
                 Assert.That(viewer.PageCount, Is.GreaterThan(0), $"{name}: expected at least one rendered page");
             }
             finally
