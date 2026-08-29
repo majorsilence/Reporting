@@ -5,6 +5,9 @@
 		<AssemblyName>RdlGtk3Viewer</AssemblyName>
 		<Configurations>Debug;Release</Configurations>
 		<TargetFrameworks>net8.0;net10.0</TargetFrameworks>
+		<!-- CI (and any Windows build) only needs the managed GtkSharp assemblies; skip the
+		     54 MB native-GTK download, whose two multi-TFM inner builds race for the same cache file. -->
+		<SkipGtkInstall>True</SkipGtkInstall>
 		<WarningsAsErrors>4014</WarningsAsErrors>
         <IsPackable>false</IsPackable>
 	</PropertyGroup>

@@ -25,16 +25,6 @@
     <Project Path="Majorsilence.Reporting.Benchmarks/Majorsilence.Reporting.Benchmarks.csproj" />
     <Project Path="RdlCreator.Tests/RdlCreator.Tests.csproj" />
     <Project Path="RdlMcp.Tests/RdlMcp.Tests.csproj" />
-    <Project Path="RdlViewer.Tests/RdlViewer.Tests.csproj">
-      <BuildType Solution="Debug-DrawingCompat|Any CPU" Project="Debug" />
-      <BuildType Solution="Release-DrawingCompat|Any CPU" Project="Debug" />
-    </Project>
-    <Project Path="ReportTests.Windows/ReportTests.Windows.csproj">
-      <BuildType Solution="Debug-DrawingCompat|Any CPU" Project="Debug" />
-      <BuildType Solution="Release-DrawingCompat|Any CPU" Project="Release" />
-      <Build Solution="Debug-DrawingCompat|Any CPU" Project="false" />
-      <Build Solution="Release-DrawingCompat|Any CPU" Project="false" />
-    </Project>
     <Project Path="RdlViewer.Tests/RdlViewer.Tests.csproj" />
     <Project Path="ReportTests/ReportTests.csproj" />
     <Project Path="ReportTests.Containers/ReportTests.Containers.csproj" />
