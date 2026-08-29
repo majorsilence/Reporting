@@ -91,9 +91,12 @@ claude mcp add majorsilence-designer  -- majorsilence-mcp --port 4444
 
 ## Notes
 
-- On Linux, PDF/image output needs the MS core fonts installed
-  (`sudo apt install ttf-mscorefonts-installer`); without them `report_render` falls back to a
-  lower-fidelity path and says so in `messages`.
+- No font installation is required. When a report asks for Arial / Times New Roman / Courier New /
+  Calibri / Cambria and those aren't on the machine, the renderer substitutes the
+  metric-compatible fonts bundled with `Majorsilence.Forms.Drawing.Common` (Liberation, Carlito,
+  Caladea, plus Noto for wide Unicode coverage), so PDF/image output looks right on a bare Linux
+  container. Installing the real fonts (`ttf-mscorefonts-installer`) only matters if you need those
+  exact typefaces rather than close equivalents.
 - `report_render` connects to the report's data source. Pass `connectionStringOverride` to point it
   somewhere else, or scaffold/inspect without ever connecting.
 
