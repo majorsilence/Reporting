@@ -38,15 +38,23 @@ if ($env:GITHUB_OUTPUT) {
 }
 
 $solutionPath = Join-Path $CURRENTPATH "MajorsilenceReporting.slnx"
-dotnet restore $solutionPath
 # ************* Begin anycpu *********************************************
-dotnet build $solutionPath --configuration Release-DrawingCompat --verbosity minimal -p:GeneratePackageOnBuild=false
+# Restore per configuration, then build --no-restore. RdlEngine's Majorsilence.Forms /
+# Majorsilence.Forms.Drawing.Common PackageReferences are conditioned on $(DrawingCompat), which is
+# a function of $(Configuration); a single config-less `dotnet restore` writes a project.assets.json
+# that the following `dotnet build -c X` treats as up to date and reuses -- so on Windows the
+# SkiaSharp compat packages were missing from the Release-DrawingCompat build (net8/net10 could not
+# find the Majorsilence.Forms.Drawing namespace). It never showed on Linux because $(DrawingCompat)
+# is always true there.
+dotnet restore $solutionPath -p:Configuration=Release-DrawingCompat
+dotnet build $solutionPath --configuration Release-DrawingCompat --no-restore --verbosity minimal -p:GeneratePackageOnBuild=false
 dotnet publish RdlCmd -c Release-DrawingCompat -r linux-x64 -f $pTargetFrameworkGeneric --self-contained true -p:GeneratePackageOnBuild=false #-p:PublishSingleFile=true
 dotnet publish RdlCmd -c Release-DrawingCompat -r linux-arm64 -f $pTargetFrameworkGeneric --self-contained true -p:GeneratePackageOnBuild=false #-p:PublishSingleFile=true
 dotnet publish RdlCmd -c Release-DrawingCompat -r osx-x64 -f $pTargetFrameworkGeneric --self-contained true -p:GeneratePackageOnBuild=false #-p:PublishSingleFile=true
 dotnet publish RdlCmd -c Release-DrawingCompat -r osx-arm64 -f $pTargetFrameworkGeneric --self-contained true -p:GeneratePackageOnBuild=false #-p:PublishSingleFile=true
 
-dotnet build $solutionPath --configuration $pConfiguration --verbosity minimal -p:GeneratePackageOnBuild=false
+dotnet restore $solutionPath -p:Configuration=$pConfiguration
+dotnet build $solutionPath --configuration $pConfiguration --no-restore --verbosity minimal -p:GeneratePackageOnBuild=false
 dotnet publish RdlCmd -c Release -r win-x64 -f $pTargetFrameworkGeneric --self-contained true -p:GeneratePackageOnBuild=false #-p:PublishSingleFile=true
 dotnet publish RdlCmd -c Release -r win-arm64 -f $pTargetFrameworkGeneric --self-contained true -p:GeneratePackageOnBuild=false #-p:PublishSingleFile=true
 
@@ -129,10 +137,14 @@ cd "$CURRENTPATH"
 # ************* Nuget ************************************************
 $nugetOutputPath = Join-Path $CURRENTPATH "Release-Builds" "build-output"
 
-dotnet build $solutionPath --configuration $pConfigurationCompat --verbosity minimal -p:GeneratePackageOnBuild=false
+# Per-config restore again (see the note at the first build) so the compat/non-compat package
+# graphs don't leak across these two builds.
+dotnet restore $solutionPath -p:Configuration=$pConfigurationCompat
+dotnet build $solutionPath --configuration $pConfigurationCompat --no-restore --verbosity minimal -p:GeneratePackageOnBuild=false
 dotnet pack $solutionPath --configuration $pConfigurationCompat --no-build --output $nugetOutputPath
 
-dotnet build $solutionPath --configuration $pConfiguration --verbosity minimal -p:GeneratePackageOnBuild=false
+dotnet restore $solutionPath -p:Configuration=$pConfiguration
+dotnet build $solutionPath --configuration $pConfiguration --no-restore --verbosity minimal -p:GeneratePackageOnBuild=false
 dotnet pack $solutionPath --configuration $pConfiguration --no-build --output $nugetOutputPath
 
 
