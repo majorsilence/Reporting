@@ -1,0 +1,12 @@
+{
+  "name": "Purchase Order",
+  "slug": "purchase-order",
+  "description": "A vendor/ship-to header, a line-item table, and a computed total.",
+  "tags": ["business", "procurement", "letter-size"],
+  "dataProvider": "Json",
+  "parameters": [],
+  "dataContract": {
+    "root": ["PONumber", "OrderDate", "ExpectedDelivery", "VendorName", "VendorAddress", "ShipToName", "ShipToAddress", "Terms"],
+    "root.Lines[]": ["Sku", "Description", "Quantity", "UnitCost"]
+  }
+}

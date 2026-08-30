@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Compatibility alias for Majorsilence.Reporting.DataProviders. The ".SkiaSharp"-suffixed ID
+    used to be the cross-platform SkiaSharp render path; the base ID is that build now (see
+    ../README.md). This package ships no assemblies — just a same-version dependency on
+    Majorsilence.Reporting.DataProviders so existing package references keep resolving.
+  -->
+  <PropertyGroup>
+    <PackageId>Majorsilence.Reporting.DataProviders.SkiaSharp</PackageId>
+    <Description>Compatibility alias — depends on Majorsilence.Reporting.DataProviders at the same version. Reporting renders through SkiaSharp (Majorsilence.Forms.Drawing) in every configuration now, so the base package is the former ".SkiaSharp" build. Reference Majorsilence.Reporting.DataProviders directly in new code.</Description>
+    <PackageTags>rdl;rdlc;ssrs;reporting;data;skiasharp;metapackage;compatibility</PackageTags>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\DataProviders\Majorsilence.Reporting.DataProviders.csproj" />
+  </ItemGroup>
+
+</Project>

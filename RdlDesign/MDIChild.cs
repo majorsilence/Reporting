@@ -3,9 +3,9 @@ using System;
 using System.Drawing;
 using System.Collections;
 using System.ComponentModel;
-using System.Windows.Forms;
+using Majorsilence.Forms;
 using System.Data;
-using System.Drawing.Printing;
+using Majorsilence.Forms.Printing;
 using System.IO;
 using System.Xml;
 using EncryptionProvider;
@@ -50,12 +50,11 @@ namespace Majorsilence.Reporting.RdlDesign
             // 
             // MDIChild
             // 
-            this.AutoScaleBaseSize = new System.Drawing.Size(5, 13);
             this.ClientSize = new System.Drawing.Size(width, height);
 
             this.Name = "";
             this.Text = "";
-            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MDIChild_Closing);
+            this.FormClosing += this.MDIChild_Closing;
 
             this.ResumeLayout(false);
         }
@@ -175,11 +174,42 @@ namespace Majorsilence.Reporting.RdlDesign
             Uri file = SourceFile;
             if (file == null || file.LocalPath == "")		// if no file name then do SaveAs
             {
-                return FileSaveAs();
+                // FileSaveAs is async (FileDialog.ShowDialog(Form) is async in Majorsilence.Forms
+                // -- see MIGRATION-NOTES.md), but FileSave() itself has many synchronous callers
+                // up through OkToClose()/MDIChild_Closing that aren't worth threading async
+                // through. Sync-over-async bridge, matching the same pattern already used
+                // elsewhere in this codebase (e.g. RdlViewer.cs's ShowParameters getter).
+                return Task.Run(async () => await FileSaveAs()).GetAwaiter().GetResult();
             }
             string rdl = GetRdlText();
 
             return FileSave(file, rdl);
+        }
+
+        // EncryptionProvider.Prompt.ShowDialog is compiled only under `#if WINDOWS || NET48`
+        // (a raw System.Windows.Forms.Form, never migrated) -- unavailable to this project's
+        // plain net8.0/net10.0 TFM. Same replacement as RdlViewer.Forms/RdlViewer.cs's
+        // PromptForPasskey: a small local dialog built directly on Majorsilence.Forms, using the
+        // default CenterScreen StartPosition instead of Prompt's manual Screen.FromControl/
+        // WorkingArea centering math.
+        private static string PromptForPasskey(string text, string caption)
+        {
+            using var prompt = new Majorsilence.Forms.Form
+            {
+                Size = new System.Drawing.Size(500, 200),
+                FormBorderStyle = Majorsilence.Forms.FormBorderStyle.FixedDialog,
+                Text = caption,
+            };
+            var textLabel = new Majorsilence.Forms.Label { Left = 50, Top = 20, Width = 400, Height = 60, Text = text };
+            var textBox = new Majorsilence.Forms.TextBox { Left = 50, Top = 100, Width = 400 };
+            var confirmation = new Majorsilence.Forms.Button { Text = "OK", Left = 350, Width = 100, Top = 120 };
+            confirmation.Click += (sender, e) => { prompt.Close(); };
+            prompt.Controls.Add(textBox);
+            prompt.Controls.Add(confirmation);
+            prompt.Controls.Add(textLabel);
+            prompt.AcceptButton = confirmation;
+            prompt.ShowDialog();
+            return textBox.Text;
         }
 
         private String doPossibleEncryption(Uri file, String rdl)
@@ -187,7 +217,7 @@ namespace Majorsilence.Reporting.RdlDesign
             String extension = Path.GetExtension(file.LocalPath);
             if (extension.Equals(".encrypted"))
             {
-                StringEncryption enc = new StringEncryption(Prompt.ShowDialog("Please enter passkey", "Passkey?"));
+                StringEncryption enc = new StringEncryption(PromptForPasskey("Please enter passkey", "Passkey?"));
                 try
                 {
                     rdl = enc.Encrypt(rdl);
@@ -279,7 +309,7 @@ namespace Majorsilence.Reporting.RdlDesign
 
             try
             {
-                if (sfd.ShowDialog(this) != DialogResult.OK)
+                if (await sfd.ShowDialogAsync(this) != DialogResult.OK)
                     return false;
 
                 // save the report in the requested rendered format 
@@ -309,7 +339,7 @@ namespace Majorsilence.Reporting.RdlDesign
             }
         }
 
-        public bool FileSaveAs()
+        public async Task<bool> FileSaveAs()
         {
             SaveFileDialog sfd = new SaveFileDialog();
             sfd.Filter = Strings.MDIChild_FileSaveAs_RDLFilter;
@@ -320,7 +350,7 @@ namespace Majorsilence.Reporting.RdlDesign
             sfd.FileName = file == null ? "*.rdl" : file.LocalPath;
             try
             {
-                if (sfd.ShowDialog(this) != DialogResult.OK)
+                if (await sfd.ShowDialogAsync(this) != DialogResult.OK)
                     return false;
 
                 // User wants to save!
@@ -390,7 +420,7 @@ namespace Majorsilence.Reporting.RdlDesign
                 
                 try
                 {
-                    StringEncryption enc = new StringEncryption(Prompt.ShowDialog("Please enter the passkey", "Passkey?"));
+                    StringEncryption enc = new StringEncryption(PromptForPasskey("Please enter the passkey", "Passkey?"));
                     rdl = enc.Decrypt(rdl);
                 }
                 catch (Exception)
@@ -516,20 +546,15 @@ namespace Majorsilence.Reporting.RdlDesign
             set { this.rdlDesigner.ZoomMode = value; }
         }
 
-        /// <summary>
-        /// Print the report.  
-        /// </summary>
-        public void Print(PrintDocument pd)
-        {
-            this.rdlDesigner.Print(pd);
-        }
+        // Print(PrintDocument) removed -- see RdlEditPreview.cs and MIGRATION-NOTES.md's D2
+        // printing-redesign writeup. Use SaveAs(path, OutputPresentationType.PDF) instead.
 
         public async Task SaveAs(string filename, OutputPresentationType type)
         {
             await rdlDesigner.SaveAs(filename, type);
         }
 
-        private void MDIChild_Closing(object sender, System.Windows.Forms.FormClosingEventArgs e)
+        private void MDIChild_Closing(object sender, Majorsilence.Forms.FormClosingEventArgs e)
         {
             if (!OkToClose())
             {

@@ -4,36 +4,28 @@
         <RootNamespace>Majorsilence.Reporting.Cri</RootNamespace>
         <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
         <AssemblyTitle>RdlCri</AssemblyTitle>
-        <Description>RDL Project CustomReportItem Library</Description>
+        <Description>CustomReportItem library for Majorsilence Reporting — barcodes (EAN, Code 128, and more) and QR codes as native RDL report items via ZXing. SkiaSharp-based rendering for Linux, macOS, Windows, and containers. Targets .NET 8 and .NET 10.</Description>
+        <PackageTags>rdl;rdlc;ssrs;reporting;barcode;qrcode;crystal-reports-alternative;cross-platform;dotnet</PackageTags>
         <DelaySign>false</DelaySign>
         <PackageId>Majorsilence.Reporting.RdlCri</PackageId>
-        <Configurations>Debug;Release;Debug-DrawingCompat;Release-DrawingCompat</Configurations>
-		<TargetFrameworks>net48;net8.0;net10.0</TargetFrameworks>
-        <TargetFrameworks Condition="'$(OS)' == 'Unix'">net8.0;net10.0</TargetFrameworks>
+        <Configurations>Debug;Release</Configurations>
+		<TargetFrameworks>net8.0;net10.0</TargetFrameworks>
 		<WarningsAsErrors>4014</WarningsAsErrors>
         <IsPackable>true</IsPackable>
         <Nullable>enable</Nullable>
     </PropertyGroup>
-    <PropertyGroup Condition="'$(TargetFramework)' != 'net48'">
+    <PropertyGroup>
         <IsAotCompatible>true</IsAotCompatible>
         <EnableTrimAnalyzer>true</EnableTrimAnalyzer>
     </PropertyGroup>
-	<PropertyGroup Condition="'$(Configuration)' == 'Debug-DrawingCompat' Or '$(Configuration)' == 'Release-DrawingCompat'">
-		<PackageId>Majorsilence.Reporting.RdlCri.SkiaSharp</PackageId>
-	</PropertyGroup>
     <ItemGroup>
         <ProjectReference Include="..\RdlEngine\Majorsilence.Reporting.RdlEngine.csproj" />
     </ItemGroup>
     <ItemGroup>
         <PackageReference Include="ZXing.Net" />
+        <PackageReference Include="ZXing.Net.Bindings.SkiaSharp" />
     </ItemGroup>
-	<ItemGroup Condition="'$(DrawingCompat)' != 'true' And '$(OS)' == 'Windows_NT'">
-		<PackageReference Include="ZXing.Net.Bindings.Windows.Compatibility" />
-	</ItemGroup>
-	<ItemGroup Condition="'$(DrawingCompat)' == 'true'">
-		<PackageReference Include="ZXing.Net.Bindings.SkiaSharp" />
-	</ItemGroup>
-		
+
     <ItemGroup>
         <Folder Include="Properties\" />
     </ItemGroup>

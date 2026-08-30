@@ -1,12 +1,11 @@
 using System;
-using System.Windows.Forms;
-using System.Drawing;
+using Majorsilence.Forms;
 using System.ComponentModel;
 using System.Collections;
 
 namespace Majorsilence.Reporting.RdlReader
 {
-	public partial class RdlReader : System.Windows.Forms.Form
+	public partial class RdlReader : Majorsilence.Forms.Form
 	{
 		#region Windows Form Designer generated code
 		private System.ComponentModel.Container components = null;
@@ -15,48 +14,47 @@ private MDIChild printChild=null;
 
 		private void InitializeComponent()
 		{
-			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(RdlReader));
-            this.DoubleBuffered = true;
-			this.menuStrip1 = new System.Windows.Forms.MenuStrip();
-			this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.openToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.closeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
-			this.saveAsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.printToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
-			this.recentFilesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
-			this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.editToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.selectionToolToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.toolStripSeparator4 = new System.Windows.Forms.ToolStripSeparator();
-			this.copyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.toolStripSeparator5 = new System.Windows.Forms.ToolStripSeparator();
-			this.findToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.viewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.zoomToToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.actualSizeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.fitPageToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.fitWidthToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.toolStripSeparator6 = new System.Windows.Forms.ToolStripSeparator();
-			this.pageLayoutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.singlePageToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.continuousToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.facingToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.continuousFacingToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.windowToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.cascadeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.tileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.horizontallyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.verticallyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.closeAllToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.toolStrip1 = new System.Windows.Forms.ToolStrip();
-			this.toolStripButtonOpen = new System.Windows.Forms.ToolStripButton();
-			this.toolStripButtonSave = new System.Windows.Forms.ToolStripButton();
-			this.toolStripButtonPrint = new System.Windows.Forms.ToolStripButton();
+			Majorsilence.Forms.ComponentResourceManager resources = new Majorsilence.Forms.ComponentResourceManager(typeof(RdlReader));
+			this.menuStrip1 = new Majorsilence.Forms.MenuStrip();
+			this.fileToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
+			this.openToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
+			this.closeToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
+			this.toolStripSeparator1 = new Majorsilence.Forms.ToolStripSeparator();
+			this.saveAsToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
+			this.printToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
+			this.toolStripSeparator2 = new Majorsilence.Forms.ToolStripSeparator();
+			this.recentFilesToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
+			this.toolStripSeparator3 = new Majorsilence.Forms.ToolStripSeparator();
+			this.exitToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
+			this.editToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
+			this.selectionToolToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
+			this.toolStripSeparator4 = new Majorsilence.Forms.ToolStripSeparator();
+			this.copyToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
+			this.toolStripSeparator5 = new Majorsilence.Forms.ToolStripSeparator();
+			this.findToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
+			this.viewToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
+			this.zoomToToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
+			this.actualSizeToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
+			this.fitPageToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
+			this.fitWidthToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
+			this.toolStripSeparator6 = new Majorsilence.Forms.ToolStripSeparator();
+			this.pageLayoutToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
+			this.singlePageToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
+			this.continuousToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
+			this.facingToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
+			this.continuousFacingToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
+			this.windowToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
+			this.cascadeToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
+			this.tileToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
+			this.horizontallyToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
+			this.verticallyToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
+			this.closeAllToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
+			this.helpToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
+			this.aboutToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
+			this.toolStrip1 = new Majorsilence.Forms.ToolStrip();
+			this.toolStripButtonOpen = new Majorsilence.Forms.ToolStripButton();
+			this.toolStripButtonSave = new Majorsilence.Forms.ToolStripButton();
+			this.toolStripButtonPrint = new Majorsilence.Forms.ToolStripButton();
 			this.menuStrip1.SuspendLayout();
 			this.toolStrip1.SuspendLayout();
 			this.SuspendLayout();
@@ -64,7 +62,7 @@ private MDIChild printChild=null;
 			// menuStrip1
 			// 
 			resources.ApplyResources(this.menuStrip1, "menuStrip1");
-			this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+			this.menuStrip1.Items.AddRange(new Majorsilence.Forms.ToolStripItem[] {
             this.fileToolStripMenuItem,
             this.editToolStripMenuItem,
             this.viewToolStripMenuItem,
@@ -76,7 +74,7 @@ private MDIChild printChild=null;
 			// fileToolStripMenuItem
 			// 
 			resources.ApplyResources(this.fileToolStripMenuItem, "fileToolStripMenuItem");
-			this.fileToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+			this.fileToolStripMenuItem.DropDownItems.AddRange(new Majorsilence.Forms.ToolStripItem[] {
             this.openToolStripMenuItem,
             this.closeToolStripMenuItem,
             this.toolStripSeparator1,
@@ -92,13 +90,13 @@ private MDIChild printChild=null;
 			// 
 			resources.ApplyResources(this.openToolStripMenuItem, "openToolStripMenuItem");
 			this.openToolStripMenuItem.Name = "openToolStripMenuItem";
-			this.openToolStripMenuItem.Click += new System.EventHandler(this.menuFileOpen_Click);
+			this.openToolStripMenuItem.Click += this.menuFileOpen_Click;
 			// 
 			// closeToolStripMenuItem
 			// 
 			resources.ApplyResources(this.closeToolStripMenuItem, "closeToolStripMenuItem");
 			this.closeToolStripMenuItem.Name = "closeToolStripMenuItem";
-			this.closeToolStripMenuItem.Click += new System.EventHandler(this.menuFileClose_Click);
+			this.closeToolStripMenuItem.Click += this.menuFileClose_Click;
 			// 
 			// toolStripSeparator1
 			// 
@@ -109,13 +107,13 @@ private MDIChild printChild=null;
 			// 
 			resources.ApplyResources(this.saveAsToolStripMenuItem, "saveAsToolStripMenuItem");
 			this.saveAsToolStripMenuItem.Name = "saveAsToolStripMenuItem";
-			this.saveAsToolStripMenuItem.Click += new System.EventHandler(this.menuFileSaveAs_Click);
+			this.saveAsToolStripMenuItem.Click += this.menuFileSaveAs_Click;
 			// 
 			// printToolStripMenuItem
 			// 
 			resources.ApplyResources(this.printToolStripMenuItem, "printToolStripMenuItem");
 			this.printToolStripMenuItem.Name = "printToolStripMenuItem";
-			this.printToolStripMenuItem.Click += new System.EventHandler(this.menuFilePrint_Click);
+			this.printToolStripMenuItem.Click += this.menuFilePrint_Click;
 			// 
 			// toolStripSeparator2
 			// 
@@ -136,12 +134,12 @@ private MDIChild printChild=null;
 			// 
 			resources.ApplyResources(this.exitToolStripMenuItem, "exitToolStripMenuItem");
 			this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
-			this.exitToolStripMenuItem.Click += new System.EventHandler(this.menuFileExit_Click);
+			this.exitToolStripMenuItem.Click += this.menuFileExit_Click;
 			// 
 			// editToolStripMenuItem
 			// 
 			resources.ApplyResources(this.editToolStripMenuItem, "editToolStripMenuItem");
-			this.editToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+			this.editToolStripMenuItem.DropDownItems.AddRange(new Majorsilence.Forms.ToolStripItem[] {
             this.selectionToolToolStripMenuItem,
             this.toolStripSeparator4,
             this.copyToolStripMenuItem,
@@ -153,7 +151,7 @@ private MDIChild printChild=null;
 			// 
 			resources.ApplyResources(this.selectionToolToolStripMenuItem, "selectionToolToolStripMenuItem");
 			this.selectionToolToolStripMenuItem.Name = "selectionToolToolStripMenuItem";
-			this.selectionToolToolStripMenuItem.Click += new System.EventHandler(this.menuSelection_Click);
+			this.selectionToolToolStripMenuItem.Click += this.menuSelection_Click;
 			// 
 			// toolStripSeparator4
 			// 
@@ -164,7 +162,7 @@ private MDIChild printChild=null;
 			// 
 			resources.ApplyResources(this.copyToolStripMenuItem, "copyToolStripMenuItem");
 			this.copyToolStripMenuItem.Name = "copyToolStripMenuItem";
-			this.copyToolStripMenuItem.Click += new System.EventHandler(this.menuCopy_Click);
+			this.copyToolStripMenuItem.Click += this.menuCopy_Click;
 			// 
 			// toolStripSeparator5
 			// 
@@ -175,12 +173,12 @@ private MDIChild printChild=null;
 			// 
 			resources.ApplyResources(this.findToolStripMenuItem, "findToolStripMenuItem");
 			this.findToolStripMenuItem.Name = "findToolStripMenuItem";
-			this.findToolStripMenuItem.Click += new System.EventHandler(this.menuFind_Click);
+			this.findToolStripMenuItem.Click += this.menuFind_Click;
 			// 
 			// viewToolStripMenuItem
 			// 
 			resources.ApplyResources(this.viewToolStripMenuItem, "viewToolStripMenuItem");
-			this.viewToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+			this.viewToolStripMenuItem.DropDownItems.AddRange(new Majorsilence.Forms.ToolStripItem[] {
             this.zoomToToolStripMenuItem,
             this.actualSizeToolStripMenuItem,
             this.fitPageToolStripMenuItem,
@@ -193,25 +191,25 @@ private MDIChild printChild=null;
 			// 
 			resources.ApplyResources(this.zoomToToolStripMenuItem, "zoomToToolStripMenuItem");
 			this.zoomToToolStripMenuItem.Name = "zoomToToolStripMenuItem";
-			this.zoomToToolStripMenuItem.Click += new System.EventHandler(this.menuPLZoomTo_Click);
+			this.zoomToToolStripMenuItem.Click += this.menuPLZoomTo_Click;
 			// 
 			// actualSizeToolStripMenuItem
 			// 
 			resources.ApplyResources(this.actualSizeToolStripMenuItem, "actualSizeToolStripMenuItem");
 			this.actualSizeToolStripMenuItem.Name = "actualSizeToolStripMenuItem";
-			this.actualSizeToolStripMenuItem.Click += new System.EventHandler(this.menuPLActualSize_Click);
+			this.actualSizeToolStripMenuItem.Click += this.menuPLActualSize_Click;
 			// 
 			// fitPageToolStripMenuItem
 			// 
 			resources.ApplyResources(this.fitPageToolStripMenuItem, "fitPageToolStripMenuItem");
 			this.fitPageToolStripMenuItem.Name = "fitPageToolStripMenuItem";
-			this.fitPageToolStripMenuItem.Click += new System.EventHandler(this.menuPLFitPage_Click);
+			this.fitPageToolStripMenuItem.Click += this.menuPLFitPage_Click;
 			// 
 			// fitWidthToolStripMenuItem
 			// 
 			resources.ApplyResources(this.fitWidthToolStripMenuItem, "fitWidthToolStripMenuItem");
 			this.fitWidthToolStripMenuItem.Name = "fitWidthToolStripMenuItem";
-			this.fitWidthToolStripMenuItem.Click += new System.EventHandler(this.menuPLFitWidth_Click);
+			this.fitWidthToolStripMenuItem.Click += this.menuPLFitWidth_Click;
 			// 
 			// toolStripSeparator6
 			// 
@@ -221,7 +219,7 @@ private MDIChild printChild=null;
 			// pageLayoutToolStripMenuItem
 			// 
 			resources.ApplyResources(this.pageLayoutToolStripMenuItem, "pageLayoutToolStripMenuItem");
-			this.pageLayoutToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+			this.pageLayoutToolStripMenuItem.DropDownItems.AddRange(new Majorsilence.Forms.ToolStripItem[] {
             this.singlePageToolStripMenuItem,
             this.continuousToolStripMenuItem,
             this.facingToolStripMenuItem,
@@ -232,30 +230,30 @@ private MDIChild printChild=null;
 			// 
 			resources.ApplyResources(this.singlePageToolStripMenuItem, "singlePageToolStripMenuItem");
 			this.singlePageToolStripMenuItem.Name = "singlePageToolStripMenuItem";
-			this.singlePageToolStripMenuItem.Click += new System.EventHandler(this.menuPLSinglePage_Click);
+			this.singlePageToolStripMenuItem.Click += this.menuPLSinglePage_Click;
 			// 
 			// continuousToolStripMenuItem
 			// 
 			resources.ApplyResources(this.continuousToolStripMenuItem, "continuousToolStripMenuItem");
 			this.continuousToolStripMenuItem.Name = "continuousToolStripMenuItem";
-			this.continuousToolStripMenuItem.Click += new System.EventHandler(this.menuPLContinuous_Click);
+			this.continuousToolStripMenuItem.Click += this.menuPLContinuous_Click;
 			// 
 			// facingToolStripMenuItem
 			// 
 			resources.ApplyResources(this.facingToolStripMenuItem, "facingToolStripMenuItem");
 			this.facingToolStripMenuItem.Name = "facingToolStripMenuItem";
-			this.facingToolStripMenuItem.Click += new System.EventHandler(this.menuPLFacing_Click);
+			this.facingToolStripMenuItem.Click += this.menuPLFacing_Click;
 			// 
 			// continuousFacingToolStripMenuItem
 			// 
 			resources.ApplyResources(this.continuousFacingToolStripMenuItem, "continuousFacingToolStripMenuItem");
 			this.continuousFacingToolStripMenuItem.Name = "continuousFacingToolStripMenuItem";
-			this.continuousFacingToolStripMenuItem.Click += new System.EventHandler(this.menuPLContinuousFacing_Click);
+			this.continuousFacingToolStripMenuItem.Click += this.menuPLContinuousFacing_Click;
 			// 
 			// windowToolStripMenuItem
 			// 
 			resources.ApplyResources(this.windowToolStripMenuItem, "windowToolStripMenuItem");
-			this.windowToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+			this.windowToolStripMenuItem.DropDownItems.AddRange(new Majorsilence.Forms.ToolStripItem[] {
             this.cascadeToolStripMenuItem,
             this.tileToolStripMenuItem,
             this.closeAllToolStripMenuItem});
@@ -265,12 +263,12 @@ private MDIChild printChild=null;
 			// 
 			resources.ApplyResources(this.cascadeToolStripMenuItem, "cascadeToolStripMenuItem");
 			this.cascadeToolStripMenuItem.Name = "cascadeToolStripMenuItem";
-			this.cascadeToolStripMenuItem.Click += new System.EventHandler(this.menuWndCascade_Click);
+			this.cascadeToolStripMenuItem.Click += this.menuWndCascade_Click;
 			// 
 			// tileToolStripMenuItem
 			// 
 			resources.ApplyResources(this.tileToolStripMenuItem, "tileToolStripMenuItem");
-			this.tileToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+			this.tileToolStripMenuItem.DropDownItems.AddRange(new Majorsilence.Forms.ToolStripItem[] {
             this.horizontallyToolStripMenuItem,
             this.verticallyToolStripMenuItem});
 			this.tileToolStripMenuItem.Name = "tileToolStripMenuItem";
@@ -279,24 +277,24 @@ private MDIChild printChild=null;
 			// 
 			resources.ApplyResources(this.horizontallyToolStripMenuItem, "horizontallyToolStripMenuItem");
 			this.horizontallyToolStripMenuItem.Name = "horizontallyToolStripMenuItem";
-			this.horizontallyToolStripMenuItem.Click += new System.EventHandler(this.menuWndTileH_Click);
+			this.horizontallyToolStripMenuItem.Click += this.menuWndTileH_Click;
 			// 
 			// verticallyToolStripMenuItem
 			// 
 			resources.ApplyResources(this.verticallyToolStripMenuItem, "verticallyToolStripMenuItem");
 			this.verticallyToolStripMenuItem.Name = "verticallyToolStripMenuItem";
-			this.verticallyToolStripMenuItem.Click += new System.EventHandler(this.menuWndTileV_Click);
+			this.verticallyToolStripMenuItem.Click += this.menuWndTileV_Click;
 			// 
 			// closeAllToolStripMenuItem
 			// 
 			resources.ApplyResources(this.closeAllToolStripMenuItem, "closeAllToolStripMenuItem");
 			this.closeAllToolStripMenuItem.Name = "closeAllToolStripMenuItem";
-			this.closeAllToolStripMenuItem.Click += new System.EventHandler(this.menuWndCloseAll_Click);
+			this.closeAllToolStripMenuItem.Click += this.menuWndCloseAll_Click;
 			// 
 			// helpToolStripMenuItem
 			// 
 			resources.ApplyResources(this.helpToolStripMenuItem, "helpToolStripMenuItem");
-			this.helpToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+			this.helpToolStripMenuItem.DropDownItems.AddRange(new Majorsilence.Forms.ToolStripItem[] {
             this.aboutToolStripMenuItem});
 			this.helpToolStripMenuItem.Name = "helpToolStripMenuItem";
 			// 
@@ -304,12 +302,12 @@ private MDIChild printChild=null;
 			// 
 			resources.ApplyResources(this.aboutToolStripMenuItem, "aboutToolStripMenuItem");
 			this.aboutToolStripMenuItem.Name = "aboutToolStripMenuItem";
-			this.aboutToolStripMenuItem.Click += new System.EventHandler(this.menuHelpAbout_Click);
+			this.aboutToolStripMenuItem.Click += this.menuHelpAbout_Click;
 			// 
 			// toolStrip1
 			// 
 			resources.ApplyResources(this.toolStrip1, "toolStrip1");
-			this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+			this.toolStrip1.Items.AddRange(new Majorsilence.Forms.ToolStripItem[] {
             this.toolStripButtonOpen,
             this.toolStripButtonSave,
             this.toolStripButtonPrint});
@@ -318,26 +316,26 @@ private MDIChild printChild=null;
 			// toolStripButtonOpen
 			// 
 			resources.ApplyResources(this.toolStripButtonOpen, "toolStripButtonOpen");
-			this.toolStripButtonOpen.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+			this.toolStripButtonOpen.DisplayStyle = Majorsilence.Forms.ToolStripItemDisplayStyle.Image;
 			this.toolStripButtonOpen.Image = global::RdlReader.Properties.Resources.document_open;
 			this.toolStripButtonOpen.Name = "toolStripButtonOpen";
-			this.toolStripButtonOpen.Click += new System.EventHandler(this.menuFileOpen_Click);
+			this.toolStripButtonOpen.Click += this.menuFileOpen_Click;
 			// 
 			// toolStripButtonSave
 			// 
 			resources.ApplyResources(this.toolStripButtonSave, "toolStripButtonSave");
-			this.toolStripButtonSave.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+			this.toolStripButtonSave.DisplayStyle = Majorsilence.Forms.ToolStripItemDisplayStyle.Image;
 			this.toolStripButtonSave.Image = global::RdlReader.Properties.Resources.document_save;
 			this.toolStripButtonSave.Name = "toolStripButtonSave";
-			this.toolStripButtonSave.Click += new System.EventHandler(this.menuFileSaveAs_Click);
+			this.toolStripButtonSave.Click += this.menuFileSaveAs_Click;
 			// 
 			// toolStripButtonPrint
 			// 
 			resources.ApplyResources(this.toolStripButtonPrint, "toolStripButtonPrint");
-			this.toolStripButtonPrint.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+			this.toolStripButtonPrint.DisplayStyle = Majorsilence.Forms.ToolStripItemDisplayStyle.Image;
 			this.toolStripButtonPrint.Image = global::RdlReader.Properties.Resources.document_print;
 			this.toolStripButtonPrint.Name = "toolStripButtonPrint";
-			this.toolStripButtonPrint.Click += new System.EventHandler(this.menuFilePrint_Click);
+			this.toolStripButtonPrint.Click += this.menuFilePrint_Click;
 			// 
 			// RdlReader
 			// 
@@ -346,7 +344,7 @@ private MDIChild printChild=null;
 			this.Controls.Add(this.menuStrip1);
 			this.MainMenuStrip = this.menuStrip1;
 			this.Name = "RdlReader";
-			this.WindowState = System.Windows.Forms.FormWindowState.Maximized;
+			this.WindowState = Majorsilence.Forms.FormWindowState.Maximized;
 			this.menuStrip1.ResumeLayout(false);
 			this.menuStrip1.PerformLayout();
 			this.toolStrip1.ResumeLayout(false);

@@ -1,27 +1,26 @@
 using System;
-using System.Windows.Forms;
-using System.Drawing;
+using Majorsilence.Forms;
 using System.ComponentModel;
 using System.Collections;
 
 namespace Majorsilence.Reporting.RdlDesign
 {
-    internal partial class DialogValidValues : System.Windows.Forms.Form
+    internal partial class DialogValidValues : Majorsilence.Forms.Form
 	{
 		#region Windows Form Designer generated code
-private System.Windows.Forms.DataGridView dgParms;
-private System.Windows.Forms.Button bOK;
-private System.Windows.Forms.Button bCancel;
-private System.Windows.Forms.Button bDelete;
+private Majorsilence.Forms.DataGridView dgParms;
+private Majorsilence.Forms.Button bOK;
+private Majorsilence.Forms.Button bCancel;
+private Majorsilence.Forms.Button bDelete;
 private System.ComponentModel.Container components = null;
 
 		private void InitializeComponent()
 		{
-			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(DialogValidValues));
-			this.dgParms = new System.Windows.Forms.DataGridView();
-			this.bOK = new System.Windows.Forms.Button();
-			this.bCancel = new System.Windows.Forms.Button();
-			this.bDelete = new System.Windows.Forms.Button();
+			Majorsilence.Forms.ComponentResourceManager resources = new Majorsilence.Forms.ComponentResourceManager(typeof(DialogValidValues));
+			this.dgParms = new Majorsilence.Forms.DataGridView();
+			this.bOK = new Majorsilence.Forms.Button();
+			this.bCancel = new Majorsilence.Forms.Button();
+			this.bDelete = new Majorsilence.Forms.Button();
 			((System.ComponentModel.ISupportInitialize)(this.dgParms)).BeginInit();
 			this.SuspendLayout();
 			// 
@@ -34,20 +33,20 @@ private System.ComponentModel.Container components = null;
 			// bOK
 			// 
 			resources.ApplyResources(this.bOK, "bOK");
-			this.bOK.DialogResult = System.Windows.Forms.DialogResult.OK;
+			this.bOK.DialogResult = Majorsilence.Forms.DialogResult.OK;
 			this.bOK.Name = "bOK";
 			// 
 			// bCancel
 			// 
 			resources.ApplyResources(this.bCancel, "bCancel");
-			this.bCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
+			this.bCancel.DialogResult = Majorsilence.Forms.DialogResult.Cancel;
 			this.bCancel.Name = "bCancel";
 			// 
 			// bDelete
 			// 
 			resources.ApplyResources(this.bDelete, "bDelete");
 			this.bDelete.Name = "bDelete";
-			this.bDelete.Click += new System.EventHandler(this.bDelete_Click);
+			this.bDelete.Click += this.bDelete_Click;
 			// 
 			// DialogValidValues
 			// 
@@ -63,7 +62,7 @@ private System.ComponentModel.Container components = null;
 			this.MinimizeBox = false;
 			this.Name = "DialogValidValues";
 			this.ShowInTaskbar = false;
-			this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
+			this.SizeGripStyle = Majorsilence.Forms.SizeGripStyle.Hide;
 			((System.ComponentModel.ISupportInitialize)(this.dgParms)).EndInit();
 			this.ResumeLayout(false);
 

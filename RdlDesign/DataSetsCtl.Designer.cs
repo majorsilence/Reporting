@@ -32,31 +32,31 @@ namespace Majorsilence.Reporting.RdlDesign
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(DataSetsCtl));
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
+            Majorsilence.Forms.ComponentResourceManager resources = new Majorsilence.Forms.ComponentResourceManager(typeof(DataSetsCtl));
+            Majorsilence.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new Majorsilence.Forms.DataGridViewCellStyle();
             this.DoubleBuffered = true;
-            this.splitContainer1 = new System.Windows.Forms.SplitContainer();
-            this.panel2 = new System.Windows.Forms.Panel();
-            this.panel4 = new System.Windows.Forms.Panel();
-            this.scintillaSQL = new ScintillaNET.Scintilla();
-            this.panel3 = new System.Windows.Forms.Panel();
-            this.bRefresh = new System.Windows.Forms.Button();
-            this.bEditSQL = new System.Windows.Forms.Button();
-            this.panel1 = new System.Windows.Forms.Panel();
-            this.lDataSetName = new System.Windows.Forms.Label();
-            this.tbDSName = new System.Windows.Forms.TextBox();
-            this.tbTimeout = new System.Windows.Forms.NumericUpDown();
-            this.label3 = new System.Windows.Forms.Label();
-            this.label1 = new System.Windows.Forms.Label();
-            this.cbDataSource = new System.Windows.Forms.ComboBox();
-            this.lDataSource = new System.Windows.Forms.Label();
-            this.bDeleteField = new System.Windows.Forms.Button();
-            this.dgFields = new System.Windows.Forms.DataGridView();
-            this.dgtbName = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dgtbQueryName = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dgtbValue = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dgtbTypeName = new System.Windows.Forms.DataGridViewComboBoxColumn();
-            this.label2 = new System.Windows.Forms.Label();
+            this.splitContainer1 = new Majorsilence.Forms.SplitContainer();
+            this.panel2 = new Majorsilence.Forms.Panel();
+            this.panel4 = new Majorsilence.Forms.Panel();
+            this.scintillaSQL = new Majorsilence.Reporting.RdlDesign.Syntax.Scintilla();
+            this.panel3 = new Majorsilence.Forms.Panel();
+            this.bRefresh = new Majorsilence.Forms.Button();
+            this.bEditSQL = new Majorsilence.Forms.Button();
+            this.panel1 = new Majorsilence.Forms.Panel();
+            this.lDataSetName = new Majorsilence.Forms.Label();
+            this.tbDSName = new Majorsilence.Forms.TextBox();
+            this.tbTimeout = new Majorsilence.Forms.NumericUpDown();
+            this.label3 = new Majorsilence.Forms.Label();
+            this.label1 = new Majorsilence.Forms.Label();
+            this.cbDataSource = new Majorsilence.Forms.ComboBox();
+            this.lDataSource = new Majorsilence.Forms.Label();
+            this.bDeleteField = new Majorsilence.Forms.Button();
+            this.dgFields = new Majorsilence.Forms.DataGridView();
+            this.dgtbName = new Majorsilence.Forms.DataGridViewTextBoxColumn();
+            this.dgtbQueryName = new Majorsilence.Forms.DataGridViewTextBoxColumn();
+            this.dgtbValue = new Majorsilence.Forms.DataGridViewTextBoxColumn();
+            this.dgtbTypeName = new Majorsilence.Forms.DataGridViewComboBoxColumn();
+            this.label2 = new Majorsilence.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
@@ -101,10 +101,10 @@ namespace Majorsilence.Reporting.RdlDesign
             // scintillaSQL
             // 
             resources.ApplyResources(this.scintillaSQL, "scintillaSQL");
-            this.scintillaSQL.Lexer = ScintillaNET.Lexer.Sql;
+            this.scintillaSQL.Lexer = Majorsilence.Reporting.RdlDesign.Syntax.Lexer.Sql;
             this.scintillaSQL.Name = "scintillaSQL";
             this.scintillaSQL.UseTabs = false;
-            this.scintillaSQL.TextChanged += new System.EventHandler(this.tbSQL_TextChanged);
+            this.scintillaSQL.TextChanged += this.tbSQL_TextChanged;
             // 
             // panel3
             // 
@@ -117,13 +117,13 @@ namespace Majorsilence.Reporting.RdlDesign
             // 
             resources.ApplyResources(this.bRefresh, "bRefresh");
             this.bRefresh.Name = "bRefresh";
-            this.bRefresh.Click += new System.EventHandler(this.bRefresh_Click);
+            this.bRefresh.Click += this.bRefresh_Click;
             // 
             // bEditSQL
             // 
             resources.ApplyResources(this.bEditSQL, "bEditSQL");
             this.bEditSQL.Name = "bEditSQL";
-            this.bEditSQL.Click += new System.EventHandler(this.bEditSQL_Click);
+            this.bEditSQL.Click += this.bEditSQL_Click;
             // 
             // panel1
             // 
@@ -146,7 +146,7 @@ namespace Majorsilence.Reporting.RdlDesign
             // 
             resources.ApplyResources(this.tbDSName, "tbDSName");
             this.tbDSName.Name = "tbDSName";
-            this.tbDSName.TextChanged += new System.EventHandler(this.tbDSName_TextChanged);
+            this.tbDSName.TextChanged += this.tbDSName_TextChanged;
             // 
             // tbTimeout
             // 
@@ -157,7 +157,7 @@ namespace Majorsilence.Reporting.RdlDesign
             0,
             0});
             this.tbTimeout.Name = "tbTimeout";
-            this.tbTimeout.ValueChanged += new System.EventHandler(this.tbTimeout_ValueChanged);
+            this.tbTimeout.ValueChanged += this.tbTimeout_ValueChanged;
             // 
             // label3
             // 
@@ -172,9 +172,9 @@ namespace Majorsilence.Reporting.RdlDesign
             // cbDataSource
             // 
             resources.ApplyResources(this.cbDataSource, "cbDataSource");
-            this.cbDataSource.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cbDataSource.DropDownStyle = Majorsilence.Forms.ComboBoxStyle.DropDownList;
             this.cbDataSource.Name = "cbDataSource";
-            this.cbDataSource.SelectedIndexChanged += new System.EventHandler(this.cbDataSource_SelectedIndexChanged);
+            this.cbDataSource.SelectedIndexChanged += this.cbDataSource_SelectedIndexChanged;
             // 
             // lDataSource
             // 
@@ -185,21 +185,21 @@ namespace Majorsilence.Reporting.RdlDesign
             // 
             resources.ApplyResources(this.bDeleteField, "bDeleteField");
             this.bDeleteField.Name = "bDeleteField";
-            this.bDeleteField.Click += new System.EventHandler(this.bDeleteField_Click);
+            this.bDeleteField.Click += this.bDeleteField_Click;
             // 
             // dgFields
             // 
             resources.ApplyResources(this.dgFields, "dgFields");
-            this.dgFields.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
-            dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle1.BackColor = System.Drawing.SystemColors.ControlText;
-            dataGridViewCellStyle1.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            dataGridViewCellStyle1.ForeColor = System.Drawing.SystemColors.WindowText;
-            dataGridViewCellStyle1.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            this.dgFields.AutoSizeColumnsMode = Majorsilence.Forms.DataGridViewAutoSizeColumnsMode.Fill;
+            dataGridViewCellStyle1.Alignment = Majorsilence.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle1.BackColor = Majorsilence.Forms.SystemColors.ControlText;
+            dataGridViewCellStyle1.Font = new Majorsilence.Forms.Drawing.Font("Microsoft Sans Serif", 8.25F, Majorsilence.Forms.Drawing.FontStyle.Regular, Majorsilence.Forms.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            dataGridViewCellStyle1.ForeColor = Majorsilence.Forms.SystemColors.WindowText;
+            dataGridViewCellStyle1.SelectionBackColor = Majorsilence.Forms.SystemColors.Highlight;
+            dataGridViewCellStyle1.SelectionForeColor = Majorsilence.Forms.SystemColors.HighlightText;
+            dataGridViewCellStyle1.WrapMode = Majorsilence.Forms.DataGridViewTriState.True;
             this.dgFields.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
-            this.dgFields.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
+            this.dgFields.Columns.AddRange(new Majorsilence.Forms.DataGridViewColumn[] {
             this.dgtbName,
             this.dgtbQueryName,
             this.dgtbValue,
@@ -244,8 +244,8 @@ namespace Majorsilence.Reporting.RdlDesign
             "System.Boolean",
             "System.Byte"});
             this.dgtbTypeName.Name = "dgtbTypeName";
-            this.dgtbTypeName.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            this.dgtbTypeName.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
+            this.dgtbTypeName.Resizable = Majorsilence.Forms.DataGridViewTriState.True;
+            this.dgtbTypeName.SortMode = Majorsilence.Forms.DataGridViewColumnSortMode.Automatic;
             // 
             // label2
             // 
@@ -273,27 +273,27 @@ namespace Majorsilence.Reporting.RdlDesign
         }
         #endregion
 
-        private System.Windows.Forms.SplitContainer splitContainer1;
-        private System.Windows.Forms.NumericUpDown tbTimeout;
-        private System.Windows.Forms.Label label3;
-        private System.Windows.Forms.Button bRefresh;
-        private System.Windows.Forms.Button bEditSQL;
-        private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.ComboBox cbDataSource;
-        private System.Windows.Forms.Label lDataSource;
-        private System.Windows.Forms.TextBox tbDSName;
-        private System.Windows.Forms.Label lDataSetName;
-        private System.Windows.Forms.Button bDeleteField;
-        private System.Windows.Forms.DataGridView dgFields;
-		private System.Windows.Forms.Label label2;
-		private System.Windows.Forms.DataGridViewTextBoxColumn dgtbName;
-		private System.Windows.Forms.DataGridViewTextBoxColumn dgtbQueryName;
-		private System.Windows.Forms.DataGridViewTextBoxColumn dgtbValue;
-		private System.Windows.Forms.DataGridViewComboBoxColumn dgtbTypeName;
-        private System.Windows.Forms.Panel panel2;
-        private System.Windows.Forms.Panel panel4;
-        private ScintillaNET.Scintilla scintillaSQL;
-        private System.Windows.Forms.Panel panel3;
-        private System.Windows.Forms.Panel panel1;
+        private Majorsilence.Forms.SplitContainer splitContainer1;
+        private Majorsilence.Forms.NumericUpDown tbTimeout;
+        private Majorsilence.Forms.Label label3;
+        private Majorsilence.Forms.Button bRefresh;
+        private Majorsilence.Forms.Button bEditSQL;
+        private Majorsilence.Forms.Label label1;
+        private Majorsilence.Forms.ComboBox cbDataSource;
+        private Majorsilence.Forms.Label lDataSource;
+        private Majorsilence.Forms.TextBox tbDSName;
+        private Majorsilence.Forms.Label lDataSetName;
+        private Majorsilence.Forms.Button bDeleteField;
+        private Majorsilence.Forms.DataGridView dgFields;
+		private Majorsilence.Forms.Label label2;
+		private Majorsilence.Forms.DataGridViewTextBoxColumn dgtbName;
+		private Majorsilence.Forms.DataGridViewTextBoxColumn dgtbQueryName;
+		private Majorsilence.Forms.DataGridViewTextBoxColumn dgtbValue;
+		private Majorsilence.Forms.DataGridViewComboBoxColumn dgtbTypeName;
+        private Majorsilence.Forms.Panel panel2;
+        private Majorsilence.Forms.Panel panel4;
+        private Majorsilence.Reporting.RdlDesign.Syntax.Scintilla scintillaSQL;
+        private Majorsilence.Forms.Panel panel3;
+        private Majorsilence.Forms.Panel panel1;
     }
 }

@@ -2,9 +2,9 @@
 using System;
 using System.Collections;
 using System.ComponentModel;
-using System.Drawing;
+using Majorsilence.Forms.Drawing;
 using System.Data;
-using System.Windows.Forms;
+using Majorsilence.Forms;
 using System.Xml;
 using System.Text;
 using Majorsilence.Reporting.RdlDesign.Resources;
@@ -14,32 +14,32 @@ namespace Majorsilence.Reporting.RdlDesign
 	/// <summary>
 	/// Grouping specification: used for DataRegions (List, Chart, Table, Matrix), DataSets, group instances
 	/// </summary>
-	internal class GroupingCtl : System.Windows.Forms.UserControl, IProperty
+	internal class GroupingCtl : Majorsilence.Forms.UserControl, IProperty
 	{
 		private DesignXmlDraw _Draw;
 		private XmlNode _GroupingParent;
 		private DataTable _DataTable;
 
-		private System.Windows.Forms.Button bDelete;
-		private System.Windows.Forms.Button bUp;
-		private System.Windows.Forms.Button bDown;
-		private System.Windows.Forms.DataGridView dgGroup;
-		private System.Windows.Forms.Label label1;
-		private System.Windows.Forms.TextBox tbName;
-		private System.Windows.Forms.Label label2;
-		private System.Windows.Forms.Label label3;
-		private System.Windows.Forms.ComboBox cbLabelExpr;
-		private System.Windows.Forms.ComboBox cbParentExpr;
-		private System.Windows.Forms.CheckBox chkPBS;
-		private System.Windows.Forms.CheckBox chkPBE;
-		private System.Windows.Forms.CheckBox chkRepeatHeader;
-		private System.Windows.Forms.CheckBox chkGrpHeader;
-		private System.Windows.Forms.CheckBox chkRepeatFooter;
-		private System.Windows.Forms.CheckBox chkGrpFooter;
-		private System.Windows.Forms.Label lParent;
-		private System.Windows.Forms.Button bValueExpr;
-		private System.Windows.Forms.Button bLabelExpr;
-		private System.Windows.Forms.Button bParentExpr;
+		private Majorsilence.Forms.Button bDelete;
+		private Majorsilence.Forms.Button bUp;
+		private Majorsilence.Forms.Button bDown;
+		private Majorsilence.Forms.DataGridView dgGroup;
+		private Majorsilence.Forms.Label label1;
+		private Majorsilence.Forms.TextBox tbName;
+		private Majorsilence.Forms.Label label2;
+		private Majorsilence.Forms.Label label3;
+		private Majorsilence.Forms.ComboBox cbLabelExpr;
+		private Majorsilence.Forms.ComboBox cbParentExpr;
+		private Majorsilence.Forms.CheckBox chkPBS;
+		private Majorsilence.Forms.CheckBox chkPBE;
+		private Majorsilence.Forms.CheckBox chkRepeatHeader;
+		private Majorsilence.Forms.CheckBox chkGrpHeader;
+		private Majorsilence.Forms.CheckBox chkRepeatFooter;
+		private Majorsilence.Forms.CheckBox chkGrpFooter;
+		private Majorsilence.Forms.Label lParent;
+		private Majorsilence.Forms.Button bValueExpr;
+		private Majorsilence.Forms.Button bLabelExpr;
+		private Majorsilence.Forms.Button bParentExpr;
         private Button BtnCercaFormulaEsclusione;
         private TextBox TxtPageBreakCondition;
         private Label label4;
@@ -179,31 +179,31 @@ namespace Majorsilence.Reporting.RdlDesign
 		/// </summary>
 		private void InitializeComponent()
 		{
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(GroupingCtl));
+            Majorsilence.Forms.ComponentResourceManager resources = new Majorsilence.Forms.ComponentResourceManager(typeof(GroupingCtl));
             this.DoubleBuffered = true;
-            this.dgGroup = new System.Windows.Forms.DataGridView();
-            this.bDelete = new System.Windows.Forms.Button();
-            this.bUp = new System.Windows.Forms.Button();
-            this.bDown = new System.Windows.Forms.Button();
-            this.label1 = new System.Windows.Forms.Label();
-            this.tbName = new System.Windows.Forms.TextBox();
-            this.label2 = new System.Windows.Forms.Label();
-            this.label3 = new System.Windows.Forms.Label();
-            this.cbLabelExpr = new System.Windows.Forms.ComboBox();
-            this.cbParentExpr = new System.Windows.Forms.ComboBox();
-            this.lParent = new System.Windows.Forms.Label();
-            this.chkPBS = new System.Windows.Forms.CheckBox();
-            this.chkPBE = new System.Windows.Forms.CheckBox();
-            this.chkRepeatHeader = new System.Windows.Forms.CheckBox();
-            this.chkGrpHeader = new System.Windows.Forms.CheckBox();
-            this.chkRepeatFooter = new System.Windows.Forms.CheckBox();
-            this.chkGrpFooter = new System.Windows.Forms.CheckBox();
-            this.bValueExpr = new System.Windows.Forms.Button();
-            this.bLabelExpr = new System.Windows.Forms.Button();
-            this.bParentExpr = new System.Windows.Forms.Button();
-            this.BtnCercaFormulaEsclusione = new System.Windows.Forms.Button();
-            this.TxtPageBreakCondition = new System.Windows.Forms.TextBox();
-            this.label4 = new System.Windows.Forms.Label();
+            this.dgGroup = new Majorsilence.Forms.DataGridView();
+            this.bDelete = new Majorsilence.Forms.Button();
+            this.bUp = new Majorsilence.Forms.Button();
+            this.bDown = new Majorsilence.Forms.Button();
+            this.label1 = new Majorsilence.Forms.Label();
+            this.tbName = new Majorsilence.Forms.TextBox();
+            this.label2 = new Majorsilence.Forms.Label();
+            this.label3 = new Majorsilence.Forms.Label();
+            this.cbLabelExpr = new Majorsilence.Forms.ComboBox();
+            this.cbParentExpr = new Majorsilence.Forms.ComboBox();
+            this.lParent = new Majorsilence.Forms.Label();
+            this.chkPBS = new Majorsilence.Forms.CheckBox();
+            this.chkPBE = new Majorsilence.Forms.CheckBox();
+            this.chkRepeatHeader = new Majorsilence.Forms.CheckBox();
+            this.chkGrpHeader = new Majorsilence.Forms.CheckBox();
+            this.chkRepeatFooter = new Majorsilence.Forms.CheckBox();
+            this.chkGrpFooter = new Majorsilence.Forms.CheckBox();
+            this.bValueExpr = new Majorsilence.Forms.Button();
+            this.bLabelExpr = new Majorsilence.Forms.Button();
+            this.bParentExpr = new Majorsilence.Forms.Button();
+            this.BtnCercaFormulaEsclusione = new Majorsilence.Forms.Button();
+            this.TxtPageBreakCondition = new Majorsilence.Forms.TextBox();
+            this.label4 = new Majorsilence.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.dgGroup)).BeginInit();
             this.SuspendLayout();
             // 
@@ -216,19 +216,19 @@ namespace Majorsilence.Reporting.RdlDesign
             // 
             resources.ApplyResources(this.bDelete, "bDelete");
             this.bDelete.Name = "bDelete";
-            this.bDelete.Click += new System.EventHandler(this.bDelete_Click);
+            this.bDelete.Click += this.bDelete_Click;
             // 
             // bUp
             // 
             resources.ApplyResources(this.bUp, "bUp");
             this.bUp.Name = "bUp";
-            this.bUp.Click += new System.EventHandler(this.bUp_Click);
+            this.bUp.Click += this.bUp_Click;
             // 
             // bDown
             // 
             resources.ApplyResources(this.bDown, "bDown");
             this.bDown.Name = "bDown";
-            this.bDown.Click += new System.EventHandler(this.bDown_Click);
+            this.bDown.Click += this.bDown_Click;
             // 
             // label1
             // 
@@ -239,7 +239,7 @@ namespace Majorsilence.Reporting.RdlDesign
             // 
             resources.ApplyResources(this.tbName, "tbName");
             this.tbName.Name = "tbName";
-            this.tbName.Validating += new System.ComponentModel.CancelEventHandler(this.tbName_Validating);
+            this.tbName.Validating += this.tbName_Validating;
             // 
             // label2
             // 
@@ -301,28 +301,28 @@ namespace Majorsilence.Reporting.RdlDesign
             resources.ApplyResources(this.bValueExpr, "bValueExpr");
             this.bValueExpr.Name = "bValueExpr";
             this.bValueExpr.Tag = "value";
-            this.bValueExpr.Click += new System.EventHandler(this.bValueExpr_Click);
+            this.bValueExpr.Click += this.bValueExpr_Click;
             // 
             // bLabelExpr
             // 
             resources.ApplyResources(this.bLabelExpr, "bLabelExpr");
             this.bLabelExpr.Name = "bLabelExpr";
             this.bLabelExpr.Tag = "label";
-            this.bLabelExpr.Click += new System.EventHandler(this.bExpr_Click);
+            this.bLabelExpr.Click += this.bExpr_Click;
             // 
             // bParentExpr
             // 
             resources.ApplyResources(this.bParentExpr, "bParentExpr");
             this.bParentExpr.Name = "bParentExpr";
             this.bParentExpr.Tag = "parent";
-            this.bParentExpr.Click += new System.EventHandler(this.bExpr_Click);
+            this.bParentExpr.Click += this.bExpr_Click;
             // 
             // BtnCercaFormulaEsclusione
             // 
             resources.ApplyResources(this.BtnCercaFormulaEsclusione, "BtnCercaFormulaEsclusione");
             this.BtnCercaFormulaEsclusione.Name = "BtnCercaFormulaEsclusione";
             this.BtnCercaFormulaEsclusione.Tag = "value";
-            this.BtnCercaFormulaEsclusione.Click += new System.EventHandler(this.BtnCercaFormulaEsclusione_Click);
+            this.BtnCercaFormulaEsclusione.Click += this.BtnCercaFormulaEsclusione_Click;
             // 
             // TxtPageBreakCondition
             // 

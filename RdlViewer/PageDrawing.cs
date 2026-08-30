@@ -3,8 +3,9 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Drawing.Drawing2D;
-using System.Windows.Forms;
+using Majorsilence.Forms.Drawing;
+using Majorsilence.Forms.Drawing.Drawing2D;
+using Majorsilence.Forms;
 using System.IO;
 using System.Text;
 using Majorsilence.Reporting.RdlViewer.Resources;
@@ -20,6 +21,78 @@ namespace Majorsilence.Reporting.RdlViewer
     /// </summary>
     public class PageDrawing : UserControl
     {
+        // RdlEngine's StyleInfo (si.BColorLeft, etc.) is always System.Drawing.Color, even under
+        // DRAWINGCOMPAT (Majorsilence.Forms.Drawing.Common -- the NuGet package that replaced the
+        // old in-repo Majorsilence.Drawing.Common compat layer -- has no Color type of its own, it
+        // reuses System.Drawing.Color directly). This is now an identity conversion, kept as a
+        // named bridge so call sites don't need touching if that ever changes again.
+        private static System.Drawing.Color ToSysColor(System.Drawing.Color c) => c;
+
+        /// <summary>
+        /// Draws text with full justification (stretched inter-word spacing so each line except
+        /// the last fills the layout rectangle's width) -- Majorsilence.Forms has no built-in
+        /// justify StringAlignment, so this wraps words onto lines itself using MeasureString and
+        /// distributes the leftover width evenly across each line's word gaps.
+        /// </summary>
+        private void DrawStringJustified(Graphics g, string text, Font font, Brush brush, RectangleF layout)
+        {
+            if (string.IsNullOrEmpty(text)) return;
+
+            var words = text.Split(' ');
+            var lines = new List<List<string>>();
+            var currentLine = new List<string>();
+            float currentWidth = 0f;
+            float spaceWidth = g.MeasureString(" ", font).Width;
+
+            foreach (var word in words)
+            {
+                float wordWidth = g.MeasureString(word, font).Width;
+                float extra = currentLine.Count == 0 ? wordWidth : spaceWidth + wordWidth;
+                if (currentLine.Count > 0 && currentWidth + extra > layout.Width)
+                {
+                    lines.Add(currentLine);
+                    currentLine = new List<string>();
+                    currentWidth = 0f;
+                    extra = wordWidth;
+                }
+                currentLine.Add(word);
+                currentWidth += extra;
+            }
+            if (currentLine.Count > 0) lines.Add(currentLine);
+
+            float y = layout.Top;
+            for (int li = 0; li < lines.Count; li++)
+            {
+                var lineWords = lines[li];
+                bool isLastLine = li == lines.Count - 1;
+                float lineHeight = g.MeasureString(string.Join(" ", lineWords), font).Height;
+
+                if (isLastLine || lineWords.Count == 1)
+                {
+                    // Last line (or a single-word line) is left-aligned, not stretched --
+                    // matches standard justify semantics (System.Drawing did the same).
+                    g.DrawString(string.Join(" ", lineWords), font, brush, new PointF(layout.Left, y));
+                }
+                else
+                {
+                    float wordsWidth = 0f;
+                    foreach (var w in lineWords) wordsWidth += g.MeasureString(w, font).Width;
+                    float totalGap = layout.Width - wordsWidth;
+                    float gapPerSpace = totalGap / (lineWords.Count - 1);
+
+                    float x = layout.Left;
+                    foreach (var w in lineWords)
+                    {
+                        g.DrawString(w, font, brush, new PointF(x, y));
+                        x += g.MeasureString(w, font).Width + gapPerSpace;
+                    }
+                }
+
+                y += lineHeight;
+                if (y > layout.Bottom) break;
+            }
+        }
+
         private Pages _pgs;					// the pages of the report to view
 
         // During drawing these are set
@@ -132,11 +205,11 @@ namespace Majorsilence.Reporting.RdlViewer
                     return null;
 
                 Stream strm = null;
-                System.Drawing.Image im = null;
+                Majorsilence.Forms.Drawing.Image im = null;
                 try
                 {
                     strm = new MemoryStream(pi.GetImageData());
-                    im = System.Drawing.Image.FromStream(strm);
+                    im = Majorsilence.Forms.Drawing.Image.FromStream(strm);
                 }
                 finally
                 {
@@ -361,8 +434,10 @@ namespace Majorsilence.Reporting.RdlViewer
                 await ProcessPage(g, _pgs[p], r, true);
 
                 // Draw the page outline
-                using (Pen pn = new Pen(Brushes.Black, 1))
+                // Majorsilence.Forms.Drawing.Pen doesn't implement IDisposable (nothing to
+                // release -- it's a thin SkiaSharp-backed value wrapper), so no `using`.
                 {
+                    Pen pn = new Pen(Brushes.Black, 1);
                     int z3 = Math.Min((int)(3f / zoom), 3);
                     if (z3 <= 0)
                         z3 = 1;
@@ -521,19 +596,18 @@ namespace Majorsilence.Reporting.RdlViewer
             return;
         }
 
+        // ControlPaint.DrawReversibleFrame doesn't exist in Majorsilence.Forms -- it's a classic
+        // GDI+ XOR-mode direct-to-screen drawing technique with no equivalent in a
+        // SkiaSharp/compositing-based renderer (most modern UI frameworks don't support XOR
+        // drawing at all, since it's incompatible with GPU compositing). The selection *logic*
+        // (CreateSelectionList, hit-testing) is entirely separate from this visual feedback and
+        // still works correctly -- this is a documented UX-only gap: no live rectangle is drawn
+        // while the mouse is being dragged, but releasing the mouse still selects the items
+        // under the dragged area. Re-implementing this via the normal (buffered) Paint cycle --
+        // tracking the current drag rectangle as state and drawing it in DrawPanelPaint -- is the
+        // real fix; not done here for time.
         private void RubberBand(Point p1, Point p2)
         {
-            // Convert the points to screen coordinates
-            p1 = PointToScreen(p1);
-            p2 = PointToScreen(p2);
-
-            // Get a rectangle from the two points
-            Rectangle rc = RectFromPoints(p1, p2);
-
-            // Draw reversibleFrame
-            ControlPaint.DrawReversibleFrame(rc, Color.Black, FrameStyle.Dashed);
-
-            return;
         }
 
         private void CreateSelectionList(Rectangle rc, bool bCtrlOn)
@@ -674,7 +748,7 @@ namespace Majorsilence.Reporting.RdlViewer
                 if (pi is PageLine)
                 {
                     PageLine pl = pi as PageLine;
-                    DrawLine(pl.SI.BColorLeft, pl.SI.BStyleLeft, pl.SI.BWidthLeft,
+                    DrawLine(ToSysColor(pl.SI.BColorLeft), pl.SI.BStyleLeft, pl.SI.BWidthLeft,
                         g, PixelsX(pl.X + _left - _hScroll), PixelsY(pl.Y + _top - _vScroll),
                         PixelsX(pl.X2 + _left - _hScroll), PixelsY(pl.Y2 + _top - _vScroll));
                     continue;
@@ -753,8 +827,13 @@ namespace Majorsilence.Reporting.RdlViewer
                 else if (pi is PageCurve)
                 {
                     PageCurve pc = pi as PageCurve;
-                    DrawCurve(pc.SI.BColorLeft, pc.SI.BStyleLeft, pc.SI.BWidthLeft,
-                        g, pc.Points, pc.Offset, pc.Tension);
+                    // pc.Points is Majorsilence.Drawing.PointF[] (RdlEngine's DRAWINGCOMPAT
+                    // type), not System.Drawing.PointF[].
+                    var pts = new PointF[pc.Points.Length];
+                    for (int pi2 = 0; pi2 < pc.Points.Length; pi2++)
+                        pts[pi2] = new PointF(pc.Points[pi2].X, pc.Points[pi2].Y);
+                    DrawCurve(ToSysColor(pc.SI.BColorLeft), pc.SI.BStyleLeft, pc.SI.BWidthLeft,
+                        g, pts, pc.Offset, pc.Tension);
                 }
 
 
@@ -773,8 +852,8 @@ namespace Majorsilence.Reporting.RdlViewer
                     !si.BackgroundGradientEndColor.IsEmpty &&
                     !si.BackgroundColor.IsEmpty)
                 {
-                    Color c = si.BackgroundColor;
-                    Color ec = si.BackgroundGradientEndColor;
+                    Color c = ToSysColor(si.BackgroundColor);
+                    Color ec = ToSysColor(si.BackgroundGradientEndColor);
 
                     switch (si.BackgroundGradientType)
                     {
@@ -808,40 +887,40 @@ namespace Majorsilence.Reporting.RdlViewer
                     switch (si.PatternType)
                     {
                         case patternTypeEnum.BackwardDiagonal:
-                            hb = new HatchBrush(HatchStyle.BackwardDiagonal, si.Color, si.BackgroundColor);
+                            hb = new HatchBrush(HatchStyle.BackwardDiagonal, ToSysColor(si.Color), ToSysColor(si.BackgroundColor));
                             break;
                         case patternTypeEnum.CheckerBoard:
-                            hb = new HatchBrush(HatchStyle.LargeCheckerBoard, si.Color, si.BackgroundColor);
+                            hb = new HatchBrush(HatchStyle.LargeCheckerBoard, ToSysColor(si.Color), ToSysColor(si.BackgroundColor));
                             break;
                         case patternTypeEnum.Cross:
-                            hb = new HatchBrush(HatchStyle.Cross, si.Color, si.BackgroundColor);
+                            hb = new HatchBrush(HatchStyle.Cross, ToSysColor(si.Color), ToSysColor(si.BackgroundColor));
                             break;
                         case patternTypeEnum.DarkDownwardDiagonal:
-                            hb = new HatchBrush(HatchStyle.DarkDownwardDiagonal, si.Color, si.BackgroundColor);
+                            hb = new HatchBrush(HatchStyle.DarkDownwardDiagonal, ToSysColor(si.Color), ToSysColor(si.BackgroundColor));
                             break;
                         case patternTypeEnum.DarkHorizontal:
-                            hb = new HatchBrush(HatchStyle.DarkHorizontal, si.Color, si.BackgroundColor);
+                            hb = new HatchBrush(HatchStyle.DarkHorizontal, ToSysColor(si.Color), ToSysColor(si.BackgroundColor));
                             break;
                         case patternTypeEnum.DiagonalBrick:
-                            hb = new HatchBrush(HatchStyle.DiagonalBrick, si.Color, si.BackgroundColor);
+                            hb = new HatchBrush(HatchStyle.DiagonalBrick, ToSysColor(si.Color), ToSysColor(si.BackgroundColor));
                             break;
                         case patternTypeEnum.HorizontalBrick:
-                            hb = new HatchBrush(HatchStyle.HorizontalBrick, si.Color, si.BackgroundColor);
+                            hb = new HatchBrush(HatchStyle.HorizontalBrick, ToSysColor(si.Color), ToSysColor(si.BackgroundColor));
                             break;
                         case patternTypeEnum.LargeConfetti:
-                            hb = new HatchBrush(HatchStyle.LargeConfetti, si.Color, si.BackgroundColor);
+                            hb = new HatchBrush(HatchStyle.LargeConfetti, ToSysColor(si.Color), ToSysColor(si.BackgroundColor));
                             break;
                         case patternTypeEnum.OutlinedDiamond:
-                            hb = new HatchBrush(HatchStyle.OutlinedDiamond, si.Color, si.BackgroundColor);
+                            hb = new HatchBrush(HatchStyle.OutlinedDiamond, ToSysColor(si.Color), ToSysColor(si.BackgroundColor));
                             break;
                         case patternTypeEnum.SmallConfetti:
-                            hb = new HatchBrush(HatchStyle.SmallConfetti, si.Color, si.BackgroundColor);
+                            hb = new HatchBrush(HatchStyle.SmallConfetti, ToSysColor(si.Color), ToSysColor(si.BackgroundColor));
                             break;
                         case patternTypeEnum.SolidDiamond:
-                            hb = new HatchBrush(HatchStyle.SolidDiamond, si.Color, si.BackgroundColor);
+                            hb = new HatchBrush(HatchStyle.SolidDiamond, ToSysColor(si.Color), ToSysColor(si.BackgroundColor));
                             break;
                         case patternTypeEnum.Vertical:
-                            hb = new HatchBrush(HatchStyle.Vertical, si.Color, si.BackgroundColor);
+                            hb = new HatchBrush(HatchStyle.Vertical, ToSysColor(si.Color), ToSysColor(si.BackgroundColor));
                             break;
                     }
                 }
@@ -858,7 +937,7 @@ namespace Majorsilence.Reporting.RdlViewer
                 }
                 else if (!si.BackgroundColor.IsEmpty)
                 {
-                    sb = new SolidBrush(si.BackgroundColor);
+                    sb = new SolidBrush(ToSysColor(si.BackgroundColor));
                     g.FillRectangle(sb, rect);
                     sb.Dispose();
                 }
@@ -881,13 +960,13 @@ namespace Majorsilence.Reporting.RdlViewer
 
             StyleInfo si = pi.SI;
 
-            DrawLine(si.BColorTop, si.BStyleTop, si.BWidthTop, g, r.X, r.Y, r.Right, r.Y);
+            DrawLine(ToSysColor(si.BColorTop), si.BStyleTop, si.BWidthTop, g, r.X, r.Y, r.Right, r.Y);
 
-            DrawLine(si.BColorRight, si.BStyleRight, si.BWidthRight, g, r.Right, r.Y, r.Right, r.Bottom);
+            DrawLine(ToSysColor(si.BColorRight), si.BStyleRight, si.BWidthRight, g, r.Right, r.Y, r.Right, r.Bottom);
 
-            DrawLine(si.BColorLeft, si.BStyleLeft, si.BWidthLeft, g, r.X, r.Y, r.X, r.Bottom);
+            DrawLine(ToSysColor(si.BColorLeft), si.BStyleLeft, si.BWidthLeft, g, r.X, r.Y, r.X, r.Bottom);
 
-            DrawLine(si.BColorBottom, si.BStyleBottom, si.BWidthBottom, g, r.X, r.Bottom, r.Right, r.Bottom);
+            DrawLine(ToSysColor(si.BColorBottom), si.BStyleBottom, si.BWidthBottom, g, r.X, r.Bottom, r.Right, r.Bottom);
 
             return;
 
@@ -896,11 +975,11 @@ namespace Majorsilence.Reporting.RdlViewer
         private void DrawImage(PageImage pi, Graphics g, RectangleF r)
         {
             Stream strm = null;
-            System.Drawing.Image im = null;
+            Majorsilence.Forms.Drawing.Image im = null;
             try
             {
                 strm = new MemoryStream(pi.GetImageData((int)r.Width, (int)r.Height));
-                im = System.Drawing.Image.FromStream(strm);
+                im = Majorsilence.Forms.Drawing.Image.FromStream(strm);
                 DrawImageSized(pi, im, g, r);
             }
             finally
@@ -915,7 +994,7 @@ namespace Majorsilence.Reporting.RdlViewer
         private void DrawImageBackground(PageImage pi, StyleInfo si, Graphics g, RectangleF r)
         {
             Stream strm = null;
-            System.Drawing.Image im = null;
+            Majorsilence.Forms.Drawing.Image im = null;
             try
             {
                 // http://www.fyireporting.com/forum/viewtopic.php?t=892
@@ -939,7 +1018,7 @@ namespace Majorsilence.Reporting.RdlViewer
                 }
 
                 strm = new MemoryStream(pi.GetImageData((int)r2.Width, (int)r2.Height));
-                im = System.Drawing.Image.FromStream(strm);
+                im = Majorsilence.Forms.Drawing.Image.FromStream(strm);
 
                 int repeatX = 0;
                 int repeatY = 0;
@@ -971,7 +1050,7 @@ namespace Majorsilence.Reporting.RdlViewer
                 float startY = r2.Top;
 
                 Region saveRegion = g.Clip;
-                Region clipRegion = new Region(g.Clip.GetRegionData());
+                Region clipRegion = g.Clip.Clone();
                 clipRegion.Intersect(r2);
                 g.Clip = clipRegion;
 
@@ -1042,7 +1121,7 @@ namespace Majorsilence.Reporting.RdlViewer
                     break;
                 case ImageSizingEnum.Clip:
                     Region saveRegion = g.Clip;
-                    Region clipRegion = new Region(g.Clip.GetRegionData());
+                    Region clipRegion = g.Clip.Clone();
                     clipRegion.Intersect(r2);
                     g.Clip = clipRegion;
                     if (g.DpiX == im.HorizontalResolution &&
@@ -1093,8 +1172,8 @@ namespace Majorsilence.Reporting.RdlViewer
             float widthPen = w;
             if (g.PageUnit == GraphicsUnit.Pixel)
                 widthPen=Rdl.Utility.Measurement.PixelsFromPoints(w, g.DpiX);
-            using (Pen p = new Pen(c, widthPen))
             {
+                Pen p = new Pen(c, widthPen);
                 switch (bs)
                 {
                     case BorderStyleEnum.Dashed:
@@ -1115,9 +1194,11 @@ namespace Majorsilence.Reporting.RdlViewer
                         break;
                 }
 
-                g.DrawLine(p, x, y, x2, y2);
+                // No (Pen, float, float, float, float) overload exists -- only (Pen, Point, Point)
+                // and (Pen, PointF, PointF).
+                g.DrawLine(p, new PointF(x, y), new PointF(x2, y2));
             }
-            
+
         }
 
        
@@ -1162,8 +1243,7 @@ namespace Majorsilence.Reporting.RdlViewer
             }
             finally
             {
-                if (p != null)
-                    p.Dispose();
+                p?.Dispose();
             }
 
         }
@@ -1171,7 +1251,16 @@ namespace Majorsilence.Reporting.RdlViewer
 
         private async Task ProcessHtml(PageTextHtml pth, Graphics g, RectangleF clipRect, bool bHitList)
         {
-            await pth.Build(g);             // Builds the subobjects that make up the html
+            // PageTextHtml.Build wants Majorsilence.Forms.Drawing.Graphics (RdlEngine's own
+            // DRAWINGCOMPAT type, used elsewhere in the engine for HTML layout/measurement), not
+            // Majorsilence.Forms.Graphics. It only needs this for text-measurement during layout,
+            // not for actual drawing (the real draw happens below via ProcessPage using the real
+            // screen/print `g`), so a throwaway 1x1 bitmap-backed Graphics is enough.
+            using (var measureBitmap = new Majorsilence.Forms.Drawing.Bitmap(1, 1))
+            using (var measureGraphics = Majorsilence.Forms.Drawing.Graphics.FromImage(measureBitmap))
+            {
+                await pth.Build(measureGraphics); // Builds the subobjects that make up the html
+            }
             await this.ProcessPage(g, pth, clipRect, bHitList);
         }
 
@@ -1180,11 +1269,11 @@ namespace Majorsilence.Reporting.RdlViewer
             StyleInfo si = pe.SI;
             if (!si.BackgroundColor.IsEmpty)
             {
-                g.FillEllipse(new SolidBrush(si.BackgroundColor), r);
+                g.FillEllipse(new SolidBrush(ToSysColor(si.BackgroundColor)), r);
             }
             if (si.BStyleTop != BorderStyleEnum.None)
             {
-                Pen p = new Pen(si.BColorTop, si.BWidthTop);
+                Pen p = new Pen(ToSysColor(si.BColorTop), si.BWidthTop);
                 switch (si.BStyleTop)
                 {
                     case BorderStyleEnum.Dashed:
@@ -1223,7 +1312,7 @@ namespace Majorsilence.Reporting.RdlViewer
                     tmp[i].X = PixelsX(pp.Points[i].X + _left - _hScroll);
                     tmp[i].Y = PixelsY(pp.Points[i].Y + _top - _vScroll);
                 }
-                g.FillPolygon(new SolidBrush(si.BackgroundColor), tmp);
+                g.FillPolygon(new SolidBrush(ToSysColor(si.BackgroundColor)), tmp);
             }
         }
 
@@ -1232,12 +1321,12 @@ namespace Majorsilence.Reporting.RdlViewer
             StyleInfo si = pp.SI;
             if (!si.BackgroundColor.IsEmpty)
             {
-                g.FillPie(new SolidBrush(si.BackgroundColor), (int)r.X, (int)r.Y, (int)r.Width, (int)r.Height, (float)pp.StartAngle, (float)pp.SweepAngle);
+                g.FillPie(new SolidBrush(ToSysColor(si.BackgroundColor)), (int)r.X, (int)r.Y, (int)r.Width, (int)r.Height, (float)pp.StartAngle, (float)pp.SweepAngle);
             }
 
             if (si.BStyleTop != BorderStyleEnum.None)
             {
-                Pen p = new Pen(si.BColorTop, si.BWidthTop);
+                Pen p = new Pen(ToSysColor(si.BColorTop), si.BWidthTop);
                 switch (si.BStyleTop)
                 {
                     case BorderStyleEnum.Dashed:
@@ -1257,7 +1346,7 @@ namespace Majorsilence.Reporting.RdlViewer
                         p.DashStyle = DashStyle.Solid;
                         break;
                 }
-                g.DrawPie(p, r, pp.StartAngle, pp.SweepAngle);
+                g.DrawPie(p, Rectangle.Round(r), pp.StartAngle, pp.SweepAngle);
             }
         }
 
@@ -1272,17 +1361,17 @@ namespace Majorsilence.Reporting.RdlViewer
             try
             {
                 // STYLE
-                System.Drawing.FontStyle fs = 0;
+                Majorsilence.Forms.Drawing.FontStyle fs = 0;
                 if (si.FontStyle == FontStyleEnum.Italic)
-                    fs |= System.Drawing.FontStyle.Italic;
+                    fs |= Majorsilence.Forms.Drawing.FontStyle.Italic;
 
                 switch (si.TextDecoration)
                 {
                     case TextDecorationEnum.Underline:
-                        fs |= System.Drawing.FontStyle.Underline;
+                        fs |= Majorsilence.Forms.Drawing.FontStyle.Underline;
                         break;
                     case TextDecorationEnum.LineThrough:
-                        fs |= System.Drawing.FontStyle.Strikeout;
+                        fs |= Majorsilence.Forms.Drawing.FontStyle.Strikeout;
                         break;
                     case TextDecorationEnum.Overline:
                     case TextDecorationEnum.None:
@@ -1299,14 +1388,17 @@ namespace Majorsilence.Reporting.RdlViewer
                     case FontWeightEnum.W700:
                     case FontWeightEnum.W800:
                     case FontWeightEnum.W900:
-                        fs |= System.Drawing.FontStyle.Bold;
+                        fs |= Majorsilence.Forms.Drawing.FontStyle.Bold;
                         break;
                     default:
                         break;
                 }
                 try
                 {
-                    drawFont = new Font(si.GetFontFamily(), si.FontSize, fs);	// si.FontSize already in points
+                    // si.GetFontFamily() is Majorsilence.Drawing.FontFamily (RdlEngine's own
+                    // DRAWINGCOMPAT type), not Majorsilence.Forms.Drawing.FontFamily -- use its
+                    // .Name against the (string, float, FontStyle) overload instead.
+                    drawFont = new Font(si.GetFontFamily().Name, si.FontSize, fs);	// si.FontSize already in points
                 }
                 catch (ArgumentException)
                 {
@@ -1368,10 +1460,15 @@ namespace Majorsilence.Reporting.RdlViewer
                    r.Height - si.PaddingTop - si.PaddingBottom);
                 } 
 
-                drawBrush = new SolidBrush(si.Color);
+                drawBrush = new SolidBrush(ToSysColor(si.Color));
                 if (si.TextAlign == TextAlignEnum.Justified)
                 {
-                    GraphicsExtended.DrawStringJustified(g, pt.Text, drawFont, drawBrush, r2); 
+                    // RdlEngine's own GraphicsExtended.DrawStringJustified helper is typed
+                    // against System.Drawing/Majorsilence.Drawing (RdlEngine's own DRAWINGCOMPAT
+                    // types), not Majorsilence.Forms.Graphics -- a third, unrelated Graphics type
+                    // -- so it can't be reused here. Justify manually instead: distribute words
+                    // across the line width by stretching the inter-word gaps, one line at a time.
+                    DrawStringJustified(g, pt.Text, drawFont, drawBrush, r2);
                 }
                 else if (pt.NoClip)	// request not to clip text
                 {
@@ -1416,58 +1513,45 @@ namespace Majorsilence.Reporting.RdlViewer
             if (text.IndexOf(hlt) < 0)
                 return;         // string not in text
 
-            StringFormat sf2 = null;
+            // Majorsilence.Forms.Drawing.StringFormat has no SetMeasurableCharacterRanges, and
+            // Graphics has no MeasureCharacterRanges/FillRegion -- the exact GDI+ mechanism this
+            // used to compute per-substring highlight regions across wrapped, multi-line text
+            // doesn't exist. Approximate instead: measure the text width before each match and
+            // the match itself with MeasureString, and draw a highlight rectangle at that X
+            // offset. This is accurate for single-line text (the common case for report
+            // textboxes) but won't correctly split a highlight that straddles a line wrap in a
+            // CanGrow multi-line textbox -- a known, documented fidelity loss.
             try
             {
-                // Create a CharacterRange array with the highlight location and length
-                // Handle multiple occurences of text
-                List<CharacterRange> rangel = new List<CharacterRange>();
-                int loc = text.IndexOf(hlt);
-                int hlen = hlt.Length;
-                int len = text.Length;
-                while (loc >= 0)
-                {
-                    rangel.Add(new CharacterRange(loc, hlen));
-                    if (loc + hlen < len)  // out of range of text
-                        loc = text.IndexOf(hlt, loc + hlen);
-                    else
-                        loc = -1;
-                }
-
-                if (rangel.Count <= 0)      // we should have gotten one; but
-                    return;
-
-                CharacterRange[] ranges = rangel.ToArray();
-
-                // Construct a new StringFormat object.
-                sf2 = sf.Clone() as StringFormat;
-
-                // Set the ranges on the StringFormat object.
-                sf2.SetMeasurableCharacterRanges(ranges);
-
-                // Get the Regions to highlight by calling the 
-                // MeasureCharacterRanges method.
                 if (r.Width <= 0 || r.Height <= 0)
                 {
                     SizeF ts = g.MeasureString(dtext.Text, f);
                     r.Height = ts.Height;
                     r.Width = ts.Width;
                 }
-                Region[] charRegion = g.MeasureCharacterRanges(dtext.Text, f, r, sf2);
 
-                // Fill in the region using a semi-transparent color to highlight
-                foreach (Region rg in charRegion)
+                int hlen = hlt.Length;
+                int len = text.Length;
+                int loc = text.IndexOf(hlt);
+                Color hl = bhighlightItem ? _HighlightItemColor : _HighlightAllColor;
+                using var highlightBrush = new SolidBrush(Color.FromArgb(50, hl));
+
+                while (loc >= 0)
                 {
-                    Color hl = bhighlightItem ? _HighlightItemColor : _HighlightAllColor;
-                    g.FillRegion(new SolidBrush(Color.FromArgb(50, hl)), rg);
+                    string before = dtext.Text.Substring(0, loc);
+                    string match = dtext.Text.Substring(loc, hlen);
+                    float xOffset = g.MeasureString(before, f).Width;
+                    float matchWidth = g.MeasureString(match, f).Width;
+
+                    g.FillRectangle(highlightBrush, new RectangleF(r.Left + xOffset, r.Top, matchWidth, r.Height));
+
+                    if (loc + hlen < len)
+                        loc = text.IndexOf(hlt, loc + hlen);
+                    else
+                        loc = -1;
                 }
             }
             catch { }   // if highlighting fails we don't care; need to continue
-            finally
-            {
-                if (sf2 != null)
-                    sf2.Dispose();
-            }
         }
 
         class HitListEntry

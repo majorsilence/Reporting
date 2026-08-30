@@ -1,22 +1,20 @@
 <Project>
   <!--
-    The drawing compat layer is Majorsilence.Forms.Drawing (the Majorsilence.Forms /
-    Majorsilence.Forms.Drawing.Common packages), which ship net8.0/net10.0 only. net48 therefore
-    stays on the real System.Drawing (GDI+) - which is what it always did in plain Debug/Release
-    anyway, since net48 only builds on Windows. TargetFramework is a global property in the SDK's
-    per-TFM inner builds, so this correctly turns DRAWINGCOMPAT off for the net48 inner build alone.
-
-    DrawingCompat is the flag project files must test. Don't test DefineConstants with a substring
-    match: the SDK also defines the configuration name as a symbol, so in Release-DrawingCompat every
-    TFM - net48 included - gets RELEASE_DRAWINGCOMPAT, and $(DefineConstants.Contains(DRAWINGCOMPAT))
-    is therefore true even where DRAWINGCOMPAT itself is not defined.
+    Majorsilence Reporting renders through Majorsilence.Forms.Drawing (Majorsilence.Forms and
+    Majorsilence.Forms.Drawing.Common, a SkiaSharp GDI+ replacement) on every platform and in every
+    configuration. The old dual System.Drawing vs SkiaSharp split (separate Debug-DrawingCompat and
+    Release-DrawingCompat configurations plus .SkiaSharp package IDs) is gone: DRAWINGCOMPAT is
+    always on, Debug and Release are the SkiaSharp build, and the engine targets net8.0/net10.0
+    (which is all Majorsilence.Forms.Drawing.Common ships). $(DrawingCompat) stays as the flag
+    project files test, so their existing Condition="'$(DrawingCompat)' == 'true'" item groups keep
+    working without a sweep.
   -->
-  <PropertyGroup Condition="('$(Configuration)' == 'Release-DrawingCompat' Or '$(Configuration)' == 'Debug-DrawingCompat' Or '$(OS)' != 'Windows_NT') And '$(TargetFramework)' != 'net48'">
+  <PropertyGroup>
     <DrawingCompat>true</DrawingCompat>
-    <DefineConstants>DRAWINGCOMPAT</DefineConstants>
+    <DefineConstants>$(DefineConstants);DRAWINGCOMPAT</DefineConstants>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)' == 'Release-DrawingCompat' Or '$(Configuration)' == 'Release'">
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
     <Optimize>True</Optimize>
   </PropertyGroup>
 
@@ -37,6 +35,11 @@
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <PackageProjectUrl>https://github.com/majorsilence/My-FyiReporting</PackageProjectUrl>
+    <RepositoryType>git</RepositoryType>
+    <!-- Default tags; projects with a more specific audience (e.g. the Majorsilence.Pdf family)
+         override PackageTags in their own csproj. -->
+    <PackageTags>rdl;rdlc;ssrs;reporting;reports;crystal-reports-alternative;cross-platform;dotnet</PackageTags>
   </PropertyGroup>
 
   <!-- Don't let AOT publish properties flow into referenced libraries. Passing -p:PublishAot=true on

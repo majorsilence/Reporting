@@ -1,0 +1,11 @@
+{
+  "ReportDate": "2026-07-01",
+  "WarehouseName": "Springfield DC",
+  "Items": [
+    { "Sku": "SM-220",  "Description": "Servo Motor Assembly",       "StockOnHand": 340, "ReorderPoint": 100 },
+    { "Sku": "PBK-04",  "Description": "Precision Bearing Kit",      "StockOnHand": 60,  "ReorderPoint": 150 },
+    { "Sku": "CBF-11",  "Description": "Custom Bracket Fabrication", "StockOnHand": 12,  "ReorderPoint": 20  },
+    { "Sku": "CAL-KIT", "Description": "Calibration Toolkit",        "StockOnHand": 85,  "ReorderPoint": 25  },
+    { "Sku": "LUB-02",  "Description": "Bearing Lubricant (1L)",     "StockOnHand": 4,   "ReorderPoint": 30  }
+  ]
+}

@@ -18,13 +18,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-#if DRAWINGCOMPAT
 using Draw2 = Majorsilence.Forms.Drawing;
 using Imaging = Majorsilence.Forms.Drawing.Imaging;
-#else
-using Draw2 = System.Drawing;
-using Imaging = System.Drawing.Imaging;
-#endif
 using Majorsilence.Pdf;
 using Majorsilence.Pdf.Security;
 using Majorsilence.Reporting.Rdl.Utility;
@@ -360,11 +355,9 @@ namespace Majorsilence.Reporting.Rdl
             var reg = new FontRegistry();
 
             // ── bundled fonts (always available via Majorsilence.Forms.Drawing.Common) ──
-#if DRAWINGCOMPAT
             string embDir = Majorsilence.Forms.Drawing.FontResourceLoader.GetFontDirectory();
             if (Directory.Exists(embDir))
                 reg.AddDirectory(embDir);
-#endif
 
             // ── system fonts — explicit registrations for known naming schemes ──
 
@@ -621,11 +614,7 @@ namespace Majorsilence.Reporting.Rdl
                     if (Directory.Exists("/usr/share/fonts/truetype/dejavu"))
                     { _dejavuFonts = true; return "/usr/share/fonts/truetype/dejavu"; }
                     _liberationFonts = true;
-#if DRAWINGCOMPAT
                     return Majorsilence.Forms.Drawing.FontResourceLoader.GetFontDirectory();
-#else
-                    return "/usr/share/fonts";
-#endif
                 }
 
                 DirectoryInfo winDir = Directory.GetParent(
@@ -641,11 +630,7 @@ namespace Majorsilence.Reporting.Rdl
             try
             {
                 using var ms  = new MemoryStream(data);
-#if DRAWINGCOMPAT
                 using var img = new Majorsilence.Forms.Drawing.Bitmap(ms);
-#else
-                using var img = new Draw2.Bitmap(Draw2.Image.FromStream(ms));
-#endif
                 samplesW = img.Width;
                 samplesH = img.Height;
                 var rgb = new byte[samplesW * samplesH * 3];

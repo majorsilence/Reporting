@@ -1,90 +1,95 @@
 <Project Sdk="Microsoft.NET.Sdk">
-	<PropertyGroup>
-		<OutputType>WinExe</OutputType>
-		<IsPackable>false</IsPackable>
-		<ApplicationIcon>App.ico</ApplicationIcon>
-		<UseWindowsForms>true</UseWindowsForms>
-		<ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
-		<EnableDefaultEmbeddedResourceItems>false</EnableDefaultEmbeddedResourceItems>
-		<Configurations>Debug;Release;Debug-DrawingCompat</Configurations>
-		<TargetFrameworks>net48;net8.0-windows;net10.0-windows</TargetFrameworks>
-		<WarningsAsErrors>4014</WarningsAsErrors>
-        <GenerateResourceUsePreserializedResources>true</GenerateResourceUsePreserializedResources>
-    </PropertyGroup>
-	<ItemGroup>
-		<Compile Update="DesignXmlDraw.cs">
-			<SubType>UserControl</SubType>
-		</Compile>
-	</ItemGroup>
-	<ItemGroup>
-		<Content Include="App.ico" />
-		<Content Include="line.gif" />
-		<Content Include="poly.gif" />
-		<Content Include="selection.gif" />
-		<Content Include="text.gif" />
-	</ItemGroup>
-	<ItemGroup>
-		<EmbeddedResource Include="DialogAbout.ru-RU.resx">
-			<DependentUpon>DialogAbout.cs</DependentUpon>
-		</EmbeddedResource>
-		<EmbeddedResource Include="DialogFindByKey.resx">
-			<DependentUpon>DialogFindByKey.cs</DependentUpon>
-			<SubType>Designer</SubType>
-		</EmbeddedResource>
-		<EmbeddedResource Include="DesignXmlDraw.resx">
-			<DependentUpon>DesignXmlDraw.cs</DependentUpon>
-			<SubType>Designer</SubType>
-		</EmbeddedResource>
-		<EmbeddedResource Include="DialogAbout.resx">
-			<DependentUpon>DialogAbout.cs</DependentUpon>
-			<SubType>Designer</SubType>
-		</EmbeddedResource>
-		<EmbeddedResource Include="DialogFindByKey.ru-RU.resx">
-			<DependentUpon>DialogFindByKey.cs</DependentUpon>
-		</EmbeddedResource>
-		<EmbeddedResource Include="RdlProperties\Categories.resx">
-			<Generator>ResXFileCodeGenerator</Generator>
-			<LastGenOutput>Categories.Designer.cs</LastGenOutput>
-		</EmbeddedResource>
-		<EmbeddedResource Include="RdlProperties\Categories.ru-RU.resx" />
-		<EmbeddedResource Include="RdlProperties\Descriptions.resx">
-			<Generator>ResXFileCodeGenerator</Generator>
-			<LastGenOutput>Descriptions.Designer.cs</LastGenOutput>
-		</EmbeddedResource>
-		<EmbeddedResource Include="RdlProperties\Descriptions.ru-RU.resx" />
-		<EmbeddedResource Include="RdlProperties\DisplayNames.resx">
-			<Generator>ResXFileCodeGenerator</Generator>
-			<LastGenOutput>DisplayNames.Designer.cs</LastGenOutput>
-		</EmbeddedResource>
-		<EmbeddedResource Include="RdlProperties\DisplayNames.ru-RU.resx" />
-		<EmbeddedResource Include="Resources\Strings.resx">
-			<Generator>ResXFileCodeGenerator</Generator>
-			<LastGenOutput>Strings.Designer.cs</LastGenOutput>
-		</EmbeddedResource>
-		<EmbeddedResource Include="Resources\Strings.ru-RU.resx" />
-		<EmbeddedResource Include="MapFile.resx">
-			<SubType>Designer</SubType>
-			<DependentUpon>MapFile.cs</DependentUpon>
-		</EmbeddedResource>
-		<EmbeddedResource Include="MapFile.ru-RU.resx">
-			<DependentUpon>MapFile.cs</DependentUpon>
-		</EmbeddedResource>
-		<EmbeddedResource Include="Properties\Resources.resx">
-			<Generator>ResXFileCodeGenerator</Generator>
-			<LastGenOutput>Resources.Designer.cs</LastGenOutput>
-			<SubType>Designer</SubType>
-		</EmbeddedResource>
-		<None Include="Properties\Settings.settings">
-			<Generator>SettingsSingleFileGenerator</Generator>
-			<LastGenOutput>Settings.Designer.cs</LastGenOutput>
-		</None>
-	</ItemGroup>
-	<ItemGroup Condition="'$(TargetFramework)' == 'net10.0-windows' Or '$(TargetFramework)' == 'net8.0-windows' Or '$(TargetFramework)' == 'netstandard2.0' ">
-		<!-- Add your item references here -->
-		<PackageReference Include="System.Data.Odbc" />
-		<PackageReference Include="System.Data.OleDb" />
-	</ItemGroup>
-    <ItemGroup Condition="'$(TargetFramework)' == 'net48'">
-	  <PackageReference Include="System.Resources.Extensions" />
-	</ItemGroup>
+  <PropertyGroup>
+    <ApplicationIcon>App.ico</ApplicationIcon>
+    <OutputType>WinExe</OutputType>
+    <IsPackable>false</IsPackable>
+    <EnableDefaultEmbeddedResourceItems>false</EnableDefaultEmbeddedResourceItems>
+    <Configurations>Debug;Release</Configurations>
+    <!-- net48 dropped: Majorsilence.Forms itself only targets net8.0/net10.0. -->
+    <TargetFrameworks>net8.0;net10.0</TargetFrameworks>
+    <WarningsAsErrors>4014</WarningsAsErrors>
+    <GenerateResourceUsePreserializedResources>true</GenerateResourceUsePreserializedResources>
+    <Description>Cross-platform RDL Map shape-file editor for Majorsilence Reporting, built on Majorsilence.Forms instead of System.Windows.Forms. Preview: successor to Majorsilence.Reporting.RdlMapFile (Windows-only).</Description>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Update="DesignXmlDraw.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="App.ico" />
+    <Content Include="line.gif" />
+    <Content Include="poly.gif" />
+    <Content Include="selection.gif" />
+    <Content Include="text.gif" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="DialogAbout.ru-RU.resx">
+      <DependentUpon>DialogAbout.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="DialogFindByKey.resx">
+      <DependentUpon>DialogFindByKey.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="DesignXmlDraw.resx">
+      <DependentUpon>DesignXmlDraw.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="DialogAbout.resx">
+      <DependentUpon>DialogAbout.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="DialogFindByKey.ru-RU.resx">
+      <DependentUpon>DialogFindByKey.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="RdlProperties\Categories.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Categories.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="RdlProperties\Categories.ru-RU.resx" />
+    <EmbeddedResource Include="RdlProperties\Descriptions.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Descriptions.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="RdlProperties\Descriptions.ru-RU.resx" />
+    <EmbeddedResource Include="RdlProperties\DisplayNames.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>DisplayNames.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="RdlProperties\DisplayNames.ru-RU.resx" />
+    <EmbeddedResource Include="Resources\Strings.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Strings.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\Strings.ru-RU.resx" />
+    <EmbeddedResource Include="MapFile.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>MapFile.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MapFile.ru-RU.resx">
+      <DependentUpon>MapFile.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="System.Data.Odbc" />
+    <PackageReference Include="System.Data.OleDb" />
+  </ItemGroup>
+  <ItemGroup>
+    <!-- Needed unconditionally (not just net48): GenerateResourceUsePreserializedResources
+         triggers MSB3822 without it, same fix as D2 (RdlViewer.Forms). -->
+    <PackageReference Include="System.Resources.Extensions" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Majorsilence.Forms" />
+    <PackageReference Include="Majorsilence.Forms.Avalonia" />
+  </ItemGroup>
 </Project>

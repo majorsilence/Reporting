@@ -5,7 +5,3 @@
 
 using System.Diagnostics.CodeAnalysis;
 
-#if !DRAWINGCOMPAT
-[assembly: SuppressMessage("Interoperability", "CA1416:Validate platform compatibility",
-    Justification = "System.Drawing usage is intentional")]
-#endif

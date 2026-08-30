@@ -3,9 +3,8 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Drawing;
 using System.Data;
-using System.Windows.Forms;
+using Majorsilence.Forms;
 using System.Xml;
 using Majorsilence.Reporting.RdlDesign.Resources;
 
@@ -14,19 +13,19 @@ namespace Majorsilence.Reporting.RdlDesign
 	/// <summary>
 	/// Summary description for ReportCtl.
 	/// </summary>
-	internal class GridCtl : System.Windows.Forms.UserControl, IProperty
+	internal class GridCtl : Majorsilence.Forms.UserControl, IProperty
 	{
         private List<XmlNode> _ReportItems;
 		private DesignXmlDraw _Draw;
 		bool fPBBefore, fPBAfter;
         bool fCheckRows;
-		private System.Windows.Forms.GroupBox groupBox1;
-		private System.Windows.Forms.CheckBox chkPBBefore;
-        private System.Windows.Forms.CheckBox chkPBAfter;
-		private System.Windows.Forms.GroupBox groupBox3;
-		private System.Windows.Forms.CheckBox chkDetails;
-		private System.Windows.Forms.CheckBox chkHeaderRows;
-		private System.Windows.Forms.CheckBox chkFooterRows;
+		private Majorsilence.Forms.GroupBox groupBox1;
+		private Majorsilence.Forms.CheckBox chkPBBefore;
+        private Majorsilence.Forms.CheckBox chkPBAfter;
+		private Majorsilence.Forms.GroupBox groupBox3;
+		private Majorsilence.Forms.CheckBox chkDetails;
+		private Majorsilence.Forms.CheckBox chkHeaderRows;
+		private Majorsilence.Forms.CheckBox chkFooterRows;
         private CheckBox chkFooterRepeat;
         private CheckBox chkHeaderRepeat;
 		/// <summary> 
@@ -96,17 +95,17 @@ namespace Majorsilence.Reporting.RdlDesign
 		/// </summary>
 		private void InitializeComponent()
 		{
-			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(GridCtl));
+			Majorsilence.Forms.ComponentResourceManager resources = new Majorsilence.Forms.ComponentResourceManager(typeof(GridCtl));
             this.DoubleBuffered = true;
-			this.groupBox1 = new System.Windows.Forms.GroupBox();
-			this.chkPBAfter = new System.Windows.Forms.CheckBox();
-			this.chkPBBefore = new System.Windows.Forms.CheckBox();
-			this.groupBox3 = new System.Windows.Forms.GroupBox();
-			this.chkFooterRepeat = new System.Windows.Forms.CheckBox();
-			this.chkHeaderRepeat = new System.Windows.Forms.CheckBox();
-			this.chkFooterRows = new System.Windows.Forms.CheckBox();
-			this.chkHeaderRows = new System.Windows.Forms.CheckBox();
-			this.chkDetails = new System.Windows.Forms.CheckBox();
+			this.groupBox1 = new Majorsilence.Forms.GroupBox();
+			this.chkPBAfter = new Majorsilence.Forms.CheckBox();
+			this.chkPBBefore = new Majorsilence.Forms.CheckBox();
+			this.groupBox3 = new Majorsilence.Forms.GroupBox();
+			this.chkFooterRepeat = new Majorsilence.Forms.CheckBox();
+			this.chkHeaderRepeat = new Majorsilence.Forms.CheckBox();
+			this.chkFooterRows = new Majorsilence.Forms.CheckBox();
+			this.chkHeaderRows = new Majorsilence.Forms.CheckBox();
+			this.chkDetails = new Majorsilence.Forms.CheckBox();
 			this.groupBox1.SuspendLayout();
 			this.groupBox3.SuspendLayout();
 			this.SuspendLayout();
@@ -123,13 +122,13 @@ namespace Majorsilence.Reporting.RdlDesign
 			// 
 			resources.ApplyResources(this.chkPBAfter, "chkPBAfter");
 			this.chkPBAfter.Name = "chkPBAfter";
-			this.chkPBAfter.CheckedChanged += new System.EventHandler(this.chkPBAfter_CheckedChanged);
+			this.chkPBAfter.CheckedChanged += this.chkPBAfter_CheckedChanged;
 			// 
 			// chkPBBefore
 			// 
 			resources.ApplyResources(this.chkPBBefore, "chkPBBefore");
 			this.chkPBBefore.Name = "chkPBBefore";
-			this.chkPBBefore.CheckedChanged += new System.EventHandler(this.chkPBBefore_CheckedChanged);
+			this.chkPBBefore.CheckedChanged += this.chkPBBefore_CheckedChanged;
 			// 
 			// groupBox3
 			// 
@@ -146,31 +145,31 @@ namespace Majorsilence.Reporting.RdlDesign
 			// 
 			resources.ApplyResources(this.chkFooterRepeat, "chkFooterRepeat");
 			this.chkFooterRepeat.Name = "chkFooterRepeat";
-			this.chkFooterRepeat.CheckedChanged += new System.EventHandler(this.chkRows_CheckedChanged);
+			this.chkFooterRepeat.CheckedChanged += this.chkRows_CheckedChanged;
 			// 
 			// chkHeaderRepeat
 			// 
 			resources.ApplyResources(this.chkHeaderRepeat, "chkHeaderRepeat");
 			this.chkHeaderRepeat.Name = "chkHeaderRepeat";
-			this.chkHeaderRepeat.CheckedChanged += new System.EventHandler(this.chkRows_CheckedChanged);
+			this.chkHeaderRepeat.CheckedChanged += this.chkRows_CheckedChanged;
 			// 
 			// chkFooterRows
 			// 
 			resources.ApplyResources(this.chkFooterRows, "chkFooterRows");
 			this.chkFooterRows.Name = "chkFooterRows";
-			this.chkFooterRows.CheckedChanged += new System.EventHandler(this.chkRows_CheckedChanged);
+			this.chkFooterRows.CheckedChanged += this.chkRows_CheckedChanged;
 			// 
 			// chkHeaderRows
 			// 
 			resources.ApplyResources(this.chkHeaderRows, "chkHeaderRows");
 			this.chkHeaderRows.Name = "chkHeaderRows";
-			this.chkHeaderRows.CheckedChanged += new System.EventHandler(this.chkRows_CheckedChanged);
+			this.chkHeaderRows.CheckedChanged += this.chkRows_CheckedChanged;
 			// 
 			// chkDetails
 			// 
 			resources.ApplyResources(this.chkDetails, "chkDetails");
 			this.chkDetails.Name = "chkDetails";
-			this.chkDetails.CheckedChanged += new System.EventHandler(this.chkRows_CheckedChanged);
+			this.chkDetails.CheckedChanged += this.chkRows_CheckedChanged;
 			// 
 			// GridCtl
 			// 

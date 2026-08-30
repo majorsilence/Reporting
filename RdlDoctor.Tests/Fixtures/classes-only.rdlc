@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Report>
+  <Classes>
+    <Class>
+      <ClassName>MyApp.Helper</ClassName>
+      <InstanceName>Helper</InstanceName>
+    </Class>
+  </Classes>
+  <DataSets>
+    <DataSet Name="DS1">
+      <Fields>
+        <Field Name="X"><DataField>X</DataField></Field>
+      </Fields>
+    </DataSet>
+  </DataSets>
+  <Body>
+    <ReportItems></ReportItems>
+    <Height>1in</Height>
+  </Body>
+  <Width>1in</Width>
+</Report>

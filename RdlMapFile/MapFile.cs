@@ -4,7 +4,7 @@ using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Text;
-using System.Windows.Forms;
+using Majorsilence.Forms;
 using System.Runtime.InteropServices;
 using System.Xml;
 using System.IO;
@@ -30,7 +30,7 @@ namespace Majorsilence.Reporting.RdlMapFile
             // 
             // map
             // 
-            this.map.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.map.Dock = Majorsilence.Forms.DockStyle.Fill;
             this.map.Location = new System.Drawing.Point(0, 0);
             this.map.Name = "map";
             this.map.Size = new System.Drawing.Size(620, 474);
@@ -40,7 +40,7 @@ namespace Majorsilence.Reporting.RdlMapFile
             map.XmlChange += new DesignXmlDraw.DrawEventHandler(map_XmlChange);
             map.SelectionChange += new DesignXmlDraw.DrawEventHandler(map_SelectionChange);
             map.ToolChange += new DesignXmlDraw.DrawEventHandler(map_ToolChange);
-            this.Closing += new CancelEventHandler(MapFile_Closing);
+            this.Closing += MapFile_Closing;
 
             if (file != null)
             {
@@ -136,24 +136,12 @@ namespace Majorsilence.Reporting.RdlMapFile
             string z = string.Format("{0}%", Math.Round(dxd.Zoom * 100, 0));
             cbZoom.Text = z;
         }
-        /// <summary>
-        /// Handles mousewheel processing when window under mousewheel doesn't have focus
-        /// </summary>
-        /// <param name="m"></param>
-        /// <returns></returns>
+        // Windows-only P/Invoke cross-app mousewheel routing (WindowFromPoint/SendMessage) --
+        // already dead under Majorsilence.Forms (Application.AddMessageFilter is a documented
+        // no-op) and would fail at runtime on Linux/macOS anyway. Same pattern as D3 (RdlReader.cs)
+        // and D4 (RdlDesigner.cs). Gutted to a no-op rather than ported.
         public bool PreFilterMessage(ref Message m)
         {
-            if (m.Msg == 0x20a)
-            {
-                // WM_MOUSEWHEEL, find the control at screen position m.LParam
-                Point pos = new Point(m.LParam.ToInt32() & 0xffff, m.LParam.ToInt32() >> 16);
-                IntPtr hWnd = WindowFromPoint(pos);
-                if (hWnd != IntPtr.Zero && hWnd != m.HWnd && Control.FromHandle(hWnd) != null)
-                {
-                    SendMessage(hWnd, m.Msg, m.WParam, m.LParam);
-                    return true;
-                }
-            }
             return false;
         }
 
@@ -193,7 +181,10 @@ namespace Majorsilence.Reporting.RdlMapFile
             // need to save file first then exit
             if (map.File == null)
             {
-                if (!SaveAs())
+                // SaveAs is async (FileDialog.ShowDialog(Form) is async in Majorsilence.Forms),
+                // but Save/OkToClose have synchronous callers (e.g. the Closing event handler),
+                // so bridge synchronously here -- same pattern as D4's MDIChild.FileSave().
+                if (!System.Threading.Tasks.Task.Run(async () => await SaveAsAsync()).GetAwaiter().GetResult())
                     return false;
             }
             string file = map.File;
@@ -226,7 +217,7 @@ namespace Majorsilence.Reporting.RdlMapFile
 /// Asks user for file name and sets the map file name to user specified one
 /// </summary>
 /// <returns></returns>
-        private bool SaveAs()
+        private async System.Threading.Tasks.Task<bool> SaveAsAsync()
         {
             SaveFileDialog sfd = new SaveFileDialog();
             sfd.DefaultExt = "xml";
@@ -236,7 +227,7 @@ namespace Majorsilence.Reporting.RdlMapFile
             bool rc = false;
             try
             {
-                if (sfd.ShowDialog(this) == DialogResult.OK)
+                if ( sfd.ShowDialog(this) == DialogResult.OK)
                 {
                     map.File = sfd.FileName;
                     rc = true;
@@ -257,7 +248,7 @@ namespace Majorsilence.Reporting.RdlMapFile
 
             Text = title;
         }
-        private void openToolStripMenuItem_Click(object sender, EventArgs e)
+        private async void openToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (!OkToClose())
                 return;
@@ -281,7 +272,7 @@ namespace Majorsilence.Reporting.RdlMapFile
 
             try
             {
-                if (ofd.ShowDialog(this) == DialogResult.OK)
+                if ( ofd.ShowDialog(this) == DialogResult.OK)
                 {
                     map.SetMapFile(ofd.FileName);
                     SetTitle(false);
@@ -298,7 +289,7 @@ namespace Majorsilence.Reporting.RdlMapFile
 
         }
 
-        private void setBackgroundImageToolStripMenuItem_Click(object sender, EventArgs e)
+        private async void setBackgroundImageToolStripMenuItem_Click(object sender, EventArgs e)
         {
             OpenFileDialog ofd = new OpenFileDialog();
             ofd.Filter = Strings.MapFile_setBackgroundImageToolStripMenuItem_Click_OpenPicture;
@@ -306,7 +297,7 @@ namespace Majorsilence.Reporting.RdlMapFile
             ofd.CheckFileExists = true;
             try
             {
-                if (ofd.ShowDialog(this) == DialogResult.OK)
+                if ( ofd.ShowDialog(this) == DialogResult.OK)
                 {
                     map.SetBackgroundImage(ofd.FileName);
                 }
@@ -361,9 +352,9 @@ namespace Majorsilence.Reporting.RdlMapFile
             this.Save();
         }
 
-        private void saveAsToolStripMenuItem_Click(object sender, EventArgs e)
+        private async void saveAsToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (SaveAs())
+            if (await SaveAsAsync())
                 Save();
         }
 
@@ -456,7 +447,7 @@ namespace Majorsilence.Reporting.RdlMapFile
 
         }
 
-        private void importMenuItem_Click(object sender, EventArgs e)
+        private async void importMenuItem_Click(object sender, EventArgs e)
         {
             OpenFileDialog ofd = new OpenFileDialog();
             ofd.Filter = Strings.MapFile_importMenuItem_Click_OpenShape;
@@ -464,7 +455,7 @@ namespace Majorsilence.Reporting.RdlMapFile
             ofd.CheckFileExists = true;
             try
             {
-                if (ofd.ShowDialog(this) == DialogResult.OK)
+                if ( ofd.ShowDialog(this) == DialogResult.OK)
                 {
                     map.ClearUndo();
                     ShapeFile sf = new ShapeFile();

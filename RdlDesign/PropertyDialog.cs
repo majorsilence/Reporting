@@ -1,10 +1,10 @@
 
 using System;
-using System.Drawing;
+using Majorsilence.Forms.Drawing;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Windows.Forms;
+using Majorsilence.Forms;
 using System.Xml;
 using Majorsilence.Reporting.RdlDesign.Resources;
 
@@ -487,7 +487,7 @@ namespace Majorsilence.Reporting.RdlDesign
             _TabPanels.Add(uc);
             tp.Controls.Add(uc);
 
-            uc.Dock = System.Windows.Forms.DockStyle.Fill;
+            uc.Dock = Majorsilence.Forms.DockStyle.Fill;
             uc.Location = new System.Drawing.Point(0, 0);
             uc.Name = name + "1";
             uc.Size = new System.Drawing.Size(552, 284);
@@ -533,7 +533,7 @@ namespace Majorsilence.Reporting.RdlDesign
             return true;
         }
 
-        private void PropertyDialog_Closing(object sender, System.Windows.Forms.FormClosingEventArgs e)
+        private void PropertyDialog_Closing(object sender, Majorsilence.Forms.FormClosingEventArgs e)
         {
             if (_Type == PropertyTypeEnum.Grouping)
             {	// Need to check if grouping value is still required

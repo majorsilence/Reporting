@@ -1,0 +1,27 @@
+@{
+    ViewData["Title"] = "Report Viewer";
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Report Viewer</title>
+  <style>
+    html, body { margin: 0; padding: 0; height: 100%; }
+    report-viewer { display: block; width: 100%; height: 100vh; }
+  </style>
+</head>
+<body>
+  <report-viewer
+    render-endpoint="/rdl-viewer/render"
+    parameters-endpoint="/rdl-viewer/parameters"
+    report-name="SimpleSalesReport">
+  </report-viewer>
+
+  <script type="module"
+    src="/_content/Majorsilence.Reporting.WebDesigner/rdl-viewer/rdl-viewer.js">
+  </script>
+</body>
+</html>

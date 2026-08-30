@@ -1,23 +1,14 @@
-﻿using System;
-using System.Collections;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Majorsilence.Reporting.Rdl;
 using NUnit.Framework;
 using ReportTests.Utils;
+using SkiaSharp;
 using UglyToad.PdfPig;
 using ZXing;
-#if DRAWINGCOMPAT
-using Majorsilence.Forms.Drawing;
-using System.Drawing;  // value types (Color, Point, Size, Rectangle, ...) come from System.Drawing.Primitives
-using ZXing.SkiaSharp;
-#else
-using System.Drawing;
-using ZXing.Windows.Compatibility;
-#endif
 
 namespace ReportTests.Utils
 {
@@ -47,12 +38,27 @@ namespace ReportTests.Utils
             "QrCode", "BarCode128", "AztecCode", "DataMatrix", "Pdf417", "BarCode39"
         };
 
+        private static BarcodeFormat ExpectedFormat(string barcodeType) => barcodeType switch
+        {
+            "QrCode" => BarcodeFormat.QR_CODE,
+            "BarCode128" => BarcodeFormat.CODE_128,
+            "AztecCode" => BarcodeFormat.AZTEC,
+            "DataMatrix" => BarcodeFormat.DATA_MATRIX,
+            "Pdf417" => BarcodeFormat.PDF_417,
+            "BarCode39" => BarcodeFormat.CODE_39,
+            _ => throw new ArgumentOutOfRangeException(nameof(barcodeType), barcodeType, "Unknown barcode type"),
+        };
+
+        // Renders barcode.rdl to PDF with the barcode type chosen by parameter, then reads the
+        // barcode back out of the PDF to prove the render is machine-decodable. Everything runs the
+        // SkiaSharp path now (ZXing.Net.Bindings.SkiaSharp for both the writer in RdlCri and the
+        // reader here). The report lays the barcode out at several sizes and also emits 1x1 spacer
+        // images, so the assertion is that *some* extracted image decodes as the requested format.
         [Test, TestCaseSource(nameof(BarCodeTypes))]
-#if NET6_0_OR_GREATER
-        [System.Runtime.Versioning.SupportedOSPlatform("windows")]
-#endif
         public async Task RenderPdf_BarcodeTypesViaParameter(string barcodeType)
         {
+            var expected = ExpectedFormat(barcodeType);
+
             Uri fileRdlUri = new Uri(_reportFolder, "barcode.rdl");
             // We change dir so the SQL lite database is found
             System.IO.Directory.SetCurrentDirectory(_reportFolder.LocalPath);
@@ -72,70 +78,25 @@ namespace ReportTests.Utils
             using var pdfDocument = PdfDocument.Open(fullOutputPath);
             var images = pdfDocument.GetPages().SelectMany(page => page.GetImages()).ToList();
 
-            Assert.Multiple(() =>
+            Assert.That(images, Is.Not.Empty, "No images found in PDF");
+
+            var reader = new ZXing.SkiaSharp.BarcodeReader { Options = { TryHarder = true } };
+            var decoded = new List<BarcodeFormat>();
+
+            foreach (var image in images)
             {
-                Assert.That(images.Count, Is.GreaterThan(0), "No images found in PDF");
+                var imageBytes = image.TryGetPng(out var pngBytes) ? pngBytes : image.RawBytes.ToArray();
+                using var barcodeBitmap = SKBitmap.Decode(imageBytes);
+                if (barcodeBitmap is null || barcodeBitmap.Width < 8 || barcodeBitmap.Height < 8)
+                    continue;
 
-                foreach (var image in images)
-                {
-#if DRAWINGCOMPAT
-                    var reader = new ZXing.SkiaSharp.BarcodeReader();
-#elif NET6_0_OR_GREATER
-                    var reader = new ZXing.Windows.Compatibility.BarcodeReader();
-#else
-                    var reader = new ZXing.BarcodeReader();
-#endif
-                    var imageBytes = image.TryGetPng(out var pngBytes) ? pngBytes : image.RawBytes.ToArray();
-#if DRAWINGCOMPAT
-                    // ZXing's SkiaSharp reader decodes an SKBitmap, and Majorsilence.Forms.Drawing
-                    // does not hand out the one behind its Bitmap.
-                    using var barcodeBitmap = SkiaSharp.SKBitmap.Decode(imageBytes);
-#else
-                    using var ms = new MemoryStream(imageBytes);
-                    using var barcodeBitmap = new Bitmap(ms);
-#endif
-                    var result = reader.Decode(barcodeBitmap);
+                var result = reader.Decode(barcodeBitmap);
+                if (result != null)
+                    decoded.Add(result.BarcodeFormat);
+            }
 
-                    Assert.That(result, Is.Not.Null);
-
-                    switch (barcodeType)
-                    {
-                        case "QrCode":
-                            Assert.That(result.BarcodeFormat,
-                                Is.EqualTo(BarcodeFormat.QR_CODE),
-                                "No QrCode image found in PDF");
-                            break;
-                        case "BarCode128":
-                            Assert.That(result.BarcodeFormat,
-                                Is.EqualTo(BarcodeFormat.CODE_128),
-                                "No BarCode128 image found in PDF");
-                            break;
-                        case "AztecCode":
-                            Assert.That(result.BarcodeFormat,
-                                Is.EqualTo(BarcodeFormat.AZTEC),
-                                "No AztecCode image found in PDF");
-                            break;
-                        case "DataMatrix":
-                            Assert.That(result.BarcodeFormat,
-                                Is.EqualTo(BarcodeFormat.DATA_MATRIX),
-                                "No DataMatrix image found in PDF");
-                            break;
-                        case "Pdf417":
-                            Assert.That(result.BarcodeFormat,
-                                Is.EqualTo(BarcodeFormat.PDF_417),
-                                "No Pdf417 image found in PDF");
-                            break;
-                        case "BarCode39":
-                            Assert.That(result.BarcodeFormat,
-                                Is.EqualTo(BarcodeFormat.CODE_39),
-                                "No BarCode39 image found in PDF");
-                            break;
-                        default:
-                            Assert.Fail($"Unknown barcode type: {barcodeType}");
-                            break;
-                    }
-                }
-            });
+            Assert.That(decoded, Does.Contain(expected),
+                $"No image in the PDF decoded as {expected}. Decoded formats: [{string.Join(", ", decoded)}]");
         }
     }
 }

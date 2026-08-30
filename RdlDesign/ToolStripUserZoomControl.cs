@@ -1,6 +1,6 @@
-﻿using System;
+using System;
 using System.ComponentModel;
-using System.Windows.Forms;
+using Majorsilence.Forms;
 
 namespace Majorsilence.Reporting.RdlDesign
 {
@@ -8,7 +8,15 @@ namespace Majorsilence.Reporting.RdlDesign
     public class ToolStripUserZoomControl : ToolStripControlHost
     {
         // Call the base constructor passing in a MonthCalendar instance.
-        public ToolStripUserZoomControl() : base(new UserZoomControl()) { }
+        // Majorsilence.Forms.ToolStripControlHost has no OnSubscribeControlEvents/
+        // OnUnsubscribeControlEvents virtual hooks (or any Dispose override point at all --
+        // ToolStripItem -> MenuItem : ILayoutable, not Component-derived), so subscribe directly
+        // here instead of via that pattern. No matching unsubscribe: this control lives as long
+        // as the toolbar itself, so there's nothing meaningful to leak in practice.
+        public ToolStripUserZoomControl() : base(new UserZoomControl())
+        {
+            ZoomControl!.ZoomChanged += new EventHandler<UserZoomControl.CambiaValori>(ZoomControl1_ValueChanged);
+        }
 
         public UserZoomControl ZoomControl
         {
@@ -20,26 +28,6 @@ namespace Majorsilence.Reporting.RdlDesign
 
         [Browsable(true)]
         public event EventHandler<UserZoomControl.CambiaValori> ZoomChanged;
-
-
-        // Subscribe and unsubscribe the control events you wish to expose.
-        protected override void OnSubscribeControlEvents(Control c)
-        {
-            // Call the base so the base events are connected.
-            base.OnSubscribeControlEvents(c);
-
-            UserZoomControl zoomControl = (UserZoomControl)c;
-            zoomControl.ZoomChanged += new EventHandler<UserZoomControl.CambiaValori>(ZoomControl1_ValueChanged);
-        }
-
-        protected override void OnUnsubscribeControlEvents(Control c)
-        {
-            // Call the base method so the basic events are unsubscribed.
-            base.OnUnsubscribeControlEvents(c);
-
-            UserZoomControl zoomControl = (UserZoomControl)c;
-            zoomControl.ZoomChanged -= new EventHandler<UserZoomControl.CambiaValori>(ZoomControl1_ValueChanged);
-        }
 
 
         // Raise the DateChanged event.

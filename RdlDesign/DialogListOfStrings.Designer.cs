@@ -1,33 +1,32 @@
 using System;
-using System.Windows.Forms;
-using System.Drawing;
+using Majorsilence.Forms;
 using System.ComponentModel;
 using System.Collections;
 
 namespace Majorsilence.Reporting.RdlDesign
 {
-    public partial class DialogListOfStrings : System.Windows.Forms.Form
+    public partial class DialogListOfStrings : Majorsilence.Forms.Form
 	{
 		#region Windows Form Designer generated code
-		private System.Windows.Forms.Button bOK;
-private System.Windows.Forms.Button bCancel;
-private System.Windows.Forms.Label label1;
-private System.Windows.Forms.TextBox tbStrings;
+		private Majorsilence.Forms.Button bOK;
+private Majorsilence.Forms.Button bCancel;
+private Majorsilence.Forms.Label label1;
+private Majorsilence.Forms.TextBox tbStrings;
 private System.ComponentModel.Container components = null;
 
 		private void InitializeComponent()
 		{
-			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(DialogListOfStrings));
-			this.bOK = new System.Windows.Forms.Button();
-			this.tbStrings = new System.Windows.Forms.TextBox();
-			this.bCancel = new System.Windows.Forms.Button();
-			this.label1 = new System.Windows.Forms.Label();
+			Majorsilence.Forms.ComponentResourceManager resources = new Majorsilence.Forms.ComponentResourceManager(typeof(DialogListOfStrings));
+			this.bOK = new Majorsilence.Forms.Button();
+			this.tbStrings = new Majorsilence.Forms.TextBox();
+			this.bCancel = new Majorsilence.Forms.Button();
+			this.label1 = new Majorsilence.Forms.Label();
 			this.SuspendLayout();
 			// 
 			// bOK
 			// 
 			resources.ApplyResources(this.bOK, "bOK");
-			this.bOK.DialogResult = System.Windows.Forms.DialogResult.OK;
+			this.bOK.DialogResult = Majorsilence.Forms.DialogResult.OK;
 			this.bOK.Name = "bOK";
 			// 
 			// tbStrings
@@ -38,7 +37,7 @@ private System.ComponentModel.Container components = null;
 			// bCancel
 			// 
 			resources.ApplyResources(this.bCancel, "bCancel");
-			this.bCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
+			this.bCancel.DialogResult = Majorsilence.Forms.DialogResult.Cancel;
 			this.bCancel.Name = "bCancel";
 			// 
 			// label1
@@ -54,12 +53,12 @@ private System.ComponentModel.Container components = null;
 			this.Controls.Add(this.bCancel);
 			this.Controls.Add(this.tbStrings);
 			this.Controls.Add(this.bOK);
-			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
+			this.FormBorderStyle = Majorsilence.Forms.FormBorderStyle.FixedDialog;
 			this.MaximizeBox = false;
 			this.MinimizeBox = false;
 			this.Name = "DialogListOfStrings";
 			this.ShowInTaskbar = false;
-			this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
+			this.SizeGripStyle = Majorsilence.Forms.SizeGripStyle.Hide;
 			this.ResumeLayout(false);
 			this.PerformLayout();
 

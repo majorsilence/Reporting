@@ -1,92 +1,87 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-	<PropertyGroup>
-		<ProjectType>Local</ProjectType>
-		<ApplicationIcon>App.ico</ApplicationIcon>
-		<DelaySign>false</DelaySign>
-		<OutputType>WinExe</OutputType>
-		<IsPackable>false</IsPackable>
-		<RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
-		<UseWindowsForms>true</UseWindowsForms>
-		<ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
-		<EnableDefaultEmbeddedResourceItems>false</EnableDefaultEmbeddedResourceItems>
-		<Configurations>Debug;Release;Debug-DrawingCompat</Configurations>
-		<TargetFrameworks>net48;net8.0-windows;net10.0-windows</TargetFrameworks>
-		<WarningsAsErrors>4014</WarningsAsErrors>
-		<ApplicationHighDpiMode>SystemAware</ApplicationHighDpiMode>
-		<ApplicationManifest>app.manifest</ApplicationManifest>
-        <GenerateResourceUsePreserializedResources>true</GenerateResourceUsePreserializedResources>
-	</PropertyGroup>
-	<ItemGroup>
-		<Reference Update="System">
-			<Name>System</Name>
-		</Reference>
-		<Reference Update="System.Data">
-			<Name>System.Data</Name>
-		</Reference>
-		<Reference Update="System.Drawing">
-			<Name>System.Drawing</Name>
-		</Reference>
-		<Reference Update="System.Xml">
-			<Name>System.XML</Name>
-		</Reference>
-	</ItemGroup>
-	<ItemGroup>
-		<EmbeddedResource Include="DialogAbout.resx">
-			<DependentUpon>DialogAbout.cs</DependentUpon>
-			<SubType>Designer</SubType>
-		</EmbeddedResource>
-		<EmbeddedResource Include="DialogAbout.ru-RU.resx">
-			<DependentUpon>DialogAbout.cs</DependentUpon>
-		</EmbeddedResource>
-		<EmbeddedResource Include="MDIChild.resx">
-			<DependentUpon>MDIChild.cs</DependentUpon>
-			<SubType>Designer</SubType>
-		</EmbeddedResource>
-		<EmbeddedResource Include="Properties\Resources.resx">
-			<Generator>ResXFileCodeGenerator</Generator>
-			<LastGenOutput>Resources.Designer.cs</LastGenOutput>
-		</EmbeddedResource>
-		<EmbeddedResource Include="RdlReader.fr.resx">
-            <DependentUpon>RdlReader.cs</DependentUpon>
-        </EmbeddedResource>
-		<EmbeddedResource Include="RdlReader.resx">
-			<DependentUpon>RdlReader.cs</DependentUpon>
-			<SubType>Designer</SubType>
-		</EmbeddedResource>
-		<EmbeddedResource Include="RdlReader.ru-RU.resx">
-			<DependentUpon>RdlReader.cs</DependentUpon>
-		</EmbeddedResource>
-		<EmbeddedResource Include="ZoomTo.resx">
-			<DependentUpon>ZoomTo.cs</DependentUpon>
-			<SubType>Designer</SubType>
-		</EmbeddedResource>
-		<EmbeddedResource Include="Resources\Strings.resx">
-			<DependentUpon>Strings.Designer.cs</DependentUpon>
-			<SubType>Designer</SubType>
-		</EmbeddedResource>
-	</ItemGroup>
-	<ItemGroup>
-		<Content Include="App.ico" />
-	</ItemGroup>
-	<ItemGroup>
-		<ProjectReference Include="..\RdlCri\Majorsilence.Reporting.RdlCri.csproj" />
-		<ProjectReference Include="..\RdlEngine\Majorsilence.Reporting.RdlEngine.csproj" />
-		<ProjectReference Include="..\RdlViewer\RdlViewer.csproj" />
-	</ItemGroup>
-	<ItemGroup>
-	  <Compile Update="Properties\Resources.Designer.cs">
-	    <DesignTime>True</DesignTime>
-	    <AutoGen>True</AutoGen>
-	    <DependentUpon>Resources.resx</DependentUpon>
-	  </Compile>
-	</ItemGroup>
-	<ItemGroup>
-		<PackageReference Include="Microsoft.Data.SqlClient" />
-		<PackageReference Include="Microsoft.Data.Sqlite" />
-		<PackageReference Include="MySql.Data" />
-		<PackageReference Include="Npgsql" />
-	</ItemGroup>
-    <ItemGroup Condition="'$(TargetFramework)' == 'net48'">
-        <PackageReference Include="System.Resources.Extensions" />
-    </ItemGroup>
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <ProjectType>Local</ProjectType>
+    <ApplicationIcon>App.ico</ApplicationIcon>
+    <DelaySign>false</DelaySign>
+    <OutputType>WinExe</OutputType>
+    <IsPackable>false</IsPackable>
+    <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
+    <!-- ImportWindowsDesktopTargets dropped: only meaningful with UseWpf/UseWindowsForms (both
+         gone), and importing it without either triggers NETSDK1106. Majorsilence.Forms.Avalonia
+         handles windowing itself, no WindowsDesktop SDK import needed. -->
+    <EnableDefaultEmbeddedResourceItems>false</EnableDefaultEmbeddedResourceItems>
+    <Configurations>Debug;Release</Configurations>
+    <!-- net48 dropped: Majorsilence.Forms itself only targets net8.0/net10.0. -->
+    <TargetFrameworks>net8.0;net10.0</TargetFrameworks>
+    <WarningsAsErrors>4014</WarningsAsErrors>
+    <ApplicationHighDpiMode>SystemAware</ApplicationHighDpiMode>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <GenerateResourceUsePreserializedResources>true</GenerateResourceUsePreserializedResources>
+    <Description>Cross-platform MDI RDL/RDLC viewer application for Majorsilence Reporting, built on Majorsilence.Forms instead of System.Windows.Forms. Preview: successor to Majorsilence.Reporting.RdlReader (Windows-only).</Description>
+  </PropertyGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="DialogAbout.resx">
+      <DependentUpon>DialogAbout.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="DialogAbout.ru-RU.resx">
+      <DependentUpon>DialogAbout.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MDIChild.resx">
+      <DependentUpon>MDIChild.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="RdlReader.fr.resx">
+      <DependentUpon>RdlReader.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="RdlReader.resx">
+      <DependentUpon>RdlReader.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="RdlReader.ru-RU.resx">
+      <DependentUpon>RdlReader.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ZoomTo.resx">
+      <DependentUpon>ZoomTo.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\Strings.resx">
+      <DependentUpon>Strings.Designer.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="App.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\RdlCri\Majorsilence.Reporting.RdlCri.csproj" />
+    <ProjectReference Include="..\RdlEngine\Majorsilence.Reporting.RdlEngine.csproj" />
+    <ProjectReference Include="..\RdlViewer\RdlViewer.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Update="Properties\Resources.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Data.SqlClient" />
+    <PackageReference Include="Microsoft.Data.Sqlite" />
+    <PackageReference Include="MySql.Data" />
+    <PackageReference Include="Npgsql" />
+  </ItemGroup>
+  <ItemGroup>
+    <!-- Needed unconditionally (not just net48): GenerateResourceUsePreserializedResources
+         triggers MSB3822 without it, same fix as D2 (RdlViewer.Forms). -->
+    <PackageReference Include="System.Resources.Extensions" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Majorsilence.Forms" />
+    <PackageReference Include="Majorsilence.Forms.Avalonia" />
+  </ItemGroup>
 </Project>

@@ -3,9 +3,9 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Drawing;
+using Majorsilence.Forms.Drawing;
 using System.Data;
-using System.Windows.Forms;
+using Majorsilence.Forms;
 using System.Xml;
 using Majorsilence.Reporting.RdlDesign.Resources;
 
@@ -14,7 +14,7 @@ namespace Majorsilence.Reporting.RdlDesign
 	/// <summary>
 	/// Summary description for StyleCtl.
 	/// </summary>
-	internal class StyleCtl : System.Windows.Forms.UserControl, IProperty
+	internal class StyleCtl : Majorsilence.Forms.UserControl, IProperty
 	{
         private List<XmlNode> _ReportItems;
 		private DesignXmlDraw _Draw;
@@ -22,36 +22,36 @@ namespace Majorsilence.Reporting.RdlDesign
 		private bool fPadLeft, fPadRight, fPadTop, fPadBottom;
 		private bool fEndColor, fBackColor, fGradient, fDEName, fDEOutput;
 
-		private System.Windows.Forms.Label label11;
-		private System.Windows.Forms.Label label12;
-		private System.Windows.Forms.Label label13;
-		private System.Windows.Forms.Label label14;
-		private System.Windows.Forms.TextBox tbPadLeft;
-		private System.Windows.Forms.TextBox tbPadRight;
-		private System.Windows.Forms.TextBox tbPadTop;
-		private System.Windows.Forms.GroupBox grpBoxPadding;
-		private System.Windows.Forms.GroupBox groupBox1;
-		private System.Windows.Forms.Label label3;
-		private System.Windows.Forms.Button bBackColor;
-		private System.Windows.Forms.Label label10;
-		private System.Windows.Forms.Label label15;
-		private System.Windows.Forms.ComboBox cbEndColor;
-		private System.Windows.Forms.ComboBox cbBackColor;
-		private System.Windows.Forms.Button bEndColor;
-		private System.Windows.Forms.ComboBox cbGradient;
-		private System.Windows.Forms.TextBox tbPadBottom;
-		private System.Windows.Forms.Label label1;
-		private System.Windows.Forms.Label label2;
-		private System.Windows.Forms.TextBox tbDEName;
-		private System.Windows.Forms.ComboBox cbDEOutput;
-		private System.Windows.Forms.GroupBox gbXML;
-		private System.Windows.Forms.Button bValueExpr;
-		private System.Windows.Forms.Button button1;
-		private System.Windows.Forms.Button button2;
-		private System.Windows.Forms.Button button3;
-		private System.Windows.Forms.Button bGradient;
-		private System.Windows.Forms.Button bExprBackColor;
-		private System.Windows.Forms.Button bExprEndColor;
+		private Majorsilence.Forms.Label label11;
+		private Majorsilence.Forms.Label label12;
+		private Majorsilence.Forms.Label label13;
+		private Majorsilence.Forms.Label label14;
+		private Majorsilence.Forms.TextBox tbPadLeft;
+		private Majorsilence.Forms.TextBox tbPadRight;
+		private Majorsilence.Forms.TextBox tbPadTop;
+		private Majorsilence.Forms.GroupBox grpBoxPadding;
+		private Majorsilence.Forms.GroupBox groupBox1;
+		private Majorsilence.Forms.Label label3;
+		private Majorsilence.Forms.Button bBackColor;
+		private Majorsilence.Forms.Label label10;
+		private Majorsilence.Forms.Label label15;
+		private Majorsilence.Forms.ComboBox cbEndColor;
+		private Majorsilence.Forms.ComboBox cbBackColor;
+		private Majorsilence.Forms.Button bEndColor;
+		private Majorsilence.Forms.ComboBox cbGradient;
+		private Majorsilence.Forms.TextBox tbPadBottom;
+		private Majorsilence.Forms.Label label1;
+		private Majorsilence.Forms.Label label2;
+		private Majorsilence.Forms.TextBox tbDEName;
+		private Majorsilence.Forms.ComboBox cbDEOutput;
+		private Majorsilence.Forms.GroupBox gbXML;
+		private Majorsilence.Forms.Button bValueExpr;
+		private Majorsilence.Forms.Button button1;
+		private Majorsilence.Forms.Button button2;
+		private Majorsilence.Forms.Button button3;
+		private Majorsilence.Forms.Button bGradient;
+		private Majorsilence.Forms.Button bExprBackColor;
+		private Majorsilence.Forms.Button bExprEndColor;
 		/// <summary> 
 		/// Required designer variable.
 		/// </summary>
@@ -124,38 +124,38 @@ namespace Majorsilence.Reporting.RdlDesign
 		/// </summary>
 		private void InitializeComponent()
 		{
-			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(StyleCtl));
+			Majorsilence.Forms.ComponentResourceManager resources = new Majorsilence.Forms.ComponentResourceManager(typeof(StyleCtl));
             this.DoubleBuffered = true;
-			this.label11 = new System.Windows.Forms.Label();
-			this.label12 = new System.Windows.Forms.Label();
-			this.label13 = new System.Windows.Forms.Label();
-			this.label14 = new System.Windows.Forms.Label();
-			this.tbPadLeft = new System.Windows.Forms.TextBox();
-			this.tbPadRight = new System.Windows.Forms.TextBox();
-			this.tbPadTop = new System.Windows.Forms.TextBox();
-			this.tbPadBottom = new System.Windows.Forms.TextBox();
-			this.grpBoxPadding = new System.Windows.Forms.GroupBox();
-			this.button3 = new System.Windows.Forms.Button();
-			this.button2 = new System.Windows.Forms.Button();
-			this.button1 = new System.Windows.Forms.Button();
-			this.bValueExpr = new System.Windows.Forms.Button();
-			this.groupBox1 = new System.Windows.Forms.GroupBox();
-			this.bGradient = new System.Windows.Forms.Button();
-			this.bExprBackColor = new System.Windows.Forms.Button();
-			this.bExprEndColor = new System.Windows.Forms.Button();
-			this.bEndColor = new System.Windows.Forms.Button();
-			this.cbBackColor = new System.Windows.Forms.ComboBox();
-			this.cbEndColor = new System.Windows.Forms.ComboBox();
-			this.label15 = new System.Windows.Forms.Label();
-			this.cbGradient = new System.Windows.Forms.ComboBox();
-			this.label10 = new System.Windows.Forms.Label();
-			this.bBackColor = new System.Windows.Forms.Button();
-			this.label3 = new System.Windows.Forms.Label();
-			this.gbXML = new System.Windows.Forms.GroupBox();
-			this.cbDEOutput = new System.Windows.Forms.ComboBox();
-			this.tbDEName = new System.Windows.Forms.TextBox();
-			this.label2 = new System.Windows.Forms.Label();
-			this.label1 = new System.Windows.Forms.Label();
+			this.label11 = new Majorsilence.Forms.Label();
+			this.label12 = new Majorsilence.Forms.Label();
+			this.label13 = new Majorsilence.Forms.Label();
+			this.label14 = new Majorsilence.Forms.Label();
+			this.tbPadLeft = new Majorsilence.Forms.TextBox();
+			this.tbPadRight = new Majorsilence.Forms.TextBox();
+			this.tbPadTop = new Majorsilence.Forms.TextBox();
+			this.tbPadBottom = new Majorsilence.Forms.TextBox();
+			this.grpBoxPadding = new Majorsilence.Forms.GroupBox();
+			this.button3 = new Majorsilence.Forms.Button();
+			this.button2 = new Majorsilence.Forms.Button();
+			this.button1 = new Majorsilence.Forms.Button();
+			this.bValueExpr = new Majorsilence.Forms.Button();
+			this.groupBox1 = new Majorsilence.Forms.GroupBox();
+			this.bGradient = new Majorsilence.Forms.Button();
+			this.bExprBackColor = new Majorsilence.Forms.Button();
+			this.bExprEndColor = new Majorsilence.Forms.Button();
+			this.bEndColor = new Majorsilence.Forms.Button();
+			this.cbBackColor = new Majorsilence.Forms.ComboBox();
+			this.cbEndColor = new Majorsilence.Forms.ComboBox();
+			this.label15 = new Majorsilence.Forms.Label();
+			this.cbGradient = new Majorsilence.Forms.ComboBox();
+			this.label10 = new Majorsilence.Forms.Label();
+			this.bBackColor = new Majorsilence.Forms.Button();
+			this.label3 = new Majorsilence.Forms.Label();
+			this.gbXML = new Majorsilence.Forms.GroupBox();
+			this.cbDEOutput = new Majorsilence.Forms.ComboBox();
+			this.tbDEName = new Majorsilence.Forms.TextBox();
+			this.label2 = new Majorsilence.Forms.Label();
+			this.label1 = new Majorsilence.Forms.Label();
 			this.grpBoxPadding.SuspendLayout();
 			this.groupBox1.SuspendLayout();
 			this.gbXML.SuspendLayout();
@@ -185,25 +185,25 @@ namespace Majorsilence.Reporting.RdlDesign
 			// 
 			resources.ApplyResources(this.tbPadLeft, "tbPadLeft");
 			this.tbPadLeft.Name = "tbPadLeft";
-			this.tbPadLeft.TextChanged += new System.EventHandler(this.tbPadLeft_TextChanged);
+			this.tbPadLeft.TextChanged += this.tbPadLeft_TextChanged;
 			// 
 			// tbPadRight
 			// 
 			resources.ApplyResources(this.tbPadRight, "tbPadRight");
 			this.tbPadRight.Name = "tbPadRight";
-			this.tbPadRight.TextChanged += new System.EventHandler(this.tbPadRight_TextChanged);
+			this.tbPadRight.TextChanged += this.tbPadRight_TextChanged;
 			// 
 			// tbPadTop
 			// 
 			resources.ApplyResources(this.tbPadTop, "tbPadTop");
 			this.tbPadTop.Name = "tbPadTop";
-			this.tbPadTop.TextChanged += new System.EventHandler(this.tbPadTop_TextChanged);
+			this.tbPadTop.TextChanged += this.tbPadTop_TextChanged;
 			// 
 			// tbPadBottom
 			// 
 			resources.ApplyResources(this.tbPadBottom, "tbPadBottom");
 			this.tbPadBottom.Name = "tbPadBottom";
-			this.tbPadBottom.TextChanged += new System.EventHandler(this.tbPadBottom_TextChanged);
+			this.tbPadBottom.TextChanged += this.tbPadBottom_TextChanged;
 			// 
 			// grpBoxPadding
 			// 
@@ -228,28 +228,28 @@ namespace Majorsilence.Reporting.RdlDesign
 			resources.ApplyResources(this.button3, "button3");
 			this.button3.Name = "button3";
 			this.button3.Tag = "pright";
-			this.button3.Click += new System.EventHandler(this.bExpr_Click);
+			this.button3.Click += this.bExpr_Click;
 			// 
 			// button2
 			// 
 			resources.ApplyResources(this.button2, "button2");
 			this.button2.Name = "button2";
 			this.button2.Tag = "pbottom";
-			this.button2.Click += new System.EventHandler(this.bExpr_Click);
+			this.button2.Click += this.bExpr_Click;
 			// 
 			// button1
 			// 
 			resources.ApplyResources(this.button1, "button1");
 			this.button1.Name = "button1";
 			this.button1.Tag = "ptop";
-			this.button1.Click += new System.EventHandler(this.bExpr_Click);
+			this.button1.Click += this.bExpr_Click;
 			// 
 			// bValueExpr
 			// 
 			resources.ApplyResources(this.bValueExpr, "bValueExpr");
 			this.bValueExpr.Name = "bValueExpr";
 			this.bValueExpr.Tag = "pleft";
-			this.bValueExpr.Click += new System.EventHandler(this.bExpr_Click);
+			this.bValueExpr.Click += this.bExpr_Click;
 			// 
 			// groupBox1
 			// 
@@ -273,41 +273,41 @@ namespace Majorsilence.Reporting.RdlDesign
 			resources.ApplyResources(this.bGradient, "bGradient");
 			this.bGradient.Name = "bGradient";
 			this.bGradient.Tag = "bgradient";
-			this.bGradient.Click += new System.EventHandler(this.bExpr_Click);
+			this.bGradient.Click += this.bExpr_Click;
 			// 
 			// bExprBackColor
 			// 
 			resources.ApplyResources(this.bExprBackColor, "bExprBackColor");
 			this.bExprBackColor.Name = "bExprBackColor";
 			this.bExprBackColor.Tag = "bcolor";
-			this.bExprBackColor.Click += new System.EventHandler(this.bExpr_Click);
+			this.bExprBackColor.Click += this.bExpr_Click;
 			// 
 			// bExprEndColor
 			// 
 			resources.ApplyResources(this.bExprEndColor, "bExprEndColor");
 			this.bExprEndColor.Name = "bExprEndColor";
 			this.bExprEndColor.Tag = "bendcolor";
-			this.bExprEndColor.Click += new System.EventHandler(this.bExpr_Click);
+			this.bExprEndColor.Click += this.bExpr_Click;
 			// 
 			// bEndColor
 			// 
 			resources.ApplyResources(this.bEndColor, "bEndColor");
 			this.bEndColor.Name = "bEndColor";
-			this.bEndColor.Click += new System.EventHandler(this.bColor_Click);
+			this.bEndColor.Click += this.bColor_Click;
 			// 
 			// cbBackColor
 			// 
 			resources.ApplyResources(this.cbBackColor, "cbBackColor");
 			this.cbBackColor.Name = "cbBackColor";
-			this.cbBackColor.SelectedIndexChanged += new System.EventHandler(this.cbBackColor_SelectedIndexChanged);
-			this.cbBackColor.TextChanged += new System.EventHandler(this.cbBackColor_SelectedIndexChanged);
+			this.cbBackColor.SelectedIndexChanged += this.cbBackColor_SelectedIndexChanged;
+			this.cbBackColor.TextChanged += this.cbBackColor_SelectedIndexChanged;
 			// 
 			// cbEndColor
 			// 
 			resources.ApplyResources(this.cbEndColor, "cbEndColor");
 			this.cbEndColor.Name = "cbEndColor";
-			this.cbEndColor.SelectedIndexChanged += new System.EventHandler(this.cbEndColor_SelectedIndexChanged);
-			this.cbEndColor.TextChanged += new System.EventHandler(this.cbEndColor_SelectedIndexChanged);
+			this.cbEndColor.SelectedIndexChanged += this.cbEndColor_SelectedIndexChanged;
+			this.cbEndColor.TextChanged += this.cbEndColor_SelectedIndexChanged;
 			// 
 			// label15
 			// 
@@ -317,7 +317,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			// cbGradient
 			// 
 			resources.ApplyResources(this.cbGradient, "cbGradient");
-			this.cbGradient.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+			this.cbGradient.DropDownStyle = Majorsilence.Forms.ComboBoxStyle.DropDownList;
 			this.cbGradient.Items.AddRange(new object[] {
             resources.GetString("cbGradient.Items"),
             resources.GetString("cbGradient.Items1"),
@@ -328,7 +328,7 @@ namespace Majorsilence.Reporting.RdlDesign
             resources.GetString("cbGradient.Items6"),
             resources.GetString("cbGradient.Items7")});
 			this.cbGradient.Name = "cbGradient";
-			this.cbGradient.SelectedIndexChanged += new System.EventHandler(this.cbGradient_SelectedIndexChanged);
+			this.cbGradient.SelectedIndexChanged += this.cbGradient_SelectedIndexChanged;
 			// 
 			// label10
 			// 
@@ -339,7 +339,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			// 
 			resources.ApplyResources(this.bBackColor, "bBackColor");
 			this.bBackColor.Name = "bBackColor";
-			this.bBackColor.Click += new System.EventHandler(this.bColor_Click);
+			this.bBackColor.Click += this.bColor_Click;
 			// 
 			// label3
 			// 
@@ -359,20 +359,20 @@ namespace Majorsilence.Reporting.RdlDesign
 			// cbDEOutput
 			// 
 			resources.ApplyResources(this.cbDEOutput, "cbDEOutput");
-			this.cbDEOutput.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+			this.cbDEOutput.DropDownStyle = Majorsilence.Forms.ComboBoxStyle.DropDownList;
 			this.cbDEOutput.Items.AddRange(new object[] {
             resources.GetString("cbDEOutput.Items"),
             resources.GetString("cbDEOutput.Items1"),
             resources.GetString("cbDEOutput.Items2"),
             resources.GetString("cbDEOutput.Items3")});
 			this.cbDEOutput.Name = "cbDEOutput";
-			this.cbDEOutput.SelectedIndexChanged += new System.EventHandler(this.cbDEOutput_SelectedIndexChanged);
+			this.cbDEOutput.SelectedIndexChanged += this.cbDEOutput_SelectedIndexChanged;
 			// 
 			// tbDEName
 			// 
 			resources.ApplyResources(this.tbDEName, "tbDEName");
 			this.tbDEName.Name = "tbDEName";
-			this.tbDEName.TextChanged += new System.EventHandler(this.tbDEName_TextChanged);
+			this.tbDEName.TextChanged += this.tbDEName_TextChanged;
 			// 
 			// label2
 			// 
@@ -478,9 +478,9 @@ namespace Majorsilence.Reporting.RdlDesign
 
                 RdlDesigner.SetCustomColors(cd.CustomColors);
                 if (sender == this.bEndColor)
-                    cbEndColor.Text = ColorTranslator.ToHtml(cd.Color);
+                    cbEndColor.Text = Majorsilence.Forms.ColorTranslator.ToHtml(cd.Color);
                 else if (sender == this.bBackColor)
-                    cbBackColor.Text = ColorTranslator.ToHtml(cd.Color);
+                    cbBackColor.Text = Majorsilence.Forms.ColorTranslator.ToHtml(cd.Color);
             }
 			return;
 		}

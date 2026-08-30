@@ -3,13 +3,12 @@ using Majorsilence.Reporting.Rdl;
 using Majorsilence.Reporting.RdlDesign.Resources;
 using Majorsilence.Reporting.RdlDesign.Syntax;
 using Majorsilence.Reporting.RdlViewer;
-using ScintillaNET;
 using System;
 using System.ComponentModel;
 using System.Drawing;
-using System.Drawing.Printing;
+using Majorsilence.Forms.Printing;
 using System.Threading.Tasks;
-using System.Windows.Forms;
+using Majorsilence.Forms;
 using System.Xml;
 
 namespace Majorsilence.Reporting.RdlDesign
@@ -17,18 +16,18 @@ namespace Majorsilence.Reporting.RdlDesign
     /// <summary>
     /// Summary description for RdlEditPreview.
     /// </summary>
-    internal class RdlEditPreview : System.Windows.Forms.UserControl
+    internal class RdlEditPreview : Majorsilence.Forms.UserControl
 	{
-		private System.Windows.Forms.TabControl tcEHP;
-		private System.Windows.Forms.TabPage tpEditor;
-		private System.Windows.Forms.TabPage tpBrowser;
+		private Majorsilence.Forms.TabControl tcEHP;
+		private Majorsilence.Forms.TabPage tpEditor;
+		private Majorsilence.Forms.TabPage tpBrowser;
 		/// <summary> 
 		/// Required designer variable.
 		/// </summary>
 		private System.ComponentModel.Container components = null;
 
 		private Majorsilence.Reporting.RdlViewer.RdlViewer rdlPreview;
-		private System.Windows.Forms.TabPage tpDesign;
+		private Majorsilence.Forms.TabPage tpDesign;
 		private DesignCtl dcDesign;
 
 		public FindTab FindTab;
@@ -91,23 +90,23 @@ namespace Majorsilence.Reporting.RdlDesign
             dcTopRuler.Offset = dcLeftRuler.Width;
             dcLeftRuler.Offset = dcTopRuler.Height;
 
-           // dcDesign.Dock = System.Windows.Forms.DockStyle.Bottom;
+           // dcDesign.Dock = Majorsilence.Forms.DockStyle.Bottom;
             dcDesign.Anchor = AnchorStyles.Left | AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Right;
 			dcDesign.Location = new System.Drawing.Point(dcLeftRuler.Width, dcTopRuler.Height);
 			dcDesign.Name = "dcDesign";
 			dcDesign.Size = new System.Drawing.Size(tpDesign.Width-dcLeftRuler.Width, tpDesign.Height-dcTopRuler.Height);
 			dcDesign.TabIndex = 0;
-			dcDesign.ReportChanged += new System.EventHandler(dcDesign_ReportChanged);
-            dcDesign.HeightChanged += new DesignCtl.HeightEventHandler(dcDesign_HeightChanged);
-            dcDesign.SelectionChanged += new System.EventHandler(dcDesign_SelectionChanged);
-			dcDesign.SelectionMoved += new System.EventHandler(dcDesign_SelectionMoved);
-			dcDesign.ReportItemInserted += new System.EventHandler(dcDesign_ReportItemInserted);
-			dcDesign.OpenSubreport += new DesignCtl.OpenSubreportEventHandler(dcDesign_OpenSubreport);
+			dcDesign.ReportChanged += dcDesign_ReportChanged;
+            dcDesign.HeightChanged += dcDesign_HeightChanged;
+            dcDesign.SelectionChanged += dcDesign_SelectionChanged;
+			dcDesign.SelectionMoved += dcDesign_SelectionMoved;
+			dcDesign.ReportItemInserted += dcDesign_ReportItemInserted;
+			dcDesign.OpenSubreport += dcDesign_OpenSubreport;
 
-            //ScintillaNET Init
+            //Majorsilence.Reporting.RdlDesign.Syntax Init
             ScintillaXMLStyle.ConfigureScintillaStyle(scintilla1);
 			scintilla1.SetSavePoint();
-            scintilla1.KeyDown += new KeyEventHandler(scintilla1_KeyDown);
+            scintilla1.KeyDown += scintilla1_KeyDown;
         }
 
         void scintilla1_KeyDown(object sender, KeyEventArgs e)
@@ -566,7 +565,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			set {this.rdlPreview.ZoomMode = value;}
 		}
 
-		public void FindNext(Control ctl, string str, bool matchCase, bool revertSearch, bool showEndMsg = true)
+		public void FindNext(IWin32Window ctl, string str, bool matchCase, bool revertSearch, bool showEndMsg = true)
 		{
 			if (_CurrentTab != DesignTabs.Edit)
 				return;
@@ -631,7 +630,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			FindTab = null;
 		}
 
-		public void ReplaceNext(Control ctl, string str, string strReplace, bool matchCase)
+		public void ReplaceNext(IWin32Window ctl, string str, string strReplace, bool matchCase)
 		{
 			if (_CurrentTab != DesignTabs.Edit)
 				return;
@@ -648,8 +647,9 @@ namespace Majorsilence.Reporting.RdlDesign
 			}
 		}
 
-		public void ReplaceAll(Control ctl, string str, string strReplace, bool matchCase)
-		{			
+		// `ctl` is unused inside this method -- widened from Control to object, same rationale as Goto.
+		public void ReplaceAll(object ctl, string str, string strReplace, bool matchCase)
+		{
 			if (_CurrentTab != DesignTabs.Edit)
 				return;
 
@@ -666,7 +666,10 @@ namespace Majorsilence.Reporting.RdlDesign
 			}
 		}
 
-		public void Goto(Control ctl, int nLine)
+		// `ctl` is unused inside this method -- widened from Control to object so any caller
+		// (Control- or Form-based; Form isn't Control-derived in Majorsilence.Forms) can pass
+		// itself without a cast.
+		public void Goto(object ctl, int nLine)
 		{
 			if (_CurrentTab != DesignTabs.Edit)
 				return;
@@ -700,13 +703,13 @@ namespace Majorsilence.Reporting.RdlDesign
 		/// </summary>
 		private void InitializeComponent()
 		{
-			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(RdlEditPreview));
+			Majorsilence.Forms.ComponentResourceManager resources = new Majorsilence.Forms.ComponentResourceManager(typeof(RdlEditPreview));
             this.DoubleBuffered = true;
-            this.tcEHP = new System.Windows.Forms.TabControl();
-			this.tpDesign = new System.Windows.Forms.TabPage();
-			this.tpEditor = new System.Windows.Forms.TabPage();
-			this.scintilla1 = new ScintillaNET.Scintilla();
-			this.tpBrowser = new System.Windows.Forms.TabPage();
+            this.tcEHP = new Majorsilence.Forms.TabControl();
+			this.tpDesign = new Majorsilence.Forms.TabPage();
+			this.tpEditor = new Majorsilence.Forms.TabPage();
+			this.scintilla1 = new Majorsilence.Reporting.RdlDesign.Syntax.Scintilla();
+			this.tpBrowser = new Majorsilence.Forms.TabPage();
 			this.rdlPreview = new Majorsilence.Reporting.RdlViewer.RdlViewer();
 			this.tcEHP.SuspendLayout();
 			this.tpEditor.SuspendLayout();
@@ -721,7 +724,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			this.tcEHP.Controls.Add(this.tpBrowser);
 			this.tcEHP.Name = "tcEHP";
 			this.tcEHP.SelectedIndex = 0;
-			this.tcEHP.SelectedIndexChanged += new System.EventHandler(this.tcEHP_SelectedIndexChanged);
+			this.tcEHP.SelectedIndexChanged += this.tcEHP_SelectedIndexChanged;
 			// 
 			// tpDesign
 			// 
@@ -739,11 +742,11 @@ namespace Majorsilence.Reporting.RdlDesign
 			// scintilla1
 			// 
 			resources.ApplyResources(this.scintilla1, "scintilla1");
-			this.scintilla1.Lexer = ScintillaNET.Lexer.Xml;
+			this.scintilla1.Lexer = Majorsilence.Reporting.RdlDesign.Syntax.Lexer.Xml;
 			this.scintilla1.Name = "scintilla1";
 			this.scintilla1.UseTabs = false;
-			this.scintilla1.UpdateUI += new System.EventHandler<ScintillaNET.UpdateUIEventArgs>(this.scintilla1_UpdateUI);
-			this.scintilla1.TextChanged += new System.EventHandler(this.scintilla1_TextChanged);
+			this.scintilla1.UpdateUI += new System.EventHandler<Majorsilence.Reporting.RdlDesign.Syntax.UpdateUIEventArgs>(this.scintilla1_UpdateUI);
+			this.scintilla1.TextChanged += this.scintilla1_TextChanged;
 			// 
 			// tpBrowser
 			// 
@@ -754,7 +757,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			// 
 			// rdlPreview
 			// 
-			this.rdlPreview.Cursor = System.Windows.Forms.Cursors.Default;
+			this.rdlPreview.Cursor = Majorsilence.Forms.Cursors.Default;
 			resources.ApplyResources(this.rdlPreview, "rdlPreview");
 			this.rdlPreview.dSubReportGetContent = null;
 			this.rdlPreview.Folder = null;
@@ -877,6 +880,12 @@ namespace Majorsilence.Reporting.RdlDesign
 			{
 				if (rdlPreview.SourceRdl != scintilla1.Text)			// sync up preview
 					await this.rdlPreview.SetSourceRdl(scintilla1.Text);
+
+				// SetSourceRdl only renders when the viewer is already Visible; on the tab switch
+				// that reveals this pane it is not yet, and the lazy first-paint load does not
+				// arrive inside the MDI child -- so force it here or the preview stays blank until
+				// Run Report.
+				await this.rdlPreview.EnsureRendered();
 			}
 			else if (tag == DesignTabs.Design)
 			{
@@ -900,13 +909,10 @@ namespace Majorsilence.Reporting.RdlDesign
 				OnDesignTabChanged(this, e);
 		}
 
-		/// <summary>
-		/// Print the report.  
-		/// </summary>
-		public async void Print(PrintDocument pd)
-		{
-			await this.rdlPreview.Print(pd);
-		}
+        // Print(PrintDocument) removed -- rdlPreview.Print(PrintDocument) no longer exists (see
+        // RdlViewer.Forms/RdlViewer.cs and MIGRATION-NOTES.md's D2 printing-redesign writeup).
+        // "Printing" now goes through SaveAs(path, OutputPresentationType.PDF) below; see
+        // RdlDesigner.cs's menuFilePrint_Click for the caller-side change.
 
         public async Task SaveAs(string filename, OutputPresentationType type)
 		{

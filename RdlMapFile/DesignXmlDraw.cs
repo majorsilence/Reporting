@@ -3,9 +3,10 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Drawing.Drawing2D;
-using System.Drawing.Imaging;
-using System.Windows.Forms;
+using Majorsilence.Forms.Drawing;
+using Majorsilence.Forms.Drawing.Drawing2D;
+using Majorsilence.Forms.Drawing.Imaging;
+using Majorsilence.Forms;
 using System.IO;
 using System.Xml;
 using System.Globalization;
@@ -796,11 +797,11 @@ namespace Majorsilence.Reporting.RdlMapFile
         private void MouseDownContext(MouseEventArgs e)
         {
             ContextMenuStrip mc = new ContextMenuStrip();
-            mc.Opening += new System.ComponentModel.CancelEventHandler(mc_Popup);
+            mc.Opening += mc_Popup;
             if (_menuCopy == null)
-                _menuCopy = new ToolStripMenuItem("&Copy", null, new EventHandler(mc_Copy));
+                _menuCopy = new ToolStripMenuItem("&Copy", (Image)null, mc_Copy);
             if (_menuPaste == null)
-                _menuPaste = new ToolStripMenuItem("&Paste", null, new EventHandler(mc_Paste));
+                _menuPaste = new ToolStripMenuItem("&Paste", (Image)null, mc_Paste);
 
             mc.Items.AddRange(
                 new ToolStripMenuItem[] {_menuCopy, _menuPaste});
@@ -811,7 +812,7 @@ namespace Majorsilence.Reporting.RdlMapFile
                 string[] keys = GetKeysInPolygon(_SelectedList[0]);
                 foreach (string k in keys)
                 {
-                    ToolStripMenuItem mi = new ToolStripMenuItem(string.Format("Select by key = {0}", k), null, new EventHandler(mc_Keys));
+                    ToolStripMenuItem mi = new ToolStripMenuItem(string.Format("Select by key = {0}", k), (Image)null, mc_Keys);
                     mi.Tag = k;
                     mc.Items.Add(mi);
                 }
@@ -1188,7 +1189,7 @@ namespace Majorsilence.Reporting.RdlMapFile
 
 
             if (this._BackImage != null)
-                g.DrawImage(this._BackImage, new Point(-hScrollBar.Value, -vScrollBar.Value));
+                g.DrawImage(this._BackImage, -hScrollBar.Value, -vScrollBar.Value);
 
             //_clip = new Rectangle(cr.X + hScrollBar.Value, 
             //    cr.Y + vScrollBar.Value, 
@@ -1358,7 +1359,7 @@ namespace Majorsilence.Reporting.RdlMapFile
             Color c = Color.Empty;
 			try 
 			{
-				c = ColorTranslator.FromHtml(sc);
+				c = Majorsilence.Forms.Drawing.ColorTranslator.FromHtml(sc);
 			}
 			catch 
 			{       // if bad color just ignore and handle as empty color
@@ -1451,19 +1452,19 @@ namespace Majorsilence.Reporting.RdlMapFile
             string face = GetTextFontFamily(xNode);
             float pts = GetTextFontSize(xNode);
 
-            System.Drawing.FontStyle fs = 0;
+            Majorsilence.Forms.Drawing.FontStyle fs = 0;
             if (IsTextFontWeightItalic(xNode))
-                fs |= System.Drawing.FontStyle.Italic;
+                fs |= Majorsilence.Forms.Drawing.FontStyle.Italic;
             if (IsTextFontWeightBold(xNode))
-                fs |= System.Drawing.FontStyle.Bold;
+                fs |= Majorsilence.Forms.Drawing.FontStyle.Bold;
 
             switch (GetTextDecoration(xNode))
             {
                 case "Underline":
-                    fs |= System.Drawing.FontStyle.Underline;
+                    fs |= Majorsilence.Forms.Drawing.FontStyle.Underline;
                     break;
                 case "LineThrough":
-                    fs |= System.Drawing.FontStyle.Strikeout;
+                    fs |= Majorsilence.Forms.Drawing.FontStyle.Strikeout;
                     break;
                 default:
                     break;
@@ -1584,29 +1585,29 @@ namespace Majorsilence.Reporting.RdlMapFile
         private void InitializeComponent()
         {
             this.DoubleBuffered = true;
-            this.vScrollBar = new System.Windows.Forms.VScrollBar();
-            this.hScrollBar = new System.Windows.Forms.HScrollBar();
+            this.vScrollBar = new Majorsilence.Forms.VScrollBar();
+            this.hScrollBar = new Majorsilence.Forms.HScrollBar();
             this.SuspendLayout();
             // 
             // vScrollBar
             // 
-            this.vScrollBar.Dock = System.Windows.Forms.DockStyle.Right;
+            this.vScrollBar.Dock = Majorsilence.Forms.DockStyle.Right;
             this.vScrollBar.Location = new System.Drawing.Point(133, 0);
             this.vScrollBar.Name = "vScrollBar";
             this.vScrollBar.Size = new System.Drawing.Size(17, 150);
             this.vScrollBar.SmallChange = 10;
             this.vScrollBar.TabIndex = 0;
-            this.vScrollBar.Scroll += new System.Windows.Forms.ScrollEventHandler(this.vScrollBar_Scroll);
+            this.vScrollBar.Scroll += this.vScrollBar_Scroll;
             // 
             // hScrollBar
             // 
-            this.hScrollBar.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.hScrollBar.Dock = Majorsilence.Forms.DockStyle.Bottom;
             this.hScrollBar.Location = new System.Drawing.Point(0, 133);
             this.hScrollBar.Name = "hScrollBar";
             this.hScrollBar.Size = new System.Drawing.Size(133, 17);
             this.hScrollBar.SmallChange = 10;
             this.hScrollBar.TabIndex = 1;
-            this.hScrollBar.Scroll += new System.Windows.Forms.ScrollEventHandler(this.hScrollBar_Scroll);
+            this.hScrollBar.Scroll += this.hScrollBar_Scroll;
             // 
             // DesignXmlDraw
             // 
@@ -1704,7 +1705,7 @@ namespace Majorsilence.Reporting.RdlMapFile
             }
 
             Stream strm = null;
-            System.Drawing.Image im = null;
+            Majorsilence.Forms.Drawing.Image im = null;
 
             try
             {
@@ -1718,7 +1719,7 @@ namespace Majorsilence.Reporting.RdlMapFile
                 }
                 else
                     strm = new FileStream(fname, FileMode.Open, FileAccess.Read, FileShare.Read);
-                im = System.Drawing.Image.FromStream(strm);
+                im = Majorsilence.Forms.Drawing.Image.FromStream(strm);
                 if (_BackImage != null)
                     _BackImage.Dispose();
                 _BackImage = im;

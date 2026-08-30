@@ -4,8 +4,9 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
+using Majorsilence.Forms.Drawing;
 using System.Data;
-using System.Windows.Forms;
+using Majorsilence.Forms;
 using System.Xml;
 using System.Globalization;
 using Majorsilence.Reporting.RdlDesign.Resources;
@@ -15,48 +16,48 @@ namespace Majorsilence.Reporting.RdlDesign
 	/// <summary>
 	/// FontCtl
 	/// </summary>
-	internal class FontCtl : System.Windows.Forms.UserControl, IProperty
+	internal class FontCtl : Majorsilence.Forms.UserControl, IProperty
 	{
         private List<XmlNode> _ReportItems;
 		private DesignXmlDraw _Draw;
 		private bool fHorzAlign, fFormat, fDirection, fWritingMode, fTextDecoration;
 		private bool fColor, fVerticalAlign, fFontStyle, fFontWeight, fFontSize, fFontFamily;
-		private System.Windows.Forms.Label label4;
-		private System.Windows.Forms.Label label5;
-		private System.Windows.Forms.Label label6;
-		private System.Windows.Forms.Label label7;
-		private System.Windows.Forms.Label label8;
-		private System.Windows.Forms.Label lFont;
-		private System.Windows.Forms.Button bFont;
-		private System.Windows.Forms.ComboBox cbHorzAlign;
-		private System.Windows.Forms.ComboBox cbFormat;
-		private System.Windows.Forms.ComboBox cbDirection;
-		private System.Windows.Forms.ComboBox cbWritingMode;
-		private System.Windows.Forms.Label label2;
-		private System.Windows.Forms.ComboBox cbTextDecoration;
-		private System.Windows.Forms.Button bColor;
-		private System.Windows.Forms.Label label9;
-		private System.Windows.Forms.ComboBox cbColor;
-		private System.Windows.Forms.ComboBox cbVerticalAlign;
-		private System.Windows.Forms.Label label3;
-		private System.Windows.Forms.ComboBox cbFontStyle;
-		private System.Windows.Forms.ComboBox cbFontWeight;
-		private System.Windows.Forms.Label label10;
-		private System.Windows.Forms.ComboBox cbFontSize;
-		private System.Windows.Forms.Label label11;
-		private System.Windows.Forms.ComboBox cbFontFamily;
-        private System.Windows.Forms.GroupBox groupBox1;
-		private System.Windows.Forms.Button bFamily;
-		private System.Windows.Forms.Button bStyle;
-		private System.Windows.Forms.Button bColorEx;
-		private System.Windows.Forms.Button bSize;
-		private System.Windows.Forms.Button bWeight;
-		private System.Windows.Forms.Button button2;
-		private System.Windows.Forms.Button bAlignment;
-		private System.Windows.Forms.Button bDirection;
-		private System.Windows.Forms.Button bVertical;
-		private System.Windows.Forms.Button bWrtMode;
-		private System.Windows.Forms.Button bFormat;
+		private Majorsilence.Forms.Label label4;
+		private Majorsilence.Forms.Label label5;
+		private Majorsilence.Forms.Label label6;
+		private Majorsilence.Forms.Label label7;
+		private Majorsilence.Forms.Label label8;
+		private Majorsilence.Forms.Label lFont;
+		private Majorsilence.Forms.Button bFont;
+		private Majorsilence.Forms.ComboBox cbHorzAlign;
+		private Majorsilence.Forms.ComboBox cbFormat;
+		private Majorsilence.Forms.ComboBox cbDirection;
+		private Majorsilence.Forms.ComboBox cbWritingMode;
+		private Majorsilence.Forms.Label label2;
+		private Majorsilence.Forms.ComboBox cbTextDecoration;
+		private Majorsilence.Forms.Button bColor;
+		private Majorsilence.Forms.Label label9;
+		private Majorsilence.Forms.ComboBox cbColor;
+		private Majorsilence.Forms.ComboBox cbVerticalAlign;
+		private Majorsilence.Forms.Label label3;
+		private Majorsilence.Forms.ComboBox cbFontStyle;
+		private Majorsilence.Forms.ComboBox cbFontWeight;
+		private Majorsilence.Forms.Label label10;
+		private Majorsilence.Forms.ComboBox cbFontSize;
+		private Majorsilence.Forms.Label label11;
+		private Majorsilence.Forms.ComboBox cbFontFamily;
+        private Majorsilence.Forms.GroupBox groupBox1;
+		private Majorsilence.Forms.Button bFamily;
+		private Majorsilence.Forms.Button bStyle;
+		private Majorsilence.Forms.Button bColorEx;
+		private Majorsilence.Forms.Button bSize;
+		private Majorsilence.Forms.Button bWeight;
+		private Majorsilence.Forms.Button button2;
+		private Majorsilence.Forms.Button bAlignment;
+		private Majorsilence.Forms.Button bDirection;
+		private Majorsilence.Forms.Button bVertical;
+		private Majorsilence.Forms.Button bWrtMode;
+		private Majorsilence.Forms.Button bFormat;
 		/// <summary> 
 		/// Required designer variable.
 		/// </summary>
@@ -188,44 +189,44 @@ namespace Majorsilence.Reporting.RdlDesign
 		/// </summary>
 		private void InitializeComponent()
 		{
-			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FontCtl));
+			Majorsilence.Forms.ComponentResourceManager resources = new Majorsilence.Forms.ComponentResourceManager(typeof(FontCtl));
             this.DoubleBuffered = true;
-			this.label4 = new System.Windows.Forms.Label();
-			this.label5 = new System.Windows.Forms.Label();
-			this.label6 = new System.Windows.Forms.Label();
-			this.label7 = new System.Windows.Forms.Label();
-			this.label8 = new System.Windows.Forms.Label();
-			this.lFont = new System.Windows.Forms.Label();
-			this.bFont = new System.Windows.Forms.Button();
-			this.cbVerticalAlign = new System.Windows.Forms.ComboBox();
-			this.cbHorzAlign = new System.Windows.Forms.ComboBox();
-			this.cbFormat = new System.Windows.Forms.ComboBox();
-			this.cbDirection = new System.Windows.Forms.ComboBox();
-			this.cbWritingMode = new System.Windows.Forms.ComboBox();
-			this.label2 = new System.Windows.Forms.Label();
-			this.cbTextDecoration = new System.Windows.Forms.ComboBox();
-			this.bColor = new System.Windows.Forms.Button();
-			this.label9 = new System.Windows.Forms.Label();
-			this.cbColor = new System.Windows.Forms.ComboBox();
-			this.label3 = new System.Windows.Forms.Label();
-			this.cbFontStyle = new System.Windows.Forms.ComboBox();
-			this.cbFontWeight = new System.Windows.Forms.ComboBox();
-			this.label10 = new System.Windows.Forms.Label();
-			this.cbFontSize = new System.Windows.Forms.ComboBox();
-			this.label11 = new System.Windows.Forms.Label();
-			this.cbFontFamily = new System.Windows.Forms.ComboBox();
-			this.groupBox1 = new System.Windows.Forms.GroupBox();
-			this.button2 = new System.Windows.Forms.Button();
-			this.bWeight = new System.Windows.Forms.Button();
-			this.bSize = new System.Windows.Forms.Button();
-			this.bColorEx = new System.Windows.Forms.Button();
-			this.bStyle = new System.Windows.Forms.Button();
-			this.bFamily = new System.Windows.Forms.Button();
-			this.bAlignment = new System.Windows.Forms.Button();
-			this.bDirection = new System.Windows.Forms.Button();
-			this.bVertical = new System.Windows.Forms.Button();
-			this.bWrtMode = new System.Windows.Forms.Button();
-			this.bFormat = new System.Windows.Forms.Button();
+			this.label4 = new Majorsilence.Forms.Label();
+			this.label5 = new Majorsilence.Forms.Label();
+			this.label6 = new Majorsilence.Forms.Label();
+			this.label7 = new Majorsilence.Forms.Label();
+			this.label8 = new Majorsilence.Forms.Label();
+			this.lFont = new Majorsilence.Forms.Label();
+			this.bFont = new Majorsilence.Forms.Button();
+			this.cbVerticalAlign = new Majorsilence.Forms.ComboBox();
+			this.cbHorzAlign = new Majorsilence.Forms.ComboBox();
+			this.cbFormat = new Majorsilence.Forms.ComboBox();
+			this.cbDirection = new Majorsilence.Forms.ComboBox();
+			this.cbWritingMode = new Majorsilence.Forms.ComboBox();
+			this.label2 = new Majorsilence.Forms.Label();
+			this.cbTextDecoration = new Majorsilence.Forms.ComboBox();
+			this.bColor = new Majorsilence.Forms.Button();
+			this.label9 = new Majorsilence.Forms.Label();
+			this.cbColor = new Majorsilence.Forms.ComboBox();
+			this.label3 = new Majorsilence.Forms.Label();
+			this.cbFontStyle = new Majorsilence.Forms.ComboBox();
+			this.cbFontWeight = new Majorsilence.Forms.ComboBox();
+			this.label10 = new Majorsilence.Forms.Label();
+			this.cbFontSize = new Majorsilence.Forms.ComboBox();
+			this.label11 = new Majorsilence.Forms.Label();
+			this.cbFontFamily = new Majorsilence.Forms.ComboBox();
+			this.groupBox1 = new Majorsilence.Forms.GroupBox();
+			this.button2 = new Majorsilence.Forms.Button();
+			this.bWeight = new Majorsilence.Forms.Button();
+			this.bSize = new Majorsilence.Forms.Button();
+			this.bColorEx = new Majorsilence.Forms.Button();
+			this.bStyle = new Majorsilence.Forms.Button();
+			this.bFamily = new Majorsilence.Forms.Button();
+			this.bAlignment = new Majorsilence.Forms.Button();
+			this.bDirection = new Majorsilence.Forms.Button();
+			this.bVertical = new Majorsilence.Forms.Button();
+			this.bWrtMode = new Majorsilence.Forms.Button();
+			this.bFormat = new Majorsilence.Forms.Button();
 			this.groupBox1.SuspendLayout();
 			this.SuspendLayout();
 			// 
@@ -263,61 +264,61 @@ namespace Majorsilence.Reporting.RdlDesign
 			// 
 			resources.ApplyResources(this.bFont, "bFont");
 			this.bFont.Name = "bFont";
-			this.bFont.Click += new System.EventHandler(this.bFont_Click);
+			this.bFont.Click += this.bFont_Click;
 			// 
 			// cbVerticalAlign
 			// 
 			resources.ApplyResources(this.cbVerticalAlign, "cbVerticalAlign");
-			this.cbVerticalAlign.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+			this.cbVerticalAlign.DropDownStyle = Majorsilence.Forms.ComboBoxStyle.DropDownList;
 			this.cbVerticalAlign.Items.AddRange(new object[] {
             resources.GetString("cbVerticalAlign.Items"),
             resources.GetString("cbVerticalAlign.Items1"),
             resources.GetString("cbVerticalAlign.Items2")});
 			this.cbVerticalAlign.Name = "cbVerticalAlign";
-			this.cbVerticalAlign.SelectedIndexChanged += new System.EventHandler(this.cbVerticalAlign_TextChanged);
-			this.cbVerticalAlign.TextChanged += new System.EventHandler(this.cbVerticalAlign_TextChanged);
+			this.cbVerticalAlign.SelectedIndexChanged += this.cbVerticalAlign_TextChanged;
+			this.cbVerticalAlign.TextChanged += this.cbVerticalAlign_TextChanged;
 			// 
 			// cbHorzAlign
 			// 
 			resources.ApplyResources(this.cbHorzAlign, "cbHorzAlign");
-			this.cbHorzAlign.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+			this.cbHorzAlign.DropDownStyle = Majorsilence.Forms.ComboBoxStyle.DropDownList;
 			this.cbHorzAlign.Items.AddRange(new object[] {
             resources.GetString("cbHorzAlign.Items"),
             resources.GetString("cbHorzAlign.Items1"),
             resources.GetString("cbHorzAlign.Items2"),
             resources.GetString("cbHorzAlign.Items3")});
 			this.cbHorzAlign.Name = "cbHorzAlign";
-			this.cbHorzAlign.SelectedIndexChanged += new System.EventHandler(this.cbHorzAlign_TextChanged);
-			this.cbHorzAlign.TextChanged += new System.EventHandler(this.cbHorzAlign_TextChanged);
+			this.cbHorzAlign.SelectedIndexChanged += this.cbHorzAlign_TextChanged;
+			this.cbHorzAlign.TextChanged += this.cbHorzAlign_TextChanged;
 			// 
 			// cbFormat
 			// 
 			resources.ApplyResources(this.cbFormat, "cbFormat");
 			this.cbFormat.Name = "cbFormat";
-			this.cbFormat.TextChanged += new System.EventHandler(this.cbFormat_TextChanged);
+			this.cbFormat.TextChanged += this.cbFormat_TextChanged;
 			// 
 			// cbDirection
 			// 
 			resources.ApplyResources(this.cbDirection, "cbDirection");
-			this.cbDirection.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+			this.cbDirection.DropDownStyle = Majorsilence.Forms.ComboBoxStyle.DropDownList;
 			this.cbDirection.Items.AddRange(new object[] {
             resources.GetString("cbDirection.Items"),
             resources.GetString("cbDirection.Items1")});
 			this.cbDirection.Name = "cbDirection";
-			this.cbDirection.SelectedIndexChanged += new System.EventHandler(this.cbDirection_TextChanged);
-			this.cbDirection.TextChanged += new System.EventHandler(this.cbDirection_TextChanged);
+			this.cbDirection.SelectedIndexChanged += this.cbDirection_TextChanged;
+			this.cbDirection.TextChanged += this.cbDirection_TextChanged;
 			// 
 			// cbWritingMode
 			// 
 			resources.ApplyResources(this.cbWritingMode, "cbWritingMode");
-			this.cbWritingMode.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+			this.cbWritingMode.DropDownStyle = Majorsilence.Forms.ComboBoxStyle.DropDownList;
 			this.cbWritingMode.Items.AddRange(new object[] {
             resources.GetString("cbWritingMode.Items"),
             resources.GetString("cbWritingMode.Items1"),
             resources.GetString("cbWritingMode.Items2")});
 			this.cbWritingMode.Name = "cbWritingMode";
-			this.cbWritingMode.SelectedIndexChanged += new System.EventHandler(this.cbWritingMode_TextChanged);
-			this.cbWritingMode.TextChanged += new System.EventHandler(this.cbWritingMode_TextChanged);
+			this.cbWritingMode.SelectedIndexChanged += this.cbWritingMode_TextChanged;
+			this.cbWritingMode.TextChanged += this.cbWritingMode_TextChanged;
 			// 
 			// label2
 			// 
@@ -333,14 +334,14 @@ namespace Majorsilence.Reporting.RdlDesign
             resources.GetString("cbTextDecoration.Items2"),
             resources.GetString("cbTextDecoration.Items3")});
 			this.cbTextDecoration.Name = "cbTextDecoration";
-			this.cbTextDecoration.SelectedIndexChanged += new System.EventHandler(this.cbTextDecoration_TextChanged);
-			this.cbTextDecoration.TextChanged += new System.EventHandler(this.cbTextDecoration_TextChanged);
+			this.cbTextDecoration.SelectedIndexChanged += this.cbTextDecoration_TextChanged;
+			this.cbTextDecoration.TextChanged += this.cbTextDecoration_TextChanged;
 			// 
 			// bColor
 			// 
 			resources.ApplyResources(this.bColor, "bColor");
 			this.bColor.Name = "bColor";
-			this.bColor.Click += new System.EventHandler(this.bColor_Click);
+			this.bColor.Click += this.bColor_Click;
 			// 
 			// label9
 			// 
@@ -351,7 +352,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			// 
 			resources.ApplyResources(this.cbColor, "cbColor");
 			this.cbColor.Name = "cbColor";
-			this.cbColor.TextChanged += new System.EventHandler(this.cbColor_TextChanged);
+			this.cbColor.TextChanged += this.cbColor_TextChanged;
 			// 
 			// label3
 			// 
@@ -365,7 +366,7 @@ namespace Majorsilence.Reporting.RdlDesign
             resources.GetString("cbFontStyle.Items"),
             resources.GetString("cbFontStyle.Items1")});
 			this.cbFontStyle.Name = "cbFontStyle";
-			this.cbFontStyle.TextChanged += new System.EventHandler(this.cbFontStyle_TextChanged);
+			this.cbFontStyle.TextChanged += this.cbFontStyle_TextChanged;
 			// 
 			// cbFontWeight
 			// 
@@ -385,7 +386,7 @@ namespace Majorsilence.Reporting.RdlDesign
             resources.GetString("cbFontWeight.Items11"),
             resources.GetString("cbFontWeight.Items12")});
 			this.cbFontWeight.Name = "cbFontWeight";
-			this.cbFontWeight.TextChanged += new System.EventHandler(this.cbFontWeight_TextChanged);
+			this.cbFontWeight.TextChanged += this.cbFontWeight_TextChanged;
 			// 
 			// label10
 			// 
@@ -413,7 +414,7 @@ namespace Majorsilence.Reporting.RdlDesign
             resources.GetString("cbFontSize.Items14"),
             resources.GetString("cbFontSize.Items15")});
 			this.cbFontSize.Name = "cbFontSize";
-			this.cbFontSize.TextChanged += new System.EventHandler(this.cbFontSize_TextChanged);
+			this.cbFontSize.TextChanged += this.cbFontSize_TextChanged;
 			// 
 			// label11
 			// 
@@ -426,7 +427,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			this.cbFontFamily.Items.AddRange(new object[] {
             resources.GetString("cbFontFamily.Items")});
 			this.cbFontFamily.Name = "cbFontFamily";
-			this.cbFontFamily.TextChanged += new System.EventHandler(this.cbFontFamily_TextChanged);
+			this.cbFontFamily.TextChanged += this.cbFontFamily_TextChanged;
 			// 
 			// groupBox1
 			// 
@@ -459,77 +460,77 @@ namespace Majorsilence.Reporting.RdlDesign
 			resources.ApplyResources(this.button2, "button2");
 			this.button2.Name = "button2";
 			this.button2.Tag = "decoration";
-			this.button2.Click += new System.EventHandler(this.bExpr_Click);
+			this.button2.Click += this.bExpr_Click;
 			// 
 			// bWeight
 			// 
 			resources.ApplyResources(this.bWeight, "bWeight");
 			this.bWeight.Name = "bWeight";
 			this.bWeight.Tag = "weight";
-			this.bWeight.Click += new System.EventHandler(this.bExpr_Click);
+			this.bWeight.Click += this.bExpr_Click;
 			// 
 			// bSize
 			// 
 			resources.ApplyResources(this.bSize, "bSize");
 			this.bSize.Name = "bSize";
 			this.bSize.Tag = "size";
-			this.bSize.Click += new System.EventHandler(this.bExpr_Click);
+			this.bSize.Click += this.bExpr_Click;
 			// 
 			// bColorEx
 			// 
 			resources.ApplyResources(this.bColorEx, "bColorEx");
 			this.bColorEx.Name = "bColorEx";
 			this.bColorEx.Tag = "color";
-			this.bColorEx.Click += new System.EventHandler(this.bExpr_Click);
+			this.bColorEx.Click += this.bExpr_Click;
 			// 
 			// bStyle
 			// 
 			resources.ApplyResources(this.bStyle, "bStyle");
 			this.bStyle.Name = "bStyle";
 			this.bStyle.Tag = "style";
-			this.bStyle.Click += new System.EventHandler(this.bExpr_Click);
+			this.bStyle.Click += this.bExpr_Click;
 			// 
 			// bFamily
 			// 
 			resources.ApplyResources(this.bFamily, "bFamily");
 			this.bFamily.Name = "bFamily";
 			this.bFamily.Tag = "family";
-			this.bFamily.Click += new System.EventHandler(this.bExpr_Click);
+			this.bFamily.Click += this.bExpr_Click;
 			// 
 			// bAlignment
 			// 
 			resources.ApplyResources(this.bAlignment, "bAlignment");
 			this.bAlignment.Name = "bAlignment";
 			this.bAlignment.Tag = "halign";
-			this.bAlignment.Click += new System.EventHandler(this.bExpr_Click);
+			this.bAlignment.Click += this.bExpr_Click;
 			// 
 			// bDirection
 			// 
 			resources.ApplyResources(this.bDirection, "bDirection");
 			this.bDirection.Name = "bDirection";
 			this.bDirection.Tag = "direction";
-			this.bDirection.Click += new System.EventHandler(this.bExpr_Click);
+			this.bDirection.Click += this.bExpr_Click;
 			// 
 			// bVertical
 			// 
 			resources.ApplyResources(this.bVertical, "bVertical");
 			this.bVertical.Name = "bVertical";
 			this.bVertical.Tag = "valign";
-			this.bVertical.Click += new System.EventHandler(this.bExpr_Click);
+			this.bVertical.Click += this.bExpr_Click;
 			// 
 			// bWrtMode
 			// 
 			resources.ApplyResources(this.bWrtMode, "bWrtMode");
 			this.bWrtMode.Name = "bWrtMode";
 			this.bWrtMode.Tag = "writing";
-			this.bWrtMode.Click += new System.EventHandler(this.bExpr_Click);
+			this.bWrtMode.Click += this.bExpr_Click;
 			// 
 			// bFormat
 			// 
 			resources.ApplyResources(this.bFormat, "bFormat");
 			this.bFormat.Name = "bFormat";
 			this.bFormat.Tag = "format";
-			this.bFormat.Click += new System.EventHandler(this.bExpr_Click);
+			this.bFormat.Click += this.bExpr_Click;
 			// 
 			// FontCtl
 			// 
@@ -649,9 +650,9 @@ namespace Majorsilence.Reporting.RdlDesign
 			fd.ShowColor = true;
 
 			// STYLE
-			System.Drawing.FontStyle fs = 0;
+			Majorsilence.Forms.Drawing.FontStyle fs = 0;
 			if (cbFontStyle.Text == "Italic")
-				fs |= System.Drawing.FontStyle.Italic;
+				fs |= Majorsilence.Forms.Drawing.FontStyle.Italic;
 
 			if (cbTextDecoration.Text == "Underline")
 				fs |= FontStyle.Underline;
@@ -668,7 +669,7 @@ namespace Majorsilence.Reporting.RdlDesign
 				case "700":
 				case "800":
 				case "900":
-					fs |= System.Drawing.FontStyle.Bold;
+					fs |= Majorsilence.Forms.Drawing.FontStyle.Bold;
 					break;
 				default:
 					break;
@@ -701,7 +702,7 @@ namespace Majorsilence.Reporting.RdlDesign
                 cbFontStyle.Text = fd.Font.Italic ? "Italic" : "Normal";
                 cbFontFamily.Text = fd.Font.FontFamily.Name;
                 cbFontSize.Text = fd.Font.Size.ToString() + "pt";
-                cbColor.Text = ColorTranslator.ToHtml(fd.Color);
+                cbColor.Text = Majorsilence.Forms.ColorTranslator.ToHtml(fd.Color);
                 if (fd.Font.Underline)
                     this.cbTextDecoration.Text = "Underline";
                 else if (fd.Font.Strikeout)
@@ -733,7 +734,7 @@ namespace Majorsilence.Reporting.RdlDesign
 
                 RdlDesigner.SetCustomColors(cd.CustomColors);
                 if (sender == this.bColor)
-                    cbColor.Text = ColorTranslator.ToHtml(cd.Color);
+                    cbColor.Text = Majorsilence.Forms.ColorTranslator.ToHtml(cd.Color);
             }
             finally
             {
