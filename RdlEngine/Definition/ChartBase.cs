@@ -3,15 +3,9 @@ using System;
 using System.Collections;
 using System.Threading.Tasks;
 
-#if DRAWINGCOMPAT
 using Draw2 = Majorsilence.Forms.Drawing;
 using Drawing2D = Majorsilence.Forms.Drawing.Drawing2D;
 using Imaging = Majorsilence.Forms.Drawing.Imaging;
-#else
-using Draw2 = System.Drawing;
-using Drawing2D = System.Drawing.Drawing2D;
-using Imaging = System.Drawing.Imaging;
-#endif
 
 
 
@@ -25,10 +19,6 @@ namespace Majorsilence.Reporting.Rdl
         protected Chart _ChartDefn; // GJL 14082008 Using Vector Graphics
         MatrixCellEntry[,] _DataDefn;
         protected Draw2.Bitmap _bm;
-#if !DRAWINGCOMPAT
-        protected Imaging.Metafile _mf = null; // GJL 14082008 Using Vector Graphics
-        public System.IO.MemoryStream _aStream; // GJL 14082008 Using Vector Graphics
-#endif
         protected ChartLayout Layout;
         Draw2.Brush[] _SeriesBrush;
         ChartMarkerEnum[] _SeriesMarker;
@@ -75,29 +65,14 @@ namespace Majorsilence.Reporting.Rdl
         {
             if (_bm == null)
                 Draw(rpt);
-#if !DRAWINGCOMPAT
-            if (_mf != null)
-            {
-                _mf.Save(stream, im);
-            }
-            else
-            {
-                _bm.Save(stream, im);
-            }
-#else
             _bm.Save(stream, im);
-#endif
         }
 
         internal Draw2.Image Image(Report rpt) // GJL 14082008 Using Vector Graphics
         {
             if (_bm == null)
                 Draw(rpt);
-#if !DRAWINGCOMPAT
-            return _mf == null? _bm : _mf;
-#else
             return _bm;
-#endif
 
         }
 

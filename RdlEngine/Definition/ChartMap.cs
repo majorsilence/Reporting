@@ -5,13 +5,8 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 
-#if DRAWINGCOMPAT
 using Draw2 = Majorsilence.Forms.Drawing;
 using Imaging = Majorsilence.Forms.Drawing.Imaging;
-#else
-using Draw2 = System.Drawing;
-using Imaging = System.Drawing.Imaging;
-#endif
 using System.Text;
 using System.Globalization;
 using System.Runtime.InteropServices;
@@ -34,24 +29,7 @@ namespace Majorsilence.Reporting.Rdl
 		override internal async Task Draw(Report rpt)
 		{
 			CreateSizedBitmap();
-#if !DRAWINGCOMPAT
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-			{
-				using (Draw2.Graphics g1 = Draw2.Graphics.FromImage(_bm))
-				{
-					_aStream = new System.IO.MemoryStream();
-					IntPtr HDC = g1.GetHdc();
-					//_mf = new System.Draw2.Imaging.Metafile(_aStream, HDC);
-					_mf = new Imaging.Metafile(_aStream, HDC, new System.Drawing.RectangleF(0, 0, _bm.Width, _bm.Height),
-						Imaging.MetafileFrameUnit.Pixel);
-					g1.ReleaseHdc(HDC);
-				}
-			}
-
-			using(Draw2.Graphics g = Draw2.Graphics.FromImage(_mf != null ? _mf : _bm))
-#else
             using (Draw2.Graphics g = Draw2.Graphics.FromImage(_bm))
-#endif
             {
                 // 06122007AJM Used to Force Higher Quality
                 g.InterpolationMode = Draw2.Drawing2D.InterpolationMode.HighQualityBicubic;

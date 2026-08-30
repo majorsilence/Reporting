@@ -1518,11 +1518,7 @@ namespace Majorsilence.Reporting.RdlDesign
         {
             try
             {
-#if NET6_0_OR_GREATER
                 Microsoft.Data.Sql.SqlDataSourceEnumerator instance = Microsoft.Data.Sql.SqlDataSourceEnumerator.Instance;
-#else
-                System.Data.Sql.SqlDataSourceEnumerator instance = System.Data.Sql.SqlDataSourceEnumerator.Instance;
-#endif
                 DataTable dt;
                 dt = instance.GetDataSources();
 

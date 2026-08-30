@@ -1,11 +1,7 @@
 
 
 using System;
-#if DRAWINGCOMPAT
 using Draw2 = Majorsilence.Forms.Drawing;
-#else
-using Draw2 = System.Drawing;
-#endif
 using Majorsilence.Reporting.RdlEngine.Resources;
 
 namespace Majorsilence.Reporting.Rdl

@@ -4,13 +4,8 @@ using System;
 using System.Xml;
 using System.IO;
 using System.Text;
-#if DRAWINGCOMPAT
 using Draw = Majorsilence.Forms.Drawing;
 using Drawing2D = Majorsilence.Forms.Drawing.Drawing2D;
-#else
-using Draw = System.Drawing;
-using Drawing2D = System.Drawing.Drawing2D;
-#endif
 
 
 namespace Majorsilence.Reporting.Rdl

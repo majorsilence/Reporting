@@ -14,7 +14,7 @@
         <IsPackable>true</IsPackable>
         <Nullable>enable</Nullable>
     </PropertyGroup>
-    <PropertyGroup Condition="'$(TargetFramework)' != 'net48'">
+    <PropertyGroup>
         <IsAotCompatible>true</IsAotCompatible>
         <EnableTrimAnalyzer>true</EnableTrimAnalyzer>
     </PropertyGroup>
@@ -23,14 +23,9 @@
     </ItemGroup>
     <ItemGroup>
         <PackageReference Include="ZXing.Net" />
+        <PackageReference Include="ZXing.Net.Bindings.SkiaSharp" />
     </ItemGroup>
-	<ItemGroup Condition="'$(DrawingCompat)' != 'true' And '$(OS)' == 'Windows_NT'">
-		<PackageReference Include="ZXing.Net.Bindings.Windows.Compatibility" />
-	</ItemGroup>
-	<ItemGroup Condition="'$(DrawingCompat)' == 'true'">
-		<PackageReference Include="ZXing.Net.Bindings.SkiaSharp" />
-	</ItemGroup>
-		
+
     <ItemGroup>
         <Folder Include="Properties\" />
     </ItemGroup>

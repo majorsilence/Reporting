@@ -2,11 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using Majorsilence.Reporting.Rdl;
-#if DRAWINGCOMPAT
 using Draw2 = Majorsilence.Forms.Drawing;
-#else
-using Draw2 = System.Drawing;
-#endif
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Xml;
