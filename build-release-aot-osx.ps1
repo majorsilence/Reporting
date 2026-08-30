@@ -6,7 +6,7 @@ $ErrorActionPreference = "Stop"
 $PSNativeCommandUseErrorActionPreference = $true
 $CURRENTPATH=$pwd.Path
 
-$pConfigurationCompat="Release-DrawingCompat"
+$pConfigurationCompat="Release"
 $pTargetFrameworkGeneric="net10.0"
 
 function GetVersions([ref]$theVersion)
@@ -26,14 +26,14 @@ if ($env:GITHUB_OUTPUT) {
     "version=$Version" | Out-File -Append -FilePath $env:GITHUB_OUTPUT
 }
 
-dotnet publish RdlCmd -c Release-DrawingCompat -r osx-x64   -f $pTargetFrameworkGeneric --self-contained true -p:PublishAot=true -p:GeneratePackageOnBuild=false -o "RdlCmd/bin/$pConfigurationCompat/$pTargetFrameworkGeneric/osx-x64-aot/publish"
-dotnet publish RdlCmd -c Release-DrawingCompat -r osx-arm64 -f $pTargetFrameworkGeneric --self-contained true -p:PublishAot=true -p:GeneratePackageOnBuild=false -o "RdlCmd/bin/$pConfigurationCompat/$pTargetFrameworkGeneric/osx-arm64-aot/publish"
+dotnet publish RdlCmd -c Release -r osx-x64   -f $pTargetFrameworkGeneric --self-contained true -p:PublishAot=true -p:GeneratePackageOnBuild=false -o "RdlCmd/bin/$pConfigurationCompat/$pTargetFrameworkGeneric/osx-x64-aot/publish"
+dotnet publish RdlCmd -c Release -r osx-arm64 -f $pTargetFrameworkGeneric --self-contained true -p:PublishAot=true -p:GeneratePackageOnBuild=false -o "RdlCmd/bin/$pConfigurationCompat/$pTargetFrameworkGeneric/osx-arm64-aot/publish"
 
-dotnet publish RdlNative -c Release-DrawingCompat -r osx-x64   -f $pTargetFrameworkGeneric --self-contained true -p:PublishAot=true -p:GeneratePackageOnBuild=false -o "RdlNative/bin/$pConfigurationCompat/$pTargetFrameworkGeneric/osx-x64-aot/publish"
-dotnet publish RdlNative -c Release-DrawingCompat -r osx-arm64 -f $pTargetFrameworkGeneric --self-contained true -p:PublishAot=true -p:GeneratePackageOnBuild=false -o "RdlNative/bin/$pConfigurationCompat/$pTargetFrameworkGeneric/osx-arm64-aot/publish"
+dotnet publish RdlNative -c Release -r osx-x64   -f $pTargetFrameworkGeneric --self-contained true -p:PublishAot=true -p:GeneratePackageOnBuild=false -o "RdlNative/bin/$pConfigurationCompat/$pTargetFrameworkGeneric/osx-x64-aot/publish"
+dotnet publish RdlNative -c Release -r osx-arm64 -f $pTargetFrameworkGeneric --self-contained true -p:PublishAot=true -p:GeneratePackageOnBuild=false -o "RdlNative/bin/$pConfigurationCompat/$pTargetFrameworkGeneric/osx-arm64-aot/publish"
 
-dotnet publish PdfNative -c Release-DrawingCompat -r osx-x64   -f $pTargetFrameworkGeneric --self-contained true -p:PublishAot=true -p:GeneratePackageOnBuild=false -o "PdfNative/bin/$pConfigurationCompat/$pTargetFrameworkGeneric/osx-x64-aot/publish"
-dotnet publish PdfNative -c Release-DrawingCompat -r osx-arm64 -f $pTargetFrameworkGeneric --self-contained true -p:PublishAot=true -p:GeneratePackageOnBuild=false -o "PdfNative/bin/$pConfigurationCompat/$pTargetFrameworkGeneric/osx-arm64-aot/publish"
+dotnet publish PdfNative -c Release -r osx-x64   -f $pTargetFrameworkGeneric --self-contained true -p:PublishAot=true -p:GeneratePackageOnBuild=false -o "PdfNative/bin/$pConfigurationCompat/$pTargetFrameworkGeneric/osx-x64-aot/publish"
+dotnet publish PdfNative -c Release -r osx-arm64 -f $pTargetFrameworkGeneric --self-contained true -p:PublishAot=true -p:GeneratePackageOnBuild=false -o "PdfNative/bin/$pConfigurationCompat/$pTargetFrameworkGeneric/osx-arm64-aot/publish"
 
 # Native AOT verification: publish Majorsilence.Pdf's smoke test as a self-contained AOT
 # binary and actually run it (only for this runner's own architecture -- a cross-compiled

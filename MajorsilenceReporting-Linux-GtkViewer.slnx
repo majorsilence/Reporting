@@ -1,9 +1,7 @@
 <Solution>
   <Configurations>
     <BuildType Name="Debug" />
-    <BuildType Name="Debug-DrawingCompat" />
     <BuildType Name="Release" />
-    <BuildType Name="Release-DrawingCompat" />
     <Platform Name="Any CPU" />
     <Platform Name="x86" />
   </Configurations>

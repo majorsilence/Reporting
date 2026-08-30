@@ -6,7 +6,7 @@
         <!--Avalonia doesen't support TrimMode=link currently,but we are working on that https://github.com/AvaloniaUI/Avalonia/issues/6892 -->
         <TrimMode>copyused</TrimMode>
         <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
-        <Configurations>Debug;Release;Debug-DrawingCompat;Release-DrawingCompat</Configurations>
+        <Configurations>Debug;Release</Configurations>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
         <DefineConstants>$(DefineConstants);DRAWINGCOMPAT</DefineConstants>
         <IsPackable>true</IsPackable>

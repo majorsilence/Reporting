@@ -7,9 +7,6 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>Majorsilence.Reporting.Mcp</RootNamespace>
     <AssemblyName>majorsilence-report-mcp</AssemblyName>
-    <!-- The referenced engine projects carry these; match them so the solution's DrawingCompat
-         configurations resolve for this project too. -->
-    <Configurations>Debug;Release;Debug-DrawingCompat;Release-DrawingCompat</Configurations>
 
     <!-- Ships to nuget.org as a .NET global tool:
            dotnet tool install -g Majorsilence.Reporting.Mcp

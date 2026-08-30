@@ -8,9 +8,8 @@
 		<RootNamespace>Majorsilence.Reporting.RdlDesktop</RootNamespace>
 		<RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
 		<StartupObject>Majorsilence.Reporting.RdlDesktop.RdlDesktop</StartupObject>
-		<Configurations>Debug;Release;Debug-DrawingCompat;Release-DrawingCompat</Configurations>
-		<TargetFrameworks>net48;net8.0;net10.0</TargetFrameworks>
-        <TargetFrameworks Condition="'$(OS)' == 'Unix'">net8.0;net10.0</TargetFrameworks>
+		<Configurations>Debug;Release</Configurations>
+		<TargetFrameworks>net8.0;net10.0</TargetFrameworks>
 		<WarningsAsErrors>4014</WarningsAsErrors>
 	</PropertyGroup>
 	<ItemGroup>

@@ -15,7 +15,7 @@
          list across referenced projects is what caused a real "ref assembly could not be found"
          build failure for a project referencing this one under Debug-DrawingCompat/
          Release-DrawingCompat in Visual Studio. -->
-    <Configurations>Debug;Release;Debug-DrawingCompat;Release-DrawingCompat</Configurations>
+    <Configurations>Debug;Release</Configurations>
     <!-- net48 dropped: Majorsilence.Forms itself only targets net8.0/net10.0. -->
     <TargetFrameworks>net8.0;net10.0</TargetFrameworks>
     <WarningsAsErrors>4014</WarningsAsErrors>

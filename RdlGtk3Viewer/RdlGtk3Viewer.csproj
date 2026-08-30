@@ -3,7 +3,7 @@
 		<OutputType>WinExe</OutputType>
 		<RootNamespace>RdlGtk3Viewer</RootNamespace>
 		<AssemblyName>RdlGtk3Viewer</AssemblyName>
-		<Configurations>Debug;Release;Debug-DrawingCompat;Release-DrawingCompat</Configurations>
+		<Configurations>Debug;Release</Configurations>
 		<TargetFrameworks>net8.0;net10.0</TargetFrameworks>
 		<WarningsAsErrors>4014</WarningsAsErrors>
         <IsPackable>false</IsPackable>
