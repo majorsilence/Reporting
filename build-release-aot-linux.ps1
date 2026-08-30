@@ -11,7 +11,7 @@ $ErrorActionPreference = "Stop"
 $PSNativeCommandUseErrorActionPreference = $true
 $CURRENTPATH=$pwd.Path
 
-$pConfigurationCompat="Release-DrawingCompat"
+$pConfigurationCompat="Release"
 $pTargetFrameworkGeneric="net10.0"
 $rid = "linux-$Arch"
 
@@ -32,9 +32,9 @@ if ($env:GITHUB_OUTPUT) {
     "version=$Version" | Out-File -Append -FilePath $env:GITHUB_OUTPUT
 }
 
-dotnet publish RdlCmd    -c Release-DrawingCompat -r $rid -f $pTargetFrameworkGeneric --self-contained true -p:PublishAot=true -p:GeneratePackageOnBuild=false -o "RdlCmd/bin/$pConfigurationCompat/$pTargetFrameworkGeneric/$rid-aot/publish"
-dotnet publish RdlNative -c Release-DrawingCompat -r $rid -f $pTargetFrameworkGeneric --self-contained true -p:PublishAot=true -p:GeneratePackageOnBuild=false -o "RdlNative/bin/$pConfigurationCompat/$pTargetFrameworkGeneric/$rid-aot/publish"
-dotnet publish PdfNative -c Release-DrawingCompat -r $rid -f $pTargetFrameworkGeneric --self-contained true -p:PublishAot=true -p:GeneratePackageOnBuild=false -o "PdfNative/bin/$pConfigurationCompat/$pTargetFrameworkGeneric/$rid-aot/publish"
+dotnet publish RdlCmd    -c Release -r $rid -f $pTargetFrameworkGeneric --self-contained true -p:PublishAot=true -p:GeneratePackageOnBuild=false -o "RdlCmd/bin/$pConfigurationCompat/$pTargetFrameworkGeneric/$rid-aot/publish"
+dotnet publish RdlNative -c Release -r $rid -f $pTargetFrameworkGeneric --self-contained true -p:PublishAot=true -p:GeneratePackageOnBuild=false -o "RdlNative/bin/$pConfigurationCompat/$pTargetFrameworkGeneric/$rid-aot/publish"
+dotnet publish PdfNative -c Release -r $rid -f $pTargetFrameworkGeneric --self-contained true -p:PublishAot=true -p:GeneratePackageOnBuild=false -o "PdfNative/bin/$pConfigurationCompat/$pTargetFrameworkGeneric/$rid-aot/publish"
 
 # Native AOT verification: publish Majorsilence.Pdf's smoke test as a self-contained AOT
 # binary and actually run it, not just check that it compiled without trim/AOT warnings.

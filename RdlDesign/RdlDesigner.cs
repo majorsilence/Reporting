@@ -141,11 +141,7 @@ namespace Majorsilence.Reporting.RdlDesign
 		public async Task OpenFileAsync(Uri filePath, string connectionString)
 		{
 			XmlDocument xmlDoc = new XmlDocument();
-            #if NET6_0_OR_GREATER
             string xml = await File.ReadAllTextAsync(filePath.AbsolutePath);
-            #else
-            string xml = File.ReadAllText(filePath.AbsolutePath);
-            #endif
 			xmlDoc.LoadXml(xml);
 
 			foreach (XmlNode node in xmlDoc.GetElementsByTagName("ConnectString"))
@@ -2378,11 +2374,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			{
 				XmlDocument xDoc = new XmlDocument();
 				xDoc.PreserveWhitespace = false;
-                #if NET6_0_OR_GREATER
                 string xml = await System.IO.File.ReadAllTextAsync(optFileName);
-                #else
-                string xml = System.IO.File.ReadAllText(optFileName);
-                #endif
 				xDoc.LoadXml(xml);
 				XmlNode xNode;
 				xNode = xDoc.SelectSingleNode("//designerstate");

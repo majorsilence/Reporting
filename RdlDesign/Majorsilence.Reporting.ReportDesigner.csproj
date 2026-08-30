@@ -13,7 +13,7 @@
     <PackageId>Majorsilence.Reporting.ReportDesigner</PackageId>
     <Description>Cross-platform drag-and-drop RDL report designer control for Majorsilence Reporting, built on Majorsilence.Forms. Targets .NET 8 and .NET 10, any OS Majorsilence.Forms.Avalonia supports.</Description>
     <!-- net48 dropped: Majorsilence.Forms itself only targets net8.0/net10.0. -->
-    <Configurations>Debug;Release;Debug-DrawingCompat;Release-DrawingCompat</Configurations>
+    <Configurations>Debug;Release</Configurations>
     <TargetFrameworks>net8.0;net10.0</TargetFrameworks>
     <WarningsAsErrors>4014</WarningsAsErrors>
     <ApplicationManifest>app.manifest</ApplicationManifest>
@@ -202,18 +202,6 @@
          class for code nothing calls. -->
     <Compile Remove="RdlProperties/PropertyTableTab.cs" />
   </ItemGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net48|AnyCPU'">
-    <Optimize>False</Optimize>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release-DrawingCompat|net48|AnyCPU'">
-    <Optimize>False</Optimize>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net8.0-windows|AnyCPU'">
-    <Optimize>False</Optimize>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release-DrawingCompat|net8.0-windows|AnyCPU'">
-    <Optimize>False</Optimize>
-  </PropertyGroup>
   <ItemGroup>
     <!-- Needed unconditionally (not just net48): GenerateResourceUsePreserializedResources
          triggers MSB3822 without it, same fix as D2/D3. -->

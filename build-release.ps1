@@ -5,9 +5,9 @@ $ErrorActionPreference = "Stop"
 $PSNativeCommandUseErrorActionPreference = $true
 $CURRENTPATH=$pwd.Path
 
-# /p:Configuration="Debug", "Debug-DrawingCompat", "Release", "Release-DrawingCompat"
+# /p:Configuration accepts "Debug" or "Release" (both are the SkiaSharp build now)
 $pConfiguration="Release"
-$pConfigurationCompat="Release-DrawingCompat"
+$pConfigurationCompat="Release"
 $pTargetFrameworkGeneric="net10.0"
 
 function delete_files([string]$path)
@@ -40,13 +40,12 @@ if ($env:GITHUB_OUTPUT) {
 $solutionPath = Join-Path $CURRENTPATH "MajorsilenceReporting.slnx"
 dotnet restore $solutionPath
 # ************* Begin anycpu *********************************************
-dotnet build $solutionPath --configuration Release-DrawingCompat --verbosity minimal -p:GeneratePackageOnBuild=false
-dotnet publish RdlCmd -c Release-DrawingCompat -r linux-x64 -f $pTargetFrameworkGeneric --self-contained true -p:GeneratePackageOnBuild=false #-p:PublishSingleFile=true
-dotnet publish RdlCmd -c Release-DrawingCompat -r linux-arm64 -f $pTargetFrameworkGeneric --self-contained true -p:GeneratePackageOnBuild=false #-p:PublishSingleFile=true
-dotnet publish RdlCmd -c Release-DrawingCompat -r osx-x64 -f $pTargetFrameworkGeneric --self-contained true -p:GeneratePackageOnBuild=false #-p:PublishSingleFile=true
-dotnet publish RdlCmd -c Release-DrawingCompat -r osx-arm64 -f $pTargetFrameworkGeneric --self-contained true -p:GeneratePackageOnBuild=false #-p:PublishSingleFile=true
+dotnet build $solutionPath --configuration Release --verbosity minimal -p:GeneratePackageOnBuild=false
+dotnet publish RdlCmd -c Release -r linux-x64 -f $pTargetFrameworkGeneric --self-contained true -p:GeneratePackageOnBuild=false #-p:PublishSingleFile=true
+dotnet publish RdlCmd -c Release -r linux-arm64 -f $pTargetFrameworkGeneric --self-contained true -p:GeneratePackageOnBuild=false #-p:PublishSingleFile=true
+dotnet publish RdlCmd -c Release -r osx-x64 -f $pTargetFrameworkGeneric --self-contained true -p:GeneratePackageOnBuild=false #-p:PublishSingleFile=true
+dotnet publish RdlCmd -c Release -r osx-arm64 -f $pTargetFrameworkGeneric --self-contained true -p:GeneratePackageOnBuild=false #-p:PublishSingleFile=true
 
-dotnet build $solutionPath --configuration $pConfiguration --verbosity minimal -p:GeneratePackageOnBuild=false
 dotnet publish RdlCmd -c Release -r win-x64 -f $pTargetFrameworkGeneric --self-contained true -p:GeneratePackageOnBuild=false #-p:PublishSingleFile=true
 dotnet publish RdlCmd -c Release -r win-arm64 -f $pTargetFrameworkGeneric --self-contained true -p:GeneratePackageOnBuild=false #-p:PublishSingleFile=true
 
@@ -128,9 +127,6 @@ cd "$CURRENTPATH"
 
 # ************* Nuget ************************************************
 $nugetOutputPath = Join-Path $CURRENTPATH "Release-Builds" "build-output"
-
-dotnet build $solutionPath --configuration $pConfigurationCompat --verbosity minimal -p:GeneratePackageOnBuild=false
-dotnet pack $solutionPath --configuration $pConfigurationCompat --no-build --output $nugetOutputPath
 
 dotnet build $solutionPath --configuration $pConfiguration --verbosity minimal -p:GeneratePackageOnBuild=false
 dotnet pack $solutionPath --configuration $pConfiguration --no-build --output $nugetOutputPath

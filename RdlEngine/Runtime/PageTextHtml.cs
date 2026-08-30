@@ -3,13 +3,8 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-#if DRAWINGCOMPAT
 using Draw = Majorsilence.Forms.Drawing;
 using Majorsilence.Forms.Drawing.Imaging;
-#else
-using Draw = System.Drawing;
-using System.Drawing.Imaging;
-#endif
 using System.Text;
 using System.IO;
 using System.Net;

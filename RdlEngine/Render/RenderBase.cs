@@ -31,14 +31,9 @@ using System;
 using System.IO;
 using System.Collections;
 using System.Collections.Generic;
-#if DRAWINGCOMPAT
 using Draw2 = Majorsilence.Forms.Drawing;
 using Drawing2D = Majorsilence.Forms.Drawing.Imaging;
 using Majorsilence.Forms.Drawing.Imaging;
-#else
-using Draw2 = System.Drawing;
-using Drawing2D = System.Drawing.Imaging;
-#endif
 using System.Text;
 using Majorsilence.Reporting.Rdl.Utility;
 using System.Security;
@@ -350,23 +345,12 @@ namespace Majorsilence.Reporting.Rdl
                             adjustedRect = r2;
                             break;
                     }
-#if !DRAWINGCOMPAT
-                    if (i.ImgFormat == Draw2.Imaging.ImageFormat.Wmf || i.ImgFormat == Draw2.Imaging.ImageFormat.Emf)
-                    {
-                        //We dont want to add it - its already been broken down into page items;
-                    }
-                    else
-                    {
-#endif
 
                         AddImage(i.Name, i.SI, i.ImgFormat,
                             adjustedRect.X, adjustedRect.Y, adjustedRect.Width,
                             adjustedRect.Height, clipRect, 
                             i.GetImageData((int)clipRect.Width, (int)clipRect.Height),
                             i.SamplesW, i.SamplesH, i.HyperLink, i.Tooltip);
-#if !DRAWINGCOMPAT
-                    }
-#endif
                     continue;
                 }
 

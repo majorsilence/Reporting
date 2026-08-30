@@ -55,6 +55,16 @@ missing API surface.
 
 ## Toolchain
 
+> **Local NuGet feed (`.local-nuget-feed` + `nuget.config`) removed after D9.** The whole
+> `Majorsilence.Forms` family — including `.Drawing.Common` and the Windows-only `.WinForms` —
+> ships on nuget.org at `26.0.50`, so the local pack-and-restore loop the older sections below
+> describe is no longer wired up (and `nuget.config` broke CI on a fresh checkout, since the local
+> source path doesn't exist there). To iterate on an *unreleased* framework fix again: `dotnet pack
+> -c Release -o .local-nuget-feed` the changed `Majorsilence.Forms*` projects, add a throwaway
+> `nuget.config` pointing `<add key="local" value=".local-nuget-feed" />`, bump
+> `Directory.Packages.props`, and clear the `majorsilence.forms*` NuGet cache. `.local-nuget-feed`
+> is git-ignored; don't commit the `nuget.config` back.
+
 - `Majorsilence.Forms` **is published to nuget.org**, currently at `26.0.0`
   (`Majorsilence.Forms`, `.Avalonia`, `.Headless`, `.Uno`, `.Drawing.Common`, `.Telerik` all
   confirmed live). Add package versions to the root `Directory.Packages.props` under a

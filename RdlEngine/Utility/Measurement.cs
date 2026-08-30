@@ -29,13 +29,8 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
-#if DRAWINGCOMPAT
 using Drawing = Majorsilence.Forms.Drawing;
 using Drawing2D = Majorsilence.Forms.Drawing.Drawing2D;
-#else
-using Drawing = System.Drawing;
-using Drawing2D = System.Drawing.Drawing2D;
-#endif
 
 namespace Majorsilence.Reporting.Rdl.Utility
 {

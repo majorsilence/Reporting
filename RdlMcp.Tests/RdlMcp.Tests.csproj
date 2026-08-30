@@ -5,7 +5,7 @@
     <IsPackable>false</IsPackable>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <Configurations>Debug;Release;Debug-DrawingCompat;Release-DrawingCompat</Configurations>
+    <Configurations>Debug;Release</Configurations>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\RdlMcp\Majorsilence.Reporting.Mcp.csproj" />

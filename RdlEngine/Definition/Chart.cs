@@ -4,13 +4,8 @@ using System.IO;
 using System.Threading.Tasks;
 
 
-#if DRAWINGCOMPAT
 using Draw2 = Majorsilence.Forms.Drawing;
 using Imaging = Majorsilence.Forms.Drawing.Imaging;
-#else
-using Draw2 = System.Drawing;
-using Imaging = System.Drawing.Imaging;
-#endif
 
 namespace Majorsilence.Reporting.Rdl
 {
@@ -279,18 +274,7 @@ namespace Majorsilence.Reporting.Rdl
 			{
 				cb = await RunChartBuild(rpt, row);                   // Build the chart
 
-#if DRAWINGCOMPAT
                 p = await RunPage_Bitmap(pgs, row, rpt, cb);
-#else
-			    if (!await _isHYNEsWonderfulVector.EvaluateBoolean(rpt,row)) //AJM GJL 14082008 'Classic' Rendering 
-                {
-                    p = await RunPage_Bitmap(pgs, row, rpt, cb);
-                }
-                else //Ultimate Rendering - Vector //AJM GJL 14082008
-                {
-                    p = await RunPage_Emf(pgs, row, rpt, cb);
-                }		
-#endif
 
             }
             catch (Exception ex)
@@ -306,63 +290,6 @@ namespace Majorsilence.Reporting.Rdl
             return;
 		}
 
-#if !DRAWINGCOMPAT
-        private async Task<Page> RunPage_Emf(Pages pgs, Row row, Report rpt, ChartBase cb)
-        {
-            Page p;
-            var im = cb.Image(rpt); // Grab the image
-                                    //im could still be saved to a bitmap at this point
-                                    //if we were to offer a choice of raster or vector, it would probably
-                                    //be easiest to draw the chart to the EMF and then save as bitmap if needed
-            int height = im.Height;                         // save height and width
-            int width = im.Width;
-            byte[] ba = cb._aStream.ToArray();
-            cb._aStream.Close();
-
-            PageImage pi = new PageImage(Imaging.ImageFormat.Wmf, ba, width, height);
-
-
-            RunPageRegionBegin(pgs);
-
-            await SetPagePositionAndStyle(rpt, pi, row);
-            pi.SI.BackgroundImage = null;   // chart already has the background image
-
-            if (pgs.CurrentPage.YOffset + pi.Y + pi.H >= pgs.BottomOfPage && !pgs.CurrentPage.IsEmpty())
-            {   // force page break if it doesn't fit on the page
-                pgs.NextOrNew();
-                pgs.CurrentPage.YOffset = OwnerReport.TopOfPage;
-                if (this.YParents != null)
-                    pi.Y = 0;
-            }
-
-            p = pgs.CurrentPage;
-
-            //GJL 25072008 - Charts now draw in EMFplus format and not in bitmap. Still using the "PageImage" for the positioning
-            //paging etc, but we don't add it to the page.
-            // ******************************************************************************************************************
-            // New EMF Processing... we want to add the EMF Components to the page and not the actual EMF...
-            EMF emf = new EMF(pi.X, pi.Y, width, height);
-            emf.ProcessEMF(ba); //Process takes the bytearray of EMFplus data and breaks it down into lines,ellipses,text,rectangles
-                                //etc... There are still a lot of GDI+ functions I haven't got to (and some I have no intention of getting to!). 
-            foreach (PageItem emfItem in emf.PageItems)
-            {
-                p.AddObject(emfItem);
-
-            }
-            // ******************************************************************************************************************
-
-            //p.AddObject(pi);
-            RunPageRegionEnd(pgs);
-            pi.Y += p.YOffset;
-            if (!this.PageBreakAtEnd && !IsTableOrMatrixCell(rpt))
-            {
-                float newY = pi.Y + pi.H;
-                p.YOffset += newY;  // bump the y location
-            }
-            SetPagePositionEnd(pgs, pi.Y + pi.H); //our emf size seems to be bigger than the jpeg...
-            return p;
-        }
-#endif
 
         private async Task<Page> RunPage_Bitmap(Pages pgs, Row row, Report rpt, ChartBase cb)
         {
