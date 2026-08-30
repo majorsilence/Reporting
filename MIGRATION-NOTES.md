@@ -941,3 +941,48 @@ Method notes for continuing this loop:
 - Pre-existing unrelated failure on `windowbase-compat`: `SelectedTextClipTests.DropDownList_
   TooShortForFont_KeepsCapsInsteadOfSlicingTop` (there's a `w517-harden-cliptest` branch for it).
   Present on a clean tree; not caused by this work.
+
+## D10: SkiaSharp-only, `.SkiaSharp` aliases, PR #327 (2026-08-30)
+
+**The `System.Drawing` / SkiaSharp dual build is retired** (commit `ddc64fe`). Reporting renders
+through `Majorsilence.Forms.Drawing` (SkiaSharp) in *every* configuration now:
+
+- `Directory.Build.props` defines `DRAWINGCOMPAT` unconditionally; `Debug` and `Release` *are* the
+  SkiaSharp build. The `Debug-DrawingCompat` / `Release-DrawingCompat` configs are gone from the
+  `.slnx` (BuildTypes + per-project remaps), CI (`linux/mac/containers.yml` build `-c Release`), and
+  `build-release*.ps1`. `$(DrawingCompat)` stays defined-and-true so the existing
+  `Condition="'$(DrawingCompat)' == 'true'"` item groups keep firing without a sweep — the `#else`
+  / `#if !DRAWINGCOMPAT` / `#if NET48` arms across ~90 `.cs` files are now dead code, not yet
+  stripped.
+- **net48 dropped** from `RdlEngine`, `RdlCreator`, `RdlCri`, `DataProviders`, and the
+  viewer/designer projects — `Majorsilence.Forms.Drawing.Common` ships net8.0/net10.0 only. New
+  floor is net8.0. (`Majorsilence.Forms.WinForms` itself still has net48+netstandard2.0 upstream;
+  that's a different package.)
+- This also fixed the PR #327 windows-build failure: `RdlEngine`'s
+  `Majorsilence.Forms.Drawing.Common` reference was gated on `$(DrawingCompat)`, a
+  `$(Configuration)`-derived property that `.slnx` restore doesn't evaluate on Windows, so
+  `dotnet build -c Release-DrawingCompat` restored without it and the compat namespace wouldn't
+  resolve. One config ⇒ no gate.
+- Linux/macOS CI passes `-p:EnableWindowsTargeting=true` so `LibRdlWpfViewer`'s WPF TFMs still
+  compile for reference resolution; `EncryptionProvider` keeps a non-Windows `TargetFrameworks`
+  trim for its `-windows` TFMs; `RdlGtk3*` set `<SkipGtkInstall>True</SkipGtkInstall>` (the net48
+  inner build used to warm the 54 MB GtkSharp download cache first; without it the multi-TFM
+  parallel builds raced → `MSB3923`).
+
+**`.SkiaSharp` compatibility alias metapackages** (`PackageAliases/`). The base IDs
+(`Majorsilence.Reporting.RdlEngine`, `.RdlCreator`, `.RdlCri`, `.DataProviders`) are the SkiaSharp
+build now, so the old `<base>.SkiaSharp` IDs ship as thin metapackages: `net8.0;net10.0`,
+`IncludeBuildOutput=false`, a single `<ProjectReference>` to the base project → the pack emits one
+same-version `<dependency>` and nothing else. Existing `.SkiaSharp` package references keep
+resolving; new code should use the base ID. In `MajorsilenceReporting.slnx` under `/Package
+Aliases/`.
+
+**Barcode PDF round-trip test un-ignored** (`ReportTests/RenderPdf_WithBarcodeParameter.cs`).
+`RenderPdf_BarcodeTypesViaParameter` was `[Ignore]`d during the cutover on a guess that ZXing's
+SkiaSharp reader couldn't decode the barcode back. It can — diagnostics showed all six formats
+(QR, Code128, Aztec, DataMatrix, PDF417, Code39) render into the PDF and decode fine. The real
+problem was the assertion looping over *every* extracted image and requiring each to decode:
+`barcode.rdl` lays the barcode out at several sizes and also emits 1×1 spacer images. The test now
+extracts every image, decodes what it can (skipping anything < 8 px), and asserts that *some*
+image decoded as the requested `BarcodeFormat`. SkiaSharp-only — the `#if DRAWINGCOMPAT` /
+`ZXing.Windows.Compatibility` arms are gone from that file.
