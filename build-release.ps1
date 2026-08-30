@@ -38,15 +38,7 @@ if ($env:GITHUB_OUTPUT) {
 }
 
 $solutionPath = Join-Path $CURRENTPATH "MajorsilenceReporting.slnx"
-# No standalone `dotnet restore` here. RdlEngine's Majorsilence.Forms / Majorsilence.Forms.Drawing.Common
-# PackageReferences are conditioned on $(DrawingCompat), a function of $(Configuration). A config-less
-# `dotnet restore` primes project.nuget.cache for the default (Debug = non-compat on Windows); the
-# following `dotnet build -c Release-DrawingCompat` then no-ops its own implicit restore and compiles
-# against non-compat assets that lack Majorsilence.Forms.Drawing.Common -- so on Windows the SkiaSharp
-# namespace went missing (it never showed on Linux, where $(DrawingCompat) is always true). Letting
-# each `dotnet build -c X` run its own implicit restore (which does forward $(Configuration)) keeps the
-# compat and non-compat package graphs correct. `.slnx` restore does not forward -p:Configuration, so
-# that is not a workaround either.
+dotnet restore $solutionPath
 # ************* Begin anycpu *********************************************
 dotnet build $solutionPath --configuration Release-DrawingCompat --verbosity minimal -p:GeneratePackageOnBuild=false
 dotnet publish RdlCmd -c Release-DrawingCompat -r linux-x64 -f $pTargetFrameworkGeneric --self-contained true -p:GeneratePackageOnBuild=false #-p:PublishSingleFile=true
