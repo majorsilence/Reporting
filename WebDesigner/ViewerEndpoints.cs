@@ -67,7 +67,7 @@ public static class ViewerEndpoints
         app.MapGet($"/{prefix}/parameters/{{name}}", async (string name) =>
         {
             var path = ResolveReportPath(options.ReportsFolder, name);
-            if (!File.Exists(path))
+            if (path is null || !File.Exists(path))
                 return Results.NotFound($"Report '{name}' not found.");
 
             try
@@ -131,7 +131,7 @@ public static class ViewerEndpoints
         else
         {
             var path = ResolveReportPath(options.ReportsFolder, name!);
-            if (!File.Exists(path))
+            if (path is null || !File.Exists(path))
                 return Results.NotFound($"Report '{name}' not found.");
             rdlXml = await File.ReadAllTextAsync(path);
             folder = options.ReportsFolder;
@@ -253,12 +253,24 @@ public static class ViewerEndpoints
         };
     }
 
-    private static string ResolveReportPath(string reportsFolder, string name)
+    // Maps a caller-supplied report name to a file inside the configured reports folder, or null if
+    // it escapes that folder. Strips any directory component, forces the .rdl extension, then
+    // canonicalises and confirms the result sits directly in the reports folder (defence in depth
+    // against '..', absolute paths, symlinks and casing tricks).
+    private static string? ResolveReportPath(string reportsFolder, string name)
     {
         var safeName = Path.GetFileName(name);
+        if (string.IsNullOrEmpty(safeName))
+            return null;
         if (!safeName.EndsWith(".rdl", StringComparison.OrdinalIgnoreCase))
             safeName += ".rdl";
-        return Path.Combine(reportsFolder, safeName);
+
+        var root = Path.TrimEndingDirectorySeparator(Path.GetFullPath(reportsFolder));
+        var candidate = Path.GetFullPath(Path.Combine(root, safeName));
+
+        return string.Equals(Path.GetDirectoryName(candidate), root, StringComparison.Ordinal)
+            ? candidate
+            : null;
     }
 
     private static void EnsureEngineConfig()
