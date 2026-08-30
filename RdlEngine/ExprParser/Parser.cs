@@ -1003,10 +1003,16 @@ namespace Majorsilence.Reporting.Rdl
 			if (args.Length >= indexOfScope)
 			{
 				string n = await args[indexOfScope-1].EvaluateString(null, null);
-				if (idLookup.IsPageScope)
-					throw new ParserException(string.Format(Strings.Parser_ErrorP_ScopeNotSpecifiedInHeaderOrFooter,n));
 
 				scope = idLookup.LookupScope(n);
+
+				// A page header/footer has no row context, so grouping scopes are meaningless
+				// there — but a scope naming a dataset aggregates over that dataset's rows,
+				// independent of the page, which is what RDL 2008+ page headers routinely do
+				// (e.g. =First(Fields!X.Value, "SomeDataSet") for a report-wide caption).
+				if (idLookup.IsPageScope && scope is not DataSetDefn)
+					throw new ParserException(string.Format(Strings.Parser_ErrorP_ScopeNotSpecifiedInHeaderOrFooter,n));
+
 				if (scope == null)
 				{
 					Identifier ie = args[indexOfScope-1] as Identifier;

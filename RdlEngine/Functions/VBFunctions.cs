@@ -1237,6 +1237,48 @@ namespace Majorsilence.Reporting.Rdl
         static public string TrimLeft(object str) => LTrim(str);
 
         static public string TrimRight(object str) => RTrim(str);
+        // ── Join ──────────────────────────────────────────────────────────────────
+        // VB's Join(array, delimiter). Report Builder emits it constantly for
+        // multi-value parameter display (=Join(Parameters!X.Value, ", ")). A
+        // multi-value parameter reference is TypeCode.Object evaluating to an
+        // ArrayList, hence the object-typed first argument; a scalar argument is
+        // treated as a one-element list, matching VB's tolerance.
+
+        static public string Join(object values)
+        {
+            return Join(values, " ");
+        }
+
+        static public string Join(object values, string delimiter)
+        {
+            if (values == null || values is DBNull)
+                return "";
+
+            if (values is string s)     // string is IEnumerable; VB treats it as a scalar
+                return s;
+
+            if (values is IEnumerable list)
+            {
+                var sb = new StringBuilder();
+                bool first = true;
+                foreach (object item in list)
+                {
+                    if (!first)
+                        sb.Append(delimiter);
+                    first = false;
+                    if (item != null && !(item is DBNull))
+                        sb.Append(Convert.ToString(item));
+                }
+                return sb.ToString();
+            }
+
+            return Convert.ToString(values);
+        }
+
+        static public string Join(object values, object delimiter)
+        {
+            return Join(values, delimiter == null || delimiter is DBNull ? " " : Convert.ToString(delimiter));
+        }
 
         static public string Mid(object str, object start)
         {

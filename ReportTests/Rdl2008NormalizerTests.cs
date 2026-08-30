@@ -614,6 +614,39 @@ namespace ReportTests
             return messages;
         }
 
+
+        [Test]
+        public async Task MultiValueParameter_JoinFunction_Parses ()
+        {
+            var rdl = TablixReport (HeaderThenDetail,
+                Row ("0.25in", Cell (Textbox ("H1", @"=Join(Parameters!Clinics.Value, "", "")")), Cell (Textbox ("H2", "Amount"))) +
+                Row ("0.25in", Cell (Textbox ("D1", "=Fields!Name.Value")), Cell (Textbox ("D2", "=Fields!Amount.Value"))))
+                .Replace ("<DataSets>",
+                    @"<ReportParameters><ReportParameter Name=""Clinics""><DataType>String</DataType><MultiValue>true</MultiValue></ReportParameter></ReportParameters><DataSets>");
+
+            using var report = await ParseAsync (rdl);
+
+            Assert.That (report.ErrorMaxSeverity, Is.LessThanOrEqualTo (4),
+                "Join expression rejected: " + string.Join (" | ", report.ErrorItems ?? new System.Collections.ArrayList ()));
+        }
+
+        [Test]
+        public async Task DataSetScopedAggregate_InPageHeader_ParsesAndEvaluates ()
+        {
+            // RDL 2008+ page headers routinely carry =First(Fields!X.Value, "SomeDataSet")
+            // for report-wide captions; the scope names a dataset, so no row context is needed.
+            var rdl = TablixReport (HeaderThenDetail,
+                Row ("0.25in", Cell (Textbox ("H1", "Name")), Cell (Textbox ("H2", "Amount"))) +
+                Row ("0.25in", Cell (Textbox ("D1", "=Fields!Name.Value")), Cell (Textbox ("D2", "=Fields!Amount.Value"))))
+                .Replace ("<Body>",
+                    @"<PageHeader><Height>0.5in</Height><PrintOnFirstPage>true</PrintOnFirstPage><PrintOnLastPage>true</PrintOnLastPage>
+                        <ReportItems>" + Textbox ("PH1", @"=First(Fields!Name.Value, ""Data"")") + @"</ReportItems>
+                      </PageHeader><Body>");
+
+            var html = await RenderHtml (rdl);
+
+            Assert.That (html, Does.Contain ("Widget"), "page header aggregate did not evaluate");
+        }
         private static async Task<string> RenderHtml (string rdl)
         {
             using var report = await ParseAsync (rdl);
@@ -632,4 +665,6 @@ namespace ReportTests
         }
     }
 }
+
+
 
