@@ -950,10 +950,15 @@ through `Majorsilence.Forms.Drawing` (SkiaSharp) in *every* configuration now:
 - `Directory.Build.props` defines `DRAWINGCOMPAT` unconditionally; `Debug` and `Release` *are* the
   SkiaSharp build. The `Debug-DrawingCompat` / `Release-DrawingCompat` configs are gone from the
   `.slnx` (BuildTypes + per-project remaps), CI (`linux/mac/containers.yml` build `-c Release`), and
-  `build-release*.ps1`. `$(DrawingCompat)` stays defined-and-true so the existing
-  `Condition="'$(DrawingCompat)' == 'true'"` item groups keep firing without a sweep — the `#else`
-  / `#if !DRAWINGCOMPAT` / `#if NET48` arms across ~90 `.cs` files are now dead code, not yet
-  stripped.
+  `build-release*.ps1`. `$(DrawingCompat)` stays defined-and-true. The dead `#else` /
+  `#if !DRAWINGCOMPAT` / `#if NET48` arms — and the `#if NET6/7/8_0_OR_GREATER` guards whose
+  `#else` targeted net48/netstandard — were stripped from ~72 `.cs` files (~1000 lines), and three
+  files that were nothing but a dead branch deleted (`Polyfills/TrimmingAttributes.cs`,
+  `Polyfills/IsExternalInit.cs`, `Render/CompilationExtensions.cs`). The RdlEngine/RdlCri csprojs
+  lost their `$(DrawingCompat)` / `net48` `Condition` attributes and the dead
+  `System.Drawing.Common` / `ZXing.Net.Bindings.Windows.Compatibility` references;
+  `Directory.Packages.props` lost those pins plus `ZKWeb.System.Drawing`. Still `<Compile Remove>`d
+  wholesale rather than deleted: `Definition/EMFConverter/**` (the GDI+ EMF-parsing subsystem).
 - **net48 dropped** from `RdlEngine`, `RdlCreator`, `RdlCri`, `DataProviders`, and the
   viewer/designer projects — `Majorsilence.Forms.Drawing.Common` ships net8.0/net10.0 only. New
   floor is net8.0. (`Majorsilence.Forms.WinForms` itself still has net48+netstandard2.0 upstream;
