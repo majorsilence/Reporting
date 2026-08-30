@@ -784,9 +784,9 @@ Resumed the "run the real `ReportDesigner` on a Linux desktop, fix what breaks" 
 notes; that branch turned out to be a stale orphan — 1 commit ahead of a ~320-commit-old base, and
 that 1 commit, `48692a6` "modal dialogs shown with no explicit owner", never merged to `main`;
 forward-ported here). That branch has since merged to `main` and shipped: everything below is in
-**`Majorsilence.Forms` `26.0.50` on nuget.org** (`Majorsilence.Forms.WinForms` `26.0.50` too), so
-`.local-nuget-feed` is no longer needed for these versions — `Directory.Packages.props` points the
-whole family at `26.0.50`. Avalonia also bumped `12.1.0 → 12.1.1` (current stable) in both repos as part
+**`Majorsilence.Forms` `26.0.51` on nuget.org** (`Majorsilence.Forms.WinForms` `26.0.51` too; item 14
+below is the 26.0.51 fix), so `.local-nuget-feed` is no longer needed for these versions —
+`Directory.Packages.props` points the whole family at `26.0.51`. Avalonia also bumped `12.1.0 → 12.1.1` (current stable) in both repos as part
 of this — a clean central-package bump; `Avalonia.Controls.WebView` stays `12.1.0` (no 12.1.1
 release). NB: Rider, if open on `Majorsilence.Forms`, will rewrite `Directory.Packages.props` into
 a broken state (duplicate `PackageVersion` entries) — close it or disable its NuGet auto-sync
@@ -900,6 +900,13 @@ finished or not started:
     now records the size assigned through its `Size` property (the path `ApplyResources` takes) and
     returns it from a `GetPreferredSize` override, falling back to the hosted control's own size. Fixes
     `ToolStripComboBox` widths too. No Reporting-side change needed.
+
+14. **`26.0.51`** — `Majorsilence.Forms.Drawing.Common`'s `EncoderParameters(int count)` ctor set the
+    backing list's *capacity*, not its count, so `Param` came back empty and `Param[0] = new
+    EncoderParameter(...)` (the idiomatic `System.Drawing` pattern, used by `Chart.cs` for JPEG
+    quality) threw `IndexOutOfRange`. The ctor now allocates `new EncoderParameter[count]`; added an
+    `Add` method and `GetParameters()` that skips unassigned slots. `Chart.cs` already works around it
+    by assigning the whole `Param` array, which stays valid — left as-is.
 
 ### RdlViewer async/paint hacks — Reporting side (`RdlViewer.cs`, `RdlEditPreview.cs`)
 
