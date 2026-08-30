@@ -11,8 +11,15 @@
     <Project Path="Examples/PdfLayoutExample/PdfLayoutExample.csproj" />
     <Project Path="Majorsilence.Reporting.WebExample/Majorsilence.Reporting.WebExample.csproj" />
   </Folder>
+  <Folder Name="/Package Aliases/">
+    <Project Path="PackageAliases/Majorsilence.Reporting.DataProviders.SkiaSharp/Majorsilence.Reporting.DataProviders.SkiaSharp.csproj" />
+    <Project Path="PackageAliases/Majorsilence.Reporting.RdlCreator.SkiaSharp/Majorsilence.Reporting.RdlCreator.SkiaSharp.csproj" />
+    <Project Path="PackageAliases/Majorsilence.Reporting.RdlCri.SkiaSharp/Majorsilence.Reporting.RdlCri.SkiaSharp.csproj" />
+    <Project Path="PackageAliases/Majorsilence.Reporting.RdlEngine.SkiaSharp/Majorsilence.Reporting.RdlEngine.SkiaSharp.csproj" />
+  </Folder>
   <Folder Name="/Solution Items/">
     <File Path=".editorconfig" />
+    <File Path="PackageAliases/README.md" />
   </Folder>
   <Folder Name="/Tests/">
     <Project Path="Majorsilence.Reporting.Benchmarks/Majorsilence.Reporting.Benchmarks.csproj" />
