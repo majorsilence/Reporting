@@ -49,10 +49,11 @@ jobs:
           build-mode: none
         - language: javascript-typescript
           build-mode: none
-        - language: python
-          build-mode: none
-        - language: ruby
-          build-mode: none
+        # No python/ruby matrix entries: the language wrappers were moved to their own repos
+        # (commit 1a7a2e6), so there is no Python or Ruby source here for CodeQL to extract —
+        # adding them just produces "no source code seen" job failures. main's code-scanning
+        # history still lists /language:python and /language:ruby configs, which surfaces as a
+        # non-blocking "2 configurations not found" neutral result until that history ages out.
         # CodeQL supports the following values keywords for 'language': 'actions', 'c-cpp', 'csharp', 'go', 'java-kotlin', 'javascript-typescript', 'python', 'ruby', 'rust', 'swift'
         # Use `c-cpp` to analyze code written in C, C++ or both
         # Use 'java-kotlin' to analyze code written in Java, Kotlin or both
