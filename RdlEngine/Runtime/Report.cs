@@ -733,6 +733,14 @@ namespace Majorsilence.Reporting.Rdl
 			set { _ClientLanguage = value; }
 		}
 
+		/// <summary>
+		/// The client language exactly as supplied by the host, without the report-Language
+		/// fallback above. User!Language must read this: the fallback evaluates the report's
+		/// Language expression, and a report whose Language is "=User!Language" (a stock
+		/// Report Builder default) would otherwise recurse forever.
+		/// </summary>
+		internal string ClientLanguageRaw => _ClientLanguage;
+
 		internal DataSourcesDefn ParentConnections
 		{
 			get {return _ParentConnections; }

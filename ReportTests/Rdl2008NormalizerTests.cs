@@ -647,6 +647,25 @@ namespace ReportTests
 
             Assert.That (html, Does.Contain ("Widget"), "page header aggregate did not evaluate");
         }
+
+        [Test]
+        public async Task ReportLanguage_UserLanguage_DoesNotRecurse ()
+        {
+            // <Language>=User!Language</Language> is a stock Report Builder default. Before
+            // the ClientLanguageRaw split, User!Language evaluated Report.ClientLanguage,
+            // whose fallback re-evaluated the report Language expression: infinite mutual
+            // async recursion that hung rendering forever.
+            var rdl = TablixReport (HeaderThenDetail,
+                Row ("0.25in", Cell (Textbox ("H1", "Name")), Cell (Textbox ("H2", "Amount"))) +
+                Row ("0.25in", Cell (Textbox ("D1", "=Fields!Name.Value")), Cell (Textbox ("D2", "=Fields!Amount.Value"))))
+                .Replace ("<Body>", "<Language>=User!Language</Language><Body>");
+
+            var render = RenderHtml (rdl);
+            var winner = await Task.WhenAny (render, Task.Delay (TimeSpan.FromSeconds (30)));
+
+            Assert.That (winner, Is.SameAs (render), "render did not complete: User!Language recursion");
+            Assert.That (await render, Does.Contain ("Widget"));
+        }
         private static async Task<string> RenderHtml (string rdl)
         {
             using var report = await ParseAsync (rdl);
@@ -665,6 +684,7 @@ namespace ReportTests
         }
     }
 }
+
 
 
 
