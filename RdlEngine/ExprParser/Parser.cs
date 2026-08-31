@@ -182,14 +182,26 @@ namespace Majorsilence.Reporting.Rdl
 			IExpr lhs;
 			lhs = await MatchExprAddSub();
 			result = lhs;			// in case we get no matches
-			while ((t = curToken.Type) == TokenTypes.EQUAL ||
-				t == TokenTypes.NOTEQUAL ||
-				t == TokenTypes.GREATERTHAN ||
-				t == TokenTypes.GREATERTHANOREQUAL ||
-				t == TokenTypes.LESSTHAN ||
-				t == TokenTypes.LESSTHANOREQUAL ||
-				t == TokenTypes.LIKE)
+			while (true)
 			{
+				t = curToken.Type;
+				// VB "Is" comparison ("X Is Nothing"): the lexer sees a plain identifier, so
+				// promote it to an equality test here.
+				if (t == TokenTypes.IDENTIFIER
+					&& string.Equals(curToken.Value, "Is", StringComparison.OrdinalIgnoreCase))
+				{
+					t = TokenTypes.EQUAL;
+				}
+				else if (t != TokenTypes.EQUAL &&
+					t != TokenTypes.NOTEQUAL &&
+					t != TokenTypes.GREATERTHAN &&
+					t != TokenTypes.GREATERTHANOREQUAL &&
+					t != TokenTypes.LESSTHAN &&
+					t != TokenTypes.LESSTHANOREQUAL &&
+					t != TokenTypes.LIKE)
+				{
+					break;
+				}
 				curToken = tokens.Extract();
 				IExpr rhs;
 				rhs = await MatchExprAddSub();
@@ -504,9 +516,10 @@ namespace Majorsilence.Reporting.Rdl
 						}
 					}
 
+					thirdPart = NormalizeMemberRef(thirdPart);
 					if (thirdPart == null || thirdPart == "Value")
 					{
-						result = new FunctionField(f);	
+						result = new FunctionField(f);
 					}
 					else if (thirdPart == "IsMissing")
 					{
@@ -519,6 +532,7 @@ namespace Majorsilence.Reporting.Rdl
 					ReportParameter p = idLookup.LookupParameter(method);
 					if (p == null)
 						throw new ParserException(string.Format(Strings.Parser_ErrorP_ParameterNotFound, method));
+                    thirdPart = NormalizeMemberRef(thirdPart);
                     // Parameters!X.Count, Parameters!X.Value.Count and Parameters!X.Label.Count
                     // all mean the multi-value count; the bare form is what Report Builder emits.
                     bool wantCount = false;
@@ -549,6 +563,7 @@ namespace Majorsilence.Reporting.Rdl
 					Textbox t = idLookup.LookupReportItem(method);
 					if (t == null)
 						throw new ParserException(string.Format(Strings.Parser_ErrorP_ItemNotFound, method));
+					thirdPart = NormalizeMemberRef(thirdPart);
 					if (thirdPart != null && thirdPart != "Value")
 						throw new ParserException(string.Format(Strings.Parser_ErrorP_ItemSupportsValue, method));
 					result = new FunctionTextbox(t, idLookup.ExpressionName);	
@@ -573,7 +588,12 @@ namespace Majorsilence.Reporting.Rdl
 					return (true, result);
 				default:
 					if (!bOnePart)
+					{
+						IExpr wellKnown = ResolveWellKnownConstant(fullname);
+						if (wellKnown != null)
+							return (true, wellKnown);
 						throw new ParserException(string.Format(Strings.Parser_ErrorP_UnknownIdentifer, fullname));
+					}
 
 					switch (method.ToLower())		// lexer should probably mark these
 					{
@@ -708,6 +728,7 @@ namespace Majorsilence.Reporting.Rdl
             }
 			else switch(method.ToLower())
 			{
+				case "if":		// VB.NET ternary If(cond, a, b): same shape as IIF
 				case "iif":
 					if (args.Length != 3)
 						throw new ParserException(Strings.Parser_ErrorP_iff_function_requires_3_arguments + GetLocationInfo(curToken));
@@ -1077,6 +1098,101 @@ namespace Majorsilence.Reporting.Rdl
             return result;
         }
 
+		/// <summary>
+		/// Multi-part identifiers that are really well-known constants: framework and VB
+		/// constants plus the VB enum values Report Builder writes into date functions.
+		/// Returns null when the name is not recognised.
+		/// </summary>
+		private static IExpr ResolveWellKnownConstant(string fullname)
+		{
+			string key = fullname.ToLowerInvariant();
+
+			if (key == "environment.newline" || key == "system.environment.newline")
+				return new ConstantString(Environment.NewLine);
+
+			if (key.StartsWith("microsoft.visualbasic.constants.") || key.StartsWith("constants."))
+			{
+				switch (key.Substring(key.LastIndexOf('.') + 1))
+				{
+					case "vbcrlf":
+					case "vbnewline": return new ConstantString("\r\n");
+					case "vbcr": return new ConstantString("\r");
+					case "vblf": return new ConstantString("\n");
+					case "vbtab": return new ConstantString("\t");
+				}
+				return null;
+			}
+
+			if (key.StartsWith("dateformat."))
+			{
+				switch (key.Substring("dateformat.".Length))
+				{
+					case "generaldate": return new ConstantInteger(0);
+					case "longdate": return new ConstantInteger(1);
+					case "shortdate": return new ConstantInteger(2);
+					case "longtime": return new ConstantInteger(3);
+					case "shorttime": return new ConstantInteger(4);
+				}
+				return null;
+			}
+
+			if (key.StartsWith("dateinterval."))
+			{
+				// The interval codes DateDiff/DatePart accept, per VB semantics.
+				switch (key.Substring("dateinterval.".Length))
+				{
+					case "year": return new ConstantString("yyyy");
+					case "quarter": return new ConstantString("q");
+					case "month": return new ConstantString("m");
+					case "dayofyear": return new ConstantString("y");
+					case "day": return new ConstantString("d");
+					case "weekofyear": return new ConstantString("ww");
+					case "weekday": return new ConstantString("w");
+					case "hour": return new ConstantString("h");
+					case "minute": return new ConstantString("n");
+					case "second": return new ConstantString("s");
+				}
+				return null;
+			}
+
+			return null;
+		}
+
+		/// <summary>
+		/// Canonicalises a Fields!/Parameters!/ReportItems! member reference: property names
+		/// are case-insensitive in SSRS, and no-op accessor suffixes that CLR-fluent report
+		/// authors write (.ToString(), .DateTime) reduce to the value itself.
+		/// <para>
+		/// .ToLocalTime() is deliberately not in that list. It is not a no-op -- dropping it
+		/// would show a UTC value as UTC while the report asked for local time -- and it
+		/// cannot simply be honoured either, because DateTime.ToLocalTime treats an
+		/// Unspecified Kind as UTC, which is how an ordinary SQL Server datetime arrives. So
+		/// it stays a parse error rather than becoming a silent hour's difference either way.
+		/// </para>
+		/// </summary>
+		private static string NormalizeMemberRef(string part)
+		{
+			if (part == null)
+				return null;
+
+			foreach (string suffix in new[] { ".ToString()", ".ToString", ".DateTime" })
+			{
+				if (part.EndsWith(suffix, StringComparison.OrdinalIgnoreCase))
+				{
+					part = part.Substring(0, part.Length - suffix.Length);
+					break;
+				}
+			}
+
+			if (string.Equals(part, "Value", StringComparison.OrdinalIgnoreCase)) return "Value";
+			if (string.Equals(part, "Label", StringComparison.OrdinalIgnoreCase)) return "Label";
+			if (string.Equals(part, "Count", StringComparison.OrdinalIgnoreCase)) return "Count";
+			if (string.Equals(part, "IsMissing", StringComparison.OrdinalIgnoreCase)) return "IsMissing";
+			if (part.StartsWith("Value.", StringComparison.OrdinalIgnoreCase)) return "Value" + part.Substring(5);
+			if (part.StartsWith("Label.", StringComparison.OrdinalIgnoreCase)) return "Label" + part.Substring(5);
+			return part;
+		}
+
 		private IExpr ResolveMethodCall(string fullname, IExpr[] args)
 		{
 			string cls, method;
@@ -1137,8 +1253,10 @@ namespace Majorsilence.Reporting.Rdl
 			string syscls = null;
 
 			if (cType == null)
-			{	// ok try for some of the system functions
-				(cType, syscls) = cls switch
+			{	// ok try for some of the system functions; reports qualify these both ways
+				// ("Convert.ToInt32" and "System.Convert.ToInt32").
+				string clsKey = cls.StartsWith("System.", StringComparison.Ordinal) ? cls.Substring(7) : cls;
+				(cType, syscls) = clsKey switch
 				{
 					"Math"      => (typeof(System.Math),    "System.Math"),
 					"String"    => (typeof(string),          "System.String"),
@@ -1162,6 +1280,27 @@ namespace Majorsilence.Reporting.Rdl
 			IExpr result=null;
 
 			MethodInfo mInfo = XmlUtil.GetMethod(cType, method, argTypes);
+			if (mInfo == null && cType == typeof(System.Convert))
+			{
+				// Convert's overloads resolve by exact parse-time argument type, so an
+				// argument whose type could not be inferred (Object) never binds — e.g.
+				// Convert.ToBase64String(First(Fields!X.Value, "DS")). VBFunctions carries
+				// object-tolerant mirrors named the same way, and for Convert they mean the
+				// same thing, so falling back to them recovers the expression.
+				//
+				// Only Convert. The other system classes must not fall back: VBFunctions has
+				// members that share a name with a System.String or System.Math method but
+				// take their arguments differently, and silently binding to those would turn
+				// a parse error into quietly wrong output. String.Join(", ", x) is the
+				// example -- VB's Join(values, delimiter) is the same name in the other order.
+				MethodInfo fallback = XmlUtil.GetMethod(typeof(VBFunctions), method, argTypes);
+				if (fallback != null)
+				{
+					cType = typeof(VBFunctions);
+					syscls = "Majorsilence.Reporting.Rdl.VBFunctions";
+					mInfo = fallback;
+				}
+			}
             if (mInfo == null)
             {
                 string err;

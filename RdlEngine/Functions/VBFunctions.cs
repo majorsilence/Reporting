@@ -1237,6 +1237,78 @@ namespace Majorsilence.Reporting.Rdl
         static public string TrimLeft(object str) => LTrim(str);
 
         static public string TrimRight(object str) => RTrim(str);
+        // ── VB date/format functions Report Builder emits ────────────────────────
+
+        /// <summary>VB FormatDateTime with the DateFormat enum values (0 GeneralDate .. 4 ShortTime).</summary>
+        static public string FormatDateTime(object date)
+        {
+            return FormatDateTime(date, 0);
+        }
+
+        static public string FormatDateTime(object date, object format)
+        {
+            DateTime dt = Convert.ToDateTime(date);
+            switch ((int)Convert.ToDouble(format))
+            {
+                case 1: return dt.ToString("D");
+                case 2: return dt.ToString("d");
+                case 3: return dt.ToString("T");
+                case 4: return dt.ToString("t");
+                default: return dt.ToString("G");
+            }
+        }
+
+        /// <summary>VB FormatCurrency.</summary>
+        static public string FormatCurrency(object value)
+        {
+            return FormatCurrency(value, 2);
+        }
+
+        static public string FormatCurrency(object value, object digits)
+        {
+            return Convert.ToDouble(value).ToString("C" + (int)Convert.ToDouble(digits));
+        }
+
+        /// <summary>Microsoft.VisualBasic.Interaction.IIf, reached via qualified calls.
+        /// Unlike the parser's IIF this evaluates both branches first.</summary>
+        static public object IIF(object condition, object truePart, object falsePart)
+        {
+            return Convert.ToBoolean(condition) ? truePart : falsePart;
+        }
+
+        /// <summary>System.Uri.EscapeDataString mirror (resolved via the fallback).</summary>
+        static public string EscapeDataString(object value)
+        {
+            return Uri.EscapeDataString(Convert.ToString(value) ?? "");
+        }
+
+        /// <summary>System.DateTime.Parse mirror (resolved via the fallback).</summary>
+        static public DateTime Parse(object value)
+        {
+            return Convert.ToDateTime(value);
+        }
+
+        // ── System.Convert mirrors ────────────────────────────────────────────────
+        // Object-tolerant Base64 helpers: the real System.Convert overloads take string /
+        // byte[], which never bind when the parse-time argument type is Object (aggregates,
+        // fields of uninferred type). Resolved via the VBFunctions fallback in the parser.
+
+        static public byte[] FromBase64String(object encoded)
+        {
+            if (encoded == null || encoded is DBNull)
+                return Array.Empty<byte>();
+            return Convert.FromBase64String(Convert.ToString(encoded));
+        }
+
+        static public string ToBase64String(object data)
+        {
+            if (data == null || data is DBNull)
+                return "";
+            if (data is byte[] bytes)
+                return Convert.ToBase64String(bytes);
+            return Convert.ToBase64String(Encoding.UTF8.GetBytes(Convert.ToString(data)));
+        }
+
         // ── Join ──────────────────────────────────────────────────────────────────
         // VB's Join(array, delimiter). Report Builder emits it constantly for
         // multi-value parameter display (=Join(Parameters!X.Value, ", ")). A

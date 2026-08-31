@@ -1155,10 +1155,15 @@ namespace Majorsilence.Reporting.Rdl
             foreach (XmlNode node in parent.ChildNodes) {
                 if (node is not XmlElement element)
                     continue;
-                if (string.Equals (element.NamespaceURI, ReportDesignerNamespace, StringComparison.OrdinalIgnoreCase))
-                    found.Add (element);
-                else
+                if (string.Equals (element.NamespaceURI, ReportDesignerNamespace, StringComparison.OrdinalIgnoreCase)) {
+                    // rd:TypeName is the one designer element the engine consumes: it types
+                    // dataset fields. Stripping it degrades every field to String, breaking
+                    // arithmetic and formatting downstream.
+                    if (!string.Equals (element.LocalName, "TypeName", StringComparison.Ordinal))
+                        found.Add (element);
+                } else {
                     CollectDesignerElements (element, found);
+                }
             }
         }
 
