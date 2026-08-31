@@ -124,6 +124,8 @@ namespace Majorsilence.Reporting.Rdl
 						}
 						else
 							return new Token(ch.ToString(), reader.Line, reader.Column, reader.Line, reader.Column, TokenTypes.FORWARDSLASH);
+					case '\\':	// VB integer division operator
+						return new Token(ch.ToString(), reader.Line, reader.Column, reader.Line, reader.Column, TokenTypes.BACKSLASH);
 					case '<':
 						if (reader.Peek() == '=')
 						{
@@ -139,8 +141,6 @@ namespace Majorsilence.Reporting.Rdl
 							return new Token(ch.ToString(), reader.Line, reader.Column, reader.Line, reader.Column, TokenTypes.LESSTHAN);
 					case '*':
 						return new Token(ch.ToString(), reader.Line, reader.Column, reader.Line, reader.Column, TokenTypes.STAR);
-					case '\\':
-						return new Token(ch.ToString(), reader.Line, reader.Column, reader.Line, reader.Column, TokenTypes.BACKSLASH);
 					case '"':
 					case '\'':
 						return ReadQuoted(ch);

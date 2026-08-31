@@ -1288,6 +1288,19 @@ namespace Majorsilence.Reporting.Rdl
             return Convert.ToDateTime(value);
         }
 
+        /// <summary>Environment.NewLine written as a method call (resolved via the fallback).</summary>
+        static public string NewLine()
+        {
+            return Environment.NewLine;
+        }
+
+        /// <summary>VB TimeValue: the time-of-day portion of a date or time string.</summary>
+        static public DateTime TimeValue(object value)
+        {
+            DateTime dt = Convert.ToDateTime(value);
+            return new DateTime(1, 1, 1).Add(dt.TimeOfDay);
+        }
+
         // ── System.Convert mirrors ────────────────────────────────────────────────
         // Object-tolerant Base64 helpers: the real System.Convert overloads take string /
         // byte[], which never bind when the parse-time argument type is Object (aggregates,
