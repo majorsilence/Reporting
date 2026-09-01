@@ -37,7 +37,7 @@ namespace Majorsilence.Reporting.Rdl
 			// in -> inches (1 inch = 2.54 cm)
 			// cm -> centimeters (.01 meters)
 			// mm -> millimeters (.001 meters)
-			// pt -> points (1 point = 1/72.27 inches)
+			// pt -> points (1 point = 1/72 inches)
 			// pc -> Picas (1 pica = 12 points)
 			if (t == null)		// e.g. an expression that evaluated to no result
 			{
@@ -158,8 +158,17 @@ namespace Majorsilence.Reporting.Rdl
 			}
 		}
 
-		static internal readonly float POINTSIZED = 72.27f;
-		static internal readonly decimal POINTSIZEM = 72.27m;
+		// 72 points to the inch. This was 72.27 - TeX's printer's point - for as long as
+		// this engine has existed, and it is the wrong point for everything this engine
+		// talks to: RDL sizes are CSS length units and CSS defines 1pt = 1/72in, PDF user
+		// space is 1/72in, and GDI fonts are 1/72in. With 72.27 every dimension written in
+		// inches came out 0.375% oversized in the PDF - a Letter page had a MediaBox of
+		// 794x614 instead of 612x792, and a 0.215in table row rendered 15.535pt tall
+		// instead of 15.48 - an error that compounds down a page of rows. Sizes given in
+		// pt round-trip through _Size unchanged under either constant, so font sizes do
+		// not move; only in/cm/mm dimensions do, by that 0.375%.
+		static internal readonly float POINTSIZED = 72f;
+		static internal readonly decimal POINTSIZEM = 72m;
 
 		static internal int PixelsFromPoints(float x)
 		{

@@ -354,7 +354,7 @@ namespace fyiReporting.RDLPrint
         //    return;
         //}
 
-        private float POINTSIZEF = 72.27f;
+        private float POINTSIZEF = 72f;   // see RSize.POINTSIZED - 1pt = 1/72in
 
         private Report GetReport()
         {

@@ -79,11 +79,11 @@ namespace Majorsilence.Reporting.Rdl.Utility
         /// <summary>
         /// The constant value used to calculate the conversion of pixels into points, as a float.
         /// </summary>
-        public const float POINTSIZE_F = 72.27f;
+        public const float POINTSIZE_F = 72f;
         /// <summary>
         /// The constant value used to calculate the conversion of pixels into points, as a decimal.
         /// </summary>
-        public const decimal POINTSIZE_M = 72.27m;
+        public const decimal POINTSIZE_M = 72m;
 
         public const float STANDARD_DPI_X = 96f;
         public const float STANDARD_DPI_Y = 96f;
