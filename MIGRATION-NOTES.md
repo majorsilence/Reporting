@@ -1053,3 +1053,84 @@ be compiled/verified on Linux, same caveat as `LibRdlWpfViewer` in D8 — real v
 `WinFormsShims.Compat` generator is a C#-only Roslyn source generator (`IsRoslynComponent` +
 netstandard2.0 analyzer, emits C#); it does not run against a VB.NET compilation at all, so this app
 has no path to the shim. It would need the `ToWinFormsControl()` rewrite instead, not attempted here.
+
+## D12: `RdlViewer` itself rewritten onto the compat shim namespace
+
+Per a direct user decision, went further than D11's Examples-only scope: rewrote `RdlViewer`'s own
+9 `.cs` files to import `System.Windows.Forms`/`System.Drawing` (via
+`Majorsilence.Forms.WinFormsShims.Compat`) instead of `Majorsilence.Forms`/`Majorsilence.Forms.Drawing`
+directly, added the `PackageReference`, and fixed every resulting compile error rather than reverting.
+Verified: `RdlViewer` builds clean on both `net8.0`/`net10.0`, `RdlViewer.Tests` passes (3/3), and
+every downstream consumer still builds unmodified (`RdlReader`, `LibRdlWpfViewer`, and the four D11
+Examples) — none of RdlViewer's *public* signatures ended up compat-typed, so nothing rippled out.
+
+**Important corrected understanding, found empirically (see full investigation in that session's
+transcript, not reproduced here): this is NOT "the shim makes Majorsilence.Forms act like real
+WinForms."** It is a mechanical namespace substitution with real, structural gaps that don't
+converge with more casts — they recur in kind. The fix pattern below is what makes it tractable, and
+generalizes to `RdlDesign`.
+
+### Rule of thumb
+
+The mechanical rewrite (`Majorsilence.Forms` → `System.Windows.Forms`, `Majorsilence.Forms.Drawing` →
+`System.Drawing`, done with a namespace-boundary-aware regex that leaves real sub-namespaces alone —
+`Design`, `Printing`, `Drawing.Common`, `Drawing.Drawing2D`, `Drawing.Imaging` — since the shim only
+maps the two top-level namespaces themselves) gets *most* of a file compiling. What's left over falls
+into a small number of repeating categories — **when one appears, qualify with the real
+`Majorsilence.Forms`/`Majorsilence.Forms.Drawing` name instead of fighting it**:
+
+1. **Inherited plain members from `Control`/`Form` that the generator never retypes.** The
+   generator's rule #1 (subclassing) adds *only* forwarding constructors — it does not shadow
+   inherited properties or static members with translated types. `Anchor`, `Dock`, `AutoScaleMode`,
+   `BorderStyle`, `Cursor`, `DialogResult`, `FormBorderStyle`, `SizeGripStyle`, `Control.ModifierKeys`
+   all stay real-typed no matter what the *consumer's* using directives say, because they're declared
+   once on the real `Majorsilence.Forms.Control`/`.Form`. Any literal assigned to one of these needs
+   `Majorsilence.Forms.<Enum>.<Value>`, not the bare/compat name.
+2. **Plain virtual method overrides outside Control's own Paint/Mouse/Key/Drag family (rule #5).**
+   `IsInputKey(Keys)` is the example: the base signature's `Keys` parameter is real, so the override
+   (and everything compared against the parameter inside it) needs `Majorsilence.Forms.Keys`
+   throughout, not just at the signature.
+3. **Types with no accessible constructor get no compat type at all** (`Graphics`, `Image` — `Image`
+   specifically has no *wrapper* either, since it isn't sealed, so it's a rule-#1 subclass with no
+   implicit conversion in either direction). Always use `Majorsilence.Forms.Drawing.Graphics` /
+   `.Image`; there is no `System.Drawing.Graphics` to fall back to, compat or real, in a project with
+   no `System.Drawing.Common` reference.
+4. **Wrapper types (rule #1b) don't forward `IDisposable` or inherited base-class members.**
+   `SolidBrush`/`Bitmap`/`Font` used in a `using (...)` statement, or `.Dispose()`'d directly, need
+   `Majorsilence.Forms.Drawing.<Type>` — the compat wrapper compiles for simple construction/passing
+   (implicit conversion covers that) but not disposal. Same for `Bitmap.Width`/`.Height` (inherited
+   from `Image`, not forwarded by the wrapper).
+5. **Cross-type polymorphism among generated subclasses doesn't exist.** This is the one worth
+   understanding, not just pattern-matching: every rule-#1 subclass derives from its *same-named real
+   type* (`compat.TextBox : real.TextBox`), never from another *generated* compat type. So
+   `compat.Control` and `compat.TextBox` are unrelated siblings in the compat namespace — assigning a
+   compat `TextBox`/`ComboBox` to a compat `Control`-typed variable does not compile
+   (`CS0029`), confirmed with an isolated 3-line repro against just the shim packages. Any
+   polymorphic storage of concrete controls (`Control v; ... v = someTextBox;`, and the equivalent for
+   `Brush`/`SolidBrush`) needs the variable declared as the real `Majorsilence.Forms.Control` /
+   `.Drawing.Brush` type — it's still satisfied, since every compat leaf type inherits transitively
+   from the real base.
+6. **Ambiguous simple names where a same-named instance/static member is also inherited.**
+   `BorderStyle.None`, `Cursor.Current`, `MouseButtons.Left` are enum-*type* references that collide
+   with an inherited property/static member of the identical name (`Control.BorderStyle`,
+   `Control.Cursor`, `Control.MouseButtons`), so the bare name resolves to the member, not the type,
+   and `.None`/`.Current`/`.Left` then fails as `CS0176` ("cannot be accessed with an instance
+   reference"). Any namespace-qualified prefix disambiguates it back to the type; which one
+   (`Majorsilence.Forms.X` vs. `System.Windows.Forms.X`) has to match whatever the *other* side of the
+   comparison/assignment actually is — plain inherited members want the real type (per #1), but a
+   property already translated by rule #5 (below) wants the compat type.
+7. **Rule #5's Paint/Mouse/Key/Drag event wrapper is the one place inherited members *are*
+   translated.** `Control.OnMouseDown(MouseEventArgs)` and its 25 siblings get a real compat
+   `EventArgs` wrapper with translatable properties (`.Button`, `.KeyCode`, ...) forwarded as
+   *compat*-typed. Code overriding `OnMouseDown`/etc. and comparing `e.Button` against
+   `MouseButtons.Left` needs the fully-qualified *compat* form (`System.Windows.Forms.MouseButtons.Left`)
+   to match, not the real one — the one case where #6's ambiguity fix goes the other way.
+8. **No mapping exists below the two top-level namespaces**, so anything under
+   `Majorsilence.Forms.Printing`/`.Design`/`.Drawing.Drawing2D`/`.Drawing.Imaging`/`.Drawing.Common`
+   stays real, unconditionally — there's nothing to switch it to. Same for events not on `Control`
+   itself (`ScrollEventArgs` on a `ScrollBar`, not one of the 26 `Control`-declared ones).
+
+This ruleset generalizes directly to `RdlDesign`'s much larger surface (119 files, ~3,000
+`Majorsilence.Forms` references, D4-scale) — expect the same categories to recur, not new ones, since
+they all trace back to fixed properties of the generator (what rule #1/#1b/#5 do and don't cover),
+not to anything specific to `RdlViewer`'s code.

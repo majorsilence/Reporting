@@ -1,5 +1,5 @@
 using System;
-using Majorsilence.Forms;
+using System.Windows.Forms;
 using System.ComponentModel;
 using System.Collections;
 
@@ -24,11 +24,11 @@ private VScrollBar _vScroll;
 
 private void InitializeComponent()
 {
-			Majorsilence.Forms.ComponentResourceManager resources = new Majorsilence.Forms.ComponentResourceManager(typeof(RdlViewer));
+			System.Windows.Forms.ComponentResourceManager resources = new System.Windows.Forms.ComponentResourceManager(typeof(RdlViewer));
             this.DoubleBuffered = true;
-			this._RunButton = new Majorsilence.Forms.Button();
-			this._hScroll = new Majorsilence.Forms.HScrollBar();
-			this._vScroll = new Majorsilence.Forms.VScrollBar();
+			this._RunButton = new System.Windows.Forms.Button();
+			this._hScroll = new System.Windows.Forms.HScrollBar();
+			this._vScroll = new System.Windows.Forms.VScrollBar();
 			this._DrawPanel = new Majorsilence.Reporting.RdlViewer.PageDrawing();
 			this.SuspendLayout();
 			// 

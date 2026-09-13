@@ -1,7 +1,7 @@
 using System;
-using Majorsilence.Forms;
+using System.Windows.Forms;
 using Majorsilence.Forms.Printing;
-using Majorsilence.Forms.Drawing;
+using System.Drawing;
 using System.Resources;
 using System.Reflection;
 using System.IO;
@@ -50,7 +50,7 @@ namespace Majorsilence.Reporting.RdlViewer
         {
             var dlg = new OpenFileDialog();
             var result = dlg.ShowDialog();
-            if (result != DialogResult.OK)
+            if (result != Majorsilence.Forms.DialogResult.OK)
             {
                 return;
             }
@@ -70,7 +70,7 @@ namespace Majorsilence.Reporting.RdlViewer
             }
 
             // No real print-spooler integration -- see MIGRATION-NOTES.md and RdlViewer.cs's
-            // comment where Print(PrintDocument) used to live. Majorsilence.Forms.PrintDialog is
+            // comment where Print(PrintDocument) used to live. System.Windows.Forms.PrintDialog is
             // a no-op stub with no real UI anyway, so don't pretend to show one; go straight to
             // "export as PDF" (the same path the Save As toolbar button already uses) and let the
             // user print from their OS's own PDF viewer.
@@ -79,7 +79,7 @@ namespace Majorsilence.Reporting.RdlViewer
                 Filter = "PDF files (*.pdf)|*.pdf",
                 FileName = System.IO.Path.GetFileNameWithoutExtension(Viewer.SourceFile.LocalPath) + ".pdf",
             };
-            if (dlg.ShowDialog() == DialogResult.OK)
+            if (dlg.ShowDialog() == Majorsilence.Forms.DialogResult.OK)
             {
                 await Viewer.SaveAs(dlg.FileName, Majorsilence.Reporting.Rdl.OutputPresentationType.PDF);
             }
@@ -96,7 +96,7 @@ namespace Majorsilence.Reporting.RdlViewer
             dlg.Filter = Strings.RdlViewer_menuFileSaveAs_Click_FilesFilter;
             dlg.FileName = ".pdf";
             var result = dlg.ShowDialog();
-            if (result != DialogResult.OK)
+            if (result != Majorsilence.Forms.DialogResult.OK)
             {
                 return;
             }

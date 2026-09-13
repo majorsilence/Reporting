@@ -1,22 +1,22 @@
 using System;
-using Majorsilence.Forms;
+using System.Windows.Forms;
 using System.ComponentModel;
 using System.Collections;
 
 namespace Majorsilence.Reporting.RdlViewer
 {
-    public partial class DialogMessages : Majorsilence.Forms.Form
+    public partial class DialogMessages : System.Windows.Forms.Form
 	{
 		#region Windows Form Designer generated code
-		private Majorsilence.Forms.Button bOK;
-private Majorsilence.Forms.TextBox tbMessages;
+		private System.Windows.Forms.Button bOK;
+private System.Windows.Forms.TextBox tbMessages;
 private System.ComponentModel.Container components = null;
 
 		private void InitializeComponent()
 		{
-			Majorsilence.Forms.ComponentResourceManager resources = new Majorsilence.Forms.ComponentResourceManager(typeof(DialogMessages));
-			this.bOK = new Majorsilence.Forms.Button();
-			this.tbMessages = new Majorsilence.Forms.TextBox();
+			System.Windows.Forms.ComponentResourceManager resources = new System.Windows.Forms.ComponentResourceManager(typeof(DialogMessages));
+			this.bOK = new System.Windows.Forms.Button();
+			this.tbMessages = new System.Windows.Forms.TextBox();
 			this.SuspendLayout();
 			// 
 			// bOK

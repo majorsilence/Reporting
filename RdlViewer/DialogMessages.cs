@@ -2,7 +2,7 @@
 using System;
 using System.Collections;
 using System.ComponentModel;
-using Majorsilence.Forms;
+using System.Windows.Forms;
 
 namespace Majorsilence.Reporting.RdlViewer
 {

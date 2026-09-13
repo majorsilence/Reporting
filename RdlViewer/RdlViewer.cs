@@ -3,9 +3,9 @@ using System.Collections;
 using System.Collections.Specialized;
 using System.Collections.Generic;
 using System.Drawing;
-using Majorsilence.Forms.Drawing;
+using System.Drawing;
 using System.IO;
-using Majorsilence.Forms;
+using System.Windows.Forms;
 using Majorsilence.Forms.Printing;
 using System.Text;
 using EncryptionProvider;
@@ -24,7 +24,7 @@ namespace Majorsilence.Reporting.RdlViewer
     /// <summary>
     /// RdlViewer displays RDL files or syntax. 
     /// </summary>
-    public partial class RdlViewer : Majorsilence.Forms.UserControl
+    public partial class RdlViewer : System.Windows.Forms.UserControl
     {
         public delegate void HyperlinkEventHandler(object source, HyperlinkEventArgs e);
 
@@ -168,7 +168,7 @@ namespace Majorsilence.Reporting.RdlViewer
             RdlEngineConfig.GetCustomReportTypes();
 
             this.InitializeComponent();
-            _DrawPanel.BorderStyle = BorderStyle.None;
+            _DrawPanel.BorderStyle = Majorsilence.Forms.BorderStyle.None;
             _SourceFileName = null;
             _SourceRdl = null;
             _Parameters = null;             // parameters to run the report
@@ -182,7 +182,7 @@ namespace Majorsilence.Reporting.RdlViewer
             _zoom = -1;                     // force zoom to be calculated
 
             // Get our graphics DPI					   
-            Graphics g = null;
+            Majorsilence.Forms.Drawing.Graphics g = null;
             try
             {
                 g = this.CreateGraphics();
@@ -536,12 +536,12 @@ namespace Majorsilence.Reporting.RdlViewer
             if (!CanCopy)
                 return;
 
-            Image im = _DrawPanel.SelectImage;
+            Majorsilence.Forms.Drawing.Image im = _DrawPanel.SelectImage;
             if (im == null)
                 Clipboard.SetDataObject(SelectText, true);
             else
             {
-                Clipboard.SetImage(im);
+                Majorsilence.Forms.Clipboard.SetImage(im);
                 im.Dispose();
             }
         }
@@ -835,10 +835,10 @@ namespace Majorsilence.Reporting.RdlViewer
         // Print(PrintDocument) / _Print / PrintPage removed -- see MIGRATION-NOTES.md.
         //
         // Majorsilence.Forms.Printing.PrintPageEventArgs.Graphics is SkiaGraphics, a completely
-        // separate, much narrower type from the Majorsilence.Forms.Graphics PageDrawing.Draw is
+        // separate, much narrower type from the System.Windows.Forms.Graphics PageDrawing.Draw is
         // written against (no inheritance relationship, missing PageUnit/Transform/many
         // overloads PageDrawing needs) -- reusing the screen-paint code for printing would need
-        // a large parallel rendering path. Majorsilence.Forms's own PrintDocument doesn't talk to
+        // a large parallel rendering path. System.Windows.Forms's own PrintDocument doesn't talk to
         // an OS print spooler either; it always renders straight to a PDF file via SkiaSharp, and
         // its PrintDialog is a no-op stub with no real UI. Given that, "printing" here means:
         // SaveAs(path, OutputPresentationType.PDF) -- the same mature RunRenderPdf pipeline every
@@ -1050,7 +1050,7 @@ namespace Majorsilence.Reporting.RdlViewer
                 int maxScroll = Math.Max(_vScroll.Minimum, _vScroll.Maximum - _DrawPanel.Height);
                 _vScroll.Value = Math.Min(Math.Max(scroll, _vScroll.Minimum), Math.Min(maxScroll, _vScroll.Maximum));
                 SetScrollControlsV();
-                ScrollEventArgs sa = new ScrollEventArgs(ScrollEventType.ThumbPosition, _vScroll.Maximum + 1); // position is intentionally wrong
+                Majorsilence.Forms.ScrollEventArgs sa = new Majorsilence.Forms.ScrollEventArgs(Majorsilence.Forms.ScrollEventType.ThumbPosition, _vScroll.Maximum + 1); // position is intentionally wrong
                 OnVScroll(_vScroll, sa);
             }
 
@@ -1063,7 +1063,7 @@ namespace Majorsilence.Reporting.RdlViewer
                 int maxScroll = Math.Max(_hScroll.Minimum, _hScroll.Maximum - _DrawPanel.Width);
                 _hScroll.Value = Math.Min(Math.Max(scroll, _hScroll.Minimum), Math.Min(maxScroll, _hScroll.Maximum));
                 SetScrollControlsH();
-                ScrollEventArgs sa = new ScrollEventArgs(ScrollEventType.ThumbPosition, _hScroll.Maximum + 1); // position is intentionally wrong
+                Majorsilence.Forms.ScrollEventArgs sa = new Majorsilence.Forms.ScrollEventArgs(Majorsilence.Forms.ScrollEventType.ThumbPosition, _hScroll.Maximum + 1); // position is intentionally wrong
                 OnHScroll(_hScroll, sa);
             }
         }
@@ -1084,7 +1084,7 @@ namespace Majorsilence.Reporting.RdlViewer
                 Math.Max(1, _DrawPanel.Width), Math.Max(1, _DrawPanel.Height),
                 _HighlightItem, _HighlightText, _HighlightCaseSensitive, _HighlightAll);
 
-        private async void DrawPanelPaint(object sender, Majorsilence.Forms.PaintEventArgs e)
+        private async void DrawPanelPaint(object sender, System.Windows.Forms.PaintEventArgs e)
         {
             try         // never want to die in here
             {
@@ -1113,8 +1113,8 @@ namespace Majorsilence.Reporting.RdlViewer
                     // Re-read: LoadPageIfNeeded / CalcZoom above may have moved zoom or scroll.
                     key = CurrentRenderKey();
 
-                    var next = new Bitmap(Math.Max(1, _DrawPanel.Width), Math.Max(1, _DrawPanel.Height));
-                    using (Graphics g = Graphics.FromImage(next))
+                    var next = new Majorsilence.Forms.Drawing.Bitmap(Math.Max(1, _DrawPanel.Width), Math.Max(1, _DrawPanel.Height));
+                    using (Majorsilence.Forms.Drawing.Graphics g = Majorsilence.Forms.Drawing.Graphics.FromImage(next))
                     {
                         await _DrawPanel.Draw(g, _zoom, _leftMargin, _pageGap,
                                 PointsX(_hScroll.Value), PointsY(_vScroll.Value),
@@ -1135,7 +1135,7 @@ namespace Majorsilence.Reporting.RdlViewer
             }
             catch (Exception ex)
             {   // don't want to kill process if we die
-                using (Font font = new Font("Arial", 8))
+                using (Majorsilence.Forms.Drawing.Font font = new Majorsilence.Forms.Drawing.Font("Arial", 8))
                     e.Graphics.DrawString(ex.Message + "\r\n" + ex.StackTrace, font, Brushes.Black, 0, 0);
             }
         }
@@ -1538,12 +1538,12 @@ namespace Majorsilence.Reporting.RdlViewer
 
         // EncryptionProvider.Prompt.ShowDialog is compiled only under `#if WINDOWS || NET48`
         // (a raw System.Windows.Forms.Form, never migrated) -- unavailable to this project's
-        // plain net8.0/net10.0 TFM. A small local replacement using Majorsilence.Forms directly,
+        // plain net8.0/net10.0 TFM. A small local replacement using System.Windows.Forms directly,
         // using the default CenterScreen StartPosition instead of Prompt's manual
         // Screen.FromControl/WorkingArea centering math.
         private static string PromptForPasskey(string text, string caption)
         {
-            using var prompt = new Majorsilence.Forms.Form
+            using var prompt = new System.Windows.Forms.Form
             {
                 // Form has no separate Width/Height ints, only a settable Size (see D1's
                 // MIGRATION-NOTES.md "Form is not a Control" gotcha).
@@ -1551,9 +1551,9 @@ namespace Majorsilence.Reporting.RdlViewer
                 FormBorderStyle = Majorsilence.Forms.FormBorderStyle.FixedDialog,
                 Text = caption,
             };
-            var textLabel = new Majorsilence.Forms.Label { Left = 50, Top = 20, Width = 400, Height = 60, Text = text };
-            var textBox = new Majorsilence.Forms.TextBox { Left = 50, Top = 100, Width = 400 };
-            var confirmation = new Majorsilence.Forms.Button { Text = "OK", Left = 350, Width = 100, Top = 120 };
+            var textLabel = new System.Windows.Forms.Label { Left = 50, Top = 20, Width = 400, Height = 60, Text = text };
+            var textBox = new System.Windows.Forms.TextBox { Left = 50, Top = 100, Width = 400 };
+            var confirmation = new System.Windows.Forms.Button { Text = "OK", Left = 350, Width = 100, Top = 120 };
             confirmation.Click += (sender, e) => { prompt.Close(); };
             prompt.Controls.Add(textBox);
             prompt.Controls.Add(confirmation);
@@ -1609,7 +1609,7 @@ namespace Majorsilence.Reporting.RdlViewer
             if (_pgs == null && !_loadingPages)
             {
                 _loadingPages = true;
-                Cursor savec = null;
+                Majorsilence.Forms.Cursor savec = null;
                 try
                 {
                     // 15052008 AJM - Updating Render notification window - This could be improved to show current action in the future
@@ -1656,14 +1656,14 @@ namespace Majorsilence.Reporting.RdlViewer
                 label.Location = new Point(10, yPos);
 
                 // Create a control
-                Control v;
+                Majorsilence.Forms.Control v;
                 int width = 90;
                 if (rp.DisplayValues == null)
                 {
                     TextBox tb = new TextBox();
                     v = tb;
                     // TextBox.PreferredHeight (an auto-size convenience property) doesn't exist
-                    // on Majorsilence.Forms.TextBox; use a typical single-line height instead.
+                    // on System.Windows.Forms.TextBox; use a typical single-line height instead.
                     tb.Height = 22;
                     tb.Validated += new System.EventHandler(ParametersTextValidated);
                 }
@@ -1763,7 +1763,7 @@ namespace Majorsilence.Reporting.RdlViewer
 
         private async void ParametersViewClick(object sender, System.EventArgs e)
         {
-            Cursor.Current = Cursors.WaitCursor;
+            Majorsilence.Forms.Cursor.Current = Cursors.WaitCursor;
             try
             {
                 _RunButton.Enabled = false;
@@ -1822,7 +1822,7 @@ namespace Majorsilence.Reporting.RdlViewer
             {
                 this.HideWaiter();
                 _RunButton.Enabled = true;
-                Cursor.Current = Cursors.Default;
+                Majorsilence.Forms.Cursor.Current = Cursors.Default;
 
                
             }
@@ -1967,7 +1967,7 @@ namespace Majorsilence.Reporting.RdlViewer
         private void DrawPanelMouseWheel(object sender, MouseEventArgs e)
         {
             int wvalue;
-            bool bCtrlOn = (Control.ModifierKeys & Keys.Control) == Keys.Control;
+            bool bCtrlOn = (Control.ModifierKeys & Majorsilence.Forms.Keys.Control) == Majorsilence.Forms.Keys.Control;
 
             if (bCtrlOn)
             {   // when ctrl key on and wheel rotated we zoom in or out
@@ -2166,7 +2166,7 @@ namespace Majorsilence.Reporting.RdlViewer
         private void _WarningButton_Paint(object sender, PaintEventArgs e)
         {
             int midPoint = _WarningButton.Width / 2;
-            Graphics g = e.Graphics;
+            Majorsilence.Forms.Drawing.Graphics g = e.Graphics;
 
             Point[] triangle = new Point[5];
             triangle[0] = triangle[4] = new Point(midPoint - 1, 0);

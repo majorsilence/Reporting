@@ -51,5 +51,6 @@
   <ItemGroup>
     <PackageReference Include="Majorsilence.Forms" />
     <PackageReference Include="Majorsilence.Forms.Avalonia" />
+    <PackageReference Include="Majorsilence.Forms.WinFormsShims.Compat" />
   </ItemGroup>
 </Project>

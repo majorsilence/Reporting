@@ -4,7 +4,7 @@ using System.Collections;
 using System.Collections.Specialized;
 using System.Collections.Generic;
 using System.IO;
-using Majorsilence.Forms;
+using System.Windows.Forms;
 using Majorsilence.Forms.Printing;
 using System.Text;
 using Majorsilence.Reporting.RdlViewer.Resources;
@@ -17,7 +17,7 @@ namespace Majorsilence.Reporting.RdlViewer
 	/// <summary>
 	/// RdlViewerFind finds text inside of the RdlViewer control
 	/// </summary>
-	public class RdlViewerFind : Majorsilence.Forms.UserControl
+	public class RdlViewerFind : System.Windows.Forms.UserControl
     {
         private Button bClose;
         private Button bFindNext;
@@ -45,16 +45,16 @@ namespace Majorsilence.Reporting.RdlViewer
 
         private void InitializeComponent()
         {
-			Majorsilence.Forms.ComponentResourceManager resources = new Majorsilence.Forms.ComponentResourceManager(typeof(RdlViewerFind));
+			System.Windows.Forms.ComponentResourceManager resources = new System.Windows.Forms.ComponentResourceManager(typeof(RdlViewerFind));
             this.DoubleBuffered = true;
-			this.bClose = new Majorsilence.Forms.Button();
-			this.tbFind = new Majorsilence.Forms.TextBox();
-			this.bFindNext = new Majorsilence.Forms.Button();
-			this.bFindPrevious = new Majorsilence.Forms.Button();
-			this.ckHighlightAll = new Majorsilence.Forms.CheckBox();
-			this.ckMatchCase = new Majorsilence.Forms.CheckBox();
-			this.lFind = new Majorsilence.Forms.Label();
-			this.lStatus = new Majorsilence.Forms.Label();
+			this.bClose = new System.Windows.Forms.Button();
+			this.tbFind = new System.Windows.Forms.TextBox();
+			this.bFindNext = new System.Windows.Forms.Button();
+			this.bFindPrevious = new System.Windows.Forms.Button();
+			this.ckHighlightAll = new System.Windows.Forms.CheckBox();
+			this.ckMatchCase = new System.Windows.Forms.CheckBox();
+			this.lFind = new System.Windows.Forms.Label();
+			this.lStatus = new System.Windows.Forms.Label();
 			this.SuspendLayout();
 			// 
 			// bClose
