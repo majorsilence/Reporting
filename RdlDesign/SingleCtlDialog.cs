@@ -3,7 +3,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
-using Majorsilence.Forms;
+using System.Windows.Forms;
 using System.Xml;
 using Majorsilence.Reporting.RdlDesign.Resources;
 
@@ -110,7 +110,7 @@ namespace Majorsilence.Reporting.RdlDesign
             int w = uc.Width;
             uc.Top = 0;
             uc.Left = 0;
-            uc.Dock = DockStyle.Fill;
+            uc.Dock = Majorsilence.Forms.DockStyle.Fill;
             uc.Parent = this.pMain;
             this.Height = h + (this.Height - pMain.Height);
             this.Width = w + (this.Width - pMain.Width);
@@ -168,12 +168,12 @@ namespace Majorsilence.Reporting.RdlDesign
             _DesignCtl.SignalReportChanged();
             _Draw.Invalidate();
 
-            this.DialogResult = DialogResult.OK;
+            this.DialogResult = Majorsilence.Forms.DialogResult.OK;
         }
 
         private void bCancel_Click(object sender, EventArgs e)
         {
-            this.DialogResult = DialogResult.Cancel;
+            this.DialogResult = Majorsilence.Forms.DialogResult.Cancel;
         }
 
 

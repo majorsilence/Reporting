@@ -1,41 +1,41 @@
 using System;
-using Majorsilence.Forms;
+using System.Windows.Forms;
 using System.ComponentModel;
 using System.Collections;
 
 namespace Majorsilence.Reporting.RdlDesign
 {
-    internal partial class DialogEmbeddedImages : Majorsilence.Forms.Form
+    internal partial class DialogEmbeddedImages : System.Windows.Forms.Form
 	{
 		#region Windows Form Designer generated code
 		DesignXmlDraw _Draw;
-private Majorsilence.Forms.Button bOK;
-private Majorsilence.Forms.Button bCancel;
-private Majorsilence.Forms.Button bRemove;
-private Majorsilence.Forms.Label label1;
-private Majorsilence.Forms.Label lDataProvider;
-private Majorsilence.Forms.ListBox lbImages;
-private Majorsilence.Forms.Button bImport;
-private Majorsilence.Forms.TextBox tbEIName;
-private Majorsilence.Forms.Button bPaste;
-private Majorsilence.Forms.PictureBox pictureImage;
-private Majorsilence.Forms.Label lbMIMEType;
+private System.Windows.Forms.Button bOK;
+private System.Windows.Forms.Button bCancel;
+private System.Windows.Forms.Button bRemove;
+private System.Windows.Forms.Label label1;
+private System.Windows.Forms.Label lDataProvider;
+private System.Windows.Forms.ListBox lbImages;
+private System.Windows.Forms.Button bImport;
+private System.Windows.Forms.TextBox tbEIName;
+private System.Windows.Forms.Button bPaste;
+private System.Windows.Forms.PictureBox pictureImage;
+private System.Windows.Forms.Label lbMIMEType;
 private System.ComponentModel.Container components = null;
 
 		private void InitializeComponent()
 		{
-			Majorsilence.Forms.ComponentResourceManager resources = new Majorsilence.Forms.ComponentResourceManager(typeof(DialogEmbeddedImages));
-			this.lDataProvider = new Majorsilence.Forms.Label();
-			this.bOK = new Majorsilence.Forms.Button();
-			this.bCancel = new Majorsilence.Forms.Button();
-			this.lbImages = new Majorsilence.Forms.ListBox();
-			this.bRemove = new Majorsilence.Forms.Button();
-			this.bImport = new Majorsilence.Forms.Button();
-			this.label1 = new Majorsilence.Forms.Label();
-			this.tbEIName = new Majorsilence.Forms.TextBox();
-			this.bPaste = new Majorsilence.Forms.Button();
-			this.lbMIMEType = new Majorsilence.Forms.Label();
-			this.pictureImage = new Majorsilence.Forms.PictureBox();
+			System.Windows.Forms.ComponentResourceManager resources = new System.Windows.Forms.ComponentResourceManager(typeof(DialogEmbeddedImages));
+			this.lDataProvider = new System.Windows.Forms.Label();
+			this.bOK = new System.Windows.Forms.Button();
+			this.bCancel = new System.Windows.Forms.Button();
+			this.lbImages = new System.Windows.Forms.ListBox();
+			this.bRemove = new System.Windows.Forms.Button();
+			this.bImport = new System.Windows.Forms.Button();
+			this.label1 = new System.Windows.Forms.Label();
+			this.tbEIName = new System.Windows.Forms.TextBox();
+			this.bPaste = new System.Windows.Forms.Button();
+			this.lbMIMEType = new System.Windows.Forms.Label();
+			this.pictureImage = new System.Windows.Forms.PictureBox();
 			((System.ComponentModel.ISupportInitialize)(this.pictureImage)).BeginInit();
 			this.SuspendLayout();
 			// 

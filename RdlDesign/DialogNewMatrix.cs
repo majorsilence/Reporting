@@ -1,10 +1,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System;
-using Majorsilence.Forms.Drawing;
+using System.Drawing;
 using System.Collections;
 using System.ComponentModel;
-using Majorsilence.Forms;
+using System.Windows.Forms;
 using System.Text;
 using System.Xml;
 using Majorsilence.Reporting.Rdl;
@@ -137,7 +137,7 @@ namespace Majorsilence.Reporting.RdlDesign
         private void bOK_Click(object sender, System.EventArgs e)
         {
             // apply the result
-            DialogResult = DialogResult.OK;
+            DialogResult = Majorsilence.Forms.DialogResult.OK;
         }
 
         private void cbDataSets_SelectedIndexChanged(object sender, System.EventArgs e)

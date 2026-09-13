@@ -4,9 +4,9 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
-using Majorsilence.Forms.Drawing;
+using System.Drawing;
 using System.Data;
-using Majorsilence.Forms;
+using System.Windows.Forms;
 using System.Xml;
 using Majorsilence.Reporting.Rdl;
 
@@ -15,7 +15,7 @@ namespace Majorsilence.Reporting.RdlDesign
 	/// <summary>
 	/// Summary description for ReportCtl.
 	/// </summary>
-	internal class PropertyCtl : Majorsilence.Forms.UserControl
+	internal class PropertyCtl : System.Windows.Forms.UserControl
 	{
 		private DesignXmlDraw _Draw;
         private DesignCtl _DesignCtl;
@@ -205,19 +205,19 @@ namespace Majorsilence.Reporting.RdlDesign
 		/// </summary>
 		private void InitializeComponent()
 		{
-			Majorsilence.Forms.ComponentResourceManager resources = new Majorsilence.Forms.ComponentResourceManager(typeof(PropertyCtl));
+			System.Windows.Forms.ComponentResourceManager resources = new System.Windows.Forms.ComponentResourceManager(typeof(PropertyCtl));
             this.DoubleBuffered = true;
-			this.label1 = new Majorsilence.Forms.Label();
-			this.pgSelected = new Majorsilence.Forms.PropertyGrid();
-			this.bClose = new Majorsilence.Forms.Button();
-			this.cbReportItems = new Majorsilence.Forms.ComboBox();
+			this.label1 = new System.Windows.Forms.Label();
+			this.pgSelected = new System.Windows.Forms.PropertyGrid();
+			this.bClose = new System.Windows.Forms.Button();
+			this.cbReportItems = new System.Windows.Forms.ComboBox();
 			this.SuspendLayout();
 			// 
 			// label1
 			// 
 			resources.ApplyResources(this.label1, "label1");
-			this.label1.BackColor = Majorsilence.Forms.SystemColors.Control;
-			this.label1.ForeColor = Majorsilence.Forms.SystemColors.InfoText;
+			this.label1.BackColor = System.Windows.Forms.SystemColors.Control;
+			this.label1.ForeColor = System.Windows.Forms.SystemColors.InfoText;
 			this.label1.Name = "label1";
 			// 
 			// pgSelected
@@ -258,7 +258,7 @@ namespace Majorsilence.Reporting.RdlDesign
         public event EventHandler HidePropertiesClicked = null;
         private void bClose_Click(object sender, EventArgs e)
         {
-            // Was: this.Parent as RdlDesigner -- Form isn't Control-derived in Majorsilence.Forms,
+            // Was: this.Parent as RdlDesigner -- Form isn't Control-derived in System.Windows.Forms,
             // so a Control's .Parent can never be one; FindForm() is the correct lookup here.
             RdlDesigner rd = this.FindForm() as RdlDesigner;
             if (rd == null)

@@ -2,7 +2,7 @@
 // Licensed under the Apache License, Version 2.0.
 //
 // Compatibility shim for fernandreu.ScintillaNET (the WinForms-only Scintilla code-editor
-// control), which has no equivalent in Majorsilence.Forms -- only a plain RichTextBox exists.
+// control), which has no equivalent in System.Windows.Forms -- only a plain RichTextBox exists.
 // This is a RichTextBox subclass exposing the subset of the real Scintilla API surface that
 // RdlDesign actually uses (see MIGRATION-NOTES.md's D4 catalogue), so the calling code
 // (RdlEditPreview.cs, DialogExprEditor.cs, DataSetsCtl.cs, Syntax/*.cs) keeps compiling with
@@ -17,11 +17,11 @@
 // D4 scope: text editing (Text, undo/redo, selection, search-in-target) is real, backed by the
 // underlying RichTextBox. Everything styling/lexer/margin/marker/indicator-related is a
 // documented no-op -- see D5 ("ScintillaCompat made real") for actually wiring up syntax
-// colorization via Majorsilence.Forms.RichTextBox's SelectionColor/SelectionFont per-span API.
+// colorization via System.Windows.Forms.RichTextBox's SelectionColor/SelectionFont per-span API.
 
 using System;
 using System.Collections.Generic;
-using Majorsilence.Forms;
+using System.Windows.Forms;
 
 namespace Majorsilence.Reporting.RdlDesign.Syntax
 {
@@ -222,7 +222,7 @@ namespace Majorsilence.Reporting.RdlDesign.Syntax
         // --- Real (D5): syntax coloring, driven through the same Styles[]/StyleNeeded/
         // SetStyling surface RdlScriptLexer.StyleText and ScintillaExprStyle already use -- only
         // these three members change from no-ops to actually recording what the lexer reports,
-        // which ComputeColorSpans (below) turns into Majorsilence.Forms.TextSpanStyle spans via
+        // which ComputeColorSpans (below) turns into System.Windows.Forms.TextSpanStyle spans via
         // the base RichTextBox/TextBox.Colorizer hook. RdlScriptLexer.cs and ScintillaExprStyle.cs
         // themselves are unchanged from the mechanical D4 migration.
         private int _stylingPos;
@@ -245,10 +245,10 @@ namespace Majorsilence.Reporting.RdlDesign.Syntax
 
         // Fires StyleNeeded (as real Scintilla does when it needs a range colored) covering the
         // whole document, then converts whatever SetStyling calls that triggered into
-        // TextSpanStyle spans using each style index's configured Styles[] entry. No-op (empty
+        // Majorsilence.Forms.TextSpanStyle spans using each style index's configured Styles[] entry. No-op (empty
         // result) when nothing is listening for StyleNeeded -- e.g. SQL/XML editors, which
         // configure a built-in lexer instead of a Container one and never call StyleText.
-        private IEnumerable<TextSpanStyle> ComputeColorSpans(string text)
+        private IEnumerable<Majorsilence.Forms.TextSpanStyle> ComputeColorSpans(string text)
         {
             // Full recolor each call (not incremental like real Scintilla) -- reset so
             // GetEndStyled() reports 0 and StyleText starts from the beginning of the document.
@@ -263,7 +263,7 @@ namespace Majorsilence.Reporting.RdlDesign.Syntax
 
                 var style = Styles[run.Style];
                 var color = style.ForeColor.IsEmpty ? System.Drawing.Color.Black : style.ForeColor;
-                yield return new TextSpanStyle(run.Start, run.Length,
+                yield return new Majorsilence.Forms.TextSpanStyle(run.Start, run.Length,
                     new SkiaSharp.SKColor(color.R, color.G, color.B, color.A),
                     style.Bold, style.Underline);
             }

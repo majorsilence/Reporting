@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;            // need this for the properties metadata
 using System.Globalization;
-using Majorsilence.Forms;
+using System.Windows.Forms;
 using Majorsilence.Forms.Design;
 
 namespace Majorsilence.Reporting.RdlDesign
@@ -213,7 +213,7 @@ namespace Majorsilence.Reporting.RdlDesign
             {
 
                 // Display the UI editor dialog
-                if (editorService.ShowDialog(scd) == DialogResult.OK)
+                if (editorService.ShowDialog(scd) == Majorsilence.Forms.DialogResult.OK)
                 {
                     // Return the new property value from the UI editor form
                     return new PropertyBackground(pre);

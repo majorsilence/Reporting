@@ -4,7 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
-using Majorsilence.Forms;
+using System.Windows.Forms;
 using System.Xml;
 
 namespace Majorsilence.Reporting.RdlDesign
@@ -12,7 +12,7 @@ namespace Majorsilence.Reporting.RdlDesign
 	/// <summary>
 	/// Summary description for ChartCtl.
 	/// </summary>
-	internal class ChartAxisCtl : Majorsilence.Forms.UserControl, IProperty
+	internal class ChartAxisCtl : System.Windows.Forms.UserControl, IProperty
 	{
         private List<XmlNode> _ReportItems;
 		private DesignXmlDraw _Draw;
@@ -23,47 +23,47 @@ namespace Majorsilence.Reporting.RdlDesign
 		bool fMajorInterval, fMinorInterval,fMax,fMin;
 		bool fMinorTickMarks,fScalar,fLogScale,fMajorGLShow, fMinorGLShow, fCanOmit;
 		
-		private Majorsilence.Forms.Label label1;
-		private Majorsilence.Forms.Label label2;
-        private Majorsilence.Forms.CheckBox chkMonth;
-		private Majorsilence.Forms.CheckBox chkVisible;
-		private Majorsilence.Forms.ComboBox cbMajorTickMarks;
-		private Majorsilence.Forms.CheckBox chkMargin;
-		private Majorsilence.Forms.CheckBox chkReverse;
-		private Majorsilence.Forms.CheckBox chkInterlaced;
-		private Majorsilence.Forms.GroupBox groupBox1;
-		private Majorsilence.Forms.TextBox tbMajorGLWidth;
-		private Majorsilence.Forms.Button bMajorGLColor;
-		private Majorsilence.Forms.ComboBox cbMajorGLColor;
-		private Majorsilence.Forms.ComboBox cbMajorGLStyle;
-		private Majorsilence.Forms.Label label7;
-		private Majorsilence.Forms.Label label6;
-		private Majorsilence.Forms.Label label3;
-		private Majorsilence.Forms.GroupBox groupBox2;
-		private Majorsilence.Forms.TextBox tbMinorGLWidth;
-		private Majorsilence.Forms.Button bMinorGLColor;
-		private Majorsilence.Forms.ComboBox cbMinorGLColor;
-		private Majorsilence.Forms.ComboBox cbMinorGLStyle;
-		private Majorsilence.Forms.Label label4;
-		private Majorsilence.Forms.Label label5;
-		private Majorsilence.Forms.Label label8;
-		private Majorsilence.Forms.Label label9;
-		private Majorsilence.Forms.TextBox tbMajorInterval;
-		private Majorsilence.Forms.TextBox tbMinorInterval;
-		private Majorsilence.Forms.Label label10;
-		private Majorsilence.Forms.TextBox tbMax;
-		private Majorsilence.Forms.Label label11;
-		private Majorsilence.Forms.TextBox tbMin;
-		private Majorsilence.Forms.Label label12;
-		private Majorsilence.Forms.ComboBox cbMinorTickMarks;
-		private Majorsilence.Forms.CheckBox chkScalar;
-		private Majorsilence.Forms.CheckBox chkLogScale;
-		private Majorsilence.Forms.CheckBox chkMajorGLShow;
-		private Majorsilence.Forms.CheckBox chkMinorGLShow;
-		private Majorsilence.Forms.Button bMinorIntervalExpr;
-		private Majorsilence.Forms.Button bMajorIntervalExpr;
-		private Majorsilence.Forms.Button bMinExpr;
-		private Majorsilence.Forms.Button bMaxExpr;
+		private System.Windows.Forms.Label label1;
+		private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.CheckBox chkMonth;
+		private System.Windows.Forms.CheckBox chkVisible;
+		private System.Windows.Forms.ComboBox cbMajorTickMarks;
+		private System.Windows.Forms.CheckBox chkMargin;
+		private System.Windows.Forms.CheckBox chkReverse;
+		private System.Windows.Forms.CheckBox chkInterlaced;
+		private System.Windows.Forms.GroupBox groupBox1;
+		private System.Windows.Forms.TextBox tbMajorGLWidth;
+		private System.Windows.Forms.Button bMajorGLColor;
+		private System.Windows.Forms.ComboBox cbMajorGLColor;
+		private System.Windows.Forms.ComboBox cbMajorGLStyle;
+		private System.Windows.Forms.Label label7;
+		private System.Windows.Forms.Label label6;
+		private System.Windows.Forms.Label label3;
+		private System.Windows.Forms.GroupBox groupBox2;
+		private System.Windows.Forms.TextBox tbMinorGLWidth;
+		private System.Windows.Forms.Button bMinorGLColor;
+		private System.Windows.Forms.ComboBox cbMinorGLColor;
+		private System.Windows.Forms.ComboBox cbMinorGLStyle;
+		private System.Windows.Forms.Label label4;
+		private System.Windows.Forms.Label label5;
+		private System.Windows.Forms.Label label8;
+		private System.Windows.Forms.Label label9;
+		private System.Windows.Forms.TextBox tbMajorInterval;
+		private System.Windows.Forms.TextBox tbMinorInterval;
+		private System.Windows.Forms.Label label10;
+		private System.Windows.Forms.TextBox tbMax;
+		private System.Windows.Forms.Label label11;
+		private System.Windows.Forms.TextBox tbMin;
+		private System.Windows.Forms.Label label12;
+		private System.Windows.Forms.ComboBox cbMinorTickMarks;
+		private System.Windows.Forms.CheckBox chkScalar;
+		private System.Windows.Forms.CheckBox chkLogScale;
+		private System.Windows.Forms.CheckBox chkMajorGLShow;
+		private System.Windows.Forms.CheckBox chkMinorGLShow;
+		private System.Windows.Forms.Button bMinorIntervalExpr;
+		private System.Windows.Forms.Button bMajorIntervalExpr;
+		private System.Windows.Forms.Button bMinExpr;
+		private System.Windows.Forms.Button bMaxExpr;
         private CheckBox chkCanOmit;
         
 		/// <summary> 
@@ -164,50 +164,50 @@ namespace Majorsilence.Reporting.RdlDesign
 		/// </summary>
 		private void InitializeComponent()
 		{
-			Majorsilence.Forms.ComponentResourceManager resources = new Majorsilence.Forms.ComponentResourceManager(typeof(ChartAxisCtl));
+			System.Windows.Forms.ComponentResourceManager resources = new System.Windows.Forms.ComponentResourceManager(typeof(ChartAxisCtl));
             this.DoubleBuffered = true;
-			this.label1 = new Majorsilence.Forms.Label();
-			this.label2 = new Majorsilence.Forms.Label();
-			this.cbMajorTickMarks = new Majorsilence.Forms.ComboBox();
-			this.cbMinorTickMarks = new Majorsilence.Forms.ComboBox();
-			this.chkVisible = new Majorsilence.Forms.CheckBox();
-			this.chkMargin = new Majorsilence.Forms.CheckBox();
-			this.chkReverse = new Majorsilence.Forms.CheckBox();
-			this.chkInterlaced = new Majorsilence.Forms.CheckBox();
-			this.chkScalar = new Majorsilence.Forms.CheckBox();
-			this.chkLogScale = new Majorsilence.Forms.CheckBox();
-			this.groupBox1 = new Majorsilence.Forms.GroupBox();
-			this.chkMajorGLShow = new Majorsilence.Forms.CheckBox();
-			this.tbMajorGLWidth = new Majorsilence.Forms.TextBox();
-			this.bMajorGLColor = new Majorsilence.Forms.Button();
-			this.cbMajorGLColor = new Majorsilence.Forms.ComboBox();
-			this.cbMajorGLStyle = new Majorsilence.Forms.ComboBox();
-			this.label7 = new Majorsilence.Forms.Label();
-			this.label6 = new Majorsilence.Forms.Label();
-			this.label3 = new Majorsilence.Forms.Label();
-			this.groupBox2 = new Majorsilence.Forms.GroupBox();
-			this.chkMinorGLShow = new Majorsilence.Forms.CheckBox();
-			this.tbMinorGLWidth = new Majorsilence.Forms.TextBox();
-			this.bMinorGLColor = new Majorsilence.Forms.Button();
-			this.cbMinorGLColor = new Majorsilence.Forms.ComboBox();
-			this.cbMinorGLStyle = new Majorsilence.Forms.ComboBox();
-			this.label4 = new Majorsilence.Forms.Label();
-			this.label5 = new Majorsilence.Forms.Label();
-			this.label8 = new Majorsilence.Forms.Label();
-			this.label9 = new Majorsilence.Forms.Label();
-			this.tbMajorInterval = new Majorsilence.Forms.TextBox();
-			this.tbMinorInterval = new Majorsilence.Forms.TextBox();
-			this.label10 = new Majorsilence.Forms.Label();
-			this.tbMax = new Majorsilence.Forms.TextBox();
-			this.label11 = new Majorsilence.Forms.Label();
-			this.tbMin = new Majorsilence.Forms.TextBox();
-			this.label12 = new Majorsilence.Forms.Label();
-			this.bMinorIntervalExpr = new Majorsilence.Forms.Button();
-			this.bMajorIntervalExpr = new Majorsilence.Forms.Button();
-			this.bMinExpr = new Majorsilence.Forms.Button();
-			this.bMaxExpr = new Majorsilence.Forms.Button();
-			this.chkCanOmit = new Majorsilence.Forms.CheckBox();
-			this.chkMonth = new Majorsilence.Forms.CheckBox();
+			this.label1 = new System.Windows.Forms.Label();
+			this.label2 = new System.Windows.Forms.Label();
+			this.cbMajorTickMarks = new System.Windows.Forms.ComboBox();
+			this.cbMinorTickMarks = new System.Windows.Forms.ComboBox();
+			this.chkVisible = new System.Windows.Forms.CheckBox();
+			this.chkMargin = new System.Windows.Forms.CheckBox();
+			this.chkReverse = new System.Windows.Forms.CheckBox();
+			this.chkInterlaced = new System.Windows.Forms.CheckBox();
+			this.chkScalar = new System.Windows.Forms.CheckBox();
+			this.chkLogScale = new System.Windows.Forms.CheckBox();
+			this.groupBox1 = new System.Windows.Forms.GroupBox();
+			this.chkMajorGLShow = new System.Windows.Forms.CheckBox();
+			this.tbMajorGLWidth = new System.Windows.Forms.TextBox();
+			this.bMajorGLColor = new System.Windows.Forms.Button();
+			this.cbMajorGLColor = new System.Windows.Forms.ComboBox();
+			this.cbMajorGLStyle = new System.Windows.Forms.ComboBox();
+			this.label7 = new System.Windows.Forms.Label();
+			this.label6 = new System.Windows.Forms.Label();
+			this.label3 = new System.Windows.Forms.Label();
+			this.groupBox2 = new System.Windows.Forms.GroupBox();
+			this.chkMinorGLShow = new System.Windows.Forms.CheckBox();
+			this.tbMinorGLWidth = new System.Windows.Forms.TextBox();
+			this.bMinorGLColor = new System.Windows.Forms.Button();
+			this.cbMinorGLColor = new System.Windows.Forms.ComboBox();
+			this.cbMinorGLStyle = new System.Windows.Forms.ComboBox();
+			this.label4 = new System.Windows.Forms.Label();
+			this.label5 = new System.Windows.Forms.Label();
+			this.label8 = new System.Windows.Forms.Label();
+			this.label9 = new System.Windows.Forms.Label();
+			this.tbMajorInterval = new System.Windows.Forms.TextBox();
+			this.tbMinorInterval = new System.Windows.Forms.TextBox();
+			this.label10 = new System.Windows.Forms.Label();
+			this.tbMax = new System.Windows.Forms.TextBox();
+			this.label11 = new System.Windows.Forms.Label();
+			this.tbMin = new System.Windows.Forms.TextBox();
+			this.label12 = new System.Windows.Forms.Label();
+			this.bMinorIntervalExpr = new System.Windows.Forms.Button();
+			this.bMajorIntervalExpr = new System.Windows.Forms.Button();
+			this.bMinExpr = new System.Windows.Forms.Button();
+			this.bMaxExpr = new System.Windows.Forms.Button();
+			this.chkCanOmit = new System.Windows.Forms.CheckBox();
+			this.chkMonth = new System.Windows.Forms.CheckBox();
 			this.groupBox1.SuspendLayout();
 			this.groupBox2.SuspendLayout();
 			this.SuspendLayout();
@@ -795,11 +795,11 @@ namespace Majorsilence.Reporting.RdlDesign
 
             try
             {
-                if (cd.ShowDialog() != DialogResult.OK)
+                if (cd.ShowDialog() != Majorsilence.Forms.DialogResult.OK)
                     return;
 
                 RdlDesigner.SetCustomColors(cd.CustomColors);
-                cbColor.Text = Majorsilence.Forms.ColorTranslator.ToHtml(cd.Color);
+                cbColor.Text = System.Windows.Forms.ColorTranslator.ToHtml(cd.Color);
             }
             finally
             {
@@ -813,7 +813,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			Button b = sender as Button;
 			if (b == null)
 				return;
-			Control c = null;
+			Majorsilence.Forms.Control c = null;
 			bool bColor=false;
 			switch (b.Tag as string)
 			{
@@ -839,8 +839,8 @@ namespace Majorsilence.Reporting.RdlDesign
 			DialogExprEditor ee = new DialogExprEditor(_Draw, c.Text, sNode, bColor);
             try
             {
-                DialogResult dr = ee.ShowDialog();
-                if (dr == DialogResult.OK)
+                Majorsilence.Forms.DialogResult dr = ee.ShowDialog();
+                if (dr == Majorsilence.Forms.DialogResult.OK)
                     c.Text = ee.Expression;
             }
             finally

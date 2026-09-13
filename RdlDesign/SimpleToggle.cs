@@ -2,9 +2,9 @@
 using System;
 using System.ComponentModel;
 using System.Drawing;
-using Majorsilence.Forms.Drawing;
+using System.Drawing;
 using Majorsilence.Forms.Drawing.Imaging;
-using Majorsilence.Forms;
+using System.Windows.Forms;
 
 
 namespace Majorsilence.Reporting.RdlDesign
@@ -18,7 +18,7 @@ namespace Majorsilence.Reporting.RdlDesign
 
 		public SimpleToggle() 
 		{	
-			this.Appearance = Appearance.Button; 
+			this.Appearance = Majorsilence.Forms.Appearance.Button; 
 
 			this.UpColor = Color.LightGray;
 			this.DownColor = Color.Azure;
@@ -31,17 +31,17 @@ namespace Majorsilence.Reporting.RdlDesign
 			this.MouseLeave += SimpleToggle_MouseLeave;
 		}
 
-		private void DrawPanelPaint(object sender, Majorsilence.Forms.PaintEventArgs e)
+		private void DrawPanelPaint(object sender, System.Windows.Forms.PaintEventArgs e)
 		{
 
-			Graphics g = e.Graphics;
-			Brush b = null;
+			Majorsilence.Forms.Drawing.Graphics g = e.Graphics;
+			Majorsilence.Forms.Drawing.Brush b = null;
 			Pen p = null;
 
 			try			// never want to die in here
 			{
 
-				b = new SolidBrush(this.BackColor);
+				b = new Majorsilence.Forms.Drawing.SolidBrush(this.BackColor);
 				g.FillRectangle(b, e.ClipRectangle);
 				if (this.Checked || bIn)
 				{
@@ -53,7 +53,7 @@ namespace Majorsilence.Reporting.RdlDesign
 					int y = (this.Height - this.Image.Height) / 2;
 
 					// ImageAttributes/SetColorKey (transparent-color-key drawing) has no
-					// Majorsilence.Forms equivalent -- see SimpleButton.cs for the same fix and
+					// System.Windows.Forms equivalent -- see SimpleButton.cs for the same fix and
 					// rationale. Draw the image directly; the _Transparency color-keying effect
 					// is a documented, dropped cosmetic feature.
 					g.DrawImage(this.Image, new Rectangle(x, y, this.Image.Width, this.Image.Height));

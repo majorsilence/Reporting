@@ -1,6 +1,6 @@
 using System;
 using System.ComponentModel;
-using Majorsilence.Forms;
+using System.Windows.Forms;
 
 namespace Majorsilence.Reporting.RdlDesign
 {
@@ -8,7 +8,7 @@ namespace Majorsilence.Reporting.RdlDesign
     public class ToolStripUserZoomControl : ToolStripControlHost
     {
         // Call the base constructor passing in a MonthCalendar instance.
-        // Majorsilence.Forms.ToolStripControlHost has no OnSubscribeControlEvents/
+        // System.Windows.Forms.ToolStripControlHost has no OnSubscribeControlEvents/
         // OnUnsubscribeControlEvents virtual hooks (or any Dispose override point at all --
         // ToolStripItem -> MenuItem : ILayoutable, not Component-derived), so subscribe directly
         // here instead of via that pattern. No matching unsubscribe: this control lives as long

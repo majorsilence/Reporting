@@ -2,7 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;            // need this for the properties metadata
-using Majorsilence.Forms;
+using System.Windows.Forms;
 using Majorsilence.Forms.Design;
 using System.Xml;
 
@@ -109,7 +109,7 @@ namespace Majorsilence.Reporting.RdlDesign
             using (SingleCtlDialog scd = new SingleCtlDialog(pr.DesignCtl, pr.Draw, pr.Nodes, SingleCtlTypeEnum.SubreportCtl, null))
             {
                 // Display the UI editor dialog
-                if (editorService.ShowDialog(scd) == DialogResult.OK)
+                if (editorService.ShowDialog(scd) == Majorsilence.Forms.DialogResult.OK)
                 {
                     // Return the new property value from the UI editor form
                     return pr.ReportName;
@@ -154,7 +154,7 @@ namespace Majorsilence.Reporting.RdlDesign
             using (SingleCtlDialog scd = new SingleCtlDialog(pr.DesignCtl, pr.Draw, pr.Nodes, SingleCtlTypeEnum.SubreportCtl, null))
             {
                 // Display the UI editor dialog
-                if (editorService.ShowDialog(scd) == DialogResult.OK)
+                if (editorService.ShowDialog(scd) == Majorsilence.Forms.DialogResult.OK)
                 {
                     // Return the new property value from the UI editor form
                     return pr.Parameters;

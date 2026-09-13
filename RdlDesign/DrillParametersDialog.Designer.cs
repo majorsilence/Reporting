@@ -1,32 +1,32 @@
 using System;
-using Majorsilence.Forms;
+using System.Windows.Forms;
 using System.ComponentModel;
 using System.Collections;
 
 namespace Majorsilence.Reporting.RdlDesign
 {
-    internal partial class DrillParametersDialog : Majorsilence.Forms.Form
+    internal partial class DrillParametersDialog : System.Windows.Forms.Form
 	{
 		#region Windows Form Designer generated code
-private Majorsilence.Forms.Label label1;
-private Majorsilence.Forms.Button bFile;
-private Majorsilence.Forms.TextBox tbReportFile;
-private Majorsilence.Forms.DataGridView dgParms;
-private Majorsilence.Forms.Button bRefreshParms;
-private Majorsilence.Forms.Button bOK;
-private Majorsilence.Forms.Button bCancel;
+private System.Windows.Forms.Label label1;
+private System.Windows.Forms.Button bFile;
+private System.Windows.Forms.TextBox tbReportFile;
+private System.Windows.Forms.DataGridView dgParms;
+private System.Windows.Forms.Button bRefreshParms;
+private System.Windows.Forms.Button bOK;
+private System.Windows.Forms.Button bCancel;
 private System.ComponentModel.Container components = null;
 
 		private void InitializeComponent()
 		{
-			Majorsilence.Forms.ComponentResourceManager resources = new Majorsilence.Forms.ComponentResourceManager(typeof(DrillParametersDialog));
-			this.dgParms = new Majorsilence.Forms.DataGridView();
-			this.label1 = new Majorsilence.Forms.Label();
-			this.tbReportFile = new Majorsilence.Forms.TextBox();
-			this.bFile = new Majorsilence.Forms.Button();
-			this.bRefreshParms = new Majorsilence.Forms.Button();
-			this.bOK = new Majorsilence.Forms.Button();
-			this.bCancel = new Majorsilence.Forms.Button();
+			System.Windows.Forms.ComponentResourceManager resources = new System.Windows.Forms.ComponentResourceManager(typeof(DrillParametersDialog));
+			this.dgParms = new System.Windows.Forms.DataGridView();
+			this.label1 = new System.Windows.Forms.Label();
+			this.tbReportFile = new System.Windows.Forms.TextBox();
+			this.bFile = new System.Windows.Forms.Button();
+			this.bRefreshParms = new System.Windows.Forms.Button();
+			this.bOK = new System.Windows.Forms.Button();
+			this.bCancel = new System.Windows.Forms.Button();
 			((System.ComponentModel.ISupportInitialize)(this.dgParms)).BeginInit();
 			this.SuspendLayout();
 			// 

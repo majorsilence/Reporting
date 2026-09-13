@@ -3,7 +3,7 @@ using System;
 using System.Collections;
 using System.ComponentModel;
 using System.Data;
-using Majorsilence.Forms;
+using System.Windows.Forms;
 using System.Xml;
 using System.Text;
 
@@ -12,18 +12,18 @@ namespace Majorsilence.Reporting.RdlDesign
 	/// <summary>
 	/// Sorting specification
 	/// </summary>
-	internal class SortingCtl : Majorsilence.Forms.UserControl, IProperty
+	internal class SortingCtl : System.Windows.Forms.UserControl, IProperty
 	{
 		private DesignXmlDraw _Draw;
 		private XmlNode _SortingParent;
 		private DataGridViewTextBoxColumn dgtbExpr;
 		private DataGridViewCheckBoxColumn dgtbDir;
 
-		private Majorsilence.Forms.Button bDelete;
-		private Majorsilence.Forms.Button bUp;
-		private Majorsilence.Forms.Button bDown;
-		private Majorsilence.Forms.DataGridView dgSorting;
-		private Majorsilence.Forms.Button bValueExpr;
+		private System.Windows.Forms.Button bDelete;
+		private System.Windows.Forms.Button bUp;
+		private System.Windows.Forms.Button bDown;
+		private System.Windows.Forms.DataGridView dgSorting;
+		private System.Windows.Forms.Button bValueExpr;
 		/// <summary> 
 		/// Required designer variable.
 		/// </summary>
@@ -106,12 +106,12 @@ namespace Majorsilence.Reporting.RdlDesign
 		/// </summary>
 		private void InitializeComponent()
 		{
-			Majorsilence.Forms.ComponentResourceManager resources = new Majorsilence.Forms.ComponentResourceManager(typeof(SortingCtl));
-			this.dgSorting = new Majorsilence.Forms.DataGridView();
-			this.bDelete = new Majorsilence.Forms.Button();
-			this.bUp = new Majorsilence.Forms.Button();
-			this.bDown = new Majorsilence.Forms.Button();
-			this.bValueExpr = new Majorsilence.Forms.Button();
+			System.Windows.Forms.ComponentResourceManager resources = new System.Windows.Forms.ComponentResourceManager(typeof(SortingCtl));
+			this.dgSorting = new System.Windows.Forms.DataGridView();
+			this.bDelete = new System.Windows.Forms.Button();
+			this.bUp = new System.Windows.Forms.Button();
+			this.bDown = new System.Windows.Forms.Button();
+			this.bValueExpr = new System.Windows.Forms.Button();
 			((System.ComponentModel.ISupportInitialize)(this.dgSorting)).BeginInit();
 			this.SuspendLayout();
 			// 
@@ -171,7 +171,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			XmlNode sorts = null;
 			_Draw.RemoveElement(_SortingParent, "Sorting");
 			// Loop thru and add all the filters
-			foreach (DataGridViewRow dr in dgSorting.Rows)
+			foreach (Majorsilence.Forms.DataGridViewRow dr in dgSorting.Rows)
 			{
                 string expr = dr.Cells[0].Value as string;
                 bool dir = dr.Cells[1].Value == null? true: (bool) dr.Cells[1].Value;
@@ -197,7 +197,7 @@ namespace Majorsilence.Reporting.RdlDesign
                 dgSorting.Rows.RemoveAt(this.dgSorting.CurrentRow.Index);
             else
             {   // just empty out the values
-                DataGridViewRow dgrv = dgSorting.Rows[this.dgSorting.CurrentRow.Index];
+                Majorsilence.Forms.DataGridViewRow dgrv = dgSorting.Rows[this.dgSorting.CurrentRow.Index];
                 dgrv.Cells[0].Value = null;
                 dgrv.Cells[1].Value = null;
             }
@@ -227,7 +227,7 @@ namespace Majorsilence.Reporting.RdlDesign
                 dgSorting.Rows[cr + 1].Cells[dgSorting.CurrentCell.ColumnIndex];
         }
 
-		private void SwapRow(DataGridViewRow tdr, DataGridViewRow fdr)
+		private void SwapRow(Majorsilence.Forms.DataGridViewRow tdr, Majorsilence.Forms.DataGridViewRow fdr)
 		{
             // column 1
             object save = tdr.Cells[0].Value;
@@ -245,7 +245,7 @@ namespace Majorsilence.Reporting.RdlDesign
             if (dgSorting.CurrentCell == null)
                 dgSorting.Rows.Add("",true);
 
-            DataGridViewCell dgc = dgSorting.CurrentCell;
+            Majorsilence.Forms.DataGridViewCell dgc = dgSorting.CurrentCell;
             int cc = dgc.ColumnIndex;
 
             // >>>>>>>>>> 
@@ -257,8 +257,8 @@ namespace Majorsilence.Reporting.RdlDesign
 
             using (DialogExprEditor ee = new DialogExprEditor(_Draw, cv, _SortingParent, false))
             {
-                DialogResult dlgr = ee.ShowDialog();
-                if (dlgr == DialogResult.OK)
+                Majorsilence.Forms.DialogResult dlgr = ee.ShowDialog();
+                if (dlgr == Majorsilence.Forms.DialogResult.OK)
                     dgc.Value = ee.Expression;
             }
 		}

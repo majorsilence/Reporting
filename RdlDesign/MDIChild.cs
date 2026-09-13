@@ -3,7 +3,7 @@ using System;
 using System.Drawing;
 using System.Collections;
 using System.ComponentModel;
-using Majorsilence.Forms;
+using System.Windows.Forms;
 using System.Data;
 using Majorsilence.Forms.Printing;
 using System.IO;
@@ -174,7 +174,7 @@ namespace Majorsilence.Reporting.RdlDesign
             Uri file = SourceFile;
             if (file == null || file.LocalPath == "")		// if no file name then do SaveAs
             {
-                // FileSaveAs is async (FileDialog.ShowDialog(Form) is async in Majorsilence.Forms
+                // FileSaveAs is async (FileDialog.ShowDialog(Form) is async in System.Windows.Forms
                 // -- see MIGRATION-NOTES.md), but FileSave() itself has many synchronous callers
                 // up through OkToClose()/MDIChild_Closing that aren't worth threading async
                 // through. Sync-over-async bridge, matching the same pattern already used
@@ -189,20 +189,20 @@ namespace Majorsilence.Reporting.RdlDesign
         // EncryptionProvider.Prompt.ShowDialog is compiled only under `#if WINDOWS || NET48`
         // (a raw System.Windows.Forms.Form, never migrated) -- unavailable to this project's
         // plain net8.0/net10.0 TFM. Same replacement as RdlViewer.Forms/RdlViewer.cs's
-        // PromptForPasskey: a small local dialog built directly on Majorsilence.Forms, using the
+        // PromptForPasskey: a small local dialog built directly on System.Windows.Forms, using the
         // default CenterScreen StartPosition instead of Prompt's manual Screen.FromControl/
         // WorkingArea centering math.
         private static string PromptForPasskey(string text, string caption)
         {
-            using var prompt = new Majorsilence.Forms.Form
+            using var prompt = new System.Windows.Forms.Form
             {
                 Size = new System.Drawing.Size(500, 200),
                 FormBorderStyle = Majorsilence.Forms.FormBorderStyle.FixedDialog,
                 Text = caption,
             };
-            var textLabel = new Majorsilence.Forms.Label { Left = 50, Top = 20, Width = 400, Height = 60, Text = text };
-            var textBox = new Majorsilence.Forms.TextBox { Left = 50, Top = 100, Width = 400 };
-            var confirmation = new Majorsilence.Forms.Button { Text = "OK", Left = 350, Width = 100, Top = 120 };
+            var textLabel = new System.Windows.Forms.Label { Left = 50, Top = 20, Width = 400, Height = 60, Text = text };
+            var textBox = new System.Windows.Forms.TextBox { Left = 50, Top = 100, Width = 400 };
+            var confirmation = new System.Windows.Forms.Button { Text = "OK", Left = 350, Width = 100, Top = 120 };
             confirmation.Click += (sender, e) => { prompt.Close(); };
             prompt.Controls.Add(textBox);
             prompt.Controls.Add(confirmation);
@@ -224,7 +224,7 @@ namespace Majorsilence.Reporting.RdlDesign
                 }
                 catch (Exception)
                 {
-                    MessageBox.Show(Properties.Resources.MDIChild_doPossibleEncryption_Unable_to_encrypt_file_);
+                    Majorsilence.Forms.MessageBox.Show(Properties.Resources.MDIChild_doPossibleEncryption_Unable_to_encrypt_file_);
                 }
                 
             }
@@ -250,7 +250,7 @@ namespace Majorsilence.Reporting.RdlDesign
             catch (Exception ae)
             {
                 bOK = false;
-                MessageBox.Show(ae.Message + "\r\n" + ae.StackTrace);
+                Majorsilence.Forms.MessageBox.Show(ae.Message + "\r\n" + ae.StackTrace);
                 //				statusBar.Text = "Save of file '" + curFileName + "' failed";
             }
             if (bOK)
@@ -309,7 +309,7 @@ namespace Majorsilence.Reporting.RdlDesign
 
             try
             {
-                if (await sfd.ShowDialogAsync(this) != DialogResult.OK)
+                if (await sfd.ShowDialogAsync(this) != Majorsilence.Forms.DialogResult.OK)
                     return false;
 
                 // save the report in the requested rendered format 
@@ -317,18 +317,18 @@ namespace Majorsilence.Reporting.RdlDesign
                 // tif can be either in color or black and white; ask user what they want
                 if (type == OutputPresentationType.TIF)
                 {
-                    DialogResult dr = MessageBox.Show(this, Strings.MDIChild_ShowF_WantDisplayColorsInTIF, Strings.MDIChild_ShowF_Export, MessageBoxButtons.YesNoCancel);
-                    if (dr == DialogResult.No)
+                    Majorsilence.Forms.DialogResult dr = Majorsilence.Forms.MessageBox.Show(this, Strings.MDIChild_ShowF_WantDisplayColorsInTIF, Strings.MDIChild_ShowF_Export, Majorsilence.Forms.MessageBoxButtons.YesNoCancel);
+                    if (dr == Majorsilence.Forms.DialogResult.No)
                         type = OutputPresentationType.TIFBW;
-                    else if (dr == DialogResult.Cancel)
+                    else if (dr == Majorsilence.Forms.DialogResult.Cancel)
                         return false;
                 }
                 try { await SaveAs(sfd.FileName, type); }
                 catch (Exception ex)
                 {
-                    MessageBox.Show(this,
+                    Majorsilence.Forms.MessageBox.Show(this,
                         ex.Message, Strings.MDIChild_ShowG_ExportError,
-                        MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        Majorsilence.Forms.MessageBoxButtons.OK, Majorsilence.Forms.MessageBoxIcon.Error);
                     rc = false;
                 }
                 return rc;
@@ -350,7 +350,7 @@ namespace Majorsilence.Reporting.RdlDesign
             sfd.FileName = file == null ? "*.rdl" : file.LocalPath;
             try
             {
-                if (await sfd.ShowDialogAsync(this) != DialogResult.OK)
+                if (await sfd.ShowDialogAsync(this) != Majorsilence.Forms.DialogResult.OK)
                     return false;
 
                 // User wants to save!
@@ -425,7 +425,7 @@ namespace Majorsilence.Reporting.RdlDesign
                 }
                 catch (Exception)
                 {
-                    MessageBox.Show(Properties.Resources.MDIChild_doPossibleDecryption_Incorrect_passkey_entered_);
+                    Majorsilence.Forms.MessageBox.Show(Properties.Resources.MDIChild_doPossibleDecryption_Incorrect_passkey_entered_);
                 }
             }
 
@@ -565,7 +565,7 @@ namespace Majorsilence.Reporting.RdlDesign
             if (Tab == null)
                 return;
 
-            Control ctl = Tab.Parent;
+            Majorsilence.Forms.Control ctl = Tab.Parent;
             ctl.Controls.Remove(Tab);
             Tab.Tag = null;             // this is the Tab reference to this
             Tab = null;
@@ -576,17 +576,17 @@ namespace Majorsilence.Reporting.RdlDesign
             if (!Modified)
                 return true;
 
-            DialogResult r =
-                    MessageBox.Show(this, String.Format(Strings.MDIChild_ShowH_WantSaveChanges,
+            Majorsilence.Forms.DialogResult r =
+                    Majorsilence.Forms.MessageBox.Show(this, String.Format(Strings.MDIChild_ShowH_WantSaveChanges,
                     _SourceFile == null ? Strings.MDIChild_ShowH_Untitled : Path.GetFileName(_SourceFile.LocalPath)),
                     Strings.MDIChild_ShowH_fyiReportingDesigner,
-                    MessageBoxButtons.YesNoCancel,
-                    MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button3);
+                    Majorsilence.Forms.MessageBoxButtons.YesNoCancel,
+                    Majorsilence.Forms.MessageBoxIcon.Exclamation, Majorsilence.Forms.MessageBoxDefaultButton.Button3);
 
             bool bOK = true;
-            if (r == DialogResult.Cancel)
+            if (r == Majorsilence.Forms.DialogResult.Cancel)
                 bOK = false;
-            else if (r == DialogResult.Yes)
+            else if (r == Majorsilence.Forms.DialogResult.Yes)
             {
                 if (!FileSave())
                     bOK = false;

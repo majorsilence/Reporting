@@ -7,7 +7,7 @@
 // no longer sets. RdlProperties/*.cs (PropertyBorder, PropertyFilters, PropertyGrouping, etc.)
 // use `[Editor(typeof(XyzUIEditor), typeof(UITypeEditor))]` attributes with custom UITypeEditor
 // subclasses to show a "..." button in the PropertyGrid that opens a modal sub-editor.
-// Majorsilence.Forms.PropertyGrid has no support for Editor attributes at all (confirmed: no
+// System.Windows.Forms.PropertyGrid has no support for Editor attributes at all (confirmed: no
 // UITypeEditor/EditorAttribute handling in its source), so these custom editors won't actually be
 // invocable through the grid regardless -- this is a real, documented gap for D6 (Designer
 // parity) to address, not something this stub fixes. This stub exists purely so the *attributes*
@@ -36,19 +36,19 @@ namespace System.Drawing.Design
 namespace Majorsilence.Forms.Design
 {
     // Real IWindowsFormsEditorService shows a dropdown/modal editor UI hosted by the PropertyGrid.
-    // Majorsilence.Forms.PropertyGrid never requests this service (no Editor-attribute support),
+    // System.Windows.Forms.PropertyGrid never requests this service (no Editor-attribute support),
     // so no implementation is ever actually handed to EditValue's `provider` -- callers already
     // null-check `provider.GetService(typeof(IWindowsFormsEditorService))` and fall back to
     // `base.EditValue(...)`, so this interface only needs to exist for the cast to compile.
     //
     // Namespaced as Majorsilence.Forms.Design (not System.Windows.Forms.Design) because the
-    // migrator's built-in System.Windows.Forms -> Majorsilence.Forms prefix rule already rewrote
+    // migrator's built-in System.Windows.Forms -> System.Windows.Forms prefix rule already rewrote
     // every `using System.Windows.Forms.Design;` to `using Majorsilence.Forms.Design;` in the
     // source files -- this stub has to live where the rewritten code actually looks for it.
     public interface IWindowsFormsEditorService
     {
-        void DropDownControl(Majorsilence.Forms.Control control);
-        Majorsilence.Forms.DialogResult ShowDialog(Majorsilence.Forms.Form dialog);
+        void DropDownControl(System.Windows.Forms.Control control);
+        Majorsilence.Forms.DialogResult ShowDialog(System.Windows.Forms.Form dialog);
         void CloseDropDown();
     }
 }

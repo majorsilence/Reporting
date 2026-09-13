@@ -29,13 +29,13 @@ namespace Majorsilence.Reporting.RdlDesign
 		/// </summary>
 		private void InitializeComponent()
 		{
-            Majorsilence.Forms.ComponentResourceManager resources = new Majorsilence.Forms.ComponentResourceManager(typeof(QueryParametersCtl));
+            System.Windows.Forms.ComponentResourceManager resources = new System.Windows.Forms.ComponentResourceManager(typeof(QueryParametersCtl));
             this.DoubleBuffered = true;
-            this.dgParms = new Majorsilence.Forms.DataGridView();
-            this.dgtbName = new Majorsilence.Forms.DataGridViewTextBoxColumn();
-            this.dgtbValue = new Majorsilence.Forms.DataGridViewTextBoxColumn();
-            this.bValueExpr = new Majorsilence.Forms.Button();
-            this.bDelete = new Majorsilence.Forms.Button();
+            this.dgParms = new System.Windows.Forms.DataGridView();
+            this.dgtbName = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.dgtbValue = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.bValueExpr = new System.Windows.Forms.Button();
+            this.bDelete = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.dgParms)).BeginInit();
             this.SuspendLayout();
             // 
@@ -86,10 +86,10 @@ namespace Majorsilence.Reporting.RdlDesign
 		}
 		#endregion
 				
-		private Majorsilence.Forms.DataGridView dgParms;
-		private Majorsilence.Forms.DataGridViewTextBoxColumn dgtbName;
-		private Majorsilence.Forms.DataGridViewTextBoxColumn dgtbValue;
-        private Majorsilence.Forms.Button bValueExpr;
-        private Majorsilence.Forms.Button bDelete;
+		private System.Windows.Forms.DataGridView dgParms;
+		private System.Windows.Forms.DataGridViewTextBoxColumn dgtbName;
+		private System.Windows.Forms.DataGridViewTextBoxColumn dgtbValue;
+        private System.Windows.Forms.Button bValueExpr;
+        private System.Windows.Forms.Button bDelete;
     }
 }

@@ -7,7 +7,7 @@ using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
-using Majorsilence.Forms;
+using System.Windows.Forms;
 
 namespace Majorsilence.Reporting.RdlDesign
 {

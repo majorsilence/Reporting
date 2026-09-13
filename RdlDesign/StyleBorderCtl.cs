@@ -4,7 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
-using Majorsilence.Forms;
+using System.Windows.Forms;
 using System.Xml;
 using System.Globalization;
 using Majorsilence.Reporting.RdlDesign.Resources;
@@ -14,7 +14,7 @@ namespace Majorsilence.Reporting.RdlDesign
 	/// <summary>
 	/// Summary description for StyleCtl.
 	/// </summary>
-	internal class StyleBorderCtl : Majorsilence.Forms.UserControl, IProperty
+	internal class StyleBorderCtl : System.Windows.Forms.UserControl, IProperty
 	{
         private List<XmlNode> _ReportItems;
 		private DesignXmlDraw _Draw;
@@ -22,49 +22,49 @@ namespace Majorsilence.Reporting.RdlDesign
 		private bool fStyleDefault, fStyleLeft, fStyleRight, fStyleTop, fStyleBottom;
 		private bool fColorDefault, fColorLeft, fColorRight, fColorTop, fColorBottom;
 		private bool fWidthDefault, fWidthLeft, fWidthRight, fWidthTop, fWidthBottom;
-		private Majorsilence.Forms.Label label2;
-		private Majorsilence.Forms.Label label6;
-		private Majorsilence.Forms.Label label7;
-		private Majorsilence.Forms.ComboBox cbStyleLeft;
-		private Majorsilence.Forms.Label label8;
-		private Majorsilence.Forms.ComboBox cbStyleBottom;
-		private Majorsilence.Forms.ComboBox cbStyleTop;
-		private Majorsilence.Forms.ComboBox cbStyleRight;
-		private Majorsilence.Forms.Button bColorLeft;
-		private Majorsilence.Forms.ComboBox cbColorLeft;
-		private Majorsilence.Forms.Button bColorRight;
-		private Majorsilence.Forms.ComboBox cbColorRight;
-		private Majorsilence.Forms.Button bColorTop;
-		private Majorsilence.Forms.ComboBox cbColorTop;
-		private Majorsilence.Forms.Button bColorBottom;
-		private Majorsilence.Forms.ComboBox cbColorBottom;
-		private Majorsilence.Forms.TextBox tbWidthLeft;
-		private Majorsilence.Forms.TextBox tbWidthRight;
-		private Majorsilence.Forms.TextBox tbWidthTop;
-		private Majorsilence.Forms.TextBox tbWidthBottom;
-		private Majorsilence.Forms.TextBox tbWidthDefault;
-		private Majorsilence.Forms.Button bColorDefault;
-		private Majorsilence.Forms.ComboBox cbColorDefault;
-		private Majorsilence.Forms.ComboBox cbStyleDefault;
-		private Majorsilence.Forms.Label lLeft;
-		private Majorsilence.Forms.Label lBottom;
-		private Majorsilence.Forms.Label lTop;
-		private Majorsilence.Forms.Label lRight;
-		private Majorsilence.Forms.Button bSD;
-		private Majorsilence.Forms.Button bSL;
-		private Majorsilence.Forms.Button bSR;
-		private Majorsilence.Forms.Button bST;
-		private Majorsilence.Forms.Button bSB;
-		private Majorsilence.Forms.Button bCD;
-		private Majorsilence.Forms.Button bCT;
-		private Majorsilence.Forms.Button bCB;
-		private Majorsilence.Forms.Button bWB;
-		private Majorsilence.Forms.Button bWT;
-		private Majorsilence.Forms.Button bWR;
-		private Majorsilence.Forms.Button bCR;
-		private Majorsilence.Forms.Button bWL;
-		private Majorsilence.Forms.Button bWD;
-		private Majorsilence.Forms.Button bCL;
+		private System.Windows.Forms.Label label2;
+		private System.Windows.Forms.Label label6;
+		private System.Windows.Forms.Label label7;
+		private System.Windows.Forms.ComboBox cbStyleLeft;
+		private System.Windows.Forms.Label label8;
+		private System.Windows.Forms.ComboBox cbStyleBottom;
+		private System.Windows.Forms.ComboBox cbStyleTop;
+		private System.Windows.Forms.ComboBox cbStyleRight;
+		private System.Windows.Forms.Button bColorLeft;
+		private System.Windows.Forms.ComboBox cbColorLeft;
+		private System.Windows.Forms.Button bColorRight;
+		private System.Windows.Forms.ComboBox cbColorRight;
+		private System.Windows.Forms.Button bColorTop;
+		private System.Windows.Forms.ComboBox cbColorTop;
+		private System.Windows.Forms.Button bColorBottom;
+		private System.Windows.Forms.ComboBox cbColorBottom;
+		private System.Windows.Forms.TextBox tbWidthLeft;
+		private System.Windows.Forms.TextBox tbWidthRight;
+		private System.Windows.Forms.TextBox tbWidthTop;
+		private System.Windows.Forms.TextBox tbWidthBottom;
+		private System.Windows.Forms.TextBox tbWidthDefault;
+		private System.Windows.Forms.Button bColorDefault;
+		private System.Windows.Forms.ComboBox cbColorDefault;
+		private System.Windows.Forms.ComboBox cbStyleDefault;
+		private System.Windows.Forms.Label lLeft;
+		private System.Windows.Forms.Label lBottom;
+		private System.Windows.Forms.Label lTop;
+		private System.Windows.Forms.Label lRight;
+		private System.Windows.Forms.Button bSD;
+		private System.Windows.Forms.Button bSL;
+		private System.Windows.Forms.Button bSR;
+		private System.Windows.Forms.Button bST;
+		private System.Windows.Forms.Button bSB;
+		private System.Windows.Forms.Button bCD;
+		private System.Windows.Forms.Button bCT;
+		private System.Windows.Forms.Button bCB;
+		private System.Windows.Forms.Button bWB;
+		private System.Windows.Forms.Button bWT;
+		private System.Windows.Forms.Button bWR;
+		private System.Windows.Forms.Button bCR;
+		private System.Windows.Forms.Button bWL;
+		private System.Windows.Forms.Button bWD;
+		private System.Windows.Forms.Button bCL;
 		/// <summary> 
 		/// Required designer variable.
 		/// </summary>
@@ -98,7 +98,7 @@ namespace Majorsilence.Reporting.RdlDesign
 
             XmlNode sNode = _Draw.GetCreateNamedChildNode(node, "Style");
 
-			// Handle BorderStyle
+			// Handle Majorsilence.Forms.BorderStyle
 			XmlNode bsNode = _Draw.SetElement(sNode, "BorderStyle", null);
 			cbStyleDefault.Text = _Draw.GetElementValue(bsNode, "Default", "None");
 			cbStyleLeft.Text = _Draw.GetElementValue(bsNode, "Left", cbStyleDefault.Text);
@@ -176,50 +176,50 @@ namespace Majorsilence.Reporting.RdlDesign
 		/// </summary>
 		private void InitializeComponent()
 		{
-			Majorsilence.Forms.ComponentResourceManager resources = new Majorsilence.Forms.ComponentResourceManager(typeof(StyleBorderCtl));
-			this.lLeft = new Majorsilence.Forms.Label();
-			this.lBottom = new Majorsilence.Forms.Label();
-			this.lTop = new Majorsilence.Forms.Label();
-			this.lRight = new Majorsilence.Forms.Label();
-			this.label2 = new Majorsilence.Forms.Label();
-			this.label6 = new Majorsilence.Forms.Label();
-			this.label7 = new Majorsilence.Forms.Label();
-			this.cbStyleLeft = new Majorsilence.Forms.ComboBox();
-			this.cbStyleBottom = new Majorsilence.Forms.ComboBox();
-			this.cbStyleTop = new Majorsilence.Forms.ComboBox();
-			this.cbStyleRight = new Majorsilence.Forms.ComboBox();
-			this.bColorLeft = new Majorsilence.Forms.Button();
-			this.cbColorLeft = new Majorsilence.Forms.ComboBox();
-			this.bColorRight = new Majorsilence.Forms.Button();
-			this.cbColorRight = new Majorsilence.Forms.ComboBox();
-			this.bColorTop = new Majorsilence.Forms.Button();
-			this.cbColorTop = new Majorsilence.Forms.ComboBox();
-			this.bColorBottom = new Majorsilence.Forms.Button();
-			this.cbColorBottom = new Majorsilence.Forms.ComboBox();
-			this.tbWidthLeft = new Majorsilence.Forms.TextBox();
-			this.tbWidthRight = new Majorsilence.Forms.TextBox();
-			this.tbWidthTop = new Majorsilence.Forms.TextBox();
-			this.tbWidthBottom = new Majorsilence.Forms.TextBox();
-			this.tbWidthDefault = new Majorsilence.Forms.TextBox();
-			this.bColorDefault = new Majorsilence.Forms.Button();
-			this.cbColorDefault = new Majorsilence.Forms.ComboBox();
-			this.cbStyleDefault = new Majorsilence.Forms.ComboBox();
-			this.label8 = new Majorsilence.Forms.Label();
-			this.bSD = new Majorsilence.Forms.Button();
-			this.bSL = new Majorsilence.Forms.Button();
-			this.bSR = new Majorsilence.Forms.Button();
-			this.bST = new Majorsilence.Forms.Button();
-			this.bSB = new Majorsilence.Forms.Button();
-			this.bCD = new Majorsilence.Forms.Button();
-			this.bCT = new Majorsilence.Forms.Button();
-			this.bCB = new Majorsilence.Forms.Button();
-			this.bWB = new Majorsilence.Forms.Button();
-			this.bWT = new Majorsilence.Forms.Button();
-			this.bWR = new Majorsilence.Forms.Button();
-			this.bCR = new Majorsilence.Forms.Button();
-			this.bWL = new Majorsilence.Forms.Button();
-			this.bWD = new Majorsilence.Forms.Button();
-			this.bCL = new Majorsilence.Forms.Button();
+			System.Windows.Forms.ComponentResourceManager resources = new System.Windows.Forms.ComponentResourceManager(typeof(StyleBorderCtl));
+			this.lLeft = new System.Windows.Forms.Label();
+			this.lBottom = new System.Windows.Forms.Label();
+			this.lTop = new System.Windows.Forms.Label();
+			this.lRight = new System.Windows.Forms.Label();
+			this.label2 = new System.Windows.Forms.Label();
+			this.label6 = new System.Windows.Forms.Label();
+			this.label7 = new System.Windows.Forms.Label();
+			this.cbStyleLeft = new System.Windows.Forms.ComboBox();
+			this.cbStyleBottom = new System.Windows.Forms.ComboBox();
+			this.cbStyleTop = new System.Windows.Forms.ComboBox();
+			this.cbStyleRight = new System.Windows.Forms.ComboBox();
+			this.bColorLeft = new System.Windows.Forms.Button();
+			this.cbColorLeft = new System.Windows.Forms.ComboBox();
+			this.bColorRight = new System.Windows.Forms.Button();
+			this.cbColorRight = new System.Windows.Forms.ComboBox();
+			this.bColorTop = new System.Windows.Forms.Button();
+			this.cbColorTop = new System.Windows.Forms.ComboBox();
+			this.bColorBottom = new System.Windows.Forms.Button();
+			this.cbColorBottom = new System.Windows.Forms.ComboBox();
+			this.tbWidthLeft = new System.Windows.Forms.TextBox();
+			this.tbWidthRight = new System.Windows.Forms.TextBox();
+			this.tbWidthTop = new System.Windows.Forms.TextBox();
+			this.tbWidthBottom = new System.Windows.Forms.TextBox();
+			this.tbWidthDefault = new System.Windows.Forms.TextBox();
+			this.bColorDefault = new System.Windows.Forms.Button();
+			this.cbColorDefault = new System.Windows.Forms.ComboBox();
+			this.cbStyleDefault = new System.Windows.Forms.ComboBox();
+			this.label8 = new System.Windows.Forms.Label();
+			this.bSD = new System.Windows.Forms.Button();
+			this.bSL = new System.Windows.Forms.Button();
+			this.bSR = new System.Windows.Forms.Button();
+			this.bST = new System.Windows.Forms.Button();
+			this.bSB = new System.Windows.Forms.Button();
+			this.bCD = new System.Windows.Forms.Button();
+			this.bCT = new System.Windows.Forms.Button();
+			this.bCB = new System.Windows.Forms.Button();
+			this.bWB = new System.Windows.Forms.Button();
+			this.bWT = new System.Windows.Forms.Button();
+			this.bWR = new System.Windows.Forms.Button();
+			this.bCR = new System.Windows.Forms.Button();
+			this.bWL = new System.Windows.Forms.Button();
+			this.bWD = new System.Windows.Forms.Button();
+			this.bCL = new System.Windows.Forms.Button();
 			this.SuspendLayout();
 			// 
 			// lLeft
@@ -628,7 +628,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			}
 			catch (Exception ex)
 			{
-				MessageBox.Show(ex.Message, name + " " + Strings.StyleBorderCtl_Show_SizeInvalid);
+				Majorsilence.Forms.MessageBox.Show(ex.Message, name + " " + Strings.StyleBorderCtl_Show_SizeInvalid);
 				return false;
 			}
 
@@ -660,7 +660,7 @@ namespace Majorsilence.Reporting.RdlDesign
             bool bLine = xNode.Name == "Line";
 			XmlNode sNode = _Draw.GetCreateNamedChildNode(xNode, "Style");
 
-			// Handle BorderStyle
+			// Handle Majorsilence.Forms.BorderStyle
 			XmlNode bsNode = _Draw.SetElement(sNode, "BorderStyle", null);
 			if (fStyleDefault)
 				_Draw.SetElement(bsNode, "Default", cbStyleDefault.Text);
@@ -725,26 +725,26 @@ namespace Majorsilence.Reporting.RdlDesign
 
                 cd.CustomColors = RdlDesigner.GetCustomColors();
 
-                if (cd.ShowDialog() != DialogResult.OK)
+                if (cd.ShowDialog() != Majorsilence.Forms.DialogResult.OK)
                     return;
 
                 RdlDesigner.SetCustomColors(cd.CustomColors);
                 if (sender == this.bColorDefault)
                 {
-                    cbColorDefault.Text = Majorsilence.Forms.ColorTranslator.ToHtml(cd.Color);
-                    cbColorLeft.Text = Majorsilence.Forms.ColorTranslator.ToHtml(cd.Color);
-                    cbColorRight.Text = Majorsilence.Forms.ColorTranslator.ToHtml(cd.Color);
-                    cbColorTop.Text = Majorsilence.Forms.ColorTranslator.ToHtml(cd.Color);
-                    cbColorBottom.Text = Majorsilence.Forms.ColorTranslator.ToHtml(cd.Color);
+                    cbColorDefault.Text = System.Windows.Forms.ColorTranslator.ToHtml(cd.Color);
+                    cbColorLeft.Text = System.Windows.Forms.ColorTranslator.ToHtml(cd.Color);
+                    cbColorRight.Text = System.Windows.Forms.ColorTranslator.ToHtml(cd.Color);
+                    cbColorTop.Text = System.Windows.Forms.ColorTranslator.ToHtml(cd.Color);
+                    cbColorBottom.Text = System.Windows.Forms.ColorTranslator.ToHtml(cd.Color);
                 }
                 else if (sender == this.bColorLeft)
-                    cbColorLeft.Text = Majorsilence.Forms.ColorTranslator.ToHtml(cd.Color);
+                    cbColorLeft.Text = System.Windows.Forms.ColorTranslator.ToHtml(cd.Color);
                 else if (sender == this.bColorRight)
-                    cbColorRight.Text = Majorsilence.Forms.ColorTranslator.ToHtml(cd.Color);
+                    cbColorRight.Text = System.Windows.Forms.ColorTranslator.ToHtml(cd.Color);
                 else if (sender == this.bColorTop)
-                    cbColorTop.Text = Majorsilence.Forms.ColorTranslator.ToHtml(cd.Color);
+                    cbColorTop.Text = System.Windows.Forms.ColorTranslator.ToHtml(cd.Color);
                 else if (sender == this.bColorBottom)
-                    cbColorBottom.Text = Majorsilence.Forms.ColorTranslator.ToHtml(cd.Color);
+                    cbColorBottom.Text = System.Windows.Forms.ColorTranslator.ToHtml(cd.Color);
             }
 		
 			return;
@@ -812,7 +812,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			Button b = sender as Button;
 			if (b == null)
 				return;
-			Control c = null;
+			Majorsilence.Forms.Control c = null;
 			bool bColor=false;
 			switch (b.Tag as string)
 			{
@@ -874,8 +874,8 @@ namespace Majorsilence.Reporting.RdlDesign
 			XmlNode sNode = _ReportItems[0];
             using (DialogExprEditor ee = new DialogExprEditor(_Draw, c.Text, sNode, bColor))
             {
-                DialogResult dr = ee.ShowDialog();
-                if (dr == DialogResult.OK)
+                Majorsilence.Forms.DialogResult dr = ee.ShowDialog();
+                if (dr == Majorsilence.Forms.DialogResult.OK)
                     c.Text = ee.Expression;
             }
 			return;

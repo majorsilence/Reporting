@@ -1,7 +1,7 @@
 using System.Drawing;
-using Majorsilence.Forms.Drawing;
+using System.Drawing;
 
-using Majorsilence.Forms;
+using System.Windows.Forms;
 
 namespace Majorsilence.Reporting.RdlDesign
 {
@@ -17,8 +17,8 @@ namespace Majorsilence.Reporting.RdlDesign
 
         public ColorPicker()
         {
-            DrawMode = DrawMode.OwnerDrawFixed;
-            DropDownStyle = ComboBoxStyle.DropDownList; // DropDownList
+            DrawMode = Majorsilence.Forms.DrawMode.OwnerDrawFixed;
+            DropDownStyle = Majorsilence.Forms.ComboBoxStyle.DropDownList; // DropDownList
             DropDownHeight = 1;
             Font = new Font("Arial", 8, FontStyle.Bold | FontStyle.Italic);
 
@@ -29,7 +29,7 @@ namespace Majorsilence.Reporting.RdlDesign
 				Items.AddRange(StaticLists.ColorList);
 			}
 
-            // Majorsilence.Forms.ComboBox has no OnDrawItem virtual method to override -- only a
+            // System.Windows.Forms.ComboBox has no OnDrawItem virtual method to override -- only a
             // DrawItem event, which is itself a no-op (`add { } remove { }`) since ComboBox
             // doesn't support owner-draw rendering at all. Subscribing preserves the code's shape
             // for whenever that gets real support; the swatch/fx rendering below simply won't
@@ -38,7 +38,7 @@ namespace Majorsilence.Reporting.RdlDesign
             DrawItem += ColorPicker_DrawItem;
         }
 
-        private void ColorPicker_DrawItem(object sender, DrawItemEventArgs e) => OnDrawItem(e);
+        private void ColorPicker_DrawItem(object sender, Majorsilence.Forms.DrawItemEventArgs e) => OnDrawItem(e);
 
         public override string Text
         {
@@ -54,12 +54,12 @@ namespace Majorsilence.Reporting.RdlDesign
                 base.Text = v;
             }
         }
-        private void OnDrawItem(DrawItemEventArgs e)
+        private void OnDrawItem(Majorsilence.Forms.DrawItemEventArgs e)
         {
-            Graphics g = e.Graphics;
+            Majorsilence.Forms.Drawing.Graphics g = e.Graphics;
             Color BlockColor = Color.Empty;
             int left = RECTCOLOR_LEFT;
-            if (e.State == DrawItemState.Selected || e.State == DrawItemState.None)
+            if (e.State == Majorsilence.Forms.DrawItemState.Selected || e.State == Majorsilence.Forms.DrawItemState.None)
                 e.DrawBackground();
             if (e.Index == -1)
             {

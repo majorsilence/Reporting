@@ -4,7 +4,7 @@ using Majorsilence.Reporting.RdlDesign.Syntax;
 using System;
 using System.Collections.Generic;
 using System.Data;
-using Majorsilence.Forms;
+using System.Windows.Forms;
 using System.Xml;
 
 namespace Majorsilence.Reporting.RdlDesign
@@ -12,7 +12,7 @@ namespace Majorsilence.Reporting.RdlDesign
     /// <summary>
     /// Summary description for StyleCtl.
     /// </summary>
-    internal partial class DataSetsCtl : Majorsilence.Forms.UserControl, IProperty
+    internal partial class DataSetsCtl : System.Windows.Forms.UserControl, IProperty
     {
         private bool _UseTypenameQualified = false;
         private DesignXmlDraw _Draw;
@@ -142,7 +142,7 @@ namespace Majorsilence.Reporting.RdlDesign
             string nerr = _Draw.NameError(this._dsNode, this.tbDSName.Text);
             if (nerr != null)
             {
-                MessageBox.Show(nerr, Strings.DataSetsCtl_Show_Name, MessageBoxButtons.OK,MessageBoxIcon.Error);
+                Majorsilence.Forms.MessageBox.Show(nerr, Strings.DataSetsCtl_Show_Name, Majorsilence.Forms.MessageBoxButtons.OK,Majorsilence.Forms.MessageBoxIcon.Error);
                 return false;
             }
             return true;
@@ -267,8 +267,8 @@ namespace Majorsilence.Reporting.RdlDesign
             SQLCtl sc = new SQLCtl(_Draw, cbDataSource.Text, this.scintillaSQL.Text, _dsv.QueryParameters);
             try
             {
-                DialogResult dr = sc.ShowDialog(this);
-                if (dr == DialogResult.OK)
+                Majorsilence.Forms.DialogResult dr = sc.ShowDialog(this);
+                if (dr == Majorsilence.Forms.DialogResult.OK)
                 {
                     scintillaSQL.Text = sc.SQL;
                 }

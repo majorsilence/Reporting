@@ -1,26 +1,26 @@
 using System;
-using Majorsilence.Forms;
+using System.Windows.Forms;
 using System.ComponentModel;
 using System.Collections;
 
 namespace Majorsilence.Reporting.RdlDesign
 {
-    public partial class DialogListOfStrings : Majorsilence.Forms.Form
+    public partial class DialogListOfStrings : System.Windows.Forms.Form
 	{
 		#region Windows Form Designer generated code
-		private Majorsilence.Forms.Button bOK;
-private Majorsilence.Forms.Button bCancel;
-private Majorsilence.Forms.Label label1;
-private Majorsilence.Forms.TextBox tbStrings;
+		private System.Windows.Forms.Button bOK;
+private System.Windows.Forms.Button bCancel;
+private System.Windows.Forms.Label label1;
+private System.Windows.Forms.TextBox tbStrings;
 private System.ComponentModel.Container components = null;
 
 		private void InitializeComponent()
 		{
-			Majorsilence.Forms.ComponentResourceManager resources = new Majorsilence.Forms.ComponentResourceManager(typeof(DialogListOfStrings));
-			this.bOK = new Majorsilence.Forms.Button();
-			this.tbStrings = new Majorsilence.Forms.TextBox();
-			this.bCancel = new Majorsilence.Forms.Button();
-			this.label1 = new Majorsilence.Forms.Label();
+			System.Windows.Forms.ComponentResourceManager resources = new System.Windows.Forms.ComponentResourceManager(typeof(DialogListOfStrings));
+			this.bOK = new System.Windows.Forms.Button();
+			this.tbStrings = new System.Windows.Forms.TextBox();
+			this.bCancel = new System.Windows.Forms.Button();
+			this.label1 = new System.Windows.Forms.Label();
 			this.SuspendLayout();
 			// 
 			// bOK

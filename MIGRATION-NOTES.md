@@ -1134,3 +1134,81 @@ This ruleset generalizes directly to `RdlDesign`'s much larger surface (119 file
 `Majorsilence.Forms` references, D4-scale) — expect the same categories to recur, not new ones, since
 they all trace back to fixed properties of the generator (what rule #1/#1b/#5 do and don't cover),
 not to anything specific to `RdlViewer`'s code.
+
+## D13: `RdlDesign` rewritten onto the compat shim namespace — the ruleset holds, plus two sharp edges
+
+Applied D12's rewrite to `RdlDesign` itself: same `<PackageReference>` addition, same namespace-boundary
+regex (`Majorsilence\.Forms\.Drawing(?!\.(?:Common|Drawing2D|Imaging|Text)\b)\b` → `System.Drawing`,
+`Majorsilence\.Forms(?!\.(?:Design|Printing|Drawing)\b)\b` → `System.Windows.Forms`) across all 147
+`.cs` files (123 ended up touched; 2,857 lines changed). Verified clean on `net8.0`/`net10.0`,
+`RdlDesign.Tests` passes (7/7), `RdlMapFile`/`ReportDesigner`/`Examples/SampleDesignerControl`
+(the plain-WinForms one — `SampleDesignerControlWPF` untouched, per D11) all still build unmodified,
+`dotnet build MajorsilenceReporting.slnx -c Release -p:EnableWindowsTargeting=true` is 0 errors, and
+`ReportTests` passes 303/303 on `net10.0` (no `net8.0` runtime installed on this machine to run that
+leg, unrelated to this change).
+
+**D12's 8 categories accounted for every error category RdlDesign hit** — nothing genuinely new in
+*kind*, just two of them showing up in shapes D12 hadn't spelled out explicitly:
+
+- **Category 5 (polymorphism) also breaks arrays/collections typed with a compat base**, not just
+  bare local variables. `this.dgFields.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[]
+  { this.dgtbName, ... })` fails the same way `Control v = someTextBox` does — fix is the same,
+  qualify the *array's element type*, not each element (`new
+  Majorsilence.Forms.DataGridViewColumn[]`), the same pattern as `ToolStripItem[]` from D11.
+- **Category 8 (unmapped events) needs a per-control judgment call, not just a per-type-name one.**
+  `TextBox.KeyDown`/`Control.DragDrop` are rule-5-covered (real `Control`-declared events, so their
+  `EventArgs` really is the compat wrapper) — but `ToolStripTextBox.KeyDown` is *not*, because
+  `ToolStripTextBox : ToolStripControlHost : ToolStripItem`, and `ToolStripItem` doesn't inherit
+  `Control` at all (rule 5 walks each compat subclass's own reachable `Control`-declared events, and
+  `ToolStripItem`'s chain never reaches one). Two handlers wired to the *same event name* on different
+  control kinds needed opposite treatment: `EditTextBox_KeyDown` (wired to a `ToolStripTextBox`) needed
+  real `Majorsilence.Forms.KeyEventArgs`/`Keys`, while half a dozen other `_KeyDown` handlers (wired to
+  plain `TextBox`/a custom `Control` subclass) needed to *stay* compat. The only reliable check: find
+  what the Designer.cs field declares the control as, not what the handler's own code looks like.
+
+**A related, sharper case: `DragEventArgs.Data` is unreachable through the compat wrapper at all**,
+even though `DragEnter`/`DragDrop` themselves are rule-5-covered — `Data` returns `IDataObject`, an
+interface the wrapper can't safely translate (same reasoning as `Brush`'s downcast note in D12 #5),
+so it's silently dropped from the forwarded member set. Switching the handler to real `DragEventArgs`
+looked like the fix (that's what D12 documents for exactly this shape of gap) — except `Control`'s
+real `DragDrop`/`DragEnter` events are rule-5-translated, so wiring `this.DragDrop +=
+this.RdlDesigner_DragDrop;` in Designer.cs needs a handler matching the *compat* `DragEventHandler`,
+and switching to real broke that (`CS0123: no overload matches delegate`). The actual fix needed both
+halves at once: keep the handler's own parameter compat (`DragEventArgs e`, matching the delegate), but
+reach `.Data` via the wrapper's `internal Inner` property — `e.Inner.Data` — which every rule-5
+`EventArgs` wrapper carries specifically so code *in the same assembly* the generator runs against
+(which RdlDesign always is) can drop past the wrapper to the real instance for exactly the members it
+didn't forward. `e.Effect` (a plain enum, fully translatable) stayed compat-typed throughout — only
+`.Data` needed the escape hatch.
+
+**Two self-inflicted regressions during this pass, worth recording so they aren't repeated:**
+
+1. **The first rewrite attempt used a namespace-boundary regex that was too generic**
+   (`Majorsilence\.Forms(?!\.[A-Za-z])` — "not followed by a dot and a letter") and silently skipped
+   every *type* reference followed by a member access, not just the intended sub-namespaces, e.g.
+   `Majorsilence.Forms.Form` (a type, "Form" followed by nothing) was fine, but the regex's own
+   reasoning conflated "followed by `.Identifier`" with "is a sub-namespace" — indistinguishable by
+   regex alone. Caught early (diff was suspiciously small: 149 lines for ~3,000 candidate
+   occurrences) by checking actual namespace usage first (`grep` for every
+   `Majorsilence\.Forms\.[A-Za-z0-9_]+` token actually used, cross-referenced against
+   `Majorsilence.Forms`'s real declared namespaces) and using an explicit exclusion list instead —
+   the same technique D12 already used for `RdlViewer`, just skipped the first time under time
+   pressure. **Always build the exclusion list from what's actually declared, never from a shape
+   heuristic.**
+2. **Bulk bare-word qualification (`(?<!\.)\bTypeName\b` → `Majorsilence.Forms.TypeName`) corrupts
+   string literals and member names that happen to share a type's name**, and this bit twice:
+   `BorderStyle`/`Image` inside RDL XML string literals (`"<Image>...</Image>"`,
+   `"Majorsilence.Forms.BorderStyle"` as an XML element name passed to `SetElement`) and a `Padding`/
+   `Image`-named *property* (`public PropertyPadding Padding { get; }`) got its own name corrupted to
+   `public PropertyPadding Majorsilence.Forms.Padding` — invalid syntax, but only caught by the
+   compiler because it happened to be a property; a corrupted *string* compiles fine and silently
+   emits wrong RDL XML at runtime. ~340 corrupted string occurrences were found and fixed across two
+   cleanup passes; **a generic "is this inside a string" regex is not reliable enough to fix this
+   automatically** (it re-broke things on every re-run once new type names were added to the sweep
+   list) — the safe fix that actually stuck was precise, delimiter-anchored patterns
+   (`<Majorsilence\.Forms\.BorderStyle>` → `<BorderStyle>`, `"Majorsilence\.Forms\.BorderStyle"` →
+   `"BorderStyle"`) that cannot appear in valid C# syntax, so they can only ever match inside a
+   string. **After any bulk bare-word sweep over real source (not just Designer.cs), grep for the
+   qualified name still appearing inside `"..."` and inside a `public/internal/private/protected ...
+   Name` declaration line before trusting a green build** — a clean compile does not mean the sweep
+   was correct, only that it didn't happen to corrupt something the compiler checks.

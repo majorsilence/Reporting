@@ -29,18 +29,18 @@ namespace Majorsilence.Reporting.RdlDesign
 		/// </summary>
 		private void InitializeComponent()
 		{
-			Majorsilence.Forms.ComponentResourceManager resources = new Majorsilence.Forms.ComponentResourceManager(typeof(DataSetRowsCtl));
+			System.Windows.Forms.ComponentResourceManager resources = new System.Windows.Forms.ComponentResourceManager(typeof(DataSetRowsCtl));
             this.DoubleBuffered = true;
-			this.dgRows = new Majorsilence.Forms.DataGridView();
-			this.bDelete = new Majorsilence.Forms.Button();
-			this.bUp = new Majorsilence.Forms.Button();
-			this.bDown = new Majorsilence.Forms.Button();
-			this.chkRowsFile = new Majorsilence.Forms.CheckBox();
-			this.tbRowsFile = new Majorsilence.Forms.TextBox();
-			this.bRowsFile = new Majorsilence.Forms.Button();
-			this.label1 = new Majorsilence.Forms.Label();
-			this.bLoad = new Majorsilence.Forms.Button();
-			this.bClear = new Majorsilence.Forms.Button();
+			this.dgRows = new System.Windows.Forms.DataGridView();
+			this.bDelete = new System.Windows.Forms.Button();
+			this.bUp = new System.Windows.Forms.Button();
+			this.bDown = new System.Windows.Forms.Button();
+			this.chkRowsFile = new System.Windows.Forms.CheckBox();
+			this.tbRowsFile = new System.Windows.Forms.TextBox();
+			this.bRowsFile = new System.Windows.Forms.Button();
+			this.label1 = new System.Windows.Forms.Label();
+			this.bLoad = new System.Windows.Forms.Button();
+			this.bClear = new System.Windows.Forms.Button();
 			((System.ComponentModel.ISupportInitialize)(this.dgRows)).BeginInit();
 			this.SuspendLayout();
 			// 
@@ -125,15 +125,15 @@ namespace Majorsilence.Reporting.RdlDesign
 		}
 		#endregion
 		
-		private Majorsilence.Forms.Button bDelete;
-		private Majorsilence.Forms.Button bUp;
-		private Majorsilence.Forms.Button bDown;
-		private Majorsilence.Forms.CheckBox chkRowsFile;
-		private Majorsilence.Forms.Button bRowsFile;
-		private Majorsilence.Forms.DataGridView dgRows;
-		private Majorsilence.Forms.TextBox tbRowsFile;
-		private Majorsilence.Forms.Label label1;
-		private Majorsilence.Forms.Button bLoad;
-		private Majorsilence.Forms.Button bClear;
+		private System.Windows.Forms.Button bDelete;
+		private System.Windows.Forms.Button bUp;
+		private System.Windows.Forms.Button bDown;
+		private System.Windows.Forms.CheckBox chkRowsFile;
+		private System.Windows.Forms.Button bRowsFile;
+		private System.Windows.Forms.DataGridView dgRows;
+		private System.Windows.Forms.TextBox tbRowsFile;
+		private System.Windows.Forms.Label label1;
+		private System.Windows.Forms.Button bLoad;
+		private System.Windows.Forms.Button bClear;
 	}
 }

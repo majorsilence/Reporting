@@ -4,7 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
-using Majorsilence.Forms;
+using System.Windows.Forms;
 using System.Xml;
 using Majorsilence.Reporting.RdlDesign.Resources;
 
@@ -13,30 +13,30 @@ namespace Majorsilence.Reporting.RdlDesign
 	/// <summary>
 	/// Summary description for ReportCtl.
 	/// </summary>
-	internal class TableCtl : Majorsilence.Forms.UserControl, IProperty
+	internal class TableCtl : System.Windows.Forms.UserControl, IProperty
 	{
         private List<XmlNode> _ReportItems;
 		private DesignXmlDraw _Draw;
 		bool fDataSet, fPBBefore, fPBAfter, fNoRows;
 		bool fDetailElementName, fDetailCollectionName, fRenderDetails;
 		bool fCheckRows;
-		private Majorsilence.Forms.Label label2;
-		private Majorsilence.Forms.ComboBox cbDataSet;
-		private Majorsilence.Forms.GroupBox groupBox1;
-		private Majorsilence.Forms.CheckBox chkPBBefore;
-		private Majorsilence.Forms.CheckBox chkPBAfter;
-		private Majorsilence.Forms.Label label1;
-		private Majorsilence.Forms.TextBox tbNoRows;
-		private Majorsilence.Forms.GroupBox groupBox2;
-		private Majorsilence.Forms.Label label3;
-		private Majorsilence.Forms.Label label4;
-		private Majorsilence.Forms.CheckBox chkRenderDetails;
-		private Majorsilence.Forms.TextBox tbDetailElementName;
-		private Majorsilence.Forms.TextBox tbDetailCollectionName;
-		private Majorsilence.Forms.GroupBox groupBox3;
-		private Majorsilence.Forms.CheckBox chkDetails;
-		private Majorsilence.Forms.CheckBox chkHeaderRows;
-		private Majorsilence.Forms.CheckBox chkFooterRows;
+		private System.Windows.Forms.Label label2;
+		private System.Windows.Forms.ComboBox cbDataSet;
+		private System.Windows.Forms.GroupBox groupBox1;
+		private System.Windows.Forms.CheckBox chkPBBefore;
+		private System.Windows.Forms.CheckBox chkPBAfter;
+		private System.Windows.Forms.Label label1;
+		private System.Windows.Forms.TextBox tbNoRows;
+		private System.Windows.Forms.GroupBox groupBox2;
+		private System.Windows.Forms.Label label3;
+		private System.Windows.Forms.Label label4;
+		private System.Windows.Forms.CheckBox chkRenderDetails;
+		private System.Windows.Forms.TextBox tbDetailElementName;
+		private System.Windows.Forms.TextBox tbDetailCollectionName;
+		private System.Windows.Forms.GroupBox groupBox3;
+		private System.Windows.Forms.CheckBox chkDetails;
+		private System.Windows.Forms.CheckBox chkHeaderRows;
+		private System.Windows.Forms.CheckBox chkFooterRows;
         private CheckBox chkFooterRepeat;
         private CheckBox chkHeaderRepeat;
 		/// <summary> 
@@ -117,27 +117,27 @@ namespace Majorsilence.Reporting.RdlDesign
 		/// </summary>
 		private void InitializeComponent()
 		{
-			Majorsilence.Forms.ComponentResourceManager resources = new Majorsilence.Forms.ComponentResourceManager(typeof(TableCtl));
+			System.Windows.Forms.ComponentResourceManager resources = new System.Windows.Forms.ComponentResourceManager(typeof(TableCtl));
             this.DoubleBuffered = true;
-			this.label2 = new Majorsilence.Forms.Label();
-			this.cbDataSet = new Majorsilence.Forms.ComboBox();
-			this.groupBox1 = new Majorsilence.Forms.GroupBox();
-			this.chkPBAfter = new Majorsilence.Forms.CheckBox();
-			this.chkPBBefore = new Majorsilence.Forms.CheckBox();
-			this.label1 = new Majorsilence.Forms.Label();
-			this.tbNoRows = new Majorsilence.Forms.TextBox();
-			this.groupBox2 = new Majorsilence.Forms.GroupBox();
-			this.tbDetailCollectionName = new Majorsilence.Forms.TextBox();
-			this.tbDetailElementName = new Majorsilence.Forms.TextBox();
-			this.chkRenderDetails = new Majorsilence.Forms.CheckBox();
-			this.label4 = new Majorsilence.Forms.Label();
-			this.label3 = new Majorsilence.Forms.Label();
-			this.groupBox3 = new Majorsilence.Forms.GroupBox();
-			this.chkFooterRepeat = new Majorsilence.Forms.CheckBox();
-			this.chkHeaderRepeat = new Majorsilence.Forms.CheckBox();
-			this.chkFooterRows = new Majorsilence.Forms.CheckBox();
-			this.chkHeaderRows = new Majorsilence.Forms.CheckBox();
-			this.chkDetails = new Majorsilence.Forms.CheckBox();
+			this.label2 = new System.Windows.Forms.Label();
+			this.cbDataSet = new System.Windows.Forms.ComboBox();
+			this.groupBox1 = new System.Windows.Forms.GroupBox();
+			this.chkPBAfter = new System.Windows.Forms.CheckBox();
+			this.chkPBBefore = new System.Windows.Forms.CheckBox();
+			this.label1 = new System.Windows.Forms.Label();
+			this.tbNoRows = new System.Windows.Forms.TextBox();
+			this.groupBox2 = new System.Windows.Forms.GroupBox();
+			this.tbDetailCollectionName = new System.Windows.Forms.TextBox();
+			this.tbDetailElementName = new System.Windows.Forms.TextBox();
+			this.chkRenderDetails = new System.Windows.Forms.CheckBox();
+			this.label4 = new System.Windows.Forms.Label();
+			this.label3 = new System.Windows.Forms.Label();
+			this.groupBox3 = new System.Windows.Forms.GroupBox();
+			this.chkFooterRepeat = new System.Windows.Forms.CheckBox();
+			this.chkHeaderRepeat = new System.Windows.Forms.CheckBox();
+			this.chkFooterRows = new System.Windows.Forms.CheckBox();
+			this.chkHeaderRows = new System.Windows.Forms.CheckBox();
+			this.chkDetails = new System.Windows.Forms.CheckBox();
 			this.groupBox1.SuspendLayout();
 			this.groupBox2.SuspendLayout();
 			this.groupBox3.SuspendLayout();
@@ -293,7 +293,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			if (chkDetails.Checked || chkFooterRows.Checked || chkHeaderRows.Checked)
 				return true;
 
-			MessageBox.Show(Strings.TableCtl_Show_TableMustHaveRegions, Strings.TableCtl_Show_Table);
+			Majorsilence.Forms.MessageBox.Show(Strings.TableCtl_Show_TableMustHaveRegions, Strings.TableCtl_Show_Table);
 
 			return false;
 		}

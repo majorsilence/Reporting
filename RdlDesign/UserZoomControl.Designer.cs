@@ -29,15 +29,15 @@ namespace Majorsilence.Reporting.RdlDesign
         private void InitializeComponent()
         {
             this.DoubleBuffered = true;
-            this.BtnPlus = new Majorsilence.Forms.Button();
-            this.BtnMinus = new Majorsilence.Forms.Button();
-            this.TxtZoomValue = new Majorsilence.Forms.TextBox();
+            this.BtnPlus = new System.Windows.Forms.Button();
+            this.BtnMinus = new System.Windows.Forms.Button();
+            this.TxtZoomValue = new System.Windows.Forms.TextBox();
             this.SuspendLayout();
             // 
             // BtnPlus
             // 
             this.BtnPlus.AutoSize = true;
-            this.BtnPlus.Font = new Majorsilence.Forms.Drawing.Font("Segoe UI", 9F, Majorsilence.Forms.Drawing.FontStyle.Bold, Majorsilence.Forms.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.BtnPlus.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.BtnPlus.Location = new System.Drawing.Point(86, 1);
             this.BtnPlus.Margin = new Majorsilence.Forms.Padding(0);
             this.BtnPlus.Name = "BtnPlus";
@@ -51,7 +51,7 @@ namespace Majorsilence.Reporting.RdlDesign
             // BtnMinus
             // 
             this.BtnMinus.AutoSizeMode = Majorsilence.Forms.AutoSizeMode.GrowAndShrink;
-            this.BtnMinus.Font = new Majorsilence.Forms.Drawing.Font("Segoe UI", 9F, Majorsilence.Forms.Drawing.FontStyle.Bold, Majorsilence.Forms.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.BtnMinus.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.BtnMinus.Location = new System.Drawing.Point(2, 1);
             this.BtnMinus.Margin = new Majorsilence.Forms.Padding(0);
             this.BtnMinus.Name = "BtnMinus";
@@ -65,7 +65,7 @@ namespace Majorsilence.Reporting.RdlDesign
             // TxtZoomValue
             // 
             this.TxtZoomValue.BorderStyle = Majorsilence.Forms.BorderStyle.None;
-            this.TxtZoomValue.Font = new Majorsilence.Forms.Drawing.Font("Segoe UI", 9F, Majorsilence.Forms.Drawing.FontStyle.Bold, Majorsilence.Forms.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.TxtZoomValue.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.TxtZoomValue.Location = new System.Drawing.Point(38, 6);
             this.TxtZoomValue.Margin = new Majorsilence.Forms.Padding(0);
             this.TxtZoomValue.Name = "TxtZoomValue";
@@ -85,7 +85,7 @@ namespace Majorsilence.Reporting.RdlDesign
             this.Controls.Add(this.TxtZoomValue);
             this.Controls.Add(this.BtnMinus);
             this.Controls.Add(this.BtnPlus);
-            this.Font = new Majorsilence.Forms.Drawing.Font("Segoe UI Semibold", 9F, Majorsilence.Forms.Drawing.FontStyle.Bold, Majorsilence.Forms.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.Font = new System.Drawing.Font("Segoe UI Semibold", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.Margin = new Majorsilence.Forms.Padding(0);
             this.Name = "UserZoomControl";
             this.Size = new System.Drawing.Size(122, 31);
@@ -96,8 +96,8 @@ namespace Majorsilence.Reporting.RdlDesign
 
         #endregion
 
-        private Majorsilence.Forms.Button BtnPlus;
-        private Majorsilence.Forms.Button BtnMinus;
-        private Majorsilence.Forms.TextBox TxtZoomValue;
+        private System.Windows.Forms.Button BtnPlus;
+        private System.Windows.Forms.Button BtnMinus;
+        private System.Windows.Forms.TextBox TxtZoomValue;
     }
 }

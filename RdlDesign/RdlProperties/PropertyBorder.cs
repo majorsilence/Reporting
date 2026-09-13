@@ -5,7 +5,7 @@ using System.Text;
 using System.ComponentModel;            // need this for the properties metadata
 using System.Xml;
 using System.Globalization;
-using Majorsilence.Forms;
+using System.Windows.Forms;
 using Majorsilence.Forms.Design;
 
 namespace Majorsilence.Reporting.RdlDesign
@@ -138,7 +138,7 @@ namespace Majorsilence.Reporting.RdlDesign
             using (SingleCtlDialog scd = new SingleCtlDialog(pri.DesignCtl, pri.Draw, pri.Nodes, SingleCtlTypeEnum.BorderCtl, pb.Names))
             {
                 // Display the UI editor dialog
-                if (editorService.ShowDialog(scd) == DialogResult.OK)
+                if (editorService.ShowDialog(scd) == Majorsilence.Forms.DialogResult.OK)
                 {
                     // Return the new property value from the UI editor form
                     return new PropertyBorder(pri, pb.Names);

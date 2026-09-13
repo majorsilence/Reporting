@@ -1,56 +1,56 @@
 using System;
-using Majorsilence.Forms;
+using System.Windows.Forms;
 using System.ComponentModel;
 using System.Collections;
 
 namespace Majorsilence.Reporting.RdlDesign
 {
-    public partial class DialogDataSourceRef : Majorsilence.Forms.Form
+    public partial class DialogDataSourceRef : System.Windows.Forms.Form
 	{
 		#region Windows Form Designer generated code
-		private Majorsilence.Forms.Label label1;
-private Majorsilence.Forms.TextBox tbPassword;
-private Majorsilence.Forms.Label label2;
-private Majorsilence.Forms.TextBox tbFilename;
-private Majorsilence.Forms.Button bGetFilename;
-private Majorsilence.Forms.Label label3;
-private Majorsilence.Forms.ComboBox cbDataProvider;
-private Majorsilence.Forms.Label label4;
-private Majorsilence.Forms.TextBox tbConnection;
-private Majorsilence.Forms.CheckBox ckbIntSecurity;
-private Majorsilence.Forms.Label label5;
-private Majorsilence.Forms.TextBox tbPrompt;
-private Majorsilence.Forms.Button bOK;
-private Majorsilence.Forms.Button bCancel;
-private Majorsilence.Forms.TextBox tbPassword2;
-private Majorsilence.Forms.Label label6;
-private Majorsilence.Forms.Button bTestConnection;
-private Majorsilence.Forms.ComboBox cbOdbcNames;
-private Majorsilence.Forms.Label lODBC;
+		private System.Windows.Forms.Label label1;
+private System.Windows.Forms.TextBox tbPassword;
+private System.Windows.Forms.Label label2;
+private System.Windows.Forms.TextBox tbFilename;
+private System.Windows.Forms.Button bGetFilename;
+private System.Windows.Forms.Label label3;
+private System.Windows.Forms.ComboBox cbDataProvider;
+private System.Windows.Forms.Label label4;
+private System.Windows.Forms.TextBox tbConnection;
+private System.Windows.Forms.CheckBox ckbIntSecurity;
+private System.Windows.Forms.Label label5;
+private System.Windows.Forms.TextBox tbPrompt;
+private System.Windows.Forms.Button bOK;
+private System.Windows.Forms.Button bCancel;
+private System.Windows.Forms.TextBox tbPassword2;
+private System.Windows.Forms.Label label6;
+private System.Windows.Forms.Button bTestConnection;
+private System.Windows.Forms.ComboBox cbOdbcNames;
+private System.Windows.Forms.Label lODBC;
 private System.ComponentModel.Container components = null;
 
 		private void InitializeComponent()
 		{
-			Majorsilence.Forms.ComponentResourceManager resources = new Majorsilence.Forms.ComponentResourceManager(typeof(DialogDataSourceRef));
-			this.label1 = new Majorsilence.Forms.Label();
-			this.tbPassword = new Majorsilence.Forms.TextBox();
-			this.label2 = new Majorsilence.Forms.Label();
-			this.tbFilename = new Majorsilence.Forms.TextBox();
-			this.bGetFilename = new Majorsilence.Forms.Button();
-			this.label3 = new Majorsilence.Forms.Label();
-			this.cbDataProvider = new Majorsilence.Forms.ComboBox();
-			this.label4 = new Majorsilence.Forms.Label();
-			this.tbConnection = new Majorsilence.Forms.TextBox();
-			this.ckbIntSecurity = new Majorsilence.Forms.CheckBox();
-			this.label5 = new Majorsilence.Forms.Label();
-			this.tbPrompt = new Majorsilence.Forms.TextBox();
-			this.bOK = new Majorsilence.Forms.Button();
-			this.bCancel = new Majorsilence.Forms.Button();
-			this.tbPassword2 = new Majorsilence.Forms.TextBox();
-			this.label6 = new Majorsilence.Forms.Label();
-			this.bTestConnection = new Majorsilence.Forms.Button();
-			this.cbOdbcNames = new Majorsilence.Forms.ComboBox();
-			this.lODBC = new Majorsilence.Forms.Label();
+			System.Windows.Forms.ComponentResourceManager resources = new System.Windows.Forms.ComponentResourceManager(typeof(DialogDataSourceRef));
+			this.label1 = new System.Windows.Forms.Label();
+			this.tbPassword = new System.Windows.Forms.TextBox();
+			this.label2 = new System.Windows.Forms.Label();
+			this.tbFilename = new System.Windows.Forms.TextBox();
+			this.bGetFilename = new System.Windows.Forms.Button();
+			this.label3 = new System.Windows.Forms.Label();
+			this.cbDataProvider = new System.Windows.Forms.ComboBox();
+			this.label4 = new System.Windows.Forms.Label();
+			this.tbConnection = new System.Windows.Forms.TextBox();
+			this.ckbIntSecurity = new System.Windows.Forms.CheckBox();
+			this.label5 = new System.Windows.Forms.Label();
+			this.tbPrompt = new System.Windows.Forms.TextBox();
+			this.bOK = new System.Windows.Forms.Button();
+			this.bCancel = new System.Windows.Forms.Button();
+			this.tbPassword2 = new System.Windows.Forms.TextBox();
+			this.label6 = new System.Windows.Forms.Label();
+			this.bTestConnection = new System.Windows.Forms.Button();
+			this.cbOdbcNames = new System.Windows.Forms.ComboBox();
+			this.lODBC = new System.Windows.Forms.Label();
 			this.SuspendLayout();
 			// 
 			// label1

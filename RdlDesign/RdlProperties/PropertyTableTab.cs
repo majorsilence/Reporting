@@ -5,10 +5,10 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.Design;
 using System.Drawing;
-using Majorsilence.Forms.Drawing;
+using System.Drawing;
 using Majorsilence.Forms.Drawing.Drawing2D;
 using System.Data;
-using Majorsilence.Forms;
+using System.Windows.Forms;
 using Majorsilence.Forms.Design;
 using System.Xml;
 
@@ -39,7 +39,7 @@ namespace Majorsilence.Reporting.RdlDesign
         }
 
         /// <summary>
-        /// The Image that will be displayed on the PropertyGrid toolbar.
+        /// The Majorsilence.Forms.Drawing.Image that will be displayed on the PropertyGrid toolbar.
         /// </summary>
         public override Bitmap Bitmap
         {
@@ -48,7 +48,7 @@ namespace Majorsilence.Reporting.RdlDesign
                 // force this to 16x16 to work around a Beta2 PropertyGrid
                 // issue.
                 System.Resources.ResourceManager resources = new System.Resources.ResourceManager(typeof(RdlDesigner));
-                Majorsilence.Forms.Drawing.Image i = ((Majorsilence.Forms.Drawing.Image)(resources.GetObject("bTable.Image")));
+                System.Drawing.Image i = ((System.Drawing.Image)(resources.GetObject("bTable.Image")));
 
                 return new Bitmap(i, new Size(16, 16));
             }

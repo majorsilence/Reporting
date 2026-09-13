@@ -1,10 +1,10 @@
 
 using System;
-using Majorsilence.Forms.Drawing;
+using System.Drawing;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
-using Majorsilence.Forms;
+using System.Windows.Forms;
 using System.Xml;
 using Majorsilence.Reporting.RdlDesign.Resources;
 
@@ -515,7 +515,7 @@ namespace Majorsilence.Reporting.RdlDesign
                 return;
 
             bApply_Click(sender, e);	// Apply does all the work
-            this.DialogResult = DialogResult.OK;
+            this.DialogResult = Majorsilence.Forms.DialogResult.OK;
         }
 
         private bool IsValid()
@@ -552,13 +552,13 @@ namespace Majorsilence.Reporting.RdlDesign
 
         private void bDelete_Click(object sender, System.EventArgs e)
         {
-            if (MessageBox.Show(this,
+            if (Majorsilence.Forms.MessageBox.Show(this,
                     Strings.PropertyDialog_ShowF_WantDeleteDataset,
                     Strings.PropertyDialog_ShowF_DataSet,
-                    MessageBoxButtons.YesNo) == DialogResult.Yes)
+                    Majorsilence.Forms.MessageBoxButtons.YesNo) == Majorsilence.Forms.DialogResult.Yes)
             {
                 _Delete = true;
-                DialogResult = DialogResult.OK;
+                DialogResult = Majorsilence.Forms.DialogResult.OK;
             }
         }
     }

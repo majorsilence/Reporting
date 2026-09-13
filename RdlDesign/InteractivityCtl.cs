@@ -4,7 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
-using Majorsilence.Forms;
+using System.Windows.Forms;
 using System.Xml;
 using System.IO;
 using Majorsilence.Reporting.RdlDesign.Resources;
@@ -14,34 +14,34 @@ namespace Majorsilence.Reporting.RdlDesign
 	/// <summary>
 	/// Summary description for StyleCtl.
 	/// </summary>
-	internal class InteractivityCtl : Majorsilence.Forms.UserControl, IProperty
+	internal class InteractivityCtl : System.Windows.Forms.UserControl, IProperty
 	{
         private List<XmlNode> _ReportItems;
 		private DesignXmlDraw _Draw;
         private List<DrillParameter> _DrillParameters;
 		// flags for controlling whether syntax changed for a particular property
 		private bool fBookmark, fAction, fHidden, fToggle;
-		private Majorsilence.Forms.GroupBox groupBox1;
-		private Majorsilence.Forms.GroupBox grpBoxVisibility;
-		private Majorsilence.Forms.Label label1;
-		private Majorsilence.Forms.TextBox tbBookmark;
-		private Majorsilence.Forms.RadioButton rbHyperlink;
-		private Majorsilence.Forms.RadioButton rbBookmarkLink;
-		private Majorsilence.Forms.RadioButton rbDrillthrough;
-		private Majorsilence.Forms.TextBox tbHyperlink;
-		private Majorsilence.Forms.TextBox tbBookmarkLink;
-		private Majorsilence.Forms.TextBox tbDrillthrough;
-		private Majorsilence.Forms.Button bParameters;
-		private Majorsilence.Forms.Label label2;
-		private Majorsilence.Forms.Label label3;
-		private Majorsilence.Forms.TextBox tbHidden;
-		private Majorsilence.Forms.ComboBox cbToggle;
-		private Majorsilence.Forms.RadioButton rbNoAction;
-		private Majorsilence.Forms.Button bDrillthrough;
-		private Majorsilence.Forms.Button bHidden;
-		private Majorsilence.Forms.Button bBookmarkLink;
-		private Majorsilence.Forms.Button bHyperlink;
-		private Majorsilence.Forms.Button bBookmark;
+		private System.Windows.Forms.GroupBox groupBox1;
+		private System.Windows.Forms.GroupBox grpBoxVisibility;
+		private System.Windows.Forms.Label label1;
+		private System.Windows.Forms.TextBox tbBookmark;
+		private System.Windows.Forms.RadioButton rbHyperlink;
+		private System.Windows.Forms.RadioButton rbBookmarkLink;
+		private System.Windows.Forms.RadioButton rbDrillthrough;
+		private System.Windows.Forms.TextBox tbHyperlink;
+		private System.Windows.Forms.TextBox tbBookmarkLink;
+		private System.Windows.Forms.TextBox tbDrillthrough;
+		private System.Windows.Forms.Button bParameters;
+		private System.Windows.Forms.Label label2;
+		private System.Windows.Forms.Label label3;
+		private System.Windows.Forms.TextBox tbHidden;
+		private System.Windows.Forms.ComboBox cbToggle;
+		private System.Windows.Forms.RadioButton rbNoAction;
+		private System.Windows.Forms.Button bDrillthrough;
+		private System.Windows.Forms.Button bHidden;
+		private System.Windows.Forms.Button bBookmarkLink;
+		private System.Windows.Forms.Button bHyperlink;
+		private System.Windows.Forms.Button bBookmark;
 		/// <summary> 
 		/// Required designer variable.
 		/// </summary>
@@ -153,29 +153,29 @@ namespace Majorsilence.Reporting.RdlDesign
 		/// </summary>
 		private void InitializeComponent()
 		{
-			Majorsilence.Forms.ComponentResourceManager resources = new Majorsilence.Forms.ComponentResourceManager(typeof(InteractivityCtl));
+			System.Windows.Forms.ComponentResourceManager resources = new System.Windows.Forms.ComponentResourceManager(typeof(InteractivityCtl));
             this.DoubleBuffered = true;
-			this.grpBoxVisibility = new Majorsilence.Forms.GroupBox();
-			this.bHidden = new Majorsilence.Forms.Button();
-			this.cbToggle = new Majorsilence.Forms.ComboBox();
-			this.tbHidden = new Majorsilence.Forms.TextBox();
-			this.label3 = new Majorsilence.Forms.Label();
-			this.label2 = new Majorsilence.Forms.Label();
-			this.groupBox1 = new Majorsilence.Forms.GroupBox();
-			this.bBookmarkLink = new Majorsilence.Forms.Button();
-			this.bHyperlink = new Majorsilence.Forms.Button();
-			this.rbNoAction = new Majorsilence.Forms.RadioButton();
-			this.bParameters = new Majorsilence.Forms.Button();
-			this.bDrillthrough = new Majorsilence.Forms.Button();
-			this.tbDrillthrough = new Majorsilence.Forms.TextBox();
-			this.tbBookmarkLink = new Majorsilence.Forms.TextBox();
-			this.tbHyperlink = new Majorsilence.Forms.TextBox();
-			this.rbDrillthrough = new Majorsilence.Forms.RadioButton();
-			this.rbBookmarkLink = new Majorsilence.Forms.RadioButton();
-			this.rbHyperlink = new Majorsilence.Forms.RadioButton();
-			this.label1 = new Majorsilence.Forms.Label();
-			this.tbBookmark = new Majorsilence.Forms.TextBox();
-			this.bBookmark = new Majorsilence.Forms.Button();
+			this.grpBoxVisibility = new System.Windows.Forms.GroupBox();
+			this.bHidden = new System.Windows.Forms.Button();
+			this.cbToggle = new System.Windows.Forms.ComboBox();
+			this.tbHidden = new System.Windows.Forms.TextBox();
+			this.label3 = new System.Windows.Forms.Label();
+			this.label2 = new System.Windows.Forms.Label();
+			this.groupBox1 = new System.Windows.Forms.GroupBox();
+			this.bBookmarkLink = new System.Windows.Forms.Button();
+			this.bHyperlink = new System.Windows.Forms.Button();
+			this.rbNoAction = new System.Windows.Forms.RadioButton();
+			this.bParameters = new System.Windows.Forms.Button();
+			this.bDrillthrough = new System.Windows.Forms.Button();
+			this.tbDrillthrough = new System.Windows.Forms.TextBox();
+			this.tbBookmarkLink = new System.Windows.Forms.TextBox();
+			this.tbHyperlink = new System.Windows.Forms.TextBox();
+			this.rbDrillthrough = new System.Windows.Forms.RadioButton();
+			this.rbBookmarkLink = new System.Windows.Forms.RadioButton();
+			this.rbHyperlink = new System.Windows.Forms.RadioButton();
+			this.label1 = new System.Windows.Forms.Label();
+			this.tbBookmark = new System.Windows.Forms.TextBox();
+			this.bBookmark = new System.Windows.Forms.Button();
 			this.grpBoxVisibility.SuspendLayout();
 			this.groupBox1.SuspendLayout();
 			this.SuspendLayout();
@@ -493,7 +493,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			ofd.AddExtension = true;
             try
             {
-                if (ofd.ShowDialog() == DialogResult.OK)
+                if (ofd.ShowDialog() == Majorsilence.Forms.DialogResult.OK)
                 {
                     string file = Path.GetFileNameWithoutExtension(ofd.FileName);
 
@@ -511,7 +511,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			DrillParametersDialog dpd = new DrillParametersDialog(this.tbDrillthrough.Text, _DrillParameters);
             try
             {
-                if (dpd.ShowDialog(this) != DialogResult.OK)
+                if (dpd.ShowDialog(this) != Majorsilence.Forms.DialogResult.OK)
                     return;
                 tbDrillthrough.Text = dpd.DrillthroughReport;
                 _DrillParameters = dpd.DrillParameters;
@@ -528,7 +528,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			Button b = sender as Button;
 			if (b == null)
 				return;
-			Control c = null;
+			Majorsilence.Forms.Control c = null;
 			switch (b.Tag as string)
 			{
 				case "bookmark":
@@ -553,8 +553,8 @@ namespace Majorsilence.Reporting.RdlDesign
 			DialogExprEditor ee = new DialogExprEditor(_Draw, c.Text, sNode);
             try
             {
-                DialogResult dr = ee.ShowDialog();
-                if (dr == DialogResult.OK)
+                Majorsilence.Forms.DialogResult dr = ee.ShowDialog();
+                if (dr == Majorsilence.Forms.DialogResult.OK)
                 {
                     c.Text = ee.Expression;
                     if ((string)(b.Tag) == "bookmark")

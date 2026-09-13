@@ -3,9 +3,9 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
-using Majorsilence.Forms.Drawing;
+using System.Drawing;
 using System.Data;
-using Majorsilence.Forms;
+using System.Windows.Forms;
 using System.Xml;
 using Majorsilence.Reporting.RdlDesign.Resources;
 
@@ -14,7 +14,7 @@ namespace Majorsilence.Reporting.RdlDesign
 	/// <summary>
 	/// Summary description for StyleCtl.
 	/// </summary>
-	internal class StyleCtl : Majorsilence.Forms.UserControl, IProperty
+	internal class StyleCtl : System.Windows.Forms.UserControl, IProperty
 	{
         private List<XmlNode> _ReportItems;
 		private DesignXmlDraw _Draw;
@@ -22,36 +22,36 @@ namespace Majorsilence.Reporting.RdlDesign
 		private bool fPadLeft, fPadRight, fPadTop, fPadBottom;
 		private bool fEndColor, fBackColor, fGradient, fDEName, fDEOutput;
 
-		private Majorsilence.Forms.Label label11;
-		private Majorsilence.Forms.Label label12;
-		private Majorsilence.Forms.Label label13;
-		private Majorsilence.Forms.Label label14;
-		private Majorsilence.Forms.TextBox tbPadLeft;
-		private Majorsilence.Forms.TextBox tbPadRight;
-		private Majorsilence.Forms.TextBox tbPadTop;
-		private Majorsilence.Forms.GroupBox grpBoxPadding;
-		private Majorsilence.Forms.GroupBox groupBox1;
-		private Majorsilence.Forms.Label label3;
-		private Majorsilence.Forms.Button bBackColor;
-		private Majorsilence.Forms.Label label10;
-		private Majorsilence.Forms.Label label15;
-		private Majorsilence.Forms.ComboBox cbEndColor;
-		private Majorsilence.Forms.ComboBox cbBackColor;
-		private Majorsilence.Forms.Button bEndColor;
-		private Majorsilence.Forms.ComboBox cbGradient;
-		private Majorsilence.Forms.TextBox tbPadBottom;
-		private Majorsilence.Forms.Label label1;
-		private Majorsilence.Forms.Label label2;
-		private Majorsilence.Forms.TextBox tbDEName;
-		private Majorsilence.Forms.ComboBox cbDEOutput;
-		private Majorsilence.Forms.GroupBox gbXML;
-		private Majorsilence.Forms.Button bValueExpr;
-		private Majorsilence.Forms.Button button1;
-		private Majorsilence.Forms.Button button2;
-		private Majorsilence.Forms.Button button3;
-		private Majorsilence.Forms.Button bGradient;
-		private Majorsilence.Forms.Button bExprBackColor;
-		private Majorsilence.Forms.Button bExprEndColor;
+		private System.Windows.Forms.Label label11;
+		private System.Windows.Forms.Label label12;
+		private System.Windows.Forms.Label label13;
+		private System.Windows.Forms.Label label14;
+		private System.Windows.Forms.TextBox tbPadLeft;
+		private System.Windows.Forms.TextBox tbPadRight;
+		private System.Windows.Forms.TextBox tbPadTop;
+		private System.Windows.Forms.GroupBox grpBoxPadding;
+		private System.Windows.Forms.GroupBox groupBox1;
+		private System.Windows.Forms.Label label3;
+		private System.Windows.Forms.Button bBackColor;
+		private System.Windows.Forms.Label label10;
+		private System.Windows.Forms.Label label15;
+		private System.Windows.Forms.ComboBox cbEndColor;
+		private System.Windows.Forms.ComboBox cbBackColor;
+		private System.Windows.Forms.Button bEndColor;
+		private System.Windows.Forms.ComboBox cbGradient;
+		private System.Windows.Forms.TextBox tbPadBottom;
+		private System.Windows.Forms.Label label1;
+		private System.Windows.Forms.Label label2;
+		private System.Windows.Forms.TextBox tbDEName;
+		private System.Windows.Forms.ComboBox cbDEOutput;
+		private System.Windows.Forms.GroupBox gbXML;
+		private System.Windows.Forms.Button bValueExpr;
+		private System.Windows.Forms.Button button1;
+		private System.Windows.Forms.Button button2;
+		private System.Windows.Forms.Button button3;
+		private System.Windows.Forms.Button bGradient;
+		private System.Windows.Forms.Button bExprBackColor;
+		private System.Windows.Forms.Button bExprEndColor;
 		/// <summary> 
 		/// Required designer variable.
 		/// </summary>
@@ -124,38 +124,38 @@ namespace Majorsilence.Reporting.RdlDesign
 		/// </summary>
 		private void InitializeComponent()
 		{
-			Majorsilence.Forms.ComponentResourceManager resources = new Majorsilence.Forms.ComponentResourceManager(typeof(StyleCtl));
+			System.Windows.Forms.ComponentResourceManager resources = new System.Windows.Forms.ComponentResourceManager(typeof(StyleCtl));
             this.DoubleBuffered = true;
-			this.label11 = new Majorsilence.Forms.Label();
-			this.label12 = new Majorsilence.Forms.Label();
-			this.label13 = new Majorsilence.Forms.Label();
-			this.label14 = new Majorsilence.Forms.Label();
-			this.tbPadLeft = new Majorsilence.Forms.TextBox();
-			this.tbPadRight = new Majorsilence.Forms.TextBox();
-			this.tbPadTop = new Majorsilence.Forms.TextBox();
-			this.tbPadBottom = new Majorsilence.Forms.TextBox();
-			this.grpBoxPadding = new Majorsilence.Forms.GroupBox();
-			this.button3 = new Majorsilence.Forms.Button();
-			this.button2 = new Majorsilence.Forms.Button();
-			this.button1 = new Majorsilence.Forms.Button();
-			this.bValueExpr = new Majorsilence.Forms.Button();
-			this.groupBox1 = new Majorsilence.Forms.GroupBox();
-			this.bGradient = new Majorsilence.Forms.Button();
-			this.bExprBackColor = new Majorsilence.Forms.Button();
-			this.bExprEndColor = new Majorsilence.Forms.Button();
-			this.bEndColor = new Majorsilence.Forms.Button();
-			this.cbBackColor = new Majorsilence.Forms.ComboBox();
-			this.cbEndColor = new Majorsilence.Forms.ComboBox();
-			this.label15 = new Majorsilence.Forms.Label();
-			this.cbGradient = new Majorsilence.Forms.ComboBox();
-			this.label10 = new Majorsilence.Forms.Label();
-			this.bBackColor = new Majorsilence.Forms.Button();
-			this.label3 = new Majorsilence.Forms.Label();
-			this.gbXML = new Majorsilence.Forms.GroupBox();
-			this.cbDEOutput = new Majorsilence.Forms.ComboBox();
-			this.tbDEName = new Majorsilence.Forms.TextBox();
-			this.label2 = new Majorsilence.Forms.Label();
-			this.label1 = new Majorsilence.Forms.Label();
+			this.label11 = new System.Windows.Forms.Label();
+			this.label12 = new System.Windows.Forms.Label();
+			this.label13 = new System.Windows.Forms.Label();
+			this.label14 = new System.Windows.Forms.Label();
+			this.tbPadLeft = new System.Windows.Forms.TextBox();
+			this.tbPadRight = new System.Windows.Forms.TextBox();
+			this.tbPadTop = new System.Windows.Forms.TextBox();
+			this.tbPadBottom = new System.Windows.Forms.TextBox();
+			this.grpBoxPadding = new System.Windows.Forms.GroupBox();
+			this.button3 = new System.Windows.Forms.Button();
+			this.button2 = new System.Windows.Forms.Button();
+			this.button1 = new System.Windows.Forms.Button();
+			this.bValueExpr = new System.Windows.Forms.Button();
+			this.groupBox1 = new System.Windows.Forms.GroupBox();
+			this.bGradient = new System.Windows.Forms.Button();
+			this.bExprBackColor = new System.Windows.Forms.Button();
+			this.bExprEndColor = new System.Windows.Forms.Button();
+			this.bEndColor = new System.Windows.Forms.Button();
+			this.cbBackColor = new System.Windows.Forms.ComboBox();
+			this.cbEndColor = new System.Windows.Forms.ComboBox();
+			this.label15 = new System.Windows.Forms.Label();
+			this.cbGradient = new System.Windows.Forms.ComboBox();
+			this.label10 = new System.Windows.Forms.Label();
+			this.bBackColor = new System.Windows.Forms.Button();
+			this.label3 = new System.Windows.Forms.Label();
+			this.gbXML = new System.Windows.Forms.GroupBox();
+			this.cbDEOutput = new System.Windows.Forms.ComboBox();
+			this.tbDEName = new System.Windows.Forms.TextBox();
+			this.label2 = new System.Windows.Forms.Label();
+			this.label1 = new System.Windows.Forms.Label();
 			this.grpBoxPadding.SuspendLayout();
 			this.groupBox1.SuspendLayout();
 			this.gbXML.SuspendLayout();
@@ -433,7 +433,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			}
 			catch (Exception ex)
 			{
-				MessageBox.Show(ex.Message, string.Format(Strings.StyleCtl_Show_PaddingInvalid, name));
+				Majorsilence.Forms.MessageBox.Show(ex.Message, string.Format(Strings.StyleCtl_Show_PaddingInvalid, name));
 				return false;
 			}
 			return true;
@@ -459,7 +459,7 @@ namespace Majorsilence.Reporting.RdlDesign
             using (FontDialog fd = new FontDialog())
             {
                 fd.ShowColor = true;
-                if (fd.ShowDialog() != DialogResult.OK)
+                if (fd.ShowDialog() != Majorsilence.Forms.DialogResult.OK)
                     return;
             } 
             return;
@@ -473,14 +473,14 @@ namespace Majorsilence.Reporting.RdlDesign
                 cd.FullOpen = true;
                 cd.CustomColors = RdlDesigner.GetCustomColors();
 
-                if (cd.ShowDialog() != DialogResult.OK)
+                if (cd.ShowDialog() != Majorsilence.Forms.DialogResult.OK)
                     return;
 
                 RdlDesigner.SetCustomColors(cd.CustomColors);
                 if (sender == this.bEndColor)
-                    cbEndColor.Text = Majorsilence.Forms.ColorTranslator.ToHtml(cd.Color);
+                    cbEndColor.Text = System.Windows.Forms.ColorTranslator.ToHtml(cd.Color);
                 else if (sender == this.bBackColor)
-                    cbBackColor.Text = Majorsilence.Forms.ColorTranslator.ToHtml(cd.Color);
+                    cbBackColor.Text = System.Windows.Forms.ColorTranslator.ToHtml(cd.Color);
             }
 			return;
 		}
@@ -558,7 +558,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			Button b = sender as Button;
 			if (b == null)
 				return;
-			Control c = null;
+			Majorsilence.Forms.Control c = null;
 			bool bColor=false;
 			switch (b.Tag as string)
 			{
@@ -594,8 +594,8 @@ namespace Majorsilence.Reporting.RdlDesign
 
             using (DialogExprEditor ee = new DialogExprEditor(_Draw, c.Text, sNode, bColor))
             {
-                DialogResult dr = ee.ShowDialog();
-                if (dr == DialogResult.OK)
+                Majorsilence.Forms.DialogResult dr = ee.ShowDialog();
+                if (dr == Majorsilence.Forms.DialogResult.OK)
                     c.Text = ee.Expression;
 
             } 

@@ -1,5 +1,5 @@
 using System;
-using Majorsilence.Forms;
+using System.Windows.Forms;
 using System.ComponentModel;
 using System.Collections;
 
@@ -13,7 +13,7 @@ TabPage _Tab;
 
 		private void InitializeComponent()
 		{
-			Majorsilence.Forms.ComponentResourceManager resources = new Majorsilence.Forms.ComponentResourceManager(typeof(MDIChild));
+			System.Windows.Forms.ComponentResourceManager resources = new System.Windows.Forms.ComponentResourceManager(typeof(MDIChild));
 			this.rdlDesigner = new Majorsilence.Reporting.RdlDesign.RdlEditPreview();
 			this.SuspendLayout();
 			// 

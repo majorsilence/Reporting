@@ -4,7 +4,7 @@ using System.Drawing;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
-using Majorsilence.Forms;
+using System.Windows.Forms;
 using System.Text;
 using System.Xml;
 using Majorsilence.Reporting.Rdl;
@@ -248,7 +248,7 @@ namespace Majorsilence.Reporting.RdlDesign
         {
             // apply the result
             Apply();
-            DialogResult = DialogResult.OK;
+            DialogResult = Majorsilence.Forms.DialogResult.OK;
         }
 
         private void cbDataSets_SelectedIndexChanged(object sender, System.EventArgs e)
@@ -264,7 +264,7 @@ namespace Majorsilence.Reporting.RdlDesign
         private void bRight_Click(object sender, System.EventArgs e)
         {
             // ListBox.SelectedIndexCollection doesn't exist -- SelectedIndices is IEnumerable<int>
-            // in Majorsilence.Forms; materialize it for .Count/ArrayList ctor support below.
+            // in System.Windows.Forms; materialize it for .Count/ArrayList ctor support below.
             List<int> sic = lbFields.SelectedIndices.ToList();
             int count = sic.Count;
             foreach (int i in sic)

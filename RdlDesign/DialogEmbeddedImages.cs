@@ -1,8 +1,8 @@
 using System;
-using Majorsilence.Forms.Drawing;
+using System.Drawing;
 using System.Collections;
 using System.ComponentModel;
-using Majorsilence.Forms;
+using System.Windows.Forms;
 using System.Text;
 using System.Xml;
 using System.IO;
@@ -82,14 +82,14 @@ namespace Majorsilence.Reporting.RdlDesign
         private void bPaste_Click(object sender, System.EventArgs e)
         {
             // Make sure we have an image on the clipboard
-            IDataObject iData = Clipboard.GetDataObject();
+            Majorsilence.Forms.IDataObject iData = Majorsilence.Forms.Clipboard.GetDataObject();
             if (iData == null || !iData.GetDataPresent(DataFormats.Bitmap))
             {
-                MessageBox.Show(this, Strings.DialogEmbeddedImages_ShowE_CopyImageBeforePaste, Strings.DialogEmbeddedImages_ShowE_Image);
+                Majorsilence.Forms.MessageBox.Show(this, Strings.DialogEmbeddedImages_ShowE_CopyImageBeforePaste, Strings.DialogEmbeddedImages_ShowE_Image);
                 return;
             }
 
-            Majorsilence.Forms.Drawing.Bitmap img = (Majorsilence.Forms.Drawing.Bitmap)iData.GetData(DataFormats.Bitmap);
+            System.Drawing.Bitmap img = (System.Drawing.Bitmap)iData.GetData(DataFormats.Bitmap);
 
             // convert the image to the png format and create a base 64	string representation
             string imagedata = GetBase64Image(img);
@@ -117,7 +117,7 @@ namespace Majorsilence.Reporting.RdlDesign
             ofd.Multiselect = true;
             try
             {
-                if (await ofd.ShowDialogAsync(this) != DialogResult.OK)
+                if (await ofd.ShowDialogAsync(this) != Majorsilence.Forms.DialogResult.OK)
                     return;
 
                 // need to create a new embedded image(s)
@@ -135,7 +135,7 @@ namespace Majorsilence.Reporting.RdlDesign
                     }
                     catch (Exception ex)
                     {
-						MessageBox.Show(this, ex.Message, Strings.DialogEmbeddedImages_ShowE_Image);
+						Majorsilence.Forms.MessageBox.Show(this, ex.Message, Strings.DialogEmbeddedImages_ShowE_Image);
                     }
                     finally
                     {
@@ -224,7 +224,7 @@ namespace Majorsilence.Reporting.RdlDesign
             this.pictureImage.Image = GetImage(eiv.ImageData);
         }
 
-        private Image GetImage(string imdata)
+        private Majorsilence.Forms.Drawing.Image GetImage(string imdata)
         {
             byte[] ba = Convert.FromBase64String(imdata);
 
@@ -237,7 +237,7 @@ namespace Majorsilence.Reporting.RdlDesign
             }
             catch (Exception e)
             {
-                MessageBox.Show(this, e.Message, Strings.DialogEmbeddedImages_ShowE_ErrorConvertingImage);
+                Majorsilence.Forms.MessageBox.Show(this, e.Message, Strings.DialogEmbeddedImages_ShowE_ErrorConvertingImage);
             }
             finally
             {
@@ -247,7 +247,7 @@ namespace Majorsilence.Reporting.RdlDesign
             return im;
         }
 
-        private string GetBase64Image(Image img)
+        private string GetBase64Image(Majorsilence.Forms.Drawing.Image img)
         {
             string imagedata = null;
             try
@@ -261,7 +261,7 @@ namespace Majorsilence.Reporting.RdlDesign
             }
             catch (Exception ex)
             {
-				MessageBox.Show(this, ex.Message, Strings.DialogEmbeddedImages_ShowE_Image);
+				Majorsilence.Forms.MessageBox.Show(this, ex.Message, Strings.DialogEmbeddedImages_ShowE_Image);
                 imagedata = null;
             }
             return imagedata;
@@ -298,13 +298,13 @@ namespace Majorsilence.Reporting.RdlDesign
             {
                 if (eiv.Name == null || eiv.Name.Length == 0)
                 {
-					MessageBox.Show(this, Strings.DialogEmbeddedImages_ShowE_NameMustSpecified, Strings.DialogEmbeddedImages_ShowE_Image);
+					Majorsilence.Forms.MessageBox.Show(this, Strings.DialogEmbeddedImages_ShowE_NameMustSpecified, Strings.DialogEmbeddedImages_ShowE_Image);
                     return;
                 }
 
                 if (!ReportNames.IsNameValid(eiv.Name))
                 {
-                    MessageBox.Show(this,
+                    Majorsilence.Forms.MessageBox.Show(this,
 						string.Format(Strings.DialogEmbeddedImages_ShowE_NameInvalid, eiv.Name), Strings.DialogEmbeddedImages_ShowE_Image);
                     return;
                 }
@@ -312,7 +312,7 @@ namespace Majorsilence.Reporting.RdlDesign
                 string name = (string)ht[eiv.Name];
                 if (name != null)
                 {
-                    MessageBox.Show(this,
+                    Majorsilence.Forms.MessageBox.Show(this,
 						string.Format(Strings.DialogEmbeddedImages_ShowE_ImageMustUniqueName, eiv.Name), Strings.DialogEmbeddedImages_ShowE_Image);
                     return;
                 }
@@ -320,7 +320,7 @@ namespace Majorsilence.Reporting.RdlDesign
             }
 
             Apply();
-            DialogResult = DialogResult.OK;
+            DialogResult = Majorsilence.Forms.DialogResult.OK;
         }
 
         private void tbEIName_Validating(object sender, System.ComponentModel.CancelEventArgs e)
@@ -328,7 +328,7 @@ namespace Majorsilence.Reporting.RdlDesign
             if (!ReportNames.IsNameValid(tbEIName.Text))
             {
                 e.Cancel = true;
-                MessageBox.Show(this,
+                Majorsilence.Forms.MessageBox.Show(this,
 					string.Format(Strings.DialogEmbeddedImages_ShowE_NameInvalid, tbEIName.Text), Strings.DialogEmbeddedImages_ShowE_Image);
             }
         }

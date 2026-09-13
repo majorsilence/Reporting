@@ -1,57 +1,57 @@
 using System;
-using Majorsilence.Forms;
+using System.Windows.Forms;
 using System.ComponentModel;
 using System.Collections;
 
 namespace Majorsilence.Reporting.RdlDesign
 {
-    internal partial class DialogDataSources : Majorsilence.Forms.Form
+    internal partial class DialogDataSources : System.Windows.Forms.Form
 	{
 		#region Windows Form Designer generated code
 		DesignXmlDraw _Draw;
-private Majorsilence.Forms.TextBox tbFilename;
-private Majorsilence.Forms.Button bGetFilename;
-private Majorsilence.Forms.ComboBox cbDataProvider;
-private Majorsilence.Forms.TextBox tbConnection;
-private Majorsilence.Forms.CheckBox ckbIntSecurity;
-private Majorsilence.Forms.TextBox tbPrompt;
-private Majorsilence.Forms.Button bOK;
-private Majorsilence.Forms.Button bCancel;
-private Majorsilence.Forms.Button bTestConnection;
-private Majorsilence.Forms.ListBox lbDataSources;
-private Majorsilence.Forms.Button bRemove;
-private Majorsilence.Forms.Button bAdd;
-private Majorsilence.Forms.CheckBox chkSharedDataSource;
-private Majorsilence.Forms.Label label1;
-private Majorsilence.Forms.Label lDataProvider;
-private Majorsilence.Forms.Label lConnectionString;
-private Majorsilence.Forms.Label lPrompt;
-private Majorsilence.Forms.TextBox tbDSName;
-private Majorsilence.Forms.Button bExprConnect;
+private System.Windows.Forms.TextBox tbFilename;
+private System.Windows.Forms.Button bGetFilename;
+private System.Windows.Forms.ComboBox cbDataProvider;
+private System.Windows.Forms.TextBox tbConnection;
+private System.Windows.Forms.CheckBox ckbIntSecurity;
+private System.Windows.Forms.TextBox tbPrompt;
+private System.Windows.Forms.Button bOK;
+private System.Windows.Forms.Button bCancel;
+private System.Windows.Forms.Button bTestConnection;
+private System.Windows.Forms.ListBox lbDataSources;
+private System.Windows.Forms.Button bRemove;
+private System.Windows.Forms.Button bAdd;
+private System.Windows.Forms.CheckBox chkSharedDataSource;
+private System.Windows.Forms.Label label1;
+private System.Windows.Forms.Label lDataProvider;
+private System.Windows.Forms.Label lConnectionString;
+private System.Windows.Forms.Label lPrompt;
+private System.Windows.Forms.TextBox tbDSName;
+private System.Windows.Forms.Button bExprConnect;
 private System.ComponentModel.Container components = null;
 
 		private void InitializeComponent()
 		{
-			Majorsilence.Forms.ComponentResourceManager resources = new Majorsilence.Forms.ComponentResourceManager(typeof(DialogDataSources));
-			this.tbFilename = new Majorsilence.Forms.TextBox();
-			this.bGetFilename = new Majorsilence.Forms.Button();
-			this.lDataProvider = new Majorsilence.Forms.Label();
-			this.cbDataProvider = new Majorsilence.Forms.ComboBox();
-			this.lConnectionString = new Majorsilence.Forms.Label();
-			this.tbConnection = new Majorsilence.Forms.TextBox();
-			this.ckbIntSecurity = new Majorsilence.Forms.CheckBox();
-			this.lPrompt = new Majorsilence.Forms.Label();
-			this.tbPrompt = new Majorsilence.Forms.TextBox();
-			this.bOK = new Majorsilence.Forms.Button();
-			this.bCancel = new Majorsilence.Forms.Button();
-			this.bTestConnection = new Majorsilence.Forms.Button();
-			this.lbDataSources = new Majorsilence.Forms.ListBox();
-			this.bRemove = new Majorsilence.Forms.Button();
-			this.bAdd = new Majorsilence.Forms.Button();
-			this.chkSharedDataSource = new Majorsilence.Forms.CheckBox();
-			this.label1 = new Majorsilence.Forms.Label();
-			this.tbDSName = new Majorsilence.Forms.TextBox();
-			this.bExprConnect = new Majorsilence.Forms.Button();
+			System.Windows.Forms.ComponentResourceManager resources = new System.Windows.Forms.ComponentResourceManager(typeof(DialogDataSources));
+			this.tbFilename = new System.Windows.Forms.TextBox();
+			this.bGetFilename = new System.Windows.Forms.Button();
+			this.lDataProvider = new System.Windows.Forms.Label();
+			this.cbDataProvider = new System.Windows.Forms.ComboBox();
+			this.lConnectionString = new System.Windows.Forms.Label();
+			this.tbConnection = new System.Windows.Forms.TextBox();
+			this.ckbIntSecurity = new System.Windows.Forms.CheckBox();
+			this.lPrompt = new System.Windows.Forms.Label();
+			this.tbPrompt = new System.Windows.Forms.TextBox();
+			this.bOK = new System.Windows.Forms.Button();
+			this.bCancel = new System.Windows.Forms.Button();
+			this.bTestConnection = new System.Windows.Forms.Button();
+			this.lbDataSources = new System.Windows.Forms.ListBox();
+			this.bRemove = new System.Windows.Forms.Button();
+			this.bAdd = new System.Windows.Forms.Button();
+			this.chkSharedDataSource = new System.Windows.Forms.CheckBox();
+			this.label1 = new System.Windows.Forms.Label();
+			this.tbDSName = new System.Windows.Forms.TextBox();
+			this.bExprConnect = new System.Windows.Forms.Button();
 			this.SuspendLayout();
 			// 
 			// tbFilename

@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
 using System.Data;
-using Majorsilence.Forms;
+using System.Windows.Forms;
 using System.Xml;
 
 //This NEW class allows the modifying of static series on a chart. GJL & AJM
@@ -98,7 +98,7 @@ namespace Majorsilence.Reporting.RdlDesign
                 DialogExprEditor ee = new DialogExprEditor(_Draw, txt.Text,_ReportItems[0] , false);
                 try
                 {
-                    if (ee.ShowDialog() == DialogResult.OK)
+                    if (ee.ShowDialog() == Majorsilence.Forms.DialogResult.OK)
                     {                 
                         txt.Text = ee.Expression;
                     }

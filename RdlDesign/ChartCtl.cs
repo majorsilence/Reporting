@@ -4,7 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
-using Majorsilence.Forms;
+using System.Windows.Forms;
 using System.Xml;
 
 namespace Majorsilence.Reporting.RdlDesign
@@ -12,7 +12,7 @@ namespace Majorsilence.Reporting.RdlDesign
 	/// <summary>
 	/// Summary description for ChartCtl.
 	/// </summary>
-	internal class ChartCtl : Majorsilence.Forms.UserControl, IProperty
+	internal class ChartCtl : System.Windows.Forms.UserControl, IProperty
 	{
         private List<XmlNode> _ReportItems;
 		private DesignXmlDraw _Draw;
@@ -21,27 +21,27 @@ namespace Majorsilence.Reporting.RdlDesign
         bool fNoRows, fDataSet, fPageBreakStart, fPageBreakEnd, tooltipYFormat, tooltipXFormat;
 		bool fChartData;
         
-		private Majorsilence.Forms.Label label1;
-		private Majorsilence.Forms.Label label2;
-		private Majorsilence.Forms.Label label3;
-		private Majorsilence.Forms.Label label4;
-		private Majorsilence.Forms.ComboBox cbChartType;
-		private Majorsilence.Forms.ComboBox cbSubType;
-		private Majorsilence.Forms.ComboBox cbPalette;
-		private Majorsilence.Forms.ComboBox cbRenderElement;
-		private Majorsilence.Forms.Label label5;
-		private Majorsilence.Forms.NumericUpDown tbPercentWidth;
-		private Majorsilence.Forms.Label label6;
-		private Majorsilence.Forms.TextBox tbNoRows;
-		private Majorsilence.Forms.Label label7;
-		private Majorsilence.Forms.ComboBox cbDataSet;
-		private Majorsilence.Forms.CheckBox chkPageBreakStart;
-		private Majorsilence.Forms.CheckBox chkPageBreakEnd;
-        private Majorsilence.Forms.ComboBox cbChartData;
+		private System.Windows.Forms.Label label1;
+		private System.Windows.Forms.Label label2;
+		private System.Windows.Forms.Label label3;
+		private System.Windows.Forms.Label label4;
+		private System.Windows.Forms.ComboBox cbChartType;
+		private System.Windows.Forms.ComboBox cbSubType;
+		private System.Windows.Forms.ComboBox cbPalette;
+		private System.Windows.Forms.ComboBox cbRenderElement;
+		private System.Windows.Forms.Label label5;
+		private System.Windows.Forms.NumericUpDown tbPercentWidth;
+		private System.Windows.Forms.Label label6;
+		private System.Windows.Forms.TextBox tbNoRows;
+		private System.Windows.Forms.Label label7;
+		private System.Windows.Forms.ComboBox cbDataSet;
+		private System.Windows.Forms.CheckBox chkPageBreakStart;
+		private System.Windows.Forms.CheckBox chkPageBreakEnd;
+        private System.Windows.Forms.ComboBox cbChartData;
         private ComboBox cbDataLabel;
         private CheckBox chkDataLabel;
         private Button bDataLabelExpr;
-		private Majorsilence.Forms.Label lData1;
+		private System.Windows.Forms.Label lData1;
         private ComboBox cbChartData2;
         private Label lData2;
         private ComboBox cbChartData3;
@@ -229,48 +229,48 @@ namespace Majorsilence.Reporting.RdlDesign
 		/// </summary>
 		private void InitializeComponent()
 		{
-			Majorsilence.Forms.ComponentResourceManager resources = new Majorsilence.Forms.ComponentResourceManager(typeof(ChartCtl));
+			System.Windows.Forms.ComponentResourceManager resources = new System.Windows.Forms.ComponentResourceManager(typeof(ChartCtl));
             this.DoubleBuffered = true;
-			this.label1 = new Majorsilence.Forms.Label();
-			this.label2 = new Majorsilence.Forms.Label();
-			this.label3 = new Majorsilence.Forms.Label();
-			this.label4 = new Majorsilence.Forms.Label();
-			this.cbChartType = new Majorsilence.Forms.ComboBox();
-			this.cbSubType = new Majorsilence.Forms.ComboBox();
-			this.cbPalette = new Majorsilence.Forms.ComboBox();
-			this.cbRenderElement = new Majorsilence.Forms.ComboBox();
-			this.label5 = new Majorsilence.Forms.Label();
-			this.tbPercentWidth = new Majorsilence.Forms.NumericUpDown();
-			this.label6 = new Majorsilence.Forms.Label();
-			this.tbNoRows = new Majorsilence.Forms.TextBox();
-			this.label7 = new Majorsilence.Forms.Label();
-			this.cbDataSet = new Majorsilence.Forms.ComboBox();
-			this.chkPageBreakStart = new Majorsilence.Forms.CheckBox();
-			this.chkPageBreakEnd = new Majorsilence.Forms.CheckBox();
-			this.cbChartData = new Majorsilence.Forms.ComboBox();
-			this.cbDataLabel = new Majorsilence.Forms.ComboBox();
-			this.chkDataLabel = new Majorsilence.Forms.CheckBox();
-			this.bDataLabelExpr = new Majorsilence.Forms.Button();
-			this.lData1 = new Majorsilence.Forms.Label();
-			this.cbChartData2 = new Majorsilence.Forms.ComboBox();
-			this.lData2 = new Majorsilence.Forms.Label();
-			this.cbChartData3 = new Majorsilence.Forms.ComboBox();
-			this.lData3 = new Majorsilence.Forms.Label();
-			this.bDataExpr = new Majorsilence.Forms.Button();
-			this.bDataExpr3 = new Majorsilence.Forms.Button();
-			this.bDataExpr2 = new Majorsilence.Forms.Button();
-			this.cbVector = new Majorsilence.Forms.ComboBox();
-			this.btnVectorExp = new Majorsilence.Forms.Button();
-			this.label8 = new Majorsilence.Forms.Label();
-			this.button1 = new Majorsilence.Forms.Button();
-			this.button2 = new Majorsilence.Forms.Button();
-			this.button3 = new Majorsilence.Forms.Button();
-			this.chkToolTip = new Majorsilence.Forms.CheckBox();
-			this.checkBox1 = new Majorsilence.Forms.CheckBox();
-			this.txtYToolFormat = new Majorsilence.Forms.TextBox();
-			this.txtXToolFormat = new Majorsilence.Forms.TextBox();
-			this.label9 = new Majorsilence.Forms.Label();
-			this.label10 = new Majorsilence.Forms.Label();
+			this.label1 = new System.Windows.Forms.Label();
+			this.label2 = new System.Windows.Forms.Label();
+			this.label3 = new System.Windows.Forms.Label();
+			this.label4 = new System.Windows.Forms.Label();
+			this.cbChartType = new System.Windows.Forms.ComboBox();
+			this.cbSubType = new System.Windows.Forms.ComboBox();
+			this.cbPalette = new System.Windows.Forms.ComboBox();
+			this.cbRenderElement = new System.Windows.Forms.ComboBox();
+			this.label5 = new System.Windows.Forms.Label();
+			this.tbPercentWidth = new System.Windows.Forms.NumericUpDown();
+			this.label6 = new System.Windows.Forms.Label();
+			this.tbNoRows = new System.Windows.Forms.TextBox();
+			this.label7 = new System.Windows.Forms.Label();
+			this.cbDataSet = new System.Windows.Forms.ComboBox();
+			this.chkPageBreakStart = new System.Windows.Forms.CheckBox();
+			this.chkPageBreakEnd = new System.Windows.Forms.CheckBox();
+			this.cbChartData = new System.Windows.Forms.ComboBox();
+			this.cbDataLabel = new System.Windows.Forms.ComboBox();
+			this.chkDataLabel = new System.Windows.Forms.CheckBox();
+			this.bDataLabelExpr = new System.Windows.Forms.Button();
+			this.lData1 = new System.Windows.Forms.Label();
+			this.cbChartData2 = new System.Windows.Forms.ComboBox();
+			this.lData2 = new System.Windows.Forms.Label();
+			this.cbChartData3 = new System.Windows.Forms.ComboBox();
+			this.lData3 = new System.Windows.Forms.Label();
+			this.bDataExpr = new System.Windows.Forms.Button();
+			this.bDataExpr3 = new System.Windows.Forms.Button();
+			this.bDataExpr2 = new System.Windows.Forms.Button();
+			this.cbVector = new System.Windows.Forms.ComboBox();
+			this.btnVectorExp = new System.Windows.Forms.Button();
+			this.label8 = new System.Windows.Forms.Label();
+			this.button1 = new System.Windows.Forms.Button();
+			this.button2 = new System.Windows.Forms.Button();
+			this.button3 = new System.Windows.Forms.Button();
+			this.chkToolTip = new System.Windows.Forms.CheckBox();
+			this.checkBox1 = new System.Windows.Forms.CheckBox();
+			this.txtYToolFormat = new System.Windows.Forms.TextBox();
+			this.txtXToolFormat = new System.Windows.Forms.TextBox();
+			this.label9 = new System.Windows.Forms.Label();
+			this.label10 = new System.Windows.Forms.Label();
 			((System.ComponentModel.ISupportInitialize)(this.tbPercentWidth)).BeginInit();
 			this.SuspendLayout();
 			// 
@@ -837,7 +837,7 @@ namespace Majorsilence.Reporting.RdlDesign
             Button bs = sender as Button;
             if (bs == null)
                 return;
-            Control ctl = null; 
+            Majorsilence.Forms.Control ctl = null; 
             switch (bs.Tag as string)
             {
                 case "d1":
@@ -872,8 +872,8 @@ namespace Majorsilence.Reporting.RdlDesign
             DialogExprEditor ee = new DialogExprEditor(_Draw, ctl.Text, _ReportItems[0], false);
             try
             {
-                DialogResult dlgr = ee.ShowDialog();
-                if (dlgr == DialogResult.OK)
+                Majorsilence.Forms.DialogResult dlgr = ee.ShowDialog();
+                if (dlgr == Majorsilence.Forms.DialogResult.OK)
                 {
                     ctl.Text = ee.Expression;
                     fChartData = true;
@@ -895,7 +895,7 @@ namespace Majorsilence.Reporting.RdlDesign
             DialogExprEditor ee = new DialogExprEditor(_Draw, cbDataLabel.Text,_ReportItems[0] , false);
             try
             {
-                if (ee.ShowDialog() == DialogResult.OK)
+                if (ee.ShowDialog() == Majorsilence.Forms.DialogResult.OK)
                 {                 
                     cbDataLabel.Text = ee.Expression;
                 }

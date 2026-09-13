@@ -1,36 +1,36 @@
 using System;
-using Majorsilence.Forms;
+using System.Windows.Forms;
 using System.ComponentModel;
 using System.Collections;
 
 namespace Majorsilence.Reporting.RdlDesign
 {
-    public partial class DialogAbout : Majorsilence.Forms.Form
+    public partial class DialogAbout : System.Windows.Forms.Form
 	{
 		#region Windows Form Designer generated code
-		private Majorsilence.Forms.Button bOK;
-private Majorsilence.Forms.TextBox tbLicense;
-private Majorsilence.Forms.LinkLabel linkLabel3;
-private Majorsilence.Forms.LinkLabel linkLabel4;
-private Majorsilence.Forms.Label label5;
-private Majorsilence.Forms.Label label6;
-private Majorsilence.Forms.Label label8;
-private Majorsilence.Forms.Label lVersion;
-private Majorsilence.Forms.Label lVMVersion;
+		private System.Windows.Forms.Button bOK;
+private System.Windows.Forms.TextBox tbLicense;
+private System.Windows.Forms.LinkLabel linkLabel3;
+private System.Windows.Forms.LinkLabel linkLabel4;
+private System.Windows.Forms.Label label5;
+private System.Windows.Forms.Label label6;
+private System.Windows.Forms.Label label8;
+private System.Windows.Forms.Label lVersion;
+private System.Windows.Forms.Label lVMVersion;
 private System.ComponentModel.Container components = null;
 
 		private void InitializeComponent()
 		{
-            Majorsilence.Forms.ComponentResourceManager resources = new Majorsilence.Forms.ComponentResourceManager(typeof(DialogAbout));
-            this.bOK = new Majorsilence.Forms.Button();
-            this.tbLicense = new Majorsilence.Forms.TextBox();
-            this.linkLabel3 = new Majorsilence.Forms.LinkLabel();
-            this.linkLabel4 = new Majorsilence.Forms.LinkLabel();
-            this.label5 = new Majorsilence.Forms.Label();
-            this.label6 = new Majorsilence.Forms.Label();
-            this.lVersion = new Majorsilence.Forms.Label();
-            this.label8 = new Majorsilence.Forms.Label();
-            this.lVMVersion = new Majorsilence.Forms.Label();
+            System.Windows.Forms.ComponentResourceManager resources = new System.Windows.Forms.ComponentResourceManager(typeof(DialogAbout));
+            this.bOK = new System.Windows.Forms.Button();
+            this.tbLicense = new System.Windows.Forms.TextBox();
+            this.linkLabel3 = new System.Windows.Forms.LinkLabel();
+            this.linkLabel4 = new System.Windows.Forms.LinkLabel();
+            this.label5 = new System.Windows.Forms.Label();
+            this.label6 = new System.Windows.Forms.Label();
+            this.lVersion = new System.Windows.Forms.Label();
+            this.label8 = new System.Windows.Forms.Label();
+            this.lVMVersion = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // bOK

@@ -3,7 +3,7 @@ using System;
 using System.Collections;
 using System.ComponentModel;
 using System.Data;
-using Majorsilence.Forms;
+using System.Windows.Forms;
 using System.Xml;
 using System.Text;
 using System.IO;
@@ -16,7 +16,7 @@ namespace Majorsilence.Reporting.RdlDesign
 	/// Control supports the properties for DataSet/Rows elements.  This is an extension to 
 	/// the RDL specification allowing data to be defined within a report.
 	/// </summary>
-	internal partial class DataSetRowsCtl : Majorsilence.Forms.UserControl, IProperty
+	internal partial class DataSetRowsCtl : System.Windows.Forms.UserControl, IProperty
 	{
 		private DesignXmlDraw _Draw;
 		private DataSetValues _dsv;
@@ -129,9 +129,9 @@ namespace Majorsilence.Reporting.RdlDesign
                         {
                             if (!bSkipMsg)
                             {
-                                if (MessageBox.Show(string.Format(Strings.DataSetRowsCtl_ShowB_UnableConvert,
+                                if (Majorsilence.Forms.MessageBox.Show(string.Format(Strings.DataSetRowsCtl_ShowB_UnableConvert,
                                         dc.DataType, dNode.InnerText, e.Message) + Environment.NewLine + Strings.DataSetRowsCtl_ShowB_WantSeeErrors,
-                                        Strings.DataSetRowsCtl_ShowB_ErrorReadingDataRows, MessageBoxButtons.YesNo) == DialogResult.No)
+                                        Strings.DataSetRowsCtl_ShowB_ErrorReadingDataRows, Majorsilence.Forms.MessageBoxButtons.YesNo) == Majorsilence.Forms.DialogResult.No)
                                     bSkipMsg = true;
                             }
                             rowValues[col] = dNode.InnerText;
@@ -148,7 +148,7 @@ namespace Majorsilence.Reporting.RdlDesign
 		{
 			if (chkRowsFile.Checked && tbRowsFile.Text.Length == 0)
 			{
-				MessageBox.Show(Strings.DataSetRowsCtl_ShowC_FileNameRequired);
+				Majorsilence.Forms.MessageBox.Show(Strings.DataSetRowsCtl_ShowC_FileNameRequired);
 				return false;
 			}
 			return true;
@@ -245,7 +245,7 @@ namespace Majorsilence.Reporting.RdlDesign
 
             try
             {
-                if (ofd.ShowDialog() == DialogResult.OK)
+                if (ofd.ShowDialog() == Majorsilence.Forms.DialogResult.OK)
                 {
                     string file = Path.GetFileName(ofd.FileName);
 
@@ -363,7 +363,7 @@ namespace Majorsilence.Reporting.RdlDesign
 				}
 				if (datasource == null)
 				{
-					MessageBox.Show(string.Format(Strings.DataSetRowsCtl_Show_DatasourceNotFound, _dsv.DataSourceName), Strings.DataSetRowsCtl_Show_LoadFailed);
+					Majorsilence.Forms.MessageBox.Show(string.Format(Strings.DataSetRowsCtl_Show_DatasourceNotFound, _dsv.DataSourceName), Strings.DataSetRowsCtl_Show_LoadFailed);
 					return;
 				}
                 // get the connection information
@@ -374,13 +374,13 @@ namespace Majorsilence.Reporting.RdlDesign
                 if (dataSourceReference != null)
                 {
                     // Was: walk _Draw.Parent looking for an MDIChild then an RdlDesigner ancestor
-                    // -- Form isn't Control-derived in Majorsilence.Forms, so that chain can never
+                    // -- Form isn't Control-derived in System.Windows.Forms, so that chain can never
                     // reach either (see DesignerUtility.GetConnnectionInfo's identical fix).
                     MDIChild mc = _Draw.FindForm() as MDIChild;
                     RdlDesigner rd = mc?.MdiParent as RdlDesigner;
                     if (rd == null || mc == null || mc.SourceFile == null)
                     {
-                        MessageBox.Show(Strings.DataSetRowsCtl_ShowC_UnableLocateDSR);
+                        Majorsilence.Forms.MessageBox.Show(Strings.DataSetRowsCtl_ShowC_UnableLocateDSR);
                         return;
                     }
                     Uri filename = new Uri(Path.GetDirectoryName(mc.SourceFile.LocalPath) + Path.DirectorySeparatorChar + dataSourceReference);
@@ -402,7 +402,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			}
 			catch (Exception ex)
 			{
-				MessageBox.Show(ex.Message, Strings.DataSetRowsCtl_Show_LoadFailed);
+				Majorsilence.Forms.MessageBox.Show(ex.Message, Strings.DataSetRowsCtl_Show_LoadFailed);
 			}
 		}
 	}

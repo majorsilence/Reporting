@@ -1,31 +1,31 @@
 using System;
-using Majorsilence.Forms;
+using System.Windows.Forms;
 using System.ComponentModel;
 using System.Collections;
 
 namespace Majorsilence.Reporting.RdlDesign
 {
-    internal partial class PropertyDialog : Majorsilence.Forms.Form
+    internal partial class PropertyDialog : System.Windows.Forms.Form
 	{
 		#region Windows Form Designer generated code
 		private DesignXmlDraw _Draw;
-private Majorsilence.Forms.Panel panel1;
-private Majorsilence.Forms.Button bCancel;
-private Majorsilence.Forms.Button bOK;
-private Majorsilence.Forms.Button bApply;
-private Majorsilence.Forms.TabControl tcProps;
-private Majorsilence.Forms.Button bDelete;
+private System.Windows.Forms.Panel panel1;
+private System.Windows.Forms.Button bCancel;
+private System.Windows.Forms.Button bOK;
+private System.Windows.Forms.Button bApply;
+private System.Windows.Forms.TabControl tcProps;
+private System.Windows.Forms.Button bDelete;
 private System.ComponentModel.Container components = null;
 
 		private void InitializeComponent()
 		{
-            Majorsilence.Forms.ComponentResourceManager resources = new Majorsilence.Forms.ComponentResourceManager(typeof(PropertyDialog));
-            this.panel1 = new Majorsilence.Forms.Panel();
-            this.bDelete = new Majorsilence.Forms.Button();
-            this.bApply = new Majorsilence.Forms.Button();
-            this.bOK = new Majorsilence.Forms.Button();
-            this.bCancel = new Majorsilence.Forms.Button();
-            this.tcProps = new Majorsilence.Forms.TabControl();
+            System.Windows.Forms.ComponentResourceManager resources = new System.Windows.Forms.ComponentResourceManager(typeof(PropertyDialog));
+            this.panel1 = new System.Windows.Forms.Panel();
+            this.bDelete = new System.Windows.Forms.Button();
+            this.bApply = new System.Windows.Forms.Button();
+            this.bOK = new System.Windows.Forms.Button();
+            this.bCancel = new System.Windows.Forms.Button();
+            this.tcProps = new System.Windows.Forms.TabControl();
             this.panel1.SuspendLayout();
             this.SuspendLayout();
             // 

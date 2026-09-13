@@ -2,7 +2,7 @@
 using System;
 using System.Collections;
 using System.ComponentModel;
-using Majorsilence.Forms;
+using System.Windows.Forms;
 using System.Xml;
 using System.Text;
 using System.Reflection;
@@ -42,7 +42,7 @@ namespace Majorsilence.Reporting.RdlDesign
                 if (op == cbOperator.Text)
                     return;
             }
-            MessageBox.Show(string.Format(Strings.DialogFilterOperator_Show_OperatorInList, cbOperator.Text), Strings.DialogFilterOperator_Show_PickFilterOperator);
+            Majorsilence.Forms.MessageBox.Show(string.Format(Strings.DialogFilterOperator_Show_OperatorInList, cbOperator.Text), Strings.DialogFilterOperator_Show_PickFilterOperator);
             e.Cancel = true;
         }
 

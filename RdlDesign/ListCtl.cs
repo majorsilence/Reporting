@@ -4,7 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
-using Majorsilence.Forms;
+using System.Windows.Forms;
 using System.Xml;
 
 namespace Majorsilence.Reporting.RdlDesign
@@ -12,23 +12,23 @@ namespace Majorsilence.Reporting.RdlDesign
 	/// <summary>
 	/// Summary description for ReportCtl.
 	/// </summary>
-	internal class ListCtl : Majorsilence.Forms.UserControl, IProperty
+	internal class ListCtl : System.Windows.Forms.UserControl, IProperty
 	{
         private List<XmlNode> _ReportItems;
 		private DesignXmlDraw _Draw;
 		bool fDataSet, fPBBefore, fPBAfter, fNoRows, fDataInstanceElementOutput, fDataInstanceName;
-		private Majorsilence.Forms.Label label2;
-		private Majorsilence.Forms.ComboBox cbDataSet;
-		private Majorsilence.Forms.GroupBox groupBox1;
-		private Majorsilence.Forms.CheckBox chkPBBefore;
-		private Majorsilence.Forms.CheckBox chkPBAfter;
-		private Majorsilence.Forms.Button bGroups;
-		private Majorsilence.Forms.Label label1;
-		private Majorsilence.Forms.TextBox tbNoRows;
-		private Majorsilence.Forms.TextBox tbDataInstanceName;
-		private Majorsilence.Forms.CheckBox chkXmlInstances;
-		private Majorsilence.Forms.Label label3;
-		private Majorsilence.Forms.GroupBox groupBox2;
+		private System.Windows.Forms.Label label2;
+		private System.Windows.Forms.ComboBox cbDataSet;
+		private System.Windows.Forms.GroupBox groupBox1;
+		private System.Windows.Forms.CheckBox chkPBBefore;
+		private System.Windows.Forms.CheckBox chkPBAfter;
+		private System.Windows.Forms.Button bGroups;
+		private System.Windows.Forms.Label label1;
+		private System.Windows.Forms.TextBox tbNoRows;
+		private System.Windows.Forms.TextBox tbDataInstanceName;
+		private System.Windows.Forms.CheckBox chkXmlInstances;
+		private System.Windows.Forms.Label label3;
+		private System.Windows.Forms.GroupBox groupBox2;
 		/// <summary> 
 		/// Required designer variable.
 		/// </summary>
@@ -84,20 +84,20 @@ namespace Majorsilence.Reporting.RdlDesign
 		/// </summary>
 		private void InitializeComponent()
 		{
-			Majorsilence.Forms.ComponentResourceManager resources = new Majorsilence.Forms.ComponentResourceManager(typeof(ListCtl));
+			System.Windows.Forms.ComponentResourceManager resources = new System.Windows.Forms.ComponentResourceManager(typeof(ListCtl));
             this.DoubleBuffered = true;
-			this.label2 = new Majorsilence.Forms.Label();
-			this.cbDataSet = new Majorsilence.Forms.ComboBox();
-			this.groupBox1 = new Majorsilence.Forms.GroupBox();
-			this.chkPBAfter = new Majorsilence.Forms.CheckBox();
-			this.chkPBBefore = new Majorsilence.Forms.CheckBox();
-			this.bGroups = new Majorsilence.Forms.Button();
-			this.label1 = new Majorsilence.Forms.Label();
-			this.tbNoRows = new Majorsilence.Forms.TextBox();
-			this.tbDataInstanceName = new Majorsilence.Forms.TextBox();
-			this.chkXmlInstances = new Majorsilence.Forms.CheckBox();
-			this.label3 = new Majorsilence.Forms.Label();
-			this.groupBox2 = new Majorsilence.Forms.GroupBox();
+			this.label2 = new System.Windows.Forms.Label();
+			this.cbDataSet = new System.Windows.Forms.ComboBox();
+			this.groupBox1 = new System.Windows.Forms.GroupBox();
+			this.chkPBAfter = new System.Windows.Forms.CheckBox();
+			this.chkPBBefore = new System.Windows.Forms.CheckBox();
+			this.bGroups = new System.Windows.Forms.Button();
+			this.label1 = new System.Windows.Forms.Label();
+			this.tbNoRows = new System.Windows.Forms.TextBox();
+			this.tbDataInstanceName = new System.Windows.Forms.TextBox();
+			this.chkXmlInstances = new System.Windows.Forms.CheckBox();
+			this.label3 = new System.Windows.Forms.Label();
+			this.groupBox2 = new System.Windows.Forms.GroupBox();
 			this.groupBox1.SuspendLayout();
 			this.groupBox2.SuspendLayout();
 			this.SuspendLayout();
@@ -262,8 +262,8 @@ namespace Majorsilence.Reporting.RdlDesign
 			PropertyDialog pd = new PropertyDialog(_Draw, _ReportItems, PropertyTypeEnum.Grouping);
             try
             {
-                DialogResult dr = pd.ShowDialog();
-                if (pd.Changed || dr == DialogResult.OK)
+                Majorsilence.Forms.DialogResult dr = pd.ShowDialog();
+                if (pd.Changed || dr == Majorsilence.Forms.DialogResult.OK)
                 {
                     //				_DrawPanel.Invalidate();   TODO need to force change somehow?????
                 }

@@ -3,7 +3,7 @@ using System;
 using System.Collections;
 using System.ComponentModel;
 using System.Data;
-using Majorsilence.Forms;
+using System.Windows.Forms;
 using System.Xml;
 using System.Text;
 using System.IO;
@@ -14,7 +14,7 @@ namespace Majorsilence.Reporting.RdlDesign
 	/// <summary>
 	/// QueryParametersCtl provides values for the DataSet Query QueryParameters rdl elements
 	/// </summary>
-	internal partial class QueryParametersCtl : Majorsilence.Forms.UserControl, IProperty
+	internal partial class QueryParametersCtl : System.Windows.Forms.UserControl, IProperty
 	{
 		private DesignXmlDraw _Draw;
 		private DataSetValues _dsv;
@@ -49,7 +49,7 @@ namespace Majorsilence.Reporting.RdlDesign
         {
             if (dgParms.CurrentCell != null)
             {
-                DataGridViewCell dgc = dgParms.CurrentCell;
+                Majorsilence.Forms.DataGridViewCell dgc = dgParms.CurrentCell;
                 if (dgc.ColumnIndex == 1)
                 {
                     string cv = dgc.Value as string;
@@ -57,8 +57,8 @@ namespace Majorsilence.Reporting.RdlDesign
                     DialogExprEditor ee = new DialogExprEditor(_Draw, cv, _dsv.Node, false);
                     try
                     {
-                        DialogResult dlgr = ee.ShowDialog();
-                        if (dlgr == DialogResult.OK)
+                        Majorsilence.Forms.DialogResult dlgr = ee.ShowDialog();
+                        if (dlgr == Majorsilence.Forms.DialogResult.OK)
                             dgc.Value = ee.Expression;
                     }
                     finally

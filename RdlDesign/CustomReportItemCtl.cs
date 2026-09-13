@@ -4,7 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
-using Majorsilence.Forms;
+using System.Windows.Forms;
 using System.Xml;
 using System.Text;
 using System.IO;
@@ -16,7 +16,7 @@ namespace Majorsilence.Reporting.RdlDesign
 	/// <summary>
 	/// CustomReportItemCtl provides property values for a CustomReportItem
 	/// </summary>
-	internal class CustomReportItemCtl : Majorsilence.Forms.UserControl, IProperty
+	internal class CustomReportItemCtl : System.Windows.Forms.UserControl, IProperty
 	{
         private List<XmlNode> _ReportItems;
         private DesignXmlDraw _Draw;
@@ -84,10 +84,10 @@ namespace Majorsilence.Reporting.RdlDesign
 		/// </summary>
 		private void InitializeComponent()
 		{
-			Majorsilence.Forms.ComponentResourceManager resources = new Majorsilence.Forms.ComponentResourceManager(typeof(CustomReportItemCtl));
+			System.Windows.Forms.ComponentResourceManager resources = new System.Windows.Forms.ComponentResourceManager(typeof(CustomReportItemCtl));
             this.DoubleBuffered = true;
-			this.pgProps = new Majorsilence.Forms.PropertyGrid();
-			this.bExpr = new Majorsilence.Forms.Button();
+			this.pgProps = new System.Windows.Forms.PropertyGrid();
+			this.bExpr = new System.Windows.Forms.Button();
 			this.SuspendLayout();
 			// 
 			// pgProps
@@ -144,14 +144,14 @@ namespace Majorsilence.Reporting.RdlDesign
 
         private void bExpr_Click(object sender, EventArgs e)
         {
-            GridItem gi = this.pgProps.SelectedGridItem;
+            Majorsilence.Forms.GridItem gi = this.pgProps.SelectedGridItem;
             
             XmlNode sNode = _ReportItems[0];
             DialogExprEditor ee = new DialogExprEditor(_Draw, gi.Value.ToString(), sNode, false);
             try
             {
-                DialogResult dr = ee.ShowDialog();
-                if (dr == DialogResult.OK)
+                Majorsilence.Forms.DialogResult dr = ee.ShowDialog();
+                if (dr == Majorsilence.Forms.DialogResult.OK)
                 {
                     // There's probably a better way without reflection but this works fine.
                     

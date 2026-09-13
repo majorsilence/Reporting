@@ -1,11 +1,11 @@
 using System;
-using Majorsilence.Forms;
+using System.Windows.Forms;
 using System.ComponentModel;
 using System.Collections;
 
 namespace Majorsilence.Reporting.RdlDesign
 {
-    public partial class DialogExprEditor : Majorsilence.Forms.Form
+    public partial class DialogExprEditor : System.Windows.Forms.Form
 	{
 		#region Windows Form Designer generated code
 		private DesignXmlDraw _Draw;
@@ -21,16 +21,16 @@ private System.ComponentModel.Container components = null;
 
 		private void InitializeComponent()
 		{
-            Majorsilence.Forms.ComponentResourceManager resources = new Majorsilence.Forms.ComponentResourceManager(typeof(DialogExprEditor));
-            this.splitContainer1 = new Majorsilence.Forms.SplitContainer();
-            this.tvOp = new Majorsilence.Forms.TreeView();
-            this.bCopy = new Majorsilence.Forms.Button();
-            this.lOp = new Majorsilence.Forms.Label();
+            System.Windows.Forms.ComponentResourceManager resources = new System.Windows.Forms.ComponentResourceManager(typeof(DialogExprEditor));
+            this.splitContainer1 = new System.Windows.Forms.SplitContainer();
+            this.tvOp = new System.Windows.Forms.TreeView();
+            this.bCopy = new System.Windows.Forms.Button();
+            this.lOp = new System.Windows.Forms.Label();
             this.scintilla1 = new Majorsilence.Reporting.RdlDesign.Syntax.Scintilla();
-            this.lExpr = new Majorsilence.Forms.Label();
-            this.panel1 = new Majorsilence.Forms.Panel();
-            this.bCancel = new Majorsilence.Forms.Button();
-            this.bOK = new Majorsilence.Forms.Button();
+            this.lExpr = new System.Windows.Forms.Label();
+            this.panel1 = new System.Windows.Forms.Panel();
+            this.bCancel = new System.Windows.Forms.Button();
+            this.bOK = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();

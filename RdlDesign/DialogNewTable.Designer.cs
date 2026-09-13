@@ -1,61 +1,61 @@
 using System;
-using Majorsilence.Forms;
+using System.Windows.Forms;
 using System.ComponentModel;
 using System.Collections;
 
 namespace Majorsilence.Reporting.RdlDesign
 {
-    internal partial class DialogNewTable : Majorsilence.Forms.Form
+    internal partial class DialogNewTable : System.Windows.Forms.Form
 	{
 		#region Windows Form Designer generated code
 		private DesignXmlDraw _Draw;
-private Majorsilence.Forms.Button bOK;
-private Majorsilence.Forms.Button bCancel;
-private Majorsilence.Forms.Label label1;
-private Majorsilence.Forms.ComboBox cbDataSets;
-private Majorsilence.Forms.Label label2;
-private Majorsilence.Forms.Label label3;
-private Majorsilence.Forms.ListBox lbFields;
-private Majorsilence.Forms.CheckedListBox lbTableColumns;
-private Majorsilence.Forms.Button bUp;
-private Majorsilence.Forms.Button bDown;
-private Majorsilence.Forms.Button bRight;
-private Majorsilence.Forms.Button bAllRight;
-private Majorsilence.Forms.Button bLeft;
-private Majorsilence.Forms.Button bAllLeft;
-private Majorsilence.Forms.Label label4;
-private Majorsilence.Forms.ComboBox cbGroupColumn;
-private Majorsilence.Forms.CheckBox chkGrandTotals;
-private Majorsilence.Forms.GroupBox groupBox1;
-private Majorsilence.Forms.RadioButton rbHorz;
-private Majorsilence.Forms.RadioButton rbVert;
-private Majorsilence.Forms.RadioButton rbVertComp;
+private System.Windows.Forms.Button bOK;
+private System.Windows.Forms.Button bCancel;
+private System.Windows.Forms.Label label1;
+private System.Windows.Forms.ComboBox cbDataSets;
+private System.Windows.Forms.Label label2;
+private System.Windows.Forms.Label label3;
+private System.Windows.Forms.ListBox lbFields;
+private System.Windows.Forms.CheckedListBox lbTableColumns;
+private System.Windows.Forms.Button bUp;
+private System.Windows.Forms.Button bDown;
+private System.Windows.Forms.Button bRight;
+private System.Windows.Forms.Button bAllRight;
+private System.Windows.Forms.Button bLeft;
+private System.Windows.Forms.Button bAllLeft;
+private System.Windows.Forms.Label label4;
+private System.Windows.Forms.ComboBox cbGroupColumn;
+private System.Windows.Forms.CheckBox chkGrandTotals;
+private System.Windows.Forms.GroupBox groupBox1;
+private System.Windows.Forms.RadioButton rbHorz;
+private System.Windows.Forms.RadioButton rbVert;
+private System.Windows.Forms.RadioButton rbVertComp;
 private System.ComponentModel.Container components = null;
 
 		private void InitializeComponent()
 		{
-			Majorsilence.Forms.ComponentResourceManager resources = new Majorsilence.Forms.ComponentResourceManager(typeof(DialogNewTable));
-			this.bOK = new Majorsilence.Forms.Button();
-			this.bCancel = new Majorsilence.Forms.Button();
-			this.label1 = new Majorsilence.Forms.Label();
-			this.cbDataSets = new Majorsilence.Forms.ComboBox();
-			this.label2 = new Majorsilence.Forms.Label();
-			this.label3 = new Majorsilence.Forms.Label();
-			this.lbFields = new Majorsilence.Forms.ListBox();
-			this.lbTableColumns = new Majorsilence.Forms.CheckedListBox();
-			this.bUp = new Majorsilence.Forms.Button();
-			this.bDown = new Majorsilence.Forms.Button();
-			this.bRight = new Majorsilence.Forms.Button();
-			this.bAllRight = new Majorsilence.Forms.Button();
-			this.bLeft = new Majorsilence.Forms.Button();
-			this.bAllLeft = new Majorsilence.Forms.Button();
-			this.label4 = new Majorsilence.Forms.Label();
-			this.cbGroupColumn = new Majorsilence.Forms.ComboBox();
-			this.chkGrandTotals = new Majorsilence.Forms.CheckBox();
-			this.groupBox1 = new Majorsilence.Forms.GroupBox();
-			this.rbVertComp = new Majorsilence.Forms.RadioButton();
-			this.rbVert = new Majorsilence.Forms.RadioButton();
-			this.rbHorz = new Majorsilence.Forms.RadioButton();
+			System.Windows.Forms.ComponentResourceManager resources = new System.Windows.Forms.ComponentResourceManager(typeof(DialogNewTable));
+			this.bOK = new System.Windows.Forms.Button();
+			this.bCancel = new System.Windows.Forms.Button();
+			this.label1 = new System.Windows.Forms.Label();
+			this.cbDataSets = new System.Windows.Forms.ComboBox();
+			this.label2 = new System.Windows.Forms.Label();
+			this.label3 = new System.Windows.Forms.Label();
+			this.lbFields = new System.Windows.Forms.ListBox();
+			this.lbTableColumns = new System.Windows.Forms.CheckedListBox();
+			this.bUp = new System.Windows.Forms.Button();
+			this.bDown = new System.Windows.Forms.Button();
+			this.bRight = new System.Windows.Forms.Button();
+			this.bAllRight = new System.Windows.Forms.Button();
+			this.bLeft = new System.Windows.Forms.Button();
+			this.bAllLeft = new System.Windows.Forms.Button();
+			this.label4 = new System.Windows.Forms.Label();
+			this.cbGroupColumn = new System.Windows.Forms.ComboBox();
+			this.chkGrandTotals = new System.Windows.Forms.CheckBox();
+			this.groupBox1 = new System.Windows.Forms.GroupBox();
+			this.rbVertComp = new System.Windows.Forms.RadioButton();
+			this.rbVert = new System.Windows.Forms.RadioButton();
+			this.rbHorz = new System.Windows.Forms.RadioButton();
 			this.groupBox1.SuspendLayout();
 			this.SuspendLayout();
 			// 

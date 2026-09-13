@@ -4,7 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
-using Majorsilence.Forms;
+using System.Windows.Forms;
 using System.Xml;
 using Majorsilence.Reporting.RdlDesign.Resources;
 
@@ -13,24 +13,24 @@ namespace Majorsilence.Reporting.RdlDesign
 	/// <summary>
 	/// Summary description for StyleCtl.
 	/// </summary>
-	internal class BackgroundCtl : Majorsilence.Forms.UserControl, IProperty
+	internal class BackgroundCtl : System.Windows.Forms.UserControl, IProperty
 	{
         private List<XmlNode> _ReportItems;
 		private DesignXmlDraw _Draw;
 		// flags for controlling whether syntax changed for a particular property
 		private bool fEndColor, fBackColor, fGradient, fBackImage;
-		private Majorsilence.Forms.GroupBox groupBox1;
-		private Majorsilence.Forms.Label label3;
-		private Majorsilence.Forms.Button bBackColor;
-		private Majorsilence.Forms.Label label10;
-		private Majorsilence.Forms.Label label15;
-		private Majorsilence.Forms.ComboBox cbEndColor;
-		private Majorsilence.Forms.ComboBox cbBackColor;
-		private Majorsilence.Forms.Button bEndColor;
-        private Majorsilence.Forms.ComboBox cbGradient;
-		private Majorsilence.Forms.Button bGradient;
-		private Majorsilence.Forms.Button bExprBackColor;
-        private Majorsilence.Forms.Button bExprEndColor;
+		private System.Windows.Forms.GroupBox groupBox1;
+		private System.Windows.Forms.Label label3;
+		private System.Windows.Forms.Button bBackColor;
+		private System.Windows.Forms.Label label10;
+		private System.Windows.Forms.Label label15;
+		private System.Windows.Forms.ComboBox cbEndColor;
+		private System.Windows.Forms.ComboBox cbBackColor;
+		private System.Windows.Forms.Button bEndColor;
+        private System.Windows.Forms.ComboBox cbGradient;
+		private System.Windows.Forms.Button bGradient;
+		private System.Windows.Forms.Button bExprBackColor;
+        private System.Windows.Forms.Button bExprEndColor;
         private GroupBox groupBox2;
         private Button bExternalExpr;
         private Button bEmbeddedExpr;
@@ -150,37 +150,37 @@ namespace Majorsilence.Reporting.RdlDesign
 		/// </summary>
 		private void InitializeComponent()
 		{
-			Majorsilence.Forms.ComponentResourceManager resources = new Majorsilence.Forms.ComponentResourceManager(typeof(BackgroundCtl));
-			this.groupBox1 = new Majorsilence.Forms.GroupBox();
-			this.bGradient = new Majorsilence.Forms.Button();
-			this.bExprBackColor = new Majorsilence.Forms.Button();
-			this.bExprEndColor = new Majorsilence.Forms.Button();
-			this.bEndColor = new Majorsilence.Forms.Button();
-			this.cbBackColor = new Majorsilence.Forms.ComboBox();
-			this.cbEndColor = new Majorsilence.Forms.ComboBox();
-			this.label15 = new Majorsilence.Forms.Label();
-			this.cbGradient = new Majorsilence.Forms.ComboBox();
-			this.label10 = new Majorsilence.Forms.Label();
-			this.bBackColor = new Majorsilence.Forms.Button();
-			this.label3 = new Majorsilence.Forms.Label();
-			this.groupBox2 = new Majorsilence.Forms.GroupBox();
-			this.bRepeatExpr = new Majorsilence.Forms.Button();
-			this.rbNone = new Majorsilence.Forms.RadioButton();
-			this.cbRepeat = new Majorsilence.Forms.ComboBox();
-			this.label1 = new Majorsilence.Forms.Label();
-			this.bExternalExpr = new Majorsilence.Forms.Button();
-			this.bEmbeddedExpr = new Majorsilence.Forms.Button();
-			this.bMimeExpr = new Majorsilence.Forms.Button();
-			this.bDatabaseExpr = new Majorsilence.Forms.Button();
-			this.bEmbedded = new Majorsilence.Forms.Button();
-			this.bExternal = new Majorsilence.Forms.Button();
-			this.tbValueExternal = new Majorsilence.Forms.TextBox();
-			this.cbValueDatabase = new Majorsilence.Forms.ComboBox();
-			this.cbMIMEType = new Majorsilence.Forms.ComboBox();
-			this.cbValueEmbedded = new Majorsilence.Forms.ComboBox();
-			this.rbDatabase = new Majorsilence.Forms.RadioButton();
-			this.rbEmbedded = new Majorsilence.Forms.RadioButton();
-			this.rbExternal = new Majorsilence.Forms.RadioButton();
+			System.Windows.Forms.ComponentResourceManager resources = new System.Windows.Forms.ComponentResourceManager(typeof(BackgroundCtl));
+			this.groupBox1 = new System.Windows.Forms.GroupBox();
+			this.bGradient = new System.Windows.Forms.Button();
+			this.bExprBackColor = new System.Windows.Forms.Button();
+			this.bExprEndColor = new System.Windows.Forms.Button();
+			this.bEndColor = new System.Windows.Forms.Button();
+			this.cbBackColor = new System.Windows.Forms.ComboBox();
+			this.cbEndColor = new System.Windows.Forms.ComboBox();
+			this.label15 = new System.Windows.Forms.Label();
+			this.cbGradient = new System.Windows.Forms.ComboBox();
+			this.label10 = new System.Windows.Forms.Label();
+			this.bBackColor = new System.Windows.Forms.Button();
+			this.label3 = new System.Windows.Forms.Label();
+			this.groupBox2 = new System.Windows.Forms.GroupBox();
+			this.bRepeatExpr = new System.Windows.Forms.Button();
+			this.rbNone = new System.Windows.Forms.RadioButton();
+			this.cbRepeat = new System.Windows.Forms.ComboBox();
+			this.label1 = new System.Windows.Forms.Label();
+			this.bExternalExpr = new System.Windows.Forms.Button();
+			this.bEmbeddedExpr = new System.Windows.Forms.Button();
+			this.bMimeExpr = new System.Windows.Forms.Button();
+			this.bDatabaseExpr = new System.Windows.Forms.Button();
+			this.bEmbedded = new System.Windows.Forms.Button();
+			this.bExternal = new System.Windows.Forms.Button();
+			this.tbValueExternal = new System.Windows.Forms.TextBox();
+			this.cbValueDatabase = new System.Windows.Forms.ComboBox();
+			this.cbMIMEType = new System.Windows.Forms.ComboBox();
+			this.cbValueEmbedded = new System.Windows.Forms.ComboBox();
+			this.rbDatabase = new System.Windows.Forms.RadioButton();
+			this.rbEmbedded = new System.Windows.Forms.RadioButton();
+			this.rbExternal = new System.Windows.Forms.RadioButton();
 			this.groupBox1.SuspendLayout();
 			this.groupBox2.SuspendLayout();
 			this.SuspendLayout();
@@ -457,14 +457,14 @@ namespace Majorsilence.Reporting.RdlDesign
 
             try
             {
-                if (cd.ShowDialog() != DialogResult.OK)
+                if (cd.ShowDialog() != Majorsilence.Forms.DialogResult.OK)
                     return;
 
                 RdlDesigner.SetCustomColors(cd.CustomColors);
                 if (sender == this.bEndColor)
-                    cbEndColor.Text = Majorsilence.Forms.ColorTranslator.ToHtml(cd.Color);
+                    cbEndColor.Text = System.Windows.Forms.ColorTranslator.ToHtml(cd.Color);
                 else if (sender == this.bBackColor)
-                    cbBackColor.Text = Majorsilence.Forms.ColorTranslator.ToHtml(cd.Color);
+                    cbBackColor.Text = System.Windows.Forms.ColorTranslator.ToHtml(cd.Color);
             }
             finally
             {
@@ -558,7 +558,7 @@ namespace Majorsilence.Reporting.RdlDesign
             ofd.CheckFileExists = true;
             try
             {
-                if (ofd.ShowDialog(this) == DialogResult.OK)
+                if (ofd.ShowDialog(this) == Majorsilence.Forms.DialogResult.OK)
                 {
                     tbValueExternal.Text = ofd.FileName;
                 }
@@ -572,11 +572,11 @@ namespace Majorsilence.Reporting.RdlDesign
         private void bEmbedded_Click(object sender, System.EventArgs e)
         {
             DialogEmbeddedImages dlgEI = new DialogEmbeddedImages(this._Draw);
-            dlgEI.StartPosition = FormStartPosition.CenterParent;
+            dlgEI.StartPosition = Majorsilence.Forms.FormStartPosition.CenterParent;
             try
             {
-                DialogResult dr = dlgEI.ShowDialog();
-                if (dr != DialogResult.OK)
+                Majorsilence.Forms.DialogResult dr = dlgEI.ShowDialog();
+                if (dr != Majorsilence.Forms.DialogResult.OK)
                     return;
 
                 // Populate the EmbeddedImage names
@@ -594,7 +594,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			Button b = sender as Button;
 			if (b == null)
 				return;
-			Control c = null;
+			Majorsilence.Forms.Control c = null;
 			bool bColor=false;
 			switch (b.Tag as string)
 			{
@@ -632,8 +632,8 @@ namespace Majorsilence.Reporting.RdlDesign
 			XmlNode sNode = _ReportItems[0];
 
 			DialogExprEditor ee = new DialogExprEditor(_Draw, c.Text, sNode, bColor);
-			DialogResult dr = ee.ShowDialog();
-			if (dr == DialogResult.OK)
+			Majorsilence.Forms.DialogResult dr = ee.ShowDialog();
+			if (dr == Majorsilence.Forms.DialogResult.OK)
 				c.Text = ee.Expression;
 			return;
 		}

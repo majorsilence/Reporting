@@ -3,10 +3,10 @@ using System;
 using System.Collections;
 using System.ComponentModel;
 using System.Drawing;
-using Majorsilence.Forms.Drawing;
+using System.Drawing;
 using Majorsilence.Forms.Drawing.Drawing2D;
 using Majorsilence.Forms.Drawing.Imaging;
-using Majorsilence.Forms;
+using System.Windows.Forms;
 using System.Globalization;
 using System.Net;
 using System.Xml;
@@ -92,7 +92,7 @@ namespace Majorsilence.Reporting.RdlDesign
             }
         }
         
-		private void DesignRulerPaint(object sender, Majorsilence.Forms.PaintEventArgs e)
+		private void DesignRulerPaint(object sender, System.Windows.Forms.PaintEventArgs e)
         {
 
             _IsMetric = RdlDesign.RdlDesigner.MeasureUnits == "cm" ? true : false;
@@ -123,7 +123,7 @@ namespace Majorsilence.Reporting.RdlDesign
             _Design.Invalidate();
         }
         
-        private void Ruler_DrawHorz(Graphics g)
+        private void Ruler_DrawHorz(Majorsilence.Forms.Drawing.Graphics g)
         {
             float xoff, yoff, xinc;
 
@@ -213,16 +213,16 @@ namespace Majorsilence.Reporting.RdlDesign
             }
         }
 
-        private void Ruler_DrawVert(Graphics g)
+        private void Ruler_DrawVert(Majorsilence.Forms.Drawing.Graphics g)
         {
             StringFormat strFormat = null;
             Font fontOutput = null;
-            SolidBrush sb = null;           // brush for non-ruler portions of ruler
-            SolidBrush bb = null;           // brush for drawing the areas next to band separator
+            Majorsilence.Forms.Drawing.SolidBrush sb = null;           // brush for non-ruler portions of ruler
+            Majorsilence.Forms.Drawing.SolidBrush bb = null;           // brush for drawing the areas next to band separator
             float SectionHeigth = 0f;
 
             g.ScaleTransform(1f, 1f);
-            g.PageUnit = GraphicsUnit.Point;
+            g.PageUnit = Majorsilence.Forms.Drawing.GraphicsUnit.Point;
 
             try
             {
@@ -231,8 +231,8 @@ namespace Majorsilence.Reporting.RdlDesign
                 strFormat.FormatFlags |= StringFormatFlags.NoWrap;
                 strFormat.Alignment = StringAlignment.Near;
                 fontOutput = new Font("Arial", 8, FontStyle.Regular);
-                sb = new SolidBrush(GAPCOLOR);
-                bb = new SolidBrush(Design.SepColor);
+                sb = new Majorsilence.Forms.Drawing.SolidBrush(GAPCOLOR);
+                bb = new Majorsilence.Forms.Drawing.SolidBrush(Design.SepColor);
                 // Go thru the regions
 
                 float sp = Design.PointsY(this.ScrollPosition) * _Design.SCALEY;
@@ -320,7 +320,7 @@ namespace Majorsilence.Reporting.RdlDesign
                     bb.Dispose();
             }
         }
-        private void Ruler_DrawVertPart(Graphics g, Font f, StringFormat df, float offset, float height)
+        private void Ruler_DrawVertPart(Majorsilence.Forms.Drawing.Graphics g, Font f, StringFormat df, float offset, float height)
         {
             float xoff, yoff, yinc, sinc;
             float mod;

@@ -2,11 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
-using Majorsilence.Forms.Drawing;
+using System.Drawing;
 using System.Data;
 using System.Linq;
 using System.Text;
-using Majorsilence.Forms;
+using System.Windows.Forms;
 using Majorsilence.Reporting.RdlDesign.Resources;
 using Majorsilence.Reporting.RdlViewer;
 using Majorsilence.Reporting.Rdl;
@@ -159,9 +159,9 @@ namespace Majorsilence.Reporting.RdlDesign
 
             using (DataSourcePassword dlg = new DataSourcePassword())
             {
-                DialogResult rc = dlg.ShowDialog();
+                Majorsilence.Forms.DialogResult rc = dlg.ShowDialog();
                 bGotPassword = true;
-                if (rc == DialogResult.OK)
+                if (rc == Majorsilence.Forms.DialogResult.OK)
                 {
                     _DataSourceReferencePassword = dlg.PassPhrase;
                 }
@@ -179,12 +179,12 @@ namespace Majorsilence.Reporting.RdlDesign
         {
             using (DialogDatabase dlgDB = new DialogDatabase(this))
             {
-                dlgDB.StartPosition = FormStartPosition.CenterParent;
-                dlgDB.FormBorderStyle = FormBorderStyle.SizableToolWindow;
+                dlgDB.StartPosition = Majorsilence.Forms.FormStartPosition.CenterParent;
+                dlgDB.FormBorderStyle = Majorsilence.Forms.FormBorderStyle.SizableToolWindow;
 
                 // show modally
                 dlgDB.ShowDialog();
-                if (dlgDB.DialogResult == DialogResult.Cancel)
+                if (dlgDB.DialogResult == Majorsilence.Forms.DialogResult.Cancel)
                     return;
                 string rdl = dlgDB.ResultReport;
 
@@ -224,7 +224,7 @@ namespace Majorsilence.Reporting.RdlDesign
             catch (Exception ae)
             {
                 bOK = false;
-                MessageBox.Show(ae.Message + "\r\n" + ae.StackTrace);
+                Majorsilence.Forms.MessageBox.Show(ae.Message + "\r\n" + ae.StackTrace);
                 //				statusBar.Text = "Save of file '" + curFileName + "' failed";
             }
             finally
@@ -306,7 +306,7 @@ namespace Majorsilence.Reporting.RdlDesign
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message);
+                Majorsilence.Forms.MessageBox.Show(ex.Message);
             }
 
        
@@ -429,11 +429,11 @@ namespace Majorsilence.Reporting.RdlDesign
             }
             if (foreColorPicker1 != null)
             {
-                foreColorPicker1.Text = si.Color.IsEmpty ? si.ColorText : Majorsilence.Forms.ColorTranslator.ToHtml(si.Color);
+                foreColorPicker1.Text = si.Color.IsEmpty ? si.ColorText : System.Windows.Forms.ColorTranslator.ToHtml(si.Color);
             }
             if (backColorPicker1 != null)
             {
-                backColorPicker1.Text = si.BackgroundColor.IsEmpty ? si.BackgroundColorText : Majorsilence.Forms.ColorTranslator.ToHtml(si.BackgroundColor);
+                backColorPicker1.Text = si.BackgroundColor.IsEmpty ? si.BackgroundColorText : System.Windows.Forms.ColorTranslator.ToHtml(si.BackgroundColor);
             }
 
             bSuppressChange = false;
@@ -766,7 +766,7 @@ namespace Majorsilence.Reporting.RdlDesign
 
             try
             {
-                if (sfd.ShowDialog(this) != DialogResult.OK)
+                if (sfd.ShowDialog(this) != Majorsilence.Forms.DialogResult.OK)
                     return false;
 
                 // save the report in the requested rendered format 
@@ -774,18 +774,18 @@ namespace Majorsilence.Reporting.RdlDesign
                 // tif can be either in color or black and white; ask user what they want
                 if (type == OutputPresentationType.TIF)
                 {
-                    DialogResult dr = MessageBox.Show(this, Strings.MDIChild_ShowF_WantDisplayColorsInTIF, Strings.MDIChild_ShowF_Export, MessageBoxButtons.YesNoCancel);
-                    if (dr == DialogResult.No)
+                    Majorsilence.Forms.DialogResult dr = Majorsilence.Forms.MessageBox.Show(this, Strings.MDIChild_ShowF_WantDisplayColorsInTIF, Strings.MDIChild_ShowF_Export, Majorsilence.Forms.MessageBoxButtons.YesNoCancel);
+                    if (dr == Majorsilence.Forms.DialogResult.No)
                         type = OutputPresentationType.TIFBW;
-                    else if (dr == DialogResult.Cancel)
+                    else if (dr == Majorsilence.Forms.DialogResult.Cancel)
                         return false;
                 }
                 try { await SaveAsAsync(sfd.FileName, type); }
                 catch (Exception ex)
                 {
-                    MessageBox.Show(this,
+                    Majorsilence.Forms.MessageBox.Show(this,
                         ex.Message, Strings.MDIChild_ShowG_ExportError,
-                        MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        Majorsilence.Forms.MessageBoxButtons.OK, Majorsilence.Forms.MessageBoxIcon.Error);
                     rc = false;
                 }
                 return rc;
@@ -857,7 +857,7 @@ namespace Majorsilence.Reporting.RdlDesign
             ofd.Multiselect = true;
             try
             {
-                if (ofd.ShowDialog(this) == DialogResult.OK)
+                if (ofd.ShowDialog(this) == Majorsilence.Forms.DialogResult.OK)
                 {
    
                     OpenReport(new Uri(ofd.FileName), null);
@@ -899,7 +899,7 @@ namespace Majorsilence.Reporting.RdlDesign
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message);
+                Majorsilence.Forms.MessageBox.Show(ex.Message);
             }
 
 
@@ -916,7 +916,7 @@ namespace Majorsilence.Reporting.RdlDesign
             sfd.FileName = file == null ? "*.rdl" : file.LocalPath;
             try
             {
-                if (sfd.ShowDialog(this) != DialogResult.OK)
+                if (sfd.ShowDialog(this) != Majorsilence.Forms.DialogResult.OK)
                     return false;
 
                 // User wants to save!
@@ -1009,7 +1009,7 @@ namespace Majorsilence.Reporting.RdlDesign
 
         }
 
-        private void ctlEditTextbox_KeyDown(object sender, KeyEventArgs e)
+        private void ctlEditTextbox_KeyDown(object sender, Majorsilence.Forms.KeyEventArgs e)
         {
 
         }
@@ -1119,8 +1119,8 @@ namespace Majorsilence.Reporting.RdlDesign
         }
 
 
-        // No real print-spooler integration under Majorsilence.Forms -- see MIGRATION-NOTES.md
-        // (D2) for the full rationale. Majorsilence.Forms.PrintDialog is a no-op stub with no
+        // No real print-spooler integration under System.Windows.Forms -- see MIGRATION-NOTES.md
+        // (D2) for the full rationale. System.Windows.Forms.PrintDialog is a no-op stub with no
         // real UI, so go straight to "export as PDF" instead of pretending to show one.
         private bool isPrinting = false;
         private async void printToolStripButton2_Click(object sender, EventArgs e)
@@ -1128,7 +1128,7 @@ namespace Majorsilence.Reporting.RdlDesign
 
             if (isPrinting == true)			// already printing
             {
-                MessageBox.Show(Strings.RdlUserControl_Show_PrintOneFile, Strings.RdlUserControl_Show_RDLDesign);
+                Majorsilence.Forms.MessageBox.Show(Strings.RdlUserControl_Show_PrintOneFile, Strings.RdlUserControl_Show_RDLDesign);
                 return;
             }
 
@@ -1140,14 +1140,14 @@ namespace Majorsilence.Reporting.RdlDesign
                     Filter = "PDF files (*.pdf)|*.pdf",
                     FileName = Path.GetFileNameWithoutExtension(SourceFile.LocalPath) + ".pdf",
                 };
-                if (await sfd.ShowDialogAsync(this.FindForm()) == DialogResult.OK)
+                if (await sfd.ShowDialogAsync(this.FindForm()) == Majorsilence.Forms.DialogResult.OK)
                 {
                     await SaveAsAsync(sfd.FileName, OutputPresentationType.PDF);
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show(Strings.RdlUserControl_Show_PrintError + ex.Message, Strings.RdlUserControl_Show_RDLDesign);
+                Majorsilence.Forms.MessageBox.Show(Strings.RdlUserControl_Show_PrintError + ex.Message, Strings.RdlUserControl_Show_RDLDesign);
             }
             finally
             {
@@ -1179,7 +1179,7 @@ namespace Majorsilence.Reporting.RdlDesign
                     }
                     catch (Exception ex)
                     {
-                        MessageBox.Show(ex.Message, Strings.RdlUserControl_Show_ZoomValueInvalid);
+                        Majorsilence.Forms.MessageBox.Show(ex.Message, Strings.RdlUserControl_Show_ZoomValueInvalid);
                     }
                     break;
             }

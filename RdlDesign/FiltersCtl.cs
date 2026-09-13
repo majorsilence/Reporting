@@ -2,9 +2,9 @@
 using System;
 using System.Collections;
 using System.ComponentModel;
-using Majorsilence.Forms.Drawing;
+using System.Drawing;
 using System.Data;
-using Majorsilence.Forms;
+using System.Windows.Forms;
 using System.Xml;
 using System.Text;
 
@@ -13,7 +13,7 @@ namespace Majorsilence.Reporting.RdlDesign
 	/// <summary>
 	/// Filters specification: used for DataRegions (List, Chart, Table, Matrix), DataSets, group instances
 	/// </summary>
-	internal class FiltersCtl : Majorsilence.Forms.UserControl, IProperty
+	internal class FiltersCtl : System.Windows.Forms.UserControl, IProperty
 	{
 		private DesignXmlDraw _Draw;
 		private XmlNode _FilterParent;
@@ -21,11 +21,11 @@ namespace Majorsilence.Reporting.RdlDesign
         private DataGridViewComboBoxColumn dgtbOP;
         private DataGridViewTextBoxColumn dgtbFV;
 
-		private Majorsilence.Forms.Button bDelete;
-		private Majorsilence.Forms.DataGridView dgFilters;
-		private Majorsilence.Forms.Button bUp;
-		private Majorsilence.Forms.Button bDown;
-		private Majorsilence.Forms.Button bValueExpr;
+		private System.Windows.Forms.Button bDelete;
+		private System.Windows.Forms.DataGridView dgFilters;
+		private System.Windows.Forms.Button bUp;
+		private System.Windows.Forms.Button bDown;
+		private System.Windows.Forms.Button bValueExpr;
 		/// <summary> 
 		/// Required designer variable.
 		/// </summary>
@@ -135,13 +135,13 @@ namespace Majorsilence.Reporting.RdlDesign
 		/// </summary>
 		private void InitializeComponent()
 		{
-			Majorsilence.Forms.ComponentResourceManager resources = new Majorsilence.Forms.ComponentResourceManager(typeof(FiltersCtl));
+			System.Windows.Forms.ComponentResourceManager resources = new System.Windows.Forms.ComponentResourceManager(typeof(FiltersCtl));
             this.DoubleBuffered = true;
-			this.dgFilters = new Majorsilence.Forms.DataGridView();
-			this.bDelete = new Majorsilence.Forms.Button();
-			this.bUp = new Majorsilence.Forms.Button();
-			this.bDown = new Majorsilence.Forms.Button();
-			this.bValueExpr = new Majorsilence.Forms.Button();
+			this.dgFilters = new System.Windows.Forms.DataGridView();
+			this.bDelete = new System.Windows.Forms.Button();
+			this.bUp = new System.Windows.Forms.Button();
+			this.bDown = new System.Windows.Forms.Button();
+			this.bValueExpr = new System.Windows.Forms.Button();
 			((System.ComponentModel.ISupportInitialize)(this.dgFilters)).BeginInit();
 			this.SuspendLayout();
 			// 
@@ -201,7 +201,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			_Draw.RemoveElement(_FilterParent, "Filters");
 
 			// Loop thru and add all the filters
-			foreach (DataGridViewRow dr in this.dgFilters.Rows)
+			foreach (Majorsilence.Forms.DataGridViewRow dr in this.dgFilters.Rows)
 			{
 				string fe = dr.Cells[0].Value as string;
                 string op = dr.Cells[1].Value as string;
@@ -245,7 +245,7 @@ namespace Majorsilence.Reporting.RdlDesign
                 dgFilters.Rows.RemoveAt(this.dgFilters.CurrentRow.Index);
             else
             {   // just empty out the values
-                DataGridViewRow dgrv = dgFilters.Rows[this.dgFilters.CurrentRow.Index];
+                Majorsilence.Forms.DataGridViewRow dgrv = dgFilters.Rows[this.dgFilters.CurrentRow.Index];
                 dgrv.Cells[0].Value = null;
                 dgrv.Cells[1].Value = "Equal";
                 dgrv.Cells[2].Value = null;
@@ -277,7 +277,7 @@ namespace Majorsilence.Reporting.RdlDesign
                 dgFilters.Rows[cr + 1].Cells[dgFilters.CurrentCell.ColumnIndex];
 		}
 
-        private void SwapRow(DataGridViewRow tdr, DataGridViewRow fdr)
+        private void SwapRow(Majorsilence.Forms.DataGridViewRow tdr, Majorsilence.Forms.DataGridViewRow fdr)
 		{
 			// column 1
 			object save = tdr.Cells[0].Value;
@@ -298,7 +298,7 @@ namespace Majorsilence.Reporting.RdlDesign
 		{
             if (dgFilters.CurrentCell == null)
                 dgFilters.Rows.Add("", "Equal", "");
-            DataGridViewCell dgc = dgFilters.CurrentCell;
+            Majorsilence.Forms.DataGridViewCell dgc = dgFilters.CurrentCell;
 			int cc = dgc.ColumnIndex;
 			string cv = dgc.Value as string;
 
@@ -307,8 +307,8 @@ namespace Majorsilence.Reporting.RdlDesign
 				DialogFilterOperator fo = new DialogFilterOperator(cv);
                 try
                 {
-                    DialogResult dlgr = fo.ShowDialog();
-                    if (dlgr == DialogResult.OK)
+                    Majorsilence.Forms.DialogResult dlgr = fo.ShowDialog();
+                    if (dlgr == Majorsilence.Forms.DialogResult.OK)
                         dgc.Value = fo.Operator;
                 }
                 finally
@@ -321,8 +321,8 @@ namespace Majorsilence.Reporting.RdlDesign
 				DialogExprEditor ee = new DialogExprEditor(_Draw, cv, _FilterParent, false);
                 try
                 {
-                    DialogResult dlgr = ee.ShowDialog();
-                    if (dlgr == DialogResult.OK)
+                    Majorsilence.Forms.DialogResult dlgr = ee.ShowDialog();
+                    if (dlgr == Majorsilence.Forms.DialogResult.OK)
                         dgc.Value = ee.Expression;
                 }
                 finally

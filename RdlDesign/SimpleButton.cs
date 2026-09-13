@@ -2,9 +2,9 @@
 using System;
 using System.ComponentModel;
 using System.Drawing;
-using Majorsilence.Forms.Drawing;
+using System.Drawing;
 using Majorsilence.Forms.Drawing.Imaging;
-using Majorsilence.Forms;
+using System.Windows.Forms;
 
 
 namespace Majorsilence.Reporting.RdlDesign
@@ -30,16 +30,16 @@ namespace Majorsilence.Reporting.RdlDesign
 			this.Paint += this.DrawPanelPaint;
 		}
 
-		private void DrawPanelPaint(object sender, Majorsilence.Forms.PaintEventArgs e)
+		private void DrawPanelPaint(object sender, System.Windows.Forms.PaintEventArgs e)
 		{
 
-			Graphics g = e.Graphics;
-			Brush b = null;
+			Majorsilence.Forms.Drawing.Graphics g = e.Graphics;
+			Majorsilence.Forms.Drawing.Brush b = null;
 			Pen p = null;
 
 			try			// never want to die in here
 			{
-				b = new SolidBrush(this.Enabled? this.BackColor: Color.LightGray);
+				b = new Majorsilence.Forms.Drawing.SolidBrush(this.Enabled? this.BackColor: Color.LightGray);
 				g.FillRectangle(b, e.ClipRectangle);
 				if (bIn && this.Enabled)
 					g.DrawRectangle(Pens.Blue, 0, 0, this.Width-1, this.Height-1);
@@ -55,7 +55,7 @@ namespace Majorsilence.Reporting.RdlDesign
 					}
 
 					// ImageAttributes/SetColorKey (transparent-color-key drawing) has no
-					// Majorsilence.Forms equivalent -- would need per-pixel SkiaSharp color
+					// System.Windows.Forms equivalent -- would need per-pixel SkiaSharp color
 					// filtering to replicate properly. Draw the image directly instead; the
 					// _Transparency color-keying effect is a documented, dropped cosmetic
 					// feature (this control is already flagged as a migration candidate, same
@@ -87,13 +87,13 @@ namespace Majorsilence.Reporting.RdlDesign
 
 		private void SimpleButton_MouseDown(object sender, MouseEventArgs e)
 		{
-			if (e.Button == MouseButtons.Left)
+			if (e.Button == System.Windows.Forms.MouseButtons.Left)
 				bDown = true;
 		}
 
 		private void SimpleButton_MouseUp(object sender, MouseEventArgs e)
 		{
-			if (e.Button == MouseButtons.Left)
+			if (e.Button == System.Windows.Forms.MouseButtons.Left)
 				bDown = false;
 		}
 

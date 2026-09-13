@@ -4,7 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
-using Majorsilence.Forms;
+using System.Windows.Forms;
 using System.Xml;
 using Majorsilence.Reporting.RdlDesign.Resources;
 
@@ -13,36 +13,36 @@ namespace Majorsilence.Reporting.RdlDesign
 	/// <summary>
 	/// Summary description for ReportCtl.
 	/// </summary>
-	internal class PositionCtl : Majorsilence.Forms.UserControl, IProperty
+	internal class PositionCtl : System.Windows.Forms.UserControl, IProperty
 	{
         private List<XmlNode> _ReportItems;
 		private DesignXmlDraw _Draw;
 		bool fName, fLeft, fTop, fWidth, fHeight, fZIndex, fColSpan;
 		bool fCanGrow, fCanShrink, fHideDuplicates, fToggleImage, fDataElementStyle;
-		private Majorsilence.Forms.Label label5;
-		private Majorsilence.Forms.Label label6;
-		private Majorsilence.Forms.Label label7;
-		private Majorsilence.Forms.Label label8;
-		private Majorsilence.Forms.Label label9;
-		private Majorsilence.Forms.TextBox tbWidth;
-		private Majorsilence.Forms.TextBox tbTop;
-		private Majorsilence.Forms.TextBox tbLeft;
-		private Majorsilence.Forms.NumericUpDown tbZIndex;
-		private Majorsilence.Forms.Label label1;
-		private Majorsilence.Forms.TextBox tbName;
-		private Majorsilence.Forms.TextBox tbHeight;
-		private Majorsilence.Forms.GroupBox gbPosition;
-		private Majorsilence.Forms.Label lblColSpan;
-		private Majorsilence.Forms.NumericUpDown tbColSpan;
-		private Majorsilence.Forms.GroupBox gbText;
-		private Majorsilence.Forms.CheckBox chkCanGrow;
-		private Majorsilence.Forms.CheckBox chkCanShrink;
-		private Majorsilence.Forms.Label label2;
-		private Majorsilence.Forms.ComboBox cbHideDuplicates;
-		private Majorsilence.Forms.Label label3;
-		private Majorsilence.Forms.ComboBox cbDataElementStyle;
-		private Majorsilence.Forms.Label label4;
-		private Majorsilence.Forms.ComboBox cbToggleImage;
+		private System.Windows.Forms.Label label5;
+		private System.Windows.Forms.Label label6;
+		private System.Windows.Forms.Label label7;
+		private System.Windows.Forms.Label label8;
+		private System.Windows.Forms.Label label9;
+		private System.Windows.Forms.TextBox tbWidth;
+		private System.Windows.Forms.TextBox tbTop;
+		private System.Windows.Forms.TextBox tbLeft;
+		private System.Windows.Forms.NumericUpDown tbZIndex;
+		private System.Windows.Forms.Label label1;
+		private System.Windows.Forms.TextBox tbName;
+		private System.Windows.Forms.TextBox tbHeight;
+		private System.Windows.Forms.GroupBox gbPosition;
+		private System.Windows.Forms.Label lblColSpan;
+		private System.Windows.Forms.NumericUpDown tbColSpan;
+		private System.Windows.Forms.GroupBox gbText;
+		private System.Windows.Forms.CheckBox chkCanGrow;
+		private System.Windows.Forms.CheckBox chkCanShrink;
+		private System.Windows.Forms.Label label2;
+		private System.Windows.Forms.ComboBox cbHideDuplicates;
+		private System.Windows.Forms.Label label3;
+		private System.Windows.Forms.ComboBox cbDataElementStyle;
+		private System.Windows.Forms.Label label4;
+		private System.Windows.Forms.ComboBox cbToggleImage;
 		/// <summary> 
 		/// Required designer variable.
 		/// </summary>
@@ -145,32 +145,32 @@ namespace Majorsilence.Reporting.RdlDesign
 		/// </summary>
 		private void InitializeComponent()
 		{
-			Majorsilence.Forms.ComponentResourceManager resources = new Majorsilence.Forms.ComponentResourceManager(typeof(PositionCtl));
+			System.Windows.Forms.ComponentResourceManager resources = new System.Windows.Forms.ComponentResourceManager(typeof(PositionCtl));
             this.DoubleBuffered = true;
-			this.gbPosition = new Majorsilence.Forms.GroupBox();
-			this.tbHeight = new Majorsilence.Forms.TextBox();
-			this.label7 = new Majorsilence.Forms.Label();
-			this.tbWidth = new Majorsilence.Forms.TextBox();
-			this.label8 = new Majorsilence.Forms.Label();
-			this.tbTop = new Majorsilence.Forms.TextBox();
-			this.label6 = new Majorsilence.Forms.Label();
-			this.tbLeft = new Majorsilence.Forms.TextBox();
-			this.label5 = new Majorsilence.Forms.Label();
-			this.label9 = new Majorsilence.Forms.Label();
-			this.tbZIndex = new Majorsilence.Forms.NumericUpDown();
-			this.label1 = new Majorsilence.Forms.Label();
-			this.tbName = new Majorsilence.Forms.TextBox();
-			this.lblColSpan = new Majorsilence.Forms.Label();
-			this.tbColSpan = new Majorsilence.Forms.NumericUpDown();
-			this.gbText = new Majorsilence.Forms.GroupBox();
-			this.cbToggleImage = new Majorsilence.Forms.ComboBox();
-			this.label4 = new Majorsilence.Forms.Label();
-			this.cbDataElementStyle = new Majorsilence.Forms.ComboBox();
-			this.label3 = new Majorsilence.Forms.Label();
-			this.cbHideDuplicates = new Majorsilence.Forms.ComboBox();
-			this.label2 = new Majorsilence.Forms.Label();
-			this.chkCanShrink = new Majorsilence.Forms.CheckBox();
-			this.chkCanGrow = new Majorsilence.Forms.CheckBox();
+			this.gbPosition = new System.Windows.Forms.GroupBox();
+			this.tbHeight = new System.Windows.Forms.TextBox();
+			this.label7 = new System.Windows.Forms.Label();
+			this.tbWidth = new System.Windows.Forms.TextBox();
+			this.label8 = new System.Windows.Forms.Label();
+			this.tbTop = new System.Windows.Forms.TextBox();
+			this.label6 = new System.Windows.Forms.Label();
+			this.tbLeft = new System.Windows.Forms.TextBox();
+			this.label5 = new System.Windows.Forms.Label();
+			this.label9 = new System.Windows.Forms.Label();
+			this.tbZIndex = new System.Windows.Forms.NumericUpDown();
+			this.label1 = new System.Windows.Forms.Label();
+			this.tbName = new System.Windows.Forms.TextBox();
+			this.lblColSpan = new System.Windows.Forms.Label();
+			this.tbColSpan = new System.Windows.Forms.NumericUpDown();
+			this.gbText = new System.Windows.Forms.GroupBox();
+			this.cbToggleImage = new System.Windows.Forms.ComboBox();
+			this.label4 = new System.Windows.Forms.Label();
+			this.cbDataElementStyle = new System.Windows.Forms.ComboBox();
+			this.label3 = new System.Windows.Forms.Label();
+			this.cbHideDuplicates = new System.Windows.Forms.ComboBox();
+			this.label2 = new System.Windows.Forms.Label();
+			this.chkCanShrink = new System.Windows.Forms.CheckBox();
+			this.chkCanGrow = new System.Windows.Forms.CheckBox();
 			this.gbPosition.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.tbZIndex)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.tbColSpan)).BeginInit();
@@ -391,7 +391,7 @@ namespace Majorsilence.Reporting.RdlDesign
 				string nerr = _Draw.NameError(ri, this.tbName.Text);
 				if (nerr != null)
 				{
-					MessageBox.Show(nerr, Strings.PositionCtl_Show_Name);
+					Majorsilence.Forms.MessageBox.Show(nerr, Strings.PositionCtl_Show_Name);
 					return false;
 				}
 			}
@@ -422,7 +422,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			}
 			catch (Exception ex)
 			{
-				MessageBox.Show(ex.Message, name + " " + Strings.PositionCtl_Show_SizeInvalid);
+				Majorsilence.Forms.MessageBox.Show(ex.Message, name + " " + Strings.PositionCtl_Show_SizeInvalid);
 				return false;
 			}
 
@@ -546,7 +546,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			if (err != null)
 			{
 				e.Cancel = true;
-				MessageBox.Show(string.Format(Strings.PositionCtl_Show_Invalid, tbName.Text, err), Strings.PositionCtl_Show_Name);
+				Majorsilence.Forms.MessageBox.Show(string.Format(Strings.PositionCtl_Show_Invalid, tbName.Text, err), Strings.PositionCtl_Show_Name);
 				return;
 			}
 		}

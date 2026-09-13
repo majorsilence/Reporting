@@ -3,7 +3,7 @@ using System;
 using System.Collections;
 using System.ComponentModel;
 using System.Data;
-using Majorsilence.Forms;
+using System.Windows.Forms;
 using System.Xml;
 
 namespace Majorsilence.Reporting.RdlDesign
@@ -11,15 +11,15 @@ namespace Majorsilence.Reporting.RdlDesign
 	/// <summary>
 	/// Summary description for BodyCtl.
 	/// </summary>
-	internal class BodyCtl : Majorsilence.Forms.UserControl, IProperty
+	internal class BodyCtl : System.Windows.Forms.UserControl, IProperty
 	{
 		private DesignXmlDraw _Draw;
-		private Majorsilence.Forms.Label label1;
-		private Majorsilence.Forms.Label label2;
-		private Majorsilence.Forms.Label label3;
-		private Majorsilence.Forms.TextBox tbHeight;
-		private Majorsilence.Forms.TextBox tbColumns;
-		private Majorsilence.Forms.TextBox tbColumnSpacing;
+		private System.Windows.Forms.Label label1;
+		private System.Windows.Forms.Label label2;
+		private System.Windows.Forms.Label label3;
+		private System.Windows.Forms.TextBox tbHeight;
+		private System.Windows.Forms.TextBox tbColumns;
+		private System.Windows.Forms.TextBox tbColumnSpacing;
 		/// <summary> 
 		/// Required designer variable.
 		/// </summary>
@@ -66,14 +66,14 @@ namespace Majorsilence.Reporting.RdlDesign
 		/// </summary>
 		private void InitializeComponent()
 		{
-			Majorsilence.Forms.ComponentResourceManager resources = new Majorsilence.Forms.ComponentResourceManager(typeof(BodyCtl));
+			System.Windows.Forms.ComponentResourceManager resources = new System.Windows.Forms.ComponentResourceManager(typeof(BodyCtl));
             this.DoubleBuffered = true;
-			this.label1 = new Majorsilence.Forms.Label();
-			this.label2 = new Majorsilence.Forms.Label();
-			this.label3 = new Majorsilence.Forms.Label();
-			this.tbHeight = new Majorsilence.Forms.TextBox();
-			this.tbColumns = new Majorsilence.Forms.TextBox();
-			this.tbColumnSpacing = new Majorsilence.Forms.TextBox();
+			this.label1 = new System.Windows.Forms.Label();
+			this.label2 = new System.Windows.Forms.Label();
+			this.label3 = new System.Windows.Forms.Label();
+			this.tbHeight = new System.Windows.Forms.TextBox();
+			this.tbColumns = new System.Windows.Forms.TextBox();
+			this.tbColumnSpacing = new System.Windows.Forms.TextBox();
 			this.SuspendLayout();
 			// 
 			// label1

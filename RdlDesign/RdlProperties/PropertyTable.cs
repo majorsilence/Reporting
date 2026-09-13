@@ -7,7 +7,7 @@ using System.ComponentModel;            // need this for the properties metadata
 using System.Xml;
 using System.Text.RegularExpressions;
 using System.Globalization;
-using Majorsilence.Forms;
+using System.Windows.Forms;
 using Majorsilence.Forms.Design;
 using Majorsilence.Reporting.Rdl;
 using Majorsilence.Reporting.RdlDesign.Resources;
@@ -95,9 +95,9 @@ namespace Majorsilence.Reporting.RdlDesign
             using (PropertyDialog pd = new PropertyDialog(dp, ar, PropertyTypeEnum.ReportItems, tc, tr))
             {
                 // Display the UI editor dialog
-                DialogResult dr = editorService.ShowDialog(pd);
-                dc.UndoObject.EndUndoGroup(pd.Changed || dr == DialogResult.OK);
-                if (pd.Changed || dr == DialogResult.OK)
+                Majorsilence.Forms.DialogResult dr = editorService.ShowDialog(pd);
+                dc.UndoObject.EndUndoGroup(pd.Changed || dr == Majorsilence.Forms.DialogResult.OK);
+                if (pd.Changed || dr == Majorsilence.Forms.DialogResult.OK)
                 {
                     dp.Invalidate();
                     return new PropertyTable(dp, dc, pt.Nodes);

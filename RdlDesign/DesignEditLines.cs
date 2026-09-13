@@ -3,10 +3,10 @@ using System;
 using System.Collections;
 using System.ComponentModel;
 using System.Drawing;
-using Majorsilence.Forms.Drawing;
+using System.Drawing;
 using Majorsilence.Forms.Drawing.Drawing2D;
 using Majorsilence.Forms.Drawing.Imaging;
-using Majorsilence.Forms;
+using System.Windows.Forms;
 using System.Globalization;
 using System.Net;
 
@@ -18,7 +18,7 @@ namespace Majorsilence.Reporting.RdlDesign
 	/// </summary>
     public class DesignEditLines : UserControl, System.ComponentModel.ISupportInitialize
     {
-        Majorsilence.Forms.RichTextBox editor=null;
+        System.Windows.Forms.RichTextBox editor=null;
         int saveTbEditorLines = -1;
         int _LineHeight = -1;
 
@@ -32,7 +32,7 @@ namespace Majorsilence.Reporting.RdlDesign
         }
 
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        internal Majorsilence.Forms.RichTextBox Editor
+        internal System.Windows.Forms.RichTextBox Editor
         {
             get { return editor; }
             set 
@@ -44,12 +44,12 @@ namespace Majorsilence.Reporting.RdlDesign
             }
         }
 
-		private void DesignEditLinesPaint(object sender, Majorsilence.Forms.PaintEventArgs e)
+		private void DesignEditLinesPaint(object sender, System.Windows.Forms.PaintEventArgs e)
         {
             Lines_Draw(e.Graphics);
         } 
         
-        private void Lines_Draw(Graphics g)
+        private void Lines_Draw(Majorsilence.Forms.Drawing.Graphics g)
         {
             if (!this.Visible || editor == null)
                 return;
@@ -73,7 +73,7 @@ namespace Majorsilence.Reporting.RdlDesign
             first_line_y = editor.GetPositionFromCharIndex(first_index).Y;
 
             //  Draw the lines
-            SolidBrush sb = new SolidBrush(Control.DefaultBackColor);
+            Majorsilence.Forms.Drawing.SolidBrush sb = new Majorsilence.Forms.Drawing.SolidBrush(Control.DefaultBackColor);
             g.FillRectangle(sb, g.VisibleClipBounds);
             sb.Dispose();
 
@@ -97,7 +97,7 @@ namespace Majorsilence.Reporting.RdlDesign
 
         private void editor_Resize(object sender, EventArgs e)
         {
-            using (Graphics g = this.CreateGraphics())
+            using (Majorsilence.Forms.Drawing.Graphics g = this.CreateGraphics())
             {
                 Lines_Draw(g);
             }
@@ -105,7 +105,7 @@ namespace Majorsilence.Reporting.RdlDesign
 
         private void editor_VScroll(object sender, EventArgs e)
         {
-            using (Graphics g = this.CreateGraphics())
+            using (Majorsilence.Forms.Drawing.Graphics g = this.CreateGraphics())
             {
                 Lines_Draw(g);
             }
@@ -121,7 +121,7 @@ namespace Majorsilence.Reporting.RdlDesign
             if (saveTbEditorLines != eLines)
             {
                 saveTbEditorLines = eLines;
-                using (Graphics g = this.CreateGraphics())
+                using (Majorsilence.Forms.Drawing.Graphics g = this.CreateGraphics())
                 {
                     Lines_Draw(g);
                 }

@@ -6,14 +6,14 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
-using Majorsilence.Forms.Drawing;
+using System.Drawing;
 using Majorsilence.Forms.Printing;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
-using Majorsilence.Forms;
+using System.Windows.Forms;
 using System.Xml;
 using System.Threading.Tasks;
 using System.ComponentModel;
@@ -34,7 +34,7 @@ namespace Majorsilence.Reporting.RdlDesign
 	/// designer.Show() 
 	/// </code>
 	/// </example>
-	public partial class RdlDesigner : IMessageFilter
+	public partial class RdlDesigner : Majorsilence.Forms.IMessageFilter
 	{
 		// The version should match what is set in program.cs
 		static readonly string IpcFileName = string.Format("\\fyiIpcData{0}.txt", typeof(RdlDesigner).Assembly.GetName().Version.ToString().Replace(".", ""));
@@ -183,7 +183,7 @@ namespace Majorsilence.Reporting.RdlDesign
             propertiesWindowsToolStripMenuItem.Checked = _ShowProperties;
             IsMdiContainer = true;
             
-            Application.AddMessageFilter(this);
+            Majorsilence.Forms.Application.AddMessageFilter(this);
 
             this.MdiChildActivate += RdlDesigner_MdiChildActivate;
             this.FormClosing += this.RdlDesigner_Closing;
@@ -215,25 +215,25 @@ namespace Majorsilence.Reporting.RdlDesign
         /// <returns></returns>
         // Raw Win32 message-loop plumbing (user32.dll WindowFromPoint/SendMessage P/Invoke,
         // WM_MOUSEWHEEL constant matching) -- fundamentally Windows-only and would fail at
-        // runtime on Linux/macOS even if it compiled. Already dead code under Majorsilence.Forms:
+        // runtime on Linux/macOS even if it compiled. Already dead code under System.Windows.Forms:
         // Application.AddMessageFilter is a documented no-op (nothing ever calls
         // PreFilterMessage), and Avalonia's own input pipeline routes wheel events to the control
         // under the pointer by default anyway. Same fix as RdlReader.Forms/RdlReader.cs (D3).
-        public bool PreFilterMessage(ref Message m)
+        public bool PreFilterMessage(ref Majorsilence.Forms.Message m)
         {
             return false;
         }
 
-		private DockStyle GetPropertiesDockStyle(string l)
+		private Majorsilence.Forms.DockStyle GetPropertiesDockStyle(string l)
 		{
-			DockStyle ds;
+			Majorsilence.Forms.DockStyle ds;
 			try
 			{
-				ds = (DockStyle)Enum.Parse(typeof(DockStyle), l, true);
+				ds = (Majorsilence.Forms.DockStyle)Enum.Parse(typeof(Majorsilence.Forms.DockStyle), l, true);
 			}
 			catch
 			{
-				ds = DockStyle.Right;
+				ds = Majorsilence.Forms.DockStyle.Right;
 			}
 
 			return ds;
@@ -254,7 +254,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			{   // When tabbed we force the mdi children to be maximized (on reset)
 				foreach (MDIChild mc in this.MdiChildren)
 				{
-					mc.WindowState = FormWindowState.Maximized;
+					mc.WindowState = Majorsilence.Forms.FormWindowState.Maximized;
 				}
 			}
 
@@ -307,7 +307,7 @@ namespace Majorsilence.Reporting.RdlDesign
 		}
 
 		// LockWindowUpdate is raw Win32 (user32.dll) -- a screen-freeze-during-redraw anti-flicker
-		// trick with no cross-platform equivalent and no real Majorsilence.Forms Handle/Refresh()
+		// trick with no cross-platform equivalent and no real System.Windows.Forms Handle/Refresh()
 		// to hang it off anyway (see MIGRATION-NOTES.md's Form-vs-Control table: Refresh() ->
 		// Invalidate(), no Handle property on Form). Purely cosmetic; dropped.
 		void mdi_Activate(MDIChild mc)
@@ -391,7 +391,7 @@ namespace Majorsilence.Reporting.RdlDesign
 		}
 
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-		internal DockStyle PropertiesLocation
+		internal Majorsilence.Forms.DockStyle PropertiesLocation
 		{
 			get
 			{
@@ -409,12 +409,12 @@ namespace Majorsilence.Reporting.RdlDesign
 				//   fill the whole main window
 				switch (_PropertiesLocation)
 				{
-					case DockStyle.Left:
-					case DockStyle.Right:
+					case Majorsilence.Forms.DockStyle.Left:
+					case Majorsilence.Forms.DockStyle.Right:
 						mainProperties.Width = this.Width / 3;
 						break;
-					case DockStyle.Top:
-					case DockStyle.Bottom:
+					case Majorsilence.Forms.DockStyle.Top:
+					case Majorsilence.Forms.DockStyle.Bottom:
 						mainProperties.Height = this.Height / 3;
 						break;
 				}
@@ -457,7 +457,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			}
 			catch (Exception ex)
 			{
-				MessageBox.Show(string.Format(Strings.DesignCtl_ShowB_CustomReportItemError, ex.Message), Strings.DesignCtl_Show_Insert, MessageBoxButtons.OK);
+				Majorsilence.Forms.MessageBox.Show(string.Format(Strings.DesignCtl_ShowB_CustomReportItemError, ex.Message), Strings.DesignCtl_Show_Insert, Majorsilence.Forms.MessageBoxButtons.OK);
 			}
 		}
 
@@ -625,7 +625,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			using (DialogExprEditor de = new DialogExprEditor(mc.DrawCtl, ctlEditTextbox.Text, tn))
 			{
 				// Display the UI editor dialog
-				if (await de.ShowDialogAsync(this) == DialogResult.OK)
+				if (await de.ShowDialogAsync(this) == Majorsilence.Forms.DialogResult.OK)
 				{
 					ctlEditTextbox.Text = de.Expression;
 					mc.Editor.SetSelectedText(de.Expression);
@@ -655,7 +655,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			if (bImg == null)
 			{
 				ctl.Text = t;
-				using (Graphics g = ctl.CreateGraphics())
+				using (Majorsilence.Forms.Drawing.Graphics g = ctl.CreateGraphics())
 				{
 					SizeF fs = g.MeasureString(ctl.Text, ctl.Font);
 					ctl.Height = (int)fs.Height + 8;    // 8 is for margins
@@ -665,7 +665,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			else
 			{
 				ctl.Image = bImg;
-				ctl.ImageAlign = ContentAlignment.MiddleCenter;
+				ctl.ImageAlign = Majorsilence.Forms.ContentAlignment.MiddleCenter;
 				ctl.Height = bImg.Height + 5;
 				ctl.Width = bImg.Width + 8;
 				ctl.Text = "";
@@ -674,7 +674,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			ctl.Tag = t;
 			ctl.Left = x;
 			ctl.Top = y;
-			ctl.FlatStyle = FlatStyle.Flat;
+			ctl.FlatStyle = Majorsilence.Forms.FlatStyle.Flat;
 			ToolTip tipb = new ToolTip();
 			tipb.AutomaticDelay = 500;
 			tipb.ShowAlways = true;
@@ -692,7 +692,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			// Create the font
 
 
-			foreach (FontFamily ff in FontFamily.Families)
+			foreach (FontFamily ff in Majorsilence.Forms.Drawing.FontFamily.Families)
 			{
 				fontToolStripComboBox1.Items.Add(ff.Name);
 			}
@@ -821,7 +821,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			ofd.Multiselect = true;
 			try
 			{
-				if (await ofd.ShowDialogAsync(this) == DialogResult.OK)
+				if (await ofd.ShowDialogAsync(this) == Majorsilence.Forms.DialogResult.OK)
 				{
 					foreach (string file in ofd.FileNames)
 					{
@@ -868,7 +868,7 @@ namespace Majorsilence.Reporting.RdlDesign
 					mc.MdiParent = this;
 					mc.Editor.DesignCtl.RdlDesigner = this;
 					if (this._ShowTabbedInterface)
-						mc.WindowState = FormWindowState.Maximized;
+						mc.WindowState = Majorsilence.Forms.FormWindowState.Maximized;
 					mc.Viewer.GetDataSourceReferencePassword = _GetPassword;
 					if (file != null)
 					{
@@ -904,7 +904,7 @@ namespace Majorsilence.Reporting.RdlDesign
 				}
 				catch (Exception ex)
 				{
-					MessageBox.Show(ex.Message);
+					Majorsilence.Forms.MessageBox.Show(ex.Message);
 					if (mc != null)
 						mc.Close();
 					return null;
@@ -1214,7 +1214,7 @@ namespace Majorsilence.Reporting.RdlDesign
 					}
 					catch (Exception ex)
 					{
-						MessageBox.Show(ex.Message, Strings.RdlDesigner_Show_ZoomValueInvalid);
+						Majorsilence.Forms.MessageBox.Show(ex.Message, Strings.RdlDesigner_Show_ZoomValueInvalid);
 					}
 					break;
 			}
@@ -1373,11 +1373,11 @@ namespace Majorsilence.Reporting.RdlDesign
 			}
 			if (foreColorPicker1 != null)
 			{
-				foreColorPicker1.Text = si.Color.IsEmpty ? si.ColorText : Majorsilence.Forms.ColorTranslator.ToHtml(si.Color);
+				foreColorPicker1.Text = si.Color.IsEmpty ? si.ColorText : System.Windows.Forms.ColorTranslator.ToHtml(si.Color);
 			}
 			if (backColorPicker1 != null)
 			{
-				backColorPicker1.Text = si.BackgroundColor.IsEmpty ? si.BackgroundColorText : Majorsilence.Forms.ColorTranslator.ToHtml(si.BackgroundColor);
+				backColorPicker1.Text = si.BackgroundColor.IsEmpty ? si.BackgroundColorText : System.Windows.Forms.ColorTranslator.ToHtml(si.BackgroundColor);
 			}
 
 			bSuppressChange = false;
@@ -1426,10 +1426,10 @@ namespace Majorsilence.Reporting.RdlDesign
 			mc.Editor.StartUndoGroup(Strings.RdlDesigner_Undo_DataSourcesDialog);
 			using (DialogDataSources dlgDS = new DialogDataSources(mc.SourceFile, mc.DrawCtl))
 			{
-				dlgDS.StartPosition = FormStartPosition.CenterParent;
-				DialogResult dr = dlgDS.ShowDialog();
-				mc.Editor.EndUndoGroup(dr == DialogResult.OK);
-				if (dr == DialogResult.OK)
+				dlgDS.StartPosition = Majorsilence.Forms.FormStartPosition.CenterParent;
+				Majorsilence.Forms.DialogResult dr = dlgDS.ShowDialog();
+				mc.Editor.EndUndoGroup(dr == Majorsilence.Forms.DialogResult.OK);
+				if (dr == Majorsilence.Forms.DialogResult.OK)
 					mc.Modified = true;
 			}
 		}
@@ -1482,8 +1482,8 @@ namespace Majorsilence.Reporting.RdlDesign
 
 			using (PropertyDialog pd = new PropertyDialog(mc.DrawCtl, ds, PropertyTypeEnum.DataSets))
 			{
-				DialogResult dr = pd.ShowDialog();
-				if (pd.Changed || dr == DialogResult.OK)
+				Majorsilence.Forms.DialogResult dr = pd.ShowDialog();
+				if (pd.Changed || dr == Majorsilence.Forms.DialogResult.OK)
 				{
 					if (dsCount == 1)
 					// if we used to just have one DataSet we may need to fix up DataRegions 
@@ -1536,7 +1536,7 @@ namespace Majorsilence.Reporting.RdlDesign
 				if (!dsNode.HasChildNodes)      // If no dataset exists we remove DataSets
 					draw.RemoveElement(rNode, "DataSets");
 
-				mc.Editor.EndUndoGroup(pd.Changed || dr == DialogResult.OK);
+				mc.Editor.EndUndoGroup(pd.Changed || dr == Majorsilence.Forms.DialogResult.OK);
 			}
 		}
 
@@ -1549,10 +1549,10 @@ namespace Majorsilence.Reporting.RdlDesign
 			mc.Editor.StartUndoGroup(Strings.RdlDesigner_Undo_EmbeddedImagesDialog);
 			using (DialogEmbeddedImages dlgEI = new DialogEmbeddedImages(mc.DrawCtl))
 			{
-				dlgEI.StartPosition = FormStartPosition.CenterParent;
-				DialogResult dr = dlgEI.ShowDialog();
-				mc.Editor.EndUndoGroup(dr == DialogResult.OK);
-				if (dr == DialogResult.OK)
+				dlgEI.StartPosition = Majorsilence.Forms.FormStartPosition.CenterParent;
+				Majorsilence.Forms.DialogResult dr = dlgEI.ShowDialog();
+				mc.Editor.EndUndoGroup(dr == Majorsilence.Forms.DialogResult.OK);
+				if (dr == Majorsilence.Forms.DialogResult.OK)
 					mc.Modified = true;
 			}
 		}
@@ -1561,9 +1561,9 @@ namespace Majorsilence.Reporting.RdlDesign
 		{
 			using (DialogDataSourceRef dlgDS = new DialogDataSourceRef())
 			{
-				dlgDS.StartPosition = FormStartPosition.CenterParent;
+				dlgDS.StartPosition = Majorsilence.Forms.FormStartPosition.CenterParent;
 				dlgDS.ShowDialog();
-				if (dlgDS.DialogResult == DialogResult.Cancel)
+				if (dlgDS.DialogResult == Majorsilence.Forms.DialogResult.Cancel)
 					return;
 			}
 		}
@@ -1572,12 +1572,12 @@ namespace Majorsilence.Reporting.RdlDesign
 		{
 			using (DialogDatabase dlgDB = new DialogDatabase(this))
 			{
-				dlgDB.StartPosition = FormStartPosition.CenterParent;
+				dlgDB.StartPosition = Majorsilence.Forms.FormStartPosition.CenterParent;
 				//dlgDB.FormBorderStyle = FormBorderStyle.SizableToolWindow;
 
 				// show modally
 				dlgDB.ShowDialog();
-				if (dlgDB.DialogResult == DialogResult.Cancel)
+				if (dlgDB.DialogResult == Majorsilence.Forms.DialogResult.Cancel)
 					return;
 				string rdl = dlgDB.ResultReport;
 
@@ -1589,9 +1589,9 @@ namespace Majorsilence.Reporting.RdlDesign
 			}
 		}
 
-		// No real print-spooler integration under Majorsilence.Forms -- see MIGRATION-NOTES.md
+		// No real print-spooler integration under System.Windows.Forms -- see MIGRATION-NOTES.md
 		// (D2) and RdlViewer.Forms/ViewerToolstrip.cs's PrintClicked for the same redesign.
-		// Majorsilence.Forms.PrintDialog is a no-op stub with no real UI, so go straight to
+		// System.Windows.Forms.PrintDialog is a no-op stub with no real UI, so go straight to
 		// "export as PDF" instead of pretending to show a print dialog.
 		private async void menuFilePrint_Click(object sender, EventArgs e)
 		{
@@ -1602,7 +1602,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			}
 			if (printChild != null)         // already printing
 			{
-				MessageBox.Show(Strings.RdlDesigner_Show_PrintOneFile, Strings.RdlDesigner_Show_RDLDesign);
+				Majorsilence.Forms.MessageBox.Show(Strings.RdlDesigner_Show_PrintOneFile, Strings.RdlDesigner_Show_RDLDesign);
 				return;
 			}
 
@@ -1613,7 +1613,7 @@ namespace Majorsilence.Reporting.RdlDesign
 				Filter = "PDF files (*.pdf)|*.pdf",
 				FileName = Path.GetFileNameWithoutExtension(mc.SourceFile.LocalPath) + ".pdf",
 			};
-			if (await sfd.ShowDialogAsync(this) == DialogResult.OK)
+			if (await sfd.ShowDialogAsync(this) == Majorsilence.Forms.DialogResult.OK)
 			{
 				try
 				{
@@ -1621,7 +1621,7 @@ namespace Majorsilence.Reporting.RdlDesign
 				}
 				catch (Exception ex)
 				{
-					MessageBox.Show(Strings.RdlDesigner_Show_PrintError + ex.Message, Strings.RdlDesigner_Show_RDLDesign);
+					Majorsilence.Forms.MessageBox.Show(Strings.RdlDesigner_Show_PrintError + ex.Message, Strings.RdlDesigner_Show_RDLDesign);
 				}
 			}
 			printChild = null;
@@ -1852,7 +1852,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			bool bSelection = e.SelectionLength > 0;    // any text selected?
 			cutToolStripMenuItem.Enabled = bSelection && bNotPreview;
 			copyToolStripMenuItem.Enabled = bSelection;
-			pasteToolStripMenuItem.Enabled = Clipboard.GetDataObject().GetDataPresent(DataFormats.Text) && bNotPreview;
+			pasteToolStripMenuItem.Enabled = Majorsilence.Forms.Clipboard.GetDataObject().GetDataPresent(DataFormats.Text) && bNotPreview;
 			deleteToolStripMenuItem.Enabled = bSelection && bNotPreview;
 			selectAllToolStripMenuItem.Enabled = bNotPreview;
 
@@ -1942,8 +1942,8 @@ namespace Majorsilence.Reporting.RdlDesign
 			if (e == null)
 				return;
 
-			if (Clipboard.GetDataObject().GetDataPresent(DataFormats.Text) == true ||
-				Clipboard.GetDataObject().GetDataPresent(DataFormats.Bitmap) == true)
+			if (Majorsilence.Forms.Clipboard.GetDataObject().GetDataPresent(DataFormats.Text) == true ||
+				Majorsilence.Forms.Clipboard.GetDataObject().GetDataPresent(DataFormats.Bitmap) == true)
 				e.Paste();
 		}
 
@@ -2049,7 +2049,7 @@ namespace Majorsilence.Reporting.RdlDesign
 				}
 				catch (Exception ex)
 				{
-					MessageBox.Show(ex.Message, Strings.RdlDesigner_Showl_FormatXML);
+					Majorsilence.Forms.MessageBox.Show(ex.Message, Strings.RdlDesigner_Showl_FormatXML);
 				}
 			}
 		}
@@ -2100,7 +2100,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			}
 			catch (Exception ex)
 			{
-				MessageBox.Show(ex.Message + "\n\n" + Strings.RdlDesigner_Show_ResettingHelpURL, Strings.RdlDesigner_Show_HelpURLInvalid);
+				Majorsilence.Forms.MessageBox.Show(ex.Message + "\n\n" + Strings.RdlDesigner_Show_ResettingHelpURL, Strings.RdlDesigner_Show_HelpURLInvalid);
 				_HelpUrl = DefaultHelpUrl;
 			}
 		}
@@ -2122,7 +2122,7 @@ namespace Majorsilence.Reporting.RdlDesign
             }
 			catch (Exception ex)
 			{
-				MessageBox.Show(ex.Message + "\n\n" + Strings.RdlDesigner_Show_ResettingSupportURL, Strings.RdlDesigner_Show_SupportURLInvalid);
+				Majorsilence.Forms.MessageBox.Show(ex.Message + "\n\n" + Strings.RdlDesigner_Show_ResettingSupportURL, Strings.RdlDesigner_Show_SupportURLInvalid);
 				_SupportUrl = DefaultSupportUrl;
 			}
 		}
@@ -2177,7 +2177,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			catch (Exception ex)
 			{
 				if (bMsg)
-					MessageBox.Show(ex.Message, Strings.RdlDesigner_Show_UnableStartDesktop);
+					Majorsilence.Forms.MessageBox.Show(ex.Message, Strings.RdlDesigner_Show_UnableStartDesktop);
 			}
 
 			return;
@@ -2196,7 +2196,7 @@ namespace Majorsilence.Reporting.RdlDesign
 				catch (Exception ex)
 				{
 					if (bMsg)
-						MessageBox.Show(ex.Message, Strings.RdlDesigner_Show_ErrorStopProcess);
+						Majorsilence.Forms.MessageBox.Show(ex.Message, Strings.RdlDesigner_Show_ErrorStopProcess);
 				}
 			}
 			_ServerProcess = null;
@@ -2207,7 +2207,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			string SaveUnits = MeasureUnits;
 			using (DialogToolOptions dlg = new DialogToolOptions(this))
 			{
-				DialogResult rc = dlg.ShowDialog();
+				Majorsilence.Forms.DialogResult rc = dlg.ShowDialog();
 				if (SaveUnits != MeasureUnits)
 				{
 					MDIChild mc = this.ActiveMdiChild as MDIChild;
@@ -2253,7 +2253,7 @@ namespace Majorsilence.Reporting.RdlDesign
 
 		private void menuWndCascade_Click(object sender, EventArgs e)
 		{
-			this.LayoutMdi(MdiLayout.Cascade);
+			this.LayoutMdi(Majorsilence.Forms.MdiLayout.Cascade);
 		}
 
 		private void menuWndCloseAll_Click(object sender, EventArgs e)
@@ -2278,12 +2278,12 @@ namespace Majorsilence.Reporting.RdlDesign
 
 		private void menuWndTileH_Click(object sender, EventArgs e)
 		{
-			this.LayoutMdi(MdiLayout.TileHorizontal);
+			this.LayoutMdi(Majorsilence.Forms.MdiLayout.TileHorizontal);
 		}
 
 		private void menuWndTileV_Click(object sender, EventArgs e)
 		{
-			this.LayoutMdi(MdiLayout.TileVertical);
+			this.LayoutMdi(Majorsilence.Forms.MdiLayout.TileVertical);
 		}
 
 		private async void menuRecentItem_Click(object sender, System.EventArgs e)
@@ -2354,9 +2354,9 @@ namespace Majorsilence.Reporting.RdlDesign
 
 			using (DataSourcePassword dlg = new DataSourcePassword())
 			{
-				DialogResult rc = dlg.ShowDialog();
+				Majorsilence.Forms.DialogResult rc = dlg.ShowDialog();
 				bGotPassword = true;
-				if (rc == DialogResult.OK)
+				if (rc == Majorsilence.Forms.DialogResult.OK)
 					_DataSourceReferencePassword = dlg.PassPhrase;
 
 				return _DataSourceReferencePassword;
@@ -2589,13 +2589,13 @@ namespace Majorsilence.Reporting.RdlDesign
 				string loc = "right";
 				switch (_PropertiesLocation)
 				{
-					case DockStyle.Left:
+					case Majorsilence.Forms.DockStyle.Left:
 						loc = "left";
 						break;
-					case DockStyle.Top:
+					case Majorsilence.Forms.DockStyle.Top:
 						loc = "top";
 						break;
-					case DockStyle.Bottom:
+					case Majorsilence.Forms.DockStyle.Bottom:
 						loc = "bottom";
 						break;
 				}
@@ -2724,7 +2724,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			}
 			catch (Exception e)
 			{
-				MessageBox.Show(e.Message, Strings.RdlDesigner_Show_CustomColorSaveFailed);
+				Majorsilence.Forms.MessageBox.Show(e.Message, Strings.RdlDesigner_Show_CustomColorSaveFailed);
 			}
 			return;
 		}
@@ -2905,7 +2905,7 @@ namespace Majorsilence.Reporting.RdlDesign
 					}
 					catch (Exception ex)
 					{
-						MessageBox.Show(ex.Message, Strings.RdlDesigner_Show_ZoomValueInvalid);
+						Majorsilence.Forms.MessageBox.Show(ex.Message, Strings.RdlDesigner_Show_ZoomValueInvalid);
 					}
 					break;
 			}
@@ -3030,7 +3030,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			statusPosition.Text = "";
 		}
 
-		private void EditTextBox_KeyDown(object sender, KeyEventArgs e)
+		private void EditTextBox_KeyDown(object sender, Majorsilence.Forms.KeyEventArgs e)
 		{
 			MDIChild mc = this.ActiveMdiChild as MDIChild;
 			if (mc == null)
@@ -3039,11 +3039,11 @@ namespace Majorsilence.Reporting.RdlDesign
 			// Force scroll up and down
 			switch (e.KeyCode)
 			{
-				case Keys.Enter:
+				case Majorsilence.Forms.Keys.Enter:
 					mc.SetFocus();
 					e.Handled = true;
 					break;
-				case Keys.Escape:
+				case Majorsilence.Forms.Keys.Escape:
 					if (mc.DrawCtl.SelectedCount == 1)
 					{
 						XmlNode tn = mc.DrawCtl.SelectedList[0] as XmlNode;
@@ -3400,7 +3400,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			}
 			catch (Exception ex)
 			{
-				MessageBox.Show(ex.Message, Strings.RdlDesigner_Show_UnableShowReport);
+				Majorsilence.Forms.MessageBox.Show(ex.Message, Strings.RdlDesigner_Show_UnableShowReport);
 			}
 
 		}
@@ -3718,7 +3718,7 @@ namespace Majorsilence.Reporting.RdlDesign
 		{
 			try
 			{
-				string[] s = (string[])e.Data.GetData(DataFormats.FileDrop, false);
+				string[] s = (string[])e.Inner.Data.GetData(DataFormats.FileDrop, false);
 				int i;
 				for (i = 0; i < s.Length; i++)
 				{
@@ -3730,19 +3730,19 @@ namespace Majorsilence.Reporting.RdlDesign
 			}
 			catch (Exception ex)
 			{
-				MessageBox.Show(ex.Message, Strings.RdlDesigner_ShowD_Error, MessageBoxButtons.OK, MessageBoxIcon.Error);
+				Majorsilence.Forms.MessageBox.Show(ex.Message, Strings.RdlDesigner_ShowD_Error, Majorsilence.Forms.MessageBoxButtons.OK, Majorsilence.Forms.MessageBoxIcon.Error);
 			}
 		}
 
 		private void RdlDesigner_DragEnter(object sender, DragEventArgs e)
 		{
-			if (e.Data.GetDataPresent(DataFormats.FileDrop))
+			if (e.Inner.Data.GetDataPresent(DataFormats.FileDrop))
 			{
-				e.Effect = DragDropEffects.All;
+				e.Effect = System.Windows.Forms.DragDropEffects.All;
 			}
 			else
 			{
-				e.Effect = DragDropEffects.None;
+				e.Effect = System.Windows.Forms.DragDropEffects.None;
 			}
 		}
 

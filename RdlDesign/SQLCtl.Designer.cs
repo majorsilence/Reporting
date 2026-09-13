@@ -1,17 +1,17 @@
 using System;
-using Majorsilence.Forms;
+using System.Windows.Forms;
 using System.ComponentModel;
 using System.Collections;
 
 namespace Majorsilence.Reporting.RdlDesign
 {
-    internal partial class SQLCtl : Majorsilence.Forms.Form
+    internal partial class SQLCtl : System.Windows.Forms.Form
 	{
 		#region Windows Form Designer generated code
 		DesignXmlDraw _Draw;
-private Majorsilence.Forms.Panel panel1;
-private Majorsilence.Forms.Button bOK;
-private Majorsilence.Forms.Button bCancel;
+private System.Windows.Forms.Panel panel1;
+private System.Windows.Forms.Button bOK;
+private System.Windows.Forms.Button bCancel;
 private SplitContainer splitContainer1;
 private TreeView tvTablesColumns;
 private TextBox tbSQL;
@@ -20,14 +20,14 @@ private System.ComponentModel.Container components = null;
 
 		private void InitializeComponent()
 		{
-			Majorsilence.Forms.ComponentResourceManager resources = new Majorsilence.Forms.ComponentResourceManager(typeof(SQLCtl));
-			this.splitContainer1 = new Majorsilence.Forms.SplitContainer();
-			this.tvTablesColumns = new Majorsilence.Forms.TreeView();
-			this.tbSQL = new Majorsilence.Forms.TextBox();
-			this.bMove = new Majorsilence.Forms.Button();
-			this.panel1 = new Majorsilence.Forms.Panel();
-			this.bOK = new Majorsilence.Forms.Button();
-			this.bCancel = new Majorsilence.Forms.Button();
+			System.Windows.Forms.ComponentResourceManager resources = new System.Windows.Forms.ComponentResourceManager(typeof(SQLCtl));
+			this.splitContainer1 = new System.Windows.Forms.SplitContainer();
+			this.tvTablesColumns = new System.Windows.Forms.TreeView();
+			this.tbSQL = new System.Windows.Forms.TextBox();
+			this.bMove = new System.Windows.Forms.Button();
+			this.panel1 = new System.Windows.Forms.Panel();
+			this.bOK = new System.Windows.Forms.Button();
+			this.bCancel = new System.Windows.Forms.Button();
 			((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
 			this.splitContainer1.Panel1.SuspendLayout();
 			this.splitContainer1.Panel2.SuspendLayout();

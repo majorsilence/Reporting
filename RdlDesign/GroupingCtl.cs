@@ -2,9 +2,9 @@
 using System;
 using System.Collections;
 using System.ComponentModel;
-using Majorsilence.Forms.Drawing;
+using System.Drawing;
 using System.Data;
-using Majorsilence.Forms;
+using System.Windows.Forms;
 using System.Xml;
 using System.Text;
 using Majorsilence.Reporting.RdlDesign.Resources;
@@ -14,32 +14,32 @@ namespace Majorsilence.Reporting.RdlDesign
 	/// <summary>
 	/// Grouping specification: used for DataRegions (List, Chart, Table, Matrix), DataSets, group instances
 	/// </summary>
-	internal class GroupingCtl : Majorsilence.Forms.UserControl, IProperty
+	internal class GroupingCtl : System.Windows.Forms.UserControl, IProperty
 	{
 		private DesignXmlDraw _Draw;
 		private XmlNode _GroupingParent;
 		private DataTable _DataTable;
 
-		private Majorsilence.Forms.Button bDelete;
-		private Majorsilence.Forms.Button bUp;
-		private Majorsilence.Forms.Button bDown;
-		private Majorsilence.Forms.DataGridView dgGroup;
-		private Majorsilence.Forms.Label label1;
-		private Majorsilence.Forms.TextBox tbName;
-		private Majorsilence.Forms.Label label2;
-		private Majorsilence.Forms.Label label3;
-		private Majorsilence.Forms.ComboBox cbLabelExpr;
-		private Majorsilence.Forms.ComboBox cbParentExpr;
-		private Majorsilence.Forms.CheckBox chkPBS;
-		private Majorsilence.Forms.CheckBox chkPBE;
-		private Majorsilence.Forms.CheckBox chkRepeatHeader;
-		private Majorsilence.Forms.CheckBox chkGrpHeader;
-		private Majorsilence.Forms.CheckBox chkRepeatFooter;
-		private Majorsilence.Forms.CheckBox chkGrpFooter;
-		private Majorsilence.Forms.Label lParent;
-		private Majorsilence.Forms.Button bValueExpr;
-		private Majorsilence.Forms.Button bLabelExpr;
-		private Majorsilence.Forms.Button bParentExpr;
+		private System.Windows.Forms.Button bDelete;
+		private System.Windows.Forms.Button bUp;
+		private System.Windows.Forms.Button bDown;
+		private System.Windows.Forms.DataGridView dgGroup;
+		private System.Windows.Forms.Label label1;
+		private System.Windows.Forms.TextBox tbName;
+		private System.Windows.Forms.Label label2;
+		private System.Windows.Forms.Label label3;
+		private System.Windows.Forms.ComboBox cbLabelExpr;
+		private System.Windows.Forms.ComboBox cbParentExpr;
+		private System.Windows.Forms.CheckBox chkPBS;
+		private System.Windows.Forms.CheckBox chkPBE;
+		private System.Windows.Forms.CheckBox chkRepeatHeader;
+		private System.Windows.Forms.CheckBox chkGrpHeader;
+		private System.Windows.Forms.CheckBox chkRepeatFooter;
+		private System.Windows.Forms.CheckBox chkGrpFooter;
+		private System.Windows.Forms.Label lParent;
+		private System.Windows.Forms.Button bValueExpr;
+		private System.Windows.Forms.Button bLabelExpr;
+		private System.Windows.Forms.Button bParentExpr;
         private Button BtnCercaFormulaEsclusione;
         private TextBox TxtPageBreakCondition;
         private Label label4;
@@ -179,31 +179,31 @@ namespace Majorsilence.Reporting.RdlDesign
 		/// </summary>
 		private void InitializeComponent()
 		{
-            Majorsilence.Forms.ComponentResourceManager resources = new Majorsilence.Forms.ComponentResourceManager(typeof(GroupingCtl));
+            System.Windows.Forms.ComponentResourceManager resources = new System.Windows.Forms.ComponentResourceManager(typeof(GroupingCtl));
             this.DoubleBuffered = true;
-            this.dgGroup = new Majorsilence.Forms.DataGridView();
-            this.bDelete = new Majorsilence.Forms.Button();
-            this.bUp = new Majorsilence.Forms.Button();
-            this.bDown = new Majorsilence.Forms.Button();
-            this.label1 = new Majorsilence.Forms.Label();
-            this.tbName = new Majorsilence.Forms.TextBox();
-            this.label2 = new Majorsilence.Forms.Label();
-            this.label3 = new Majorsilence.Forms.Label();
-            this.cbLabelExpr = new Majorsilence.Forms.ComboBox();
-            this.cbParentExpr = new Majorsilence.Forms.ComboBox();
-            this.lParent = new Majorsilence.Forms.Label();
-            this.chkPBS = new Majorsilence.Forms.CheckBox();
-            this.chkPBE = new Majorsilence.Forms.CheckBox();
-            this.chkRepeatHeader = new Majorsilence.Forms.CheckBox();
-            this.chkGrpHeader = new Majorsilence.Forms.CheckBox();
-            this.chkRepeatFooter = new Majorsilence.Forms.CheckBox();
-            this.chkGrpFooter = new Majorsilence.Forms.CheckBox();
-            this.bValueExpr = new Majorsilence.Forms.Button();
-            this.bLabelExpr = new Majorsilence.Forms.Button();
-            this.bParentExpr = new Majorsilence.Forms.Button();
-            this.BtnCercaFormulaEsclusione = new Majorsilence.Forms.Button();
-            this.TxtPageBreakCondition = new Majorsilence.Forms.TextBox();
-            this.label4 = new Majorsilence.Forms.Label();
+            this.dgGroup = new System.Windows.Forms.DataGridView();
+            this.bDelete = new System.Windows.Forms.Button();
+            this.bUp = new System.Windows.Forms.Button();
+            this.bDown = new System.Windows.Forms.Button();
+            this.label1 = new System.Windows.Forms.Label();
+            this.tbName = new System.Windows.Forms.TextBox();
+            this.label2 = new System.Windows.Forms.Label();
+            this.label3 = new System.Windows.Forms.Label();
+            this.cbLabelExpr = new System.Windows.Forms.ComboBox();
+            this.cbParentExpr = new System.Windows.Forms.ComboBox();
+            this.lParent = new System.Windows.Forms.Label();
+            this.chkPBS = new System.Windows.Forms.CheckBox();
+            this.chkPBE = new System.Windows.Forms.CheckBox();
+            this.chkRepeatHeader = new System.Windows.Forms.CheckBox();
+            this.chkGrpHeader = new System.Windows.Forms.CheckBox();
+            this.chkRepeatFooter = new System.Windows.Forms.CheckBox();
+            this.chkGrpFooter = new System.Windows.Forms.CheckBox();
+            this.bValueExpr = new System.Windows.Forms.Button();
+            this.bLabelExpr = new System.Windows.Forms.Button();
+            this.bParentExpr = new System.Windows.Forms.Button();
+            this.BtnCercaFormulaEsclusione = new System.Windows.Forms.Button();
+            this.TxtPageBreakCondition = new System.Windows.Forms.TextBox();
+            this.label4 = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.dgGroup)).BeginInit();
             this.SuspendLayout();
             // 
@@ -380,7 +380,7 @@ namespace Majorsilence.Reporting.RdlDesign
 					_GroupingParent.Name == "List")
 					return true;
 
-				MessageBox.Show(Strings.GroupingCtl_Show_GroupMustDefined, Strings.GroupingCtl_Show_Grouping);
+				Majorsilence.Forms.MessageBox.Show(Strings.GroupingCtl_Show_GroupMustDefined, Strings.GroupingCtl_Show_Grouping);
 				return false;
 			}
 
@@ -389,13 +389,13 @@ namespace Majorsilence.Reporting.RdlDesign
 			string nerr = _Draw.GroupingNameCheck(grouping, this.tbName.Text);
 			if (nerr != null)
 			{
-				MessageBox.Show(nerr, Strings.GroupingCtl_Show_GroupNameError);
+				Majorsilence.Forms.MessageBox.Show(nerr, Strings.GroupingCtl_Show_GroupNameError);
 				return false;
 			}
 
 			if (!bRows)
 			{
-				MessageBox.Show(Strings.GroupingCtl_Show_NoExpressionsForGroup, Strings.GroupingCtl_Show_Group);
+				Majorsilence.Forms.MessageBox.Show(Strings.GroupingCtl_Show_NoExpressionsForGroup, Strings.GroupingCtl_Show_Group);
 				return false;
 			}
 
@@ -405,7 +405,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			if (this.cbLabelExpr.Text.Length > 0)
 				return true;
 
-			MessageBox.Show(Strings.GroupingCtl_Show_ChartSeriesMustHaveLabelForLegend, Strings.GroupingCtl_Show_Chart);
+			Majorsilence.Forms.MessageBox.Show(Strings.GroupingCtl_Show_ChartSeriesMustHaveLabelForLegend, Strings.GroupingCtl_Show_Chart);
 
 			return false;
 		}
@@ -616,7 +616,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			if (!ReportNames.IsNameValid(tbName.Text))
 			{
 				e.Cancel = true;
-				MessageBox.Show(string.Format(Strings.GroupingCtl_Show_InvalidName, tbName.Text), Strings.GroupingCtl_Show_Name);
+				Majorsilence.Forms.MessageBox.Show(string.Format(Strings.GroupingCtl_Show_InvalidName, tbName.Text), Strings.GroupingCtl_Show_Name);
 			}
 		}
 
@@ -636,7 +636,7 @@ namespace Majorsilence.Reporting.RdlDesign
 				cr = 0;
 			}
 
-            DataGridViewCell dgc = dgGroup.CurrentCell;
+            Majorsilence.Forms.DataGridViewCell dgc = dgGroup.CurrentCell;
 			int cc = dgc.ColumnIndex;
 			DataRow dr = _DataTable.Rows[cr];
 			string cv = dr[cc] as string;
@@ -644,8 +644,8 @@ namespace Majorsilence.Reporting.RdlDesign
 			DialogExprEditor ee = new DialogExprEditor(_Draw, cv, _GroupingParent, false);
             try
             {
-                DialogResult dlgr = ee.ShowDialog();
-                if (dlgr == DialogResult.OK)
+                Majorsilence.Forms.DialogResult dlgr = ee.ShowDialog();
+                if (dlgr == Majorsilence.Forms.DialogResult.OK)
                     dr[cc] = ee.Expression;
             }
             finally
@@ -659,7 +659,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			Button b = sender as Button;
 			if (b == null)
 				return;
-			Control c = null;
+			Majorsilence.Forms.Control c = null;
 			switch (b.Tag as string)
 			{
 				case "label":
@@ -676,8 +676,8 @@ namespace Majorsilence.Reporting.RdlDesign
 			DialogExprEditor ee = new DialogExprEditor(_Draw, c.Text, _GroupingParent, false);
             try
             {
-                DialogResult dr = ee.ShowDialog();
-                if (dr == DialogResult.OK)
+                Majorsilence.Forms.DialogResult dr = ee.ShowDialog();
+                if (dr == Majorsilence.Forms.DialogResult.OK)
                     c.Text = ee.Expression;
             }
             finally
@@ -689,12 +689,12 @@ namespace Majorsilence.Reporting.RdlDesign
 
         private void BtnCercaFormulaEsclusione_Click(object sender, EventArgs e)
         {
-            Control c = TxtPageBreakCondition;
+            Majorsilence.Forms.Control c = TxtPageBreakCondition;
             DialogExprEditor ee = new DialogExprEditor(_Draw, c.Text, _GroupingParent, false);
             try
             {
-                DialogResult dr = ee.ShowDialog();
-                if (dr == DialogResult.OK)
+                Majorsilence.Forms.DialogResult dr = ee.ShowDialog();
+                if (dr == Majorsilence.Forms.DialogResult.OK)
                     c.Text = ee.Expression;
             }
             finally

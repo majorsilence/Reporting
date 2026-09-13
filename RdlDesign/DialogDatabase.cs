@@ -3,7 +3,7 @@ using System.Drawing;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
-using Majorsilence.Forms;
+using System.Windows.Forms;
 using System.Text;
 using System.Data;
 using System.Data.OleDb;
@@ -355,7 +355,7 @@ namespace Majorsilence.Reporting.RdlDesign
         {
             if (!DoReportSyntax(false))
                 return;
-            DialogResult = DialogResult.OK;
+            DialogResult = Majorsilence.Forms.DialogResult.OK;
             _ResultReport = tbReportSyntax.Text;
             this.Close();
         }
@@ -400,20 +400,20 @@ namespace Majorsilence.Reporting.RdlDesign
 
             // Get the schema information
             List<SqlSchemaInfo> si = DesignerUtility.GetSchemaInfo(GetDataProvider(), GetDataConnection());
-            TreeNode ndRoot = new TreeNode("Tables");
+            Majorsilence.Forms.TreeNode ndRoot = new Majorsilence.Forms.TreeNode("Tables");
             tvTablesColumns.Nodes.Add(ndRoot);
             bool bView = false;
             foreach (SqlSchemaInfo ssi in si)
             {
                 if (!bView && ssi.Type == "VIEW")
                 {	// Switch over to views
-                    ndRoot = new TreeNode("Views");
+                    ndRoot = new Majorsilence.Forms.TreeNode("Views");
                     tvTablesColumns.Nodes.Add(ndRoot);
                     bView = true;
                 }
 
                 // Add the node to the tree
-                TreeNode aRoot = new TreeNode(ssi.Name);
+                Majorsilence.Forms.TreeNode aRoot = new Majorsilence.Forms.TreeNode(ssi.Name);
                 ndRoot.Nodes.Add(aRoot);
                 aRoot.Nodes.Add("");
             }
@@ -421,7 +421,7 @@ namespace Majorsilence.Reporting.RdlDesign
             // Now do parameters
             //if (lbParameters.Items.Count > 0)
             //{
-            //    ndRoot = new TreeNode("Parameters");
+            //    ndRoot = new Majorsilence.Forms.TreeNode("Parameters");
             //    tvTablesColumns.Nodes.Add(ndRoot);
             //    foreach (ReportParm rp in lbParameters.Items)
             //    {
@@ -434,7 +434,7 @@ namespace Majorsilence.Reporting.RdlDesign
             //            paramName = "@" + rp.Name;
 
             //        // Add the node to the tree
-            //        TreeNode aRoot = new TreeNode(paramName);
+            //        Majorsilence.Forms.TreeNode aRoot = new Majorsilence.Forms.TreeNode(paramName);
             //        ndRoot.Nodes.Add(aRoot);
             //    }
             //}
@@ -800,7 +800,7 @@ namespace Majorsilence.Reporting.RdlDesign
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, Strings.DialogDatabase_Show_InternalError);
+                Majorsilence.Forms.MessageBox.Show(ex.Message, Strings.DialogDatabase_Show_InternalError);
                 tbReportSyntax.Text = sb.ToString();
             }
             return true;
@@ -969,7 +969,7 @@ namespace Majorsilence.Reporting.RdlDesign
             tvTablesColumns_ExpandTable(e.Node);
         }
 
-        private void tvTablesColumns_ExpandTable(TreeNode tNode)
+        private void tvTablesColumns_ExpandTable(Majorsilence.Forms.TreeNode tNode)
         {
             if (tNode.Parent == null)	// Check for Tables or Views
                 return;
@@ -1001,21 +1001,21 @@ namespace Majorsilence.Reporting.RdlDesign
             tvTablesColumns.EndUpdate();
         }
 
-        private void tbSQL_DragEnter(object sender, Majorsilence.Forms.DragEventArgs e)
+        private void tbSQL_DragEnter(object sender, DragEventArgs e)
         {
-            if (e.Data.GetDataPresent(DataFormats.Text))	// only accept text
-                e.Effect = DragDropEffects.Copy;
+            if (e.Inner.Data.GetDataPresent(DataFormats.Text))	// only accept text
+                e.Effect = System.Windows.Forms.DragDropEffects.Copy;
         }
 
-        private void tbSQL_DragDrop(object sender, Majorsilence.Forms.DragEventArgs e)
+        private void tbSQL_DragDrop(object sender, DragEventArgs e)
         {
-            if (e.Data.GetDataPresent(DataFormats.Text))
-                tbSQL.SelectedText = (string)e.Data.GetData(DataFormats.Text);
+            if (e.Inner.Data.GetDataPresent(DataFormats.Text))
+                tbSQL.SelectedText = (string)e.Inner.Data.GetData(DataFormats.Text);
         }
 
-        private void tvTablesColumns_MouseDown(object sender, Majorsilence.Forms.MouseEventArgs e)
+        private void tvTablesColumns_MouseDown(object sender, System.Windows.Forms.MouseEventArgs e)
         {
-            TreeNode node = (TreeNode)tvTablesColumns.GetNodeAt(e.X, e.Y);
+            Majorsilence.Forms.TreeNode node = (Majorsilence.Forms.TreeNode)tvTablesColumns.GetNodeAt(e.X, e.Y);
             if (node == null || node.Parent == null)
                 return;
 
@@ -1027,11 +1027,11 @@ namespace Majorsilence.Reporting.RdlDesign
                     tvTablesColumns_ExpandTable(node);	// make sure we've obtained the columns
 
                     dragText = "SELECT ";
-                    TreeNode next = (TreeNode)node.FirstNode;
+                    Majorsilence.Forms.TreeNode next = (Majorsilence.Forms.TreeNode)node.FirstNode;
                     while (true)
                     {
                         dragText += DesignerUtility.NormalizeSqlName(next.Text);
-                        next = (TreeNode)next.NextNode;
+                        next = (Majorsilence.Forms.TreeNode)next.NextNode;
                         if (next == null)
                             break;
                         dragText += ", ";
@@ -1046,7 +1046,7 @@ namespace Majorsilence.Reporting.RdlDesign
             else
                 dragText = node.Text;
 
-            tvTablesColumns.DoDragDrop(dragText, DragDropEffects.Copy);
+            tvTablesColumns.DoDragDrop(dragText, Majorsilence.Forms.DragDropEffects.Copy);
         }
 
 
@@ -1290,7 +1290,7 @@ namespace Majorsilence.Reporting.RdlDesign
                 tvTablesColumns.SelectedNode.Parent == null)
                 return;		// this is the Tables/Views node
 
-            TreeNode node = (TreeNode)tvTablesColumns.SelectedNode;
+            Majorsilence.Forms.TreeNode node = (Majorsilence.Forms.TreeNode)tvTablesColumns.SelectedNode;
             string t = node.Text;
             if (tbSQL.Text == "")
             {
@@ -1299,11 +1299,11 @@ namespace Majorsilence.Reporting.RdlDesign
                     tvTablesColumns_ExpandTable(node);	// make sure we've obtained the columns
 
                     StringBuilder sb = new StringBuilder("SELECT ");
-                    TreeNode next = (TreeNode)node.FirstNode;
+                    Majorsilence.Forms.TreeNode next = (Majorsilence.Forms.TreeNode)node.FirstNode;
                     while (true)
                     {
                         sb.Append(DesignerUtility.NormalizeSqlName(next.Text));
-                        next = (TreeNode)next.NextNode;
+                        next = (Majorsilence.Forms.TreeNode)next.NextNode;
                         if (next == null)
                             break;
                         sb.Append(", ");
@@ -1334,7 +1334,7 @@ namespace Majorsilence.Reporting.RdlDesign
         //    DialogValidValues dvv = new DialogValidValues(rp.ValidValues);
         //    try
         //    {
-        //        if (dvv.ShowDialog() != DialogResult.OK)
+        //        if (dvv.ShowDialog() != Majorsilence.Forms.DialogResult.OK)
         //            return;
         //        rp.ValidValues = dvv.ValidValues;
         //        this.tbParmValidValues.Text = rp.ValidValuesDisplay;
@@ -1423,7 +1423,7 @@ namespace Majorsilence.Reporting.RdlDesign
         {
             if (string.IsNullOrEmpty(tbConnection.Text))
             {
-                MessageBox.Show(Strings.DialogDatabase_ShowD_SelectDataProvider, Strings.DesignerUtility_Show_TestConnection, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                Majorsilence.Forms.MessageBox.Show(Strings.DialogDatabase_ShowD_SelectDataProvider, Strings.DesignerUtility_Show_TestConnection, Majorsilence.Forms.MessageBoxButtons.OK, Majorsilence.Forms.MessageBoxIcon.Error);
                 return;
             }
 
@@ -1433,7 +1433,7 @@ namespace Majorsilence.Reporting.RdlDesign
                 return;
 
             if (DesignerUtility.TestConnection(cType, GetDataConnection()))
-                MessageBox.Show(Strings.DialogDatabase_Show_ConnectionSuccessful, Strings.DesignerUtility_Show_TestConnection);
+                Majorsilence.Forms.MessageBox.Show(Strings.DialogDatabase_Show_ConnectionSuccessful, Strings.DesignerUtility_Show_TestConnection);
         }
 
         private void DBConnection_Validating(object sender, System.ComponentModel.CancelEventArgs e)
@@ -1458,7 +1458,7 @@ namespace Majorsilence.Reporting.RdlDesign
             ofd.AddExtension = true;
             try
             {
-                if (ofd.ShowDialog() == DialogResult.OK)
+                if (ofd.ShowDialog() == Majorsilence.Forms.DialogResult.OK)
                     tbConnection.Text = ofd.FileName;
             }
             finally
@@ -1477,7 +1477,7 @@ namespace Majorsilence.Reporting.RdlDesign
                 
                 try
                 {
-                    if (await ofd.ShowDialogAsync(this) != DialogResult.OK)
+                    if (await ofd.ShowDialogAsync(this) != Majorsilence.Forms.DialogResult.OK)
                     {
                         return;
                     }
@@ -1510,7 +1510,7 @@ namespace Majorsilence.Reporting.RdlDesign
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, Strings.DialogDatabase_ShowD_Error, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                Majorsilence.Forms.MessageBox.Show(ex.Message, Strings.DialogDatabase_ShowD_Error, Majorsilence.Forms.MessageBoxButtons.OK, Majorsilence.Forms.MessageBoxIcon.Error);
             }
         }
 
@@ -1538,7 +1538,7 @@ namespace Majorsilence.Reporting.RdlDesign
             }
             catch(Exception ex)
             {
-				MessageBox.Show(ex.Message, Strings.DialogDatabase_ShowD_Error, MessageBoxButtons.OK, MessageBoxIcon.Error);
+				Majorsilence.Forms.MessageBox.Show(ex.Message, Strings.DialogDatabase_ShowD_Error, Majorsilence.Forms.MessageBoxButtons.OK, Majorsilence.Forms.MessageBoxIcon.Error);
             }
         }
 
@@ -1569,7 +1569,7 @@ namespace Majorsilence.Reporting.RdlDesign
             }
             catch (Exception ex)
             {
-				MessageBox.Show(ex.Message, Strings.DialogDatabase_ShowD_Error, MessageBoxButtons.OK, MessageBoxIcon.Error);
+				Majorsilence.Forms.MessageBox.Show(ex.Message, Strings.DialogDatabase_ShowD_Error, Majorsilence.Forms.MessageBoxButtons.OK, Majorsilence.Forms.MessageBoxIcon.Error);
                 return;
             }
             finally
@@ -1593,13 +1593,13 @@ namespace Majorsilence.Reporting.RdlDesign
             }
             catch (Exception ex)
             {
-				MessageBox.Show(ex.Message, Strings.DialogDatabase_ShowD_Error, MessageBoxButtons.OK, MessageBoxIcon.Error);
+				Majorsilence.Forms.MessageBox.Show(ex.Message, Strings.DialogDatabase_ShowD_Error, Majorsilence.Forms.MessageBoxButtons.OK, Majorsilence.Forms.MessageBoxIcon.Error);
             }
         }
 
         private void tbSQL_KeyDown(object sender, KeyEventArgs e)
         {
-             if (e.Control && e.KeyCode == Keys.A)
+             if (e.Control && e.KeyCode == System.Windows.Forms.Keys.A)
              {
                 tbSQL.SelectAll();
              }

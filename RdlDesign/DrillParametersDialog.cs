@@ -4,7 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
-using Majorsilence.Forms;
+using System.Windows.Forms;
 using System.Xml;
 using System.Text;
 using System.IO;
@@ -108,7 +108,7 @@ namespace Majorsilence.Reporting.RdlDesign
             ofd.AddExtension = true;
             try
             {
-                if (ofd.ShowDialog() == DialogResult.OK)
+                if (ofd.ShowDialog() == Majorsilence.Forms.DialogResult.OK)
                 {
                     string file = Path.GetFileNameWithoutExtension(ofd.FileName);
 
@@ -124,8 +124,8 @@ namespace Majorsilence.Reporting.RdlDesign
         private async void bRefreshParms_Click(object sender, System.EventArgs e)
         {
             // Obtain the source
-            Cursor savec = Cursor.Current;
-            Cursor.Current = Cursors.WaitCursor;	// this can take some time
+            Majorsilence.Forms.Cursor savec = Majorsilence.Forms.Cursor.Current;
+            Majorsilence.Forms.Cursor.Current = Cursors.WaitCursor;	// this can take some time
             try
             {
                 string filename = "";
@@ -159,7 +159,7 @@ namespace Majorsilence.Reporting.RdlDesign
             }
             finally
             {
-                Cursor.Current = savec;
+                Majorsilence.Forms.Cursor.Current = savec;
             }
         }
 
@@ -182,7 +182,7 @@ namespace Majorsilence.Reporting.RdlDesign
             catch (Exception e)
             {
                 prog = null;
-                MessageBox.Show(e.Message, Strings.DrillParametersDialog_Show_ErrorReading);
+                Majorsilence.Forms.MessageBox.Show(e.Message, Strings.DrillParametersDialog_Show_ErrorReading);
             }
             finally
             {
@@ -210,14 +210,14 @@ namespace Majorsilence.Reporting.RdlDesign
                 r = await rdlp.Parse();
                 if (r.ErrorMaxSeverity > 4)
                 {
-                    MessageBox.Show(Strings.DrillParametersDialog_ShowC_ReportHasErrors);
+                    Majorsilence.Forms.MessageBox.Show(Strings.DrillParametersDialog_ShowC_ReportHasErrors);
                     r = null;			// don't return when severe errors
                 }
             }
             catch (Exception e)
             {
                 r = null;
-                MessageBox.Show(e.Message, Strings.DrillParametersDialog_Show_ReportLoadFailed);
+                Majorsilence.Forms.MessageBox.Show(e.Message, Strings.DrillParametersDialog_Show_ReportLoadFailed);
             }
             return r;
         }
@@ -240,7 +240,7 @@ namespace Majorsilence.Reporting.RdlDesign
             }
             if (e.Cancel)
             {
-                MessageBox.Show(Strings.DrillParametersDialog_Show_ValueMustSpecified, Text);
+                Majorsilence.Forms.MessageBox.Show(Strings.DrillParametersDialog_Show_ValueMustSpecified, Text);
             }
         }
 
@@ -250,10 +250,10 @@ namespace Majorsilence.Reporting.RdlDesign
             DrillParametersDialog_Validating(this, ce);
             if (ce.Cancel)
             {
-                DialogResult = DialogResult.None;
+                DialogResult = Majorsilence.Forms.DialogResult.None;
                 return;
             }
-            DialogResult = DialogResult.OK;
+            DialogResult = Majorsilence.Forms.DialogResult.OK;
         }
 
     }

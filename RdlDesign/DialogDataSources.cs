@@ -1,7 +1,7 @@
 using System;
 using System.Collections;
 using System.ComponentModel;
-using Majorsilence.Forms;
+using System.Windows.Forms;
 using System.Text;
 using System.Xml;
 using System.IO;
@@ -145,7 +145,7 @@ namespace Majorsilence.Reporting.RdlDesign
             }
             try
             {
-                if (ofd.ShowDialog() == DialogResult.OK)
+                if (ofd.ShowDialog() == Majorsilence.Forms.DialogResult.OK)
                 {
                     try
                     {
@@ -190,13 +190,13 @@ namespace Majorsilence.Reporting.RdlDesign
             {
                 if (dsv.Name == null || dsv.Name.Length == 0)
                 {
-                    MessageBox.Show(this, Strings.DialogDataSources_ShowE_NameMustSpecified, Strings.DialogDataSources_ShowE_DataSources);
+                    Majorsilence.Forms.MessageBox.Show(this, Strings.DialogDataSources_ShowE_NameMustSpecified, Strings.DialogDataSources_ShowE_DataSources);
                     return;
                 }
 
                 if (!ReportNames.IsNameValid(dsv.Name))
                 {
-                    MessageBox.Show(this,
+                    Majorsilence.Forms.MessageBox.Show(this,
 						string.Format(Strings.DialogDataSources_ShowE_NameInvalid, dsv.Name), Strings.DialogDataSources_ShowE_DataSources);
                     return;
                 }
@@ -204,7 +204,7 @@ namespace Majorsilence.Reporting.RdlDesign
                 string name = (string)ht[dsv.Name];
                 if (name != null)
                 {
-                    MessageBox.Show(this,
+                    Majorsilence.Forms.MessageBox.Show(this,
 						string.Format(Strings.DialogDataSources_ShowE_DataSourceMustUniqueN, dsv.Name), Strings.DialogDataSources_ShowE_DataSources);
                     return;
                 }
@@ -213,14 +213,14 @@ namespace Majorsilence.Reporting.RdlDesign
 
             // apply the result
             Apply();
-            DialogResult = DialogResult.OK;
+            DialogResult = Majorsilence.Forms.DialogResult.OK;
         }
 
         private void bTestConnection_Click(object sender, System.EventArgs e)
         {
             if (string.IsNullOrEmpty(this.cbDataProvider.Text))
             {
-                MessageBox.Show(Strings.DialogDatabase_ShowD_SelectDataProvider, Strings.DesignerUtility_Show_TestConnection, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                Majorsilence.Forms.MessageBox.Show(Strings.DialogDatabase_ShowD_SelectDataProvider, Strings.DesignerUtility_Show_TestConnection, Majorsilence.Forms.MessageBoxButtons.OK, Majorsilence.Forms.MessageBoxIcon.Error);
                 return;
             }
 
@@ -231,7 +231,7 @@ namespace Majorsilence.Reporting.RdlDesign
             }
 
             if (DesignerUtility.TestConnection(this.cbDataProvider.Text, connectionString))
-                MessageBox.Show(Strings.DialogDatabase_Show_ConnectionSuccessful, Strings.DesignerUtility_Show_TestConnection);
+                Majorsilence.Forms.MessageBox.Show(Strings.DialogDatabase_Show_ConnectionSuccessful, Strings.DesignerUtility_Show_TestConnection);
         }
 
         private void tbDSName_TextChanged(object sender, System.EventArgs e)
@@ -335,7 +335,7 @@ namespace Majorsilence.Reporting.RdlDesign
             if (!ReportNames.IsNameValid(tbDSName.Text))
             {
                 e.Cancel = true;
-                MessageBox.Show(this,
+                Majorsilence.Forms.MessageBox.Show(this,
 					string.Format(Strings.DialogDataSources_ShowE_NameInvalid, tbDSName.Text), Strings.DialogDataSources_ShowE_DataSources);
             }
 
@@ -398,8 +398,8 @@ namespace Majorsilence.Reporting.RdlDesign
             DialogExprEditor ee = new DialogExprEditor(_Draw, this.tbConnection.Text, null, false);
             try
             {
-                DialogResult dr = ee.ShowDialog();
-                if (dr == DialogResult.OK)
+                Majorsilence.Forms.DialogResult dr = ee.ShowDialog();
+                if (dr == Majorsilence.Forms.DialogResult.OK)
                     tbConnection.Text = ee.Expression;
             }
             finally

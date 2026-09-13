@@ -1,26 +1,26 @@
 using System;
-using Majorsilence.Forms;
+using System.Windows.Forms;
 using System.ComponentModel;
 using System.Collections;
 
 namespace Majorsilence.Reporting.RdlDesign
 {
-    internal partial class DialogValidValues : Majorsilence.Forms.Form
+    internal partial class DialogValidValues : System.Windows.Forms.Form
 	{
 		#region Windows Form Designer generated code
-private Majorsilence.Forms.DataGridView dgParms;
-private Majorsilence.Forms.Button bOK;
-private Majorsilence.Forms.Button bCancel;
-private Majorsilence.Forms.Button bDelete;
+private System.Windows.Forms.DataGridView dgParms;
+private System.Windows.Forms.Button bOK;
+private System.Windows.Forms.Button bCancel;
+private System.Windows.Forms.Button bDelete;
 private System.ComponentModel.Container components = null;
 
 		private void InitializeComponent()
 		{
-			Majorsilence.Forms.ComponentResourceManager resources = new Majorsilence.Forms.ComponentResourceManager(typeof(DialogValidValues));
-			this.dgParms = new Majorsilence.Forms.DataGridView();
-			this.bOK = new Majorsilence.Forms.Button();
-			this.bCancel = new Majorsilence.Forms.Button();
-			this.bDelete = new Majorsilence.Forms.Button();
+			System.Windows.Forms.ComponentResourceManager resources = new System.Windows.Forms.ComponentResourceManager(typeof(DialogValidValues));
+			this.dgParms = new System.Windows.Forms.DataGridView();
+			this.bOK = new System.Windows.Forms.Button();
+			this.bCancel = new System.Windows.Forms.Button();
+			this.bDelete = new System.Windows.Forms.Button();
 			((System.ComponentModel.ISupportInitialize)(this.dgParms)).BeginInit();
 			this.SuspendLayout();
 			// 

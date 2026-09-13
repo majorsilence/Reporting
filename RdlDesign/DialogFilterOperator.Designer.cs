@@ -1,26 +1,26 @@
 using System;
-using Majorsilence.Forms;
+using System.Windows.Forms;
 using System.ComponentModel;
 using System.Collections;
 
 namespace Majorsilence.Reporting.RdlDesign
 {
-    public partial class DialogFilterOperator : Majorsilence.Forms.Form
+    public partial class DialogFilterOperator : System.Windows.Forms.Form
 	{
 		#region Windows Form Designer generated code
-		private Majorsilence.Forms.Button bOK;
-private Majorsilence.Forms.Button bCancel;
-private Majorsilence.Forms.Label lOp;
-private Majorsilence.Forms.ComboBox cbOperator;
+		private System.Windows.Forms.Button bOK;
+private System.Windows.Forms.Button bCancel;
+private System.Windows.Forms.Label lOp;
+private System.Windows.Forms.ComboBox cbOperator;
 private System.ComponentModel.Container components = null;
 
 		private void InitializeComponent()
 		{
-			Majorsilence.Forms.ComponentResourceManager resources = new Majorsilence.Forms.ComponentResourceManager(typeof(DialogFilterOperator));
-			this.bOK = new Majorsilence.Forms.Button();
-			this.bCancel = new Majorsilence.Forms.Button();
-			this.lOp = new Majorsilence.Forms.Label();
-			this.cbOperator = new Majorsilence.Forms.ComboBox();
+			System.Windows.Forms.ComponentResourceManager resources = new System.Windows.Forms.ComponentResourceManager(typeof(DialogFilterOperator));
+			this.bOK = new System.Windows.Forms.Button();
+			this.bCancel = new System.Windows.Forms.Button();
+			this.lOp = new System.Windows.Forms.Label();
+			this.cbOperator = new System.Windows.Forms.ComboBox();
 			this.SuspendLayout();
 			// 
 			// bOK

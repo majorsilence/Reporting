@@ -1,11 +1,11 @@
 using System;
-using Majorsilence.Forms;
+using System.Windows.Forms;
 using System.ComponentModel;
 using System.Collections;
 
 namespace Majorsilence.Reporting.RdlDesign
 {
-    internal partial class SingleCtlDialog : Majorsilence.Forms.Form
+    internal partial class SingleCtlDialog : System.Windows.Forms.Form
 	{
 		#region Windows Form Designer generated code
 		private DesignCtl _DesignCtl;
@@ -17,10 +17,10 @@ private System.ComponentModel.Container components = null;
 
 		private void InitializeComponent()
 		{
-			Majorsilence.Forms.ComponentResourceManager resources = new Majorsilence.Forms.ComponentResourceManager(typeof(SingleCtlDialog));
-			this.bOK = new Majorsilence.Forms.Button();
-			this.bCancel = new Majorsilence.Forms.Button();
-			this.pMain = new Majorsilence.Forms.Panel();
+			System.Windows.Forms.ComponentResourceManager resources = new System.Windows.Forms.ComponentResourceManager(typeof(SingleCtlDialog));
+			this.bOK = new System.Windows.Forms.Button();
+			this.bCancel = new System.Windows.Forms.Button();
+			this.pMain = new System.Windows.Forms.Panel();
 			this.SuspendLayout();
 			// 
 			// bOK

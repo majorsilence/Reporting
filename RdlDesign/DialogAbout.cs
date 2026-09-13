@@ -2,7 +2,7 @@ using Majorsilence.Reporting.RdlDesign.Resources;
 
 using System;
 using System.Reflection;
-using Majorsilence.Forms;
+using System.Windows.Forms;
 
 namespace Majorsilence.Reporting.RdlDesign
 {
@@ -24,7 +24,7 @@ namespace Majorsilence.Reporting.RdlDesign
             lVMVersion.Text = string.Format(".NET {0}", Environment.Version);
         }
 
-        private void lnk_LinkClicked(object sender, LinkLabelLinkClickedEventArgs ea)
+        private void lnk_LinkClicked(object sender, Majorsilence.Forms.LinkLabelLinkClickedEventArgs ea)
         {
             var lnk = (LinkLabel)sender;
             lnk.Links[lnk.Links.IndexOf(ea.Link)].Visited = true;

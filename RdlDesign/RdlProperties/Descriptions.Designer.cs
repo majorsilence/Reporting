@@ -187,7 +187,7 @@ namespace Majorsilence.Reporting.RdlDesign.RdlProperties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Image to place in the background of the report item.
+        ///   Looks up a localized string similar to Majorsilence.Forms.Drawing.Image to place in the background of the report item.
         /// </summary>
         internal static string Background_Image {
             get {
@@ -214,7 +214,7 @@ namespace Majorsilence.Reporting.RdlDesign.RdlProperties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Background Image Source: None, External, Embedded, Database..
+        ///   Looks up a localized string similar to Background Majorsilence.Forms.Drawing.Image Source: None, External, Embedded, Database..
         /// </summary>
         internal static string BackgroundImage_Source {
             get {
@@ -592,7 +592,7 @@ namespace Majorsilence.Reporting.RdlDesign.RdlProperties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Padding properties of the axis..
+        ///   Looks up a localized string similar to Majorsilence.Forms.Padding properties of the axis..
         /// </summary>
         internal static string ChartAxis_Padding {
             get {
@@ -781,7 +781,7 @@ namespace Majorsilence.Reporting.RdlDesign.RdlProperties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Padding properties of the legend..
+        ///   Looks up a localized string similar to Majorsilence.Forms.Padding properties of the legend..
         /// </summary>
         internal static string ChartLegend_Padding {
             get {
@@ -853,7 +853,7 @@ namespace Majorsilence.Reporting.RdlDesign.RdlProperties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Padding properties of the caption..
+        ///   Looks up a localized string similar to Majorsilence.Forms.Padding properties of the caption..
         /// </summary>
         internal static string ChartTitle_Padding {
             get {
@@ -952,7 +952,7 @@ namespace Majorsilence.Reporting.RdlDesign.RdlProperties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Image Source:External, Embedded, Database..
+        ///   Looks up a localized string similar to Majorsilence.Forms.Drawing.Image Source:External, Embedded, Database..
         /// </summary>
         internal static string ImageI_Source {
             get {

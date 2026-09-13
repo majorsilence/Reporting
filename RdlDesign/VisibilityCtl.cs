@@ -4,7 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
-using Majorsilence.Forms;
+using System.Windows.Forms;
 using System.Xml;
 using System.IO;
 
@@ -13,18 +13,18 @@ namespace Majorsilence.Reporting.RdlDesign
 	/// <summary>
 	/// Summary description for StyleCtl.
 	/// </summary>
-	internal class VisibilityCtl : Majorsilence.Forms.UserControl, IProperty
+	internal class VisibilityCtl : System.Windows.Forms.UserControl, IProperty
 	{
         private List<XmlNode> _ReportItems;
 		private DesignXmlDraw _Draw;
 		// flags for controlling whether syntax changed for a particular property
         private bool fHidden, fToggle;
-        private Majorsilence.Forms.GroupBox grpBoxVisibility;
-		private Majorsilence.Forms.Label label2;
-		private Majorsilence.Forms.Label label3;
-		private Majorsilence.Forms.TextBox tbHidden;
-        private Majorsilence.Forms.ComboBox cbToggle;
-        private Majorsilence.Forms.Button bHidden;
+        private System.Windows.Forms.GroupBox grpBoxVisibility;
+		private System.Windows.Forms.Label label2;
+		private System.Windows.Forms.Label label3;
+		private System.Windows.Forms.TextBox tbHidden;
+        private System.Windows.Forms.ComboBox cbToggle;
+        private System.Windows.Forms.Button bHidden;
 		/// <summary> 
 		/// Required designer variable.
 		/// </summary>
@@ -89,14 +89,14 @@ namespace Majorsilence.Reporting.RdlDesign
 		/// </summary>
 		private void InitializeComponent()
 		{
-			Majorsilence.Forms.ComponentResourceManager resources = new Majorsilence.Forms.ComponentResourceManager(typeof(VisibilityCtl));
+			System.Windows.Forms.ComponentResourceManager resources = new System.Windows.Forms.ComponentResourceManager(typeof(VisibilityCtl));
             this.DoubleBuffered = true;
-			this.grpBoxVisibility = new Majorsilence.Forms.GroupBox();
-			this.bHidden = new Majorsilence.Forms.Button();
-			this.cbToggle = new Majorsilence.Forms.ComboBox();
-			this.tbHidden = new Majorsilence.Forms.TextBox();
-			this.label3 = new Majorsilence.Forms.Label();
-			this.label2 = new Majorsilence.Forms.Label();
+			this.grpBoxVisibility = new System.Windows.Forms.GroupBox();
+			this.bHidden = new System.Windows.Forms.Button();
+			this.cbToggle = new System.Windows.Forms.ComboBox();
+			this.tbHidden = new System.Windows.Forms.TextBox();
+			this.label3 = new System.Windows.Forms.Label();
+			this.label2 = new System.Windows.Forms.Label();
 			this.grpBoxVisibility.SuspendLayout();
 			this.SuspendLayout();
 			// 
@@ -205,7 +205,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			Button b = sender as Button;
 			if (b == null)
 				return;
-			Control c = null;
+			Majorsilence.Forms.Control c = null;
 			switch (b.Tag as string)
 			{
 				case "visibility":
@@ -220,8 +220,8 @@ namespace Majorsilence.Reporting.RdlDesign
 
             using (DialogExprEditor ee = new DialogExprEditor(_Draw, c.Text, sNode))
             {
-                DialogResult dr = ee.ShowDialog();
-                if (dr == DialogResult.OK)
+                Majorsilence.Forms.DialogResult dr = ee.ShowDialog();
+                if (dr == Majorsilence.Forms.DialogResult.OK)
                     c.Text = ee.Expression;
                 return;
             }

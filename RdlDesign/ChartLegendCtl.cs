@@ -4,7 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
-using Majorsilence.Forms;
+using System.Windows.Forms;
 using System.Xml;
 
 namespace Majorsilence.Reporting.RdlDesign
@@ -12,17 +12,17 @@ namespace Majorsilence.Reporting.RdlDesign
 	/// <summary>
 	/// Summary description for ChartCtl.
 	/// </summary>
-	internal class ChartLegendCtl : Majorsilence.Forms.UserControl, IProperty
+	internal class ChartLegendCtl : System.Windows.Forms.UserControl, IProperty
 	{
         private List<XmlNode> _ReportItems;
 		private DesignXmlDraw _Draw;
 		bool fVisible, fLayout, fPosition, fInsidePlotArea;
-		private Majorsilence.Forms.Label label1;
-		private Majorsilence.Forms.Label label2;
-		private Majorsilence.Forms.ComboBox cbPosition;
-		private Majorsilence.Forms.ComboBox cbLayout;
-		private Majorsilence.Forms.CheckBox chkVisible;
-		private Majorsilence.Forms.CheckBox chkInsidePlotArea;
+		private System.Windows.Forms.Label label1;
+		private System.Windows.Forms.Label label2;
+		private System.Windows.Forms.ComboBox cbPosition;
+		private System.Windows.Forms.ComboBox cbLayout;
+		private System.Windows.Forms.CheckBox chkVisible;
+		private System.Windows.Forms.CheckBox chkInsidePlotArea;
 		/// <summary> 
 		/// Required designer variable.
 		/// </summary>
@@ -73,14 +73,14 @@ namespace Majorsilence.Reporting.RdlDesign
 		/// </summary>
 		private void InitializeComponent()
 		{
-			Majorsilence.Forms.ComponentResourceManager resources = new Majorsilence.Forms.ComponentResourceManager(typeof(ChartLegendCtl));
+			System.Windows.Forms.ComponentResourceManager resources = new System.Windows.Forms.ComponentResourceManager(typeof(ChartLegendCtl));
             this.DoubleBuffered = true;
-			this.label1 = new Majorsilence.Forms.Label();
-			this.label2 = new Majorsilence.Forms.Label();
-			this.cbPosition = new Majorsilence.Forms.ComboBox();
-			this.cbLayout = new Majorsilence.Forms.ComboBox();
-			this.chkVisible = new Majorsilence.Forms.CheckBox();
-			this.chkInsidePlotArea = new Majorsilence.Forms.CheckBox();
+			this.label1 = new System.Windows.Forms.Label();
+			this.label2 = new System.Windows.Forms.Label();
+			this.cbPosition = new System.Windows.Forms.ComboBox();
+			this.cbLayout = new System.Windows.Forms.ComboBox();
+			this.chkVisible = new System.Windows.Forms.CheckBox();
+			this.chkInsidePlotArea = new System.Windows.Forms.CheckBox();
 			this.SuspendLayout();
 			// 
 			// label1

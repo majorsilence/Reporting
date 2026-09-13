@@ -3,7 +3,7 @@ using System;
 using System.Collections;
 using System.ComponentModel;
 using System.Data;
-using Majorsilence.Forms;
+using System.Windows.Forms;
 using System.Xml;
 using System.IO;
 using Majorsilence.Reporting.RdlDesign.Resources;
@@ -14,18 +14,18 @@ namespace Majorsilence.Reporting.RdlDesign
 	/// <summary>
 	/// Summary description for StyleCtl.
 	/// </summary>
-	internal class ReportXmlCtl : Majorsilence.Forms.UserControl, IProperty
+	internal class ReportXmlCtl : System.Windows.Forms.UserControl, IProperty
 	{
 		private DesignXmlDraw _Draw;
-		private Majorsilence.Forms.Label label1;
-		private Majorsilence.Forms.TextBox tbDataTransform;
-		private Majorsilence.Forms.TextBox tbDataSchema;
-		private Majorsilence.Forms.Label label2;
-		private Majorsilence.Forms.TextBox tbDataElementName;
-		private Majorsilence.Forms.Label label3;
-		private Majorsilence.Forms.Label label4;
-		private Majorsilence.Forms.ComboBox cbElementStyle;
-		private Majorsilence.Forms.Button bOpenXsl;
+		private System.Windows.Forms.Label label1;
+		private System.Windows.Forms.TextBox tbDataTransform;
+		private System.Windows.Forms.TextBox tbDataSchema;
+		private System.Windows.Forms.Label label2;
+		private System.Windows.Forms.TextBox tbDataElementName;
+		private System.Windows.Forms.Label label3;
+		private System.Windows.Forms.Label label4;
+		private System.Windows.Forms.ComboBox cbElementStyle;
+		private System.Windows.Forms.Button bOpenXsl;
 		/// <summary> 
 		/// Required designer variable.
 		/// </summary>
@@ -72,17 +72,17 @@ namespace Majorsilence.Reporting.RdlDesign
 		/// </summary>
 		private void InitializeComponent()
 		{
-			Majorsilence.Forms.ComponentResourceManager resources = new Majorsilence.Forms.ComponentResourceManager(typeof(ReportXmlCtl));
+			System.Windows.Forms.ComponentResourceManager resources = new System.Windows.Forms.ComponentResourceManager(typeof(ReportXmlCtl));
             this.DoubleBuffered = true;
-			this.label1 = new Majorsilence.Forms.Label();
-			this.tbDataTransform = new Majorsilence.Forms.TextBox();
-			this.tbDataSchema = new Majorsilence.Forms.TextBox();
-			this.label2 = new Majorsilence.Forms.Label();
-			this.tbDataElementName = new Majorsilence.Forms.TextBox();
-			this.label3 = new Majorsilence.Forms.Label();
-			this.label4 = new Majorsilence.Forms.Label();
-			this.cbElementStyle = new Majorsilence.Forms.ComboBox();
-			this.bOpenXsl = new Majorsilence.Forms.Button();
+			this.label1 = new System.Windows.Forms.Label();
+			this.tbDataTransform = new System.Windows.Forms.TextBox();
+			this.tbDataSchema = new System.Windows.Forms.TextBox();
+			this.label2 = new System.Windows.Forms.Label();
+			this.tbDataElementName = new System.Windows.Forms.TextBox();
+			this.label3 = new System.Windows.Forms.Label();
+			this.label4 = new System.Windows.Forms.Label();
+			this.cbElementStyle = new System.Windows.Forms.ComboBox();
+			this.bOpenXsl = new System.Windows.Forms.Button();
 			this.SuspendLayout();
 			// 
 			// label1
@@ -194,7 +194,7 @@ namespace Majorsilence.Reporting.RdlDesign
                 //			ofd.DefaultExt = "xsl";
                 //			ofd.AddExtension = true;
 
-                if (ofd.ShowDialog() == DialogResult.OK)
+                if (ofd.ShowDialog() == Majorsilence.Forms.DialogResult.OK)
                 {
                     string file = Path.GetFileName(ofd.FileName);
 

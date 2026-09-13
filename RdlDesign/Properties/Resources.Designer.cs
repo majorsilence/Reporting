@@ -61,182 +61,182 @@ namespace Majorsilence.Reporting.RdlDesign.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized resource of type Majorsilence.Forms.Drawing.Bitmap.
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static Majorsilence.Forms.Drawing.Bitmap chart {
+        internal static System.Drawing.Bitmap chart {
             get {
                 object obj = ResourceManager.GetObject("chart", resourceCulture);
-                return ((Majorsilence.Forms.Drawing.Bitmap)(obj));
+                return ((System.Drawing.Bitmap)(obj));
             }
         }
         
         /// <summary>
-        ///   Looks up a localized resource of type Majorsilence.Forms.Drawing.Bitmap.
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static Majorsilence.Forms.Drawing.Bitmap csv {
+        internal static System.Drawing.Bitmap csv {
             get {
                 object obj = ResourceManager.GetObject("csv", resourceCulture);
-                return ((Majorsilence.Forms.Drawing.Bitmap)(obj));
+                return ((System.Drawing.Bitmap)(obj));
             }
         }
         
         /// <summary>
-        ///   Looks up a localized resource of type Majorsilence.Forms.Drawing.Bitmap.
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static Majorsilence.Forms.Drawing.Bitmap document_new {
+        internal static System.Drawing.Bitmap document_new {
             get {
                 object obj = ResourceManager.GetObject("document_new", resourceCulture);
-                return ((Majorsilence.Forms.Drawing.Bitmap)(obj));
+                return ((System.Drawing.Bitmap)(obj));
             }
         }
         
         /// <summary>
-        ///   Looks up a localized resource of type Majorsilence.Forms.Drawing.Bitmap.
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static Majorsilence.Forms.Drawing.Bitmap document_open {
+        internal static System.Drawing.Bitmap document_open {
             get {
                 object obj = ResourceManager.GetObject("document_open", resourceCulture);
-                return ((Majorsilence.Forms.Drawing.Bitmap)(obj));
+                return ((System.Drawing.Bitmap)(obj));
             }
         }
         
         /// <summary>
-        ///   Looks up a localized resource of type Majorsilence.Forms.Drawing.Bitmap.
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static Majorsilence.Forms.Drawing.Bitmap document_print {
+        internal static System.Drawing.Bitmap document_print {
             get {
                 object obj = ResourceManager.GetObject("document_print", resourceCulture);
-                return ((Majorsilence.Forms.Drawing.Bitmap)(obj));
+                return ((System.Drawing.Bitmap)(obj));
             }
         }
         
         /// <summary>
-        ///   Looks up a localized resource of type Majorsilence.Forms.Drawing.Bitmap.
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static Majorsilence.Forms.Drawing.Bitmap document_save {
+        internal static System.Drawing.Bitmap document_save {
             get {
                 object obj = ResourceManager.GetObject("document_save", resourceCulture);
-                return ((Majorsilence.Forms.Drawing.Bitmap)(obj));
+                return ((System.Drawing.Bitmap)(obj));
             }
         }
         
         /// <summary>
-        ///   Looks up a localized resource of type Majorsilence.Forms.Drawing.Bitmap.
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static Majorsilence.Forms.Drawing.Bitmap edit_copy {
+        internal static System.Drawing.Bitmap edit_copy {
             get {
                 object obj = ResourceManager.GetObject("edit_copy", resourceCulture);
-                return ((Majorsilence.Forms.Drawing.Bitmap)(obj));
+                return ((System.Drawing.Bitmap)(obj));
             }
         }
         
         /// <summary>
-        ///   Looks up a localized resource of type Majorsilence.Forms.Drawing.Bitmap.
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static Majorsilence.Forms.Drawing.Bitmap edit_cut {
+        internal static System.Drawing.Bitmap edit_cut {
             get {
                 object obj = ResourceManager.GetObject("edit_cut", resourceCulture);
-                return ((Majorsilence.Forms.Drawing.Bitmap)(obj));
+                return ((System.Drawing.Bitmap)(obj));
             }
         }
         
         /// <summary>
-        ///   Looks up a localized resource of type Majorsilence.Forms.Drawing.Bitmap.
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static Majorsilence.Forms.Drawing.Bitmap edit_paste {
+        internal static System.Drawing.Bitmap edit_paste {
             get {
                 object obj = ResourceManager.GetObject("edit_paste", resourceCulture);
-                return ((Majorsilence.Forms.Drawing.Bitmap)(obj));
+                return ((System.Drawing.Bitmap)(obj));
             }
         }
         
         /// <summary>
-        ///   Looks up a localized resource of type Majorsilence.Forms.Drawing.Bitmap.
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static Majorsilence.Forms.Drawing.Bitmap edit_undo {
+        internal static System.Drawing.Bitmap edit_undo {
             get {
                 object obj = ResourceManager.GetObject("edit_undo", resourceCulture);
-                return ((Majorsilence.Forms.Drawing.Bitmap)(obj));
+                return ((System.Drawing.Bitmap)(obj));
             }
         }
         
         /// <summary>
-        ///   Looks up a localized resource of type Majorsilence.Forms.Drawing.Bitmap.
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static Majorsilence.Forms.Drawing.Bitmap format_justify_center {
+        internal static System.Drawing.Bitmap format_justify_center {
             get {
                 object obj = ResourceManager.GetObject("format_justify_center", resourceCulture);
-                return ((Majorsilence.Forms.Drawing.Bitmap)(obj));
+                return ((System.Drawing.Bitmap)(obj));
             }
         }
         
         /// <summary>
-        ///   Looks up a localized resource of type Majorsilence.Forms.Drawing.Bitmap.
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static Majorsilence.Forms.Drawing.Bitmap format_justify_fill {
+        internal static System.Drawing.Bitmap format_justify_fill {
             get {
                 object obj = ResourceManager.GetObject("format_justify_fill", resourceCulture);
-                return ((Majorsilence.Forms.Drawing.Bitmap)(obj));
+                return ((System.Drawing.Bitmap)(obj));
             }
         }
         
         /// <summary>
-        ///   Looks up a localized resource of type Majorsilence.Forms.Drawing.Bitmap.
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static Majorsilence.Forms.Drawing.Bitmap format_justify_left {
+        internal static System.Drawing.Bitmap format_justify_left {
             get {
                 object obj = ResourceManager.GetObject("format_justify_left", resourceCulture);
-                return ((Majorsilence.Forms.Drawing.Bitmap)(obj));
+                return ((System.Drawing.Bitmap)(obj));
             }
         }
         
         /// <summary>
-        ///   Looks up a localized resource of type Majorsilence.Forms.Drawing.Bitmap.
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static Majorsilence.Forms.Drawing.Bitmap format_justify_right {
+        internal static System.Drawing.Bitmap format_justify_right {
             get {
                 object obj = ResourceManager.GetObject("format_justify_right", resourceCulture);
-                return ((Majorsilence.Forms.Drawing.Bitmap)(obj));
+                return ((System.Drawing.Bitmap)(obj));
             }
         }
         
         /// <summary>
-        ///   Looks up a localized resource of type Majorsilence.Forms.Drawing.Bitmap.
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static Majorsilence.Forms.Drawing.Bitmap format_text_bold {
+        internal static System.Drawing.Bitmap format_text_bold {
             get {
                 object obj = ResourceManager.GetObject("format_text_bold", resourceCulture);
-                return ((Majorsilence.Forms.Drawing.Bitmap)(obj));
+                return ((System.Drawing.Bitmap)(obj));
             }
         }
         
         /// <summary>
-        ///   Looks up a localized resource of type Majorsilence.Forms.Drawing.Bitmap.
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static Majorsilence.Forms.Drawing.Bitmap format_text_italic {
+        internal static System.Drawing.Bitmap format_text_italic {
             get {
                 object obj = ResourceManager.GetObject("format_text_italic", resourceCulture);
-                return ((Majorsilence.Forms.Drawing.Bitmap)(obj));
+                return ((System.Drawing.Bitmap)(obj));
             }
         }
         
         /// <summary>
-        ///   Looks up a localized resource of type Majorsilence.Forms.Drawing.Bitmap.
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static Majorsilence.Forms.Drawing.Bitmap format_text_underline {
+        internal static System.Drawing.Bitmap format_text_underline {
             get {
                 object obj = ResourceManager.GetObject("format_text_underline", resourceCulture);
-                return ((Majorsilence.Forms.Drawing.Bitmap)(obj));
+                return ((System.Drawing.Bitmap)(obj));
             }
         }
         
         /// <summary>
-        ///   Looks up a localized resource of type Majorsilence.Forms.Drawing.Bitmap.
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static Majorsilence.Forms.Drawing.Bitmap Image {
+        internal static System.Drawing.Bitmap Image {
             get {
                 object obj = ResourceManager.GetObject("Image", resourceCulture);
-                return ((Majorsilence.Forms.Drawing.Bitmap)(obj));
+                return ((System.Drawing.Bitmap)(obj));
             }
         }
         

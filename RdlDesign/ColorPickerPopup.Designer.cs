@@ -1,12 +1,12 @@
 using System;
-using Majorsilence.Forms;
+using System.Windows.Forms;
 using System.Drawing;
 using System.ComponentModel;
 using System.Collections;
 
 namespace Majorsilence.Reporting.RdlDesign
 {
-    public partial class ColorPickerPopup : Majorsilence.Forms.Form
+    public partial class ColorPickerPopup : System.Windows.Forms.Form
 	{
 		#region Windows Form Designer generated code
 		ColorPicker _ColorPicker;
@@ -15,7 +15,7 @@ private System.ComponentModel.Container components = null;
 
 		private void InitializeComponent()
 		{
-            this.lStatus = new Majorsilence.Forms.Label();
+            this.lStatus = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // lStatus

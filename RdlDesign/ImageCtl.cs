@@ -4,7 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
-using Majorsilence.Forms;
+using System.Windows.Forms;
 using System.Xml;
 using Majorsilence.Reporting.RdlDesign.Resources;
 
@@ -13,27 +13,27 @@ namespace Majorsilence.Reporting.RdlDesign
 	/// <summary>
 	/// Summary description for ReportCtl.
 	/// </summary>
-	internal class ImageCtl : Majorsilence.Forms.UserControl, IProperty
+	internal class ImageCtl : System.Windows.Forms.UserControl, IProperty
 	{
         private List<XmlNode> _ReportItems;
 		private DesignXmlDraw _Draw;
 		bool fSource, fValue, fSizing, fMIMEType;
-		private Majorsilence.Forms.GroupBox groupBox1;
-		private Majorsilence.Forms.RadioButton rbExternal;
-		private Majorsilence.Forms.RadioButton rbDatabase;
-		private Majorsilence.Forms.Label label1;
-		private Majorsilence.Forms.ComboBox cbSizing;
-		private Majorsilence.Forms.ComboBox cbValueEmbedded;
-		private Majorsilence.Forms.ComboBox cbMIMEType;
-		private Majorsilence.Forms.ComboBox cbValueDatabase;
-		private Majorsilence.Forms.TextBox tbValueExternal;
-		private Majorsilence.Forms.Button bExternal;
-		private Majorsilence.Forms.RadioButton rbEmbedded;
-		private Majorsilence.Forms.Button bEmbedded;
-		private Majorsilence.Forms.Button bDatabaseExpr;
-		private Majorsilence.Forms.Button bMimeExpr;
-		private Majorsilence.Forms.Button bEmbeddedExpr;
-		private Majorsilence.Forms.Button bExternalExpr;
+		private System.Windows.Forms.GroupBox groupBox1;
+		private System.Windows.Forms.RadioButton rbExternal;
+		private System.Windows.Forms.RadioButton rbDatabase;
+		private System.Windows.Forms.Label label1;
+		private System.Windows.Forms.ComboBox cbSizing;
+		private System.Windows.Forms.ComboBox cbValueEmbedded;
+		private System.Windows.Forms.ComboBox cbMIMEType;
+		private System.Windows.Forms.ComboBox cbValueDatabase;
+		private System.Windows.Forms.TextBox tbValueExternal;
+		private System.Windows.Forms.Button bExternal;
+		private System.Windows.Forms.RadioButton rbEmbedded;
+		private System.Windows.Forms.Button bEmbedded;
+		private System.Windows.Forms.Button bDatabaseExpr;
+		private System.Windows.Forms.Button bMimeExpr;
+		private System.Windows.Forms.Button bEmbeddedExpr;
+		private System.Windows.Forms.Button bExternalExpr;
 		/// <summary> 
 		/// Required designer variable.
 		/// </summary>
@@ -106,24 +106,24 @@ namespace Majorsilence.Reporting.RdlDesign
 		/// </summary>
 		private void InitializeComponent()
 		{
-			Majorsilence.Forms.ComponentResourceManager resources = new Majorsilence.Forms.ComponentResourceManager(typeof(ImageCtl));
+			System.Windows.Forms.ComponentResourceManager resources = new System.Windows.Forms.ComponentResourceManager(typeof(ImageCtl));
             this.DoubleBuffered = true;
-			this.groupBox1 = new Majorsilence.Forms.GroupBox();
-			this.bExternalExpr = new Majorsilence.Forms.Button();
-			this.bEmbeddedExpr = new Majorsilence.Forms.Button();
-			this.bMimeExpr = new Majorsilence.Forms.Button();
-			this.bDatabaseExpr = new Majorsilence.Forms.Button();
-			this.bEmbedded = new Majorsilence.Forms.Button();
-			this.bExternal = new Majorsilence.Forms.Button();
-			this.tbValueExternal = new Majorsilence.Forms.TextBox();
-			this.cbValueDatabase = new Majorsilence.Forms.ComboBox();
-			this.cbMIMEType = new Majorsilence.Forms.ComboBox();
-			this.cbValueEmbedded = new Majorsilence.Forms.ComboBox();
-			this.rbDatabase = new Majorsilence.Forms.RadioButton();
-			this.rbEmbedded = new Majorsilence.Forms.RadioButton();
-			this.rbExternal = new Majorsilence.Forms.RadioButton();
-			this.label1 = new Majorsilence.Forms.Label();
-			this.cbSizing = new Majorsilence.Forms.ComboBox();
+			this.groupBox1 = new System.Windows.Forms.GroupBox();
+			this.bExternalExpr = new System.Windows.Forms.Button();
+			this.bEmbeddedExpr = new System.Windows.Forms.Button();
+			this.bMimeExpr = new System.Windows.Forms.Button();
+			this.bDatabaseExpr = new System.Windows.Forms.Button();
+			this.bEmbedded = new System.Windows.Forms.Button();
+			this.bExternal = new System.Windows.Forms.Button();
+			this.tbValueExternal = new System.Windows.Forms.TextBox();
+			this.cbValueDatabase = new System.Windows.Forms.ComboBox();
+			this.cbMIMEType = new System.Windows.Forms.ComboBox();
+			this.cbValueEmbedded = new System.Windows.Forms.ComboBox();
+			this.rbDatabase = new System.Windows.Forms.RadioButton();
+			this.rbEmbedded = new System.Windows.Forms.RadioButton();
+			this.rbExternal = new System.Windows.Forms.RadioButton();
+			this.label1 = new System.Windows.Forms.Label();
+			this.cbSizing = new System.Windows.Forms.ComboBox();
 			this.groupBox1.SuspendLayout();
 			this.SuspendLayout();
 			// 
@@ -346,7 +346,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			ofd.CheckFileExists = true;
             try
             {
-                if (ofd.ShowDialog(this) == DialogResult.OK)
+                if (ofd.ShowDialog(this) == Majorsilence.Forms.DialogResult.OK)
                 {
                     tbValueExternal.Text = ofd.FileName;
                 }
@@ -360,11 +360,11 @@ namespace Majorsilence.Reporting.RdlDesign
 		private void bEmbedded_Click(object sender, System.EventArgs e)
 		{
 			DialogEmbeddedImages dlgEI = new DialogEmbeddedImages(this._Draw);
-			dlgEI.StartPosition = FormStartPosition.CenterParent;
+			dlgEI.StartPosition = Majorsilence.Forms.FormStartPosition.CenterParent;
             try
             {
-                DialogResult dr = dlgEI.ShowDialog();
-                if (dr != DialogResult.OK)
+                Majorsilence.Forms.DialogResult dr = dlgEI.ShowDialog();
+                if (dr != Majorsilence.Forms.DialogResult.OK)
                     return;
             }
             finally
@@ -381,7 +381,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			Button b = sender as Button;
 			if (b == null)
 				return;
-			Control c = null;
+			Majorsilence.Forms.Control c = null;
 			switch (b.Tag as string)
 			{
 				case "external":
@@ -406,8 +406,8 @@ namespace Majorsilence.Reporting.RdlDesign
 			DialogExprEditor ee = new DialogExprEditor(_Draw, c.Text, sNode);
             try
             {
-                DialogResult dr = ee.ShowDialog();
-                if (dr == DialogResult.OK)
+                Majorsilence.Forms.DialogResult dr = ee.ShowDialog();
+                if (dr == Majorsilence.Forms.DialogResult.OK)
                     c.Text = ee.Expression;
             }
             finally

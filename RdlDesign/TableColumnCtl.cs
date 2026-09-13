@@ -3,7 +3,7 @@ using System;
 using System.Collections;
 using System.ComponentModel;
 using System.Data;
-using Majorsilence.Forms;
+using System.Windows.Forms;
 using System.Xml;
 using System.IO;
 using Majorsilence.Reporting.RdlDesign.Resources;
@@ -13,22 +13,22 @@ namespace Majorsilence.Reporting.RdlDesign
 	/// <summary>
 	/// Summary description for TableColumnCtl.
 	/// </summary>
-	internal class TableColumnCtl : Majorsilence.Forms.UserControl, IProperty
+	internal class TableColumnCtl : System.Windows.Forms.UserControl, IProperty
 	{
 		private XmlNode _TableColumn;
 		private DesignXmlDraw _Draw;
 		// flags for controlling whether syntax changed for a particular property
 		private bool fHidden, fToggle, fWidth, fFixedHeader;
-		private Majorsilence.Forms.GroupBox grpBoxVisibility;
-		private Majorsilence.Forms.Label label2;
-		private Majorsilence.Forms.Label label3;
-		private Majorsilence.Forms.TextBox tbHidden;
-		private Majorsilence.Forms.ComboBox cbToggle;
-		private Majorsilence.Forms.Button bHidden;
-		private Majorsilence.Forms.Label label1;
-		private Majorsilence.Forms.TextBox tbColumnWidth;
-		private Majorsilence.Forms.Label label4;
-		private Majorsilence.Forms.CheckBox chkFixedHeader;
+		private System.Windows.Forms.GroupBox grpBoxVisibility;
+		private System.Windows.Forms.Label label2;
+		private System.Windows.Forms.Label label3;
+		private System.Windows.Forms.TextBox tbHidden;
+		private System.Windows.Forms.ComboBox cbToggle;
+		private System.Windows.Forms.Button bHidden;
+		private System.Windows.Forms.Label label1;
+		private System.Windows.Forms.TextBox tbColumnWidth;
+		private System.Windows.Forms.Label label4;
+		private System.Windows.Forms.CheckBox chkFixedHeader;
 		/// <summary> 
 		/// Required designer variable.
 		/// </summary>
@@ -95,18 +95,18 @@ namespace Majorsilence.Reporting.RdlDesign
 		/// </summary>
 		private void InitializeComponent()
 		{
-			Majorsilence.Forms.ComponentResourceManager resources = new Majorsilence.Forms.ComponentResourceManager(typeof(TableColumnCtl));
+			System.Windows.Forms.ComponentResourceManager resources = new System.Windows.Forms.ComponentResourceManager(typeof(TableColumnCtl));
             this.DoubleBuffered = true;
-			this.grpBoxVisibility = new Majorsilence.Forms.GroupBox();
-			this.bHidden = new Majorsilence.Forms.Button();
-			this.cbToggle = new Majorsilence.Forms.ComboBox();
-			this.tbHidden = new Majorsilence.Forms.TextBox();
-			this.label3 = new Majorsilence.Forms.Label();
-			this.label2 = new Majorsilence.Forms.Label();
-			this.label1 = new Majorsilence.Forms.Label();
-			this.tbColumnWidth = new Majorsilence.Forms.TextBox();
-			this.chkFixedHeader = new Majorsilence.Forms.CheckBox();
-			this.label4 = new Majorsilence.Forms.Label();
+			this.grpBoxVisibility = new System.Windows.Forms.GroupBox();
+			this.bHidden = new System.Windows.Forms.Button();
+			this.cbToggle = new System.Windows.Forms.ComboBox();
+			this.tbHidden = new System.Windows.Forms.TextBox();
+			this.label3 = new System.Windows.Forms.Label();
+			this.label2 = new System.Windows.Forms.Label();
+			this.label1 = new System.Windows.Forms.Label();
+			this.tbColumnWidth = new System.Windows.Forms.TextBox();
+			this.chkFixedHeader = new System.Windows.Forms.CheckBox();
+			this.label4 = new System.Windows.Forms.Label();
 			this.grpBoxVisibility.SuspendLayout();
 			this.SuspendLayout();
 			// 
@@ -199,7 +199,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			}
 			catch (Exception ex)
 			{
-				MessageBox.Show(ex.Message, Strings.TableColumnCtl_Show_WidthInvalid);
+				Majorsilence.Forms.MessageBox.Show(ex.Message, Strings.TableColumnCtl_Show_WidthInvalid);
 				return false;
 			}
 
@@ -219,7 +219,7 @@ namespace Majorsilence.Reporting.RdlDesign
 							case "false":
 								break;
 							default:
-								MessageBox.Show(String.Format(Strings.TableColumnCtl_Show_ExpressionTrueFalse, tbHidden.Text), Strings.TableColumnCtl_Show_HiddenInvalid);
+								Majorsilence.Forms.MessageBox.Show(String.Format(Strings.TableColumnCtl_Show_ExpressionTrueFalse, tbHidden.Text), Strings.TableColumnCtl_Show_HiddenInvalid);
 								return false;
 						}
 					}
@@ -294,7 +294,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			Button b = sender as Button;
 			if (b == null)
 				return;
-			Control c = null;
+			Majorsilence.Forms.Control c = null;
 			switch (b.Tag as string)
 			{
 				case "visibility":
@@ -307,8 +307,8 @@ namespace Majorsilence.Reporting.RdlDesign
 
             using (DialogExprEditor ee = new DialogExprEditor(_Draw, c.Text, _TableColumn))
             {
-                DialogResult dr = ee.ShowDialog();
-                if (dr == DialogResult.OK)
+                Majorsilence.Forms.DialogResult dr = ee.ShowDialog();
+                if (dr == Majorsilence.Forms.DialogResult.OK)
                     c.Text = ee.Expression;
             }
             return;

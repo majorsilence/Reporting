@@ -1,10 +1,10 @@
 
 using System;
 using System.Drawing;
-using Majorsilence.Forms.Drawing;
+using System.Drawing;
 using System.Collections;
 using System.ComponentModel;
-using Majorsilence.Forms;
+using System.Windows.Forms;
 
 namespace Majorsilence.Reporting.RdlDesign
 {
@@ -29,7 +29,7 @@ namespace Majorsilence.Reporting.RdlDesign
 
         protected override void OnPaint(PaintEventArgs e)
         {
-            Graphics g = e.Graphics;
+            Majorsilence.Forms.Drawing.Graphics g = e.Graphics;
 
             //base.OnPaint(e);
             int row = 0;
@@ -112,7 +112,7 @@ namespace Majorsilence.Reporting.RdlDesign
 
         private void ColorPickerPopup_KeyPress(object sender, KeyPressEventArgs e)
         {
-            if ((int)e.KeyChar == (int)Majorsilence.Forms.Keys.Escape)
+            if ((int)e.KeyChar == (int)System.Windows.Forms.Keys.Escape)
             {
                 Hide();
             }

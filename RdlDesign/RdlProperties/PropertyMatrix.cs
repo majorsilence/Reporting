@@ -7,7 +7,7 @@ using System.ComponentModel;            // need this for the properties metadata
 using System.Xml;
 using System.Text.RegularExpressions;
 using System.Globalization;
-using Majorsilence.Forms;
+using System.Windows.Forms;
 using Majorsilence.Forms.Design;
 using Majorsilence.Reporting.Rdl;
 

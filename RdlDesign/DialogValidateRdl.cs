@@ -1,7 +1,7 @@
 using System;
 using System.Collections;
 using System.ComponentModel;
-using Majorsilence.Forms;
+using System.Windows.Forms;
 using System.IO;
 using System.Xml;
 using System.Xml.Schema;
@@ -40,13 +40,13 @@ namespace Majorsilence.Reporting.RdlDesign
             MDIChild mc = _RdlDesigner.ActiveMdiChild as MDIChild;
             if (mc == null || mc.DesignTab != DesignTabs.Edit)
             {
-                MessageBox.Show(Strings.DialogValidateRdl_ShowC_SelectRDLTab);
+                Majorsilence.Forms.MessageBox.Show(Strings.DialogValidateRdl_ShowC_SelectRDLTab);
                 return;
             }
 
             string syntax = mc.SourceRdl;
-            Cursor saveCursor = Cursor.Current;
-            Cursor.Current = Cursors.WaitCursor;
+            Majorsilence.Forms.Cursor saveCursor = Majorsilence.Forms.Cursor.Current;
+            Majorsilence.Forms.Cursor.Current = Cursors.WaitCursor;
             StringReader sr = null;
             XmlTextReader tr = null;
             XmlReader vr = null;
@@ -91,7 +91,7 @@ namespace Majorsilence.Reporting.RdlDesign
             }
             finally
             {
-                Cursor.Current = saveCursor;
+                Majorsilence.Forms.Cursor.Current = saveCursor;
                 if (sr != null)
                     sr.Close();
                 if (tr != null)
@@ -137,7 +137,7 @@ namespace Majorsilence.Reporting.RdlDesign
 #if DEBUG
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message); // developer might care about this error??
+                Majorsilence.Forms.MessageBox.Show(ex.Message); // developer might care about this error??
             }
 #else
 			catch 
