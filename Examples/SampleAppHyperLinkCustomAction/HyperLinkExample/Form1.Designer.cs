@@ -35,8 +35,8 @@
             // 
             // rdlViewer1
             // 
-            this.rdlViewer1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
+            this.rdlViewer1.Anchor = ((Majorsilence.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+            | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.rdlViewer1.Cursor = System.Windows.Forms.Cursors.Default;
             this.rdlViewer1.Folder = null;
@@ -80,7 +80,7 @@
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.AutoScaleMode = (Majorsilence.Forms.AutoScaleMode)System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(672, 412);
             this.Controls.Add(this.ButtonReloadReport);
             this.Controls.Add(this.rdlViewer1);

@@ -991,3 +991,65 @@ problem was the assertion looping over *every* extracted image and requiring eac
 extracts every image, decodes what it can (skipping anything < 8 px), and asserts that *some*
 image decoded as the requested `BarcodeFormat`. SkiaSharp-only — the `#if DRAWINGCOMPAT` /
 `ZXing.Windows.Compatibility` arms are gone from that file.
+
+## D11: Majorsilence.Forms 26.0.52, `WinFormsShims.Compat` revives the stale legacy Examples
+
+**Version bump.** `Directory.Packages.props` pins the whole `Majorsilence.Forms` family
+(`Majorsilence.Forms`, `.Drawing.Common`, `.Avalonia`, `.Headless`, `.WinForms`) at `26.0.52`.
+`Majorsilence.Forms.WinForms` is now on nuget.org too (as of `26.0.52`) — the `.local-nuget-feed`
+workaround noted in D9 is gone; every package in the family resolves from nuget.org.
+
+**New: `Majorsilence.Forms.WinFormsShims.Compat`.** A Roslyn source generator (C#-only — it can't
+help a VB.NET consumer) that emits a `System.Windows.Forms`/`System.Drawing`-namespace compat
+surface backed by Majorsilence.Forms: subclasses/wrappers/enum copies for everything in the
+`Majorsilence.Forms`/`Majorsilence.Forms.Drawing` namespaces specifically (not for a custom control
+library's own namespace, like `Majorsilence.Reporting.RdlViewer` or `.RdlDesign` — those still
+compile against their real Majorsilence.Forms-typed base). First published at `26.0.52`; pinned
+alongside the rest of the family. This is a compile-time namespace alias, not a runtime bridge — it
+produces no real `System.Windows.Forms.Control`/HWND, so it's the wrong tool anywhere actual WinForms
+interop is needed (see below).
+
+**Revived four of the five stale `Examples/` apps** D8 explicitly left broken (they used to embed
+the classic WinForms `RdlViewer`/`ReportDesigner` directly and stopped building once those became
+Majorsilence.Forms-based): `SampleAppHyperLinkCustomAction/HyperLinkExample`,
+`Sample-Report-Viewer`, `SampleApp2-SetData`, and `SampleDesignerControl` (the plain WinForms one).
+Each: dropped `net48;net8.0-windows` → `net8.0;net10.0`, dropped `UseWindowsForms`/
+`ImportWindowsDesktopTargets` (no real System.Windows.Forms reference at all now), swapped the
+`PackageReference` to the old `5.0.18` `Majorsilence.Reporting.RdlViewer`/`.RdlCri`/
+`.ReportDesigner` NuGet packages for a `ProjectReference` to the in-repo `RdlViewer`/`RdlCri`/
+`RdlDesign` projects, and added `Majorsilence.Forms` + `Majorsilence.Forms.Avalonia` +
+`Majorsilence.Forms.WinFormsShims.Compat`. Verified building (`dotnet build`, both TFMs) on Linux —
+these are genuinely cross-platform now, not just Windows-buildable.
+
+Compile fixes the shim didn't cover, all real gaps in the generator's scope (documented in its own
+README as intentional — a value assigned straight to a real Majorsilence.Forms-typed member from a
+non-shimmed control needs an explicit cast, since the compat enum copy is a distinct type from the
+real one it mirrors):
+- Any `Designer.cs`/hand-written assignment of a compat enum (`System.Windows.Forms.AnchorStyles`,
+  `.AutoScaleMode`, `.DockStyle`) straight to a property on `RdlViewer`/`RdlDesign`'s own base
+  (`Anchor`, `AutoScaleMode`, `Dock`) needs an explicit cast to the real
+  `Majorsilence.Forms.<Enum>` — the shim's rule #2 enum copies are separate types from the
+  originals, and inherited members on a *non-generated* type were never rewritten to expect them.
+  Four call sites total across the four apps.
+- `System.Windows.Forms.Padding` doesn't exist under the shim at all — `Padding` is a struct, and
+  the generator's rules (#1 class subclassing, #1b sealed-class wrapping) only cover classes.
+  `SampleApp2-SetData/Form1.Designer.cs`'s `Margin = new System.Windows.Forms.Padding(...)`
+  needed the qualified `Majorsilence.Forms.Padding` instead.
+- `Sample-Report-Viewer/Form1.cs` had an unused `using System.Drawing.Printing;` — no compat
+  mapping exists for it (out of scope: it's Windows-only GDI+ printing, not part of either of the
+  shim's two namespace mappings) — removed since nothing in the file used it.
+
+**`SampleDesignerControlWPF` — NOT switched to the shim.** It embeds the designer control inside a
+WPF `WindowsFormsHost`, which needs a real `System.Windows.Forms.Control`/HWND to host; the shim's
+compat types are compile-time aliases with no real interop underneath, so they can't sit inside
+`WindowsFormsHost`. Rewritten instead with the same `ToWinFormsControl()` pattern D8 already used
+for `LibRdlWpfViewer`: the XAML's `WindowsFormsHost` is now empty, and code-behind constructs
+`Majorsilence.Reporting.RdlDesign.RdlUserControl` and sets `windowsFormsHost1.Child =
+reportDesigner.ToWinFormsControl()`. Windows-only (WPF + `Majorsilence.Forms.WinForms`); could not
+be compiled/verified on Linux, same caveat as `LibRdlWpfViewer` in D8 — real verification is
+`windows.yml` CI or a Windows machine.
+
+**`Examples/SampleApp` (VB.NET, `SampleReportApp.vbproj`) is still stale and out of scope.** The
+`WinFormsShims.Compat` generator is a C#-only Roslyn source generator (`IsRoslynComponent` +
+netstandard2.0 analyzer, emits C#); it does not run against a VB.NET compilation at all, so this app
+has no path to the shim. It would need the `ToWinFormsControl()` rewrite instead, not attempted here.

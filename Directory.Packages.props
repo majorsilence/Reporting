@@ -10,21 +10,20 @@
     <PackageVersion Include="dotConnect.Express.for.PostgreSQL" Version="8.3.10" />
     <!-- Version history/why for the Majorsilence.Forms family: MIGRATION-NOTES.md's D2/D4/D5/D6 +
          runtime-parity sections (per-patch breakdown lives in ../Majorsilence.Forms's git log). -->
-    <PackageVersion Include="Majorsilence.Forms" Version="26.0.51" />
-    <PackageVersion Include="Majorsilence.Forms.Drawing.Common" Version="26.0.51" />
-    <PackageVersion Include="Majorsilence.Forms.Avalonia" Version="26.0.51" />
-    <PackageVersion Include="Majorsilence.Forms.Headless" Version="26.0.51" />
+    <PackageVersion Include="Majorsilence.Forms" Version="26.0.52" />
+    <PackageVersion Include="Majorsilence.Forms.Drawing.Common" Version="26.0.52" />
+    <PackageVersion Include="Majorsilence.Forms.Avalonia" Version="26.0.52" />
+    <PackageVersion Include="Majorsilence.Forms.Headless" Version="26.0.52" />
     <!-- Windows-only (net8.0-windows/net10.0-windows); only LibRdlWpfViewer references it, to host
          Majorsilence.Forms controls inside a real System.Windows.Forms container via
-         ToWinFormsControl(). Not on nuget.org yet; packed locally from
-         ../Majorsilence.Forms/src/Majorsilence.Forms.WinForms (see nuget.config); that pack step
-         only runs on Windows. -->
-    <PackageVersion Include="Majorsilence.Forms.WinForms" Version="26.0.51" />
-    <PackageVersion Include="Majorsilence.Reporting.RdlViewer" Version="5.0.18" />
+         ToWinFormsControl(). On nuget.org as of 26.0.52. -->
+    <PackageVersion Include="Majorsilence.Forms.WinForms" Version="26.0.52" />
+    <!-- Roslyn source generator: emits a System.Windows.Forms/System.Drawing-namespace compat
+         surface backed by Majorsilence.Forms, so WinForms Designer.cs-generated source compiles
+         unchanged against it. PoC, first published at 26.0.52. -->
+    <PackageVersion Include="Majorsilence.Forms.WinFormsShims.Compat" Version="26.0.52" />
     <PackageVersion Include="Markdig" Version="1.3.2" />
     <PackageVersion Include="Majorsilence.Reporting.RdlEngine" Version="5.0.18" />
-    <PackageVersion Include="Majorsilence.Reporting.RdlCri" Version="5.0.18" />
-    <PackageVersion Include="Majorsilence.Reporting.ReportDesigner" Version="5.0.18" />
     <PackageVersion Include="Microsoft.CSharp" Version="4.5.0" />
     <PackageVersion Include="Microsoft.Data.Edm" Version="5.8.5" />
     <PackageVersion Include="Microsoft.Data.OData" Version="5.8.4" />
