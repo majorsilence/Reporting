@@ -403,7 +403,9 @@ namespace Majorsilence.Reporting.Rdl
 			else
 				result = await MatchBaseType();
 
-			return result;
+			// A ".ToString" suffix can follow any complete expression, not only the member
+			// references NormalizeMemberRef already handles.
+			return MatchPostfixToString(result);
 		}
 
 		// BaseType: FuncIdent | NUMBER | QUOTE   - note certain types are restricted in expressions
@@ -747,6 +749,11 @@ namespace Majorsilence.Reporting.Rdl
             }
 			else switch(method.ToLower())
 			{
+				case "ctype":	// VB conversion operator; second operand is a type, not a value
+					if (args.Length != 2)
+						throw new ParserException(Strings.Parser_ErrorP_Invalid_function_arguments + GetLocationInfo(curToken));
+					result = ResolveCType(args[0], args[1]);
+					break;
 				case "if":		// VB.NET ternary If(cond, a, b): same shape as IIF
 				case "iif":
 					if (args.Length != 3)
@@ -1215,6 +1222,87 @@ namespace Majorsilence.Reporting.Rdl
 			if (part.StartsWith("Value.", StringComparison.OrdinalIgnoreCase)) return "Value" + part.Substring(5);
 			if (part.StartsWith("Label.", StringComparison.OrdinalIgnoreCase)) return "Label" + part.Substring(5);
 			return part;
+		}
+
+		/// <summary>
+		/// VB's CType(value, Type). Its second operand names a type rather than carrying a
+		/// value, so it never resolved as an ordinary function: the parser reached method
+		/// lookup with "CType", found nothing on VBFunctions, and reported the function as
+		/// unknown. A primitive target maps to the VB conversion of the same name --
+		/// CType(x, Integer) is CInt(x) -- and any other target passes the value through,
+		/// because the engine carries values as objects and a cast to a reference type
+		/// (GUID, in practice) has no run-time work to do before the value is
+		/// formatted.
+		/// </summary>
+		private IExpr ResolveCType(IExpr value, IExpr typeOperand)
+		{
+			Identifier typeName = typeOperand as Identifier;
+			if (typeName == null || typeName.Name == null)
+				throw new ParserException(Strings.Parser_ErrorP_Invalid_function_arguments + GetLocationInfo(curToken));
+
+			string conversion;
+			switch (typeName.Name.ToLowerInvariant())
+			{
+				case "string":                    conversion = "CStr";   break;
+				case "integer":  case "int32":    conversion = "CInt";   break;
+				case "short":    case "int16":    conversion = "CInt";   break;
+				case "long":     case "int64":    conversion = "CLng";   break;
+				case "double":                    conversion = "CDbl";   break;
+				case "single":                    conversion = "CSng";   break;
+				case "decimal":                   conversion = "CDec";   break;
+				case "boolean":                   conversion = "CBool";  break;
+				case "date":     case "datetime": conversion = "CDate";  break;
+				default:                          conversion = null;     break;
+			}
+
+			return conversion == null ? value : ResolveMethodCall(conversion, new IExpr[] { value });
+		}
+
+		/// <summary>
+		/// ".ToString" or ".ToString()" written after a complete expression, as in
+		/// CType(Fields!X.Value, GUID).ToString. NormalizeMemberRef already absorbed the
+		/// suffix when it was glued to a Fields!/Parameters! reference, but after a closing
+		/// paren the dot was left over and parsing stopped with "end of expression expected".
+		/// SSRS accepts it, so it reduces to the string conversion it names. A ToString that
+		/// carries a format argument is left alone: that is Format(), not a bare conversion,
+		/// and the caller should still see the original error rather than a silent misread.
+		/// </summary>
+		private IExpr MatchPostfixToString(IExpr expr)
+		{
+			while (expr != null && curToken.Type == TokenTypes.DOT && tokens.Count > 0)
+			{
+				Token name = tokens.Peek();
+				if (name.Type != TokenTypes.IDENTIFIER
+					|| !string.Equals(name.Value, "ToString", StringComparison.OrdinalIgnoreCase))
+					break;
+
+				name = tokens.Extract();			// "ToString"
+				if (tokens.Count == 0)
+				{	// nothing follows the suffix; put it back and let the caller report it
+					tokens.Push(name);
+					break;
+				}
+
+				Token after = tokens.Extract();		// what follows the suffix
+				if (after.Type == TokenTypes.LPAREN)
+				{
+					if (tokens.Count == 0 || tokens.Peek().Type != TokenTypes.RPAREN)
+					{	// ToString(format) is Format(), not a bare conversion: restore the
+						// stream untouched so the caller reports it as it always has
+						tokens.Push(after);
+						tokens.Push(name);
+						break;
+					}
+					tokens.Extract();				// the matching ")"
+					curToken = tokens.Count > 0 ? tokens.Extract() : after;
+				}
+				else
+					curToken = after;
+
+				expr = ResolveMethodCall("CStr", new IExpr[] { expr });
+			}
+
+			return expr;
 		}
 
 		private IExpr ResolveMethodCall(string fullname, IExpr[] args)

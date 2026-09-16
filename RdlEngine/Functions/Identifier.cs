@@ -34,6 +34,16 @@ namespace Majorsilence.Reporting.Rdl
 			get { return _Value == null? true: false; }
 		}
 
+		/// <summary>
+		/// The identifier as written. CType's second operand is a type name that arrives here
+		/// as an ordinary identifier, and the parser has to read the name back to pick the
+		/// conversion.
+		/// </summary>
+		internal string Name
+		{
+			get { return _Value; }
+		}
+
 		public TypeCode GetTypeCode()
 		{
 			return TypeCode.Object;			// TODO
