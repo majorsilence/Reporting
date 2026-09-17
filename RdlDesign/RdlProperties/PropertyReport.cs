@@ -2,11 +2,10 @@ using Majorsilence.Reporting.RdlDesign.Resources;
 
 using System;
 using System.ComponentModel;            // need this for the properties metadata
-using System.Drawing.Design;
 using System.Globalization;
 using System.Text;
 using System.Windows.Forms;
-using System.Windows.Forms.Design;
+using Majorsilence.Forms.Design;
 using System.Xml;
 
 namespace Majorsilence.Reporting.RdlDesign
@@ -422,7 +421,7 @@ namespace Majorsilence.Reporting.RdlDesign
             using (SingleCtlDialog scd = new SingleCtlDialog(pr.DesignCtl, pr.Draw, null, SingleCtlTypeEnum.ReportParameterCtl, null))
             {
                 // Display the UI editor dialog
-                if (editorService.ShowDialog(scd) == DialogResult.OK)
+                if (editorService.ShowDialog(scd) == Majorsilence.Forms.DialogResult.OK)
                 {
                     // Return the new property value from the UI editor form
                     return new PropertyReportParameters(pr);
@@ -519,7 +518,7 @@ namespace Majorsilence.Reporting.RdlDesign
             using (SingleCtlDialog scd = new SingleCtlDialog(pr.DesignCtl, pr.Draw, null, SingleCtlTypeEnum.ReportCodeCtl, null))
             {
                 // Display the UI editor dialog
-                if (editorService.ShowDialog(scd) == DialogResult.OK)
+                if (editorService.ShowDialog(scd) == Majorsilence.Forms.DialogResult.OK)
                 {
                     // Return the new property value from the UI editor form
                     return new PropertyReportCode(pr);
@@ -623,7 +622,7 @@ namespace Majorsilence.Reporting.RdlDesign
             using (SingleCtlDialog scd = new SingleCtlDialog(pr.DesignCtl, pr.Draw, null, SingleCtlTypeEnum.ReportModulesClassesCtl, null))
             {
                 // Display the UI editor dialog
-                if (editorService.ShowDialog(scd) == DialogResult.OK)
+                if (editorService.ShowDialog(scd) == Majorsilence.Forms.DialogResult.OK)
                 {
                     // Return the new property value from the UI editor form
                     return new PropertyReportModulesClasses(pr);
@@ -673,7 +672,7 @@ namespace Majorsilence.Reporting.RdlDesign
                 ofd.Filter = Strings.FileUIEditor_EditValue_XSLFilesFilter;
                 ofd.FilterIndex = 0;
                 ofd.CheckFileExists = true;
-                if (ofd.ShowDialog() == DialogResult.OK)
+                if (ofd.ShowDialog() == Majorsilence.Forms.DialogResult.OK)
                 {
                     // Return the new property value from the UI editor form
                     return ofd.FileName;

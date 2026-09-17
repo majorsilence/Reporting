@@ -1,6 +1,5 @@
 using System;
 using System.Windows.Forms;
-using System.Drawing;
 using System.ComponentModel;
 using System.Collections;
 
@@ -35,7 +34,7 @@ private System.ComponentModel.Container components = null;
 
 		private void InitializeComponent()
 		{
-			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(DialogNewTable));
+			System.Windows.Forms.ComponentResourceManager resources = new System.Windows.Forms.ComponentResourceManager(typeof(DialogNewTable));
 			this.bOK = new System.Windows.Forms.Button();
 			this.bCancel = new System.Windows.Forms.Button();
 			this.label1 = new System.Windows.Forms.Label();
@@ -64,12 +63,12 @@ private System.ComponentModel.Container components = null;
 			// 
 			resources.ApplyResources(this.bOK, "bOK");
 			this.bOK.Name = "bOK";
-			this.bOK.Click += new System.EventHandler(this.bOK_Click);
+			this.bOK.Click += this.bOK_Click;
 			// 
 			// bCancel
 			// 
 			resources.ApplyResources(this.bCancel, "bCancel");
-			this.bCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
+			this.bCancel.DialogResult = Majorsilence.Forms.DialogResult.Cancel;
 			this.bCancel.Name = "bCancel";
 			// 
 			// label1
@@ -80,9 +79,9 @@ private System.ComponentModel.Container components = null;
 			// cbDataSets
 			// 
 			resources.ApplyResources(this.cbDataSets, "cbDataSets");
-			this.cbDataSets.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+			this.cbDataSets.DropDownStyle = Majorsilence.Forms.ComboBoxStyle.DropDownList;
 			this.cbDataSets.Name = "cbDataSets";
-			this.cbDataSets.SelectedIndexChanged += new System.EventHandler(this.cbDataSets_SelectedIndexChanged);
+			this.cbDataSets.SelectedIndexChanged += this.cbDataSets_SelectedIndexChanged;
 			// 
 			// label2
 			// 
@@ -98,7 +97,7 @@ private System.ComponentModel.Container components = null;
 			// 
 			resources.ApplyResources(this.lbFields, "lbFields");
 			this.lbFields.Name = "lbFields";
-			this.lbFields.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
+			this.lbFields.SelectionMode = Majorsilence.Forms.SelectionMode.MultiExtended;
 			// 
 			// lbTableColumns
 			// 
@@ -109,37 +108,37 @@ private System.ComponentModel.Container components = null;
 			// 
 			resources.ApplyResources(this.bUp, "bUp");
 			this.bUp.Name = "bUp";
-			this.bUp.Click += new System.EventHandler(this.bUp_Click);
+			this.bUp.Click += this.bUp_Click;
 			// 
 			// bDown
 			// 
 			resources.ApplyResources(this.bDown, "bDown");
 			this.bDown.Name = "bDown";
-			this.bDown.Click += new System.EventHandler(this.bDown_Click);
+			this.bDown.Click += this.bDown_Click;
 			// 
 			// bRight
 			// 
 			resources.ApplyResources(this.bRight, "bRight");
 			this.bRight.Name = "bRight";
-			this.bRight.Click += new System.EventHandler(this.bRight_Click);
+			this.bRight.Click += this.bRight_Click;
 			// 
 			// bAllRight
 			// 
 			resources.ApplyResources(this.bAllRight, "bAllRight");
 			this.bAllRight.Name = "bAllRight";
-			this.bAllRight.Click += new System.EventHandler(this.bAllRight_Click);
+			this.bAllRight.Click += this.bAllRight_Click;
 			// 
 			// bLeft
 			// 
 			resources.ApplyResources(this.bLeft, "bLeft");
 			this.bLeft.Name = "bLeft";
-			this.bLeft.Click += new System.EventHandler(this.bLeft_Click);
+			this.bLeft.Click += this.bLeft_Click;
 			// 
 			// bAllLeft
 			// 
 			resources.ApplyResources(this.bAllLeft, "bAllLeft");
 			this.bAllLeft.Name = "bAllLeft";
-			this.bAllLeft.Click += new System.EventHandler(this.bAllLeft_Click);
+			this.bAllLeft.Click += this.bAllLeft_Click;
 			// 
 			// label4
 			// 
@@ -149,9 +148,9 @@ private System.ComponentModel.Container components = null;
 			// cbGroupColumn
 			// 
 			resources.ApplyResources(this.cbGroupColumn, "cbGroupColumn");
-			this.cbGroupColumn.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+			this.cbGroupColumn.DropDownStyle = Majorsilence.Forms.ComboBoxStyle.DropDownList;
 			this.cbGroupColumn.Name = "cbGroupColumn";
-			this.cbGroupColumn.Enter += new System.EventHandler(this.cbGroupColumn_Enter);
+			this.cbGroupColumn.Enter += this.cbGroupColumn_Enter;
 			// 
 			// chkGrandTotals
 			// 
@@ -181,7 +180,7 @@ private System.ComponentModel.Container components = null;
 			// 
 			resources.ApplyResources(this.rbHorz, "rbHorz");
 			this.rbHorz.Name = "rbHorz";
-			this.rbHorz.CheckedChanged += new System.EventHandler(this.rbHorz_CheckedChanged);
+			this.rbHorz.CheckedChanged += this.rbHorz_CheckedChanged;
 			// 
 			// DialogNewTable
 			// 
@@ -206,12 +205,12 @@ private System.ComponentModel.Container components = null;
 			this.Controls.Add(this.label1);
 			this.Controls.Add(this.bCancel);
 			this.Controls.Add(this.bOK);
-			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
+			this.FormBorderStyle = Majorsilence.Forms.FormBorderStyle.FixedDialog;
 			this.MaximizeBox = false;
 			this.MinimizeBox = false;
 			this.Name = "DialogNewTable";
 			this.ShowInTaskbar = false;
-			this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
+			this.SizeGripStyle = Majorsilence.Forms.SizeGripStyle.Hide;
 			this.groupBox1.ResumeLayout(false);
 			this.ResumeLayout(false);
 

@@ -1,6 +1,11 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>net48;net8.0-windows</TargetFrameworks>
+    <!-- net48 dropped: RdlDesign is now Majorsilence.Forms-based (net8.0/net10.0 only). Embeds the
+         designer control inside WindowsFormsHost via Majorsilence.Forms.WinForms's
+         ToWinFormsControl() -- same pattern as LibRdlWpfViewer -- not the compile-time
+         WinFormsShims.Compat namespace shim, which can't produce a real interop Control for
+         WindowsFormsHost to host. -->
+    <TargetFrameworks>net8.0-windows;net10.0-windows</TargetFrameworks>
     <OutputType>WinExe</OutputType>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <UseWindowsForms>true</UseWindowsForms>
@@ -16,6 +21,9 @@
 		</Content>
 	</ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Majorsilence.Reporting.ReportDesigner" />
+    <ProjectReference Include="..\..\..\RdlDesign\Majorsilence.Reporting.ReportDesigner.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Majorsilence.Forms.WinForms" />
   </ItemGroup>
 </Project>

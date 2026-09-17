@@ -106,7 +106,7 @@ namespace Majorsilence.Reporting.RdlDesign
 		/// </summary>
 		private void InitializeComponent()
 		{
-			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(SubreportCtl));
+			System.Windows.Forms.ComponentResourceManager resources = new System.Windows.Forms.ComponentResourceManager(typeof(SubreportCtl));
             this.DoubleBuffered = true;
 			this.dgParms = new System.Windows.Forms.DataGridView();
 			this.label1 = new System.Windows.Forms.Label();
@@ -139,7 +139,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			// 
 			resources.ApplyResources(this.bFile, "bFile");
 			this.bFile.Name = "bFile";
-			this.bFile.Click += new System.EventHandler(this.bFile_Click);
+			this.bFile.Click += this.bFile_Click;
 			// 
 			// tbNoRows
 			// 
@@ -160,7 +160,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			// 
 			resources.ApplyResources(this.bRefreshParms, "bRefreshParms");
 			this.bRefreshParms.Name = "bRefreshParms";
-			this.bRefreshParms.Click += new System.EventHandler(this.bRefreshParms_Click);
+			this.bRefreshParms.Click += this.bRefreshParms_Click;
 			// 
 			// SubreportCtl
 			// 
@@ -185,7 +185,7 @@ namespace Majorsilence.Reporting.RdlDesign
 		{
 			if (tbReportFile.Text.Length > 0)
 				return true;
-			MessageBox.Show(Strings.SubreportCtl_Show_SubreportMustSpecified, Strings.SubreportCtl_Show_Subreport);
+			Majorsilence.Forms.MessageBox.Show(Strings.SubreportCtl_Show_SubreportMustSpecified, Strings.SubreportCtl_Show_Subreport);
 			return false;
 		}
 
@@ -234,7 +234,7 @@ namespace Majorsilence.Reporting.RdlDesign
                 ofd.DefaultExt = "rdl";
                 ofd.AddExtension = true;
 
-                if (ofd.ShowDialog() == DialogResult.OK)
+                if (ofd.ShowDialog() == Majorsilence.Forms.DialogResult.OK)
                 {
                     string file = Path.GetFileNameWithoutExtension(ofd.FileName);
 
@@ -287,7 +287,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			catch(Exception e)
 			{
 				prog = null;
-				MessageBox.Show(e.Message, Strings.SubreportCtl_Show_ErrorReading);
+				Majorsilence.Forms.MessageBox.Show(e.Message, Strings.SubreportCtl_Show_ErrorReading);
 			}
 			finally
 			{
@@ -313,14 +313,14 @@ namespace Majorsilence.Reporting.RdlDesign
 				r = await rdlp.Parse();
 				if (r.ErrorMaxSeverity > 4) 
 				{
-					MessageBox.Show(Strings.DrillParametersDialog_ShowC_ReportHasErrors);
+					Majorsilence.Forms.MessageBox.Show(Strings.DrillParametersDialog_ShowC_ReportHasErrors);
 					r = null;			// don't return when severe errors
 				}
 			}
 			catch(Exception e)
 			{
 				r = null;
-				MessageBox.Show(e.Message, Strings.SubreportCtl_Show_ReportLoadFailed);
+				Majorsilence.Forms.MessageBox.Show(e.Message, Strings.SubreportCtl_Show_ReportLoadFailed);
 			}
 			return r;
 		}

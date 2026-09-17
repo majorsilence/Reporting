@@ -179,7 +179,7 @@ namespace Majorsilence.Reporting.RdlDesign
 		/// </summary>
 		private void InitializeComponent()
 		{
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(GroupingCtl));
+            System.Windows.Forms.ComponentResourceManager resources = new System.Windows.Forms.ComponentResourceManager(typeof(GroupingCtl));
             this.DoubleBuffered = true;
             this.dgGroup = new System.Windows.Forms.DataGridView();
             this.bDelete = new System.Windows.Forms.Button();
@@ -216,19 +216,19 @@ namespace Majorsilence.Reporting.RdlDesign
             // 
             resources.ApplyResources(this.bDelete, "bDelete");
             this.bDelete.Name = "bDelete";
-            this.bDelete.Click += new System.EventHandler(this.bDelete_Click);
+            this.bDelete.Click += this.bDelete_Click;
             // 
             // bUp
             // 
             resources.ApplyResources(this.bUp, "bUp");
             this.bUp.Name = "bUp";
-            this.bUp.Click += new System.EventHandler(this.bUp_Click);
+            this.bUp.Click += this.bUp_Click;
             // 
             // bDown
             // 
             resources.ApplyResources(this.bDown, "bDown");
             this.bDown.Name = "bDown";
-            this.bDown.Click += new System.EventHandler(this.bDown_Click);
+            this.bDown.Click += this.bDown_Click;
             // 
             // label1
             // 
@@ -239,7 +239,7 @@ namespace Majorsilence.Reporting.RdlDesign
             // 
             resources.ApplyResources(this.tbName, "tbName");
             this.tbName.Name = "tbName";
-            this.tbName.Validating += new System.ComponentModel.CancelEventHandler(this.tbName_Validating);
+            this.tbName.Validating += this.tbName_Validating;
             // 
             // label2
             // 
@@ -301,28 +301,28 @@ namespace Majorsilence.Reporting.RdlDesign
             resources.ApplyResources(this.bValueExpr, "bValueExpr");
             this.bValueExpr.Name = "bValueExpr";
             this.bValueExpr.Tag = "value";
-            this.bValueExpr.Click += new System.EventHandler(this.bValueExpr_Click);
+            this.bValueExpr.Click += this.bValueExpr_Click;
             // 
             // bLabelExpr
             // 
             resources.ApplyResources(this.bLabelExpr, "bLabelExpr");
             this.bLabelExpr.Name = "bLabelExpr";
             this.bLabelExpr.Tag = "label";
-            this.bLabelExpr.Click += new System.EventHandler(this.bExpr_Click);
+            this.bLabelExpr.Click += this.bExpr_Click;
             // 
             // bParentExpr
             // 
             resources.ApplyResources(this.bParentExpr, "bParentExpr");
             this.bParentExpr.Name = "bParentExpr";
             this.bParentExpr.Tag = "parent";
-            this.bParentExpr.Click += new System.EventHandler(this.bExpr_Click);
+            this.bParentExpr.Click += this.bExpr_Click;
             // 
             // BtnCercaFormulaEsclusione
             // 
             resources.ApplyResources(this.BtnCercaFormulaEsclusione, "BtnCercaFormulaEsclusione");
             this.BtnCercaFormulaEsclusione.Name = "BtnCercaFormulaEsclusione";
             this.BtnCercaFormulaEsclusione.Tag = "value";
-            this.BtnCercaFormulaEsclusione.Click += new System.EventHandler(this.BtnCercaFormulaEsclusione_Click);
+            this.BtnCercaFormulaEsclusione.Click += this.BtnCercaFormulaEsclusione_Click;
             // 
             // TxtPageBreakCondition
             // 
@@ -380,7 +380,7 @@ namespace Majorsilence.Reporting.RdlDesign
 					_GroupingParent.Name == "List")
 					return true;
 
-				MessageBox.Show(Strings.GroupingCtl_Show_GroupMustDefined, Strings.GroupingCtl_Show_Grouping);
+				Majorsilence.Forms.MessageBox.Show(Strings.GroupingCtl_Show_GroupMustDefined, Strings.GroupingCtl_Show_Grouping);
 				return false;
 			}
 
@@ -389,13 +389,13 @@ namespace Majorsilence.Reporting.RdlDesign
 			string nerr = _Draw.GroupingNameCheck(grouping, this.tbName.Text);
 			if (nerr != null)
 			{
-				MessageBox.Show(nerr, Strings.GroupingCtl_Show_GroupNameError);
+				Majorsilence.Forms.MessageBox.Show(nerr, Strings.GroupingCtl_Show_GroupNameError);
 				return false;
 			}
 
 			if (!bRows)
 			{
-				MessageBox.Show(Strings.GroupingCtl_Show_NoExpressionsForGroup, Strings.GroupingCtl_Show_Group);
+				Majorsilence.Forms.MessageBox.Show(Strings.GroupingCtl_Show_NoExpressionsForGroup, Strings.GroupingCtl_Show_Group);
 				return false;
 			}
 
@@ -405,7 +405,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			if (this.cbLabelExpr.Text.Length > 0)
 				return true;
 
-			MessageBox.Show(Strings.GroupingCtl_Show_ChartSeriesMustHaveLabelForLegend, Strings.GroupingCtl_Show_Chart);
+			Majorsilence.Forms.MessageBox.Show(Strings.GroupingCtl_Show_ChartSeriesMustHaveLabelForLegend, Strings.GroupingCtl_Show_Chart);
 
 			return false;
 		}
@@ -616,7 +616,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			if (!ReportNames.IsNameValid(tbName.Text))
 			{
 				e.Cancel = true;
-				MessageBox.Show(string.Format(Strings.GroupingCtl_Show_InvalidName, tbName.Text), Strings.GroupingCtl_Show_Name);
+				Majorsilence.Forms.MessageBox.Show(string.Format(Strings.GroupingCtl_Show_InvalidName, tbName.Text), Strings.GroupingCtl_Show_Name);
 			}
 		}
 
@@ -636,7 +636,7 @@ namespace Majorsilence.Reporting.RdlDesign
 				cr = 0;
 			}
 
-            DataGridViewCell dgc = dgGroup.CurrentCell;
+            Majorsilence.Forms.DataGridViewCell dgc = dgGroup.CurrentCell;
 			int cc = dgc.ColumnIndex;
 			DataRow dr = _DataTable.Rows[cr];
 			string cv = dr[cc] as string;
@@ -644,8 +644,8 @@ namespace Majorsilence.Reporting.RdlDesign
 			DialogExprEditor ee = new DialogExprEditor(_Draw, cv, _GroupingParent, false);
             try
             {
-                DialogResult dlgr = ee.ShowDialog();
-                if (dlgr == DialogResult.OK)
+                Majorsilence.Forms.DialogResult dlgr = ee.ShowDialog();
+                if (dlgr == Majorsilence.Forms.DialogResult.OK)
                     dr[cc] = ee.Expression;
             }
             finally
@@ -659,7 +659,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			Button b = sender as Button;
 			if (b == null)
 				return;
-			Control c = null;
+			Majorsilence.Forms.Control c = null;
 			switch (b.Tag as string)
 			{
 				case "label":
@@ -676,8 +676,8 @@ namespace Majorsilence.Reporting.RdlDesign
 			DialogExprEditor ee = new DialogExprEditor(_Draw, c.Text, _GroupingParent, false);
             try
             {
-                DialogResult dr = ee.ShowDialog();
-                if (dr == DialogResult.OK)
+                Majorsilence.Forms.DialogResult dr = ee.ShowDialog();
+                if (dr == Majorsilence.Forms.DialogResult.OK)
                     c.Text = ee.Expression;
             }
             finally
@@ -689,12 +689,12 @@ namespace Majorsilence.Reporting.RdlDesign
 
         private void BtnCercaFormulaEsclusione_Click(object sender, EventArgs e)
         {
-            Control c = TxtPageBreakCondition;
+            Majorsilence.Forms.Control c = TxtPageBreakCondition;
             DialogExprEditor ee = new DialogExprEditor(_Draw, c.Text, _GroupingParent, false);
             try
             {
-                DialogResult dr = ee.ShowDialog();
-                if (dr == DialogResult.OK)
+                Majorsilence.Forms.DialogResult dr = ee.ShowDialog();
+                if (dr == Majorsilence.Forms.DialogResult.OK)
                     c.Text = ee.Expression;
             }
             finally

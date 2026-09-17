@@ -1,6 +1,5 @@
 using System;
 using System.Windows.Forms;
-using System.Drawing;
 using System.ComponentModel;
 using System.Collections;
 
@@ -34,7 +33,7 @@ private System.ComponentModel.Container components = null;
 
 		private void InitializeComponent()
 		{
-			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(DialogNewMatrix));
+			System.Windows.Forms.ComponentResourceManager resources = new System.Windows.Forms.ComponentResourceManager(typeof(DialogNewMatrix));
 			this.bOK = new System.Windows.Forms.Button();
 			this.bCancel = new System.Windows.Forms.Button();
 			this.label1 = new System.Windows.Forms.Label();
@@ -61,12 +60,12 @@ private System.ComponentModel.Container components = null;
 			// 
 			resources.ApplyResources(this.bOK, "bOK");
 			this.bOK.Name = "bOK";
-			this.bOK.Click += new System.EventHandler(this.bOK_Click);
+			this.bOK.Click += this.bOK_Click;
 			// 
 			// bCancel
 			// 
 			resources.ApplyResources(this.bCancel, "bCancel");
-			this.bCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
+			this.bCancel.DialogResult = Majorsilence.Forms.DialogResult.Cancel;
 			this.bCancel.Name = "bCancel";
 			// 
 			// label1
@@ -77,9 +76,9 @@ private System.ComponentModel.Container components = null;
 			// cbDataSets
 			// 
 			resources.ApplyResources(this.cbDataSets, "cbDataSets");
-			this.cbDataSets.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+			this.cbDataSets.DropDownStyle = Majorsilence.Forms.ComboBoxStyle.DropDownList;
 			this.cbDataSets.Name = "cbDataSets";
-			this.cbDataSets.SelectedIndexChanged += new System.EventHandler(this.cbDataSets_SelectedIndexChanged);
+			this.cbDataSets.SelectedIndexChanged += this.cbDataSets_SelectedIndexChanged;
 			// 
 			// label2
 			// 
@@ -95,7 +94,7 @@ private System.ComponentModel.Container components = null;
 			// 
 			resources.ApplyResources(this.lbFields, "lbFields");
 			this.lbFields.Name = "lbFields";
-			this.lbFields.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
+			this.lbFields.SelectionMode = Majorsilence.Forms.SelectionMode.MultiExtended;
 			// 
 			// lbMatrixColumns
 			// 
@@ -106,25 +105,25 @@ private System.ComponentModel.Container components = null;
 			// 
 			resources.ApplyResources(this.bColumnUp, "bColumnUp");
 			this.bColumnUp.Name = "bColumnUp";
-			this.bColumnUp.Click += new System.EventHandler(this.bColumnUp_Click);
+			this.bColumnUp.Click += this.bColumnUp_Click;
 			// 
 			// bColumnDown
 			// 
 			resources.ApplyResources(this.bColumnDown, "bColumnDown");
 			this.bColumnDown.Name = "bColumnDown";
-			this.bColumnDown.Click += new System.EventHandler(this.bColumnDown_Click);
+			this.bColumnDown.Click += this.bColumnDown_Click;
 			// 
 			// bColumn
 			// 
 			resources.ApplyResources(this.bColumn, "bColumn");
 			this.bColumn.Name = "bColumn";
-			this.bColumn.Click += new System.EventHandler(this.bColumn_Click);
+			this.bColumn.Click += this.bColumn_Click;
 			// 
 			// bRowSelect
 			// 
 			resources.ApplyResources(this.bRowSelect, "bRowSelect");
 			this.bRowSelect.Name = "bRowSelect";
-			this.bRowSelect.Click += new System.EventHandler(this.bRow_Click);
+			this.bRowSelect.Click += this.bRow_Click;
 			// 
 			// lbMatrixRows
 			// 
@@ -135,25 +134,25 @@ private System.ComponentModel.Container components = null;
 			// 
 			resources.ApplyResources(this.bColumnDelete, "bColumnDelete");
 			this.bColumnDelete.Name = "bColumnDelete";
-			this.bColumnDelete.Click += new System.EventHandler(this.bColumnDelete_Click);
+			this.bColumnDelete.Click += this.bColumnDelete_Click;
 			// 
 			// bRowDelete
 			// 
 			resources.ApplyResources(this.bRowDelete, "bRowDelete");
 			this.bRowDelete.Name = "bRowDelete";
-			this.bRowDelete.Click += new System.EventHandler(this.bRowDelete_Click);
+			this.bRowDelete.Click += this.bRowDelete_Click;
 			// 
 			// bRowDown
 			// 
 			resources.ApplyResources(this.bRowDown, "bRowDown");
 			this.bRowDown.Name = "bRowDown";
-			this.bRowDown.Click += new System.EventHandler(this.bRowDown_Click);
+			this.bRowDown.Click += this.bRowDown_Click;
 			// 
 			// bRowUp
 			// 
 			resources.ApplyResources(this.bRowUp, "bRowUp");
 			this.bRowUp.Name = "bRowUp";
-			this.bRowUp.Click += new System.EventHandler(this.bRowUp_Click);
+			this.bRowUp.Click += this.bRowUp_Click;
 			// 
 			// label4
 			// 
@@ -169,8 +168,8 @@ private System.ComponentModel.Container components = null;
 			// 
 			resources.ApplyResources(this.cbMatrixCell, "cbMatrixCell");
 			this.cbMatrixCell.Name = "cbMatrixCell";
-			this.cbMatrixCell.TextChanged += new System.EventHandler(this.cbMatrixCell_TextChanged);
-			this.cbMatrixCell.Enter += new System.EventHandler(this.cbMatrixCell_Enter);
+			this.cbMatrixCell.TextChanged += this.cbMatrixCell_TextChanged;
+			this.cbMatrixCell.Enter += this.cbMatrixCell_Enter;
 			// 
 			// DialogNewMatrix
 			// 
@@ -197,12 +196,12 @@ private System.ComponentModel.Container components = null;
 			this.Controls.Add(this.label1);
 			this.Controls.Add(this.bCancel);
 			this.Controls.Add(this.bOK);
-			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
+			this.FormBorderStyle = Majorsilence.Forms.FormBorderStyle.FixedDialog;
 			this.MaximizeBox = false;
 			this.MinimizeBox = false;
 			this.Name = "DialogNewMatrix";
 			this.ShowInTaskbar = false;
-			this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
+			this.SizeGripStyle = Majorsilence.Forms.SizeGripStyle.Hide;
 			this.ResumeLayout(false);
 
 		}

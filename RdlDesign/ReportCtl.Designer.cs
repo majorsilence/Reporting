@@ -1,6 +1,5 @@
 using System;
 using System.Windows.Forms;
-using System.Drawing;
 using System.ComponentModel;
 using System.Collections;
 
@@ -42,7 +41,7 @@ private System.ComponentModel.Container components = null;
 
 		private void InitializeComponent()
 		{
-			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ReportCtl));
+			System.Windows.Forms.ComponentResourceManager resources = new System.Windows.Forms.ComponentResourceManager(typeof(ReportCtl));
             this.DoubleBuffered = true;
 			this.tbReportAuthor = new System.Windows.Forms.TextBox();
 			this.tbReportDescription = new System.Windows.Forms.TextBox();
@@ -113,10 +112,10 @@ private System.ComponentModel.Container components = null;
 			// cbPageSize
 			// 
 			resources.ApplyResources(this.cbPageSize, "cbPageSize");
-			this.cbPageSize.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+			this.cbPageSize.DropDownStyle = Majorsilence.Forms.ComboBoxStyle.DropDownList;
 			this.cbPageSize.FormattingEnabled = true;
 			this.cbPageSize.Name = "cbPageSize";
-			this.cbPageSize.SelectedIndexChanged += new System.EventHandler(this.cbPageSize_SelectedIndexChanged);
+			this.cbPageSize.SelectedIndexChanged += this.cbPageSize_SelectedIndexChanged;
 			// 
 			// label11
 			// 
@@ -128,14 +127,14 @@ private System.ComponentModel.Container components = null;
 			resources.ApplyResources(this.tbPageHeight, "tbPageHeight");
 			this.tbPageHeight.Name = "tbPageHeight";
 			this.tbPageHeight.Tag = "Page Height";
-			this.tbPageHeight.Validating += new System.ComponentModel.CancelEventHandler(this.tbSize_Validating);
+			this.tbPageHeight.Validating += this.tbSize_Validating;
 			// 
 			// tbPageWidth
 			// 
 			resources.ApplyResources(this.tbPageWidth, "tbPageWidth");
 			this.tbPageWidth.Name = "tbPageWidth";
 			this.tbPageWidth.Tag = "Page Width";
-			this.tbPageWidth.Validating += new System.ComponentModel.CancelEventHandler(this.tbSize_Validating);
+			this.tbPageWidth.Validating += this.tbSize_Validating;
 			// 
 			// label4
 			// 
@@ -166,7 +165,7 @@ private System.ComponentModel.Container components = null;
 			resources.ApplyResources(this.tbMarginBottom, "tbMarginBottom");
 			this.tbMarginBottom.Name = "tbMarginBottom";
 			this.tbMarginBottom.Tag = "Bottom Margin";
-			this.tbMarginBottom.Validating += new System.ComponentModel.CancelEventHandler(this.tbSize_Validating);
+			this.tbMarginBottom.Validating += this.tbSize_Validating;
 			// 
 			// label7
 			// 
@@ -178,7 +177,7 @@ private System.ComponentModel.Container components = null;
 			resources.ApplyResources(this.tbMarginTop, "tbMarginTop");
 			this.tbMarginTop.Name = "tbMarginTop";
 			this.tbMarginTop.Tag = "Top Margin";
-			this.tbMarginTop.Validating += new System.ComponentModel.CancelEventHandler(this.tbSize_Validating);
+			this.tbMarginTop.Validating += this.tbSize_Validating;
 			// 
 			// label8
 			// 
@@ -190,7 +189,7 @@ private System.ComponentModel.Container components = null;
 			resources.ApplyResources(this.tbMarginRight, "tbMarginRight");
 			this.tbMarginRight.Name = "tbMarginRight";
 			this.tbMarginRight.Tag = "Right Margin";
-			this.tbMarginRight.Validating += new System.ComponentModel.CancelEventHandler(this.tbSize_Validating);
+			this.tbMarginRight.Validating += this.tbSize_Validating;
 			// 
 			// label6
 			// 
@@ -202,7 +201,7 @@ private System.ComponentModel.Container components = null;
 			resources.ApplyResources(this.tbMarginLeft, "tbMarginLeft");
 			this.tbMarginLeft.Name = "tbMarginLeft";
 			this.tbMarginLeft.Tag = "Left Margin";
-			this.tbMarginLeft.Validating += new System.ComponentModel.CancelEventHandler(this.tbSize_Validating);
+			this.tbMarginLeft.Validating += this.tbSize_Validating;
 			// 
 			// label5
 			// 
@@ -214,7 +213,7 @@ private System.ComponentModel.Container components = null;
 			resources.ApplyResources(this.tbWidth, "tbWidth");
 			this.tbWidth.Name = "tbWidth";
 			this.tbWidth.Tag = "Width";
-			this.tbWidth.Validating += new System.ComponentModel.CancelEventHandler(this.tbSize_Validating);
+			this.tbWidth.Validating += this.tbSize_Validating;
 			// 
 			// label9
 			// 

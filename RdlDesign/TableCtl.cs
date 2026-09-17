@@ -3,7 +3,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Drawing;
 using System.Data;
 using System.Windows.Forms;
 using System.Xml;
@@ -118,7 +117,7 @@ namespace Majorsilence.Reporting.RdlDesign
 		/// </summary>
 		private void InitializeComponent()
 		{
-			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(TableCtl));
+			System.Windows.Forms.ComponentResourceManager resources = new System.Windows.Forms.ComponentResourceManager(typeof(TableCtl));
             this.DoubleBuffered = true;
 			this.label2 = new System.Windows.Forms.Label();
 			this.cbDataSet = new System.Windows.Forms.ComboBox();
@@ -152,9 +151,9 @@ namespace Majorsilence.Reporting.RdlDesign
 			// cbDataSet
 			// 
 			resources.ApplyResources(this.cbDataSet, "cbDataSet");
-			this.cbDataSet.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+			this.cbDataSet.DropDownStyle = Majorsilence.Forms.ComboBoxStyle.DropDownList;
 			this.cbDataSet.Name = "cbDataSet";
-			this.cbDataSet.SelectedIndexChanged += new System.EventHandler(this.cbDataSet_SelectedIndexChanged);
+			this.cbDataSet.SelectedIndexChanged += this.cbDataSet_SelectedIndexChanged;
 			// 
 			// groupBox1
 			// 
@@ -168,13 +167,13 @@ namespace Majorsilence.Reporting.RdlDesign
 			// 
 			resources.ApplyResources(this.chkPBAfter, "chkPBAfter");
 			this.chkPBAfter.Name = "chkPBAfter";
-			this.chkPBAfter.CheckedChanged += new System.EventHandler(this.chkPBAfter_CheckedChanged);
+			this.chkPBAfter.CheckedChanged += this.chkPBAfter_CheckedChanged;
 			// 
 			// chkPBBefore
 			// 
 			resources.ApplyResources(this.chkPBBefore, "chkPBBefore");
 			this.chkPBBefore.Name = "chkPBBefore";
-			this.chkPBBefore.CheckedChanged += new System.EventHandler(this.chkPBBefore_CheckedChanged);
+			this.chkPBBefore.CheckedChanged += this.chkPBBefore_CheckedChanged;
 			// 
 			// label1
 			// 
@@ -185,7 +184,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			// 
 			resources.ApplyResources(this.tbNoRows, "tbNoRows");
 			this.tbNoRows.Name = "tbNoRows";
-			this.tbNoRows.TextChanged += new System.EventHandler(this.tbNoRows_TextChanged);
+			this.tbNoRows.TextChanged += this.tbNoRows_TextChanged;
 			// 
 			// groupBox2
 			// 
@@ -202,19 +201,19 @@ namespace Majorsilence.Reporting.RdlDesign
 			// 
 			resources.ApplyResources(this.tbDetailCollectionName, "tbDetailCollectionName");
 			this.tbDetailCollectionName.Name = "tbDetailCollectionName";
-			this.tbDetailCollectionName.TextChanged += new System.EventHandler(this.tbDetailCollectionName_TextChanged);
+			this.tbDetailCollectionName.TextChanged += this.tbDetailCollectionName_TextChanged;
 			// 
 			// tbDetailElementName
 			// 
 			resources.ApplyResources(this.tbDetailElementName, "tbDetailElementName");
 			this.tbDetailElementName.Name = "tbDetailElementName";
-			this.tbDetailElementName.TextChanged += new System.EventHandler(this.tbDetailElementName_TextChanged);
+			this.tbDetailElementName.TextChanged += this.tbDetailElementName_TextChanged;
 			// 
 			// chkRenderDetails
 			// 
 			resources.ApplyResources(this.chkRenderDetails, "chkRenderDetails");
 			this.chkRenderDetails.Name = "chkRenderDetails";
-			this.chkRenderDetails.CheckedChanged += new System.EventHandler(this.chkRenderDetails_CheckedChanged);
+			this.chkRenderDetails.CheckedChanged += this.chkRenderDetails_CheckedChanged;
 			// 
 			// label4
 			// 
@@ -241,31 +240,31 @@ namespace Majorsilence.Reporting.RdlDesign
 			// 
 			resources.ApplyResources(this.chkFooterRepeat, "chkFooterRepeat");
 			this.chkFooterRepeat.Name = "chkFooterRepeat";
-			this.chkFooterRepeat.CheckedChanged += new System.EventHandler(this.chkRows_CheckedChanged);
+			this.chkFooterRepeat.CheckedChanged += this.chkRows_CheckedChanged;
 			// 
 			// chkHeaderRepeat
 			// 
 			resources.ApplyResources(this.chkHeaderRepeat, "chkHeaderRepeat");
 			this.chkHeaderRepeat.Name = "chkHeaderRepeat";
-			this.chkHeaderRepeat.CheckedChanged += new System.EventHandler(this.chkRows_CheckedChanged);
+			this.chkHeaderRepeat.CheckedChanged += this.chkRows_CheckedChanged;
 			// 
 			// chkFooterRows
 			// 
 			resources.ApplyResources(this.chkFooterRows, "chkFooterRows");
 			this.chkFooterRows.Name = "chkFooterRows";
-			this.chkFooterRows.CheckedChanged += new System.EventHandler(this.chkRows_CheckedChanged);
+			this.chkFooterRows.CheckedChanged += this.chkRows_CheckedChanged;
 			// 
 			// chkHeaderRows
 			// 
 			resources.ApplyResources(this.chkHeaderRows, "chkHeaderRows");
 			this.chkHeaderRows.Name = "chkHeaderRows";
-			this.chkHeaderRows.CheckedChanged += new System.EventHandler(this.chkRows_CheckedChanged);
+			this.chkHeaderRows.CheckedChanged += this.chkRows_CheckedChanged;
 			// 
 			// chkDetails
 			// 
 			resources.ApplyResources(this.chkDetails, "chkDetails");
 			this.chkDetails.Name = "chkDetails";
-			this.chkDetails.CheckedChanged += new System.EventHandler(this.chkRows_CheckedChanged);
+			this.chkDetails.CheckedChanged += this.chkRows_CheckedChanged;
 			// 
 			// TableCtl
 			// 
@@ -294,7 +293,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			if (chkDetails.Checked || chkFooterRows.Checked || chkHeaderRows.Checked)
 				return true;
 
-			MessageBox.Show(Strings.TableCtl_Show_TableMustHaveRegions, Strings.TableCtl_Show_Table);
+			Majorsilence.Forms.MessageBox.Show(Strings.TableCtl_Show_TableMustHaveRegions, Strings.TableCtl_Show_Table);
 
 			return false;
 		}

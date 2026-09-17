@@ -3,8 +3,9 @@ using System;
 using System.Collections;
 using System.ComponentModel;
 using System.Drawing;
-using System.Drawing.Drawing2D;
-using System.Drawing.Imaging;
+using System.Drawing;
+using Majorsilence.Forms.Drawing.Drawing2D;
+using Majorsilence.Forms.Drawing.Imaging;
 using System.Windows.Forms;
 using System.Globalization;
 using System.Net;
@@ -36,15 +37,15 @@ namespace Majorsilence.Reporting.RdlDesign
             this.DoubleBuffered = true;
 
             //editor = e;
-            //editor.TextChanged += new System.EventHandler(editor_TextChanged);
-            //editor.Resize += new System.EventHandler(editor_Resize);
-            //editor.VScroll += new System.EventHandler(editor_VScroll);
+            //editor.TextChanged += editor_TextChanged;
+            //editor.Resize += editor_Resize;
+            //editor.VScroll += editor_VScroll;
 
             //RegionInfo rinfo = new RegionInfo(CultureInfo.CurrentCulture.Name);
             //_IsMetric = rinfo.IsMetric;
             //_Intervals = _IsMetric ? 4 : 8;
 
-            this.Paint += new PaintEventHandler(DesignRulerPaint);
+            this.Paint += DesignRulerPaint;
         }
 
          [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
@@ -58,12 +59,12 @@ namespace Majorsilence.Reporting.RdlDesign
                     return;
                 if (_Vertical)
                 {
-                    _Design.VerticalScrollChanged += new System.EventHandler(ScrollChanged);
+                    _Design.VerticalScrollChanged += ScrollChanged;
                     // need to know when the various heights change as well
-                    _Design.HeightChanged += new DesignCtl.HeightEventHandler(HeightChanged);
+                    _Design.HeightChanged += HeightChanged;
                 }
                 else
-                    _Design.HorizontalScrollChanged += new System.EventHandler(ScrollChanged);
+                    _Design.HorizontalScrollChanged += ScrollChanged;
             }
         }
 
@@ -122,7 +123,7 @@ namespace Majorsilence.Reporting.RdlDesign
             _Design.Invalidate();
         }
         
-        private void Ruler_DrawHorz(Graphics g)
+        private void Ruler_DrawHorz(Majorsilence.Forms.Drawing.Graphics g)
         {
             float xoff, yoff, xinc;
 
@@ -212,16 +213,16 @@ namespace Majorsilence.Reporting.RdlDesign
             }
         }
 
-        private void Ruler_DrawVert(Graphics g)
+        private void Ruler_DrawVert(Majorsilence.Forms.Drawing.Graphics g)
         {
             StringFormat strFormat = null;
             Font fontOutput = null;
-            SolidBrush sb = null;           // brush for non-ruler portions of ruler
-            SolidBrush bb = null;           // brush for drawing the areas next to band separator
+            Majorsilence.Forms.Drawing.SolidBrush sb = null;           // brush for non-ruler portions of ruler
+            Majorsilence.Forms.Drawing.SolidBrush bb = null;           // brush for drawing the areas next to band separator
             float SectionHeigth = 0f;
 
             g.ScaleTransform(1f, 1f);
-            g.PageUnit = GraphicsUnit.Point;
+            g.PageUnit = Majorsilence.Forms.Drawing.GraphicsUnit.Point;
 
             try
             {
@@ -230,8 +231,8 @@ namespace Majorsilence.Reporting.RdlDesign
                 strFormat.FormatFlags |= StringFormatFlags.NoWrap;
                 strFormat.Alignment = StringAlignment.Near;
                 fontOutput = new Font("Arial", 8, FontStyle.Regular);
-                sb = new SolidBrush(GAPCOLOR);
-                bb = new SolidBrush(Design.SepColor);
+                sb = new Majorsilence.Forms.Drawing.SolidBrush(GAPCOLOR);
+                bb = new Majorsilence.Forms.Drawing.SolidBrush(Design.SepColor);
                 // Go thru the regions
 
                 float sp = Design.PointsY(this.ScrollPosition) * _Design.SCALEY;
@@ -319,7 +320,7 @@ namespace Majorsilence.Reporting.RdlDesign
                     bb.Dispose();
             }
         }
-        private void Ruler_DrawVertPart(Graphics g, Font f, StringFormat df, float offset, float height)
+        private void Ruler_DrawVertPart(Majorsilence.Forms.Drawing.Graphics g, Font f, StringFormat df, float offset, float height)
         {
             float xoff, yoff, yinc, sinc;
             float mod;

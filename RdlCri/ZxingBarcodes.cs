@@ -2,11 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using Majorsilence.Reporting.Rdl;
-#if DRAWINGCOMPAT
 using Draw2 = Majorsilence.Forms.Drawing;
-#else
-using Draw2 = System.Drawing;
-#endif
 using System.ComponentModel;
 using System.Xml;
 using ZXing;
@@ -53,13 +49,7 @@ namespace Majorsilence.Reporting.Cri
         /// <param name="qrcode"></param>
         internal void DrawImage(ref Draw2.Bitmap bm, string qrcode)
         {
-#if DRAWINGCOMPAT
             var writer = new ZXing.SkiaSharp.BarcodeWriter();
-#elif NETSTANDARD2_0 || NET5_0_OR_GREATER
-            var writer = new ZXing.Windows.Compatibility.BarcodeWriter();
-#else
-            var writer = new ZXing.BarcodeWriter();
-#endif
             writer.Format = format;
             writer.Options.Hints[EncodeHintType.CHARACTER_SET] = "UTF-8";
 
@@ -69,7 +59,6 @@ namespace Majorsilence.Reporting.Cri
             writer.Options.Height = Math.Max(1, bm.Height);
             writer.Options.Width = Math.Max(1, bm.Width);
 
-#if NET5_0_OR_GREATER
             try
             {
                 System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
@@ -78,15 +67,10 @@ namespace Majorsilence.Reporting.Cri
             {
                 // The provider has already been registered.
             }
-#endif
 
-#if DRAWINGCOMPAT
             // Majorsilence.Forms.Drawing declares the SKBitmap conversion on Image; the object it
             // hands back is a Bitmap, so the ref parameter's type needs the downcast.
             bm = (Draw2.Bitmap)(Draw2.Image)writer.Write(qrcode);
-#else
-            bm = writer.Write(qrcode);
-#endif
         }
 
         /// <summary>

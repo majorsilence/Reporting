@@ -7,14 +7,9 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 using System.Globalization;
-#if DRAWINGCOMPAT
 using Majorsilence.Forms.Drawing;
 using System.Drawing;  // value types (Color, Point, Size, Rectangle, ...) come from System.Drawing.Primitives
 using Majorsilence.Forms.Drawing.Drawing2D;
-#else
-using System.Drawing;
-using System.Drawing.Drawing2D;
-#endif
 
 namespace Majorsilence.Reporting.Rdl
 {

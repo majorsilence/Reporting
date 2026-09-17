@@ -187,7 +187,7 @@ namespace Majorsilence.Reporting.RdlDesign.RdlProperties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Image.
+        ///   Looks up a localized string similar to Majorsilence.Forms.Drawing.Image.
         /// </summary>
         internal static string Background_Image {
             get {
@@ -322,7 +322,7 @@ namespace Majorsilence.Reporting.RdlDesign.RdlProperties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Padding.
+        ///   Looks up a localized string similar to Majorsilence.Forms.Padding.
         /// </summary>
         internal static string Base_Padding {
             get {
@@ -583,7 +583,7 @@ namespace Majorsilence.Reporting.RdlDesign.RdlProperties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Padding.
+        ///   Looks up a localized string similar to Majorsilence.Forms.Padding.
         /// </summary>
         internal static string ChartAxis_Padding {
             get {
@@ -754,7 +754,7 @@ namespace Majorsilence.Reporting.RdlDesign.RdlProperties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Padding.
+        ///   Looks up a localized string similar to Majorsilence.Forms.Padding.
         /// </summary>
         internal static string ChartLegend_Padding {
             get {
@@ -817,7 +817,7 @@ namespace Majorsilence.Reporting.RdlDesign.RdlProperties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Padding.
+        ///   Looks up a localized string similar to Majorsilence.Forms.Padding.
         /// </summary>
         internal static string ChartTitle_Padding {
             get {
@@ -889,7 +889,7 @@ namespace Majorsilence.Reporting.RdlDesign.RdlProperties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Image.
+        ///   Looks up a localized string similar to Majorsilence.Forms.Drawing.Image.
         /// </summary>
         internal static string Image_Image {
             get {

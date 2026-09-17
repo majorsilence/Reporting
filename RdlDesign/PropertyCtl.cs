@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
+using System.Drawing;
 using System.Data;
 using System.Windows.Forms;
 using System.Xml;
@@ -204,7 +205,7 @@ namespace Majorsilence.Reporting.RdlDesign
 		/// </summary>
 		private void InitializeComponent()
 		{
-			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(PropertyCtl));
+			System.Windows.Forms.ComponentResourceManager resources = new System.Windows.Forms.ComponentResourceManager(typeof(PropertyCtl));
             this.DoubleBuffered = true;
 			this.label1 = new System.Windows.Forms.Label();
 			this.pgSelected = new System.Windows.Forms.PropertyGrid();
@@ -215,8 +216,8 @@ namespace Majorsilence.Reporting.RdlDesign
 			// label1
 			// 
 			resources.ApplyResources(this.label1, "label1");
-			this.label1.BackColor = System.Drawing.SystemColors.Control;
-			this.label1.ForeColor = System.Drawing.SystemColors.InfoText;
+			this.label1.BackColor = System.Windows.Forms.SystemColors.Control;
+			this.label1.ForeColor = System.Windows.Forms.SystemColors.InfoText;
 			this.label1.Name = "label1";
 			// 
 			// pgSelected
@@ -231,15 +232,15 @@ namespace Majorsilence.Reporting.RdlDesign
 			this.bClose.FlatAppearance.BorderSize = 0;
 			this.bClose.Name = "bClose";
 			this.bClose.UseVisualStyleBackColor = true;
-			this.bClose.Click += new System.EventHandler(this.bClose_Click);
+			this.bClose.Click += this.bClose_Click;
 			// 
 			// cbReportItems
 			// 
 			resources.ApplyResources(this.cbReportItems, "cbReportItems");
-			this.cbReportItems.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+			this.cbReportItems.DropDownStyle = Majorsilence.Forms.ComboBoxStyle.DropDownList;
 			this.cbReportItems.FormattingEnabled = true;
 			this.cbReportItems.Name = "cbReportItems";
-			this.cbReportItems.SelectedIndexChanged += new System.EventHandler(this.cbReportItems_SelectedIndexChanged);
+			this.cbReportItems.SelectedIndexChanged += this.cbReportItems_SelectedIndexChanged;
 			// 
 			// PropertyCtl
 			// 
@@ -257,7 +258,9 @@ namespace Majorsilence.Reporting.RdlDesign
         public event EventHandler HidePropertiesClicked = null;
         private void bClose_Click(object sender, EventArgs e)
         {
-            RdlDesigner rd = this.Parent as RdlDesigner;
+            // Was: this.Parent as RdlDesigner -- Form isn't Control-derived in System.Windows.Forms,
+            // so a Control's .Parent can never be one; FindForm() is the correct lookup here.
+            RdlDesigner rd = this.FindForm() as RdlDesigner;
             if (rd == null)
             {
                 if (HidePropertiesClicked != null)

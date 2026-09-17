@@ -1,6 +1,5 @@
 using System;
 using System.Windows.Forms;
-using System.Drawing;
 using System.ComponentModel;
 using System.Collections;
 
@@ -21,7 +20,7 @@ private System.ComponentModel.Container components = null;
 
 		private void InitializeComponent()
 		{
-			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(SQLCtl));
+			System.Windows.Forms.ComponentResourceManager resources = new System.Windows.Forms.ComponentResourceManager(typeof(SQLCtl));
 			this.splitContainer1 = new System.Windows.Forms.SplitContainer();
 			this.tvTablesColumns = new System.Windows.Forms.TreeView();
 			this.tbSQL = new System.Windows.Forms.TextBox();
@@ -55,7 +54,7 @@ private System.ComponentModel.Container components = null;
 			resources.ApplyResources(this.tvTablesColumns, "tvTablesColumns");
 			this.tvTablesColumns.FullRowSelect = true;
 			this.tvTablesColumns.Name = "tvTablesColumns";
-			this.tvTablesColumns.BeforeExpand += new System.Windows.Forms.TreeViewCancelEventHandler(this.tvTablesColumns_BeforeExpand);
+			this.tvTablesColumns.BeforeExpand += this.tvTablesColumns_BeforeExpand;
 			// 
 			// tbSQL
 			// 
@@ -64,13 +63,13 @@ private System.ComponentModel.Container components = null;
 			this.tbSQL.AllowDrop = true;
 			resources.ApplyResources(this.tbSQL, "tbSQL");
 			this.tbSQL.Name = "tbSQL";
-			this.tbSQL.KeyDown += new System.Windows.Forms.KeyEventHandler(this.tbSQL_KeyDown);
+			this.tbSQL.KeyDown += this.tbSQL_KeyDown;
 			// 
 			// bMove
 			// 
 			resources.ApplyResources(this.bMove, "bMove");
 			this.bMove.Name = "bMove";
-			this.bMove.Click += new System.EventHandler(this.bMove_Click);
+			this.bMove.Click += this.bMove_Click;
 			// 
 			// panel1
 			// 
@@ -83,13 +82,13 @@ private System.ComponentModel.Container components = null;
 			// 
 			resources.ApplyResources(this.bOK, "bOK");
 			this.bOK.Name = "bOK";
-			this.bOK.Click += new System.EventHandler(this.bOK_Click);
+			this.bOK.Click += this.bOK_Click;
 			// 
 			// bCancel
 			// 
 			resources.ApplyResources(this.bCancel, "bCancel");
 			this.bCancel.CausesValidation = false;
-			this.bCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
+			this.bCancel.DialogResult = Majorsilence.Forms.DialogResult.Cancel;
 			this.bCancel.Name = "bCancel";
 			// 
 			// SQLCtl
@@ -104,7 +103,7 @@ private System.ComponentModel.Container components = null;
 			this.MinimizeBox = false;
 			this.Name = "SQLCtl";
 			this.ShowInTaskbar = false;
-			this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Show;
+			this.SizeGripStyle = Majorsilence.Forms.SizeGripStyle.Show;
 			this.splitContainer1.Panel1.ResumeLayout(false);
 			this.splitContainer1.Panel2.ResumeLayout(false);
 			this.splitContainer1.Panel2.PerformLayout();

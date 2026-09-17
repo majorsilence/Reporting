@@ -1,0 +1,74 @@
+<Solution>
+  <Configurations>
+    <BuildType Name="Debug" />
+    <BuildType Name="Release" />
+    <Platform Name="Any CPU" />
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Folder Name="/Examples/">
+    <Project Path="Examples/MajorsilencePdfExample/MajorsilencePdfExample.csproj" />
+    <Project Path="Examples/PdfLayoutExample/PdfLayoutExample.csproj" />
+    <Project Path="Majorsilence.Reporting.WebExample/Majorsilence.Reporting.WebExample.csproj" />
+  </Folder>
+  <Folder Name="/Package Aliases/">
+    <Project Path="PackageAliases/Majorsilence.Reporting.DataProviders.SkiaSharp/Majorsilence.Reporting.DataProviders.SkiaSharp.csproj" />
+    <Project Path="PackageAliases/Majorsilence.Reporting.RdlCreator.SkiaSharp/Majorsilence.Reporting.RdlCreator.SkiaSharp.csproj" />
+    <Project Path="PackageAliases/Majorsilence.Reporting.RdlCri.SkiaSharp/Majorsilence.Reporting.RdlCri.SkiaSharp.csproj" />
+    <Project Path="PackageAliases/Majorsilence.Reporting.RdlEngine.SkiaSharp/Majorsilence.Reporting.RdlEngine.SkiaSharp.csproj" />
+  </Folder>
+  <Folder Name="/Solution Items/">
+    <File Path=".editorconfig" />
+    <File Path="PackageAliases/README.md" />
+  </Folder>
+  <Folder Name="/Tests/">
+    <Project Path="Majorsilence.Reporting.Benchmarks/Majorsilence.Reporting.Benchmarks.csproj" />
+    <Project Path="RdlCreator.Tests/RdlCreator.Tests.csproj" />
+    <Project Path="RdlMcp.Tests/RdlMcp.Tests.csproj" />
+    <Project Path="RdlViewer.Tests/RdlViewer.Tests.csproj" />
+    <Project Path="ReportTests/ReportTests.csproj" />
+    <Project Path="ReportTests.Containers/ReportTests.Containers.csproj" />
+  </Folder>
+  <Folder Name="/UI/">
+    <Project Path="RdlDesign/Majorsilence.Reporting.ReportDesigner.csproj" />
+    <Project Path="RdlMapFile/RdlMapFile.csproj" />
+    <Project Path="RdlReader/RdlReader.csproj" />
+    <Project Path="RdlViewer/RdlViewer.csproj" />
+    <Project Path="ReportDesigner/ReportDesigner.csproj" />
+  </Folder>
+  <Folder Name="/Windows/">
+    <Project Path="EncryptionProvider/EncryptionProvider.csproj" />
+    <Project Path="LibRdlWpfViewer/LibRdlWpfViewer.csproj" />
+  </Folder>
+  <Project Path="DataProviders/Majorsilence.Reporting.DataProviders.csproj" />
+  <Project Path="Examples/MarkdownToPdf/MarkdownToPdf.csproj" />
+  <Project Path="Examples/PdfAotSmokeTest/PdfAotSmokeTest.csproj" />
+  <Project Path="Majorsilence.Pdf.Markdown.Tests/Majorsilence.Pdf.Markdown.Tests.csproj" />
+  <Project Path="Majorsilence.Pdf.Markdown/Majorsilence.Pdf.Markdown.csproj" />
+  <Project Path="Majorsilence.Pdf.Previewer.Tests/Majorsilence.Pdf.Previewer.Tests.csproj" />
+  <Project Path="Majorsilence.Pdf.Previewer/Majorsilence.Pdf.Previewer.csproj" />
+  <Project Path="Majorsilence.Pdf.Security/Majorsilence.Pdf.Security.csproj" />
+  <Project Path="Majorsilence.Pdf.Tests/Majorsilence.Pdf.Tests.csproj" />
+  <Project Path="Majorsilence.Pdf/Majorsilence.Pdf.csproj" />
+  <Project Path="Majorsilence.Reporting.UI.RdlAvalonia/Majorsilence.Reporting.UI.RdlAvalonia.csproj" />
+  <Project Path="Majorsilence.Reporting.UI/Majorsilence.Reporting.UI.csproj" />
+  <Project Path="Majorsilence.WinformUtils.Tests/Majorsilence.WinformUtils.Tests.csproj" />
+  <Project Path="Majorsilence.WinformUtils/Majorsilence.WinformUtils.csproj" />
+  <Project Path="RdlAsp.Mvc/Majorsilence.Reporting.RdlAsp.Mvc.csproj" />
+  <Project Path="RdlCmd/RdlCmd.csproj" />
+  <Project Path="RdlCreator/Majorsilence.Reporting.RdlCreator.csproj" />
+  <Project Path="RdlCri/Majorsilence.Reporting.RdlCri.csproj" />
+  <Project Path="RdlDesign.Tests/RdlDesign.Tests.csproj" />
+  <Project Path="RdlDesktop/RdlDesktop.csproj" />
+  <Project Path="RdlDoctor.Tests/RdlDoctor.Tests.csproj" />
+  <Project Path="RdlDoctor/RdlDoctor.csproj" />
+  <Project Path="RdlEngine/Majorsilence.Reporting.RdlEngine.csproj" />
+  <Project Path="RdlGtk3/Majorsilence.Reporting.RdlGtk3.csproj" />
+  <Project Path="RdlMcp/Majorsilence.Reporting.Mcp.csproj" />
+  <Project Path="RdlGtk3Viewer/RdlGtk3Viewer.csproj" />
+  <Project Path="RdlNative/Majorsilence.Reporting.RdlNative.csproj" />
+  <Project Path="RdlReader.Tests/RdlReader.Tests.csproj" />
+  <Project Path="Templates.Tests/Templates.Tests.csproj" />
+  <Project Path="WebDesigner.Tests/WebDesigner.Tests.csproj" />
+  <Project Path="WebDesigner/WebDesigner.csproj" />
+</Solution>

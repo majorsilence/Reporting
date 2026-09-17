@@ -1,3 +1,4 @@
+using System.Linq;
 using System;
 using System.Drawing;
 using System.Collections;
@@ -247,7 +248,7 @@ namespace Majorsilence.Reporting.RdlDesign
         {
             // apply the result
             Apply();
-            DialogResult = DialogResult.OK;
+            DialogResult = Majorsilence.Forms.DialogResult.OK;
         }
 
         private void cbDataSets_SelectedIndexChanged(object sender, System.EventArgs e)
@@ -262,7 +263,9 @@ namespace Majorsilence.Reporting.RdlDesign
 
         private void bRight_Click(object sender, System.EventArgs e)
         {
-            ListBox.SelectedIndexCollection sic = lbFields.SelectedIndices;
+            // ListBox.SelectedIndexCollection doesn't exist -- SelectedIndices is IEnumerable<int>
+            // in System.Windows.Forms; materialize it for .Count/ArrayList ctor support below.
+            List<int> sic = lbFields.SelectedIndices.ToList();
             int count = sic.Count;
             foreach (int i in sic)
             {
@@ -283,7 +286,7 @@ namespace Majorsilence.Reporting.RdlDesign
 
         private void bLeft_Click(object sender, System.EventArgs e)
         {
-            ICollection sic = lbTableColumns.SelectedIndices;
+            List<int> sic = lbTableColumns.SelectedIndices.ToList();
             int count = sic.Count;
             foreach (int i in sic)
             {

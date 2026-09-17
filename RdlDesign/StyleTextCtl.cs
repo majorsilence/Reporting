@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Drawing;
 using System.Windows.Forms;
 using System.Xml;
 using System.Globalization;
@@ -192,7 +193,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			}
 
 			// Population Font Family dropdown
-			foreach (FontFamily ff in FontFamily.Families)
+			foreach (FontFamily ff in Majorsilence.Forms.Drawing.FontFamily.Families)
 			{
 				cbFontFamily.Items.Add(ff.Name);
 			}
@@ -238,7 +239,7 @@ namespace Majorsilence.Reporting.RdlDesign
 		/// </summary>
 		private void InitializeComponent()
 		{
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(StyleTextCtl));
+            System.Windows.Forms.ComponentResourceManager resources = new System.Windows.Forms.ComponentResourceManager(typeof(StyleTextCtl));
             this.DoubleBuffered = true;
             this.label4 = new System.Windows.Forms.Label();
             this.label5 = new System.Windows.Forms.Label();
@@ -316,23 +317,23 @@ namespace Majorsilence.Reporting.RdlDesign
             // 
             resources.ApplyResources(this.bFont, "bFont");
             this.bFont.Name = "bFont";
-            this.bFont.Click += new System.EventHandler(this.bFont_Click);
+            this.bFont.Click += this.bFont_Click;
             // 
             // cbVerticalAlign
             // 
-            this.cbVerticalAlign.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cbVerticalAlign.DropDownStyle = Majorsilence.Forms.ComboBoxStyle.DropDownList;
             this.cbVerticalAlign.Items.AddRange(new object[] {
             resources.GetString("cbVerticalAlign.Items"),
             resources.GetString("cbVerticalAlign.Items1"),
             resources.GetString("cbVerticalAlign.Items2")});
             resources.ApplyResources(this.cbVerticalAlign, "cbVerticalAlign");
             this.cbVerticalAlign.Name = "cbVerticalAlign";
-            this.cbVerticalAlign.SelectedIndexChanged += new System.EventHandler(this.cbVerticalAlign_TextChanged);
-            this.cbVerticalAlign.TextChanged += new System.EventHandler(this.cbVerticalAlign_TextChanged);
+            this.cbVerticalAlign.SelectedIndexChanged += this.cbVerticalAlign_TextChanged;
+            this.cbVerticalAlign.TextChanged += this.cbVerticalAlign_TextChanged;
             // 
             // cbHorzAlign
             // 
-            this.cbHorzAlign.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cbHorzAlign.DropDownStyle = Majorsilence.Forms.ComboBoxStyle.DropDownList;
             this.cbHorzAlign.Items.AddRange(new object[] {
             resources.GetString("cbHorzAlign.Items"),
             resources.GetString("cbHorzAlign.Items1"),
@@ -341,8 +342,8 @@ namespace Majorsilence.Reporting.RdlDesign
             resources.GetString("cbHorzAlign.Items4")});
             resources.ApplyResources(this.cbHorzAlign, "cbHorzAlign");
             this.cbHorzAlign.Name = "cbHorzAlign";
-            this.cbHorzAlign.SelectedIndexChanged += new System.EventHandler(this.cbHorzAlign_TextChanged);
-            this.cbHorzAlign.TextChanged += new System.EventHandler(this.cbHorzAlign_TextChanged);
+            this.cbHorzAlign.SelectedIndexChanged += this.cbHorzAlign_TextChanged;
+            this.cbHorzAlign.TextChanged += this.cbHorzAlign_TextChanged;
             // 
             // cbFormat
             // 
@@ -369,30 +370,30 @@ namespace Majorsilence.Reporting.RdlDesign
             resources.GetString("cbFormat.Items19")});
             resources.ApplyResources(this.cbFormat, "cbFormat");
             this.cbFormat.Name = "cbFormat";
-            this.cbFormat.TextChanged += new System.EventHandler(this.cbFormat_TextChanged);
+            this.cbFormat.TextChanged += this.cbFormat_TextChanged;
             // 
             // cbDirection
             // 
-            this.cbDirection.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cbDirection.DropDownStyle = Majorsilence.Forms.ComboBoxStyle.DropDownList;
             this.cbDirection.Items.AddRange(new object[] {
             resources.GetString("cbDirection.Items"),
             resources.GetString("cbDirection.Items1")});
             resources.ApplyResources(this.cbDirection, "cbDirection");
             this.cbDirection.Name = "cbDirection";
-            this.cbDirection.SelectedIndexChanged += new System.EventHandler(this.cbDirection_TextChanged);
-            this.cbDirection.TextChanged += new System.EventHandler(this.cbDirection_TextChanged);
+            this.cbDirection.SelectedIndexChanged += this.cbDirection_TextChanged;
+            this.cbDirection.TextChanged += this.cbDirection_TextChanged;
             // 
             // cbWritingMode
             // 
-            this.cbWritingMode.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cbWritingMode.DropDownStyle = Majorsilence.Forms.ComboBoxStyle.DropDownList;
             this.cbWritingMode.Items.AddRange(new object[] {
             resources.GetString("cbWritingMode.Items"),
             resources.GetString("cbWritingMode.Items1"),
             resources.GetString("cbWritingMode.Items2")});
             resources.ApplyResources(this.cbWritingMode, "cbWritingMode");
             this.cbWritingMode.Name = "cbWritingMode";
-            this.cbWritingMode.SelectedIndexChanged += new System.EventHandler(this.cbWritingMode_TextChanged);
-            this.cbWritingMode.TextChanged += new System.EventHandler(this.cbWritingMode_TextChanged);
+            this.cbWritingMode.SelectedIndexChanged += this.cbWritingMode_TextChanged;
+            this.cbWritingMode.TextChanged += this.cbWritingMode_TextChanged;
             // 
             // label2
             // 
@@ -408,14 +409,14 @@ namespace Majorsilence.Reporting.RdlDesign
             resources.GetString("cbTextDecoration.Items3")});
             resources.ApplyResources(this.cbTextDecoration, "cbTextDecoration");
             this.cbTextDecoration.Name = "cbTextDecoration";
-            this.cbTextDecoration.SelectedIndexChanged += new System.EventHandler(this.cbTextDecoration_TextChanged);
-            this.cbTextDecoration.TextChanged += new System.EventHandler(this.cbTextDecoration_TextChanged);
+            this.cbTextDecoration.SelectedIndexChanged += this.cbTextDecoration_TextChanged;
+            this.cbTextDecoration.TextChanged += this.cbTextDecoration_TextChanged;
             // 
             // bColor
             // 
             resources.ApplyResources(this.bColor, "bColor");
             this.bColor.Name = "bColor";
-            this.bColor.Click += new System.EventHandler(this.bColor_Click);
+            this.bColor.Click += this.bColor_Click;
             // 
             // label9
             // 
@@ -426,7 +427,7 @@ namespace Majorsilence.Reporting.RdlDesign
             // 
             resources.ApplyResources(this.cbColor, "cbColor");
             this.cbColor.Name = "cbColor";
-            this.cbColor.TextChanged += new System.EventHandler(this.cbColor_TextChanged);
+            this.cbColor.TextChanged += this.cbColor_TextChanged;
             // 
             // label3
             // 
@@ -440,7 +441,7 @@ namespace Majorsilence.Reporting.RdlDesign
             resources.GetString("cbFontStyle.Items1")});
             resources.ApplyResources(this.cbFontStyle, "cbFontStyle");
             this.cbFontStyle.Name = "cbFontStyle";
-            this.cbFontStyle.TextChanged += new System.EventHandler(this.cbFontStyle_TextChanged);
+            this.cbFontStyle.TextChanged += this.cbFontStyle_TextChanged;
             // 
             // cbFontWeight
             // 
@@ -460,7 +461,7 @@ namespace Majorsilence.Reporting.RdlDesign
             resources.GetString("cbFontWeight.Items12")});
             resources.ApplyResources(this.cbFontWeight, "cbFontWeight");
             this.cbFontWeight.Name = "cbFontWeight";
-            this.cbFontWeight.TextChanged += new System.EventHandler(this.cbFontWeight_TextChanged);
+            this.cbFontWeight.TextChanged += this.cbFontWeight_TextChanged;
             // 
             // label10
             // 
@@ -488,7 +489,7 @@ namespace Majorsilence.Reporting.RdlDesign
             resources.GetString("cbFontSize.Items15")});
             resources.ApplyResources(this.cbFontSize, "cbFontSize");
             this.cbFontSize.Name = "cbFontSize";
-            this.cbFontSize.TextChanged += new System.EventHandler(this.cbFontSize_TextChanged);
+            this.cbFontSize.TextChanged += this.cbFontSize_TextChanged;
             // 
             // label11
             // 
@@ -501,7 +502,7 @@ namespace Majorsilence.Reporting.RdlDesign
             resources.GetString("cbFontFamily.Items")});
             resources.ApplyResources(this.cbFontFamily, "cbFontFamily");
             this.cbFontFamily.Name = "cbFontFamily";
-            this.cbFontFamily.TextChanged += new System.EventHandler(this.cbFontFamily_TextChanged);
+            this.cbFontFamily.TextChanged += this.cbFontFamily_TextChanged;
             // 
             // lblValue
             // 
@@ -539,90 +540,90 @@ namespace Majorsilence.Reporting.RdlDesign
             resources.ApplyResources(this.button2, "button2");
             this.button2.Name = "button2";
             this.button2.Tag = "decoration";
-            this.button2.Click += new System.EventHandler(this.bExpr_Click);
+            this.button2.Click += this.bExpr_Click;
             // 
             // bWeight
             // 
             resources.ApplyResources(this.bWeight, "bWeight");
             this.bWeight.Name = "bWeight";
             this.bWeight.Tag = "weight";
-            this.bWeight.Click += new System.EventHandler(this.bExpr_Click);
+            this.bWeight.Click += this.bExpr_Click;
             // 
             // bSize
             // 
             resources.ApplyResources(this.bSize, "bSize");
             this.bSize.Name = "bSize";
             this.bSize.Tag = "size";
-            this.bSize.Click += new System.EventHandler(this.bExpr_Click);
+            this.bSize.Click += this.bExpr_Click;
             // 
             // bColorEx
             // 
             resources.ApplyResources(this.bColorEx, "bColorEx");
             this.bColorEx.Name = "bColorEx";
             this.bColorEx.Tag = "color";
-            this.bColorEx.Click += new System.EventHandler(this.bExpr_Click);
+            this.bColorEx.Click += this.bExpr_Click;
             // 
             // bStyle
             // 
             resources.ApplyResources(this.bStyle, "bStyle");
             this.bStyle.Name = "bStyle";
             this.bStyle.Tag = "style";
-            this.bStyle.Click += new System.EventHandler(this.bExpr_Click);
+            this.bStyle.Click += this.bExpr_Click;
             // 
             // bFamily
             // 
             resources.ApplyResources(this.bFamily, "bFamily");
             this.bFamily.Name = "bFamily";
             this.bFamily.Tag = "family";
-            this.bFamily.Click += new System.EventHandler(this.bExpr_Click);
+            this.bFamily.Click += this.bExpr_Click;
             // 
             // cbValue
             // 
             resources.ApplyResources(this.cbValue, "cbValue");
             this.cbValue.Name = "cbValue";
-            this.cbValue.TextChanged += new System.EventHandler(this.cbValue_TextChanged);
+            this.cbValue.TextChanged += this.cbValue_TextChanged;
             // 
             // bValueExpr
             // 
             resources.ApplyResources(this.bValueExpr, "bValueExpr");
             this.bValueExpr.Name = "bValueExpr";
             this.bValueExpr.Tag = "value";
-            this.bValueExpr.Click += new System.EventHandler(this.bExpr_Click);
+            this.bValueExpr.Click += this.bExpr_Click;
             // 
             // bAlignment
             // 
             resources.ApplyResources(this.bAlignment, "bAlignment");
             this.bAlignment.Name = "bAlignment";
             this.bAlignment.Tag = "halign";
-            this.bAlignment.Click += new System.EventHandler(this.bExpr_Click);
+            this.bAlignment.Click += this.bExpr_Click;
             // 
             // bDirection
             // 
             resources.ApplyResources(this.bDirection, "bDirection");
             this.bDirection.Name = "bDirection";
             this.bDirection.Tag = "direction";
-            this.bDirection.Click += new System.EventHandler(this.bExpr_Click);
+            this.bDirection.Click += this.bExpr_Click;
             // 
             // bVertical
             // 
             resources.ApplyResources(this.bVertical, "bVertical");
             this.bVertical.Name = "bVertical";
             this.bVertical.Tag = "valign";
-            this.bVertical.Click += new System.EventHandler(this.bExpr_Click);
+            this.bVertical.Click += this.bExpr_Click;
             // 
             // bWrtMode
             // 
             resources.ApplyResources(this.bWrtMode, "bWrtMode");
             this.bWrtMode.Name = "bWrtMode";
             this.bWrtMode.Tag = "writing";
-            this.bWrtMode.Click += new System.EventHandler(this.bExpr_Click);
+            this.bWrtMode.Click += this.bExpr_Click;
             // 
             // bFormat
             // 
             resources.ApplyResources(this.bFormat, "bFormat");
             this.bFormat.Name = "bFormat";
             this.bFormat.Tag = "format";
-            this.bFormat.Click += new System.EventHandler(this.bExpr_Click);
+            this.bFormat.Click += this.bExpr_Click;
             // 
             // StyleTextCtl
             // 
@@ -665,7 +666,7 @@ namespace Majorsilence.Reporting.RdlDesign
 				}
 				catch (Exception e)
 				{
-					MessageBox.Show(e.Message, Strings.StyleTextCtl_Show_InvalidFontSize);
+					Majorsilence.Forms.MessageBox.Show(e.Message, Strings.StyleTextCtl_Show_InvalidFontSize);
 					return false;
 				}
 
@@ -791,8 +792,8 @@ namespace Majorsilence.Reporting.RdlDesign
 				DesignerUtility.ColorFromHtml(cbColor.Text, System.Drawing.Color.Black);
             try
             {
-                DialogResult dr = fd.ShowDialog();
-                if (dr != DialogResult.OK)
+                Majorsilence.Forms.DialogResult dr = fd.ShowDialog();
+                if (dr != Majorsilence.Forms.DialogResult.OK)
                 {
                     drawFont.Dispose();
                     return;
@@ -803,7 +804,7 @@ namespace Majorsilence.Reporting.RdlDesign
                 cbFontStyle.Text = fd.Font.Italic ? "Italic" : "Normal";
                 cbFontFamily.Text = fd.Font.FontFamily.Name;
                 cbFontSize.Text = fd.Font.Size.ToString() + "pt";
-                cbColor.Text = ColorTranslator.ToHtml(fd.Color);
+                cbColor.Text = System.Windows.Forms.ColorTranslator.ToHtml(fd.Color);
                 if (fd.Font.Underline)
                     this.cbTextDecoration.Text = "Underline";
                 else if (fd.Font.Strikeout)
@@ -830,12 +831,12 @@ namespace Majorsilence.Reporting.RdlDesign
                 cd.Color =
                     DesignerUtility.ColorFromHtml(cbColor.Text, System.Drawing.Color.Black);
 
-                if (cd.ShowDialog() != DialogResult.OK)
+                if (cd.ShowDialog() != Majorsilence.Forms.DialogResult.OK)
                     return;
 
                 RdlDesigner.SetCustomColors(cd.CustomColors);
                 if (sender == this.bColor)
-                    cbColor.Text = ColorTranslator.ToHtml(cd.Color);
+                    cbColor.Text = System.Windows.Forms.ColorTranslator.ToHtml(cd.Color);
             }		
 			return;
 		}
@@ -905,7 +906,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			Button b = sender as Button;
 			if (b == null)
 				return;
-			Control c = null;
+			Majorsilence.Forms.Control c = null;
 			bool bColor=false;
 			switch (b.Tag as string)
 			{
@@ -955,8 +956,8 @@ namespace Majorsilence.Reporting.RdlDesign
 
             using (DialogExprEditor ee = new DialogExprEditor(_Draw, c.Text, sNode, bColor))
             {
-                DialogResult dr = ee.ShowDialog();
-                if (dr == DialogResult.OK)
+                Majorsilence.Forms.DialogResult dr = ee.ShowDialog();
+                if (dr == Majorsilence.Forms.DialogResult.OK)
                     c.Text = ee.Expression;
             }
             return;

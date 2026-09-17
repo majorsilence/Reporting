@@ -3,10 +3,9 @@ using System;
 using System.Collections;
 using System.Collections.Specialized;
 using System.Collections.Generic;
-using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
-using System.Drawing.Printing;
+using Majorsilence.Forms.Printing;
 using System.Text;
 using Majorsilence.Reporting.RdlViewer.Resources;
 using Majorsilence.Reporting.Rdl;
@@ -46,7 +45,7 @@ namespace Majorsilence.Reporting.RdlViewer
 
         private void InitializeComponent()
         {
-			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(RdlViewerFind));
+			System.Windows.Forms.ComponentResourceManager resources = new System.Windows.Forms.ComponentResourceManager(typeof(RdlViewerFind));
             this.DoubleBuffered = true;
 			this.bClose = new System.Windows.Forms.Button();
 			this.tbFind = new System.Windows.Forms.TextBox();

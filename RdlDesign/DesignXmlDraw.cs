@@ -5,8 +5,9 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Drawing.Drawing2D;
-using System.Drawing.Imaging;
+using System.Drawing;
+using Majorsilence.Forms.Drawing.Drawing2D;
+using Majorsilence.Forms.Drawing.Imaging;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -58,7 +59,7 @@ namespace Majorsilence.Reporting.RdlDesign
 		public string Folder { get; set; }
 
 		// During drawing these are set
-		Graphics g;
+		Majorsilence.Forms.Drawing.Graphics g;
 		float _vScroll;
 		float _hScroll;
 		RectangleF _clip;				
@@ -85,7 +86,7 @@ namespace Majorsilence.Reporting.RdlDesign
 		{
             this.DoubleBuffered = true;
 			// Get our graphics DPI					   
-			Graphics ga = null;				
+			Majorsilence.Forms.Drawing.Graphics ga = null;				
 			try
 			{
 				ga = this.CreateGraphics(); 
@@ -103,9 +104,9 @@ namespace Majorsilence.Reporting.RdlDesign
 			}
 			
 			// force to double buffering for smoother drawing
-			this.SetStyle(ControlStyles.DoubleBuffer | 
-				ControlStyles.UserPaint | 
-				ControlStyles.AllPaintingInWmPaint,
+			this.SetStyle(Majorsilence.Forms.ControlStyles.DoubleBuffer | 
+				Majorsilence.Forms.ControlStyles.UserPaint | 
+				Majorsilence.Forms.ControlStyles.AllPaintingInWmPaint,
 				true);
 		}
 
@@ -114,9 +115,9 @@ namespace Majorsilence.Reporting.RdlDesign
 		/// </summary>
 		/// <param name="keyData"></param>
 		/// <returns></returns>
-		override protected bool IsInputKey(Keys keyData)
+		override protected bool IsInputKey(Majorsilence.Forms.Keys keyData)
 		{
-            if (keyData == Keys.Escape)
+            if (keyData == Majorsilence.Forms.Keys.Escape)
                 return false;
 			return true;
 		}
@@ -955,14 +956,14 @@ namespace Majorsilence.Reporting.RdlDesign
 		/// <param name="hScroll">Horizontal scroll position</param>
 		/// <param name="vScroll">Vertical scroll position</param>
 		/// <param name="clipRectangle"></param>
-		internal async Task Draw(Graphics ag, float hScroll, float vScroll, System.Drawing.Rectangle clipRectangle)
+		internal async Task Draw(Majorsilence.Forms.Drawing.Graphics ag, float hScroll, float vScroll, System.Drawing.Rectangle clipRectangle)
 		{
 			g = ag;
 			
 			_hScroll = hScroll;
 			_vScroll = vScroll;
 
-			g.PageUnit = GraphicsUnit.Point;
+			g.PageUnit = Majorsilence.Forms.Drawing.GraphicsUnit.Point;
             // Now use scale value
             g.ScaleTransform(SCALAX, SCALAY);
 
@@ -1516,7 +1517,12 @@ namespace Majorsilence.Reporting.RdlDesign
             string type = GetCustomReportItemType(tNode.InnerText);
            
             ICustomReportItem cri = null;
-            Bitmap bm = null;
+            // ICustomReportItem.DrawDesignerImage needs System.Drawing.Bitmap (the
+            // RdlEngine plugin interface's own DRAWINGCOMPAT type) -- bridge to the UI framework's
+            // Bitmap via a PNG round-trip through a MemoryStream, since neither exposes a public
+            // SKBitmap accessor the other assembly can use directly.
+            Majorsilence.Forms.Drawing.Bitmap engineBm = null;
+            Majorsilence.Forms.Drawing.Bitmap bm = null;
             try
             {
                 cri = RdlEngineConfig.CreateCustomReportItem(type);
@@ -1526,8 +1532,14 @@ namespace Majorsilence.Reporting.RdlDesign
                     width = 1;
                 if (height <= 0)
                     height = 1;
-                bm = new Bitmap(width, height);
-                cri.DrawDesignerImage(ref bm);
+                engineBm = new Majorsilence.Forms.Drawing.Bitmap(width, height);
+                cri.DrawDesignerImage(ref engineBm);
+                using (var ms = new MemoryStream())
+                {
+                    engineBm.Save(ms, Majorsilence.Forms.Drawing.Imaging.ImageFormat.Png);
+                    ms.Position = 0;
+                    bm = new Majorsilence.Forms.Drawing.Bitmap(ms);
+                }
                 DrawImageSized(xNode,ImageSizingEnum.Clip, bm, si, ir);
                 DrawBorder(si, ir);
             }
@@ -1539,6 +1551,8 @@ namespace Majorsilence.Reporting.RdlDesign
             {
                 if (cri != null)
                     cri.Dispose();
+                if (engineBm != null)
+                    engineBm.Dispose();
                 if (bm != null)
                     bm.Dispose();
             }
@@ -1623,12 +1637,12 @@ namespace Majorsilence.Reporting.RdlDesign
 			byte[] ba = Convert.FromBase64String(id.InnerText);
 			
 			Stream strm=null;
-			System.Drawing.Image im=null;
+			Majorsilence.Forms.Drawing.Image im=null;
 			bool bResize=false;
 			try 
 			{
 				strm = new MemoryStream(ba);
-				im = System.Drawing.Image.FromStream(strm);	 
+				im = Majorsilence.Forms.Drawing.Image.FromStream(strm);	 
 				// Draw based on sizing options
                 // Josh: adds base rectangle so the "paper" size is known when drawing image.
                 bResize = DrawImageSized(iNode, im, si, r, rBase); 
@@ -1647,7 +1661,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			return bResize;
 		}
 
-        private System.Drawing.Image GetImageEmbedded(string emName)
+        private Majorsilence.Forms.Drawing.Image GetImageEmbedded(string emName)
         {
             // First we need to find the embedded image list
             XmlNode emNode = this.GetNamedChildNode(rDoc.LastChild, "EmbeddedImages");
@@ -1675,11 +1689,11 @@ namespace Majorsilence.Reporting.RdlDesign
             byte[] ba = Convert.FromBase64String(id.InnerText);
 
             Stream strm = null;
-            System.Drawing.Image im = null;
+            Majorsilence.Forms.Drawing.Image im = null;
             try
             {
                 strm = new MemoryStream(ba);
-                im = System.Drawing.Image.FromStream(strm);
+                im = Majorsilence.Forms.Drawing.Image.FromStream(strm);
             }
             catch 
             {
@@ -1698,12 +1712,12 @@ namespace Majorsilence.Reporting.RdlDesign
         private async Task<bool> DrawImageExternal(XmlNode iNode, XmlNode sNode, XmlNode vNode, StyleInfo si, RectangleF r)
         {
             Stream strm = null;
-            System.Drawing.Image im = null;
+            Majorsilence.Forms.Drawing.Image im = null;
             bool bResize = false;
             try
             {
                 if (vNode.InnerText[0] == '=')
-                {   // Image is an expression; can't calculate at design time
+                {   // Majorsilence.Forms.Drawing.Image is an expression; can't calculate at design time
                     DrawString(string.Format("Image: {0}", vNode.InnerText), si, r);
                 }
                 else
@@ -1723,7 +1737,7 @@ namespace Majorsilence.Reporting.RdlDesign
                     {
                         strm = new FileStream(fname, FileMode.Open, FileAccess.Read, FileShare.Read);
                     }
-                    im = System.Drawing.Image.FromStream(strm);
+                    im = Majorsilence.Forms.Drawing.Image.FromStream(strm);
                     // Draw based on sizing options
                     bResize = DrawImageSized(iNode, im, si, r);
                 }
@@ -1751,23 +1765,23 @@ namespace Majorsilence.Reporting.RdlDesign
         }
 
         // Josh: adds the base rectange so the paper size is known.
-        private bool DrawImageSized(XmlNode iNode, Image im, StyleInfo si, RectangleF r, RectangleF rBase)
+        private bool DrawImageSized(XmlNode iNode, Majorsilence.Forms.Drawing.Image im, StyleInfo si, RectangleF r, RectangleF rBase)
         {
             return DrawImageSized(iNode, GetSizing(iNode), im, si, r, rBase);
         }
 
-        private bool DrawImageSized(XmlNode iNode, ImageSizingEnum ise, Image im, StyleInfo si, RectangleF r)
+        private bool DrawImageSized(XmlNode iNode, ImageSizingEnum ise, Majorsilence.Forms.Drawing.Image im, StyleInfo si, RectangleF r)
         {
             return DrawImageSized(iNode, ise, im, si, r, r);
         } 
 
-        private bool DrawImageSized(XmlNode iNode, Image im, StyleInfo si, RectangleF r)
+        private bool DrawImageSized(XmlNode iNode, Majorsilence.Forms.Drawing.Image im, StyleInfo si, RectangleF r)
         {
             return DrawImageSized(iNode, GetSizing(iNode), im, si, r);
         }
 
         // Josh: adds the base rectange so the paper size is known.
-        private bool DrawImageSized(XmlNode iNode, ImageSizingEnum ise, Image im, StyleInfo si, RectangleF r, RectangleF rBase)
+        private bool DrawImageSized(XmlNode iNode, ImageSizingEnum ise, Majorsilence.Forms.Drawing.Image im, StyleInfo si, RectangleF r, RectangleF rBase)
         {
 			// calculate new rectangle based on padding and scroll
 			RectangleF r2 = new RectangleF(r.Left + si.PaddingLeft - _hScroll,
@@ -1778,7 +1792,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			bool bResize = false;
 			float height, width;		// some work variables
             Rectangle ir;	// int work rectangle
-            GraphicsUnit gu;
+            Majorsilence.Forms.Drawing.GraphicsUnit gu;
 
             switch (ise)
 			{
@@ -1794,7 +1808,7 @@ namespace Majorsilence.Reporting.RdlDesign
 					this.SetReportItemHeightWidth(iNode, height, width);
                     
                     gu = g.PageUnit;
-                    g.PageUnit = GraphicsUnit.Pixel;
+                    g.PageUnit = Majorsilence.Forms.Drawing.GraphicsUnit.Pixel;
                     ir = new Rectangle(PixelsX(r2.Left), PixelsY(r2.Top), im.Width, im.Height);
                     g.DrawImage(im, ir);
                     g.PageUnit = gu;
@@ -1802,12 +1816,12 @@ namespace Majorsilence.Reporting.RdlDesign
 					break;
 				case ImageSizingEnum.Clip:
 					Region saveRegion = g.Clip;
-					Region clipRegion = new Region(g.Clip.GetRegionData());
+					Region clipRegion = g.Clip.Clone();
 					//RectangleF r3 = new RectangleF(PointsX(r2.Left), PointsY(r2.Top), PointsX(r2.Width), PointsY(r2.Height));
 					clipRegion.Intersect(r2);
 					g.Clip = clipRegion;
                     gu = g.PageUnit;
-                    g.PageUnit = GraphicsUnit.Pixel;
+                    g.PageUnit = Majorsilence.Forms.Drawing.GraphicsUnit.Pixel;
                     ir = new Rectangle(PixelsX(r2.Left), PixelsY(r2.Top), im.Width, im.Height);
                     g.DrawImage(im, ir);
                     g.PageUnit = gu;
@@ -1856,7 +1870,7 @@ namespace Majorsilence.Reporting.RdlDesign
                     startingY,
                     (width > im.Width ? im.Width : width) - startingX,
                     (height > im.Height ? im.Height : height) - startingY),
-                    GraphicsUnit.Pixel); 
+                    Majorsilence.Forms.Drawing.GraphicsUnit.Pixel); 
 					break;
 				case ImageSizingEnum.Fit:
 				default:
@@ -2392,7 +2406,7 @@ namespace Majorsilence.Reporting.RdlDesign
 		private async Task<RectangleF> DrawTextbox(XmlNode xNode, RectangleF r)
 		{
 			StyleInfo si = await GetStyleInfo(xNode);
-			if (si.Color == Color.Empty)
+			if (si.Color.IsEmpty)
 				si.Color = Color.Black;
 
 			XmlNode v = GetNamedChildNode(xNode, "Value");
@@ -2612,7 +2626,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			Color clr;
 			try
 			{
-				clr = ColorTranslator.FromHtml(c);
+				clr = System.Windows.Forms.ColorTranslator.FromHtml(c);
 			}
 			catch
 			{
@@ -2650,13 +2664,13 @@ namespace Majorsilence.Reporting.RdlDesign
 						break;
 				}
 			}
-			if (si.BColorLeft == Color.Empty)
+			if (si.BColorLeft.IsEmpty)
 				si.BColorLeft = dColor;
-			if (si.BColorRight == Color.Empty)
+			if (si.BColorRight.IsEmpty)
 				si.BColorRight = dColor;
-			if (si.BColorTop == Color.Empty)
+			if (si.BColorTop.IsEmpty)
 				si.BColorTop = dColor;
-			if (si.BColorBottom == Color.Empty)
+			if (si.BColorBottom.IsEmpty)
 				si.BColorBottom = dColor;
 		}
 
@@ -2751,7 +2765,7 @@ namespace Majorsilence.Reporting.RdlDesign
         {
             //  TODO: this is problematic since it require a PageImage
             Stream strm = null;
-            System.Drawing.Image im = null;
+            Majorsilence.Forms.Drawing.Image im = null;
             ImageRepeat repeat = ImageRepeat.Repeat;
             string source = null;
             string val = null;
@@ -2814,7 +2828,7 @@ namespace Majorsilence.Reporting.RdlDesign
                     }
                     else
                         strm = new FileStream(val, FileMode.Open, FileAccess.Read, FileShare.Read);
-                    im = System.Drawing.Image.FromStream(strm);
+                    im = Majorsilence.Forms.Drawing.Image.FromStream(strm);
                 }
                 else   // Embedded case
                 {
@@ -2823,12 +2837,12 @@ namespace Majorsilence.Reporting.RdlDesign
                 int height = im.Height;							// save height and width
                 int width = im.Width;
                 MemoryStream ostrm = new MemoryStream();
-                System.Drawing.Imaging.ImageCodecInfo[] info;
+                Majorsilence.Forms.Drawing.Imaging.ImageCodecInfo[] info;
                 info = ImageCodecInfo.GetImageEncoders();
                 EncoderParameters encoderParameters;
                 encoderParameters = new EncoderParameters(1);
                 encoderParameters.Param[0] = new EncoderParameter(Encoder.Quality, 100L);
-                System.Drawing.Imaging.ImageCodecInfo codec = null;
+                Majorsilence.Forms.Drawing.Imaging.ImageCodecInfo codec = null;
                 for (int i = 0; i < info.Length; i++)
                 {
                     if (info[i].FormatDescription == "JPEG")
@@ -2841,7 +2855,7 @@ namespace Majorsilence.Reporting.RdlDesign
 
                 byte[] ba = ostrm.ToArray();
                 ostrm.Close();
-                si.BackgroundImage = new PageImage(ImageFormat.Jpeg, ba, width, height);	// Create an image
+                si.BackgroundImage = new PageImage(Majorsilence.Forms.Drawing.Imaging.ImageFormat.Jpeg, ba, width, height);	// Create an image
                 si.BackgroundImage.Repeat = repeat;
             }
             catch
@@ -2941,7 +2955,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			RectangleF dr = new RectangleF(rect.X - _hScroll, rect.Y - _vScroll, rect.Width, rect.Height);
 
 			LinearGradientBrush linGrBrush = null;
-			SolidBrush sb=null;
+			Majorsilence.Forms.Drawing.SolidBrush sb=null;
 			try
 			{
 				if (si.BackgroundGradientType != BackgroundGradientTypeEnum.None &&
@@ -2985,7 +2999,7 @@ namespace Majorsilence.Reporting.RdlDesign
 				}
 				else if (!si.BackgroundColor.IsEmpty)
 				{
-					sb = new SolidBrush(si.BackgroundColor);
+					sb = new Majorsilence.Forms.Drawing.SolidBrush(si.BackgroundColor);
 					g.FillRectangle(sb, dr);
 				}
 			}
@@ -3007,7 +3021,7 @@ namespace Majorsilence.Reporting.RdlDesign
         private void DrawImageBackground(PageImage pi, StyleInfo si, RectangleF r)
         {
             Stream strm = null;
-            System.Drawing.Image im = null;
+            Majorsilence.Forms.Drawing.Image im = null;
             try
             {
                 RectangleF r2 = new RectangleF(r.Left + si.PaddingLeft,
@@ -3016,7 +3030,7 @@ namespace Majorsilence.Reporting.RdlDesign
                     r.Height - (si.PaddingTop + si.PaddingBottom));
 
                 strm = new MemoryStream(pi.GetImageData((int)r2.Width, (int)r2.Height));
-                im = System.Drawing.Image.FromStream(strm);
+                im = Majorsilence.Forms.Drawing.Image.FromStream(strm);
 
                 int repeatX = 0;
                 int repeatY = 0;
@@ -3051,7 +3065,7 @@ namespace Majorsilence.Reporting.RdlDesign
                 float startY = dr.Top;
 
                 Region saveRegion = g.Clip;
-                Region clipRegion = new Region(g.Clip.GetRegionData());
+                Region clipRegion = g.Clip.Clone();
  
                 clipRegion.Intersect(dr);
                 g.Clip = clipRegion;
@@ -3201,7 +3215,7 @@ namespace Majorsilence.Reporting.RdlDesign
 
 			Font drawFont = null;
 			StringFormat drawFormat = null;
-			Brush drawBrush = null;
+			Majorsilence.Forms.Drawing.Brush drawBrush = null;
 			var graphicsState = g.Save();
 
 			try
@@ -3317,7 +3331,7 @@ namespace Majorsilence.Reporting.RdlDesign
 					g.RotateTransform(270);
 				}
 
-				drawBrush = new SolidBrush(si.Color);
+				drawBrush = new Majorsilence.Forms.Drawing.SolidBrush(si.Color);
 				g.DrawString(text, drawFont, drawBrush, drawRectangle, drawFormat);
 				g.Restore(graphicsState);
 			}
@@ -3331,7 +3345,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			DrawBorder(si, r); // Draw the border if needed
 		}
 
-		internal void PasteImage(XmlNode parent, System.Drawing.Bitmap img, PointF p)
+		internal void PasteImage(XmlNode parent, Majorsilence.Forms.Drawing.Bitmap img, PointF p)
 		{
             // Josh: Adds a default ZIndex of 1 to paste above "background". 
 			string t = string.Format(NumberFormatInfo.InvariantInfo,
@@ -3534,7 +3548,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			}
 			catch (Exception e)
 			{
-				MessageBox.Show(e.Message, Strings.DesignXmlDraw_Show_XMLInvalid);
+				Majorsilence.Forms.MessageBox.Show(e.Message, Strings.DesignXmlDraw_Show_XMLInvalid);
 				return null;
 			}
 
@@ -3941,7 +3955,7 @@ namespace Majorsilence.Reporting.RdlDesign
 		/// <param name="vScroll">Vertical scroll position in points</param>
 		internal HitLocation HitContainer(Point p, float hScroll, float vScroll)
 		{
-            if ((Control.ModifierKeys & Keys.Shift) == Keys.Shift) //Josh: Added so Report can be selected below items.
+            if ((Control.ModifierKeys & Majorsilence.Forms.Keys.Shift) == Majorsilence.Forms.Keys.Shift) //Josh: Added so Report can be selected below items.
             {
                 return HitNode(p, hScroll, vScroll, true);
             }

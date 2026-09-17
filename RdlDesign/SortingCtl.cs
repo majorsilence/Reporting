@@ -2,7 +2,6 @@
 using System;
 using System.Collections;
 using System.ComponentModel;
-using System.Drawing;
 using System.Data;
 using System.Windows.Forms;
 using System.Xml;
@@ -107,7 +106,7 @@ namespace Majorsilence.Reporting.RdlDesign
 		/// </summary>
 		private void InitializeComponent()
 		{
-			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(SortingCtl));
+			System.Windows.Forms.ComponentResourceManager resources = new System.Windows.Forms.ComponentResourceManager(typeof(SortingCtl));
 			this.dgSorting = new System.Windows.Forms.DataGridView();
 			this.bDelete = new System.Windows.Forms.Button();
 			this.bUp = new System.Windows.Forms.Button();
@@ -125,26 +124,26 @@ namespace Majorsilence.Reporting.RdlDesign
 			// 
 			resources.ApplyResources(this.bDelete, "bDelete");
 			this.bDelete.Name = "bDelete";
-			this.bDelete.Click += new System.EventHandler(this.bDelete_Click);
+			this.bDelete.Click += this.bDelete_Click;
 			// 
 			// bUp
 			// 
 			resources.ApplyResources(this.bUp, "bUp");
 			this.bUp.Name = "bUp";
-			this.bUp.Click += new System.EventHandler(this.bUp_Click);
+			this.bUp.Click += this.bUp_Click;
 			// 
 			// bDown
 			// 
 			resources.ApplyResources(this.bDown, "bDown");
 			this.bDown.Name = "bDown";
-			this.bDown.Click += new System.EventHandler(this.bDown_Click);
+			this.bDown.Click += this.bDown_Click;
 			// 
 			// bValueExpr
 			// 
 			resources.ApplyResources(this.bValueExpr, "bValueExpr");
 			this.bValueExpr.Name = "bValueExpr";
 			this.bValueExpr.Tag = "value";
-			this.bValueExpr.Click += new System.EventHandler(this.bValueExpr_Click);
+			this.bValueExpr.Click += this.bValueExpr_Click;
 			// 
 			// SortingCtl
 			// 
@@ -172,7 +171,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			XmlNode sorts = null;
 			_Draw.RemoveElement(_SortingParent, "Sorting");
 			// Loop thru and add all the filters
-			foreach (DataGridViewRow dr in dgSorting.Rows)
+			foreach (Majorsilence.Forms.DataGridViewRow dr in dgSorting.Rows)
 			{
                 string expr = dr.Cells[0].Value as string;
                 bool dir = dr.Cells[1].Value == null? true: (bool) dr.Cells[1].Value;
@@ -198,7 +197,7 @@ namespace Majorsilence.Reporting.RdlDesign
                 dgSorting.Rows.RemoveAt(this.dgSorting.CurrentRow.Index);
             else
             {   // just empty out the values
-                DataGridViewRow dgrv = dgSorting.Rows[this.dgSorting.CurrentRow.Index];
+                Majorsilence.Forms.DataGridViewRow dgrv = dgSorting.Rows[this.dgSorting.CurrentRow.Index];
                 dgrv.Cells[0].Value = null;
                 dgrv.Cells[1].Value = null;
             }
@@ -228,7 +227,7 @@ namespace Majorsilence.Reporting.RdlDesign
                 dgSorting.Rows[cr + 1].Cells[dgSorting.CurrentCell.ColumnIndex];
         }
 
-		private void SwapRow(DataGridViewRow tdr, DataGridViewRow fdr)
+		private void SwapRow(Majorsilence.Forms.DataGridViewRow tdr, Majorsilence.Forms.DataGridViewRow fdr)
 		{
             // column 1
             object save = tdr.Cells[0].Value;
@@ -246,7 +245,7 @@ namespace Majorsilence.Reporting.RdlDesign
             if (dgSorting.CurrentCell == null)
                 dgSorting.Rows.Add("",true);
 
-            DataGridViewCell dgc = dgSorting.CurrentCell;
+            Majorsilence.Forms.DataGridViewCell dgc = dgSorting.CurrentCell;
             int cc = dgc.ColumnIndex;
 
             // >>>>>>>>>> 
@@ -258,8 +257,8 @@ namespace Majorsilence.Reporting.RdlDesign
 
             using (DialogExprEditor ee = new DialogExprEditor(_Draw, cv, _SortingParent, false))
             {
-                DialogResult dlgr = ee.ShowDialog();
-                if (dlgr == DialogResult.OK)
+                Majorsilence.Forms.DialogResult dlgr = ee.ShowDialog();
+                if (dlgr == Majorsilence.Forms.DialogResult.OK)
                     dgc.Value = ee.Expression;
             }
 		}

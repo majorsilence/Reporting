@@ -3,7 +3,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Drawing;
 using System.Data;
 using System.Windows.Forms;
 using System.Xml;
@@ -85,7 +84,7 @@ namespace Majorsilence.Reporting.RdlDesign
 		/// </summary>
 		private void InitializeComponent()
 		{
-			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ListCtl));
+			System.Windows.Forms.ComponentResourceManager resources = new System.Windows.Forms.ComponentResourceManager(typeof(ListCtl));
             this.DoubleBuffered = true;
 			this.label2 = new System.Windows.Forms.Label();
 			this.cbDataSet = new System.Windows.Forms.ComboBox();
@@ -111,9 +110,9 @@ namespace Majorsilence.Reporting.RdlDesign
 			// cbDataSet
 			// 
 			resources.ApplyResources(this.cbDataSet, "cbDataSet");
-			this.cbDataSet.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+			this.cbDataSet.DropDownStyle = Majorsilence.Forms.ComboBoxStyle.DropDownList;
 			this.cbDataSet.Name = "cbDataSet";
-			this.cbDataSet.SelectedIndexChanged += new System.EventHandler(this.cbDataSet_SelectedIndexChanged);
+			this.cbDataSet.SelectedIndexChanged += this.cbDataSet_SelectedIndexChanged;
 			// 
 			// groupBox1
 			// 
@@ -127,19 +126,19 @@ namespace Majorsilence.Reporting.RdlDesign
 			// 
 			resources.ApplyResources(this.chkPBAfter, "chkPBAfter");
 			this.chkPBAfter.Name = "chkPBAfter";
-			this.chkPBAfter.CheckedChanged += new System.EventHandler(this.chkPBAfter_CheckedChanged);
+			this.chkPBAfter.CheckedChanged += this.chkPBAfter_CheckedChanged;
 			// 
 			// chkPBBefore
 			// 
 			resources.ApplyResources(this.chkPBBefore, "chkPBBefore");
 			this.chkPBBefore.Name = "chkPBBefore";
-			this.chkPBBefore.CheckedChanged += new System.EventHandler(this.chkPBBefore_CheckedChanged);
+			this.chkPBBefore.CheckedChanged += this.chkPBBefore_CheckedChanged;
 			// 
 			// bGroups
 			// 
 			resources.ApplyResources(this.bGroups, "bGroups");
 			this.bGroups.Name = "bGroups";
-			this.bGroups.Click += new System.EventHandler(this.bGroups_Click);
+			this.bGroups.Click += this.bGroups_Click;
 			// 
 			// label1
 			// 
@@ -150,19 +149,19 @@ namespace Majorsilence.Reporting.RdlDesign
 			// 
 			resources.ApplyResources(this.tbNoRows, "tbNoRows");
 			this.tbNoRows.Name = "tbNoRows";
-			this.tbNoRows.TextChanged += new System.EventHandler(this.tbNoRows_TextChanged);
+			this.tbNoRows.TextChanged += this.tbNoRows_TextChanged;
 			// 
 			// tbDataInstanceName
 			// 
 			resources.ApplyResources(this.tbDataInstanceName, "tbDataInstanceName");
 			this.tbDataInstanceName.Name = "tbDataInstanceName";
-			this.tbDataInstanceName.TextChanged += new System.EventHandler(this.tbDataInstanceName_TextChanged);
+			this.tbDataInstanceName.TextChanged += this.tbDataInstanceName_TextChanged;
 			// 
 			// chkXmlInstances
 			// 
 			resources.ApplyResources(this.chkXmlInstances, "chkXmlInstances");
 			this.chkXmlInstances.Name = "chkXmlInstances";
-			this.chkXmlInstances.CheckedChanged += new System.EventHandler(this.chkXmlInstances_CheckedChanged);
+			this.chkXmlInstances.CheckedChanged += this.chkXmlInstances_CheckedChanged;
 			// 
 			// label3
 			// 
@@ -263,8 +262,8 @@ namespace Majorsilence.Reporting.RdlDesign
 			PropertyDialog pd = new PropertyDialog(_Draw, _ReportItems, PropertyTypeEnum.Grouping);
             try
             {
-                DialogResult dr = pd.ShowDialog();
-                if (pd.Changed || dr == DialogResult.OK)
+                Majorsilence.Forms.DialogResult dr = pd.ShowDialog();
+                if (pd.Changed || dr == Majorsilence.Forms.DialogResult.OK)
                 {
                     //				_DrawPanel.Invalidate();   TODO need to force change somehow?????
                 }

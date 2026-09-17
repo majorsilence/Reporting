@@ -2,7 +2,6 @@
 using System;
 using System.Collections;
 using System.ComponentModel;
-using System.Drawing;
 using System.Data;
 using System.Windows.Forms;
 using System.Xml;
@@ -124,7 +123,7 @@ namespace Majorsilence.Reporting.RdlDesign
 		/// </summary>
 		private void InitializeComponent()
 		{
-			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ModulesClassesCtl));
+			System.Windows.Forms.ComponentResourceManager resources = new System.Windows.Forms.ComponentResourceManager(typeof(ModulesClassesCtl));
             this.DoubleBuffered = true;
 			this.label1 = new System.Windows.Forms.Label();
 			this.bDeleteCM = new System.Windows.Forms.Button();
@@ -145,7 +144,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			// 
 			resources.ApplyResources(this.bDeleteCM, "bDeleteCM");
 			this.bDeleteCM.Name = "bDeleteCM";
-			this.bDeleteCM.Click += new System.EventHandler(this.bDeleteCM_Click);
+			this.bDeleteCM.Click += this.bDeleteCM_Click;
 			// 
 			// dgCodeModules
 			// 
@@ -157,7 +156,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			// 
 			resources.ApplyResources(this.bDeleteClass, "bDeleteClass");
 			this.bDeleteClass.Name = "bDeleteClass";
-			this.bDeleteClass.Click += new System.EventHandler(this.bDeleteClass_Click);
+			this.bDeleteClass.Click += this.bDeleteClass_Click;
 			// 
 			// dgClasses
 			// 

@@ -1,0 +1,12 @@
+{
+  "name": "Invoice",
+  "slug": "invoice",
+  "description": "A one-page invoice with company/customer header, a line-item table, and computed subtotal/tax/total.",
+  "tags": ["business", "billing", "letter-size"],
+  "dataProvider": "Json",
+  "parameters": [],
+  "dataContract": {
+    "root": ["InvoiceNumber", "InvoiceDate", "DueDate", "CompanyName", "CompanyAddress", "CustomerName", "CustomerAddress", "TaxRatePercent", "Notes"],
+    "root.Lines[]": ["Description", "Quantity", "UnitPrice"]
+  }
+}

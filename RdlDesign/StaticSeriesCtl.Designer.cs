@@ -28,7 +28,7 @@ namespace Majorsilence.Reporting.RdlDesign
         /// </summary>
         private void InitializeComponent()
         {
-			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(StaticSeriesCtl));
+			System.Windows.Forms.ComponentResourceManager resources = new System.Windows.Forms.ComponentResourceManager(typeof(StaticSeriesCtl));
 			this.label1 = new System.Windows.Forms.Label();
 			this.lbDataSeries = new System.Windows.Forms.ListBox();
 			this.label2 = new System.Windows.Forms.Label();
@@ -69,7 +69,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			this.lbDataSeries.FormattingEnabled = true;
 			resources.ApplyResources(this.lbDataSeries, "lbDataSeries");
 			this.lbDataSeries.Name = "lbDataSeries";
-			this.lbDataSeries.SelectedIndexChanged += new System.EventHandler(this.lbDataSeries_SelectedIndexChanged);
+			this.lbDataSeries.SelectedIndexChanged += this.lbDataSeries_SelectedIndexChanged;
 			// 
 			// label2
 			// 
@@ -86,60 +86,60 @@ namespace Majorsilence.Reporting.RdlDesign
 			resources.ApplyResources(this.chkShowLabels, "chkShowLabels");
 			this.chkShowLabels.Name = "chkShowLabels";
 			this.chkShowLabels.UseVisualStyleBackColor = true;
-			this.chkShowLabels.CheckedChanged += new System.EventHandler(this.chkShowLabels_CheckedChanged);
+			this.chkShowLabels.CheckedChanged += this.chkShowLabels_CheckedChanged;
 			// 
 			// txtSeriesName
 			// 
 			resources.ApplyResources(this.txtSeriesName, "txtSeriesName");
 			this.txtSeriesName.Name = "txtSeriesName";
-			this.txtSeriesName.TextChanged += new System.EventHandler(this.txtSeriesName_TextChanged);
+			this.txtSeriesName.TextChanged += this.txtSeriesName_TextChanged;
 			// 
 			// txtLabelValue
 			// 
 			resources.ApplyResources(this.txtLabelValue, "txtLabelValue");
 			this.txtLabelValue.Name = "txtLabelValue";
-			this.txtLabelValue.TextChanged += new System.EventHandler(this.txtLabelValue_TextChanged);
+			this.txtLabelValue.TextChanged += this.txtLabelValue_TextChanged;
 			// 
 			// btnAdd
 			// 
 			resources.ApplyResources(this.btnAdd, "btnAdd");
 			this.btnAdd.Name = "btnAdd";
 			this.btnAdd.UseVisualStyleBackColor = true;
-			this.btnAdd.Click += new System.EventHandler(this.btnAdd_Click);
+			this.btnAdd.Click += this.btnAdd_Click;
 			// 
 			// btnDel
 			// 
 			resources.ApplyResources(this.btnDel, "btnDel");
 			this.btnDel.Name = "btnDel";
 			this.btnDel.UseVisualStyleBackColor = true;
-			this.btnDel.Click += new System.EventHandler(this.btnDel_Click);
+			this.btnDel.Click += this.btnDel_Click;
 			// 
 			// btnLabelValue
 			// 
 			resources.ApplyResources(this.btnLabelValue, "btnLabelValue");
 			this.btnLabelValue.Name = "btnLabelValue";
 			this.btnLabelValue.UseVisualStyleBackColor = true;
-			this.btnLabelValue.Click += new System.EventHandler(this.FunctionButtonClick);
+			this.btnLabelValue.Click += this.FunctionButtonClick;
 			// 
 			// btnDataValue
 			// 
 			resources.ApplyResources(this.btnDataValue, "btnDataValue");
 			this.btnDataValue.Name = "btnDataValue";
 			this.btnDataValue.UseVisualStyleBackColor = true;
-			this.btnDataValue.Click += new System.EventHandler(this.FunctionButtonClick);
+			this.btnDataValue.Click += this.FunctionButtonClick;
 			// 
 			// btnSeriesName
 			// 
 			resources.ApplyResources(this.btnSeriesName, "btnSeriesName");
 			this.btnSeriesName.Name = "btnSeriesName";
 			this.btnSeriesName.UseVisualStyleBackColor = true;
-			this.btnSeriesName.Click += new System.EventHandler(this.FunctionButtonClick);
+			this.btnSeriesName.Click += this.FunctionButtonClick;
 			// 
 			// txtDataValue
 			// 
 			resources.ApplyResources(this.txtDataValue, "txtDataValue");
 			this.txtDataValue.Name = "txtDataValue";
-			this.txtDataValue.TextChanged += new System.EventHandler(this.txtDataValue_TextChanged);
+			this.txtDataValue.TextChanged += this.txtDataValue_TextChanged;
 			// 
 			// label4
 			// 
@@ -154,7 +154,7 @@ namespace Majorsilence.Reporting.RdlDesign
             resources.GetString("cbPlotType.Items1")});
 			resources.ApplyResources(this.cbPlotType, "cbPlotType");
 			this.cbPlotType.Name = "cbPlotType";
-			this.cbPlotType.SelectedIndexChanged += new System.EventHandler(this.cbPlotType_SelectedIndexChanged);
+			this.cbPlotType.SelectedIndexChanged += this.cbPlotType_SelectedIndexChanged;
 			// 
 			// chkLeft
 			// 
@@ -162,7 +162,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			this.chkLeft.Name = "chkLeft";
 			this.chkLeft.TabStop = true;
 			this.chkLeft.UseVisualStyleBackColor = true;
-			this.chkLeft.CheckedChanged += new System.EventHandler(this.chkLeft_CheckedChanged);
+			this.chkLeft.CheckedChanged += this.chkLeft_CheckedChanged;
 			// 
 			// chkRight
 			// 
@@ -181,20 +181,20 @@ namespace Majorsilence.Reporting.RdlDesign
 			resources.ApplyResources(this.btnUp, "btnUp");
 			this.btnUp.Name = "btnUp";
 			this.btnUp.UseVisualStyleBackColor = true;
-			this.btnUp.Click += new System.EventHandler(this.btnUp_Click);
+			this.btnUp.Click += this.btnUp_Click;
 			// 
 			// btnDown
 			// 
 			resources.ApplyResources(this.btnDown, "btnDown");
 			this.btnDown.Name = "btnDown";
 			this.btnDown.UseVisualStyleBackColor = true;
-			this.btnDown.Click += new System.EventHandler(this.btnDown_Click);
+			this.btnDown.Click += this.btnDown_Click;
 			// 
 			// txtX
 			// 
 			resources.ApplyResources(this.txtX, "txtX");
 			this.txtX.Name = "txtX";
-			this.txtX.TextChanged += new System.EventHandler(this.txtX_TextChanged);
+			this.txtX.TextChanged += this.txtX_TextChanged;
 			// 
 			// label6
 			// 
@@ -206,14 +206,14 @@ namespace Majorsilence.Reporting.RdlDesign
 			resources.ApplyResources(this.btnX, "btnX");
 			this.btnX.Name = "btnX";
 			this.btnX.UseVisualStyleBackColor = true;
-			this.btnX.Click += new System.EventHandler(this.FunctionButtonClick);
+			this.btnX.Click += this.FunctionButtonClick;
 			// 
 			// chkMarker
 			// 
 			resources.ApplyResources(this.chkMarker, "chkMarker");
 			this.chkMarker.Name = "chkMarker";
 			this.chkMarker.UseVisualStyleBackColor = true;
-			this.chkMarker.CheckedChanged += new System.EventHandler(this.chkMarker_CheckedChanged);
+			this.chkMarker.CheckedChanged += this.chkMarker_CheckedChanged;
 			// 
 			// label7
 			// 
@@ -231,7 +231,7 @@ namespace Majorsilence.Reporting.RdlDesign
             resources.GetString("cbLine.Items4")});
 			resources.ApplyResources(this.cbLine, "cbLine");
 			this.cbLine.Name = "cbLine";
-			this.cbLine.SelectedIndexChanged += new System.EventHandler(this.cbLine_SelectedIndexChanged);
+			this.cbLine.SelectedIndexChanged += this.cbLine_SelectedIndexChanged;
 			// 
 			// label8
 			// 
@@ -240,18 +240,18 @@ namespace Majorsilence.Reporting.RdlDesign
 			// 
 			// colorPicker1
 			// 
-			this.colorPicker1.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed;
+			this.colorPicker1.DrawMode = Majorsilence.Forms.DrawMode.OwnerDrawFixed;
 			this.colorPicker1.DropDownHeight = 1;
-			this.colorPicker1.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+			this.colorPicker1.DropDownStyle = Majorsilence.Forms.ComboBoxStyle.DropDownList;
 			resources.ApplyResources(this.colorPicker1, "colorPicker1");
 			this.colorPicker1.FormattingEnabled = true;
 			this.colorPicker1.Name = "colorPicker1";
-			this.colorPicker1.SelectedIndexChanged += new System.EventHandler(this.colorPicker1_SelectedIndexChanged);
+			this.colorPicker1.SelectedIndexChanged += this.colorPicker1_SelectedIndexChanged;
 			// 
 			// StaticSeriesCtl
 			// 
 			resources.ApplyResources(this, "$this");
-			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+			this.AutoScaleMode = Majorsilence.Forms.AutoScaleMode.Font;
 			this.Controls.Add(this.label8);
 			this.Controls.Add(this.colorPicker1);
 			this.Controls.Add(this.cbLine);

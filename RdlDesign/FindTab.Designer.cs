@@ -1,6 +1,5 @@
 using System;
 using System.Windows.Forms;
-using System.Drawing;
 using System.ComponentModel;
 using System.Collections;
 
@@ -39,7 +38,7 @@ private System.ComponentModel.Container components = null;
 
 		private void InitializeComponent()
 		{
-			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FindTab));
+			System.Windows.Forms.ComponentResourceManager resources = new System.Windows.Forms.ComponentResourceManager(typeof(FindTab));
 			this.tcFRG = new System.Windows.Forms.TabControl();
 			this.tabFind = new System.Windows.Forms.TabPage();
 			this.btnCancel = new System.Windows.Forms.Button();
@@ -80,8 +79,8 @@ private System.ComponentModel.Container components = null;
 			resources.ApplyResources(this.tcFRG, "tcFRG");
 			this.tcFRG.Name = "tcFRG";
 			this.tcFRG.SelectedIndex = 0;
-			this.tcFRG.SelectedIndexChanged += new System.EventHandler(this.tcFRG_SelectedIndexChanged);
-			this.tcFRG.Enter += new System.EventHandler(this.tcFRG_Enter);
+			this.tcFRG.SelectedIndexChanged += this.tcFRG_SelectedIndexChanged;
+			this.tcFRG.Enter += this.tcFRG_Enter;
 			// 
 			// tabFind
 			// 
@@ -97,16 +96,16 @@ private System.ComponentModel.Container components = null;
 			// 
 			// btnCancel
 			// 
-			this.btnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
+			this.btnCancel.DialogResult = Majorsilence.Forms.DialogResult.Cancel;
 			resources.ApplyResources(this.btnCancel, "btnCancel");
 			this.btnCancel.Name = "btnCancel";
-			this.btnCancel.Click += new System.EventHandler(this.btnCancel_Click);
+			this.btnCancel.Click += this.btnCancel_Click;
 			// 
 			// btnNext
 			// 
 			resources.ApplyResources(this.btnNext, "btnNext");
 			this.btnNext.Name = "btnNext";
-			this.btnNext.Click += new System.EventHandler(this.btnNext_Click);
+			this.btnNext.Click += this.btnNext_Click;
 			// 
 			// chkCase
 			// 
@@ -142,7 +141,7 @@ private System.ComponentModel.Container components = null;
 			// 
 			resources.ApplyResources(this.txtFind, "txtFind");
 			this.txtFind.Name = "txtFind";
-			this.txtFind.TextChanged += new System.EventHandler(this.txtFind_TextChanged);
+			this.txtFind.TextChanged += this.txtFind_TextChanged;
 			// 
 			// tabReplace
 			// 
@@ -163,13 +162,13 @@ private System.ComponentModel.Container components = null;
 			// 
 			resources.ApplyResources(this.bCloseReplace, "bCloseReplace");
 			this.bCloseReplace.Name = "bCloseReplace";
-			this.bCloseReplace.Click += new System.EventHandler(this.btnCancel_Click);
+			this.bCloseReplace.Click += this.btnCancel_Click;
 			// 
 			// btnFindNext
 			// 
 			resources.ApplyResources(this.btnFindNext, "btnFindNext");
 			this.btnFindNext.Name = "btnFindNext";
-			this.btnFindNext.Click += new System.EventHandler(this.btnFindNext_Click);
+			this.btnFindNext.Click += this.btnFindNext_Click;
 			// 
 			// chkMatchCase
 			// 
@@ -180,19 +179,19 @@ private System.ComponentModel.Container components = null;
 			// 
 			resources.ApplyResources(this.btnReplaceAll, "btnReplaceAll");
 			this.btnReplaceAll.Name = "btnReplaceAll";
-			this.btnReplaceAll.Click += new System.EventHandler(this.btnReplaceAll_Click);
+			this.btnReplaceAll.Click += this.btnReplaceAll_Click;
 			// 
 			// btnReplace
 			// 
 			resources.ApplyResources(this.btnReplace, "btnReplace");
 			this.btnReplace.Name = "btnReplace";
-			this.btnReplace.Click += new System.EventHandler(this.btnReplace_Click);
+			this.btnReplace.Click += this.btnReplace_Click;
 			// 
 			// txtFindR
 			// 
 			resources.ApplyResources(this.txtFindR, "txtFindR");
 			this.txtFindR.Name = "txtFindR";
-			this.txtFindR.TextChanged += new System.EventHandler(this.txtFindR_TextChanged);
+			this.txtFindR.TextChanged += this.txtFindR_TextChanged;
 			// 
 			// label3
 			// 
@@ -223,7 +222,7 @@ private System.ComponentModel.Container components = null;
 			// 
 			resources.ApplyResources(this.bCloseGoto, "bCloseGoto");
 			this.bCloseGoto.Name = "bCloseGoto";
-			this.bCloseGoto.Click += new System.EventHandler(this.btnCancel_Click);
+			this.bCloseGoto.Click += this.btnCancel_Click;
 			// 
 			// txtLine
 			// 
@@ -239,7 +238,7 @@ private System.ComponentModel.Container components = null;
 			// 
 			resources.ApplyResources(this.btnGoto, "btnGoto");
 			this.btnGoto.Name = "btnGoto";
-			this.btnGoto.Click += new System.EventHandler(this.btnGoto_Click);
+			this.btnGoto.Click += this.btnGoto_Click;
 			// 
 			// FindTab
 			// 
@@ -248,7 +247,7 @@ private System.ComponentModel.Container components = null;
 			this.Controls.Add(this.tcFRG);
 			this.Name = "FindTab";
 			this.TopMost = true;
-			this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.FindTab_FormClosed);
+			this.FormClosed += this.FindTab_FormClosed;
 			this.tcFRG.ResumeLayout(false);
 			this.tabFind.ResumeLayout(false);
 			this.tabFind.PerformLayout();

@@ -2,13 +2,11 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
-using System.Drawing;
 using System.ComponentModel;            // need this for the properties metadata
-using System.Drawing.Design;
 using System.Xml;
 using System.Globalization;
 using System.Windows.Forms;
-using System.Windows.Forms.Design;
+using Majorsilence.Forms.Design;
 
 namespace Majorsilence.Reporting.RdlDesign
 {
@@ -134,7 +132,7 @@ namespace Majorsilence.Reporting.RdlDesign
             {
 
                 // Display the UI editor dialog
-                if (editorService.ShowDialog(scd) == DialogResult.OK)
+                if (editorService.ShowDialog(scd) == Majorsilence.Forms.DialogResult.OK)
                 {
                     // Return the new property value from the UI editor form
                     return new PropertySorting(pri);

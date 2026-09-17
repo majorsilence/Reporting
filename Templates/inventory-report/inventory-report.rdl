@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Report xmlns="http://schemas.microsoft.com/sqlserver/reporting/2005/01/reportdefinition"
+        xmlns:rd="http://schemas.microsoft.com/SQLServer/reporting/reportdesigner">
+  <Description>Inventory report -- stock levels with conditional formatting flagging items at or below their reorder point.</Description>
+  <PageHeight>11in</PageHeight>
+  <PageWidth>8.5in</PageWidth>
+  <TopMargin>.5in</TopMargin>
+  <LeftMargin>.6in</LeftMargin>
+  <RightMargin>.6in</RightMargin>
+  <BottomMargin>.5in</BottomMargin>
+  <Width>7.3in</Width>
+
+  <DataSources>
+    <DataSource Name="DS1">
+      <ConnectionProperties>
+        <DataProvider>Json</DataProvider>
+        <ConnectString>file=sample-data.json</ConnectString>
+      </ConnectionProperties>
+    </DataSource>
+  </DataSources>
+
+  <DataSets>
+    <DataSet Name="Header">
+      <Query>
+        <DataSourceName>DS1</DataSourceName>
+        <CommandText>columns=ReportDate,WarehouseName;table=root</CommandText>
+      </Query>
+      <Fields>
+        <Field Name="ReportDate"><DataField>ReportDate</DataField><rd:TypeName>System.String</rd:TypeName></Field>
+        <Field Name="WarehouseName"><DataField>WarehouseName</DataField><rd:TypeName>System.String</rd:TypeName></Field>
+      </Fields>
+    </DataSet>
+    <DataSet Name="Items">
+      <Query>
+        <DataSourceName>DS1</DataSourceName>
+        <CommandText>columns=Sku,Description,StockOnHand,ReorderPoint;table=root_Items</CommandText>
+      </Query>
+      <Fields>
+        <Field Name="Sku"><DataField>Sku</DataField><rd:TypeName>System.String</rd:TypeName></Field>
+        <Field Name="Description"><DataField>Description</DataField><rd:TypeName>System.String</rd:TypeName></Field>
+        <Field Name="StockOnHand"><DataField>StockOnHand</DataField><rd:TypeName>System.Double</rd:TypeName></Field>
+        <Field Name="ReorderPoint"><DataField>ReorderPoint</DataField><rd:TypeName>System.Double</rd:TypeName></Field>
+      </Fields>
+    </DataSet>
+  </DataSets>
+
+  <Body>
+    <Height>9in</Height>
+    <ReportItems>
+      <Textbox Name="Title">
+        <Top>0in</Top><Left>0in</Left><Width>5in</Width><Height>.28in</Height>
+        <Value>Inventory Report</Value>
+        <Style><FontSize>18pt</FontSize><FontWeight>Bold</FontWeight><Color>#2C3E50</Color></Style>
+      </Textbox>
+      <Textbox Name="Subtitle">
+        <Top>.32in</Top><Left>0in</Left><Width>5in</Width><Height>.2in</Height>
+        <Value>=First(Fields!WarehouseName.Value, "Header") &amp; " -- as of " &amp; First(Fields!ReportDate.Value, "Header")</Value>
+        <Style><FontSize>9pt</FontSize><Color>Gray</Color></Style>
+      </Textbox>
+
+      <Table Name="ItemsTable">
+        <DataSetName>Items</DataSetName>
+        <NoRows>No inventory items.</NoRows>
+        <Top>.7in</Top>
+        <Left>0in</Left>
+        <TableColumns>
+          <TableColumn><Width>1in</Width></TableColumn>
+          <TableColumn><Width>2.8in</Width></TableColumn>
+          <TableColumn><Width>1.15in</Width></TableColumn>
+          <TableColumn><Width>1.15in</Width></TableColumn>
+          <TableColumn><Width>1.2in</Width></TableColumn>
+        </TableColumns>
+        <Header>
+          <TableRows>
+            <TableRow>
+              <Height>.22in</Height>
+              <TableCells>
+                <TableCell><ReportItems><Textbox Name="H_Sku"><Value>SKU</Value><Style><FontWeight>Bold</FontWeight><BackgroundColor>#2C3E50</BackgroundColor><Color>White</Color><PaddingLeft>4pt</PaddingLeft><VerticalAlign>Middle</VerticalAlign></Style></Textbox></ReportItems></TableCell>
+                <TableCell><ReportItems><Textbox Name="H_Desc"><Value>Description</Value><Style><FontWeight>Bold</FontWeight><BackgroundColor>#2C3E50</BackgroundColor><Color>White</Color><PaddingLeft>4pt</PaddingLeft><VerticalAlign>Middle</VerticalAlign></Style></Textbox></ReportItems></TableCell>
+                <TableCell><ReportItems><Textbox Name="H_Stock"><Value>On Hand</Value><Style><FontWeight>Bold</FontWeight><BackgroundColor>#2C3E50</BackgroundColor><Color>White</Color><TextAlign>Right</TextAlign><PaddingRight>4pt</PaddingRight><VerticalAlign>Middle</VerticalAlign></Style></Textbox></ReportItems></TableCell>
+                <TableCell><ReportItems><Textbox Name="H_Reorder"><Value>Reorder At</Value><Style><FontWeight>Bold</FontWeight><BackgroundColor>#2C3E50</BackgroundColor><Color>White</Color><TextAlign>Right</TextAlign><PaddingRight>4pt</PaddingRight><VerticalAlign>Middle</VerticalAlign></Style></Textbox></ReportItems></TableCell>
+                <TableCell><ReportItems><Textbox Name="H_St"><Value>Status</Value><Style><FontWeight>Bold</FontWeight><BackgroundColor>#2C3E50</BackgroundColor><Color>White</Color><TextAlign>Center</TextAlign><VerticalAlign>Middle</VerticalAlign></Style></Textbox></ReportItems></TableCell>
+              </TableCells>
+            </TableRow>
+          </TableRows>
+          <RepeatOnNewPage>true</RepeatOnNewPage>
+        </Header>
+        <Details>
+          <TableRows>
+            <TableRow>
+              <Height>.2in</Height>
+              <TableCells>
+                <TableCell><ReportItems><Textbox Name="D_Sku"><Value>=Fields!Sku.Value</Value><Style><PaddingLeft>4pt</PaddingLeft><BackgroundColor>=IIf(RowNumber(Nothing) Mod 2 = 0, "#F3EEFA", "White")</BackgroundColor></Style></Textbox></ReportItems></TableCell>
+                <TableCell><ReportItems><Textbox Name="D_Desc"><Value>=Fields!Description.Value</Value><CanGrow>true</CanGrow><Style><PaddingLeft>4pt</PaddingLeft><BackgroundColor>=IIf(RowNumber(Nothing) Mod 2 = 0, "#F3EEFA", "White")</BackgroundColor></Style></Textbox></ReportItems></TableCell>
+                <TableCell><ReportItems><Textbox Name="D_Stock"><Value>=Fields!StockOnHand.Value</Value><Style><TextAlign>Right</TextAlign><PaddingRight>4pt</PaddingRight><FontWeight>=IIf(Fields!StockOnHand.Value &lt;= Fields!ReorderPoint.Value, "Bold", "Normal")</FontWeight><Color>=IIf(Fields!StockOnHand.Value &lt;= Fields!ReorderPoint.Value, "#C0392B", "Black")</Color><BackgroundColor>=IIf(RowNumber(Nothing) Mod 2 = 0, "#F3EEFA", "White")</BackgroundColor></Style></Textbox></ReportItems></TableCell>
+                <TableCell><ReportItems><Textbox Name="D_Reorder"><Value>=Fields!ReorderPoint.Value</Value><Style><TextAlign>Right</TextAlign><PaddingRight>4pt</PaddingRight><BackgroundColor>=IIf(RowNumber(Nothing) Mod 2 = 0, "#F3EEFA", "White")</BackgroundColor></Style></Textbox></ReportItems></TableCell>
+                <TableCell><ReportItems><Textbox Name="D_St"><Value>=IIf(Fields!StockOnHand.Value &lt;= Fields!ReorderPoint.Value, "REORDER", "OK")</Value><Style><TextAlign>Center</TextAlign><FontWeight>Bold</FontWeight><FontSize>8pt</FontSize><Color>=IIf(Fields!StockOnHand.Value &lt;= Fields!ReorderPoint.Value, "#C0392B", "#1E8449")</Color><BackgroundColor>=IIf(RowNumber(Nothing) Mod 2 = 0, "#F3EEFA", "White")</BackgroundColor></Style></Textbox></ReportItems></TableCell>
+              </TableCells>
+            </TableRow>
+          </TableRows>
+        </Details>
+      </Table>
+    </ReportItems>
+  </Body>
+
+  <PageFooter>
+    <Height>16pt</Height>
+    <PrintOnFirstPage>true</PrintOnFirstPage>
+    <PrintOnLastPage>true</PrintOnLastPage>
+    <ReportItems>
+      <Textbox Name="PageNum">
+        <Top>1pt</Top><Left>0in</Left><Width>3in</Width><Height>14pt</Height>
+        <Value>=Globals!PageNumber &amp; " of " &amp; Globals!TotalPages</Value>
+        <Style><FontSize>8pt</FontSize><Color>Gray</Color></Style>
+      </Textbox>
+    </ReportItems>
+  </PageFooter>
+</Report>

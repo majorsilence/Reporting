@@ -94,9 +94,7 @@ public static class RdlNativeApi
         DllImportResolver resolver = (name, _, _) => ResolveFromDir(name, libDir);
         RegisterSafe(resolver, typeof(RdlNativeApi).Assembly);
         RegisterSafe(resolver, typeof(RdlEngineConfig).Assembly);
-#if DRAWINGCOMPAT
         RegisterSafe(resolver, typeof(SkiaSharp.SKBitmap).Assembly);
-#endif
         RegisterSafe(resolver, typeof(SQLitePCL.raw).Assembly);
         RegisterSafe(resolver, typeof(MySql.Data.MySqlClient.MySqlConnection).Assembly);
         RegisterSafe(resolver, typeof(Npgsql.NpgsqlConnection).Assembly);

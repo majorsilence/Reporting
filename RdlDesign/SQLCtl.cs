@@ -2,7 +2,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Drawing;
 using System.Data;
 using System.Windows.Forms;
 using System.Text;
@@ -44,7 +43,7 @@ namespace Majorsilence.Reporting.RdlDesign
             List<SqlSchemaInfo> si = DesignerUtility.GetSchemaInfo(_Draw, _DataSource);
             if (si != null && si.Count > 0)
             {
-                TreeNode ndRoot = new TreeNode("Tables");
+                Majorsilence.Forms.TreeNode ndRoot = new Majorsilence.Forms.TreeNode("Tables");
                 tvTablesColumns.Nodes.Add(ndRoot);
                 if (si == null)		// Nothing to initialize
                     return;
@@ -53,19 +52,19 @@ namespace Majorsilence.Reporting.RdlDesign
                 {
                     if (!bView && ssi.Type == "VIEW")
                     {	// Switch over to views
-                        ndRoot = new TreeNode("Views");
+                        ndRoot = new Majorsilence.Forms.TreeNode("Views");
                         tvTablesColumns.Nodes.Add(ndRoot);
                         bView = true;
                     }
 
                     // Add the node to the tree
-                    TreeNode aRoot = new TreeNode(ssi.Name);
+                    Majorsilence.Forms.TreeNode aRoot = new Majorsilence.Forms.TreeNode(ssi.Name);
                     ndRoot.Nodes.Add(aRoot);
                     aRoot.Nodes.Add("");
                 }
             }
             // Now do parameters
-            TreeNode qpRoot = null;
+            Majorsilence.Forms.TreeNode qpRoot = null;
             foreach (DataRow dr in _QueryParameters.Rows)
             {
                 if (dr[0] == DBNull.Value || dr[1] == null)
@@ -75,7 +74,7 @@ namespace Majorsilence.Reporting.RdlDesign
                     continue;
                 if (qpRoot == null)
                 {
-                    qpRoot = new TreeNode("Query Parameters");
+                    qpRoot = new Majorsilence.Forms.TreeNode("Query Parameters");
                     tvTablesColumns.Nodes.Add(qpRoot);
                 }
                 if (pName[0] != '@')
@@ -83,7 +82,7 @@ namespace Majorsilence.Reporting.RdlDesign
                     pName = "@" + pName;
                 }
                 // Add the node to the tree
-                TreeNode aRoot = new TreeNode(pName);
+                Majorsilence.Forms.TreeNode aRoot = new Majorsilence.Forms.TreeNode(pName);
                 qpRoot.Nodes.Add(aRoot);
             }
 
@@ -99,14 +98,14 @@ namespace Majorsilence.Reporting.RdlDesign
 
         private void bOK_Click(object sender, System.EventArgs e)
         {
-            this.DialogResult = DialogResult.OK;
+            this.DialogResult = Majorsilence.Forms.DialogResult.OK;
         }
-        private void tvTablesColumns_BeforeExpand(object sender, System.Windows.Forms.TreeViewCancelEventArgs e)
+        private void tvTablesColumns_BeforeExpand(object sender, Majorsilence.Forms.TreeViewCancelEventArgs e)
         {
             tvTablesColumns_ExpandTable(e.Node);
         }
 
-        private void tvTablesColumns_ExpandTable(TreeNode tNode)
+        private void tvTablesColumns_ExpandTable(Majorsilence.Forms.TreeNode tNode)
         {
             if (tNode.Parent == null)	// Check for Tables or Views
                 return;
@@ -141,7 +140,7 @@ namespace Majorsilence.Reporting.RdlDesign
                 tvTablesColumns.SelectedNode.Parent == null)
                 return;		// this is the Tables/Views node
 
-            TreeNode node = tvTablesColumns.SelectedNode;
+            Majorsilence.Forms.TreeNode node = (Majorsilence.Forms.TreeNode)tvTablesColumns.SelectedNode;
             string t = node.Text;
             if (tbSQL.Text == "")
             {
@@ -150,11 +149,11 @@ namespace Majorsilence.Reporting.RdlDesign
                     tvTablesColumns_ExpandTable(node);	// make sure we've obtained the columns
 
                     StringBuilder sb = new StringBuilder("SELECT ");
-                    TreeNode next = node.FirstNode;
+                    Majorsilence.Forms.TreeNode next = (Majorsilence.Forms.TreeNode)node.FirstNode;
                     while (true)
                     {
                         sb.Append(DesignerUtility.NormalizeSqlName(next.Text));
-                        next = next.NextNode;
+                        next = (Majorsilence.Forms.TreeNode)next.NextNode;
                         if (next == null)
                             break;
                         sb.Append(", ");
@@ -174,7 +173,7 @@ namespace Majorsilence.Reporting.RdlDesign
 
 		private void tbSQL_KeyDown(object sender, KeyEventArgs e)
 		{
-			if (e.Control && (e.KeyCode == Keys.A))
+			if (e.Control && (e.KeyCode == System.Windows.Forms.Keys.A))
 			{
 				if (sender != null)
 					((TextBox)sender).SelectAll();

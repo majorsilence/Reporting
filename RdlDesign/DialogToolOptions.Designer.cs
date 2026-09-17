@@ -1,6 +1,5 @@
 using System;
 using System.Windows.Forms;
-using System.Drawing;
 using System.ComponentModel;
 using System.Collections;
 
@@ -58,7 +57,7 @@ private System.ComponentModel.Container components = null;
 
 		private void InitializeComponent()
 		{
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(DialogToolOptions));
+            System.Windows.Forms.ComponentResourceManager resources = new System.Windows.Forms.ComponentResourceManager(typeof(DialogToolOptions));
             this.bOK = new System.Windows.Forms.Button();
             this.bCancel = new System.Windows.Forms.Button();
             this.tabControl1 = new System.Windows.Forms.TabControl();
@@ -123,12 +122,12 @@ private System.ComponentModel.Container components = null;
             // 
             resources.ApplyResources(this.bOK, "bOK");
             this.bOK.Name = "bOK";
-            this.bOK.Click += new System.EventHandler(this.bOK_Click);
+            this.bOK.Click += this.bOK_Click;
             // 
             // bCancel
             // 
             this.bCancel.CausesValidation = false;
-            this.bCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
+            this.bCancel.DialogResult = Majorsilence.Forms.DialogResult.Cancel;
             resources.ApplyResources(this.bCancel, "bCancel");
             this.bCancel.Name = "bCancel";
             // 
@@ -176,7 +175,7 @@ private System.ComponentModel.Container components = null;
             resources.ApplyResources(this.radioButtonCm, "radioButtonCm");
             this.radioButtonCm.Name = "radioButtonCm";
             this.radioButtonCm.UseVisualStyleBackColor = true;
-            this.radioButtonCm.CheckedChanged += new System.EventHandler(this.RadioButtonCm_CheckedChanged);
+            this.radioButtonCm.CheckedChanged += this.RadioButtonCm_CheckedChanged;
             // 
             // radioButtonInches
             // 
@@ -185,7 +184,7 @@ private System.ComponentModel.Container components = null;
             this.radioButtonInches.Name = "radioButtonInches";
             this.radioButtonInches.TabStop = true;
             this.radioButtonInches.UseVisualStyleBackColor = true;
-            this.radioButtonInches.CheckedChanged += new System.EventHandler(this.RadioButtonInches_CheckedChanged);
+            this.radioButtonInches.CheckedChanged += this.RadioButtonInches_CheckedChanged;
             // 
             // label12
             // 
@@ -194,7 +193,7 @@ private System.ComponentModel.Container components = null;
             // 
             // comboXmlEndingLine
             // 
-            this.comboXmlEndingLine.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.comboXmlEndingLine.DropDownStyle = Majorsilence.Forms.ComboBoxStyle.DropDownList;
             this.comboXmlEndingLine.FormattingEnabled = true;
             resources.ApplyResources(this.comboXmlEndingLine, "comboXmlEndingLine");
             this.comboXmlEndingLine.Name = "comboXmlEndingLine";
@@ -206,11 +205,11 @@ private System.ComponentModel.Container components = null;
             // 
             // tbLanguage
             // 
-            this.tbLanguage.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.tbLanguage.DropDownStyle = Majorsilence.Forms.ComboBoxStyle.DropDownList;
             this.tbLanguage.FormattingEnabled = true;
             resources.ApplyResources(this.tbLanguage, "tbLanguage");
             this.tbLanguage.Name = "tbLanguage";
-            this.tbLanguage.SelectedIndexChanged += new System.EventHandler(this.Desktop_Changed);
+            this.tbLanguage.SelectedIndexChanged += this.Desktop_Changed;
             // 
             // cbShowReportWaitDialog
             // 
@@ -268,7 +267,7 @@ private System.ComponentModel.Container components = null;
             resources.ApplyResources(this.cbTabInterface, "cbTabInterface");
             this.cbTabInterface.Name = "cbTabInterface";
             this.cbTabInterface.UseVisualStyleBackColor = true;
-            this.cbTabInterface.CheckedChanged += new System.EventHandler(this.cbTabInterface_CheckedChanged);
+            this.cbTabInterface.CheckedChanged += this.cbTabInterface_CheckedChanged;
             // 
             // cbOutline
             // 
@@ -326,31 +325,31 @@ private System.ComponentModel.Container components = null;
             // 
             resources.ApplyResources(this.bRemove, "bRemove");
             this.bRemove.Name = "bRemove";
-            this.bRemove.Click += new System.EventHandler(this.bRemove_Click);
+            this.bRemove.Click += this.bRemove_Click;
             // 
             // bReset
             // 
             resources.ApplyResources(this.bReset, "bReset");
             this.bReset.Name = "bReset";
-            this.bReset.Click += new System.EventHandler(this.bReset_Click);
+            this.bReset.Click += this.bReset_Click;
             // 
             // bDown
             // 
             resources.ApplyResources(this.bDown, "bDown");
             this.bDown.Name = "bDown";
-            this.bDown.Click += new System.EventHandler(this.bDown_Click);
+            this.bDown.Click += this.bDown_Click;
             // 
             // bUp
             // 
             resources.ApplyResources(this.bUp, "bUp");
             this.bUp.Name = "bUp";
-            this.bUp.Click += new System.EventHandler(this.bUp_Click);
+            this.bUp.Click += this.bUp_Click;
             // 
             // bCopyItem
             // 
             resources.ApplyResources(this.bCopyItem, "bCopyItem");
             this.bCopyItem.Name = "bCopyItem";
-            this.bCopyItem.Click += new System.EventHandler(this.bCopyItem_Click);
+            this.bCopyItem.Click += this.bCopyItem_Click;
             // 
             // label5
             // 
@@ -390,13 +389,13 @@ private System.ComponentModel.Container components = null;
             // 
             resources.ApplyResources(this.bBrowse, "bBrowse");
             this.bBrowse.Name = "bBrowse";
-            this.bBrowse.Click += new System.EventHandler(this.bBrowse_Click);
+            this.bBrowse.Click += this.bBrowse_Click;
             // 
             // tbDirectory
             // 
             resources.ApplyResources(this.tbDirectory, "tbDirectory");
             this.tbDirectory.Name = "tbDirectory";
-            this.tbDirectory.TextChanged += new System.EventHandler(this.Desktop_Changed);
+            this.tbDirectory.TextChanged += this.Desktop_Changed;
             // 
             // label9
             // 
@@ -417,13 +416,13 @@ private System.ComponentModel.Container components = null;
             // 
             resources.ApplyResources(this.ckLocal, "ckLocal");
             this.ckLocal.Name = "ckLocal";
-            this.ckLocal.CheckedChanged += new System.EventHandler(this.Desktop_Changed);
+            this.ckLocal.CheckedChanged += this.Desktop_Changed;
             // 
             // tbPort
             // 
             resources.ApplyResources(this.tbPort, "tbPort");
             this.tbPort.Name = "tbPort";
-            this.tbPort.TextChanged += new System.EventHandler(this.Desktop_Changed);
+            this.tbPort.TextChanged += this.Desktop_Changed;
             // 
             // label6
             // 
@@ -450,14 +449,14 @@ private System.ComponentModel.Container components = null;
             resources.ApplyResources(this.bRemoveMap, "bRemoveMap");
             this.bRemoveMap.Name = "bRemoveMap";
             this.bRemoveMap.UseVisualStyleBackColor = true;
-            this.bRemoveMap.Click += new System.EventHandler(this.bRemoveMap_Click);
+            this.bRemoveMap.Click += this.bRemoveMap_Click;
             // 
             // bAddMap
             // 
             resources.ApplyResources(this.bAddMap, "bAddMap");
             this.bAddMap.Name = "bAddMap";
             this.bAddMap.UseVisualStyleBackColor = true;
-            this.bAddMap.Click += new System.EventHandler(this.bAddMap_Click);
+            this.bAddMap.Click += this.bAddMap_Click;
             // 
             // lbMaps
             // 
@@ -469,7 +468,7 @@ private System.ComponentModel.Container components = null;
             // 
             resources.ApplyResources(this.bApply, "bApply");
             this.bApply.Name = "bApply";
-            this.bApply.Click += new System.EventHandler(this.bApply_Click);
+            this.bApply.Click += this.bApply_Click;
             // 
             // DialogToolOptions
             // 
@@ -480,12 +479,12 @@ private System.ComponentModel.Container components = null;
             this.Controls.Add(this.tabControl1);
             this.Controls.Add(this.bCancel);
             this.Controls.Add(this.bOK);
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
+            this.FormBorderStyle = Majorsilence.Forms.FormBorderStyle.FixedDialog;
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "DialogToolOptions";
             this.ShowInTaskbar = false;
-            this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
+            this.SizeGripStyle = Majorsilence.Forms.SizeGripStyle.Hide;
             this.tabControl1.ResumeLayout(false);
             this.tpGeneral.ResumeLayout(false);
             this.tpGeneral.PerformLayout();

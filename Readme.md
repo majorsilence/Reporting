@@ -14,7 +14,7 @@ dotnet add package Majorsilence.Reporting.RdlEngine.SkiaSharp
 dotnet add package Majorsilence.Reporting.RdlCri.SkiaSharp
 ```
 
-**The core engine supports Linux, macOS, and Windows for server-side report generation. Only the WinForms-based designer and viewer are Windows-only.**
+**The core engine, report designer, and report viewer all support Linux, macOS, and Windows — the designer and viewer are built on [Majorsilence.Forms](https://github.com/majorsilence/Majorsilence.Forms), a cross-platform WinForms-API-compatible framework. Existing System.Windows.Forms host apps can still embed them as real WinForms controls via `Majorsilence.Forms.WinForms`'s `ToWinFormsControl()`.**
 
 If you have any question about Majorsilence Reporting or want to discuss it, a discussion group is available here:
 

@@ -6,6 +6,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
+using System.Drawing;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -62,7 +63,7 @@ namespace Majorsilence.Reporting.RdlDesign
 		{
 			InitializeComponent();
 			// Get our graphics DPI					   
-			Graphics g = null;			
+			Majorsilence.Forms.Drawing.Graphics g = null;			
 			try
 			{
 				g = this.CreateGraphics(); 
@@ -81,28 +82,28 @@ namespace Majorsilence.Reporting.RdlDesign
 
 			// Handle the controls
 			_vScroll = new VScrollBar();
-			_vScroll.Scroll += new ScrollEventHandler(this.VerticalScroll);
+			_vScroll.Scroll += this.VerticalScroll;
 			_vScroll.Enabled = false;
 
 			_hScroll = new HScrollBar();
-			_hScroll.Scroll += new ScrollEventHandler(this.HorizontalScroll);
+			_hScroll.Scroll += this.HorizontalScroll;
 			_hScroll.Enabled = false;
 
 			_DrawPanel = new DesignXmlDraw();
 
-			_DrawPanel.Paint += new PaintEventHandler(this.DrawPanelPaint);
-			_DrawPanel.MouseUp += new MouseEventHandler(this.DrawPanelMouseUp);
-			_DrawPanel.MouseDown += new MouseEventHandler(this.DrawPanelMouseDown);
-			_DrawPanel.Resize += new EventHandler(this.DrawPanelResize); 
-			_DrawPanel.MouseWheel +=new MouseEventHandler(DrawPanelMouseWheel);
-			_DrawPanel.KeyDown += new KeyEventHandler(DrawPanelKeyDown);
-			_DrawPanel.MouseMove += new MouseEventHandler(DrawPanelMouseMove);
-			_DrawPanel.DoubleClick += new EventHandler(DrawPanelDoubleClick);
+			_DrawPanel.Paint += this.DrawPanelPaint;
+			_DrawPanel.MouseUp += this.DrawPanelMouseUp;
+			_DrawPanel.MouseDown += this.DrawPanelMouseDown;
+			_DrawPanel.Resize += this.DrawPanelResize; 
+			_DrawPanel.MouseWheel += DrawPanelMouseWheel;
+			_DrawPanel.KeyDown += DrawPanelKeyDown;
+			_DrawPanel.MouseMove += DrawPanelMouseMove;
+			_DrawPanel.DoubleClick += DrawPanelDoubleClick;
 
-			this.Layout +=new LayoutEventHandler(DesignCtl_Layout);
+			this.Layout += DesignCtl_Layout;
 			this.SuspendLayout();		 
 
-			// Must be added in this order for DockStyle to work correctly
+			// Must be added in this order for Majorsilence.Forms.DockStyle to work correctly
 			this.Controls.Add(_DrawPanel);
 			this.Controls.Add(_vScroll);
 			this.Controls.Add(_hScroll);
@@ -205,7 +206,13 @@ namespace Majorsilence.Reporting.RdlDesign
 					StringWriter sw = new StringWriter();
                     var settings = new XmlWriterSettings
                     {
-                        NewLineChars = RdlDesigner.XmlNewLine == NewLineChar.Unix ? "\n" : "\r\n",
+                        // RdlDesigner is only wired up when this DesignCtl is hosted inside the
+                        // full MDI RdlDesigner shell (see RdlDesigner.CreateMDIChildAsync); guard
+                        // against it being null (e.g. a standalone/test-hosted DesignCtl) instead
+                        // of throwing here -- this was a silent NullReferenceException swallowed
+                        // by the catch below, surfacing only as an empty ReportSource with no
+                        // indication why (found via D6's designer round-trip test).
+                        NewLineChars = RdlDesigner?.XmlNewLine == NewLineChar.Unix ? "\n" : "\r\n",
                         Indent = true,
                         IndentChars = "  "
                     };
@@ -219,7 +226,7 @@ namespace Majorsilence.Reporting.RdlDesign
 				}
 				catch (Exception ex)
 				{
-					MessageBox.Show(ex.Message, Strings.DesignCtl_Show_UnableCreateRDL);
+					Majorsilence.Forms.MessageBox.Show(ex.Message, Strings.DesignCtl_Show_UnableCreateRDL);
 				}
 				return result;
 			}
@@ -1027,7 +1034,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			BuildContextMenusCustom(MenuDefaultInsert);
 		}
         
-        private void BuildContextMenusCustom(ToolStripDropDownItem menuItem)
+        private void BuildContextMenusCustom(ToolStripMenuItem menuItem)
         {
             try
             {
@@ -1064,34 +1071,38 @@ namespace Majorsilence.Reporting.RdlDesign
             }
             catch (Exception ex)
             {
-                MessageBox.Show(string.Format(Strings.DesignCtl_ShowB_CustomReportItemError, ex.Message), Strings.DesignCtl_Show_Insert, MessageBoxButtons.OK);
+                Majorsilence.Forms.MessageBox.Show(string.Format(Strings.DesignCtl_ShowB_CustomReportItemError, ex.Message), Strings.DesignCtl_Show_Insert, Majorsilence.Forms.MessageBoxButtons.OK);
             }   
         }
 
         private Bitmap _buffer;
-        // HACK: async shenanigans
-        bool doGraphicsDraw;
-        private async void DrawPanelPaint(object sender, System.Windows.Forms.PaintEventArgs e)
+        // PaintEventArgs.Graphics isn't valid past the synchronous portion of a paint call, so the
+        // report is rendered asynchronously into an offscreen buffer and blitted on a later,
+        // synchronous paint. Every paint call draws whatever buffer is currently available -- kept
+        // around instead of disposed immediately after use -- so there is never a call that paints
+        // nothing (that was the old flicker: a resize reallocates a blank back buffer, and a call
+        // that only *started* a render rather than drawing left it on screen for a frame).
+        //
+        // _awaitingFollowUpPaint distinguishes "this paint is the one we ourselves requested to show
+        // a just-finished render" from "something external wants a redraw" -- without it, that
+        // self-requested paint would kick off another render, which finishes and requests another
+        // paint, forever, pegging a CPU core even completely idle.
+        private bool _awaitingFollowUpPaint;
+        private void DrawPanelPaint(object sender, System.Windows.Forms.PaintEventArgs e)
         {
-            // HACK: async shenanigans
-            if (doGraphicsDraw && _buffer != null)
-            {
+            if (_buffer != null)
                 e.Graphics.DrawImage(_buffer, 0, 0);
-                _buffer.Dispose();
-                _buffer = null;
-                doGraphicsDraw = false;
-            }
-            else
+
+            if (_awaitingFollowUpPaint)
             {
-                // HACK: async shenanigans
-                await Internal_DrawPanelPaint();
-                doGraphicsDraw = true;
-                // HACK: async shenanigans, force a repaint where e.Graphics is still valid
-                _DrawPanel.Invalidate();       
+                _awaitingFollowUpPaint = false;
+                return;
             }
+
+            _ = Internal_DrawPanelPaintAsync();
         }
 
-        private async Task Internal_DrawPanelPaint()
+        private async Task Internal_DrawPanelPaintAsync()
         {
             // Only handle one paint at a time
             lock (this)
@@ -1101,33 +1112,45 @@ namespace Majorsilence.Reporting.RdlDesign
                 _InPaint = true;
             }
 
-            // Create a self-contained Graphics object
-            _buffer = new Bitmap(Math.Max(1, _DrawPanel.Width), Math.Max(1, _DrawPanel.Height));
-            using (Graphics g = Graphics.FromImage(_buffer))
+            try
             {
-                try // never want to die in here
+                // Create a self-contained Majorsilence.Forms.Drawing.Graphics object
+                var newBuffer = new Bitmap(Math.Max(1, _DrawPanel.Width), Math.Max(1, _DrawPanel.Height));
+                using (Majorsilence.Forms.Drawing.Graphics g = Majorsilence.Forms.Drawing.Graphics.FromImage(newBuffer))
                 {
-                    if (this._ReportDoc == null) // if no report force the simplest one
-                        CreateEmptyReportDoc();
+                    try // never want to die in here
+                    {
+                        if (this._ReportDoc == null) // if no report force the simplest one
+                            CreateEmptyReportDoc();
 
-                    //g.ClipBounds;
-                    var clip = new Rectangle(PixelsX(_hScroll.Value), PixelsY(_vScroll.Value),
-                        PixelsX(_DrawPanel.Width), PixelsY(_DrawPanel.Height));
-                    // Draw the report asynchronously
-                    await _DrawPanel.Draw(g, PointsX(_hScroll.Value), PointsY(_vScroll.Value), clip);
+                        //g.ClipBounds;
+                        var clip = new Rectangle(PixelsX(_hScroll.Value), PixelsY(_vScroll.Value),
+                            PixelsX(_DrawPanel.Width), PixelsY(_DrawPanel.Height));
+                        // Draw the report asynchronously
+                        await _DrawPanel.Draw(g, PointsX(_hScroll.Value), PointsY(_vScroll.Value), clip);
+                    }
+                    catch (Exception ex)
+                    { // don't want to kill process if we die -- put up some kind of error message
+                        StringFormat format = new StringFormat();
+                        string msg = string.Format("Error drawing report. Likely error in syntax. Switch to syntax and correct report syntax.{0}{1}{0}{2}",
+                            Environment.NewLine, ex.Message, ex.StackTrace);
+                        g.DrawString(msg, this.Font, Brushes.Black, new Rectangle(2, 2, this.Width, this.Height), format);
+                    }
                 }
-                catch (Exception ex)
-                { // don't want to kill process if we die -- put up some kind of error message
-                    StringFormat format = new StringFormat();
-                    string msg = string.Format("Error drawing report. Likely error in syntax. Switch to syntax and correct report syntax.{0}{1}{0}{2}",
-                        Environment.NewLine, ex.Message, ex.StackTrace);
-                    g.DrawString(msg, this.Font, Brushes.Black, new Rectangle(2, 2, this.Width, this.Height), format);
-                }
+
+                var oldBuffer = _buffer;
+                _buffer = newBuffer;
+                oldBuffer?.Dispose();
+                // Force a repaint where e.Graphics is still valid, to actually show the new buffer.
+                _awaitingFollowUpPaint = true;
+                _DrawPanel.Invalidate();
             }
-
-            lock (this)
+            finally
             {
-                _InPaint = false;
+                lock (this)
+                {
+                    _InPaint = false;
+                }
             }
         }
 
@@ -1240,7 +1263,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			return;
 		}
 
-		private new void HorizontalScroll(object sender, System.Windows.Forms.ScrollEventArgs e)
+		private new void HorizontalScroll(object sender, Majorsilence.Forms.ScrollEventArgs e)
 		{
 			if (e.NewValue == _hScroll.Value)	// don't need to scroll if already there
 				return;
@@ -1250,7 +1273,7 @@ namespace Majorsilence.Reporting.RdlDesign
                 HorizontalScrollChanged(this, new EventArgs());
         }
 
-		private new void VerticalScroll(object sender, System.Windows.Forms.ScrollEventArgs e)
+		private new void VerticalScroll(object sender, Majorsilence.Forms.ScrollEventArgs e)
 		{
 			if (e.NewValue == _vScroll.Value)	// don't need to scroll if already there
 				return;
@@ -1264,7 +1287,7 @@ namespace Majorsilence.Reporting.RdlDesign
 		{
             MouseEventArgsE e = new MouseEventArgsE(E, SCALEX, SCALEY);
 
-            if (e.Button == MouseButtons.Left)
+            if (e.Button == System.Windows.Forms.MouseButtons.Left)
 				_Undo.EndUndoGroup(true);
 
             if (_MouseDownNode != null && _MouseDownNode.Name == "Height")
@@ -1281,7 +1304,7 @@ namespace Majorsilence.Reporting.RdlDesign
 					this.DrawPanelRubberBand(this._ptRBOriginal, this._ptRBLast);
 					// Process the rectangle
 					Rectangle r = DrawPanelRectFromPoints(this._ptRBOriginal, this._ptRBLast);
-					if ((Control.ModifierKeys & Keys.Control) != Keys.Control)	// we allow addition to selection
+					if ((Control.ModifierKeys & Majorsilence.Forms.Keys.Control) != Majorsilence.Forms.Keys.Control)	// we allow addition to selection
 						_DrawPanel.ClearSelected();
 					_DrawPanel.SelectInRectangle(r, PointsX(_hScroll.Value), PointsY(_vScroll.Value));
 					SelectionChanged(this, new EventArgs());
@@ -1289,7 +1312,7 @@ namespace Majorsilence.Reporting.RdlDesign
 				// clear out the points for the next time
 				_ptRBOriginal.X = _ptRBOriginal.Y = _ptRBLast.X = _ptRBLast.Y = -1;
 			}
-			else if (e.Button == MouseButtons.Right)
+			else if (e.Button == System.Windows.Forms.MouseButtons.Right)
 			{
 				DrawPanelContextMenu(new Point(e.X, e.Y));
 			}
@@ -1498,7 +1521,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			}
 			else if (_MouseDownNode != null)
 			{  
-				if (e.Button != MouseButtons.Left)
+				if (e.Button != System.Windows.Forms.MouseButtons.Left)
 					b = _MouseDownNode;
 				else 
 				{
@@ -1521,8 +1544,8 @@ namespace Majorsilence.Reporting.RdlDesign
 							}
 							else	// trying to drag into invalid area; disallow
 							{
-								Cursor.Position = this.PointToScreen(_MousePosition);
-								newMousePosition = this.PointToClient(Cursor.Position);
+								Majorsilence.Forms.Cursor.Position = this.PointToScreen(_MousePosition);
+								newMousePosition = this.PointToClient(Majorsilence.Forms.Cursor.Position);
 							}
 							break;
 						case "TableRow":
@@ -1539,8 +1562,8 @@ namespace Majorsilence.Reporting.RdlDesign
 							}
 							else	// trying to drag into invalid area; disallow
 							{
-								Cursor.Position = this.PointToScreen(_MousePosition);
-								newMousePosition = this.PointToClient(Cursor.Position);
+								Majorsilence.Forms.Cursor.Position = this.PointToScreen(_MousePosition);
+								newMousePosition = this.PointToClient(Majorsilence.Forms.Cursor.Position);
 							}
 							break;
 						case "Height":
@@ -1555,8 +1578,8 @@ namespace Majorsilence.Reporting.RdlDesign
 							}
 							else	// trying to drag into invalid area; disallow
 							{
-								Cursor.Position = this.PointToScreen(_MousePosition);
-								newMousePosition = this.PointToClient(Cursor.Position);
+								Majorsilence.Forms.Cursor.Position = this.PointToScreen(_MousePosition);
+								newMousePosition = this.PointToClient(Majorsilence.Forms.Cursor.Position);
 							}
                             // Force scroll when off end of page
                             //if (e.Y > _DrawPanel.Height)
@@ -1591,8 +1614,8 @@ namespace Majorsilence.Reporting.RdlDesign
 							}
 							else	// trying to drag into invalid area; disallow
 							{
-								Cursor.Position = this.PointToScreen(_MousePosition);
-								newMousePosition = this.PointToClient(Cursor.Position);
+								Majorsilence.Forms.Cursor.Position = this.PointToScreen(_MousePosition);
+								newMousePosition = this.PointToClient(Majorsilence.Forms.Cursor.Position);
 							}
 
 							break;
@@ -1619,7 +1642,7 @@ namespace Majorsilence.Reporting.RdlDesign
 
             bool baseOnly = false; //Josh: Added so base form can be force selected for inserting/selecting
             //Hold shift to select the base form instead of the control the mouse is over.
-            if ((Control.ModifierKeys & Keys.Shift) == Keys.Shift)
+            if ((Control.ModifierKeys & Majorsilence.Forms.Keys.Shift) == Majorsilence.Forms.Keys.Shift)
             {
                 baseOnly = true;
             } 
@@ -1632,7 +1655,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			if (DrawPanelMouseDownInsert(hl, sender, e))		// Handle ReportItem insertion
 				return;
 
-			if (e.Button == MouseButtons.Left)
+			if (e.Button == System.Windows.Forms.MouseButtons.Left)
 				_Undo.StartUndoGroup(Strings.DesignCtl_Undo_Move_Size);
 
 			if (DrawPanelMouseDownRubberBand(sender, e))	// Handle rubber banding
@@ -1650,7 +1673,7 @@ namespace Majorsilence.Reporting.RdlDesign
 				SelectionChanged(this, new EventArgs());
                 HeightChanged(this, new HeightEventArgs(_MouseDownNode, _MouseDownNode.InnerText)); // Set the height
             }
-			else if ((Control.ModifierKeys & Keys.Control) == Keys.Control)
+			else if ((Control.ModifierKeys & Majorsilence.Forms.Keys.Control) == Majorsilence.Forms.Keys.Control)
 			{
 				_DrawPanel.AddRemoveSelection(_MouseDownNode);
 				SelectionChanged(this, new EventArgs());
@@ -1700,7 +1723,7 @@ namespace Majorsilence.Reporting.RdlDesign
 				return false;
 
 			// We have a rubber band operation
-			if (e.Button != MouseButtons.Left)
+			if (e.Button != System.Windows.Forms.MouseButtons.Left)
 			{
 				if (bDeselect)
 				{
@@ -1710,7 +1733,7 @@ namespace Majorsilence.Reporting.RdlDesign
 				return true;		// well no rubber band but it's been handled
 			}
 
-			if ((Control.ModifierKeys & Keys.Control) != Keys.Control)	// we allow addition to selection
+			if ((Control.ModifierKeys & Majorsilence.Forms.Keys.Control) != Majorsilence.Forms.Keys.Control)	// we allow addition to selection
 			{
 				if (bDeselect)
 				{
@@ -1761,7 +1784,7 @@ namespace Majorsilence.Reporting.RdlDesign
 						hl.HitContainer == null || (!(hl.HitContainer.Name == "Table" || hl.HitContainer.Name=="fyi:Grid")))
 				   return false;
 				
-				if (MessageBox.Show(Strings.DesignCtl_ShowB_WantReplaceCell, Strings.DesignCtl_Show_Insert, MessageBoxButtons.YesNo) != DialogResult.Yes)
+				if (Majorsilence.Forms.MessageBox.Show(Strings.DesignCtl_ShowB_WantReplaceCell, Strings.DesignCtl_Show_Insert, Majorsilence.Forms.MessageBoxButtons.YesNo) != Majorsilence.Forms.DialogResult.Yes)
 					return false;
 			}
 			switch (_CurrentInsert)
@@ -1810,19 +1833,12 @@ namespace Majorsilence.Reporting.RdlDesign
 			menuProperties_Click();		// treat double click like a property menu click
 		}
 
+		// ControlPaint.DrawReversibleFrame doesn't exist in System.Windows.Forms -- classic GDI+
+		// XOR-mode direct-to-screen drawing with no equivalent in a SkiaSharp/compositing-based
+		// renderer. Same documented gap and fix as RdlViewer.Forms/PageDrawing.cs's RubberBand
+		// (D2): the selection logic is unaffected, only the live-drag visual feedback is gone.
 		private void DrawPanelRubberBand(Point p1, Point p2)
 		{
-			// Convert the points to screen coordinates
-			p1 = PointToScreen(p1);
-			p2 = PointToScreen(p2);
-			
-			// Get a rectangle from the two points
-			Rectangle rc = DrawPanelRectFromPoints(p1, p2);
-
-			// Draw reversibleFrame
-			ControlPaint.DrawReversibleFrame(rc, Color.Red,	FrameStyle.Dashed);
-
-			return;
 		}
 
 		private Rectangle DrawPanelRectFromPoints(Point p1, Point p2)
@@ -1855,7 +1871,7 @@ namespace Majorsilence.Reporting.RdlDesign
 
 		private void DrawPanelSetCursor(XmlNode node, HitLocationEnum hle)
 		{
-			Cursor c;
+			Majorsilence.Forms.Cursor c;
 			if (node == null)
 				c = Cursors.Arrow;
 			else if (node.Name == "Height")
@@ -1955,39 +1971,39 @@ namespace Majorsilence.Reporting.RdlDesign
 			int hScroll=_hScroll.Value;
 
 			// Force scroll up and down
-			if (e.KeyCode == Keys.Down)  
+			if (e.KeyCode == System.Windows.Forms.Keys.Down)  
 			{
 				incY=1;
 			}
-			else if (e.KeyCode == Keys.Up)
+			else if (e.KeyCode == System.Windows.Forms.Keys.Up)
 			{
 				incY=-1;
 			}
-			else if (e.KeyCode == Keys.Left)
+			else if (e.KeyCode == System.Windows.Forms.Keys.Left)
 			{
 				incX=-1;
 			}
-			else if (e.KeyCode == Keys.Right)
+			else if (e.KeyCode == System.Windows.Forms.Keys.Right)
 			{
 				incX=1;
 			}
-			else if (e.KeyCode == Keys.PageDown)
+			else if (e.KeyCode == System.Windows.Forms.Keys.PageDown)
 			{
 				vScroll = Math.Min(_vScroll.Value + _vScroll.LargeChange, _vScroll.Maximum);
 			}
-			else if (e.KeyCode == Keys.PageUp)
+			else if (e.KeyCode == System.Windows.Forms.Keys.PageUp)
 			{
 				vScroll = Math.Max(_vScroll.Value - _vScroll.LargeChange, 0);
 			}
-			else if (e.KeyCode == Keys.Enter)
+			else if (e.KeyCode == System.Windows.Forms.Keys.Enter)
 			{
 				e.Handled = true;
 				menuProperties_Click();
 				return;
 			}
-			else if (e.KeyCode == Keys.Tab)
+			else if (e.KeyCode == System.Windows.Forms.Keys.Tab)
 			{
-				if (_DrawPanel.SelectNext((Control.ModifierKeys & Keys.Shift) == Keys.Shift))
+				if (_DrawPanel.SelectNext((Control.ModifierKeys & Majorsilence.Forms.Keys.Shift) == Majorsilence.Forms.Keys.Shift))
 				{
 					RectangleF r = _DrawPanel.GetRectangle(_DrawPanel.SelectedList[0]);
 					Rectangle nr = new Rectangle(PixelsX(r.X), PixelsY(r.Y), PixelsX(r.Width), PixelsY(r.Height));
@@ -2002,7 +2018,7 @@ namespace Majorsilence.Reporting.RdlDesign
 				}
 				e.Handled = true;
 			}
-			else if (e.KeyCode == Keys.Delete)
+			else if (e.KeyCode == System.Windows.Forms.Keys.Delete)
 			{
 				this.Delete();
 				e.Handled = true;
@@ -2026,7 +2042,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			if (incX != 0 || incY != 0)
 			{
 				HitLocationEnum hle = HitLocationEnum.Move;
-				if ((Control.ModifierKeys & Keys.Shift) == Keys.Shift)	// if shift key on resize
+				if ((Control.ModifierKeys & Majorsilence.Forms.Keys.Shift) == Majorsilence.Forms.Keys.Shift)	// if shift key on resize
 				{
 					hle = incX != 0? HitLocationEnum.RightMiddle: HitLocationEnum.BottomMiddle;
 				}
@@ -2081,8 +2097,8 @@ namespace Majorsilence.Reporting.RdlDesign
                 }
                 if (bTorM)
                 {   // all selected items are in the same table or matrix
-                    if (MessageBox.Show(string.Format(Strings.DesignCtl_ShowB_WantSelect, tn.Name),
-                        Strings.DesignCtl_ShowB_Copy, MessageBoxButtons.YesNo) == DialogResult.Yes)
+                    if (Majorsilence.Forms.MessageBox.Show(string.Format(Strings.DesignCtl_ShowB_WantSelect, tn.Name),
+                        Strings.DesignCtl_ShowB_Copy, Majorsilence.Forms.MessageBoxButtons.YesNo) == Majorsilence.Forms.DialogResult.Yes)
                     {
                         StringBuilder tb = new StringBuilder();
                         // Build XML representing the selected objects
@@ -2122,7 +2138,7 @@ namespace Majorsilence.Reporting.RdlDesign
 				if (hl.HitContainer != null && (hl.HitContainer.Name == "Table" || hl.HitContainer.Name == "fyi:Grid"))
 				{
 				//	When table we need to replace the tablecell contents; ask first
-					if (MessageBox.Show(Strings.DesignCtl_ShowB_WantReplaceCell, Strings.DesignCtl_Show_Paste, MessageBoxButtons.YesNo) != DialogResult.Yes)
+					if (Majorsilence.Forms.MessageBox.Show(Strings.DesignCtl_ShowB_WantReplaceCell, Strings.DesignCtl_Show_Paste, Majorsilence.Forms.MessageBoxButtons.YesNo) != Majorsilence.Forms.DialogResult.Yes)
 						return;
 
 					XmlNode repItems = lNode.ParentNode;
@@ -2142,7 +2158,7 @@ namespace Majorsilence.Reporting.RdlDesign
 
 		private void DoPaste(XmlNode lNode, PointF p)
 		{
-			IDataObject iData = Clipboard.GetDataObject();
+			Majorsilence.Forms.IDataObject iData = Majorsilence.Forms.Clipboard.GetDataObject();
 			if (iData == null)
 				return;
 			if (!(iData.GetDataPresent(DataFormats.Text) ||
@@ -2175,7 +2191,7 @@ namespace Majorsilence.Reporting.RdlDesign
 				}
 				catch (Exception e)
 				{
-					MessageBox.Show(e.Message, Strings.DesignCtl_Show_Paste);
+					Majorsilence.Forms.MessageBox.Show(e.Message, Strings.DesignCtl_Show_Paste);
 				}
 			}
 			else
@@ -2207,7 +2223,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			// Charts aren't allowed in PageHeader or PageFooter
 			if (_DrawPanel.InPageHeaderOrFooter(hl.HitContainer))
 			{
-				MessageBox.Show(Strings.DesignCtl_Show_ChartsInsert, Strings.DesignCtl_Show_Insert);
+				Majorsilence.Forms.MessageBox.Show(Strings.DesignCtl_Show_ChartsInsert, Strings.DesignCtl_Show_Insert);
 				return;
 			}
 
@@ -2215,8 +2231,8 @@ namespace Majorsilence.Reporting.RdlDesign
 			DialogNewChart dnc = new DialogNewChart(this._DrawPanel, hl.HitContainer);
             try
             {
-                DialogResult dr = dnc.ShowDialog(this);
-                if (dr != DialogResult.OK)
+                Majorsilence.Forms.DialogResult dr = dnc.ShowDialog(this);
+                if (dr != Majorsilence.Forms.DialogResult.OK)
                 {
                     _Undo.EndUndoGroup(false);
                     return;
@@ -2251,7 +2267,7 @@ namespace Majorsilence.Reporting.RdlDesign
             //_Undo.StartUndoGroup("Dialog");
             //PropertyDialog pd = new PropertyDialog(_DrawPanel, ar, PropertyTypeEnum.ReportItems);
             //dr = pd.ShowDialog(this);
-            //if (pd.Changed || dr == DialogResult.OK)
+            //if (pd.Changed || dr == Majorsilence.Forms.DialogResult.OK)
             //{
             //    _Undo.EndUndoGroup(true);
             //    ReportChanged(this, new EventArgs());
@@ -2281,7 +2297,7 @@ namespace Majorsilence.Reporting.RdlDesign
 
 				if (!(criXml.StartsWith("<CustomReportItem>") && criXml.EndsWith("</CustomReportItem>")))
 				{
-					MessageBox.Show(
+					Majorsilence.Forms.MessageBox.Show(
 						string.Format(Strings.DesignCtl_Show_CustomReportItem, customName, criXml), Strings.DesignCtl_Show_Insert);
 					return;
 				}
@@ -2292,7 +2308,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			}
 			catch (Exception ex)
 			{
-				MessageBox.Show(string.Format(Strings.DesignCtl_Show_CustomReportItemException, ex.Message), Strings.DesignCtl_Show_Insert);
+				Majorsilence.Forms.MessageBox.Show(string.Format(Strings.DesignCtl_Show_CustomReportItemException, ex.Message), Strings.DesignCtl_Show_Insert);
 				return;
 			}
 			finally
@@ -2539,7 +2555,7 @@ namespace Majorsilence.Reporting.RdlDesign
 				return;
 			if (_DrawPanel.InPageHeaderOrFooter(hl.HitContainer))
 			{
-				MessageBox.Show(Strings.DesignCtl_Show_ListsInBody, Strings.DesignCtl_Show_Insert);
+				Majorsilence.Forms.MessageBox.Show(Strings.DesignCtl_Show_ListsInBody, Strings.DesignCtl_Show_Insert);
 				return;
 			}
 			menuInsertReportItem(hl, ri);
@@ -2561,7 +2577,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			// Matrixs aren't allowed in PageHeader or PageFooter
 			if (_DrawPanel.InPageHeaderOrFooter(hl.HitContainer))
 			{
-				MessageBox.Show(Strings.DesignCtl_Show_MatrixsInBody, Strings.DesignCtl_Show_Insert);
+				Majorsilence.Forms.MessageBox.Show(Strings.DesignCtl_Show_MatrixsInBody, Strings.DesignCtl_Show_Insert);
 				return;
 			}
 
@@ -2569,8 +2585,8 @@ namespace Majorsilence.Reporting.RdlDesign
 			DialogNewMatrix dnm = new DialogNewMatrix(this._DrawPanel, hl.HitContainer);
             try
             {
-                DialogResult dr = dnm.ShowDialog(this);
-                if (dr != DialogResult.OK)
+                Majorsilence.Forms.DialogResult dr = dnm.ShowDialog(this);
+                if (dr != Majorsilence.Forms.DialogResult.OK)
                 {
                     _Undo.EndUndoGroup(false);
                     return;
@@ -2602,8 +2618,8 @@ namespace Majorsilence.Reporting.RdlDesign
             //_Undo.StartUndoGroup("Dialog");
             //PropertyDialog pd = new PropertyDialog(_DrawPanel, ar, PropertyTypeEnum.ReportItems);
             //dr = pd.ShowDialog(this);
-            //_Undo.EndUndoGroup(pd.Changed || dr == DialogResult.OK);
-            //if (pd.Changed || dr == DialogResult.OK)
+            //_Undo.EndUndoGroup(pd.Changed || dr == Majorsilence.Forms.DialogResult.OK);
+            //if (pd.Changed || dr == Majorsilence.Forms.DialogResult.OK)
             //{
             //    ReportChanged(this, new EventArgs());
             //    _DrawPanel.Invalidate();   
@@ -2641,7 +2657,7 @@ namespace Majorsilence.Reporting.RdlDesign
             }
             catch (Exception ex)
             {
-                MessageBox.Show(Strings.DesignCtl_ShowC_IllegalInsertSyntax + Environment.NewLine + 
+                Majorsilence.Forms.MessageBox.Show(Strings.DesignCtl_ShowC_IllegalInsertSyntax + Environment.NewLine + 
                     reportItem + Environment.NewLine + ex.Message);
                 return;
             }
@@ -2667,7 +2683,7 @@ namespace Majorsilence.Reporting.RdlDesign
 				return;
 			if (_DrawPanel.InPageHeaderOrFooter(hl.HitContainer))
 			{
-				MessageBox.Show(Strings.DesignCtl_Show_SubreportsInBody, Strings.DesignCtl_Show_Insert);
+				Majorsilence.Forms.MessageBox.Show(Strings.DesignCtl_Show_SubreportsInBody, Strings.DesignCtl_Show_Insert);
 				return;
 			}
 
@@ -2685,7 +2701,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			// Tables aren't allowed in PageHeader or PageFooter
 			if (_DrawPanel.InPageHeaderOrFooter(hl.HitContainer))
 			{
-				MessageBox.Show(Strings.DesignCtl_Show_TablesInBody, Strings.DesignCtl_Show_Insert);
+				Majorsilence.Forms.MessageBox.Show(Strings.DesignCtl_Show_TablesInBody, Strings.DesignCtl_Show_Insert);
 				return;
 			}
 
@@ -2693,8 +2709,8 @@ namespace Majorsilence.Reporting.RdlDesign
 			DialogNewTable dnt = new DialogNewTable(this._DrawPanel, hl.HitContainer);
             try
             {
-                DialogResult dr = dnt.ShowDialog(this);
-                if (dr != DialogResult.OK)
+                Majorsilence.Forms.DialogResult dr = dnt.ShowDialog(this);
+                if (dr != Majorsilence.Forms.DialogResult.OK)
                 {
                     _Undo.EndUndoGroup(false);
                     return;
@@ -2726,8 +2742,8 @@ namespace Majorsilence.Reporting.RdlDesign
             //_Undo.StartUndoGroup("Dialog");
             //PropertyDialog pd = new PropertyDialog(_DrawPanel, ar, PropertyTypeEnum.ReportItems);
             //dr = pd.ShowDialog(this);
-            //_Undo.EndUndoGroup(pd.Changed || dr == DialogResult.OK);
-            //if (pd.Changed || dr == DialogResult.OK)
+            //_Undo.EndUndoGroup(pd.Changed || dr == Majorsilence.Forms.DialogResult.OK);
+            //if (pd.Changed || dr == Majorsilence.Forms.DialogResult.OK)
             //{
             //    ReportChanged(this, new EventArgs());
             //    _DrawPanel.Invalidate();   
@@ -2843,9 +2859,9 @@ namespace Majorsilence.Reporting.RdlDesign
 			PropertyDialog pd = new PropertyDialog(_DrawPanel, ar, PropertyTypeEnum.Grouping);
             try
             {
-                DialogResult dr = pd.ShowDialog(this);
-                _Undo.EndUndoGroup(pd.Changed || dr == DialogResult.OK);
-                if (pd.Changed || dr == DialogResult.OK)
+                Majorsilence.Forms.DialogResult dr = pd.ShowDialog(this);
+                _Undo.EndUndoGroup(pd.Changed || dr == Majorsilence.Forms.DialogResult.OK);
+                if (pd.Changed || dr == Majorsilence.Forms.DialogResult.OK)
                 {
                     ReportChanged(this, new EventArgs());
                     _DrawPanel.Invalidate();
@@ -2876,8 +2892,8 @@ namespace Majorsilence.Reporting.RdlDesign
 			PropertyDialog pd = new PropertyDialog(_DrawPanel, ar, PropertyTypeEnum.Grouping);
             try
             {
-                DialogResult dr = pd.ShowDialog(this);
-                if (pd.Changed || dr == DialogResult.OK)
+                Majorsilence.Forms.DialogResult dr = pd.ShowDialog(this);
+                if (pd.Changed || dr == Majorsilence.Forms.DialogResult.OK)
                 {
                     _Undo.EndUndoGroup(true);
                     ReportChanged(this, new EventArgs());
@@ -2912,8 +2928,8 @@ namespace Majorsilence.Reporting.RdlDesign
 			PropertyDialog pd = new PropertyDialog(_DrawPanel, ar, PropertyTypeEnum.Grouping);
             try
             {
-                DialogResult dr = pd.ShowDialog(this);
-                if (pd.Changed || dr == DialogResult.OK)
+                Majorsilence.Forms.DialogResult dr = pd.ShowDialog(this);
+                if (pd.Changed || dr == Majorsilence.Forms.DialogResult.OK)
                 {
                     _Undo.EndUndoGroup(true);
                     ReportChanged(this, new EventArgs());
@@ -2981,9 +2997,9 @@ namespace Majorsilence.Reporting.RdlDesign
 			PropertyDialog pd = new PropertyDialog(_DrawPanel, ar, PropertyTypeEnum.ReportItems);
             try
             {
-                DialogResult dr = pd.ShowDialog(this);
-                _Undo.EndUndoGroup(pd.Changed || dr == DialogResult.OK);
-                if (pd.Changed || dr == DialogResult.OK)
+                Majorsilence.Forms.DialogResult dr = pd.ShowDialog(this);
+                _Undo.EndUndoGroup(pd.Changed || dr == Majorsilence.Forms.DialogResult.OK);
+                if (pd.Changed || dr == Majorsilence.Forms.DialogResult.OK)
                 {
                     ReportChanged(this, new EventArgs());
                     _DrawPanel.Invalidate();
@@ -3056,9 +3072,9 @@ namespace Majorsilence.Reporting.RdlDesign
 			PropertyDialog pd = new PropertyDialog(_DrawPanel, ar, PropertyTypeEnum.Grouping);
             try
             {
-                DialogResult dr = pd.ShowDialog(this);
-                _Undo.EndUndoGroup(pd.Changed || dr == DialogResult.OK);
-                if (pd.Changed || dr == DialogResult.OK)
+                Majorsilence.Forms.DialogResult dr = pd.ShowDialog(this);
+                _Undo.EndUndoGroup(pd.Changed || dr == Majorsilence.Forms.DialogResult.OK);
+                if (pd.Changed || dr == Majorsilence.Forms.DialogResult.OK)
                 {
                     ReportChanged(this, new EventArgs());
                     _DrawPanel.Invalidate();
@@ -3085,8 +3101,8 @@ namespace Majorsilence.Reporting.RdlDesign
 			PropertyDialog pd = new PropertyDialog(_DrawPanel, ar, PropertyTypeEnum.Grouping);
             try
             {
-                DialogResult dr = pd.ShowDialog(this);
-                if (pd.Changed || dr == DialogResult.OK)
+                Majorsilence.Forms.DialogResult dr = pd.ShowDialog(this);
+                if (pd.Changed || dr == Majorsilence.Forms.DialogResult.OK)
                 {
                     _Undo.EndUndoGroup(true);
                     ReportChanged(this, new EventArgs());
@@ -3119,8 +3135,8 @@ namespace Majorsilence.Reporting.RdlDesign
 			PropertyDialog pd = new PropertyDialog(_DrawPanel, ar, PropertyTypeEnum.Grouping);
             try
             {
-                DialogResult dr = pd.ShowDialog(this);
-                if (pd.Changed || dr == DialogResult.OK)
+                Majorsilence.Forms.DialogResult dr = pd.ShowDialog(this);
+                if (pd.Changed || dr == Majorsilence.Forms.DialogResult.OK)
                 {
                     _Undo.EndUndoGroup(true);
                     ReportChanged(this, new EventArgs());
@@ -3235,9 +3251,9 @@ namespace Majorsilence.Reporting.RdlDesign
 			PropertyDialog pd = new PropertyDialog(_DrawPanel, ar, PropertyTypeEnum.Grouping);
             try
             {
-                DialogResult dr = pd.ShowDialog(this);
-                _Undo.EndUndoGroup(pd.Changed || dr == DialogResult.OK);
-                if (pd.Changed || dr == DialogResult.OK)
+                Majorsilence.Forms.DialogResult dr = pd.ShowDialog(this);
+                _Undo.EndUndoGroup(pd.Changed || dr == Majorsilence.Forms.DialogResult.OK);
+                if (pd.Changed || dr == Majorsilence.Forms.DialogResult.OK)
                 {
                     ReportChanged(this, new EventArgs());
                     _DrawPanel.Invalidate();
@@ -3299,8 +3315,8 @@ namespace Majorsilence.Reporting.RdlDesign
 			PropertyDialog pd = new PropertyDialog(_DrawPanel, ar, PropertyTypeEnum.Grouping);
             try
             {
-                DialogResult dr = pd.ShowDialog(this);
-                if (pd.Changed || dr == DialogResult.OK)
+                Majorsilence.Forms.DialogResult dr = pd.ShowDialog(this);
+                if (pd.Changed || dr == Majorsilence.Forms.DialogResult.OK)
                 {
                     _Undo.EndUndoGroup(true);
                     ReportChanged(this, new EventArgs());
@@ -3368,9 +3384,9 @@ namespace Majorsilence.Reporting.RdlDesign
 			PropertyDialog pd = new PropertyDialog(_DrawPanel, ar, PropertyTypeEnum.ReportItems, tc, tr);
             try
             {
-                DialogResult dr = pd.ShowDialog(this);
-                _Undo.EndUndoGroup(pd.Changed || dr == DialogResult.OK);
-                if (pd.Changed || dr == DialogResult.OK)
+                Majorsilence.Forms.DialogResult dr = pd.ShowDialog(this);
+                _Undo.EndUndoGroup(pd.Changed || dr == Majorsilence.Forms.DialogResult.OK);
+                if (pd.Changed || dr == Majorsilence.Forms.DialogResult.OK)
                 {
                     ReportChanged(this, new EventArgs());
                     _DrawPanel.Invalidate();
@@ -3388,9 +3404,9 @@ namespace Majorsilence.Reporting.RdlDesign
 			PropertyDialog pd = new PropertyDialog(_DrawPanel, _DrawPanel.SelectedList, type);
             try
             {
-                DialogResult dr = pd.ShowDialog(this);
-                this.EndUndoGroup(pd.Changed || dr == DialogResult.OK);
-                if (pd.Changed || dr == DialogResult.OK)
+                Majorsilence.Forms.DialogResult dr = pd.ShowDialog(this);
+                this.EndUndoGroup(pd.Changed || dr == Majorsilence.Forms.DialogResult.OK);
+                if (pd.Changed || dr == Majorsilence.Forms.DialogResult.OK)
                 {
                     ReportChanged(this, new EventArgs());
                     _DrawPanel.Invalidate();
@@ -3417,7 +3433,7 @@ namespace Majorsilence.Reporting.RdlDesign
 
 			var al = new List<XmlNode>();
 
-			var iData = Clipboard.GetDataObject();
+			var iData = Majorsilence.Forms.Clipboard.GetDataObject();
 
 			if (iData == null)
 				bEnable = false;

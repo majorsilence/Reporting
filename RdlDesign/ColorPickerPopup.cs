@@ -1,6 +1,7 @@
 
 using System;
 using System.Drawing;
+using System.Drawing;
 using System.Collections;
 using System.ComponentModel;
 using System.Windows.Forms;
@@ -28,7 +29,7 @@ namespace Majorsilence.Reporting.RdlDesign
 
         protected override void OnPaint(PaintEventArgs e)
         {
-            Graphics g = e.Graphics;
+            Majorsilence.Forms.Drawing.Graphics g = e.Graphics;
 
             //base.OnPaint(e);
             int row = 0;

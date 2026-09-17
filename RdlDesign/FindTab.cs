@@ -1,6 +1,5 @@
 
 using System;
-using System.Drawing;
 using System.Collections;
 using System.ComponentModel;
 using System.Windows.Forms;
@@ -88,7 +87,7 @@ namespace Majorsilence.Reporting.RdlDesign
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show(this, ex.Message, Strings.FindTab_ShowE_InvalidLN);
+                    Majorsilence.Forms.MessageBox.Show(this, ex.Message, Strings.FindTab_ShowE_InvalidLN);
                 }
 
                 txtLine.Focus();
@@ -134,7 +133,7 @@ namespace Majorsilence.Reporting.RdlDesign
             tcFRG_SelectedIndexChanged(this.tcFRG, new EventArgs());
         }
 
-		private void FindTab_FormClosed(object sender, FormClosedEventArgs e)
+		private void FindTab_FormClosed(object sender, Majorsilence.Forms.FormClosedEventArgs e)
 		{
 			rdlEdit.ClearSearchHighlight();
 		}

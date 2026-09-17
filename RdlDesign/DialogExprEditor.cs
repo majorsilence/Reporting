@@ -1,6 +1,6 @@
 
 using Majorsilence.Reporting.Rdl;
-using ScintillaNET;
+using Majorsilence.Reporting.RdlDesign.Syntax;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -11,7 +11,6 @@ using System.Text;
 using System.Windows.Forms;
 using System.Xml;
 using System.Linq;
-using Majorsilence.Reporting.RdlDesign.Syntax;
 
 namespace Majorsilence.Reporting.RdlDesign
 {
@@ -134,11 +133,11 @@ namespace Majorsilence.Reporting.RdlDesign
         // Josh: 6:22:10 Added as a uniform method of addind nodes to the TreeView.
         void InitTreeNodes(string node, IEnumerable<string> list)
         {
-            TreeNode ndRoot = new TreeNode(node);
+            Majorsilence.Forms.TreeNode ndRoot = new Majorsilence.Forms.TreeNode(node);
             tvOp.Nodes.Add(ndRoot);
             foreach (string item in list)
             {
-                TreeNode aRoot = new TreeNode(item);
+                Majorsilence.Forms.TreeNode aRoot = new Majorsilence.Forms.TreeNode(item);
                 ndRoot.Nodes.Add(aRoot);
             }
         }
@@ -284,10 +283,10 @@ namespace Majorsilence.Reporting.RdlDesign
 
             ar.Sort();
 
-            TreeNode ndRoot = new TreeNode("Functions");
+            Majorsilence.Forms.TreeNode ndRoot = new Majorsilence.Forms.TreeNode("Functions");
             tvOp.Nodes.Add(ndRoot);
 
-            foreach (TreeNode node in GroupMethods(RemoveDuplicates(ar)))
+            foreach (Majorsilence.Forms.TreeNode node in GroupMethods(RemoveDuplicates(ar)))
             {
                 ndRoot.Nodes.Add(node);
             }
@@ -309,9 +308,9 @@ namespace Majorsilence.Reporting.RdlDesign
             return newAr;
         }
 
-        List<TreeNode> GroupMethods(List<string> ar)
+        List<Majorsilence.Forms.TreeNode> GroupMethods(List<string> ar)
         {
-            List<TreeNode> nodeList = new List<TreeNode>();
+            List<Majorsilence.Forms.TreeNode> nodeList = new List<Majorsilence.Forms.TreeNode>();
 
             string group = " ";
             foreach (string str in ar)
@@ -323,7 +322,7 @@ namespace Majorsilence.Reporting.RdlDesign
                         if (str.IndexOf("(") > str.IndexOf("."))
                         {
                             group = str.Split('.')[0];
-                            TreeNode aRoot = new TreeNode(group);
+                            Majorsilence.Forms.TreeNode aRoot = new Majorsilence.Forms.TreeNode(group);
                             List<string> groupList = ar.FindAll(
                             delegate(string methodName)
                             {
@@ -335,7 +334,7 @@ namespace Majorsilence.Reporting.RdlDesign
                             {
                                 foreach (string method in groupList)
                                 {
-                                    aRoot.Nodes.Add(new TreeNode(
+                                    aRoot.Nodes.Add(new Majorsilence.Forms.TreeNode(
                                     method.Replace(group, string.Empty)
                                     .Replace(".", string.Empty)));
                                 }
@@ -344,19 +343,19 @@ namespace Majorsilence.Reporting.RdlDesign
                         }
                         else
                         {
-                            nodeList.Add(new TreeNode(str));
+                            nodeList.Add(new Majorsilence.Forms.TreeNode(str));
                         }
                     }
                     else
                     {
-                        nodeList.Add(new TreeNode(str));
+                        nodeList.Add(new Majorsilence.Forms.TreeNode(str));
                     }
                 }
             }
             return nodeList;
         }
 
-        void InitFunctions(TreeNode ndRoot)
+        void InitFunctions(Majorsilence.Forms.TreeNode ndRoot)
         {
             List<string> ar = new List<string>();
 
@@ -391,7 +390,7 @@ namespace Majorsilence.Reporting.RdlDesign
                 if (item != previous)	// don't add duplicates
                 {
                     // Add the node to the tree
-                    TreeNode aRoot = new TreeNode(item);
+                    Majorsilence.Forms.TreeNode aRoot = new Majorsilence.Forms.TreeNode(item);
                     ndRoot.Nodes.Add(aRoot);
                 }
                 previous = item;
@@ -457,7 +456,7 @@ namespace Majorsilence.Reporting.RdlDesign
             tvOp.SelectedNode.Nodes.Count > 0)
                 return; // this is the top level nodes (Fields, Parameters, ...)
 
-            TreeNode node = tvOp.SelectedNode;
+            Majorsilence.Forms.TreeNode node = (Majorsilence.Forms.TreeNode)tvOp.SelectedNode;
             string t = string.Empty;
             // Josh: 6:21:10 Changed to add parent node name for grouped nodes (eg: Convert.ToByte(value))
             // and not to add it for the root functions (the non grouped).

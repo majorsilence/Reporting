@@ -29,7 +29,7 @@ namespace Majorsilence.Reporting.RdlDesign
         /// </summary>
         private void InitializeComponent()
         {
-			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ReportParameterCtl));
+			System.Windows.Forms.ComponentResourceManager resources = new System.Windows.Forms.ComponentResourceManager(typeof(ReportParameterCtl));
             this.DoubleBuffered = true;
 			this.lbParameters = new System.Windows.Forms.ListBox();
 			this.bAdd = new System.Windows.Forms.Button();
@@ -73,31 +73,31 @@ namespace Majorsilence.Reporting.RdlDesign
 			// 
 			resources.ApplyResources(this.lbParameters, "lbParameters");
 			this.lbParameters.Name = "lbParameters";
-			this.lbParameters.SelectedIndexChanged += new System.EventHandler(this.lbParameters_SelectedIndexChanged);
+			this.lbParameters.SelectedIndexChanged += this.lbParameters_SelectedIndexChanged;
 			// 
 			// bAdd
 			// 
 			resources.ApplyResources(this.bAdd, "bAdd");
 			this.bAdd.Name = "bAdd";
-			this.bAdd.Click += new System.EventHandler(this.bAdd_Click);
+			this.bAdd.Click += this.bAdd_Click;
 			// 
 			// bRemove
 			// 
 			resources.ApplyResources(this.bRemove, "bRemove");
 			this.bRemove.Name = "bRemove";
-			this.bRemove.Click += new System.EventHandler(this.bRemove_Click);
+			this.bRemove.Click += this.bRemove_Click;
 			// 
 			// bParmDown
 			// 
 			resources.ApplyResources(this.bParmDown, "bParmDown");
 			this.bParmDown.Name = "bParmDown";
-			this.bParmDown.Click += new System.EventHandler(this.bParmDown_Click);
+			this.bParmDown.Click += this.bParmDown_Click;
 			// 
 			// bParmUp
 			// 
 			resources.ApplyResources(this.bParmUp, "bParmUp");
 			this.bParmUp.Name = "bParmUp";
-			this.bParmUp.Click += new System.EventHandler(this.bParmUp_Click);
+			this.bParmUp.Click += this.bParmUp_Click;
 			// 
 			// gbPropertyEdit
 			// 
@@ -120,7 +120,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			// 
 			resources.ApplyResources(this.ckbParmMultiValue, "ckbParmMultiValue");
 			this.ckbParmMultiValue.Name = "ckbParmMultiValue";
-			this.ckbParmMultiValue.CheckedChanged += new System.EventHandler(this.ckbParmMultiValue_CheckedChanged);
+			this.ckbParmMultiValue.CheckedChanged += this.ckbParmMultiValue_CheckedChanged;
 			// 
 			// gbValidValues
 			// 
@@ -140,22 +140,22 @@ namespace Majorsilence.Reporting.RdlDesign
 			// cbValidDisplayField
 			// 
 			resources.ApplyResources(this.cbValidDisplayField, "cbValidDisplayField");
-			this.cbValidDisplayField.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+			this.cbValidDisplayField.DropDownStyle = Majorsilence.Forms.ComboBoxStyle.DropDownList;
 			this.cbValidDisplayField.Name = "cbValidDisplayField";
-			this.cbValidDisplayField.SelectedIndexChanged += new System.EventHandler(this.cbValidDisplayField_SelectedIndexChanged);
+			this.cbValidDisplayField.SelectedIndexChanged += this.cbValidDisplayField_SelectedIndexChanged;
 			// 
 			// cbValidFields
 			// 
 			resources.ApplyResources(this.cbValidFields, "cbValidFields");
-			this.cbValidFields.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+			this.cbValidFields.DropDownStyle = Majorsilence.Forms.ComboBoxStyle.DropDownList;
 			this.cbValidFields.Name = "cbValidFields";
-			this.cbValidFields.SelectedIndexChanged += new System.EventHandler(this.cbValidFields_SelectedIndexChanged);
+			this.cbValidFields.SelectedIndexChanged += this.cbValidFields_SelectedIndexChanged;
 			// 
 			// bValidValues
 			// 
 			resources.ApplyResources(this.bValidValues, "bValidValues");
 			this.bValidValues.Name = "bValidValues";
-			this.bValidValues.Click += new System.EventHandler(this.bValidValues_Click);
+			this.bValidValues.Click += this.bValidValues_Click;
 			// 
 			// lDisplayField
 			// 
@@ -170,21 +170,21 @@ namespace Majorsilence.Reporting.RdlDesign
 			// cbValidDataSets
 			// 
 			resources.ApplyResources(this.cbValidDataSets, "cbValidDataSets");
-			this.cbValidDataSets.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+			this.cbValidDataSets.DropDownStyle = Majorsilence.Forms.ComboBoxStyle.DropDownList;
 			this.cbValidDataSets.Name = "cbValidDataSets";
-			this.cbValidDataSets.SelectedIndexChanged += new System.EventHandler(this.cbValidDataSets_SelectedIndexChanged);
+			this.cbValidDataSets.SelectedIndexChanged += this.cbValidDataSets_SelectedIndexChanged;
 			// 
 			// rbValues
 			// 
 			resources.ApplyResources(this.rbValues, "rbValues");
 			this.rbValues.Name = "rbValues";
-			this.rbValues.CheckedChanged += new System.EventHandler(this.rbValues_CheckedChanged);
+			this.rbValues.CheckedChanged += this.rbValues_CheckedChanged;
 			// 
 			// rbDataSet
 			// 
 			resources.ApplyResources(this.rbDataSet, "rbDataSet");
 			this.rbDataSet.Name = "rbDataSet";
-			this.rbDataSet.CheckedChanged += new System.EventHandler(this.rbDataSet_CheckedChanged);
+			this.rbDataSet.CheckedChanged += this.rbDataSet_CheckedChanged;
 			// 
 			// tbParmValidValues
 			// 
@@ -196,19 +196,19 @@ namespace Majorsilence.Reporting.RdlDesign
 			// 
 			resources.ApplyResources(this.ckbParmAllowBlank, "ckbParmAllowBlank");
 			this.ckbParmAllowBlank.Name = "ckbParmAllowBlank";
-			this.ckbParmAllowBlank.CheckedChanged += new System.EventHandler(this.ckbParmAllowBlank_CheckedChanged);
+			this.ckbParmAllowBlank.CheckedChanged += this.ckbParmAllowBlank_CheckedChanged;
 			// 
 			// ckbParmAllowNull
 			// 
 			resources.ApplyResources(this.ckbParmAllowNull, "ckbParmAllowNull");
 			this.ckbParmAllowNull.Name = "ckbParmAllowNull";
-			this.ckbParmAllowNull.CheckedChanged += new System.EventHandler(this.ckbParmAllowNull_CheckedChanged);
+			this.ckbParmAllowNull.CheckedChanged += this.ckbParmAllowNull_CheckedChanged;
 			// 
 			// tbParmPrompt
 			// 
 			resources.ApplyResources(this.tbParmPrompt, "tbParmPrompt");
 			this.tbParmPrompt.Name = "tbParmPrompt";
-			this.tbParmPrompt.TextChanged += new System.EventHandler(this.tbParmPrompt_TextChanged);
+			this.tbParmPrompt.TextChanged += this.tbParmPrompt_TextChanged;
 			// 
 			// lParmPrompt
 			// 
@@ -218,7 +218,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			// cbParmType
 			// 
 			resources.ApplyResources(this.cbParmType, "cbParmType");
-			this.cbParmType.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+			this.cbParmType.DropDownStyle = Majorsilence.Forms.ComboBoxStyle.DropDownList;
 			this.cbParmType.Items.AddRange(new object[] {
             resources.GetString("cbParmType.Items"),
             resources.GetString("cbParmType.Items1"),
@@ -226,7 +226,7 @@ namespace Majorsilence.Reporting.RdlDesign
             resources.GetString("cbParmType.Items3"),
             resources.GetString("cbParmType.Items4")});
 			this.cbParmType.Name = "cbParmType";
-			this.cbParmType.SelectedIndexChanged += new System.EventHandler(this.cbParmType_SelectedIndexChanged);
+			this.cbParmType.SelectedIndexChanged += this.cbParmType_SelectedIndexChanged;
 			// 
 			// lParmType
 			// 
@@ -237,7 +237,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			// 
 			resources.ApplyResources(this.tbParmName, "tbParmName");
 			this.tbParmName.Name = "tbParmName";
-			this.tbParmName.TextChanged += new System.EventHandler(this.tbParmName_TextChanged);
+			this.tbParmName.TextChanged += this.tbParmName_TextChanged;
 			// 
 			// lParmName
 			// 
@@ -260,9 +260,9 @@ namespace Majorsilence.Reporting.RdlDesign
 			// cbDefaultValueField
 			// 
 			resources.ApplyResources(this.cbDefaultValueField, "cbDefaultValueField");
-			this.cbDefaultValueField.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+			this.cbDefaultValueField.DropDownStyle = Majorsilence.Forms.ComboBoxStyle.DropDownList;
 			this.cbDefaultValueField.Name = "cbDefaultValueField";
-			this.cbDefaultValueField.SelectedIndexChanged += new System.EventHandler(this.cbDefaultValueField_SelectedIndexChanged);
+			this.cbDefaultValueField.SelectedIndexChanged += this.cbDefaultValueField_SelectedIndexChanged;
 			// 
 			// tbParmDefaultValue
 			// 
@@ -274,7 +274,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			// 
 			resources.ApplyResources(this.bDefaultValues, "bDefaultValues");
 			this.bDefaultValues.Name = "bDefaultValues";
-			this.bDefaultValues.Click += new System.EventHandler(this.bDefaultValues_Click);
+			this.bDefaultValues.Click += this.bDefaultValues_Click;
 			// 
 			// lDefaultValueFields
 			// 
@@ -284,21 +284,21 @@ namespace Majorsilence.Reporting.RdlDesign
 			// cbDefaultDataSets
 			// 
 			resources.ApplyResources(this.cbDefaultDataSets, "cbDefaultDataSets");
-			this.cbDefaultDataSets.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+			this.cbDefaultDataSets.DropDownStyle = Majorsilence.Forms.ComboBoxStyle.DropDownList;
 			this.cbDefaultDataSets.Name = "cbDefaultDataSets";
-			this.cbDefaultDataSets.SelectedIndexChanged += new System.EventHandler(this.cbDefaultDataSets_SelectedIndexChanged);
+			this.cbDefaultDataSets.SelectedIndexChanged += this.cbDefaultDataSets_SelectedIndexChanged;
 			// 
 			// rbDefaultValues
 			// 
 			resources.ApplyResources(this.rbDefaultValues, "rbDefaultValues");
 			this.rbDefaultValues.Name = "rbDefaultValues";
-			this.rbDefaultValues.CheckedChanged += new System.EventHandler(this.rbDefaultValues_CheckedChanged);
+			this.rbDefaultValues.CheckedChanged += this.rbDefaultValues_CheckedChanged;
 			// 
 			// rbDefaultDataSetName
 			// 
 			resources.ApplyResources(this.rbDefaultDataSetName, "rbDefaultDataSetName");
 			this.rbDefaultDataSetName.Name = "rbDefaultDataSetName";
-			this.rbDefaultDataSetName.CheckedChanged += new System.EventHandler(this.rbDefaultDataSetName_CheckedChanged);
+			this.rbDefaultDataSetName.CheckedChanged += this.rbDefaultDataSetName_CheckedChanged;
 			// 
 			// ReportParameterCtl
 			// 

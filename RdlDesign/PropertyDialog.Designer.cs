@@ -1,6 +1,5 @@
 using System;
 using System.Windows.Forms;
-using System.Drawing;
 using System.ComponentModel;
 using System.Collections;
 
@@ -20,7 +19,7 @@ private System.ComponentModel.Container components = null;
 
 		private void InitializeComponent()
 		{
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(PropertyDialog));
+            System.Windows.Forms.ComponentResourceManager resources = new System.Windows.Forms.ComponentResourceManager(typeof(PropertyDialog));
             this.panel1 = new System.Windows.Forms.Panel();
             this.bDelete = new System.Windows.Forms.Button();
             this.bApply = new System.Windows.Forms.Button();
@@ -44,25 +43,25 @@ private System.ComponentModel.Container components = null;
             // 
             resources.ApplyResources(this.bDelete, "bDelete");
             this.bDelete.Name = "bDelete";
-            this.bDelete.Click += new System.EventHandler(this.bDelete_Click);
+            this.bDelete.Click += this.bDelete_Click;
             // 
             // bApply
             // 
             resources.ApplyResources(this.bApply, "bApply");
             this.bApply.Name = "bApply";
-            this.bApply.Click += new System.EventHandler(this.bApply_Click);
+            this.bApply.Click += this.bApply_Click;
             // 
             // bOK
             // 
             resources.ApplyResources(this.bOK, "bOK");
             this.bOK.Name = "bOK";
-            this.bOK.Click += new System.EventHandler(this.bOK_Click);
+            this.bOK.Click += this.bOK_Click;
             // 
             // bCancel
             // 
             resources.ApplyResources(this.bCancel, "bCancel");
             this.bCancel.CausesValidation = false;
-            this.bCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
+            this.bCancel.DialogResult = Majorsilence.Forms.DialogResult.Cancel;
             this.bCancel.Name = "bCancel";
             // 
             // tcProps
@@ -70,8 +69,10 @@ private System.ComponentModel.Container components = null;
             resources.ApplyResources(this.tcProps, "tcProps");
             this.tcProps.Multiline = true;
             this.tcProps.Name = "tcProps";
-            this.tcProps.SelectedIndex = 0;
-            // 
+            // SelectedIndex = 0 removed: tcProps has 0 tabs at this point (property tabs are
+            // added dynamically at runtime via tcProps.Controls.Add), same gap as
+            // RdlDesigner.Designer.cs's mainTC -- see that file's comment.
+            //
             // PropertyDialog
             // 
             this.AcceptButton = this.bOK;
@@ -84,7 +85,7 @@ private System.ComponentModel.Container components = null;
             this.Name = "PropertyDialog";
             this.ShowIcon = false;
             this.ShowInTaskbar = false;
-            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.PropertyDialog_Closing);
+            this.FormClosing += this.PropertyDialog_Closing;
             this.panel1.ResumeLayout(false);
             this.ResumeLayout(false);
 

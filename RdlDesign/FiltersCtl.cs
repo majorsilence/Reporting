@@ -135,7 +135,7 @@ namespace Majorsilence.Reporting.RdlDesign
 		/// </summary>
 		private void InitializeComponent()
 		{
-			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FiltersCtl));
+			System.Windows.Forms.ComponentResourceManager resources = new System.Windows.Forms.ComponentResourceManager(typeof(FiltersCtl));
             this.DoubleBuffered = true;
 			this.dgFilters = new System.Windows.Forms.DataGridView();
 			this.bDelete = new System.Windows.Forms.Button();
@@ -154,26 +154,26 @@ namespace Majorsilence.Reporting.RdlDesign
 			// 
 			resources.ApplyResources(this.bDelete, "bDelete");
 			this.bDelete.Name = "bDelete";
-			this.bDelete.Click += new System.EventHandler(this.bDelete_Click);
+			this.bDelete.Click += this.bDelete_Click;
 			// 
 			// bUp
 			// 
 			resources.ApplyResources(this.bUp, "bUp");
 			this.bUp.Name = "bUp";
-			this.bUp.Click += new System.EventHandler(this.bUp_Click);
+			this.bUp.Click += this.bUp_Click;
 			// 
 			// bDown
 			// 
 			resources.ApplyResources(this.bDown, "bDown");
 			this.bDown.Name = "bDown";
-			this.bDown.Click += new System.EventHandler(this.bDown_Click);
+			this.bDown.Click += this.bDown_Click;
 			// 
 			// bValueExpr
 			// 
 			resources.ApplyResources(this.bValueExpr, "bValueExpr");
 			this.bValueExpr.Name = "bValueExpr";
 			this.bValueExpr.Tag = "value";
-			this.bValueExpr.Click += new System.EventHandler(this.bValueExpr_Click);
+			this.bValueExpr.Click += this.bValueExpr_Click;
 			// 
 			// FiltersCtl
 			// 
@@ -201,7 +201,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			_Draw.RemoveElement(_FilterParent, "Filters");
 
 			// Loop thru and add all the filters
-			foreach (DataGridViewRow dr in this.dgFilters.Rows)
+			foreach (Majorsilence.Forms.DataGridViewRow dr in this.dgFilters.Rows)
 			{
 				string fe = dr.Cells[0].Value as string;
                 string op = dr.Cells[1].Value as string;
@@ -245,7 +245,7 @@ namespace Majorsilence.Reporting.RdlDesign
                 dgFilters.Rows.RemoveAt(this.dgFilters.CurrentRow.Index);
             else
             {   // just empty out the values
-                DataGridViewRow dgrv = dgFilters.Rows[this.dgFilters.CurrentRow.Index];
+                Majorsilence.Forms.DataGridViewRow dgrv = dgFilters.Rows[this.dgFilters.CurrentRow.Index];
                 dgrv.Cells[0].Value = null;
                 dgrv.Cells[1].Value = "Equal";
                 dgrv.Cells[2].Value = null;
@@ -277,7 +277,7 @@ namespace Majorsilence.Reporting.RdlDesign
                 dgFilters.Rows[cr + 1].Cells[dgFilters.CurrentCell.ColumnIndex];
 		}
 
-        private void SwapRow(DataGridViewRow tdr, DataGridViewRow fdr)
+        private void SwapRow(Majorsilence.Forms.DataGridViewRow tdr, Majorsilence.Forms.DataGridViewRow fdr)
 		{
 			// column 1
 			object save = tdr.Cells[0].Value;
@@ -298,7 +298,7 @@ namespace Majorsilence.Reporting.RdlDesign
 		{
             if (dgFilters.CurrentCell == null)
                 dgFilters.Rows.Add("", "Equal", "");
-            DataGridViewCell dgc = dgFilters.CurrentCell;
+            Majorsilence.Forms.DataGridViewCell dgc = dgFilters.CurrentCell;
 			int cc = dgc.ColumnIndex;
 			string cv = dgc.Value as string;
 
@@ -307,8 +307,8 @@ namespace Majorsilence.Reporting.RdlDesign
 				DialogFilterOperator fo = new DialogFilterOperator(cv);
                 try
                 {
-                    DialogResult dlgr = fo.ShowDialog();
-                    if (dlgr == DialogResult.OK)
+                    Majorsilence.Forms.DialogResult dlgr = fo.ShowDialog();
+                    if (dlgr == Majorsilence.Forms.DialogResult.OK)
                         dgc.Value = fo.Operator;
                 }
                 finally
@@ -321,8 +321,8 @@ namespace Majorsilence.Reporting.RdlDesign
 				DialogExprEditor ee = new DialogExprEditor(_Draw, cv, _FilterParent, false);
                 try
                 {
-                    DialogResult dlgr = ee.ShowDialog();
-                    if (dlgr == DialogResult.OK)
+                    Majorsilence.Forms.DialogResult dlgr = ee.ShowDialog();
+                    if (dlgr == Majorsilence.Forms.DialogResult.OK)
                         dgc.Value = ee.Expression;
                 }
                 finally

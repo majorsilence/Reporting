@@ -2,7 +2,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Drawing;
 using System.Data;
 using System.Windows.Forms;
 using System.Text;
@@ -88,7 +87,7 @@ namespace Majorsilence.Reporting.RdlDesign
         /// </summary>
         private void InitializeComponent()
         {
-			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(CodeCtl));
+			System.Windows.Forms.ComponentResourceManager resources = new System.Windows.Forms.ComponentResourceManager(typeof(CodeCtl));
             this.DoubleBuffered = true;
 			this.label1 = new System.Windows.Forms.Label();
 			this.bCheckSyntax = new System.Windows.Forms.Button();
@@ -108,7 +107,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			// 
 			resources.ApplyResources(this.bCheckSyntax, "bCheckSyntax");
 			this.bCheckSyntax.Name = "bCheckSyntax";
-			this.bCheckSyntax.Click += new System.EventHandler(this.bCheckSyntax_Click);
+			this.bCheckSyntax.Click += this.bCheckSyntax_Click;
 			// 
 			// panel1
 			// 
@@ -129,7 +128,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			// 
 			resources.ApplyResources(this.lbErrors, "lbErrors");
 			this.lbErrors.Name = "lbErrors";
-			this.lbErrors.SelectedIndexChanged += new System.EventHandler(this.lbErrors_SelectedIndexChanged);
+			this.lbErrors.SelectedIndexChanged += this.lbErrors_SelectedIndexChanged;
 			// 
 			// label2
 			// 
@@ -264,7 +263,7 @@ namespace Majorsilence.Reporting.RdlDesign
                 }
             }
             else
-                MessageBox.Show(Resources.Strings.CodeCtl_Show_NoErrors, Resources.Strings.CodeCtl_Show_CodeVerification);
+                Majorsilence.Forms.MessageBox.Show(Resources.Strings.CodeCtl_Show_NoErrors, Resources.Strings.CodeCtl_Show_CodeVerification);
 
             return ;
         }
@@ -299,7 +298,7 @@ namespace Majorsilence.Reporting.RdlDesign
             for ( int i = 0; i < nLine - 1 && i < tbCode.Lines.Length; ++i ) 
                 offset += (this.tbCode.Lines[i].Length + 2); 
 
-            Control savectl = this.ActiveControl;
+            Majorsilence.Forms.Control savectl = this.ActiveControl;
             tbCode.Focus(); 
             tbCode.Select( offset, this.tbCode.Lines[nLine > 0? nLine-1: 0].Length);
             this.ActiveControl = savectl;

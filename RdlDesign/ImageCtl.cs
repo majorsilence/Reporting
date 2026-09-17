@@ -3,7 +3,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Drawing;
 using System.Data;
 using System.Windows.Forms;
 using System.Xml;
@@ -107,7 +106,7 @@ namespace Majorsilence.Reporting.RdlDesign
 		/// </summary>
 		private void InitializeComponent()
 		{
-			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ImageCtl));
+			System.Windows.Forms.ComponentResourceManager resources = new System.Windows.Forms.ComponentResourceManager(typeof(ImageCtl));
             this.DoubleBuffered = true;
 			this.groupBox1 = new System.Windows.Forms.GroupBox();
 			this.bExternalExpr = new System.Windows.Forms.Button();
@@ -152,52 +151,52 @@ namespace Majorsilence.Reporting.RdlDesign
 			resources.ApplyResources(this.bExternalExpr, "bExternalExpr");
 			this.bExternalExpr.Name = "bExternalExpr";
 			this.bExternalExpr.Tag = "external";
-			this.bExternalExpr.Click += new System.EventHandler(this.bExpr_Click);
+			this.bExternalExpr.Click += this.bExpr_Click;
 			// 
 			// bEmbeddedExpr
 			// 
 			resources.ApplyResources(this.bEmbeddedExpr, "bEmbeddedExpr");
 			this.bEmbeddedExpr.Name = "bEmbeddedExpr";
 			this.bEmbeddedExpr.Tag = "embedded";
-			this.bEmbeddedExpr.Click += new System.EventHandler(this.bExpr_Click);
+			this.bEmbeddedExpr.Click += this.bExpr_Click;
 			// 
 			// bMimeExpr
 			// 
 			resources.ApplyResources(this.bMimeExpr, "bMimeExpr");
 			this.bMimeExpr.Name = "bMimeExpr";
 			this.bMimeExpr.Tag = "mime";
-			this.bMimeExpr.Click += new System.EventHandler(this.bExpr_Click);
+			this.bMimeExpr.Click += this.bExpr_Click;
 			// 
 			// bDatabaseExpr
 			// 
 			resources.ApplyResources(this.bDatabaseExpr, "bDatabaseExpr");
 			this.bDatabaseExpr.Name = "bDatabaseExpr";
 			this.bDatabaseExpr.Tag = "database";
-			this.bDatabaseExpr.Click += new System.EventHandler(this.bExpr_Click);
+			this.bDatabaseExpr.Click += this.bExpr_Click;
 			// 
 			// bEmbedded
 			// 
 			resources.ApplyResources(this.bEmbedded, "bEmbedded");
 			this.bEmbedded.Name = "bEmbedded";
-			this.bEmbedded.Click += new System.EventHandler(this.bEmbedded_Click);
+			this.bEmbedded.Click += this.bEmbedded_Click;
 			// 
 			// bExternal
 			// 
 			resources.ApplyResources(this.bExternal, "bExternal");
 			this.bExternal.Name = "bExternal";
-			this.bExternal.Click += new System.EventHandler(this.bExternal_Click);
+			this.bExternal.Click += this.bExternal_Click;
 			// 
 			// tbValueExternal
 			// 
 			resources.ApplyResources(this.tbValueExternal, "tbValueExternal");
 			this.tbValueExternal.Name = "tbValueExternal";
-			this.tbValueExternal.TextChanged += new System.EventHandler(this.Value_TextChanged);
+			this.tbValueExternal.TextChanged += this.Value_TextChanged;
 			// 
 			// cbValueDatabase
 			// 
 			resources.ApplyResources(this.cbValueDatabase, "cbValueDatabase");
 			this.cbValueDatabase.Name = "cbValueDatabase";
-			this.cbValueDatabase.TextChanged += new System.EventHandler(this.Value_TextChanged);
+			this.cbValueDatabase.TextChanged += this.Value_TextChanged;
 			// 
 			// cbMIMEType
 			// 
@@ -209,31 +208,31 @@ namespace Majorsilence.Reporting.RdlDesign
             resources.GetString("cbMIMEType.Items3"),
             resources.GetString("cbMIMEType.Items4")});
 			this.cbMIMEType.Name = "cbMIMEType";
-			this.cbMIMEType.SelectedIndexChanged += new System.EventHandler(this.cbMIMEType_SelectedIndexChanged);
+			this.cbMIMEType.SelectedIndexChanged += this.cbMIMEType_SelectedIndexChanged;
 			// 
 			// cbValueEmbedded
 			// 
 			resources.ApplyResources(this.cbValueEmbedded, "cbValueEmbedded");
 			this.cbValueEmbedded.Name = "cbValueEmbedded";
-			this.cbValueEmbedded.TextChanged += new System.EventHandler(this.Value_TextChanged);
+			this.cbValueEmbedded.TextChanged += this.Value_TextChanged;
 			// 
 			// rbDatabase
 			// 
 			resources.ApplyResources(this.rbDatabase, "rbDatabase");
 			this.rbDatabase.Name = "rbDatabase";
-			this.rbDatabase.CheckedChanged += new System.EventHandler(this.rbSource_CheckedChanged);
+			this.rbDatabase.CheckedChanged += this.rbSource_CheckedChanged;
 			// 
 			// rbEmbedded
 			// 
 			resources.ApplyResources(this.rbEmbedded, "rbEmbedded");
 			this.rbEmbedded.Name = "rbEmbedded";
-			this.rbEmbedded.CheckedChanged += new System.EventHandler(this.rbSource_CheckedChanged);
+			this.rbEmbedded.CheckedChanged += this.rbSource_CheckedChanged;
 			// 
 			// rbExternal
 			// 
 			resources.ApplyResources(this.rbExternal, "rbExternal");
 			this.rbExternal.Name = "rbExternal";
-			this.rbExternal.CheckedChanged += new System.EventHandler(this.rbSource_CheckedChanged);
+			this.rbExternal.CheckedChanged += this.rbSource_CheckedChanged;
 			// 
 			// label1
 			// 
@@ -243,14 +242,14 @@ namespace Majorsilence.Reporting.RdlDesign
 			// cbSizing
 			// 
 			resources.ApplyResources(this.cbSizing, "cbSizing");
-			this.cbSizing.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+			this.cbSizing.DropDownStyle = Majorsilence.Forms.ComboBoxStyle.DropDownList;
 			this.cbSizing.Items.AddRange(new object[] {
             resources.GetString("cbSizing.Items"),
             resources.GetString("cbSizing.Items1"),
             resources.GetString("cbSizing.Items2"),
             resources.GetString("cbSizing.Items3")});
 			this.cbSizing.Name = "cbSizing";
-			this.cbSizing.SelectedIndexChanged += new System.EventHandler(this.cbSizing_SelectedIndexChanged);
+			this.cbSizing.SelectedIndexChanged += this.cbSizing_SelectedIndexChanged;
 			// 
 			// ImageCtl
 			// 
@@ -347,7 +346,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			ofd.CheckFileExists = true;
             try
             {
-                if (ofd.ShowDialog(this) == DialogResult.OK)
+                if (ofd.ShowDialog(this) == Majorsilence.Forms.DialogResult.OK)
                 {
                     tbValueExternal.Text = ofd.FileName;
                 }
@@ -361,11 +360,11 @@ namespace Majorsilence.Reporting.RdlDesign
 		private void bEmbedded_Click(object sender, System.EventArgs e)
 		{
 			DialogEmbeddedImages dlgEI = new DialogEmbeddedImages(this._Draw);
-			dlgEI.StartPosition = FormStartPosition.CenterParent;
+			dlgEI.StartPosition = Majorsilence.Forms.FormStartPosition.CenterParent;
             try
             {
-                DialogResult dr = dlgEI.ShowDialog();
-                if (dr != DialogResult.OK)
+                Majorsilence.Forms.DialogResult dr = dlgEI.ShowDialog();
+                if (dr != Majorsilence.Forms.DialogResult.OK)
                     return;
             }
             finally
@@ -382,7 +381,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			Button b = sender as Button;
 			if (b == null)
 				return;
-			Control c = null;
+			Majorsilence.Forms.Control c = null;
 			switch (b.Tag as string)
 			{
 				case "external":
@@ -407,8 +406,8 @@ namespace Majorsilence.Reporting.RdlDesign
 			DialogExprEditor ee = new DialogExprEditor(_Draw, c.Text, sNode);
             try
             {
-                DialogResult dr = ee.ShowDialog();
-                if (dr == DialogResult.OK)
+                Majorsilence.Forms.DialogResult dr = ee.ShowDialog();
+                if (dr == Majorsilence.Forms.DialogResult.OK)
                     c.Text = ee.Expression;
             }
             finally

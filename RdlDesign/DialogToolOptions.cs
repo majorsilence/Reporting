@@ -66,16 +66,16 @@ namespace Majorsilence.Reporting.RdlDesign
 
             switch (_RdlDesigner.PropertiesLocation)
             {
-                case DockStyle.Top:
+                case Majorsilence.Forms.DockStyle.Top:
                     this.rbPBTop.Checked = true;
                     break;
-                case DockStyle.Bottom:
+                case Majorsilence.Forms.DockStyle.Bottom:
                     this.rbPBBottom.Checked = true;
                     break;
-                case DockStyle.Right:
+                case Majorsilence.Forms.DockStyle.Right:
                     this.rbPBRight.Checked = true;
                     break;
-                case DockStyle.Left:
+                case Majorsilence.Forms.DockStyle.Left:
                 default:
                     this.rbPBLeft.Checked = true;
                     break;
@@ -170,7 +170,7 @@ namespace Majorsilence.Reporting.RdlDesign
             }
             catch (Exception ex)
             {		// Didn't sucessfully get the startup state: use defaults
-                MessageBox.Show(string.Format(Strings.DialogToolOptions_Show_ConfigError, ex.Message), Strings.DialogToolOptions_Show_Options);
+                Majorsilence.Forms.MessageBox.Show(string.Format(Strings.DialogToolOptions_Show_ConfigError, ex.Message), Strings.DialogToolOptions_Show_Options);
                 this.tbPort.Text = "8080";
                 this.ckLocal.Checked = true;
                 this.tbDirectory.Text = "Examples";
@@ -208,7 +208,7 @@ namespace Majorsilence.Reporting.RdlDesign
             }
             catch
             {
-                MessageBox.Show(Strings.DialogToolOptions_Show_RecentFilesMax, Strings.DialogToolOptions_Show_Options);
+                Majorsilence.Forms.MessageBox.Show(Strings.DialogToolOptions_Show_RecentFilesMax, Strings.DialogToolOptions_Show_Options);
                 return false;
             }
         }
@@ -217,7 +217,7 @@ namespace Majorsilence.Reporting.RdlDesign
         {
             if (DoApply())
             {
-                DialogResult = DialogResult.OK;
+                DialogResult = Majorsilence.Forms.DialogResult.OK;
                 this.Close();
             }
         }
@@ -249,7 +249,7 @@ namespace Majorsilence.Reporting.RdlDesign
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show(ex.Message, Strings.DialogToolOptions_Show_Options);
+                    Majorsilence.Forms.MessageBox.Show(ex.Message, Strings.DialogToolOptions_Show_Options);
                     return false;
                 }
             }
@@ -257,13 +257,13 @@ namespace Majorsilence.Reporting.RdlDesign
 
         private void HandleProperties()
         {
-            DockStyle ds = DockStyle.Right;
+            Majorsilence.Forms.DockStyle ds = Majorsilence.Forms.DockStyle.Right;
             if (this.rbPBTop.Checked)
-                ds = DockStyle.Top;
+                ds = Majorsilence.Forms.DockStyle.Top;
             else if (this.rbPBBottom.Checked)
-                ds = DockStyle.Bottom;
+                ds = Majorsilence.Forms.DockStyle.Bottom;
             else if (this.rbPBLeft.Checked)
-                ds = DockStyle.Left;
+                ds = Majorsilence.Forms.DockStyle.Left;
 
             _RdlDesigner.PropertiesLocation = ds;
             _RdlDesigner.PropertiesAutoHide = chkPBAutoHide.Checked;
@@ -476,7 +476,7 @@ namespace Majorsilence.Reporting.RdlDesign
             bDesktop = true;
         }
 
-        private void bBrowse_Click(object sender, System.EventArgs e)
+        private async void bBrowse_Click(object sender, System.EventArgs e)
         {
             FolderBrowserDialog fbd = new FolderBrowserDialog();
             // Set the help text description for the FolderBrowserDialog.
@@ -491,7 +491,7 @@ namespace Majorsilence.Reporting.RdlDesign
 
             try
             {
-                if (fbd.ShowDialog(this) == DialogResult.Cancel)
+                if (await fbd.ShowDialogAsync(this) == Majorsilence.Forms.DialogResult.Cancel)
                     return;
 
                 tbDirectory.Text = fbd.SelectedPath;
@@ -553,7 +553,7 @@ namespace Majorsilence.Reporting.RdlDesign
             this.bToolbar = true;   // tabbed interface is part of the toolbar
         }
 
-        private void bAddMap_Click(object sender, EventArgs e)
+        private async void bAddMap_Click(object sender, EventArgs e)
         {
             OpenFileDialog ofd = new OpenFileDialog();
             ofd.InitialDirectory = AppDomain.CurrentDomain.BaseDirectory;
@@ -564,7 +564,7 @@ namespace Majorsilence.Reporting.RdlDesign
             ofd.Multiselect = true;
             try
             {
-                if (ofd.ShowDialog(this) == DialogResult.OK)
+                if (await ofd.ShowDialogAsync(this) == Majorsilence.Forms.DialogResult.OK)
                 {
                     foreach (string file in ofd.FileNames)
                     {

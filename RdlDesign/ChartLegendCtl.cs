@@ -3,7 +3,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Drawing;
 using System.Data;
 using System.Windows.Forms;
 using System.Xml;
@@ -74,7 +73,7 @@ namespace Majorsilence.Reporting.RdlDesign
 		/// </summary>
 		private void InitializeComponent()
 		{
-			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ChartLegendCtl));
+			System.Windows.Forms.ComponentResourceManager resources = new System.Windows.Forms.ComponentResourceManager(typeof(ChartLegendCtl));
             this.DoubleBuffered = true;
 			this.label1 = new System.Windows.Forms.Label();
 			this.label2 = new System.Windows.Forms.Label();
@@ -97,7 +96,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			// cbPosition
 			// 
 			resources.ApplyResources(this.cbPosition, "cbPosition");
-			this.cbPosition.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+			this.cbPosition.DropDownStyle = Majorsilence.Forms.ComboBoxStyle.DropDownList;
 			this.cbPosition.Items.AddRange(new object[] {
             resources.GetString("cbPosition.Items"),
             resources.GetString("cbPosition.Items1"),
@@ -112,30 +111,30 @@ namespace Majorsilence.Reporting.RdlDesign
             resources.GetString("cbPosition.Items10"),
             resources.GetString("cbPosition.Items11")});
 			this.cbPosition.Name = "cbPosition";
-			this.cbPosition.SelectedIndexChanged += new System.EventHandler(this.cbPosition_SelectedIndexChanged);
+			this.cbPosition.SelectedIndexChanged += this.cbPosition_SelectedIndexChanged;
 			// 
 			// cbLayout
 			// 
 			resources.ApplyResources(this.cbLayout, "cbLayout");
-			this.cbLayout.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+			this.cbLayout.DropDownStyle = Majorsilence.Forms.ComboBoxStyle.DropDownList;
 			this.cbLayout.Items.AddRange(new object[] {
             resources.GetString("cbLayout.Items"),
             resources.GetString("cbLayout.Items1"),
             resources.GetString("cbLayout.Items2")});
 			this.cbLayout.Name = "cbLayout";
-			this.cbLayout.SelectedIndexChanged += new System.EventHandler(this.cbLayout_SelectedIndexChanged);
+			this.cbLayout.SelectedIndexChanged += this.cbLayout_SelectedIndexChanged;
 			// 
 			// chkVisible
 			// 
 			resources.ApplyResources(this.chkVisible, "chkVisible");
 			this.chkVisible.Name = "chkVisible";
-			this.chkVisible.CheckedChanged += new System.EventHandler(this.chkVisible_CheckedChanged);
+			this.chkVisible.CheckedChanged += this.chkVisible_CheckedChanged;
 			// 
 			// chkInsidePlotArea
 			// 
 			resources.ApplyResources(this.chkInsidePlotArea, "chkInsidePlotArea");
 			this.chkInsidePlotArea.Name = "chkInsidePlotArea";
-			this.chkInsidePlotArea.CheckedChanged += new System.EventHandler(this.chkInsidePlotArea_CheckedChanged);
+			this.chkInsidePlotArea.CheckedChanged += this.chkInsidePlotArea_CheckedChanged;
 			// 
 			// ChartLegendCtl
 			// 

@@ -20,14 +20,14 @@ namespace SampleApp2_SetData
         {
             InitializeComponent();
             var split = new SplitContainer();
-            split.Dock = DockStyle.Fill;
+            split.Dock = (Majorsilence.Forms.DockStyle)DockStyle.Fill;
             this.Controls.Add(split);
 
             rdlViewerSourceRdlNoLoad = new Majorsilence.Reporting.RdlViewer.RdlViewer();
-            rdlViewerSourceRdlNoLoad.Dock = DockStyle.Fill;
+            rdlViewerSourceRdlNoLoad.Dock = (Majorsilence.Forms.DockStyle)DockStyle.Fill;
             split.Panel1.Controls.Add(rdlViewerSourceRdlNoLoad);
             rdlViewerSetSource = new Majorsilence.Reporting.RdlViewer.RdlViewer();
-            rdlViewerSetSource.Dock = DockStyle.Fill;
+            rdlViewerSetSource.Dock = (Majorsilence.Forms.DockStyle)DockStyle.Fill;
             split.Panel2.Controls.Add(rdlViewerSetSource);
 
             // 50% left, 50% right

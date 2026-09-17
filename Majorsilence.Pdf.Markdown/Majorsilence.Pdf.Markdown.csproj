@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Library</OutputType>
+    <TargetFrameworks>netstandard2.0;net6.0;net8.0;net10.0</TargetFrameworks>
+    <AssemblyTitle>Majorsilence PDF Markdown</AssemblyTitle>
+    <PackageId>Majorsilence.Pdf.Markdown</PackageId>
+    <Description>Markdown rendering extension for Majorsilence.Pdf. Depends on Markdig; the core Majorsilence.Pdf package remains zero-dependency. Targets .NET Standard 2.0, .NET 6, .NET 8, and .NET 10.</Description>
+    <PackageTags>pdf;markdown;markdig;dotnet</PackageTags>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <IsPackable>true</IsPackable>
+    <Nullable>enable</Nullable>
+    <PackageLicenseExpression>MIT OR Apache-2.0 OR BSD-3-Clause</PackageLicenseExpression>
+  </PropertyGroup>
+  <PropertyGroup Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net6.0'))">
+    <IsAotCompatible>true</IsAotCompatible>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Majorsilence.Pdf\Majorsilence.Pdf.csproj" />
+    <PackageReference Include="Markdig" />
+  </ItemGroup>
+</Project>

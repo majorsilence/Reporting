@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Linq;
 using System;
 using System.Drawing;
 using System.Collections;
@@ -135,7 +137,7 @@ namespace Majorsilence.Reporting.RdlDesign
         private void bOK_Click(object sender, System.EventArgs e)
         {
             // apply the result
-            DialogResult = DialogResult.OK;
+            DialogResult = Majorsilence.Forms.DialogResult.OK;
         }
 
         private void cbDataSets_SelectedIndexChanged(object sender, System.EventArgs e)
@@ -151,7 +153,7 @@ namespace Majorsilence.Reporting.RdlDesign
 
         private void bColumn_Click(object sender, System.EventArgs e)
         {
-            ICollection sic = lbFields.SelectedIndices;
+            List<int> sic = lbFields.SelectedIndices.ToList();
             int count = sic.Count;
             foreach (int i in sic)
             {
@@ -164,7 +166,7 @@ namespace Majorsilence.Reporting.RdlDesign
 
         private void bRow_Click(object sender, System.EventArgs e)
         {
-            ICollection sic = lbFields.SelectedIndices;
+            List<int> sic = lbFields.SelectedIndices.ToList();
             int count = sic.Count;
             foreach (int i in sic)
             {

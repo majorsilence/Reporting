@@ -1,6 +1,5 @@
 using System;
 using System.Windows.Forms;
-using System.Drawing;
 using System.ComponentModel;
 using System.Collections;
 
@@ -15,7 +14,7 @@ private System.ComponentModel.Container components = null;
 
 		private void InitializeComponent()
 		{
-			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(DialogMessages));
+			System.Windows.Forms.ComponentResourceManager resources = new System.Windows.Forms.ComponentResourceManager(typeof(DialogMessages));
 			this.bOK = new System.Windows.Forms.Button();
 			this.tbMessages = new System.Windows.Forms.TextBox();
 			this.SuspendLayout();
@@ -23,7 +22,7 @@ private System.ComponentModel.Container components = null;
 			// bOK
 			// 
 			resources.ApplyResources(this.bOK, "bOK");
-			this.bOK.DialogResult = System.Windows.Forms.DialogResult.Cancel;
+			this.bOK.DialogResult = Majorsilence.Forms.DialogResult.Cancel;
 			this.bOK.Name = "bOK";
 			// 
 			// tbMessages
@@ -39,12 +38,12 @@ private System.ComponentModel.Container components = null;
 			this.CancelButton = this.bOK;
 			this.Controls.Add(this.tbMessages);
 			this.Controls.Add(this.bOK);
-			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
+			this.FormBorderStyle = Majorsilence.Forms.FormBorderStyle.FixedDialog;
 			this.MaximizeBox = false;
 			this.MinimizeBox = false;
 			this.Name = "DialogMessages";
 			this.ShowInTaskbar = false;
-			this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
+			this.SizeGripStyle = Majorsilence.Forms.SizeGripStyle.Hide;
 			this.ResumeLayout(false);
 			this.PerformLayout();
 

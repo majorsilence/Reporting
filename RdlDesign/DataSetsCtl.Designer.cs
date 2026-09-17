@@ -32,13 +32,13 @@ namespace Majorsilence.Reporting.RdlDesign
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(DataSetsCtl));
+            System.Windows.Forms.ComponentResourceManager resources = new System.Windows.Forms.ComponentResourceManager(typeof(DataSetsCtl));
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
             this.DoubleBuffered = true;
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.panel2 = new System.Windows.Forms.Panel();
             this.panel4 = new System.Windows.Forms.Panel();
-            this.scintillaSQL = new ScintillaNET.Scintilla();
+            this.scintillaSQL = new Majorsilence.Reporting.RdlDesign.Syntax.Scintilla();
             this.panel3 = new System.Windows.Forms.Panel();
             this.bRefresh = new System.Windows.Forms.Button();
             this.bEditSQL = new System.Windows.Forms.Button();
@@ -101,10 +101,10 @@ namespace Majorsilence.Reporting.RdlDesign
             // scintillaSQL
             // 
             resources.ApplyResources(this.scintillaSQL, "scintillaSQL");
-            this.scintillaSQL.Lexer = ScintillaNET.Lexer.Sql;
+            this.scintillaSQL.Lexer = Majorsilence.Reporting.RdlDesign.Syntax.Lexer.Sql;
             this.scintillaSQL.Name = "scintillaSQL";
             this.scintillaSQL.UseTabs = false;
-            this.scintillaSQL.TextChanged += new System.EventHandler(this.tbSQL_TextChanged);
+            this.scintillaSQL.TextChanged += this.tbSQL_TextChanged;
             // 
             // panel3
             // 
@@ -117,13 +117,13 @@ namespace Majorsilence.Reporting.RdlDesign
             // 
             resources.ApplyResources(this.bRefresh, "bRefresh");
             this.bRefresh.Name = "bRefresh";
-            this.bRefresh.Click += new System.EventHandler(this.bRefresh_Click);
+            this.bRefresh.Click += this.bRefresh_Click;
             // 
             // bEditSQL
             // 
             resources.ApplyResources(this.bEditSQL, "bEditSQL");
             this.bEditSQL.Name = "bEditSQL";
-            this.bEditSQL.Click += new System.EventHandler(this.bEditSQL_Click);
+            this.bEditSQL.Click += this.bEditSQL_Click;
             // 
             // panel1
             // 
@@ -146,7 +146,7 @@ namespace Majorsilence.Reporting.RdlDesign
             // 
             resources.ApplyResources(this.tbDSName, "tbDSName");
             this.tbDSName.Name = "tbDSName";
-            this.tbDSName.TextChanged += new System.EventHandler(this.tbDSName_TextChanged);
+            this.tbDSName.TextChanged += this.tbDSName_TextChanged;
             // 
             // tbTimeout
             // 
@@ -157,7 +157,7 @@ namespace Majorsilence.Reporting.RdlDesign
             0,
             0});
             this.tbTimeout.Name = "tbTimeout";
-            this.tbTimeout.ValueChanged += new System.EventHandler(this.tbTimeout_ValueChanged);
+            this.tbTimeout.ValueChanged += this.tbTimeout_ValueChanged;
             // 
             // label3
             // 
@@ -172,9 +172,9 @@ namespace Majorsilence.Reporting.RdlDesign
             // cbDataSource
             // 
             resources.ApplyResources(this.cbDataSource, "cbDataSource");
-            this.cbDataSource.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cbDataSource.DropDownStyle = Majorsilence.Forms.ComboBoxStyle.DropDownList;
             this.cbDataSource.Name = "cbDataSource";
-            this.cbDataSource.SelectedIndexChanged += new System.EventHandler(this.cbDataSource_SelectedIndexChanged);
+            this.cbDataSource.SelectedIndexChanged += this.cbDataSource_SelectedIndexChanged;
             // 
             // lDataSource
             // 
@@ -185,21 +185,21 @@ namespace Majorsilence.Reporting.RdlDesign
             // 
             resources.ApplyResources(this.bDeleteField, "bDeleteField");
             this.bDeleteField.Name = "bDeleteField";
-            this.bDeleteField.Click += new System.EventHandler(this.bDeleteField_Click);
+            this.bDeleteField.Click += this.bDeleteField_Click;
             // 
             // dgFields
             // 
             resources.ApplyResources(this.dgFields, "dgFields");
-            this.dgFields.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
-            dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle1.BackColor = System.Drawing.SystemColors.ControlText;
+            this.dgFields.AutoSizeColumnsMode = Majorsilence.Forms.DataGridViewAutoSizeColumnsMode.Fill;
+            dataGridViewCellStyle1.Alignment = Majorsilence.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle1.BackColor = System.Windows.Forms.SystemColors.ControlText;
             dataGridViewCellStyle1.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            dataGridViewCellStyle1.ForeColor = System.Drawing.SystemColors.WindowText;
-            dataGridViewCellStyle1.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            dataGridViewCellStyle1.ForeColor = System.Windows.Forms.SystemColors.WindowText;
+            dataGridViewCellStyle1.SelectionBackColor = System.Windows.Forms.SystemColors.Highlight;
+            dataGridViewCellStyle1.SelectionForeColor = System.Windows.Forms.SystemColors.HighlightText;
+            dataGridViewCellStyle1.WrapMode = Majorsilence.Forms.DataGridViewTriState.True;
             this.dgFields.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
-            this.dgFields.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
+            this.dgFields.Columns.AddRange(new Majorsilence.Forms.DataGridViewColumn[] {
             this.dgtbName,
             this.dgtbQueryName,
             this.dgtbValue,
@@ -244,8 +244,8 @@ namespace Majorsilence.Reporting.RdlDesign
             "System.Boolean",
             "System.Byte"});
             this.dgtbTypeName.Name = "dgtbTypeName";
-            this.dgtbTypeName.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            this.dgtbTypeName.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
+            this.dgtbTypeName.Resizable = Majorsilence.Forms.DataGridViewTriState.True;
+            this.dgtbTypeName.SortMode = Majorsilence.Forms.DataGridViewColumnSortMode.Automatic;
             // 
             // label2
             // 
@@ -292,7 +292,7 @@ namespace Majorsilence.Reporting.RdlDesign
 		private System.Windows.Forms.DataGridViewComboBoxColumn dgtbTypeName;
         private System.Windows.Forms.Panel panel2;
         private System.Windows.Forms.Panel panel4;
-        private ScintillaNET.Scintilla scintillaSQL;
+        private Majorsilence.Reporting.RdlDesign.Syntax.Scintilla scintillaSQL;
         private System.Windows.Forms.Panel panel3;
         private System.Windows.Forms.Panel panel1;
     }

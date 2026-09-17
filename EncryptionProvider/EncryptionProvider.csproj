@@ -4,13 +4,14 @@
 		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
 		<AssemblyTitle>EncryptionProvider</AssemblyTitle>
 		<PackageId>Majorsilence.Reporting.EncryptionProvider</PackageId>
-		<Configurations>Debug;Release;Debug-DrawingCompat</Configurations>
-		<TargetFrameworks>net48;net8.0;net8.0-windows;net10.0;net10.0-windows</TargetFrameworks>
-		<TargetFrameworks Condition="'$(OS)' == 'Unix'">net8.0;net10.0</TargetFrameworks>
+		<Description>Connection-string encryption helper for Majorsilence Reporting viewers and designers. Targets .NET 8 and .NET 10.</Description>
+		<TargetFrameworks>net8.0;net8.0-windows;net10.0;net10.0-windows</TargetFrameworks>
+		<!-- The -windows TFMs pull in WindowsDesktop targets and only build on Windows. -->
+		<TargetFrameworks Condition="'$(OS)' != 'Windows_NT'">net8.0;net10.0</TargetFrameworks>
 		<WarningsAsErrors>4014</WarningsAsErrors>
         <IsPackable>true</IsPackable>
 	</PropertyGroup>
-	<PropertyGroup Condition="'$(TargetFramework)' == 'net48' Or $(TargetFramework.Contains('-windows'))">
+	<PropertyGroup Condition="$(TargetFramework.Contains('-windows'))">
 		<UseWindowsForms>true</UseWindowsForms>
 		<ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
 	</PropertyGroup>

@@ -487,7 +487,7 @@ namespace Majorsilence.Reporting.RdlDesign
             _TabPanels.Add(uc);
             tp.Controls.Add(uc);
 
-            uc.Dock = System.Windows.Forms.DockStyle.Fill;
+            uc.Dock = Majorsilence.Forms.DockStyle.Fill;
             uc.Location = new System.Drawing.Point(0, 0);
             uc.Name = name + "1";
             uc.Size = new System.Drawing.Size(552, 284);
@@ -515,7 +515,7 @@ namespace Majorsilence.Reporting.RdlDesign
                 return;
 
             bApply_Click(sender, e);	// Apply does all the work
-            this.DialogResult = DialogResult.OK;
+            this.DialogResult = Majorsilence.Forms.DialogResult.OK;
         }
 
         private bool IsValid()
@@ -533,7 +533,7 @@ namespace Majorsilence.Reporting.RdlDesign
             return true;
         }
 
-        private void PropertyDialog_Closing(object sender, System.Windows.Forms.FormClosingEventArgs e)
+        private void PropertyDialog_Closing(object sender, Majorsilence.Forms.FormClosingEventArgs e)
         {
             if (_Type == PropertyTypeEnum.Grouping)
             {	// Need to check if grouping value is still required
@@ -552,13 +552,13 @@ namespace Majorsilence.Reporting.RdlDesign
 
         private void bDelete_Click(object sender, System.EventArgs e)
         {
-            if (MessageBox.Show(this,
+            if (Majorsilence.Forms.MessageBox.Show(this,
                     Strings.PropertyDialog_ShowF_WantDeleteDataset,
                     Strings.PropertyDialog_ShowF_DataSet,
-                    MessageBoxButtons.YesNo) == DialogResult.Yes)
+                    Majorsilence.Forms.MessageBoxButtons.YesNo) == Majorsilence.Forms.DialogResult.Yes)
             {
                 _Delete = true;
-                DialogResult = DialogResult.OK;
+                DialogResult = Majorsilence.Forms.DialogResult.OK;
             }
         }
     }

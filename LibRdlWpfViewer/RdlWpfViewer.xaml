@@ -1,11 +1,7 @@
 ﻿<UserControl x:Class="LibRdlWpfViewer.RdlWpfViewer"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:wf="clr-namespace:System.Windows.Forms;assembly=System.Windows.Forms"
-    xmlns:myctrl="clr-namespace:Majorsilence.Reporting.RdlViewer;assembly=RdlViewer">
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <Grid Width="auto" Height="auto">
-        <WindowsFormsHost Margin="12" Name="windowsFormsHost1">
-            <myctrl:RdlViewer x:Name="reportViewer" Dock="Fill" />
-        </WindowsFormsHost>
+        <WindowsFormsHost Margin="12" Name="windowsFormsHost1" />
     </Grid>
 </UserControl>

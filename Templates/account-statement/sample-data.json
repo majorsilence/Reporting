@@ -1,0 +1,18 @@
+{
+  "AccountNumber": "ACC-88213",
+  "AccountHolderName": "Northwind Traders",
+  "AccountHolderAddress": "900 Lakeview Ave, Suite 200, Chicago, IL 60601",
+  "StatementPeriodStart": "2026-05-01",
+  "StatementPeriodEnd": "2026-05-31",
+  "OpeningBalance": 1250.00,
+  "Transactions": [
+    { "Date": "2026-05-02", "Description": "Invoice INV-2026-0121 payment received", "Amount": 480.00 },
+    { "Date": "2026-05-05", "Description": "Monthly service fee",                   "Amount": -25.00 },
+    { "Date": "2026-05-09", "Description": "Invoice INV-2026-0126 payment received", "Amount": 612.50 },
+    { "Date": "2026-05-14", "Description": "Late fee reversal",                     "Amount": 15.00 },
+    { "Date": "2026-05-19", "Description": "Invoice INV-2026-0131 payment received", "Amount": 340.00 },
+    { "Date": "2026-05-23", "Description": "Wire transfer fee",                     "Amount": -20.00 },
+    { "Date": "2026-05-28", "Description": "Invoice INV-2026-0138 payment received", "Amount": 275.00 },
+    { "Date": "2026-05-30", "Description": "Monthly service fee",                   "Amount": -25.00 }
+  ]
+}

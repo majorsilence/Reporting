@@ -212,11 +212,7 @@ namespace Majorsilence.Reporting.Rdl
 
         // ...
 
-#if NET48
-        public Task GetUrlData(string url)
-#else
         public async Task GetUrlData(string url)
-#endif
         {
             Uri uri = new Uri(url);
             if (!uri.IsFile)
@@ -226,20 +222,12 @@ namespace Majorsilence.Reporting.Rdl
             if (!File.Exists(localPath))
             {
                 this.Clear();
-#if NET48
-                return Task.CompletedTask;
-#else
                 return;
-#endif
             }
 
             // HttpClient does not support file:// URIs on non-Windows platforms.
             // Read local files directly to avoid the platform limitation.
-#if NET48
-            _ResponseBytes =  File.ReadAllBytes(localPath);
-#else
             _ResponseBytes = await File.ReadAllBytesAsync(localPath);
-#endif
             _ContentLocation = "";
 
                 // if we have string content, determine encoding type
@@ -281,9 +269,6 @@ namespace Majorsilence.Reporting.Rdl
                 else if (_ForcedEncoding == null)
                     _DetectedEncoding = DetectEncoding(_DetectedContentType, _ResponseBytes);
                 
-#if NET48
-                return Task.CompletedTask;
-#endif
         }
 
 #endregion Public methods

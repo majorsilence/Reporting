@@ -10,15 +10,10 @@ using NUnit.Framework;
 using ReportTests.Utils;
 using UglyToad.PdfPig;
 using ZXing;
-#if DRAWINGCOMPAT
 using Majorsilence.Forms.Drawing;
 using System.Drawing;  // value types (Color, Point, Size, Rectangle, ...) come from System.Drawing.Primitives
 using ZXing.SkiaSharp;
 
-#else
-using System.Drawing;
-using ZXing.Windows.Compatibility;
-#endif
 
 namespace ReportTests.Utils
 {

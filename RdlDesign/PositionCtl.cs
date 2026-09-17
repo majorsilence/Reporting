@@ -3,7 +3,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Drawing;
 using System.Data;
 using System.Windows.Forms;
 using System.Xml;
@@ -146,7 +145,7 @@ namespace Majorsilence.Reporting.RdlDesign
 		/// </summary>
 		private void InitializeComponent()
 		{
-			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(PositionCtl));
+			System.Windows.Forms.ComponentResourceManager resources = new System.Windows.Forms.ComponentResourceManager(typeof(PositionCtl));
             this.DoubleBuffered = true;
 			this.gbPosition = new System.Windows.Forms.GroupBox();
 			this.tbHeight = new System.Windows.Forms.TextBox();
@@ -198,7 +197,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			// 
 			resources.ApplyResources(this.tbHeight, "tbHeight");
 			this.tbHeight.Name = "tbHeight";
-			this.tbHeight.TextChanged += new System.EventHandler(this.tbHeight_TextChanged);
+			this.tbHeight.TextChanged += this.tbHeight_TextChanged;
 			// 
 			// label7
 			// 
@@ -209,7 +208,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			// 
 			resources.ApplyResources(this.tbWidth, "tbWidth");
 			this.tbWidth.Name = "tbWidth";
-			this.tbWidth.TextChanged += new System.EventHandler(this.tbWidth_TextChanged);
+			this.tbWidth.TextChanged += this.tbWidth_TextChanged;
 			// 
 			// label8
 			// 
@@ -220,7 +219,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			// 
 			resources.ApplyResources(this.tbTop, "tbTop");
 			this.tbTop.Name = "tbTop";
-			this.tbTop.TextChanged += new System.EventHandler(this.tbTop_TextChanged);
+			this.tbTop.TextChanged += this.tbTop_TextChanged;
 			// 
 			// label6
 			// 
@@ -231,7 +230,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			// 
 			resources.ApplyResources(this.tbLeft, "tbLeft");
 			this.tbLeft.Name = "tbLeft";
-			this.tbLeft.TextChanged += new System.EventHandler(this.tbLeft_TextChanged);
+			this.tbLeft.TextChanged += this.tbLeft_TextChanged;
 			// 
 			// label5
 			// 
@@ -252,7 +251,7 @@ namespace Majorsilence.Reporting.RdlDesign
             0,
             0});
 			this.tbZIndex.Name = "tbZIndex";
-			this.tbZIndex.ValueChanged += new System.EventHandler(this.tbZIndex_ValueChanged);
+			this.tbZIndex.ValueChanged += this.tbZIndex_ValueChanged;
 			// 
 			// label1
 			// 
@@ -263,8 +262,8 @@ namespace Majorsilence.Reporting.RdlDesign
 			// 
 			resources.ApplyResources(this.tbName, "tbName");
 			this.tbName.Name = "tbName";
-			this.tbName.TextChanged += new System.EventHandler(this.tbName_TextChanged);
-			this.tbName.Validating += new System.ComponentModel.CancelEventHandler(this.tbName_Validating);
+			this.tbName.TextChanged += this.tbName_TextChanged;
+			this.tbName.Validating += this.tbName_Validating;
 			// 
 			// lblColSpan
 			// 
@@ -290,7 +289,7 @@ namespace Majorsilence.Reporting.RdlDesign
             0,
             0,
             0});
-			this.tbColSpan.ValueChanged += new System.EventHandler(this.tbColSpan_ValueChanged);
+			this.tbColSpan.ValueChanged += this.tbColSpan_ValueChanged;
 			// 
 			// gbText
 			// 
@@ -314,8 +313,8 @@ namespace Majorsilence.Reporting.RdlDesign
             resources.GetString("cbToggleImage.Items1"),
             resources.GetString("cbToggleImage.Items2")});
 			this.cbToggleImage.Name = "cbToggleImage";
-			this.cbToggleImage.SelectedIndexChanged += new System.EventHandler(this.cbToggleImage_Changed);
-			this.cbToggleImage.TextChanged += new System.EventHandler(this.cbToggleImage_Changed);
+			this.cbToggleImage.SelectedIndexChanged += this.cbToggleImage_Changed;
+			this.cbToggleImage.TextChanged += this.cbToggleImage_Changed;
 			// 
 			// label4
 			// 
@@ -325,13 +324,13 @@ namespace Majorsilence.Reporting.RdlDesign
 			// cbDataElementStyle
 			// 
 			resources.ApplyResources(this.cbDataElementStyle, "cbDataElementStyle");
-			this.cbDataElementStyle.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+			this.cbDataElementStyle.DropDownStyle = Majorsilence.Forms.ComboBoxStyle.DropDownList;
 			this.cbDataElementStyle.Items.AddRange(new object[] {
             resources.GetString("cbDataElementStyle.Items"),
             resources.GetString("cbDataElementStyle.Items1"),
             resources.GetString("cbDataElementStyle.Items2")});
 			this.cbDataElementStyle.Name = "cbDataElementStyle";
-			this.cbDataElementStyle.SelectedIndexChanged += new System.EventHandler(this.cbDataElementStyle_SelectedIndexChanged);
+			this.cbDataElementStyle.SelectedIndexChanged += this.cbDataElementStyle_SelectedIndexChanged;
 			// 
 			// label3
 			// 
@@ -341,9 +340,9 @@ namespace Majorsilence.Reporting.RdlDesign
 			// cbHideDuplicates
 			// 
 			resources.ApplyResources(this.cbHideDuplicates, "cbHideDuplicates");
-			this.cbHideDuplicates.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+			this.cbHideDuplicates.DropDownStyle = Majorsilence.Forms.ComboBoxStyle.DropDownList;
 			this.cbHideDuplicates.Name = "cbHideDuplicates";
-			this.cbHideDuplicates.SelectedIndexChanged += new System.EventHandler(this.cbHideDuplicates_SelectedIndexChanged);
+			this.cbHideDuplicates.SelectedIndexChanged += this.cbHideDuplicates_SelectedIndexChanged;
 			// 
 			// label2
 			// 
@@ -354,13 +353,13 @@ namespace Majorsilence.Reporting.RdlDesign
 			// 
 			resources.ApplyResources(this.chkCanShrink, "chkCanShrink");
 			this.chkCanShrink.Name = "chkCanShrink";
-			this.chkCanShrink.CheckedChanged += new System.EventHandler(this.chkCanShrink_CheckedChanged);
+			this.chkCanShrink.CheckedChanged += this.chkCanShrink_CheckedChanged;
 			// 
 			// chkCanGrow
 			// 
 			resources.ApplyResources(this.chkCanGrow, "chkCanGrow");
 			this.chkCanGrow.Name = "chkCanGrow";
-			this.chkCanGrow.CheckedChanged += new System.EventHandler(this.chkCanGrow_CheckedChanged);
+			this.chkCanGrow.CheckedChanged += this.chkCanGrow_CheckedChanged;
 			// 
 			// PositionCtl
 			// 
@@ -392,7 +391,7 @@ namespace Majorsilence.Reporting.RdlDesign
 				string nerr = _Draw.NameError(ri, this.tbName.Text);
 				if (nerr != null)
 				{
-					MessageBox.Show(nerr, Strings.PositionCtl_Show_Name);
+					Majorsilence.Forms.MessageBox.Show(nerr, Strings.PositionCtl_Show_Name);
 					return false;
 				}
 			}
@@ -423,7 +422,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			}
 			catch (Exception ex)
 			{
-				MessageBox.Show(ex.Message, name + " " + Strings.PositionCtl_Show_SizeInvalid);
+				Majorsilence.Forms.MessageBox.Show(ex.Message, name + " " + Strings.PositionCtl_Show_SizeInvalid);
 				return false;
 			}
 
@@ -547,7 +546,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			if (err != null)
 			{
 				e.Cancel = true;
-				MessageBox.Show(string.Format(Strings.PositionCtl_Show_Invalid, tbName.Text, err), Strings.PositionCtl_Show_Name);
+				Majorsilence.Forms.MessageBox.Show(string.Format(Strings.PositionCtl_Show_Invalid, tbName.Text, err), Strings.PositionCtl_Show_Name);
 				return;
 			}
 		}

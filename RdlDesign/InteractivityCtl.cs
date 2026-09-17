@@ -3,7 +3,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Drawing;
 using System.Data;
 using System.Windows.Forms;
 using System.Xml;
@@ -154,7 +153,7 @@ namespace Majorsilence.Reporting.RdlDesign
 		/// </summary>
 		private void InitializeComponent()
 		{
-			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(InteractivityCtl));
+			System.Windows.Forms.ComponentResourceManager resources = new System.Windows.Forms.ComponentResourceManager(typeof(InteractivityCtl));
             this.DoubleBuffered = true;
 			this.grpBoxVisibility = new System.Windows.Forms.GroupBox();
 			this.bHidden = new System.Windows.Forms.Button();
@@ -197,20 +196,20 @@ namespace Majorsilence.Reporting.RdlDesign
 			resources.ApplyResources(this.bHidden, "bHidden");
 			this.bHidden.Name = "bHidden";
 			this.bHidden.Tag = "visibility";
-			this.bHidden.Click += new System.EventHandler(this.bExpr_Click);
+			this.bHidden.Click += this.bExpr_Click;
 			// 
 			// cbToggle
 			// 
 			resources.ApplyResources(this.cbToggle, "cbToggle");
 			this.cbToggle.Name = "cbToggle";
-			this.cbToggle.SelectedIndexChanged += new System.EventHandler(this.cbToggle_SelectedIndexChanged);
-			this.cbToggle.TextChanged += new System.EventHandler(this.cbToggle_SelectedIndexChanged);
+			this.cbToggle.SelectedIndexChanged += this.cbToggle_SelectedIndexChanged;
+			this.cbToggle.TextChanged += this.cbToggle_SelectedIndexChanged;
 			// 
 			// tbHidden
 			// 
 			resources.ApplyResources(this.tbHidden, "tbHidden");
 			this.tbHidden.Name = "tbHidden";
-			this.tbHidden.TextChanged += new System.EventHandler(this.tbHidden_TextChanged);
+			this.tbHidden.TextChanged += this.tbHidden_TextChanged;
 			// 
 			// label3
 			// 
@@ -244,68 +243,68 @@ namespace Majorsilence.Reporting.RdlDesign
 			resources.ApplyResources(this.bBookmarkLink, "bBookmarkLink");
 			this.bBookmarkLink.Name = "bBookmarkLink";
 			this.bBookmarkLink.Tag = "bookmarklink";
-			this.bBookmarkLink.Click += new System.EventHandler(this.bExpr_Click);
+			this.bBookmarkLink.Click += this.bExpr_Click;
 			// 
 			// bHyperlink
 			// 
 			resources.ApplyResources(this.bHyperlink, "bHyperlink");
 			this.bHyperlink.Name = "bHyperlink";
 			this.bHyperlink.Tag = "hyperlink";
-			this.bHyperlink.Click += new System.EventHandler(this.bExpr_Click);
+			this.bHyperlink.Click += this.bExpr_Click;
 			// 
 			// rbNoAction
 			// 
 			resources.ApplyResources(this.rbNoAction, "rbNoAction");
 			this.rbNoAction.Name = "rbNoAction";
-			this.rbNoAction.CheckedChanged += new System.EventHandler(this.rbAction_CheckedChanged);
+			this.rbNoAction.CheckedChanged += this.rbAction_CheckedChanged;
 			// 
 			// bParameters
 			// 
 			resources.ApplyResources(this.bParameters, "bParameters");
 			this.bParameters.Name = "bParameters";
-			this.bParameters.Click += new System.EventHandler(this.bParameters_Click);
+			this.bParameters.Click += this.bParameters_Click;
 			// 
 			// bDrillthrough
 			// 
 			resources.ApplyResources(this.bDrillthrough, "bDrillthrough");
 			this.bDrillthrough.Name = "bDrillthrough";
-			this.bDrillthrough.Click += new System.EventHandler(this.bDrillthrough_Click);
+			this.bDrillthrough.Click += this.bDrillthrough_Click;
 			// 
 			// tbDrillthrough
 			// 
 			resources.ApplyResources(this.tbDrillthrough, "tbDrillthrough");
 			this.tbDrillthrough.Name = "tbDrillthrough";
-			this.tbDrillthrough.TextChanged += new System.EventHandler(this.tbAction_TextChanged);
+			this.tbDrillthrough.TextChanged += this.tbAction_TextChanged;
 			// 
 			// tbBookmarkLink
 			// 
 			resources.ApplyResources(this.tbBookmarkLink, "tbBookmarkLink");
 			this.tbBookmarkLink.Name = "tbBookmarkLink";
-			this.tbBookmarkLink.TextChanged += new System.EventHandler(this.tbAction_TextChanged);
+			this.tbBookmarkLink.TextChanged += this.tbAction_TextChanged;
 			// 
 			// tbHyperlink
 			// 
 			resources.ApplyResources(this.tbHyperlink, "tbHyperlink");
 			this.tbHyperlink.Name = "tbHyperlink";
-			this.tbHyperlink.TextChanged += new System.EventHandler(this.tbAction_TextChanged);
+			this.tbHyperlink.TextChanged += this.tbAction_TextChanged;
 			// 
 			// rbDrillthrough
 			// 
 			resources.ApplyResources(this.rbDrillthrough, "rbDrillthrough");
 			this.rbDrillthrough.Name = "rbDrillthrough";
-			this.rbDrillthrough.CheckedChanged += new System.EventHandler(this.rbAction_CheckedChanged);
+			this.rbDrillthrough.CheckedChanged += this.rbAction_CheckedChanged;
 			// 
 			// rbBookmarkLink
 			// 
 			resources.ApplyResources(this.rbBookmarkLink, "rbBookmarkLink");
 			this.rbBookmarkLink.Name = "rbBookmarkLink";
-			this.rbBookmarkLink.CheckedChanged += new System.EventHandler(this.rbAction_CheckedChanged);
+			this.rbBookmarkLink.CheckedChanged += this.rbAction_CheckedChanged;
 			// 
 			// rbHyperlink
 			// 
 			resources.ApplyResources(this.rbHyperlink, "rbHyperlink");
 			this.rbHyperlink.Name = "rbHyperlink";
-			this.rbHyperlink.CheckedChanged += new System.EventHandler(this.rbAction_CheckedChanged);
+			this.rbHyperlink.CheckedChanged += this.rbAction_CheckedChanged;
 			// 
 			// label1
 			// 
@@ -322,7 +321,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			resources.ApplyResources(this.bBookmark, "bBookmark");
 			this.bBookmark.Name = "bBookmark";
 			this.bBookmark.Tag = "bookmark";
-			this.bBookmark.Click += new System.EventHandler(this.bExpr_Click);
+			this.bBookmark.Click += this.bExpr_Click;
 			// 
 			// InteractivityCtl
 			// 
@@ -494,7 +493,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			ofd.AddExtension = true;
             try
             {
-                if (ofd.ShowDialog() == DialogResult.OK)
+                if (ofd.ShowDialog() == Majorsilence.Forms.DialogResult.OK)
                 {
                     string file = Path.GetFileNameWithoutExtension(ofd.FileName);
 
@@ -512,7 +511,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			DrillParametersDialog dpd = new DrillParametersDialog(this.tbDrillthrough.Text, _DrillParameters);
             try
             {
-                if (dpd.ShowDialog(this) != DialogResult.OK)
+                if (dpd.ShowDialog(this) != Majorsilence.Forms.DialogResult.OK)
                     return;
                 tbDrillthrough.Text = dpd.DrillthroughReport;
                 _DrillParameters = dpd.DrillParameters;
@@ -529,7 +528,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			Button b = sender as Button;
 			if (b == null)
 				return;
-			Control c = null;
+			Majorsilence.Forms.Control c = null;
 			switch (b.Tag as string)
 			{
 				case "bookmark":
@@ -554,8 +553,8 @@ namespace Majorsilence.Reporting.RdlDesign
 			DialogExprEditor ee = new DialogExprEditor(_Draw, c.Text, sNode);
             try
             {
-                DialogResult dr = ee.ShowDialog();
-                if (dr == DialogResult.OK)
+                Majorsilence.Forms.DialogResult dr = ee.ShowDialog();
+                if (dr == Majorsilence.Forms.DialogResult.OK)
                 {
                     c.Text = ee.Expression;
                     if ((string)(b.Tag) == "bookmark")

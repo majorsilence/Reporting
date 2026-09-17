@@ -1,0 +1,21 @@
+{
+  "WeekStarting": "2026-06-29",
+  "WeekEnding": "2026-07-05",
+  "Entries": [
+    { "Employee": "Alice Johnson", "Day": "Mon", "DayOrder": 1, "Hours": 8 },
+    { "Employee": "Alice Johnson", "Day": "Tue", "DayOrder": 2, "Hours": 8 },
+    { "Employee": "Alice Johnson", "Day": "Wed", "DayOrder": 3, "Hours": 7.5 },
+    { "Employee": "Alice Johnson", "Day": "Thu", "DayOrder": 4, "Hours": 8 },
+    { "Employee": "Alice Johnson", "Day": "Fri", "DayOrder": 5, "Hours": 6 },
+    { "Employee": "Bilal Rahman",  "Day": "Mon", "DayOrder": 1, "Hours": 8 },
+    { "Employee": "Bilal Rahman",  "Day": "Tue", "DayOrder": 2, "Hours": 8 },
+    { "Employee": "Bilal Rahman",  "Day": "Wed", "DayOrder": 3, "Hours": 8 },
+    { "Employee": "Bilal Rahman",  "Day": "Thu", "DayOrder": 4, "Hours": 0 },
+    { "Employee": "Bilal Rahman",  "Day": "Fri", "DayOrder": 5, "Hours": 8 },
+    { "Employee": "Carla Nguyen",  "Day": "Mon", "DayOrder": 1, "Hours": 4 },
+    { "Employee": "Carla Nguyen",  "Day": "Tue", "DayOrder": 2, "Hours": 8 },
+    { "Employee": "Carla Nguyen",  "Day": "Wed", "DayOrder": 3, "Hours": 8 },
+    { "Employee": "Carla Nguyen",  "Day": "Thu", "DayOrder": 4, "Hours": 8 },
+    { "Employee": "Carla Nguyen",  "Day": "Fri", "DayOrder": 5, "Hours": 8 }
+  ]
+}

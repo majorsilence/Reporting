@@ -1,6 +1,5 @@
 using System;
 using System.Windows.Forms;
-using System.Drawing;
 using System.ComponentModel;
 using System.Collections;
 
@@ -18,7 +17,7 @@ private System.ComponentModel.Container components = null;
 
 		private void InitializeComponent()
 		{
-			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(DialogValidateRdl));
+			System.Windows.Forms.ComponentResourceManager resources = new System.Windows.Forms.ComponentResourceManager(typeof(DialogValidateRdl));
 			this.bClose = new System.Windows.Forms.Button();
 			this.lbSchemaErrors = new System.Windows.Forms.ListBox();
 			this.label1 = new System.Windows.Forms.Label();
@@ -29,15 +28,15 @@ private System.ComponentModel.Container components = null;
 			// 
 			resources.ApplyResources(this.bClose, "bClose");
 			this.bClose.CausesValidation = false;
-			this.bClose.DialogResult = System.Windows.Forms.DialogResult.Cancel;
+			this.bClose.DialogResult = Majorsilence.Forms.DialogResult.Cancel;
 			this.bClose.Name = "bClose";
-			this.bClose.Click += new System.EventHandler(this.bClose_Click);
+			this.bClose.Click += this.bClose_Click;
 			// 
 			// lbSchemaErrors
 			// 
 			resources.ApplyResources(this.lbSchemaErrors, "lbSchemaErrors");
 			this.lbSchemaErrors.Name = "lbSchemaErrors";
-			this.lbSchemaErrors.DoubleClick += new System.EventHandler(this.lbSchemaErrors_DoubleClick);
+			this.lbSchemaErrors.DoubleClick += this.lbSchemaErrors_DoubleClick;
 			// 
 			// label1
 			// 
@@ -48,7 +47,7 @@ private System.ComponentModel.Container components = null;
 			// 
 			resources.ApplyResources(this.bValidate, "bValidate");
 			this.bValidate.Name = "bValidate";
-			this.bValidate.Click += new System.EventHandler(this.bValidate_Click);
+			this.bValidate.Click += this.bValidate_Click;
 			// 
 			// DialogValidateRdl
 			// 
@@ -63,8 +62,8 @@ private System.ComponentModel.Container components = null;
 			this.MinimizeBox = false;
 			this.Name = "DialogValidateRdl";
 			this.ShowInTaskbar = false;
-			this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Show;
-			this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.DialogValidateRdl_Closing);
+			this.SizeGripStyle = Majorsilence.Forms.SizeGripStyle.Show;
+			this.FormClosing += this.DialogValidateRdl_Closing;
 			this.ResumeLayout(false);
 
 		}

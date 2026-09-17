@@ -8,22 +8,20 @@
 		<AssemblyTitle>RDL Engine</AssemblyTitle>
 		<DelaySign>false</DelaySign>
 		<PackageId>Majorsilence.Reporting.RdlEngine</PackageId>
-		<Configurations>Debug;Release;Debug-DrawingCompat;Release-DrawingCompat</Configurations>
-		<TargetFrameworks>net48;net8.0;net10.0</TargetFrameworks>
-        <TargetFrameworks Condition="'$(OS)' == 'Unix'">net8.0;net10.0</TargetFrameworks>
+		<Description>Cross-platform RDL/RDLC report rendering engine — run SQL Server Reporting Services (SSRS 2005) report definitions without a report server on Linux, macOS, Windows, and containers. SkiaSharp-based rendering, Native-AOT-compatible. Renders to PDF, HTML, MHTML, CSV, Excel, and images. Targets .NET 8 and .NET 10.</Description>
+		<PackageTags>rdl;rdlc;ssrs;reporting;reports;pdf;crystal-reports-alternative;cross-platform;aot;dotnet</PackageTags>
+		<Configurations>Debug;Release</Configurations>
+		<TargetFrameworks>net8.0;net10.0</TargetFrameworks>
 		<WarningsAsErrors>4014</WarningsAsErrors>
         <IsPackable>true</IsPackable>
         <Nullable>enable</Nullable>
 	</PropertyGroup>
-	<!-- AOT/trim analysis enabled for modern TFMs. Note: VBCodeProvider (<Code> element),
-	     Assembly.Load plug-ins, and custom compression still require dynamic code at runtime;
-	     those paths are guarded with [RequiresDynamicCode] / RuntimeFeature.IsDynamicCodeSupported. -->
-	<PropertyGroup Condition="'$(TargetFramework)' != 'net48'">
+	<!-- AOT/trim analysis. Note: VBCodeProvider (<Code> element), Assembly.Load plug-ins, and custom
+	     compression still require dynamic code at runtime; those paths are guarded with
+	     [RequiresDynamicCode] / RuntimeFeature.IsDynamicCodeSupported. -->
+	<PropertyGroup>
 		<IsAotCompatible>true</IsAotCompatible>
 		<EnableTrimAnalyzer>true</EnableTrimAnalyzer>
-	</PropertyGroup>
-	<PropertyGroup Condition="'$(Configuration)' == 'Debug-DrawingCompat' Or '$(Configuration)' == 'Release-DrawingCompat'">
-		<PackageId>Majorsilence.Reporting.RdlEngine.SkiaSharp</PackageId>
 	</PropertyGroup>
 	<ItemGroup>
 		<Reference Update="System">
@@ -31,9 +29,6 @@
 		</Reference>
 		<Reference Update="System.Data">
 			<Name>System.Data</Name>
-		</Reference>
-		<Reference Update="System.Drawing">
-			<Name>System.Drawing</Name>
 		</Reference>
 		<Reference Update="System.Xml">
 			<Name>System.XML</Name>
@@ -61,7 +56,7 @@
 		<ProjectReference Include="..\Majorsilence.Pdf\Majorsilence.Pdf.csproj" />
 		<ProjectReference Include="..\Majorsilence.Pdf.Security\Majorsilence.Pdf.Security.csproj" />
 	</ItemGroup>
-	<ItemGroup Condition="'$(DrawingCompat)' == 'true'">
+	<ItemGroup>
 		<PackageReference Include="Majorsilence.Forms" />
 		<PackageReference Include="Majorsilence.Forms.Drawing.Common" />
 	</ItemGroup>
@@ -100,19 +95,12 @@
 		<PackageReference Include="System.Data.OleDb" />
 		<!-- CodeDom/VBCodeProvider usage is guarded with RuntimeFeature.IsDynamicCodeSupported -->
 		<PackageReference Include="System.CodeDom" />
-		<PackageReference Condition="'$(DrawingCompat)' != 'true'" Include="System.Drawing.Common" />
 		<PackageReference Include="System.Security.Cryptography.Xml" />
 	</ItemGroup>
 	<ItemGroup>
+		<!-- The System.Drawing / GDI+ rendering path (replaced by Majorsilence.Forms.Drawing). -->
 		<Compile Remove="PageDrawing.cs" />
 		<Compile Remove="RdlPrint.cs" />
-		<Compile Remove="Render\CompilationExtensions.cs" />
-	</ItemGroup>
-	<ItemGroup Condition="'$(DrawingCompat)' == 'true'">
 		<Compile Remove="Definition\EMFConverter\**\**\*.cs" />
 	</ItemGroup>
-    <ItemGroup Condition="'$(TargetFramework)' == 'net48'">
-        <Reference Include="System.Net.Http" />
-        <Reference Include="System.IO.Compression" />
-    </ItemGroup>
 </Project>

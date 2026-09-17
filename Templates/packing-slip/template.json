@@ -1,0 +1,12 @@
+{
+  "name": "Packing Slip",
+  "slug": "packing-slip",
+  "description": "An order/ship-to header with carrier and tracking info, and an itemized shipment table that flags short-shipped (backordered) lines.",
+  "tags": ["business", "logistics", "letter-size"],
+  "dataProvider": "Json",
+  "parameters": [],
+  "dataContract": {
+    "root": ["OrderNumber", "OrderDate", "ShipDate", "ShippedFrom", "ShipToName", "ShipToAddress", "CarrierName", "TrackingNumber", "Notes"],
+    "root.Items[]": ["Sku", "Description", "QuantityOrdered", "QuantityShipped"]
+  }
+}

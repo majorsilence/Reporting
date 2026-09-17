@@ -2,7 +2,6 @@
 using System;
 using System.Collections;
 using System.ComponentModel;
-using System.Drawing;
 using System.Data;
 using System.Windows.Forms;
 using System.Xml;
@@ -50,7 +49,7 @@ namespace Majorsilence.Reporting.RdlDesign
         {
             if (dgParms.CurrentCell != null)
             {
-                DataGridViewCell dgc = dgParms.CurrentCell;
+                Majorsilence.Forms.DataGridViewCell dgc = dgParms.CurrentCell;
                 if (dgc.ColumnIndex == 1)
                 {
                     string cv = dgc.Value as string;
@@ -58,8 +57,8 @@ namespace Majorsilence.Reporting.RdlDesign
                     DialogExprEditor ee = new DialogExprEditor(_Draw, cv, _dsv.Node, false);
                     try
                     {
-                        DialogResult dlgr = ee.ShowDialog();
-                        if (dlgr == DialogResult.OK)
+                        Majorsilence.Forms.DialogResult dlgr = ee.ShowDialog();
+                        if (dlgr == Majorsilence.Forms.DialogResult.OK)
                             dgc.Value = ee.Expression;
                     }
                     finally

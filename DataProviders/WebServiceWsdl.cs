@@ -3,11 +3,6 @@ using System;
 using System.Xml;
 using System.Data;
 using System.Collections;
-#if !NETSTANDARD2_0 && !NET6_0_OR_GREATER
-using System.Web.Services;
-using System.Web.Services.Description;
-using System.Web.Services.Protocols;
-#endif
 using System.CodeDom;
 using System.CodeDom.Compiler;
 using System.Text;
@@ -92,14 +87,7 @@ namespace Majorsilence.Reporting.Data
 					args[ai] = Convert.ChangeType(dp.Value, pi.ParameterType);
 				ai++;
 			}
-#if !NETSTANDARD2_0 && !NET6_0_OR_GREATER
-            SoapHttpClientProtocol so = o as SoapHttpClientProtocol;
-			if (so != null && timeout != 0)
-				so.Timeout = timeout;
-			return mi.Invoke(o, args);
-#else
             throw new NotImplementedException("Some classes are not available on .NET STANDARD");
-#endif
 		}
 
 		// constructor
@@ -112,78 +100,9 @@ namespace Majorsilence.Reporting.Data
 
 		private Assembly GetAssembly()
 		{
-#if !NETSTANDARD2_0 && !NET6_0_OR_GREATER
-            ServiceDescription sd=null;
-                
-            // HACK: We need to run the async method synchronously here, but we can't use .Result or .Wait() because it can cause deadlocks. So we use Task.Run to run it on a separate thread and then wait for the result.
-            Task.Run(async()=> sd = await GetServiceDescription()).GetAwaiter().GetResult();
-
-			// ServiceDescriptionImporter provide means for generating client proxy classes for XML Web services 
-			CodeNamespace cns = new CodeNamespace(_Namespace);
-			ServiceDescriptionImporter sdi = new ServiceDescriptionImporter();
-			sdi.AddServiceDescription(sd, null, null);
-			sdi.ProtocolName = "Soap";
-			sdi.Import(cns, null);
-
-			// Generate the proxy source code
-			CSharpCodeProvider cscp = new CSharpCodeProvider();
-			StringBuilder sb = new StringBuilder();
-			StringWriter sw = new StringWriter(sb);
-			cscp.GenerateCodeFromNamespace(cns, sw, null);
-			string proxy = sb.ToString();
-			sw.Close();
-
-			// debug code !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-//			StreamWriter tsw = File.CreateText(@"c:\temp\proxy.cs");
-//			tsw.Write(proxy);
-//			tsw.Close();
-			// debug code !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!   
-
-			// Create Assembly
-			CompilerParameters cp = new CompilerParameters();
-			cp.ReferencedAssemblies.Add("System.dll");
-			cp.ReferencedAssemblies.Add("System.Xml.dll");
-			cp.ReferencedAssemblies.Add("System.Web.Services.dll");
-			cp.GenerateExecutable = false;
-			cp.GenerateInMemory = false;			// just loading into memory causes problems when instantiating
-			cp.IncludeDebugInformation = false; 
-			CompilerResults cr = cscp.CompileAssemblyFromSource(cp, proxy);
-			if(cr.Errors.Count > 0)
-			{
-				StringBuilder err = new StringBuilder(string.Format("WSDL proxy compile has {0} error(s).", cr.Errors.Count));
-				foreach (CompilerError ce in cr.Errors)
-				{
-					err.AppendFormat("\r\n{0} {1}", ce.ErrorNumber, ce.ErrorText);
-				}
-				throw new Exception(err.ToString()); 
-			}
-
-			return Assembly.LoadFrom(cr.PathToAssembly);	// We need an assembly loaded from the file system
-															//   or instantiation of object complains
-#else
             throw new NotImplementedException("Some classes are missing on .NET STANDARD");
-#endif
 		}
 
-#if !NETSTANDARD2_0 && !NET6_0_OR_GREATER
-        public async Task<ServiceDescription> GetServiceDescription()
-        {
-            ServiceDescription sd = new ServiceDescription();
-            Stream sr=null;
-            try
-            {
-                sr = await GetStream();
-                sd = ServiceDescription.Read(sr);
-            }
-            finally
-            {
-                if (sr != null)
-                    sr.Close();
-            }
-
-            return sd;
-        }
-#endif
         
         async Task<Stream> GetStream()
         {

@@ -1,6 +1,5 @@
 using System;
 using System.Windows.Forms;
-using System.Drawing;
 using System.ComponentModel;
 using System.Collections;
 
@@ -18,7 +17,7 @@ private System.ComponentModel.Container components = null;
 
 		private void InitializeComponent()
 		{
-			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(SingleCtlDialog));
+			System.Windows.Forms.ComponentResourceManager resources = new System.Windows.Forms.ComponentResourceManager(typeof(SingleCtlDialog));
 			this.bOK = new System.Windows.Forms.Button();
 			this.bCancel = new System.Windows.Forms.Button();
 			this.pMain = new System.Windows.Forms.Panel();
@@ -27,19 +26,19 @@ private System.ComponentModel.Container components = null;
 			// bOK
 			// 
 			resources.ApplyResources(this.bOK, "bOK");
-			this.bOK.DialogResult = System.Windows.Forms.DialogResult.OK;
+			this.bOK.DialogResult = Majorsilence.Forms.DialogResult.OK;
 			this.bOK.Name = "bOK";
 			this.bOK.UseVisualStyleBackColor = true;
-			this.bOK.Click += new System.EventHandler(this.bOK_Click);
+			this.bOK.Click += this.bOK_Click;
 			// 
 			// bCancel
 			// 
 			resources.ApplyResources(this.bCancel, "bCancel");
 			this.bCancel.CausesValidation = false;
-			this.bCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
+			this.bCancel.DialogResult = Majorsilence.Forms.DialogResult.Cancel;
 			this.bCancel.Name = "bCancel";
 			this.bCancel.UseVisualStyleBackColor = true;
-			this.bCancel.Click += new System.EventHandler(this.bCancel_Click);
+			this.bCancel.Click += this.bCancel_Click;
 			// 
 			// pMain
 			// 
@@ -54,7 +53,7 @@ private System.ComponentModel.Container components = null;
 			this.Controls.Add(this.pMain);
 			this.Controls.Add(this.bCancel);
 			this.Controls.Add(this.bOK);
-			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.SizableToolWindow;
+			this.FormBorderStyle = Majorsilence.Forms.FormBorderStyle.SizableToolWindow;
 			this.MaximizeBox = false;
 			this.MinimizeBox = false;
 			this.Name = "SingleCtlDialog";

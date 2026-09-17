@@ -3,11 +3,10 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Drawing;
 using System.Data;
 using System.Windows.Forms;
 using System.Xml;
-using System.Drawing.Printing;
+using Majorsilence.Forms.Printing;
 using Majorsilence.Reporting.RdlDesign.Resources;
 
 namespace Majorsilence.Reporting.RdlDesign
@@ -78,7 +77,7 @@ namespace Majorsilence.Reporting.RdlDesign
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Exception when try get paper sizes: {ex}");
+                Majorsilence.Forms.MessageBox.Show($"Exception when try get paper sizes: {ex}");
             }
         }
 
@@ -146,7 +145,7 @@ namespace Majorsilence.Reporting.RdlDesign
             catch (Exception ex)
             {
                 e.Cancel = true;
-                MessageBox.Show(string.Format(Strings.ReportCtl_Show_SizeInvalid, tb.Text, ex.Message), tb.Tag + " " + Strings.ReportCtl_Show_Field_Invalid);
+                Majorsilence.Forms.MessageBox.Show(string.Format(Strings.ReportCtl_Show_SizeInvalid, tb.Text, ex.Message), tb.Tag + " " + Strings.ReportCtl_Show_Field_Invalid);
             }
         }
 

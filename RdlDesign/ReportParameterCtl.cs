@@ -604,7 +604,7 @@ namespace Majorsilence.Reporting.RdlDesign
             using (DialogListOfStrings dlos = new DialogListOfStrings(rp.DefaultValue))
             {
                 dlos.Text = Strings.ReportParameterCtl_bDefaultValues_Click_Default_Values;
-                if (dlos.ShowDialog() != DialogResult.OK)
+                if (dlos.ShowDialog() != Majorsilence.Forms.DialogResult.OK)
                     return;
                 rp.DefaultValue = dlos.ListOfStrings;
                 this.tbParmDefaultValue.Text = rp.DefaultValueDisplay;
@@ -623,7 +623,7 @@ namespace Majorsilence.Reporting.RdlDesign
 
             using (DialogValidValues dvv = new DialogValidValues(rp.ValidValues))
             {
-                if (dvv.ShowDialog() != DialogResult.OK)
+                if (dvv.ShowDialog() != Majorsilence.Forms.DialogResult.OK)
                     return;
                 rp.ValidValues = dvv.ValidValues;
                 this.tbParmValidValues.Text = rp.ValidValuesDisplay;

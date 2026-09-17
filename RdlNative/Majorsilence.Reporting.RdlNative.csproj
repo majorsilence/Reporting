@@ -5,7 +5,7 @@
 		<RootNamespace>Majorsilence.Reporting.RdlNative</RootNamespace>
 		<!-- AOT publishing targets net10.0 only; net8.0 kept for managed-mode builds -->
 		<TargetFrameworks>net8.0;net10.0</TargetFrameworks>
-		<Configurations>Debug;Release;Debug-DrawingCompat;Release-DrawingCompat</Configurations>
+		<Configurations>Debug;Release</Configurations>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<IsAotCompatible>true</IsAotCompatible>
 		<EnableTrimAnalyzer>true</EnableTrimAnalyzer>

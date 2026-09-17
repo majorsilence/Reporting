@@ -2,7 +2,6 @@
 using System;
 using System.Collections;
 using System.ComponentModel;
-using System.Drawing;
 using System.Data;
 using System.Windows.Forms;
 using System.Xml;
@@ -73,7 +72,7 @@ namespace Majorsilence.Reporting.RdlDesign
 		/// </summary>
 		private void InitializeComponent()
 		{
-			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ReportXmlCtl));
+			System.Windows.Forms.ComponentResourceManager resources = new System.Windows.Forms.ComponentResourceManager(typeof(ReportXmlCtl));
             this.DoubleBuffered = true;
 			this.label1 = new System.Windows.Forms.Label();
 			this.tbDataTransform = new System.Windows.Forms.TextBox();
@@ -124,7 +123,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			// cbElementStyle
 			// 
 			resources.ApplyResources(this.cbElementStyle, "cbElementStyle");
-			this.cbElementStyle.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+			this.cbElementStyle.DropDownStyle = Majorsilence.Forms.ComboBoxStyle.DropDownList;
 			this.cbElementStyle.Items.AddRange(new object[] {
             resources.GetString("cbElementStyle.Items"),
             resources.GetString("cbElementStyle.Items1")});
@@ -134,7 +133,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			// 
 			resources.ApplyResources(this.bOpenXsl, "bOpenXsl");
 			this.bOpenXsl.Name = "bOpenXsl";
-			this.bOpenXsl.Click += new System.EventHandler(this.bOpenXsl_Click);
+			this.bOpenXsl.Click += this.bOpenXsl_Click;
 			// 
 			// ReportXmlCtl
 			// 
@@ -195,7 +194,7 @@ namespace Majorsilence.Reporting.RdlDesign
                 //			ofd.DefaultExt = "xsl";
                 //			ofd.AddExtension = true;
 
-                if (ofd.ShowDialog() == DialogResult.OK)
+                if (ofd.ShowDialog() == Majorsilence.Forms.DialogResult.OK)
                 {
                     string file = Path.GetFileName(ofd.FileName);
 

@@ -3,7 +3,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Drawing;
 using System.Data;
 using System.Windows.Forms;
 using System.Xml;
@@ -99,7 +98,7 @@ namespace Majorsilence.Reporting.RdlDesign
 
             XmlNode sNode = _Draw.GetCreateNamedChildNode(node, "Style");
 
-			// Handle BorderStyle
+			// Handle Majorsilence.Forms.BorderStyle
 			XmlNode bsNode = _Draw.SetElement(sNode, "BorderStyle", null);
 			cbStyleDefault.Text = _Draw.GetElementValue(bsNode, "Default", "None");
 			cbStyleLeft.Text = _Draw.GetElementValue(bsNode, "Left", cbStyleDefault.Text);
@@ -177,7 +176,7 @@ namespace Majorsilence.Reporting.RdlDesign
 		/// </summary>
 		private void InitializeComponent()
 		{
-			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(StyleBorderCtl));
+			System.Windows.Forms.ComponentResourceManager resources = new System.Windows.Forms.ComponentResourceManager(typeof(StyleBorderCtl));
 			this.lLeft = new System.Windows.Forms.Label();
 			this.lBottom = new System.Windows.Forms.Label();
 			this.lTop = new System.Windows.Forms.Label();
@@ -273,7 +272,7 @@ namespace Majorsilence.Reporting.RdlDesign
             resources.GetString("cbStyleLeft.Items8"),
             resources.GetString("cbStyleLeft.Items9")});
 			this.cbStyleLeft.Name = "cbStyleLeft";
-			this.cbStyleLeft.SelectedIndexChanged += new System.EventHandler(this.cbStyle_SelectedIndexChanged);
+			this.cbStyleLeft.SelectedIndexChanged += this.cbStyle_SelectedIndexChanged;
 			// 
 			// cbStyleBottom
 			// 
@@ -290,7 +289,7 @@ namespace Majorsilence.Reporting.RdlDesign
             resources.GetString("cbStyleBottom.Items8"),
             resources.GetString("cbStyleBottom.Items9")});
 			this.cbStyleBottom.Name = "cbStyleBottom";
-			this.cbStyleBottom.SelectedIndexChanged += new System.EventHandler(this.cbStyle_SelectedIndexChanged);
+			this.cbStyleBottom.SelectedIndexChanged += this.cbStyle_SelectedIndexChanged;
 			// 
 			// cbStyleTop
 			// 
@@ -307,7 +306,7 @@ namespace Majorsilence.Reporting.RdlDesign
             resources.GetString("cbStyleTop.Items8"),
             resources.GetString("cbStyleTop.Items9")});
 			this.cbStyleTop.Name = "cbStyleTop";
-			this.cbStyleTop.SelectedIndexChanged += new System.EventHandler(this.cbStyle_SelectedIndexChanged);
+			this.cbStyleTop.SelectedIndexChanged += this.cbStyle_SelectedIndexChanged;
 			// 
 			// cbStyleRight
 			// 
@@ -324,97 +323,97 @@ namespace Majorsilence.Reporting.RdlDesign
             resources.GetString("cbStyleRight.Items8"),
             resources.GetString("cbStyleRight.Items9")});
 			this.cbStyleRight.Name = "cbStyleRight";
-			this.cbStyleRight.SelectedIndexChanged += new System.EventHandler(this.cbStyle_SelectedIndexChanged);
+			this.cbStyleRight.SelectedIndexChanged += this.cbStyle_SelectedIndexChanged;
 			// 
 			// bColorLeft
 			// 
 			resources.ApplyResources(this.bColorLeft, "bColorLeft");
 			this.bColorLeft.Name = "bColorLeft";
-			this.bColorLeft.Click += new System.EventHandler(this.bColor_Click);
+			this.bColorLeft.Click += this.bColor_Click;
 			// 
 			// cbColorLeft
 			// 
 			resources.ApplyResources(this.cbColorLeft, "cbColorLeft");
 			this.cbColorLeft.Name = "cbColorLeft";
-			this.cbColorLeft.SelectedIndexChanged += new System.EventHandler(this.cbColor_SelectedIndexChanged);
+			this.cbColorLeft.SelectedIndexChanged += this.cbColor_SelectedIndexChanged;
 			// 
 			// bColorRight
 			// 
 			resources.ApplyResources(this.bColorRight, "bColorRight");
 			this.bColorRight.Name = "bColorRight";
-			this.bColorRight.Click += new System.EventHandler(this.bColor_Click);
+			this.bColorRight.Click += this.bColor_Click;
 			// 
 			// cbColorRight
 			// 
 			resources.ApplyResources(this.cbColorRight, "cbColorRight");
 			this.cbColorRight.Name = "cbColorRight";
-			this.cbColorRight.SelectedIndexChanged += new System.EventHandler(this.cbColor_SelectedIndexChanged);
+			this.cbColorRight.SelectedIndexChanged += this.cbColor_SelectedIndexChanged;
 			// 
 			// bColorTop
 			// 
 			resources.ApplyResources(this.bColorTop, "bColorTop");
 			this.bColorTop.Name = "bColorTop";
-			this.bColorTop.Click += new System.EventHandler(this.bColor_Click);
+			this.bColorTop.Click += this.bColor_Click;
 			// 
 			// cbColorTop
 			// 
 			resources.ApplyResources(this.cbColorTop, "cbColorTop");
 			this.cbColorTop.Name = "cbColorTop";
-			this.cbColorTop.SelectedIndexChanged += new System.EventHandler(this.cbColor_SelectedIndexChanged);
+			this.cbColorTop.SelectedIndexChanged += this.cbColor_SelectedIndexChanged;
 			// 
 			// bColorBottom
 			// 
 			resources.ApplyResources(this.bColorBottom, "bColorBottom");
 			this.bColorBottom.Name = "bColorBottom";
-			this.bColorBottom.Click += new System.EventHandler(this.bColor_Click);
+			this.bColorBottom.Click += this.bColor_Click;
 			// 
 			// cbColorBottom
 			// 
 			resources.ApplyResources(this.cbColorBottom, "cbColorBottom");
 			this.cbColorBottom.Name = "cbColorBottom";
-			this.cbColorBottom.SelectedIndexChanged += new System.EventHandler(this.cbColor_SelectedIndexChanged);
+			this.cbColorBottom.SelectedIndexChanged += this.cbColor_SelectedIndexChanged;
 			// 
 			// tbWidthLeft
 			// 
 			resources.ApplyResources(this.tbWidthLeft, "tbWidthLeft");
 			this.tbWidthLeft.Name = "tbWidthLeft";
-			this.tbWidthLeft.TextChanged += new System.EventHandler(this.tbWidth_Changed);
+			this.tbWidthLeft.TextChanged += this.tbWidth_Changed;
 			// 
 			// tbWidthRight
 			// 
 			resources.ApplyResources(this.tbWidthRight, "tbWidthRight");
 			this.tbWidthRight.Name = "tbWidthRight";
-			this.tbWidthRight.TextChanged += new System.EventHandler(this.tbWidth_Changed);
+			this.tbWidthRight.TextChanged += this.tbWidth_Changed;
 			// 
 			// tbWidthTop
 			// 
 			resources.ApplyResources(this.tbWidthTop, "tbWidthTop");
 			this.tbWidthTop.Name = "tbWidthTop";
-			this.tbWidthTop.TextChanged += new System.EventHandler(this.tbWidth_Changed);
+			this.tbWidthTop.TextChanged += this.tbWidth_Changed;
 			// 
 			// tbWidthBottom
 			// 
 			resources.ApplyResources(this.tbWidthBottom, "tbWidthBottom");
 			this.tbWidthBottom.Name = "tbWidthBottom";
-			this.tbWidthBottom.TextChanged += new System.EventHandler(this.tbWidth_Changed);
+			this.tbWidthBottom.TextChanged += this.tbWidth_Changed;
 			// 
 			// tbWidthDefault
 			// 
 			resources.ApplyResources(this.tbWidthDefault, "tbWidthDefault");
 			this.tbWidthDefault.Name = "tbWidthDefault";
-			this.tbWidthDefault.TextChanged += new System.EventHandler(this.tbWidthDefault_TextChanged);
+			this.tbWidthDefault.TextChanged += this.tbWidthDefault_TextChanged;
 			// 
 			// bColorDefault
 			// 
 			resources.ApplyResources(this.bColorDefault, "bColorDefault");
 			this.bColorDefault.Name = "bColorDefault";
-			this.bColorDefault.Click += new System.EventHandler(this.bColor_Click);
+			this.bColorDefault.Click += this.bColor_Click;
 			// 
 			// cbColorDefault
 			// 
 			resources.ApplyResources(this.cbColorDefault, "cbColorDefault");
 			this.cbColorDefault.Name = "cbColorDefault";
-			this.cbColorDefault.SelectedIndexChanged += new System.EventHandler(this.cbColorDefault_SelectedIndexChanged);
+			this.cbColorDefault.SelectedIndexChanged += this.cbColorDefault_SelectedIndexChanged;
 			// 
 			// cbStyleDefault
 			// 
@@ -431,7 +430,7 @@ namespace Majorsilence.Reporting.RdlDesign
             resources.GetString("cbStyleDefault.Items8"),
             resources.GetString("cbStyleDefault.Items9")});
 			this.cbStyleDefault.Name = "cbStyleDefault";
-			this.cbStyleDefault.SelectedIndexChanged += new System.EventHandler(this.cbStyleDefault_SelectedIndexChanged);
+			this.cbStyleDefault.SelectedIndexChanged += this.cbStyleDefault_SelectedIndexChanged;
 			// 
 			// label8
 			// 
@@ -443,105 +442,105 @@ namespace Majorsilence.Reporting.RdlDesign
 			resources.ApplyResources(this.bSD, "bSD");
 			this.bSD.Name = "bSD";
 			this.bSD.Tag = "sd";
-			this.bSD.Click += new System.EventHandler(this.bExpr_Click);
+			this.bSD.Click += this.bExpr_Click;
 			// 
 			// bSL
 			// 
 			resources.ApplyResources(this.bSL, "bSL");
 			this.bSL.Name = "bSL";
 			this.bSL.Tag = "sl";
-			this.bSL.Click += new System.EventHandler(this.bExpr_Click);
+			this.bSL.Click += this.bExpr_Click;
 			// 
 			// bSR
 			// 
 			resources.ApplyResources(this.bSR, "bSR");
 			this.bSR.Name = "bSR";
 			this.bSR.Tag = "sr";
-			this.bSR.Click += new System.EventHandler(this.bExpr_Click);
+			this.bSR.Click += this.bExpr_Click;
 			// 
 			// bST
 			// 
 			resources.ApplyResources(this.bST, "bST");
 			this.bST.Name = "bST";
 			this.bST.Tag = "st";
-			this.bST.Click += new System.EventHandler(this.bExpr_Click);
+			this.bST.Click += this.bExpr_Click;
 			// 
 			// bSB
 			// 
 			resources.ApplyResources(this.bSB, "bSB");
 			this.bSB.Name = "bSB";
 			this.bSB.Tag = "sb";
-			this.bSB.Click += new System.EventHandler(this.bExpr_Click);
+			this.bSB.Click += this.bExpr_Click;
 			// 
 			// bCD
 			// 
 			resources.ApplyResources(this.bCD, "bCD");
 			this.bCD.Name = "bCD";
 			this.bCD.Tag = "cd";
-			this.bCD.Click += new System.EventHandler(this.bExpr_Click);
+			this.bCD.Click += this.bExpr_Click;
 			// 
 			// bCT
 			// 
 			resources.ApplyResources(this.bCT, "bCT");
 			this.bCT.Name = "bCT";
 			this.bCT.Tag = "ct";
-			this.bCT.Click += new System.EventHandler(this.bExpr_Click);
+			this.bCT.Click += this.bExpr_Click;
 			// 
 			// bCB
 			// 
 			resources.ApplyResources(this.bCB, "bCB");
 			this.bCB.Name = "bCB";
 			this.bCB.Tag = "cb";
-			this.bCB.Click += new System.EventHandler(this.bExpr_Click);
+			this.bCB.Click += this.bExpr_Click;
 			// 
 			// bWB
 			// 
 			resources.ApplyResources(this.bWB, "bWB");
 			this.bWB.Name = "bWB";
 			this.bWB.Tag = "wb";
-			this.bWB.Click += new System.EventHandler(this.bExpr_Click);
+			this.bWB.Click += this.bExpr_Click;
 			// 
 			// bWT
 			// 
 			resources.ApplyResources(this.bWT, "bWT");
 			this.bWT.Name = "bWT";
 			this.bWT.Tag = "wt";
-			this.bWT.Click += new System.EventHandler(this.bExpr_Click);
+			this.bWT.Click += this.bExpr_Click;
 			// 
 			// bWR
 			// 
 			resources.ApplyResources(this.bWR, "bWR");
 			this.bWR.Name = "bWR";
 			this.bWR.Tag = "wr";
-			this.bWR.Click += new System.EventHandler(this.bExpr_Click);
+			this.bWR.Click += this.bExpr_Click;
 			// 
 			// bCR
 			// 
 			resources.ApplyResources(this.bCR, "bCR");
 			this.bCR.Name = "bCR";
 			this.bCR.Tag = "cr";
-			this.bCR.Click += new System.EventHandler(this.bExpr_Click);
+			this.bCR.Click += this.bExpr_Click;
 			// 
 			// bWL
 			// 
 			resources.ApplyResources(this.bWL, "bWL");
 			this.bWL.Name = "bWL";
 			this.bWL.Tag = "wl";
-			this.bWL.Click += new System.EventHandler(this.bExpr_Click);
+			this.bWL.Click += this.bExpr_Click;
 			// 
 			// bWD
 			// 
 			resources.ApplyResources(this.bWD, "bWD");
 			this.bWD.Name = "bWD";
 			this.bWD.Tag = "wd";
-			this.bWD.Click += new System.EventHandler(this.bExpr_Click);
+			this.bWD.Click += this.bExpr_Click;
 			// 
 			// bCL
 			// 
 			resources.ApplyResources(this.bCL, "bCL");
 			this.bCL.Name = "bCL";
 			this.bCL.Tag = "cl";
-			this.bCL.Click += new System.EventHandler(this.bExpr_Click);
+			this.bCL.Click += this.bExpr_Click;
 			// 
 			// StyleBorderCtl
 			// 
@@ -629,7 +628,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			}
 			catch (Exception ex)
 			{
-				MessageBox.Show(ex.Message, name + " " + Strings.StyleBorderCtl_Show_SizeInvalid);
+				Majorsilence.Forms.MessageBox.Show(ex.Message, name + " " + Strings.StyleBorderCtl_Show_SizeInvalid);
 				return false;
 			}
 
@@ -661,7 +660,7 @@ namespace Majorsilence.Reporting.RdlDesign
             bool bLine = xNode.Name == "Line";
 			XmlNode sNode = _Draw.GetCreateNamedChildNode(xNode, "Style");
 
-			// Handle BorderStyle
+			// Handle Majorsilence.Forms.BorderStyle
 			XmlNode bsNode = _Draw.SetElement(sNode, "BorderStyle", null);
 			if (fStyleDefault)
 				_Draw.SetElement(bsNode, "Default", cbStyleDefault.Text);
@@ -726,26 +725,26 @@ namespace Majorsilence.Reporting.RdlDesign
 
                 cd.CustomColors = RdlDesigner.GetCustomColors();
 
-                if (cd.ShowDialog() != DialogResult.OK)
+                if (cd.ShowDialog() != Majorsilence.Forms.DialogResult.OK)
                     return;
 
                 RdlDesigner.SetCustomColors(cd.CustomColors);
                 if (sender == this.bColorDefault)
                 {
-                    cbColorDefault.Text = ColorTranslator.ToHtml(cd.Color);
-                    cbColorLeft.Text = ColorTranslator.ToHtml(cd.Color);
-                    cbColorRight.Text = ColorTranslator.ToHtml(cd.Color);
-                    cbColorTop.Text = ColorTranslator.ToHtml(cd.Color);
-                    cbColorBottom.Text = ColorTranslator.ToHtml(cd.Color);
+                    cbColorDefault.Text = System.Windows.Forms.ColorTranslator.ToHtml(cd.Color);
+                    cbColorLeft.Text = System.Windows.Forms.ColorTranslator.ToHtml(cd.Color);
+                    cbColorRight.Text = System.Windows.Forms.ColorTranslator.ToHtml(cd.Color);
+                    cbColorTop.Text = System.Windows.Forms.ColorTranslator.ToHtml(cd.Color);
+                    cbColorBottom.Text = System.Windows.Forms.ColorTranslator.ToHtml(cd.Color);
                 }
                 else if (sender == this.bColorLeft)
-                    cbColorLeft.Text = ColorTranslator.ToHtml(cd.Color);
+                    cbColorLeft.Text = System.Windows.Forms.ColorTranslator.ToHtml(cd.Color);
                 else if (sender == this.bColorRight)
-                    cbColorRight.Text = ColorTranslator.ToHtml(cd.Color);
+                    cbColorRight.Text = System.Windows.Forms.ColorTranslator.ToHtml(cd.Color);
                 else if (sender == this.bColorTop)
-                    cbColorTop.Text = ColorTranslator.ToHtml(cd.Color);
+                    cbColorTop.Text = System.Windows.Forms.ColorTranslator.ToHtml(cd.Color);
                 else if (sender == this.bColorBottom)
-                    cbColorBottom.Text = ColorTranslator.ToHtml(cd.Color);
+                    cbColorBottom.Text = System.Windows.Forms.ColorTranslator.ToHtml(cd.Color);
             }
 		
 			return;
@@ -813,7 +812,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			Button b = sender as Button;
 			if (b == null)
 				return;
-			Control c = null;
+			Majorsilence.Forms.Control c = null;
 			bool bColor=false;
 			switch (b.Tag as string)
 			{
@@ -875,8 +874,8 @@ namespace Majorsilence.Reporting.RdlDesign
 			XmlNode sNode = _ReportItems[0];
             using (DialogExprEditor ee = new DialogExprEditor(_Draw, c.Text, sNode, bColor))
             {
-                DialogResult dr = ee.ShowDialog();
-                if (dr == DialogResult.OK)
+                Majorsilence.Forms.DialogResult dr = ee.ShowDialog();
+                if (dr == Majorsilence.Forms.DialogResult.OK)
                     c.Text = ee.Expression;
             }
 			return;

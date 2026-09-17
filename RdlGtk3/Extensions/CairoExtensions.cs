@@ -28,12 +28,8 @@ using Cairo;
 using Gdk;
 using Color = Cairo.Color;
 using Rectangle = Cairo.Rectangle;
-#if DRAWINGCOMPAT
 using Draw2 = Majorsilence.Forms.Drawing;
 
-#else
-using Draw2 = System.Drawing;
-#endif
 
 namespace Majorsilence.Reporting.RdlGtk3
 {

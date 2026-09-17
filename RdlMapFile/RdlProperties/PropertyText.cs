@@ -2,6 +2,7 @@ using RdlMapFile.Resources;
 using System.ComponentModel;            // need this for the properties metadata
 
 using System.Drawing;
+using Majorsilence.Forms.Drawing;
 using System.Globalization;
 using System.Xml;
 

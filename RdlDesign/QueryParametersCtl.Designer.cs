@@ -29,7 +29,7 @@ namespace Majorsilence.Reporting.RdlDesign
 		/// </summary>
 		private void InitializeComponent()
 		{
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(QueryParametersCtl));
+            System.Windows.Forms.ComponentResourceManager resources = new System.Windows.Forms.ComponentResourceManager(typeof(QueryParametersCtl));
             this.DoubleBuffered = true;
             this.dgParms = new System.Windows.Forms.DataGridView();
             this.dgtbName = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -42,8 +42,8 @@ namespace Majorsilence.Reporting.RdlDesign
             // dgParms
             // 
             resources.ApplyResources(this.dgParms, "dgParms");
-            this.dgParms.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
-            this.dgParms.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
+            this.dgParms.AutoSizeColumnsMode = Majorsilence.Forms.DataGridViewAutoSizeColumnsMode.Fill;
+            this.dgParms.Columns.AddRange(new Majorsilence.Forms.DataGridViewColumn[] {
             this.dgtbName,
             this.dgtbValue});
             this.dgParms.Name = "dgParms";
@@ -65,13 +65,13 @@ namespace Majorsilence.Reporting.RdlDesign
             resources.ApplyResources(this.bValueExpr, "bValueExpr");
             this.bValueExpr.Name = "bValueExpr";
             this.bValueExpr.Tag = "value";
-            this.bValueExpr.Click += new System.EventHandler(this.bValueExpr_Click);
+            this.bValueExpr.Click += this.bValueExpr_Click;
             // 
             // bDelete
             // 
             resources.ApplyResources(this.bDelete, "bDelete");
             this.bDelete.Name = "bDelete";
-            this.bDelete.Click += new System.EventHandler(this.bDelete_Click);
+            this.bDelete.Click += this.bDelete_Click;
             // 
             // QueryParametersCtl
             // 

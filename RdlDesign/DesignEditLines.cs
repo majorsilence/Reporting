@@ -3,8 +3,9 @@ using System;
 using System.Collections;
 using System.ComponentModel;
 using System.Drawing;
-using System.Drawing.Drawing2D;
-using System.Drawing.Imaging;
+using System.Drawing;
+using Majorsilence.Forms.Drawing.Drawing2D;
+using Majorsilence.Forms.Drawing.Imaging;
 using System.Windows.Forms;
 using System.Globalization;
 using System.Net;
@@ -27,7 +28,7 @@ namespace Majorsilence.Reporting.RdlDesign
             // force to double buffering for smoother drawing
             this.DoubleBuffered = true;
 
-            this.Paint += new PaintEventHandler(DesignEditLinesPaint);
+            this.Paint += DesignEditLinesPaint;
         }
 
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
@@ -37,9 +38,9 @@ namespace Majorsilence.Reporting.RdlDesign
             set 
             { 
                 editor = value;
-                editor.TextChanged += new System.EventHandler(editor_TextChanged);
-                editor.Resize += new System.EventHandler(editor_Resize);
-                editor.VScroll += new System.EventHandler(editor_VScroll);
+                editor.TextChanged += editor_TextChanged;
+                editor.Resize += editor_Resize;
+                editor.VScroll += editor_VScroll;
             }
         }
 
@@ -48,7 +49,7 @@ namespace Majorsilence.Reporting.RdlDesign
             Lines_Draw(e.Graphics);
         } 
         
-        private void Lines_Draw(Graphics g)
+        private void Lines_Draw(Majorsilence.Forms.Drawing.Graphics g)
         {
             if (!this.Visible || editor == null)
                 return;
@@ -72,7 +73,7 @@ namespace Majorsilence.Reporting.RdlDesign
             first_line_y = editor.GetPositionFromCharIndex(first_index).Y;
 
             //  Draw the lines
-            SolidBrush sb = new SolidBrush(Control.DefaultBackColor);
+            Majorsilence.Forms.Drawing.SolidBrush sb = new Majorsilence.Forms.Drawing.SolidBrush(Control.DefaultBackColor);
             g.FillRectangle(sb, g.VisibleClipBounds);
             sb.Dispose();
 
@@ -96,7 +97,7 @@ namespace Majorsilence.Reporting.RdlDesign
 
         private void editor_Resize(object sender, EventArgs e)
         {
-            using (Graphics g = this.CreateGraphics())
+            using (Majorsilence.Forms.Drawing.Graphics g = this.CreateGraphics())
             {
                 Lines_Draw(g);
             }
@@ -104,7 +105,7 @@ namespace Majorsilence.Reporting.RdlDesign
 
         private void editor_VScroll(object sender, EventArgs e)
         {
-            using (Graphics g = this.CreateGraphics())
+            using (Majorsilence.Forms.Drawing.Graphics g = this.CreateGraphics())
             {
                 Lines_Draw(g);
             }
@@ -120,7 +121,7 @@ namespace Majorsilence.Reporting.RdlDesign
             if (saveTbEditorLines != eLines)
             {
                 saveTbEditorLines = eLines;
-                using (Graphics g = this.CreateGraphics())
+                using (Majorsilence.Forms.Drawing.Graphics g = this.CreateGraphics())
                 {
                     Lines_Draw(g);
                 }

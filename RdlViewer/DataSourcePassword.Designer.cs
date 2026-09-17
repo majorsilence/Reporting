@@ -1,6 +1,5 @@
 using System;
 using System.Windows.Forms;
-using System.Drawing;
 using System.ComponentModel;
 using System.Collections;
 
@@ -17,7 +16,7 @@ private System.ComponentModel.Container components = null;
 
 		private void InitializeComponent()
 		{
-			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(DataSourcePassword));
+			System.Windows.Forms.ComponentResourceManager resources = new System.Windows.Forms.ComponentResourceManager(typeof(DataSourcePassword));
 			this.label1 = new System.Windows.Forms.Label();
 			this.bOK = new System.Windows.Forms.Button();
 			this.bCancel = new System.Windows.Forms.Button();
@@ -32,13 +31,13 @@ private System.ComponentModel.Container components = null;
 			// bOK
 			// 
 			resources.ApplyResources(this.bOK, "bOK");
-			this.bOK.DialogResult = System.Windows.Forms.DialogResult.OK;
+			this.bOK.DialogResult = Majorsilence.Forms.DialogResult.OK;
 			this.bOK.Name = "bOK";
 			// 
 			// bCancel
 			// 
 			resources.ApplyResources(this.bCancel, "bCancel");
-			this.bCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
+			this.bCancel.DialogResult = Majorsilence.Forms.DialogResult.Cancel;
 			this.bCancel.Name = "bCancel";
 			// 
 			// tbPassPhrase
@@ -55,7 +54,7 @@ private System.ComponentModel.Container components = null;
 			this.Controls.Add(this.bCancel);
 			this.Controls.Add(this.bOK);
 			this.Controls.Add(this.label1);
-			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
+			this.FormBorderStyle = Majorsilence.Forms.FormBorderStyle.FixedDialog;
 			this.MaximizeBox = false;
 			this.MinimizeBox = false;
 			this.Name = "DataSourcePassword";

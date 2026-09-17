@@ -11,13 +11,8 @@ using System.Globalization;
 using System.Threading.Tasks;
 
 
-#if DRAWINGCOMPAT
 using Draw2 = Majorsilence.Forms.Drawing;
 using Majorsilence.Forms.Drawing.Imaging;
-#else
-using Draw2 = System.Drawing;
-using System.Drawing.Imaging;
-#endif
 
 namespace Majorsilence.Reporting.Rdl
 {

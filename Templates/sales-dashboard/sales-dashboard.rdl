@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Report xmlns="http://schemas.microsoft.com/sqlserver/reporting/2005/01/reportdefinition"
+        xmlns:rd="http://schemas.microsoft.com/SQLServer/reporting/reportdesigner">
+  <Description>Sales dashboard -- a monthly revenue-by-region bar chart plus a product-line summary table.</Description>
+  <PageHeight>11in</PageHeight>
+  <PageWidth>8.5in</PageWidth>
+  <TopMargin>.5in</TopMargin>
+  <LeftMargin>.6in</LeftMargin>
+  <RightMargin>.6in</RightMargin>
+  <BottomMargin>.5in</BottomMargin>
+  <Width>7.3in</Width>
+
+  <DataSources>
+    <DataSource Name="DS1">
+      <ConnectionProperties>
+        <DataProvider>Json</DataProvider>
+        <ConnectString>file=sample-data.json</ConnectString>
+      </ConnectionProperties>
+    </DataSource>
+  </DataSources>
+
+  <DataSets>
+    <DataSet Name="Header">
+      <Query>
+        <DataSourceName>DS1</DataSourceName>
+        <CommandText>columns=ReportTitle,GeneratedDate;table=root</CommandText>
+      </Query>
+      <Fields>
+        <Field Name="ReportTitle"><DataField>ReportTitle</DataField><rd:TypeName>System.String</rd:TypeName></Field>
+        <Field Name="GeneratedDate"><DataField>GeneratedDate</DataField><rd:TypeName>System.String</rd:TypeName></Field>
+      </Fields>
+    </DataSet>
+    <DataSet Name="MonthlySales">
+      <Query>
+        <DataSourceName>DS1</DataSourceName>
+        <CommandText>columns=Month,MonthOrder,Region,Revenue;table=root_MonthlySales</CommandText>
+      </Query>
+      <Fields>
+        <Field Name="Month"><DataField>Month</DataField><rd:TypeName>System.String</rd:TypeName></Field>
+        <Field Name="MonthOrder"><DataField>MonthOrder</DataField><rd:TypeName>System.Double</rd:TypeName></Field>
+        <Field Name="Region"><DataField>Region</DataField><rd:TypeName>System.String</rd:TypeName></Field>
+        <Field Name="Revenue"><DataField>Revenue</DataField><rd:TypeName>System.Double</rd:TypeName></Field>
+      </Fields>
+    </DataSet>
+    <DataSet Name="ProductLines">
+      <Query>
+        <DataSourceName>DS1</DataSourceName>
+        <CommandText>columns=ProductLine,Revenue,UnitsSold;table=root_ProductLines</CommandText>
+      </Query>
+      <Fields>
+        <Field Name="ProductLine"><DataField>ProductLine</DataField><rd:TypeName>System.String</rd:TypeName></Field>
+        <Field Name="Revenue"><DataField>Revenue</DataField><rd:TypeName>System.Double</rd:TypeName></Field>
+        <Field Name="UnitsSold"><DataField>UnitsSold</DataField><rd:TypeName>System.Double</rd:TypeName></Field>
+      </Fields>
+    </DataSet>
+  </DataSets>
+
+  <Body>
+    <Height>9in</Height>
+    <ReportItems>
+      <Textbox Name="Title">
+        <Top>0in</Top><Left>0in</Left><Width>5in</Width><Height>.28in</Height>
+        <Value>=First(Fields!ReportTitle.Value, "Header")</Value>
+        <Style><FontSize>18pt</FontSize><FontWeight>Bold</FontWeight><Color>#2C3E50</Color></Style>
+      </Textbox>
+      <Textbox Name="Generated">
+        <Top>.32in</Top><Left>0in</Left><Width>5in</Width><Height>.2in</Height>
+        <Value>=&quot;Generated &quot; &amp; First(Fields!GeneratedDate.Value, "Header")</Value>
+        <Style><FontSize>9pt</FontSize><Color>Gray</Color></Style>
+      </Textbox>
+
+      <Chart Name="RevenueChart">
+        <Top>.7in</Top>
+        <Left>0in</Left>
+        <Height>3.7in</Height>
+        <Width>6in</Width>
+        <DataSetName>MonthlySales</DataSetName>
+        <NoRows>No sales data.</NoRows>
+        <Style>
+          <BorderStyle><Default>Solid</Default></BorderStyle>
+          <BorderColor><Default>#DDDDDD</Default></BorderColor>
+          <BackgroundColor>White</BackgroundColor>
+        </Style>
+        <Type>Column</Type>
+        <Subtype>Plain</Subtype>
+        <CategoryGroupings>
+          <CategoryGrouping>
+            <DynamicCategories>
+              <Grouping Name="MonthGroup">
+                <GroupExpressions>
+                  <GroupExpression>=Fields!Month.Value</GroupExpression>
+                </GroupExpressions>
+              </Grouping>
+              <Sorting>
+                <SortBy>
+                  <SortExpression>=Fields!MonthOrder.Value</SortExpression>
+                  <Direction>Ascending</Direction>
+                </SortBy>
+              </Sorting>
+            </DynamicCategories>
+          </CategoryGrouping>
+        </CategoryGroupings>
+        <CategoryAxis>
+          <Axis>
+            <Visible>true</Visible>
+            <Title><Caption>Month</Caption></Title>
+          </Axis>
+        </CategoryAxis>
+        <SeriesGroupings>
+          <SeriesGrouping>
+            <DynamicSeries>
+              <Grouping Name="RegionGroup">
+                <GroupExpressions>
+                  <GroupExpression>=Fields!Region.Value</GroupExpression>
+                </GroupExpressions>
+              </Grouping>
+              <Label>=Fields!Region.Value</Label>
+            </DynamicSeries>
+          </SeriesGrouping>
+        </SeriesGroupings>
+        <ChartData>
+          <ChartSeries>
+            <DataPoints>
+              <DataPoint>
+                <DataValues>
+                  <DataValue><Value>=Sum(Fields!Revenue.Value)</Value></DataValue>
+                </DataValues>
+                <DataLabel><Visible>False</Visible></DataLabel>
+              </DataPoint>
+            </DataPoints>
+          </ChartSeries>
+        </ChartData>
+        <ValueAxis>
+          <Axis>
+            <Visible>true</Visible>
+            <Title><Caption>Revenue ($)</Caption></Title>
+          </Axis>
+        </ValueAxis>
+        <Legend>
+          <Visible>true</Visible>
+          <Position>BottomCenter</Position>
+        </Legend>
+        <Title>
+          <Caption>Monthly Revenue by Region</Caption>
+          <Style><FontWeight>Bold</FontWeight><FontSize>11pt</FontSize></Style>
+        </Title>
+        <Palette>SemiTransparent</Palette>
+      </Chart>
+
+      <Textbox Name="ProductHeading">
+        <Top>5.6in</Top><Left>0in</Left><Width>4in</Width><Height>.22in</Height>
+        <Value>Revenue by Product Line</Value>
+        <Style><FontSize>12pt</FontSize><FontWeight>Bold</FontWeight><Color>#2C3E50</Color></Style>
+      </Textbox>
+
+      <Table Name="ProductTable">
+        <DataSetName>ProductLines</DataSetName>
+        <NoRows>No product data.</NoRows>
+        <Top>5.9in</Top>
+        <Left>0in</Left>
+        <TableColumns>
+          <TableColumn><Width>3in</Width></TableColumn>
+          <TableColumn><Width>1.5in</Width></TableColumn>
+          <TableColumn><Width>1.4in</Width></TableColumn>
+          <TableColumn><Width>1.4in</Width></TableColumn>
+        </TableColumns>
+        <Header>
+          <TableRows>
+            <TableRow>
+              <Height>.22in</Height>
+              <TableCells>
+                <TableCell><ReportItems><Textbox Name="H_PL"><Value>Product Line</Value><Style><FontWeight>Bold</FontWeight><BackgroundColor>#2C3E50</BackgroundColor><Color>White</Color><PaddingLeft>4pt</PaddingLeft><VerticalAlign>Middle</VerticalAlign></Style></Textbox></ReportItems></TableCell>
+                <TableCell><ReportItems><Textbox Name="H_Rev"><Value>Revenue</Value><Style><FontWeight>Bold</FontWeight><BackgroundColor>#2C3E50</BackgroundColor><Color>White</Color><TextAlign>Right</TextAlign><PaddingRight>4pt</PaddingRight><VerticalAlign>Middle</VerticalAlign></Style></Textbox></ReportItems></TableCell>
+                <TableCell><ReportItems><Textbox Name="H_Units"><Value>Units Sold</Value><Style><FontWeight>Bold</FontWeight><BackgroundColor>#2C3E50</BackgroundColor><Color>White</Color><TextAlign>Right</TextAlign><PaddingRight>4pt</PaddingRight><VerticalAlign>Middle</VerticalAlign></Style></Textbox></ReportItems></TableCell>
+                <TableCell><ReportItems><Textbox Name="H_Pct"><Value>% of Total</Value><Style><FontWeight>Bold</FontWeight><BackgroundColor>#2C3E50</BackgroundColor><Color>White</Color><TextAlign>Right</TextAlign><PaddingRight>4pt</PaddingRight><VerticalAlign>Middle</VerticalAlign></Style></Textbox></ReportItems></TableCell>
+              </TableCells>
+            </TableRow>
+          </TableRows>
+          <RepeatOnNewPage>true</RepeatOnNewPage>
+        </Header>
+        <Details>
+          <TableRows>
+            <TableRow>
+              <Height>.2in</Height>
+              <TableCells>
+                <TableCell><ReportItems><Textbox Name="D_PL"><Value>=Fields!ProductLine.Value</Value><Style><PaddingLeft>4pt</PaddingLeft><BackgroundColor>=IIf(RowNumber(Nothing) Mod 2 = 0, "#F3EEFA", "White")</BackgroundColor></Style></Textbox></ReportItems></TableCell>
+                <TableCell><ReportItems><Textbox Name="D_Rev"><Value>=Format(Fields!Revenue.Value, "C0")</Value><Style><TextAlign>Right</TextAlign><PaddingRight>4pt</PaddingRight><BackgroundColor>=IIf(RowNumber(Nothing) Mod 2 = 0, "#F3EEFA", "White")</BackgroundColor></Style></Textbox></ReportItems></TableCell>
+                <TableCell><ReportItems><Textbox Name="D_Units"><Value>=Format(Fields!UnitsSold.Value, "N0")</Value><Style><TextAlign>Right</TextAlign><PaddingRight>4pt</PaddingRight><BackgroundColor>=IIf(RowNumber(Nothing) Mod 2 = 0, "#F3EEFA", "White")</BackgroundColor></Style></Textbox></ReportItems></TableCell>
+                <TableCell><ReportItems><Textbox Name="D_Pct"><Value>=Format(Fields!Revenue.Value / Sum(Fields!Revenue.Value, "ProductLines"), "P1")</Value><Style><TextAlign>Right</TextAlign><PaddingRight>4pt</PaddingRight><BackgroundColor>=IIf(RowNumber(Nothing) Mod 2 = 0, "#F3EEFA", "White")</BackgroundColor></Style></Textbox></ReportItems></TableCell>
+              </TableCells>
+            </TableRow>
+          </TableRows>
+        </Details>
+      </Table>
+    </ReportItems>
+  </Body>
+
+  <PageFooter>
+    <Height>16pt</Height>
+    <PrintOnFirstPage>true</PrintOnFirstPage>
+    <PrintOnLastPage>true</PrintOnLastPage>
+    <ReportItems>
+      <Textbox Name="PageNum">
+        <Top>1pt</Top><Left>0in</Left><Width>3in</Width><Height>14pt</Height>
+        <Value>=Globals!PageNumber &amp; " of " &amp; Globals!TotalPages</Value>
+        <Style><FontSize>8pt</FontSize><Color>Gray</Color></Style>
+      </Textbox>
+    </ReportItems>
+  </PageFooter>
+</Report>

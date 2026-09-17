@@ -2,7 +2,6 @@
 using System;
 using System.Collections;
 using System.ComponentModel;
-using System.Drawing;
 using System.Data;
 using System.Windows.Forms;
 using System.Xml;
@@ -92,7 +91,7 @@ namespace Majorsilence.Reporting.RdlDesign
 		/// </summary>
 		private void InitializeComponent()
 		{
-			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(TableRowCtl));
+			System.Windows.Forms.ComponentResourceManager resources = new System.Windows.Forms.ComponentResourceManager(typeof(TableRowCtl));
             this.DoubleBuffered = true;
 			this.grpBoxVisibility = new System.Windows.Forms.GroupBox();
 			this.bHidden = new System.Windows.Forms.Button();
@@ -121,20 +120,20 @@ namespace Majorsilence.Reporting.RdlDesign
 			resources.ApplyResources(this.bHidden, "bHidden");
 			this.bHidden.Name = "bHidden";
 			this.bHidden.Tag = "visibility";
-			this.bHidden.Click += new System.EventHandler(this.bExpr_Click);
+			this.bHidden.Click += this.bExpr_Click;
 			// 
 			// cbToggle
 			// 
 			resources.ApplyResources(this.cbToggle, "cbToggle");
 			this.cbToggle.Name = "cbToggle";
-			this.cbToggle.SelectedIndexChanged += new System.EventHandler(this.cbToggle_SelectedIndexChanged);
-			this.cbToggle.TextChanged += new System.EventHandler(this.cbToggle_SelectedIndexChanged);
+			this.cbToggle.SelectedIndexChanged += this.cbToggle_SelectedIndexChanged;
+			this.cbToggle.TextChanged += this.cbToggle_SelectedIndexChanged;
 			// 
 			// tbHidden
 			// 
 			resources.ApplyResources(this.tbHidden, "tbHidden");
 			this.tbHidden.Name = "tbHidden";
-			this.tbHidden.TextChanged += new System.EventHandler(this.tbHidden_TextChanged);
+			this.tbHidden.TextChanged += this.tbHidden_TextChanged;
 			// 
 			// label3
 			// 
@@ -155,7 +154,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			// 
 			resources.ApplyResources(this.tbRowHeight, "tbRowHeight");
 			this.tbRowHeight.Name = "tbRowHeight";
-			this.tbRowHeight.TextChanged += new System.EventHandler(this.tbRowHeight_TextChanged);
+			this.tbRowHeight.TextChanged += this.tbRowHeight_TextChanged;
 			// 
 			// TableRowCtl
 			// 
@@ -181,7 +180,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			}
 			catch (Exception ex)
 			{
-				MessageBox.Show(ex.Message, Strings.TableRowCtl_Show_HeightInvalid);
+				Majorsilence.Forms.MessageBox.Show(ex.Message, Strings.TableRowCtl_Show_HeightInvalid);
 				return false;
 			}
 
@@ -201,7 +200,7 @@ namespace Majorsilence.Reporting.RdlDesign
 							case "false":
 								break;
 							default:
-								MessageBox.Show(String.Format(Strings.TableRowCtl_Show_ExpressionTrueFalse, tbHidden.Text), Strings.TableRowCtl_Show_HiddenInvalid);
+								Majorsilence.Forms.MessageBox.Show(String.Format(Strings.TableRowCtl_Show_ExpressionTrueFalse, tbHidden.Text), Strings.TableRowCtl_Show_HiddenInvalid);
 								return false;
 						}
 					}
@@ -268,7 +267,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			Button b = sender as Button;
 			if (b == null)
 				return;
-			Control c = null;
+			Majorsilence.Forms.Control c = null;
 			switch (b.Tag as string)
 			{
 				case "visibility":
@@ -281,8 +280,8 @@ namespace Majorsilence.Reporting.RdlDesign
 
             using (DialogExprEditor ee = new DialogExprEditor(_Draw, c.Text, _TableRow))
             {
-                DialogResult dr = ee.ShowDialog();
-                if (dr == DialogResult.OK)
+                Majorsilence.Forms.DialogResult dr = ee.ShowDialog();
+                if (dr == Majorsilence.Forms.DialogResult.OK)
                     c.Text = ee.Expression;
                 return;
             }

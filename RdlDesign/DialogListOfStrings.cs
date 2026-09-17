@@ -1,6 +1,5 @@
 
 using System;
-using System.Drawing;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -51,7 +50,7 @@ namespace Majorsilence.Reporting.RdlDesign
             }
         }
 
-        private void lnk_LinkClicked(object sender, LinkLabelLinkClickedEventArgs ea)
+        private void lnk_LinkClicked(object sender, Majorsilence.Forms.LinkLabelLinkClickedEventArgs ea)
         {
             LinkLabel lnk = (LinkLabel)sender;
             lnk.Links[lnk.Links.IndexOf(ea.Link)].Visited = true;

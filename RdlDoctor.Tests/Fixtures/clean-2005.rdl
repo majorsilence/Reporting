@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Report Name="EmployeeReport">
+  <Description>This is the very first report</Description>
+  <Author>Kim A, Sheffield</Author>
+  <DataSources>
+    <DataSource Name="DS1">
+      <ConnectionProperties>
+        <DataProvider>SQLite</DataProvider>
+        <ConnectString>Data Source=northwindEF.db;Version=3;</ConnectString>
+        <IntegratedSecurity>false</IntegratedSecurity>
+      </ConnectionProperties>
+    </DataSource>
+  </DataSources>
+  <DataSets>
+    <DataSet Name="Data">
+      <Query>
+        <DataSourceName>DS1</DataSourceName>
+        <CommandText>Select EmployeeID, LastName, FirstName from Employees</CommandText>
+      </Query>
+      <Fields>
+        <Field Name="EmployeeID">
+          <DataField>EmployeeID</DataField>
+        </Field>
+        <Field Name="LastName">
+          <DataField>LastName</DataField>
+        </Field>
+        <Field Name="FirstName">
+          <DataField>FirstName</DataField>
+        </Field>
+      </Fields>
+    </DataSet>
+  </DataSets>
+  <PageHeader>
+    <Height>31.7pt</Height>
+    <ReportItems>
+      <Textbox Name="Textbox8">
+        <Height>20.4pt</Height>
+        <Width>320.1pt</Width>
+        <Value>List Report Showing Absolute Positioning</Value>
+        <Left>31.5pt</Left>
+        <Top>5.25pt</Top>
+        <Style>
+          <BorderStyle />
+          <BorderColor />
+          <BorderWidth />
+          <FontStyle>Normal</FontStyle>
+          <FontFamily>Arial</FontFamily>
+          <FontWeight>Bold</FontWeight>
+          <FontSize>14pt</FontSize>
+          <TextDecoration>None</TextDecoration>
+          <TextAlign>General</TextAlign>
+          <VerticalAlign>Top</VerticalAlign>
+          <Color>Black</Color>
+          <Direction>LTR</Direction>
+          <WritingMode>lr-tb</WritingMode>
+        </Style>
+      </Textbox>
+    </ReportItems>
+    <PrintOnFirstPage>True</PrintOnFirstPage>
+    <PrintOnLastPage>True</PrintOnLastPage>
+  </PageHeader>
+  <Body>
+    <Height>96.9pt</Height>
+    <ReportItems>
+      <Textbox Name="Textbox1">
+        <Top>0 in</Top>
+        <Left>.5 in</Left>
+        <Width>1 in</Width>
+        <Height>.25 in</Height>
+        <Value>Employee ID </Value>
+        <Action>
+          <Hyperlink>http://www.fyireporting.com</Hyperlink>
+        </Action>
+      </Textbox>
+      <Textbox Name="Textbox2">
+        <Top>0 in</Top>
+        <Left>1.5 in</Left>
+        <Width>1 in</Width>
+        <Height>.25 in</Height>
+        <Value>Last Name </Value>
+      </Textbox>
+      <Textbox Name="Textbox3">
+        <Top>.25 in</Top>
+        <Left>2.5 in</Left>
+        <Width>1 in</Width>
+        <Height>.25 in</Height>
+        <Value>First Name --</Value>
+      </Textbox>
+      <List Name="List1">
+        <Top>.75 in</Top>
+        <Height>.5 in</Height>
+        <ReportItems>
+          <Textbox Name="Textbox4">
+            <Top>0 in</Top>
+            <Left>.5 in</Left>
+            <Width>1 in</Width>
+            <Height>.25 in</Height>
+            <Value>=Fields!EmployeeID.Value</Value>
+          </Textbox>
+          <Textbox Name="Textbox5">
+            <Top>0 in</Top>
+            <Left>1.5 in</Left>
+            <Width>1 in</Width>
+            <Height>.25 in</Height>
+            <Value>=Fields!LastName.Value</Value>
+            <Action>
+              <Hyperlink>="http://www.google.com/search?q=" + Fields!LastName.Value</Hyperlink>
+            </Action>
+          </Textbox>
+          <Textbox Name="Textbox6">
+            <Top>0 in</Top>
+            <Left>2.5 in</Left>
+            <Width>1 in</Width>
+            <Height>.25 in</Height>
+            <Value>=Fields!FirstName.Value</Value>
+          </Textbox>
+          <Textbox Name="Textbox7">
+            <Top>.25 in</Top>
+            <Left>.5 in</Left>
+            <Width>2 in</Width>
+            <Height>.25 in</Height>
+            <Value>=Fields!FirstName.Value+" "+Fields!LastName.Value</Value>
+          </Textbox>
+        </ReportItems>
+      </List>
+    </ReportItems>
+    <Columns>1</Columns>
+  </Body>
+  <PageFooter>
+    <Height>0pt</Height>
+    <PrintOnFirstPage>True</PrintOnFirstPage>
+    <PrintOnLastPage>True</PrintOnLastPage>
+  </PageFooter>
+  <Width>8in</Width>
+  <PageWidth>8.5in</PageWidth>
+  <PageHeight>11in</PageHeight>
+  <DataElementName>Report</DataElementName>
+  <DataElementStyle>AttributeNormal</DataElementStyle>
+</Report>

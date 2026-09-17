@@ -1,16 +1,13 @@
 ﻿<Window x:Class="SampleDesignerControlWPF.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:wf="clr-namespace:System.Windows.Forms;assembly=System.Windows.Forms"
-        xmlns:myctrl="clr-namespace:Majorsilence.Reporting.RdlDesign;assembly=RdlDesigner"
         Title="MainWindow" Loaded="Window_Loaded_1" Height="auto" Width="auto">
 
 
     <DockPanel >
         <WindowsFormsHost Margin="0"  Name="windowsFormsHost1" DockPanel.Dock="Top">
-            <myctrl:RdlUserControl x:Name="reportDesigner"  />
         </WindowsFormsHost>
-      
+
     </DockPanel>
 
 </Window>

@@ -1,5 +1,4 @@
 using System;
-using System.Drawing;
 using System.Collections;
 using System.ComponentModel;
 using System.Windows.Forms;
@@ -41,13 +40,13 @@ namespace Majorsilence.Reporting.RdlDesign
             MDIChild mc = _RdlDesigner.ActiveMdiChild as MDIChild;
             if (mc == null || mc.DesignTab != DesignTabs.Edit)
             {
-                MessageBox.Show(Strings.DialogValidateRdl_ShowC_SelectRDLTab);
+                Majorsilence.Forms.MessageBox.Show(Strings.DialogValidateRdl_ShowC_SelectRDLTab);
                 return;
             }
 
             string syntax = mc.SourceRdl;
-            Cursor saveCursor = Cursor.Current;
-            Cursor.Current = Cursors.WaitCursor;
+            Majorsilence.Forms.Cursor saveCursor = Majorsilence.Forms.Cursor.Current;
+            Majorsilence.Forms.Cursor.Current = Cursors.WaitCursor;
             StringReader sr = null;
             XmlTextReader tr = null;
             XmlReader vr = null;
@@ -60,7 +59,7 @@ namespace Majorsilence.Reporting.RdlDesign
                 sr = new StringReader(syntax);
                 tr = new XmlTextReader(sr);
                 XmlReaderSettings xrs = new XmlReaderSettings();
-                xrs.ValidationEventHandler += new ValidationEventHandler(ValidationHandler);
+                xrs.ValidationEventHandler += ValidationHandler;
                 xrs.ValidationFlags = XmlSchemaValidationFlags.AllowXmlAttributes |
                                       XmlSchemaValidationFlags.ProcessIdentityConstraints |
                                       XmlSchemaValidationFlags.ProcessSchemaLocation |
@@ -92,7 +91,7 @@ namespace Majorsilence.Reporting.RdlDesign
             }
             finally
             {
-                Cursor.Current = saveCursor;
+                Majorsilence.Forms.Cursor.Current = saveCursor;
                 if (sr != null)
                     sr.Close();
                 if (tr != null)
@@ -138,7 +137,7 @@ namespace Majorsilence.Reporting.RdlDesign
 #if DEBUG
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message); // developer might care about this error??
+                Majorsilence.Forms.MessageBox.Show(ex.Message); // developer might care about this error??
             }
 #else
 			catch 
@@ -151,7 +150,7 @@ namespace Majorsilence.Reporting.RdlDesign
             this.Close();
         }
 
-        private void DialogValidateRdl_Closing(object sender, System.Windows.Forms.FormClosingEventArgs e)
+        private void DialogValidateRdl_Closing(object sender, Majorsilence.Forms.FormClosingEventArgs e)
         {
             this._RdlDesigner.ValidateSchemaClosing();
         }

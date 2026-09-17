@@ -2,7 +2,8 @@
 using System;
 using System.ComponentModel;
 using System.Drawing;
-using System.Drawing.Imaging;
+using System.Drawing;
+using Majorsilence.Forms.Drawing.Imaging;
 using System.Windows.Forms;
 
 
@@ -17,7 +18,7 @@ namespace Majorsilence.Reporting.RdlDesign
 
 		public SimpleToggle() 
 		{	
-			this.Appearance = Appearance.Button; 
+			this.Appearance = Majorsilence.Forms.Appearance.Button; 
 
 			this.UpColor = Color.LightGray;
 			this.DownColor = Color.Azure;
@@ -25,22 +26,22 @@ namespace Majorsilence.Reporting.RdlDesign
 
 			this.BackColor = this.Checked? this.DownColor: this.UpColor;
 			this.ForeColor = this.Enabled? Color.Black: Color.Gray;
-			this.Paint += new PaintEventHandler(this.DrawPanelPaint);
-			this.MouseEnter +=new EventHandler(SimpleToggle_MouseEnter);
-			this.MouseLeave +=new EventHandler(SimpleToggle_MouseLeave);
+			this.Paint += this.DrawPanelPaint;
+			this.MouseEnter += SimpleToggle_MouseEnter;
+			this.MouseLeave += SimpleToggle_MouseLeave;
 		}
 
 		private void DrawPanelPaint(object sender, System.Windows.Forms.PaintEventArgs e)
 		{
 
-			Graphics g = e.Graphics;
-			Brush b = null;
+			Majorsilence.Forms.Drawing.Graphics g = e.Graphics;
+			Majorsilence.Forms.Drawing.Brush b = null;
 			Pen p = null;
 
 			try			// never want to die in here
 			{
 
-				b = new SolidBrush(this.BackColor);
+				b = new Majorsilence.Forms.Drawing.SolidBrush(this.BackColor);
 				g.FillRectangle(b, e.ClipRectangle);
 				if (this.Checked || bIn)
 				{
@@ -51,19 +52,11 @@ namespace Majorsilence.Reporting.RdlDesign
 					int x = (this.Width - this.Image.Width) / 2;
 					int y = (this.Height - this.Image.Height) / 2;
 
-					// Draw Image using the transparency color
-					ImageAttributes imageAttr = new ImageAttributes();
-					imageAttr.SetColorKey(_Transparency, _Transparency,
-						ColorAdjustType.Default);
-
-					g.DrawImage(this.Image,         // Image
-						new Rectangle(x, y, this.Image.Width, this.Image.Height),    // Dest. rect.
-						0,							// srcX
-						0,							// srcY
-						this.Image.Width,           // srcWidth
-						this.Image.Height,          // srcHeight
-						GraphicsUnit.Pixel,			// srcUnit
-						imageAttr);					// ImageAttributes
+					// ImageAttributes/SetColorKey (transparent-color-key drawing) has no
+					// System.Windows.Forms equivalent -- see SimpleButton.cs for the same fix and
+					// rationale. Draw the image directly; the _Transparency color-keying effect
+					// is a documented, dropped cosmetic feature.
+					g.DrawImage(this.Image, new Rectangle(x, y, this.Image.Width, this.Image.Height));
 				}
 				else
 				{

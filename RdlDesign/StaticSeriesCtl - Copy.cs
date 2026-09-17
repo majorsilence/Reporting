@@ -25,7 +25,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Drawing;
 using System.Data;
 using System.Windows.Forms;
 using System.Xml;
@@ -119,7 +118,7 @@ namespace fyiReporting.RdlDesign
                 DialogExprEditor ee = new DialogExprEditor(_Draw, txt.Text,_ReportItems[0] , false);
                 try
                 {
-                    if (ee.ShowDialog() == DialogResult.OK)
+                    if (ee.ShowDialog() == Majorsilence.Forms.DialogResult.OK)
                     {                 
                         txt.Text = ee.Expression;
                     }

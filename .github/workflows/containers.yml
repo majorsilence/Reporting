@@ -24,9 +24,9 @@ jobs:
         with:
           dotnet-version: 10.0.x
       - name: Build
-        run: dotnet build -c Release-DrawingCompat ReportTests.Containers/ReportTests.Containers.csproj
+        run: dotnet build -c Release ReportTests.Containers/ReportTests.Containers.csproj
       - name: Test
-        run: dotnet test -c Release-DrawingCompat ReportTests.Containers/ReportTests.Containers.csproj --no-build --filter "TestCategory=Containers" --verbosity normal --logger:"trx"
+        run: dotnet test -c Release ReportTests.Containers/ReportTests.Containers.csproj --no-build --filter "TestCategory=Containers" --verbosity normal --logger:"trx"
       - name: Test Report
         uses: dorny/test-reporter@v2
         if: success() || failure()

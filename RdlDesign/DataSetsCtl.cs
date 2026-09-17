@@ -142,7 +142,7 @@ namespace Majorsilence.Reporting.RdlDesign
             string nerr = _Draw.NameError(this._dsNode, this.tbDSName.Text);
             if (nerr != null)
             {
-                MessageBox.Show(nerr, Strings.DataSetsCtl_Show_Name, MessageBoxButtons.OK,MessageBoxIcon.Error);
+                Majorsilence.Forms.MessageBox.Show(nerr, Strings.DataSetsCtl_Show_Name, Majorsilence.Forms.MessageBoxButtons.OK,Majorsilence.Forms.MessageBoxIcon.Error);
                 return false;
             }
             return true;
@@ -267,8 +267,8 @@ namespace Majorsilence.Reporting.RdlDesign
             SQLCtl sc = new SQLCtl(_Draw, cbDataSource.Text, this.scintillaSQL.Text, _dsv.QueryParameters);
             try
             {
-                DialogResult dr = sc.ShowDialog(this);
-                if (dr == DialogResult.OK)
+                Majorsilence.Forms.DialogResult dr = sc.ShowDialog(this);
+                if (dr == Majorsilence.Forms.DialogResult.OK)
                 {
                     scintillaSQL.Text = sc.SQL;
                 }

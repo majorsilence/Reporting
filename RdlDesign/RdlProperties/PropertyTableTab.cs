@@ -5,10 +5,11 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.Design;
 using System.Drawing;
-using System.Drawing.Drawing2D;
+using System.Drawing;
+using Majorsilence.Forms.Drawing.Drawing2D;
 using System.Data;
 using System.Windows.Forms;
-using System.Windows.Forms.Design;
+using Majorsilence.Forms.Design;
 using System.Xml;
 
 namespace Majorsilence.Reporting.RdlDesign
@@ -38,7 +39,7 @@ namespace Majorsilence.Reporting.RdlDesign
         }
 
         /// <summary>
-        /// The Image that will be displayed on the PropertyGrid toolbar.
+        /// The Majorsilence.Forms.Drawing.Image that will be displayed on the PropertyGrid toolbar.
         /// </summary>
         public override Bitmap Bitmap
         {

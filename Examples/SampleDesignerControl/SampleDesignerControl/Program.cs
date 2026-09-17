@@ -19,7 +19,7 @@ namespace SampleApp2_SetData
             Form frm = new Form();
             var ctl = new Majorsilence.Reporting.RdlDesign.RdlUserControl();
             ctl.OpenFile(@"C:\Users\peter\source\repos\My-FyiReporting\Examples\Examples\FileDirectoryTest.rdl");
-            ctl.Dock = DockStyle.Fill;
+            ctl.Dock = (Majorsilence.Forms.DockStyle)DockStyle.Fill;
             frm.Controls.Add(ctl);
 
             Application.Run(frm);

@@ -1,0 +1,72 @@
+name: Publish to nuget.org
+
+# Publishes the Majorsilence Reporting NuGet packages to nuget.org, using Trusted
+# Publishing (OIDC) -- no long-lived API key is stored in this repo.
+#
+# Trigger: only when a human clicks "Publish release" on a GitHub Release. windows.yml
+# creates these as drafts on a version-tag push, with every .nupkg/.snupkg build-
+# release.ps1 produced already attached as release assets. Publishing the draft is the
+# deliberate manual approval gate; nothing publishes to nuget.org just from pushing a tag
+# or to main.
+#
+# One-time setup required on nuget.org:
+#   1. nuget.org -> your username -> Trusted Publishing -> add policy
+#        Repository Owner: majorsilence
+#        Repository:       <this repo's name>
+#        Workflow File:     publish-nuget.yml
+#        Environment:       (leave blank; this workflow doesn't use one)
+#   2. No GitHub secret needed for the API key. NUGET_USER below can be a plain repo
+#      variable (vars.NUGET_USER) or a secret -- either works, it's not sensitive on
+#      its own.
+#
+# This intentionally does NOT rebuild the packages -- it pushes the exact .nupkg/
+# .snupkg files already attached to the published release (built once, by windows.yml,
+# from the tagged commit), rather than repacking and risking a non-reproducible diff
+# between what was reviewed in the draft and what gets published.
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write   # required for NuGet/login's OIDC token exchange
+      contents: read    # required to download this release's own assets
+    steps:
+      - name: Download release assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p nupkg
+          gh release download "${{ github.event.release.tag_name }}" \
+            --repo "${{ github.repository }}" \
+            --pattern '*.nupkg' \
+            --pattern '*.snupkg' \
+            --dir nupkg
+          ls -lh nupkg
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 10.0.x
+
+      # Exchanges this job's short-lived GitHub OIDC token for a ~1-hour nuget.org API
+      # key, per the Trusted Publishing policy configured on nuget.org (see header comment).
+      - name: NuGet login (OIDC -> temp API key)
+        uses: NuGet/login@v1
+        id: login
+        with:
+          user: ${{ vars.NUGET_USER }}
+
+      - name: Push to nuget.org
+        shell: bash
+        run: |
+          set -euo pipefail
+          dotnet nuget push "nupkg/*.nupkg" \
+            --api-key "${{ steps.login.outputs.NUGET_API_KEY }}" \
+            --source https://api.nuget.org/v3/index.json \
+            --skip-duplicate

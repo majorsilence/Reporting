@@ -1,0 +1,12 @@
+{
+  "name": "Customer Letter",
+  "slug": "customer-letter",
+  "description": "A mail-merge style letter with a personalized greeting and an embedded recent-orders summary.",
+  "tags": ["business", "correspondence", "mail-merge", "letter-size"],
+  "dataProvider": "Json",
+  "parameters": [],
+  "dataContract": {
+    "root": ["LetterDate", "CustomerName", "CustomerAddress", "SenderName", "SenderAddress", "SenderSignatory"],
+    "root.RecentOrders[]": ["OrderNumber", "OrderDate", "Total"]
+  }
+}

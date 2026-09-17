@@ -1,12 +1,13 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>net48;net8.0-windows</TargetFrameworks>
+    <!-- net48/net8.0-windows dropped, real System.Windows.Forms reference (UseWindowsForms) dropped:
+         this now builds against Majorsilence.Forms via Majorsilence.Forms.WinFormsShims.Compat, whose
+         generated System.Windows.Forms-namespace compat surface lets this source compile unchanged. -->
+    <TargetFrameworks>net8.0;net10.0</TargetFrameworks>
     <OutputType>WinExe</OutputType>
     <RootNamespace>SampleApp2_SetData</RootNamespace>
     <AssemblyName>SampleApp2-SetData</AssemblyName>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-    <UseWindowsForms>true</UseWindowsForms>
-    <ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
   </PropertyGroup>
   <ItemGroup>
     <None Update="SampleApp2-TestReport.rdl">
@@ -19,7 +20,12 @@
 		</Content>
 	</ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\..\RdlDesign\Majorsilence.Reporting.ReportDesigner.csproj" />
+  </ItemGroup>
+  <ItemGroup>
     <PackageReference Include="Microsoft.Data.Sqlite" />
-	<PackageReference Include="Majorsilence.Reporting.ReportDesigner" />
+    <PackageReference Include="Majorsilence.Forms" />
+    <PackageReference Include="Majorsilence.Forms.Avalonia" />
+    <PackageReference Include="Majorsilence.Forms.WinFormsShims.Compat" />
   </ItemGroup>
 </Project>

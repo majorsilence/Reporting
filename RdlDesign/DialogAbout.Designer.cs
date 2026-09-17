@@ -1,6 +1,5 @@
 using System;
 using System.Windows.Forms;
-using System.Drawing;
 using System.ComponentModel;
 using System.Collections;
 
@@ -22,7 +21,7 @@ private System.ComponentModel.Container components = null;
 
 		private void InitializeComponent()
 		{
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(DialogAbout));
+            System.Windows.Forms.ComponentResourceManager resources = new System.Windows.Forms.ComponentResourceManager(typeof(DialogAbout));
             this.bOK = new System.Windows.Forms.Button();
             this.tbLicense = new System.Windows.Forms.TextBox();
             this.linkLabel3 = new System.Windows.Forms.LinkLabel();
@@ -37,7 +36,7 @@ private System.ComponentModel.Container components = null;
             // bOK
             // 
             resources.ApplyResources(this.bOK, "bOK");
-            this.bOK.DialogResult = System.Windows.Forms.DialogResult.Cancel;
+            this.bOK.DialogResult = Majorsilence.Forms.DialogResult.Cancel;
             this.bOK.Name = "bOK";
             // 
             // tbLicense
@@ -52,7 +51,7 @@ private System.ComponentModel.Container components = null;
             this.linkLabel3.Name = "linkLabel3";
             this.linkLabel3.TabStop = true;
             this.linkLabel3.Tag = "https://github.com/majorsilence/Reporting/discussions";
-            this.linkLabel3.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.lnk_LinkClicked);
+            this.linkLabel3.LinkClicked += this.lnk_LinkClicked;
             // 
             // linkLabel4
             // 
@@ -60,7 +59,7 @@ private System.ComponentModel.Container components = null;
             this.linkLabel4.Name = "linkLabel4";
             this.linkLabel4.TabStop = true;
             this.linkLabel4.Tag = "https://github.com/majorsilence/Reporting";
-            this.linkLabel4.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.lnk_LinkClicked);
+            this.linkLabel4.LinkClicked += this.lnk_LinkClicked;
             // 
             // label5
             // 
@@ -101,12 +100,12 @@ private System.ComponentModel.Container components = null;
             this.Controls.Add(this.label8);
             this.Controls.Add(this.tbLicense);
             this.Controls.Add(this.bOK);
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
+            this.FormBorderStyle = Majorsilence.Forms.FormBorderStyle.FixedDialog;
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "DialogAbout";
             this.ShowInTaskbar = false;
-            this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
+            this.SizeGripStyle = Majorsilence.Forms.SizeGripStyle.Hide;
             this.ResumeLayout(false);
             this.PerformLayout();
 

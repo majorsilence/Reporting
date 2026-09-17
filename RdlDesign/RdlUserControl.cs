@@ -1,6 +1,7 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Drawing;
 using System.Drawing;
 using System.Data;
 using System.Linq;
@@ -12,7 +13,7 @@ using Majorsilence.Reporting.Rdl;
 using System.IO;
 using System.Globalization;
 using System.Xml;
-using System.Drawing.Printing;
+using Majorsilence.Forms.Printing;
 using System.Threading.Tasks;
 
 namespace Majorsilence.Reporting.RdlDesign
@@ -158,9 +159,9 @@ namespace Majorsilence.Reporting.RdlDesign
 
             using (DataSourcePassword dlg = new DataSourcePassword())
             {
-                DialogResult rc = dlg.ShowDialog();
+                Majorsilence.Forms.DialogResult rc = dlg.ShowDialog();
                 bGotPassword = true;
-                if (rc == DialogResult.OK)
+                if (rc == Majorsilence.Forms.DialogResult.OK)
                 {
                     _DataSourceReferencePassword = dlg.PassPhrase;
                 }
@@ -178,12 +179,12 @@ namespace Majorsilence.Reporting.RdlDesign
         {
             using (DialogDatabase dlgDB = new DialogDatabase(this))
             {
-                dlgDB.StartPosition = FormStartPosition.CenterParent;
-                dlgDB.FormBorderStyle = FormBorderStyle.SizableToolWindow;
+                dlgDB.StartPosition = Majorsilence.Forms.FormStartPosition.CenterParent;
+                dlgDB.FormBorderStyle = Majorsilence.Forms.FormBorderStyle.SizableToolWindow;
 
                 // show modally
                 dlgDB.ShowDialog();
-                if (dlgDB.DialogResult == DialogResult.Cancel)
+                if (dlgDB.DialogResult == Majorsilence.Forms.DialogResult.Cancel)
                     return;
                 string rdl = dlgDB.ResultReport;
 
@@ -223,7 +224,7 @@ namespace Majorsilence.Reporting.RdlDesign
             catch (Exception ae)
             {
                 bOK = false;
-                MessageBox.Show(ae.Message + "\r\n" + ae.StackTrace);
+                Majorsilence.Forms.MessageBox.Show(ae.Message + "\r\n" + ae.StackTrace);
                 //				statusBar.Text = "Save of file '" + curFileName + "' failed";
             }
             finally
@@ -305,7 +306,7 @@ namespace Majorsilence.Reporting.RdlDesign
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message);
+                Majorsilence.Forms.MessageBox.Show(ex.Message);
             }
 
        
@@ -428,11 +429,11 @@ namespace Majorsilence.Reporting.RdlDesign
             }
             if (foreColorPicker1 != null)
             {
-                foreColorPicker1.Text = si.Color.IsEmpty ? si.ColorText : ColorTranslator.ToHtml(si.Color);
+                foreColorPicker1.Text = si.Color.IsEmpty ? si.ColorText : System.Windows.Forms.ColorTranslator.ToHtml(si.Color);
             }
             if (backColorPicker1 != null)
             {
-                backColorPicker1.Text = si.BackgroundColor.IsEmpty ? si.BackgroundColorText : ColorTranslator.ToHtml(si.BackgroundColor);
+                backColorPicker1.Text = si.BackgroundColor.IsEmpty ? si.BackgroundColorText : System.Windows.Forms.ColorTranslator.ToHtml(si.BackgroundColor);
             }
 
             bSuppressChange = false;
@@ -765,7 +766,7 @@ namespace Majorsilence.Reporting.RdlDesign
 
             try
             {
-                if (sfd.ShowDialog(this) != DialogResult.OK)
+                if (sfd.ShowDialog(this) != Majorsilence.Forms.DialogResult.OK)
                     return false;
 
                 // save the report in the requested rendered format 
@@ -773,18 +774,18 @@ namespace Majorsilence.Reporting.RdlDesign
                 // tif can be either in color or black and white; ask user what they want
                 if (type == OutputPresentationType.TIF)
                 {
-                    DialogResult dr = MessageBox.Show(this, Strings.MDIChild_ShowF_WantDisplayColorsInTIF, Strings.MDIChild_ShowF_Export, MessageBoxButtons.YesNoCancel);
-                    if (dr == DialogResult.No)
+                    Majorsilence.Forms.DialogResult dr = Majorsilence.Forms.MessageBox.Show(this, Strings.MDIChild_ShowF_WantDisplayColorsInTIF, Strings.MDIChild_ShowF_Export, Majorsilence.Forms.MessageBoxButtons.YesNoCancel);
+                    if (dr == Majorsilence.Forms.DialogResult.No)
                         type = OutputPresentationType.TIFBW;
-                    else if (dr == DialogResult.Cancel)
+                    else if (dr == Majorsilence.Forms.DialogResult.Cancel)
                         return false;
                 }
                 try { await SaveAsAsync(sfd.FileName, type); }
                 catch (Exception ex)
                 {
-                    MessageBox.Show(this,
+                    Majorsilence.Forms.MessageBox.Show(this,
                         ex.Message, Strings.MDIChild_ShowG_ExportError,
-                        MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        Majorsilence.Forms.MessageBoxButtons.OK, Majorsilence.Forms.MessageBoxIcon.Error);
                     rc = false;
                 }
                 return rc;
@@ -831,13 +832,10 @@ namespace Majorsilence.Reporting.RdlDesign
             get { return rdlEditPreview1.PageCurrent; }
         }
 
-        /// <summary>
-        /// Print the report.  
-        /// </summary>
-        public void Print(PrintDocument pd)
-        {
-            rdlEditPreview1.Print(pd);
-        }
+        // Print(PrintDocument) removed -- rdlEditPreview1.Print(PrintDocument) no longer exists
+        // per D2/D4's printing redesign (see MIGRATION-NOTES.md). Use SaveAsAsync(path,
+        // OutputPresentationType.PDF) instead; see printToolStripButton2_Click for the caller-side
+        // change.
 
 
         private void openToolStripButton1_Click(object sender, EventArgs e)
@@ -859,7 +857,7 @@ namespace Majorsilence.Reporting.RdlDesign
             ofd.Multiselect = true;
             try
             {
-                if (ofd.ShowDialog(this) == DialogResult.OK)
+                if (ofd.ShowDialog(this) == Majorsilence.Forms.DialogResult.OK)
                 {
    
                     OpenReport(new Uri(ofd.FileName), null);
@@ -901,7 +899,7 @@ namespace Majorsilence.Reporting.RdlDesign
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message);
+                Majorsilence.Forms.MessageBox.Show(ex.Message);
             }
 
 
@@ -918,7 +916,7 @@ namespace Majorsilence.Reporting.RdlDesign
             sfd.FileName = file == null ? "*.rdl" : file.LocalPath;
             try
             {
-                if (sfd.ShowDialog(this) != DialogResult.OK)
+                if (sfd.ShowDialog(this) != Majorsilence.Forms.DialogResult.OK)
                     return false;
 
                 // User wants to save!
@@ -1011,12 +1009,12 @@ namespace Majorsilence.Reporting.RdlDesign
 
         }
 
-        private void ctlEditTextbox_KeyDown(object sender, KeyEventArgs e)
+        private void ctlEditTextbox_KeyDown(object sender, Majorsilence.Forms.KeyEventArgs e)
         {
 
         }
 
-        private void mainTB_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
+        private void mainTB_ItemClicked(object sender, EventArgs e)
         {
 
         }
@@ -1121,68 +1119,38 @@ namespace Majorsilence.Reporting.RdlDesign
         }
 
 
+        // No real print-spooler integration under System.Windows.Forms -- see MIGRATION-NOTES.md
+        // (D2) for the full rationale. System.Windows.Forms.PrintDialog is a no-op stub with no
+        // real UI, so go straight to "export as PDF" instead of pretending to show one.
         private bool isPrinting = false;
-        private void printToolStripButton2_Click(object sender, EventArgs e)
+        private async void printToolStripButton2_Click(object sender, EventArgs e)
         {
 
             if (isPrinting == true)			// already printing
             {
-                MessageBox.Show(Strings.RdlUserControl_Show_PrintOneFile, Strings.RdlUserControl_Show_RDLDesign);
+                Majorsilence.Forms.MessageBox.Show(Strings.RdlUserControl_Show_PrintOneFile, Strings.RdlUserControl_Show_RDLDesign);
                 return;
             }
 
             isPrinting = true;
-
-            PrintDocument pd = new PrintDocument();
-            pd.DocumentName = SourceFile.LocalPath;
-            pd.PrinterSettings.FromPage = 1;
-            pd.PrinterSettings.ToPage = PageCount;
-            pd.PrinterSettings.MaximumPage = PageCount;
-            pd.PrinterSettings.MinimumPage = 1;
-            pd.DefaultPageSettings.Landscape = PageWidth > PageHeight ? true : false;
-
-            // Set the paper size.
-            if (SourceRdl != null)
+            try
             {
-                System.Xml.XmlDocument docxml = new System.Xml.XmlDocument();
-                docxml.LoadXml(SourceRdl);
-
-                float height = 11;
-                float width = 8.5f;
-                XmlNodeList heightList = docxml.GetElementsByTagName("PageHeight");
-                for (int i = 0; i < heightList.Count; i++)
+                SaveFileDialog sfd = new SaveFileDialog
                 {
-                    height = float.Parse(heightList[i].InnerText.Replace("in", "")) * 100;
-                }
-
-                XmlNodeList widthList = docxml.GetElementsByTagName("PageWidth");
-                for (int i = 0; i < widthList.Count; i++)
+                    Filter = "PDF files (*.pdf)|*.pdf",
+                    FileName = Path.GetFileNameWithoutExtension(SourceFile.LocalPath) + ".pdf",
+                };
+                if (await sfd.ShowDialogAsync(this.FindForm()) == Majorsilence.Forms.DialogResult.OK)
                 {
-                    width = float.Parse(widthList[i].InnerText.Replace("in", "")) * 100;
+                    await SaveAsAsync(sfd.FileName, OutputPresentationType.PDF);
                 }
-
-                pd.DefaultPageSettings.PaperSize = new PaperSize("Custom", (int)width, (int)height);
             }
-            using (PrintDialog dlg = new PrintDialog())
+            catch (Exception ex)
             {
-                dlg.Document = pd;
-                dlg.AllowSelection = true;
-                dlg.AllowSomePages = true;
-                if (dlg.ShowDialog() == DialogResult.OK)
-                {
-                    try
-                    {
-                        if (pd.PrinterSettings.PrintRange == PrintRange.Selection)
-                        {
-                            pd.PrinterSettings.FromPage = PageCurrent;
-                        }
-                        Print(pd);
-                    }
-                    catch (Exception ex)
-                    {
-                        MessageBox.Show(Strings.RdlUserControl_Show_PrintError + ex.Message, Strings.RdlUserControl_Show_RDLDesign);
-                    }
-                }
+                Majorsilence.Forms.MessageBox.Show(Strings.RdlUserControl_Show_PrintError + ex.Message, Strings.RdlUserControl_Show_RDLDesign);
+            }
+            finally
+            {
                 isPrinting = false;
             }
         }
@@ -1211,7 +1179,7 @@ namespace Majorsilence.Reporting.RdlDesign
                     }
                     catch (Exception ex)
                     {
-                        MessageBox.Show(ex.Message, Strings.RdlUserControl_Show_ZoomValueInvalid);
+                        Majorsilence.Forms.MessageBox.Show(ex.Message, Strings.RdlUserControl_Show_ZoomValueInvalid);
                     }
                     break;
             }

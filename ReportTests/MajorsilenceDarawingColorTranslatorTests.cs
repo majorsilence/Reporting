@@ -1,5 +1,4 @@
-﻿#if DRAWINGCOMPAT
-using NUnit.Framework;
+﻿using NUnit.Framework;
 
 namespace ReportTests
 {
@@ -33,4 +32,3 @@ namespace ReportTests
         }
     }
 }
-#endif

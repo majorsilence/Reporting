@@ -1,0 +1,23 @@
+{
+  "name": "@majorsilence/report-viewer-react",
+  "version": "1.0.0",
+  "description": "React wrapper for the Majorsilence RDL report-viewer Web Component",
+  "main": "index.js",
+  "module": "index.mjs",
+  "types": "index.d.ts",
+  "files": [
+    "index.js",
+    "index.mjs",
+    "index.d.ts"
+  ],
+  "scripts": {
+    "prepare": "node -e \"require('fs').copyFileSync('../../wwwroot/rdl-viewer/rdl-viewer.js', 'rdl-viewer.js')\" && echo 'rdl-viewer.js copied'"
+  },
+  "sideEffects": false,
+  "peerDependencies": {
+    "react": ">=16.8.0",
+    "react-dom": ">=16.8.0"
+  },
+  "keywords": ["react", "rdl", "report", "viewer", "majorsilence"],
+  "license": "MIT"
+}

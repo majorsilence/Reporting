@@ -254,3 +254,6 @@ obj/
 /.claude/worktrees
 /graphify-out
 /artifacts-159
+
+# Local NuGet feed for iterating on unreleased Majorsilence.Forms builds (see MIGRATION-NOTES.md).
+/.local-nuget-feed

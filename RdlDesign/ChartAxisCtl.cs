@@ -3,7 +3,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Drawing;
 using System.Data;
 using System.Windows.Forms;
 using System.Xml;
@@ -165,7 +164,7 @@ namespace Majorsilence.Reporting.RdlDesign
 		/// </summary>
 		private void InitializeComponent()
 		{
-			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ChartAxisCtl));
+			System.Windows.Forms.ComponentResourceManager resources = new System.Windows.Forms.ComponentResourceManager(typeof(ChartAxisCtl));
             this.DoubleBuffered = true;
 			this.label1 = new System.Windows.Forms.Label();
 			this.label2 = new System.Windows.Forms.Label();
@@ -226,62 +225,62 @@ namespace Majorsilence.Reporting.RdlDesign
 			// cbMajorTickMarks
 			// 
 			resources.ApplyResources(this.cbMajorTickMarks, "cbMajorTickMarks");
-			this.cbMajorTickMarks.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+			this.cbMajorTickMarks.DropDownStyle = Majorsilence.Forms.ComboBoxStyle.DropDownList;
 			this.cbMajorTickMarks.Items.AddRange(new object[] {
             resources.GetString("cbMajorTickMarks.Items"),
             resources.GetString("cbMajorTickMarks.Items1"),
             resources.GetString("cbMajorTickMarks.Items2"),
             resources.GetString("cbMajorTickMarks.Items3")});
 			this.cbMajorTickMarks.Name = "cbMajorTickMarks";
-			this.cbMajorTickMarks.SelectedIndexChanged += new System.EventHandler(this.cbMajorTickMarks_SelectedIndexChanged);
+			this.cbMajorTickMarks.SelectedIndexChanged += this.cbMajorTickMarks_SelectedIndexChanged;
 			// 
 			// cbMinorTickMarks
 			// 
 			resources.ApplyResources(this.cbMinorTickMarks, "cbMinorTickMarks");
-			this.cbMinorTickMarks.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+			this.cbMinorTickMarks.DropDownStyle = Majorsilence.Forms.ComboBoxStyle.DropDownList;
 			this.cbMinorTickMarks.Items.AddRange(new object[] {
             resources.GetString("cbMinorTickMarks.Items"),
             resources.GetString("cbMinorTickMarks.Items1"),
             resources.GetString("cbMinorTickMarks.Items2"),
             resources.GetString("cbMinorTickMarks.Items3")});
 			this.cbMinorTickMarks.Name = "cbMinorTickMarks";
-			this.cbMinorTickMarks.SelectedIndexChanged += new System.EventHandler(this.cbMinorTickMarks_SelectedIndexChanged);
+			this.cbMinorTickMarks.SelectedIndexChanged += this.cbMinorTickMarks_SelectedIndexChanged;
 			// 
 			// chkVisible
 			// 
 			resources.ApplyResources(this.chkVisible, "chkVisible");
 			this.chkVisible.Name = "chkVisible";
-			this.chkVisible.CheckedChanged += new System.EventHandler(this.chkVisible_CheckedChanged);
+			this.chkVisible.CheckedChanged += this.chkVisible_CheckedChanged;
 			// 
 			// chkMargin
 			// 
 			resources.ApplyResources(this.chkMargin, "chkMargin");
 			this.chkMargin.Name = "chkMargin";
-			this.chkMargin.CheckedChanged += new System.EventHandler(this.chkMargin_CheckedChanged);
+			this.chkMargin.CheckedChanged += this.chkMargin_CheckedChanged;
 			// 
 			// chkReverse
 			// 
 			resources.ApplyResources(this.chkReverse, "chkReverse");
 			this.chkReverse.Name = "chkReverse";
-			this.chkReverse.CheckedChanged += new System.EventHandler(this.chkReverse_CheckedChanged);
+			this.chkReverse.CheckedChanged += this.chkReverse_CheckedChanged;
 			// 
 			// chkInterlaced
 			// 
 			resources.ApplyResources(this.chkInterlaced, "chkInterlaced");
 			this.chkInterlaced.Name = "chkInterlaced";
-			this.chkInterlaced.CheckedChanged += new System.EventHandler(this.chkInterlaced_CheckedChanged);
+			this.chkInterlaced.CheckedChanged += this.chkInterlaced_CheckedChanged;
 			// 
 			// chkScalar
 			// 
 			resources.ApplyResources(this.chkScalar, "chkScalar");
 			this.chkScalar.Name = "chkScalar";
-			this.chkScalar.CheckedChanged += new System.EventHandler(this.chkScalar_CheckedChanged);
+			this.chkScalar.CheckedChanged += this.chkScalar_CheckedChanged;
 			// 
 			// chkLogScale
 			// 
 			resources.ApplyResources(this.chkLogScale, "chkLogScale");
 			this.chkLogScale.Name = "chkLogScale";
-			this.chkLogScale.CheckedChanged += new System.EventHandler(this.chkLogScale_CheckedChanged);
+			this.chkLogScale.CheckedChanged += this.chkLogScale_CheckedChanged;
 			// 
 			// groupBox1
 			// 
@@ -301,25 +300,25 @@ namespace Majorsilence.Reporting.RdlDesign
 			// 
 			resources.ApplyResources(this.chkMajorGLShow, "chkMajorGLShow");
 			this.chkMajorGLShow.Name = "chkMajorGLShow";
-			this.chkMajorGLShow.CheckedChanged += new System.EventHandler(this.chkMajorGLShow_CheckedChanged);
+			this.chkMajorGLShow.CheckedChanged += this.chkMajorGLShow_CheckedChanged;
 			// 
 			// tbMajorGLWidth
 			// 
 			resources.ApplyResources(this.tbMajorGLWidth, "tbMajorGLWidth");
 			this.tbMajorGLWidth.Name = "tbMajorGLWidth";
-			this.tbMajorGLWidth.TextChanged += new System.EventHandler(this.tbMajorGLWidth_TextChanged);
+			this.tbMajorGLWidth.TextChanged += this.tbMajorGLWidth_TextChanged;
 			// 
 			// bMajorGLColor
 			// 
 			resources.ApplyResources(this.bMajorGLColor, "bMajorGLColor");
 			this.bMajorGLColor.Name = "bMajorGLColor";
-			this.bMajorGLColor.Click += new System.EventHandler(this.bMajorGLColor_Click);
+			this.bMajorGLColor.Click += this.bMajorGLColor_Click;
 			// 
 			// cbMajorGLColor
 			// 
 			resources.ApplyResources(this.cbMajorGLColor, "cbMajorGLColor");
 			this.cbMajorGLColor.Name = "cbMajorGLColor";
-			this.cbMajorGLColor.SelectedIndexChanged += new System.EventHandler(this.cbMajorGLColor_SelectedIndexChanged);
+			this.cbMajorGLColor.SelectedIndexChanged += this.cbMajorGLColor_SelectedIndexChanged;
 			// 
 			// cbMajorGLStyle
 			// 
@@ -336,7 +335,7 @@ namespace Majorsilence.Reporting.RdlDesign
             resources.GetString("cbMajorGLStyle.Items8"),
             resources.GetString("cbMajorGLStyle.Items9")});
 			this.cbMajorGLStyle.Name = "cbMajorGLStyle";
-			this.cbMajorGLStyle.SelectedIndexChanged += new System.EventHandler(this.cbMajorGLStyle_SelectedIndexChanged);
+			this.cbMajorGLStyle.SelectedIndexChanged += this.cbMajorGLStyle_SelectedIndexChanged;
 			// 
 			// label7
 			// 
@@ -371,25 +370,25 @@ namespace Majorsilence.Reporting.RdlDesign
 			// 
 			resources.ApplyResources(this.chkMinorGLShow, "chkMinorGLShow");
 			this.chkMinorGLShow.Name = "chkMinorGLShow";
-			this.chkMinorGLShow.CheckedChanged += new System.EventHandler(this.chkMinorGLShow_CheckedChanged);
+			this.chkMinorGLShow.CheckedChanged += this.chkMinorGLShow_CheckedChanged;
 			// 
 			// tbMinorGLWidth
 			// 
 			resources.ApplyResources(this.tbMinorGLWidth, "tbMinorGLWidth");
 			this.tbMinorGLWidth.Name = "tbMinorGLWidth";
-			this.tbMinorGLWidth.TextChanged += new System.EventHandler(this.tbMinorGLWidth_TextChanged);
+			this.tbMinorGLWidth.TextChanged += this.tbMinorGLWidth_TextChanged;
 			// 
 			// bMinorGLColor
 			// 
 			resources.ApplyResources(this.bMinorGLColor, "bMinorGLColor");
 			this.bMinorGLColor.Name = "bMinorGLColor";
-			this.bMinorGLColor.Click += new System.EventHandler(this.bMinorGLColor_Click);
+			this.bMinorGLColor.Click += this.bMinorGLColor_Click;
 			// 
 			// cbMinorGLColor
 			// 
 			resources.ApplyResources(this.cbMinorGLColor, "cbMinorGLColor");
 			this.cbMinorGLColor.Name = "cbMinorGLColor";
-			this.cbMinorGLColor.SelectedIndexChanged += new System.EventHandler(this.cbMinorGLColor_SelectedIndexChanged);
+			this.cbMinorGLColor.SelectedIndexChanged += this.cbMinorGLColor_SelectedIndexChanged;
 			// 
 			// cbMinorGLStyle
 			// 
@@ -406,7 +405,7 @@ namespace Majorsilence.Reporting.RdlDesign
             resources.GetString("cbMinorGLStyle.Items8"),
             resources.GetString("cbMinorGLStyle.Items9")});
 			this.cbMinorGLStyle.Name = "cbMinorGLStyle";
-			this.cbMinorGLStyle.SelectedIndexChanged += new System.EventHandler(this.cbMinorGLStyle_SelectedIndexChanged);
+			this.cbMinorGLStyle.SelectedIndexChanged += this.cbMinorGLStyle_SelectedIndexChanged;
 			// 
 			// label4
 			// 
@@ -432,13 +431,13 @@ namespace Majorsilence.Reporting.RdlDesign
 			// 
 			resources.ApplyResources(this.tbMajorInterval, "tbMajorInterval");
 			this.tbMajorInterval.Name = "tbMajorInterval";
-			this.tbMajorInterval.TextChanged += new System.EventHandler(this.tbMajorInterval_TextChanged);
+			this.tbMajorInterval.TextChanged += this.tbMajorInterval_TextChanged;
 			// 
 			// tbMinorInterval
 			// 
 			resources.ApplyResources(this.tbMinorInterval, "tbMinorInterval");
 			this.tbMinorInterval.Name = "tbMinorInterval";
-			this.tbMinorInterval.TextChanged += new System.EventHandler(this.tbMinorInterval_TextChanged);
+			this.tbMinorInterval.TextChanged += this.tbMinorInterval_TextChanged;
 			// 
 			// label10
 			// 
@@ -449,7 +448,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			// 
 			resources.ApplyResources(this.tbMax, "tbMax");
 			this.tbMax.Name = "tbMax";
-			this.tbMax.TextChanged += new System.EventHandler(this.tbMax_TextChanged);
+			this.tbMax.TextChanged += this.tbMax_TextChanged;
 			// 
 			// label11
 			// 
@@ -460,7 +459,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			// 
 			resources.ApplyResources(this.tbMin, "tbMin");
 			this.tbMin.Name = "tbMin";
-			this.tbMin.TextChanged += new System.EventHandler(this.tbMin_TextChanged);
+			this.tbMin.TextChanged += this.tbMin_TextChanged;
 			// 
 			// label12
 			// 
@@ -472,40 +471,40 @@ namespace Majorsilence.Reporting.RdlDesign
 			resources.ApplyResources(this.bMinorIntervalExpr, "bMinorIntervalExpr");
 			this.bMinorIntervalExpr.Name = "bMinorIntervalExpr";
 			this.bMinorIntervalExpr.Tag = "minorinterval";
-			this.bMinorIntervalExpr.Click += new System.EventHandler(this.bExpr_Click);
+			this.bMinorIntervalExpr.Click += this.bExpr_Click;
 			// 
 			// bMajorIntervalExpr
 			// 
 			resources.ApplyResources(this.bMajorIntervalExpr, "bMajorIntervalExpr");
 			this.bMajorIntervalExpr.Name = "bMajorIntervalExpr";
 			this.bMajorIntervalExpr.Tag = "majorinterval";
-			this.bMajorIntervalExpr.Click += new System.EventHandler(this.bExpr_Click);
+			this.bMajorIntervalExpr.Click += this.bExpr_Click;
 			// 
 			// bMinExpr
 			// 
 			resources.ApplyResources(this.bMinExpr, "bMinExpr");
 			this.bMinExpr.Name = "bMinExpr";
 			this.bMinExpr.Tag = "min";
-			this.bMinExpr.Click += new System.EventHandler(this.bExpr_Click);
+			this.bMinExpr.Click += this.bExpr_Click;
 			// 
 			// bMaxExpr
 			// 
 			resources.ApplyResources(this.bMaxExpr, "bMaxExpr");
 			this.bMaxExpr.Name = "bMaxExpr";
 			this.bMaxExpr.Tag = "max";
-			this.bMaxExpr.Click += new System.EventHandler(this.bExpr_Click);
+			this.bMaxExpr.Click += this.bExpr_Click;
 			// 
 			// chkCanOmit
 			// 
 			resources.ApplyResources(this.chkCanOmit, "chkCanOmit");
 			this.chkCanOmit.Name = "chkCanOmit";
-			this.chkCanOmit.CheckedChanged += new System.EventHandler(this.chkCanOmit_CheckedChanged);
+			this.chkCanOmit.CheckedChanged += this.chkCanOmit_CheckedChanged;
 			// 
 			// chkMonth
 			// 
 			resources.ApplyResources(this.chkMonth, "chkMonth");
 			this.chkMonth.Name = "chkMonth";
-			this.chkMonth.CheckedChanged += new System.EventHandler(this.chkMonth_CheckedChanged);
+			this.chkMonth.CheckedChanged += this.chkMonth_CheckedChanged;
 			// 
 			// ChartAxisCtl
 			// 
@@ -796,11 +795,11 @@ namespace Majorsilence.Reporting.RdlDesign
 
             try
             {
-                if (cd.ShowDialog() != DialogResult.OK)
+                if (cd.ShowDialog() != Majorsilence.Forms.DialogResult.OK)
                     return;
 
                 RdlDesigner.SetCustomColors(cd.CustomColors);
-                cbColor.Text = ColorTranslator.ToHtml(cd.Color);
+                cbColor.Text = System.Windows.Forms.ColorTranslator.ToHtml(cd.Color);
             }
             finally
             {
@@ -814,7 +813,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			Button b = sender as Button;
 			if (b == null)
 				return;
-			Control c = null;
+			Majorsilence.Forms.Control c = null;
 			bool bColor=false;
 			switch (b.Tag as string)
 			{
@@ -840,8 +839,8 @@ namespace Majorsilence.Reporting.RdlDesign
 			DialogExprEditor ee = new DialogExprEditor(_Draw, c.Text, sNode, bColor);
             try
             {
-                DialogResult dr = ee.ShowDialog();
-                if (dr == DialogResult.OK)
+                Majorsilence.Forms.DialogResult dr = ee.ShowDialog();
+                if (dr == Majorsilence.Forms.DialogResult.OK)
                     c.Text = ee.Expression;
             }
             finally

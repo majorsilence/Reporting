@@ -3,7 +3,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Drawing;
 using System.Data;
 using System.Windows.Forms;
 using System.Xml;
@@ -230,7 +229,7 @@ namespace Majorsilence.Reporting.RdlDesign
 		/// </summary>
 		private void InitializeComponent()
 		{
-			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ChartCtl));
+			System.Windows.Forms.ComponentResourceManager resources = new System.Windows.Forms.ComponentResourceManager(typeof(ChartCtl));
             this.DoubleBuffered = true;
 			this.label1 = new System.Windows.Forms.Label();
 			this.label2 = new System.Windows.Forms.Label();
@@ -298,7 +297,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			// cbChartType
 			// 
 			resources.ApplyResources(this.cbChartType, "cbChartType");
-			this.cbChartType.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+			this.cbChartType.DropDownStyle = Majorsilence.Forms.ComboBoxStyle.DropDownList;
 			this.cbChartType.Items.AddRange(new object[] {
             resources.GetString("cbChartType.Items"),
             resources.GetString("cbChartType.Items1"),
@@ -310,13 +309,13 @@ namespace Majorsilence.Reporting.RdlDesign
             resources.GetString("cbChartType.Items7"),
             resources.GetString("cbChartType.Items8")});
 			this.cbChartType.Name = "cbChartType";
-			this.cbChartType.SelectedIndexChanged += new System.EventHandler(this.cbChartType_SelectedIndexChanged);
+			this.cbChartType.SelectedIndexChanged += this.cbChartType_SelectedIndexChanged;
 			// 
 			// cbSubType
 			// 
 			resources.ApplyResources(this.cbSubType, "cbSubType");
 			this.cbSubType.Name = "cbSubType";
-			this.cbSubType.SelectedIndexChanged += new System.EventHandler(this.cbSubType_SelectedIndexChanged);
+			this.cbSubType.SelectedIndexChanged += this.cbSubType_SelectedIndexChanged;
 			// 
 			// cbPalette
 			// 
@@ -333,17 +332,17 @@ namespace Majorsilence.Reporting.RdlDesign
             resources.GetString("cbPalette.Items8"),
             resources.GetString("cbPalette.Items9")});
 			this.cbPalette.Name = "cbPalette";
-			this.cbPalette.SelectedIndexChanged += new System.EventHandler(this.cbPalette_SelectedIndexChanged);
+			this.cbPalette.SelectedIndexChanged += this.cbPalette_SelectedIndexChanged;
 			// 
 			// cbRenderElement
 			// 
 			resources.ApplyResources(this.cbRenderElement, "cbRenderElement");
-			this.cbRenderElement.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+			this.cbRenderElement.DropDownStyle = Majorsilence.Forms.ComboBoxStyle.DropDownList;
 			this.cbRenderElement.Items.AddRange(new object[] {
             resources.GetString("cbRenderElement.Items"),
             resources.GetString("cbRenderElement.Items1")});
 			this.cbRenderElement.Name = "cbRenderElement";
-			this.cbRenderElement.SelectedIndexChanged += new System.EventHandler(this.cbRenderElement_SelectedIndexChanged);
+			this.cbRenderElement.SelectedIndexChanged += this.cbRenderElement_SelectedIndexChanged;
 			// 
 			// label5
 			// 
@@ -354,7 +353,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			// 
 			resources.ApplyResources(this.tbPercentWidth, "tbPercentWidth");
 			this.tbPercentWidth.Name = "tbPercentWidth";
-			this.tbPercentWidth.ValueChanged += new System.EventHandler(this.tbPercentWidth_ValueChanged);
+			this.tbPercentWidth.ValueChanged += this.tbPercentWidth_ValueChanged;
 			// 
 			// label6
 			// 
@@ -365,7 +364,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			// 
 			resources.ApplyResources(this.tbNoRows, "tbNoRows");
 			this.tbNoRows.Name = "tbNoRows";
-			this.tbNoRows.TextChanged += new System.EventHandler(this.tbNoRows_TextChanged);
+			this.tbNoRows.TextChanged += this.tbNoRows_TextChanged;
 			// 
 			// label7
 			// 
@@ -375,47 +374,47 @@ namespace Majorsilence.Reporting.RdlDesign
 			// cbDataSet
 			// 
 			resources.ApplyResources(this.cbDataSet, "cbDataSet");
-			this.cbDataSet.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+			this.cbDataSet.DropDownStyle = Majorsilence.Forms.ComboBoxStyle.DropDownList;
 			this.cbDataSet.Name = "cbDataSet";
-			this.cbDataSet.SelectedIndexChanged += new System.EventHandler(this.cbDataSet_SelectedIndexChanged);
+			this.cbDataSet.SelectedIndexChanged += this.cbDataSet_SelectedIndexChanged;
 			// 
 			// chkPageBreakStart
 			// 
 			resources.ApplyResources(this.chkPageBreakStart, "chkPageBreakStart");
 			this.chkPageBreakStart.Name = "chkPageBreakStart";
-			this.chkPageBreakStart.CheckedChanged += new System.EventHandler(this.chkPageBreakStart_CheckedChanged);
+			this.chkPageBreakStart.CheckedChanged += this.chkPageBreakStart_CheckedChanged;
 			// 
 			// chkPageBreakEnd
 			// 
 			resources.ApplyResources(this.chkPageBreakEnd, "chkPageBreakEnd");
 			this.chkPageBreakEnd.Name = "chkPageBreakEnd";
-			this.chkPageBreakEnd.CheckedChanged += new System.EventHandler(this.chkPageBreakEnd_CheckedChanged);
+			this.chkPageBreakEnd.CheckedChanged += this.chkPageBreakEnd_CheckedChanged;
 			// 
 			// cbChartData
 			// 
 			resources.ApplyResources(this.cbChartData, "cbChartData");
 			this.cbChartData.Name = "cbChartData";
-			this.cbChartData.TextChanged += new System.EventHandler(this.cbChartData_Changed);
+			this.cbChartData.TextChanged += this.cbChartData_Changed;
 			// 
 			// cbDataLabel
 			// 
 			resources.ApplyResources(this.cbDataLabel, "cbDataLabel");
 			this.cbDataLabel.Name = "cbDataLabel";
-			this.cbDataLabel.TextChanged += new System.EventHandler(this.cbChartData_Changed);
+			this.cbDataLabel.TextChanged += this.cbChartData_Changed;
 			// 
 			// chkDataLabel
 			// 
 			resources.ApplyResources(this.chkDataLabel, "chkDataLabel");
 			this.chkDataLabel.Name = "chkDataLabel";
 			this.chkDataLabel.UseVisualStyleBackColor = true;
-			this.chkDataLabel.CheckedChanged += new System.EventHandler(this.chkDataLabel_CheckedChanged);
+			this.chkDataLabel.CheckedChanged += this.chkDataLabel_CheckedChanged;
 			// 
 			// bDataLabelExpr
 			// 
 			resources.ApplyResources(this.bDataLabelExpr, "bDataLabelExpr");
 			this.bDataLabelExpr.Name = "bDataLabelExpr";
 			this.bDataLabelExpr.UseVisualStyleBackColor = true;
-			this.bDataLabelExpr.Click += new System.EventHandler(this.bDataLabelExpr_Click);
+			this.bDataLabelExpr.Click += this.bDataLabelExpr_Click;
 			// 
 			// lData1
 			// 
@@ -426,7 +425,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			// 
 			resources.ApplyResources(this.cbChartData2, "cbChartData2");
 			this.cbChartData2.Name = "cbChartData2";
-			this.cbChartData2.TextChanged += new System.EventHandler(this.cbChartData_Changed);
+			this.cbChartData2.TextChanged += this.cbChartData_Changed;
 			// 
 			// lData2
 			// 
@@ -437,7 +436,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			// 
 			resources.ApplyResources(this.cbChartData3, "cbChartData3");
 			this.cbChartData3.Name = "cbChartData3";
-			this.cbChartData3.TextChanged += new System.EventHandler(this.cbChartData_Changed);
+			this.cbChartData3.TextChanged += this.cbChartData_Changed;
 			// 
 			// lData3
 			// 
@@ -449,21 +448,21 @@ namespace Majorsilence.Reporting.RdlDesign
 			resources.ApplyResources(this.bDataExpr, "bDataExpr");
 			this.bDataExpr.Name = "bDataExpr";
 			this.bDataExpr.Tag = "d1";
-			this.bDataExpr.Click += new System.EventHandler(this.bDataExpr_Click);
+			this.bDataExpr.Click += this.bDataExpr_Click;
 			// 
 			// bDataExpr3
 			// 
 			resources.ApplyResources(this.bDataExpr3, "bDataExpr3");
 			this.bDataExpr3.Name = "bDataExpr3";
 			this.bDataExpr3.Tag = "d3";
-			this.bDataExpr3.Click += new System.EventHandler(this.bDataExpr_Click);
+			this.bDataExpr3.Click += this.bDataExpr_Click;
 			// 
 			// bDataExpr2
 			// 
 			resources.ApplyResources(this.bDataExpr2, "bDataExpr2");
 			this.bDataExpr2.Name = "bDataExpr2";
 			this.bDataExpr2.Tag = "d2";
-			this.bDataExpr2.Click += new System.EventHandler(this.bDataExpr_Click);
+			this.bDataExpr2.Click += this.bDataExpr_Click;
 			// 
 			// cbVector
 			// 
@@ -472,14 +471,14 @@ namespace Majorsilence.Reporting.RdlDesign
             resources.GetString("cbVector.Items"),
             resources.GetString("cbVector.Items1")});
 			this.cbVector.Name = "cbVector";
-			this.cbVector.SelectedIndexChanged += new System.EventHandler(this.cbVector_SelectedIndexChanged);
+			this.cbVector.SelectedIndexChanged += this.cbVector_SelectedIndexChanged;
 			// 
 			// btnVectorExp
 			// 
 			resources.ApplyResources(this.btnVectorExp, "btnVectorExp");
 			this.btnVectorExp.Name = "btnVectorExp";
 			this.btnVectorExp.Tag = "d4";
-			this.btnVectorExp.Click += new System.EventHandler(this.bDataExpr_Click);
+			this.btnVectorExp.Click += this.bDataExpr_Click;
 			// 
 			// label8
 			// 
@@ -491,47 +490,47 @@ namespace Majorsilence.Reporting.RdlDesign
 			resources.ApplyResources(this.button1, "button1");
 			this.button1.Name = "button1";
 			this.button1.Tag = "d7";
-			this.button1.Click += new System.EventHandler(this.bDataExpr_Click);
+			this.button1.Click += this.bDataExpr_Click;
 			// 
 			// button2
 			// 
 			resources.ApplyResources(this.button2, "button2");
 			this.button2.Name = "button2";
 			this.button2.Tag = "d5";
-			this.button2.Click += new System.EventHandler(this.bDataExpr_Click);
+			this.button2.Click += this.bDataExpr_Click;
 			// 
 			// button3
 			// 
 			resources.ApplyResources(this.button3, "button3");
 			this.button3.Name = "button3";
 			this.button3.Tag = "d6";
-			this.button3.Click += new System.EventHandler(this.bDataExpr_Click);
+			this.button3.Click += this.bDataExpr_Click;
 			// 
 			// chkToolTip
 			// 
 			resources.ApplyResources(this.chkToolTip, "chkToolTip");
 			this.chkToolTip.Name = "chkToolTip";
 			this.chkToolTip.UseVisualStyleBackColor = true;
-			this.chkToolTip.CheckedChanged += new System.EventHandler(this.chkToolTip_CheckedChanged);
+			this.chkToolTip.CheckedChanged += this.chkToolTip_CheckedChanged;
 			// 
 			// checkBox1
 			// 
 			resources.ApplyResources(this.checkBox1, "checkBox1");
 			this.checkBox1.Name = "checkBox1";
 			this.checkBox1.UseVisualStyleBackColor = true;
-			this.checkBox1.CheckedChanged += new System.EventHandler(this.checkBox1_CheckedChanged);
+			this.checkBox1.CheckedChanged += this.checkBox1_CheckedChanged;
 			// 
 			// txtYToolFormat
 			// 
 			resources.ApplyResources(this.txtYToolFormat, "txtYToolFormat");
 			this.txtYToolFormat.Name = "txtYToolFormat";
-			this.txtYToolFormat.TextChanged += new System.EventHandler(this.txtYToolFormat_TextChanged);
+			this.txtYToolFormat.TextChanged += this.txtYToolFormat_TextChanged;
 			// 
 			// txtXToolFormat
 			// 
 			resources.ApplyResources(this.txtXToolFormat, "txtXToolFormat");
 			this.txtXToolFormat.Name = "txtXToolFormat";
-			this.txtXToolFormat.TextChanged += new System.EventHandler(this.txtXToolFormat_TextChanged);
+			this.txtXToolFormat.TextChanged += this.txtXToolFormat_TextChanged;
 			// 
 			// label9
 			// 
@@ -838,7 +837,7 @@ namespace Majorsilence.Reporting.RdlDesign
             Button bs = sender as Button;
             if (bs == null)
                 return;
-            Control ctl = null; 
+            Majorsilence.Forms.Control ctl = null; 
             switch (bs.Tag as string)
             {
                 case "d1":
@@ -873,8 +872,8 @@ namespace Majorsilence.Reporting.RdlDesign
             DialogExprEditor ee = new DialogExprEditor(_Draw, ctl.Text, _ReportItems[0], false);
             try
             {
-                DialogResult dlgr = ee.ShowDialog();
-                if (dlgr == DialogResult.OK)
+                Majorsilence.Forms.DialogResult dlgr = ee.ShowDialog();
+                if (dlgr == Majorsilence.Forms.DialogResult.OK)
                 {
                     ctl.Text = ee.Expression;
                     fChartData = true;
@@ -896,7 +895,7 @@ namespace Majorsilence.Reporting.RdlDesign
             DialogExprEditor ee = new DialogExprEditor(_Draw, cbDataLabel.Text,_ReportItems[0] , false);
             try
             {
-                if (ee.ShowDialog() == DialogResult.OK)
+                if (ee.ShowDialog() == Majorsilence.Forms.DialogResult.OK)
                 {                 
                     cbDataLabel.Text = ee.Expression;
                 }

@@ -10,14 +10,9 @@ using System.Xml;
 using System.Globalization;
 using System.Threading.Tasks;
 
-#if DRAWINGCOMPAT
 using Majorsilence.Forms.Drawing;
 using System.Drawing;  // value types (Color, Point, Size, Rectangle, ...) come from System.Drawing.Primitives
 using Majorsilence.Forms.Drawing.Imaging;
-#else
-using System.Drawing;
-using System.Drawing.Imaging;
-#endif
 
 namespace Majorsilence.Reporting.Rdl
 {
@@ -1273,11 +1268,7 @@ function findObject(id) {
                 if (ioin.CanSeek)       // ioin.Length requires Seek support
                 {
                     byte[] ba = new byte[ioin.Length];
-#if NET7_0_OR_GREATER
                     ioin.ReadExactly(ba, 0, ba.Length);
-#else
-                    ioin.Read(ba, 0, ba.Length);
-#endif
                     io.Write(ba, 0, ba.Length);
                 }
                 else

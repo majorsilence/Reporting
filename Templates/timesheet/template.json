@@ -1,0 +1,12 @@
+{
+  "name": "Timesheet",
+  "slug": "timesheet",
+  "description": "A weekly Employee x Day matrix (RDL Matrix data region) with row and column subtotals.",
+  "tags": ["business", "hr", "matrix", "landscape"],
+  "dataProvider": "Json",
+  "parameters": [],
+  "dataContract": {
+    "root": ["WeekStarting", "WeekEnding"],
+    "root.Entries[]": ["Employee", "Day", "DayOrder", "Hours"]
+  }
+}

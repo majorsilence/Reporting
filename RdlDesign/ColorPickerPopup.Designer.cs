@@ -20,7 +20,7 @@ private System.ComponentModel.Container components = null;
             // 
             // lStatus
             // 
-            this.lStatus.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.lStatus.Dock = Majorsilence.Forms.DockStyle.Bottom;
             this.lStatus.Location = new System.Drawing.Point(0, 174);
             this.lStatus.Name = "lStatus";
             this.lStatus.Size = new System.Drawing.Size(233, 13);
@@ -29,27 +29,25 @@ private System.ComponentModel.Container components = null;
             // 
             // ColorPickerPopup
             // 
-            this.AutoScaleBaseSize = new System.Drawing.Size(5, 13);
             this.CausesValidation = false;
             this.ClientSize = new System.Drawing.Size(233, 187);
             this.ControlBox = false;
             this.Controls.Add(this.lStatus);
-            this.DoubleBuffered = true;
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
+            this.FormBorderStyle = Majorsilence.Forms.FormBorderStyle.FixedToolWindow;
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "ColorPickerPopup";
             this.ShowIcon = false;
             this.ShowInTaskbar = false;
-            this.StartPosition = System.Windows.Forms.FormStartPosition.Manual;
+            this.StartPosition = Majorsilence.Forms.FormStartPosition.Manual;
             this.TopMost = true;
-            this.Deactivate += new System.EventHandler(this.lbColors_Hide);
-            this.Load += new System.EventHandler(this.ColorPickerPopup_Load); 
-            this.Shown += new System.EventHandler(this.ColorPickerPopup_Shown);
-            this.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.ColorPickerPopup_KeyPress);
-            this.MouseMove += new System.Windows.Forms.MouseEventHandler(this.ColorPickerPopup_MouseMove);
-            this.Leave += new System.EventHandler(this.lbColors_Hide);
-            this.MouseDown += new System.Windows.Forms.MouseEventHandler(this.ColorPickerPopup_MouseDown);
+            this.Deactivate += this.lbColors_Hide;
+            this.Load += this.ColorPickerPopup_Load; 
+            this.Shown += this.ColorPickerPopup_Shown;
+            this.KeyPress += this.ColorPickerPopup_KeyPress;
+            this.MouseMove += this.ColorPickerPopup_MouseMove;
+            this.Leave += this.lbColors_Hide;
+            this.MouseDown += this.ColorPickerPopup_MouseDown;
             this.ResumeLayout(false);
 
 		}

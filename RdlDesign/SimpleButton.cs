@@ -2,7 +2,8 @@
 using System;
 using System.ComponentModel;
 using System.Drawing;
-using System.Drawing.Imaging;
+using System.Drawing;
+using Majorsilence.Forms.Drawing.Imaging;
 using System.Windows.Forms;
 
 
@@ -22,23 +23,23 @@ namespace Majorsilence.Reporting.RdlDesign
 
 			this.BackColor = parent.BackColor;
 			this.ForeColor = this.Enabled? Color.Black: Color.Gray;
-			this.MouseDown +=new MouseEventHandler(SimpleButton_MouseDown);
-			this.MouseUp +=new MouseEventHandler(SimpleButton_MouseUp);
-			this.MouseEnter +=new EventHandler(SimpleButton_MouseEnter);
-			this.MouseLeave +=new EventHandler(SimpleButton_MouseLeave);
-			this.Paint += new PaintEventHandler(this.DrawPanelPaint);
+			this.MouseDown += SimpleButton_MouseDown;
+			this.MouseUp += SimpleButton_MouseUp;
+			this.MouseEnter += SimpleButton_MouseEnter;
+			this.MouseLeave += SimpleButton_MouseLeave;
+			this.Paint += this.DrawPanelPaint;
 		}
 
 		private void DrawPanelPaint(object sender, System.Windows.Forms.PaintEventArgs e)
 		{
 
-			Graphics g = e.Graphics;
-			Brush b = null;
+			Majorsilence.Forms.Drawing.Graphics g = e.Graphics;
+			Majorsilence.Forms.Drawing.Brush b = null;
 			Pen p = null;
 
 			try			// never want to die in here
 			{
-				b = new SolidBrush(this.Enabled? this.BackColor: Color.LightGray);
+				b = new Majorsilence.Forms.Drawing.SolidBrush(this.Enabled? this.BackColor: Color.LightGray);
 				g.FillRectangle(b, e.ClipRectangle);
 				if (bIn && this.Enabled)
 					g.DrawRectangle(Pens.Blue, 0, 0, this.Width-1, this.Height-1);
@@ -53,19 +54,13 @@ namespace Majorsilence.Reporting.RdlDesign
 						y += 1;
 					}
 
-					// Draw Image using the transparency color
-					ImageAttributes imageAttr = new ImageAttributes();
-					imageAttr.SetColorKey(_Transparency, _Transparency,
-						ColorAdjustType.Default);
-
-					g.DrawImage(this.Image,         // Image
-						new Rectangle(x, y, this.Image.Width, this.Image.Height),    // Dest. rect.
-						0,							// srcX
-						0,							// srcY
-						this.Image.Width,           // srcWidth
-						this.Image.Height,          // srcHeight
-						GraphicsUnit.Pixel,			// srcUnit
-						imageAttr);					// ImageAttributes
+					// ImageAttributes/SetColorKey (transparent-color-key drawing) has no
+					// System.Windows.Forms equivalent -- would need per-pixel SkiaSharp color
+					// filtering to replicate properly. Draw the image directly instead; the
+					// _Transparency color-keying effect is a documented, dropped cosmetic
+					// feature (this control is already flagged as a migration candidate, same
+					// as ColorPicker.cs's "very crazy control, need replace it" note).
+					g.DrawImage(this.Image, new Rectangle(x, y, this.Image.Width, this.Image.Height));
 				}
 				else
 				{
@@ -92,13 +87,13 @@ namespace Majorsilence.Reporting.RdlDesign
 
 		private void SimpleButton_MouseDown(object sender, MouseEventArgs e)
 		{
-			if (e.Button == MouseButtons.Left)
+			if (e.Button == System.Windows.Forms.MouseButtons.Left)
 				bDown = true;
 		}
 
 		private void SimpleButton_MouseUp(object sender, MouseEventArgs e)
 		{
-			if (e.Button == MouseButtons.Left)
+			if (e.Button == System.Windows.Forms.MouseButtons.Left)
 				bDown = false;
 		}
 

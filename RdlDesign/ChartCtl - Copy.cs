@@ -306,7 +306,7 @@ namespace fyiReporting.RdlDesign
             // 
             // cbChartType
             // 
-            this.cbChartType.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cbChartType.DropDownStyle = Majorsilence.Forms.ComboBoxStyle.DropDownList;
             this.cbChartType.Items.AddRange(new object[] {
             "Area",
             "Bar",
@@ -321,7 +321,7 @@ namespace fyiReporting.RdlDesign
             this.cbChartType.Name = "cbChartType";
             this.cbChartType.Size = new System.Drawing.Size(121, 21);
             this.cbChartType.TabIndex = 0;
-            this.cbChartType.SelectedIndexChanged += new System.EventHandler(this.cbChartType_SelectedIndexChanged);
+            this.cbChartType.SelectedIndexChanged += this.cbChartType_SelectedIndexChanged;
             // 
             // cbSubType
             // 
@@ -329,9 +329,9 @@ namespace fyiReporting.RdlDesign
             this.cbSubType.Name = "cbSubType";
             this.cbSubType.Size = new System.Drawing.Size(80, 21);
             this.cbSubType.TabIndex = 1;
-            this.cbSubType.SelectedIndexChanged += new System.EventHandler(this.cbSubType_SelectedIndexChanged);
-            this.cbSubType.TextUpdate += new System.EventHandler(this.cbSubType_SelectedIndexChanged);
-            this.cbSubType.TextChanged += new System.EventHandler(this.cbSubType_SelectedIndexChanged);
+            this.cbSubType.SelectedIndexChanged += this.cbSubType_SelectedIndexChanged;
+            this.cbSubType.TextUpdate += this.cbSubType_SelectedIndexChanged;
+            this.cbSubType.TextChanged += this.cbSubType_SelectedIndexChanged;
             // 
             // cbPalette
             // 
@@ -349,11 +349,11 @@ namespace fyiReporting.RdlDesign
             this.cbPalette.Name = "cbPalette";
             this.cbPalette.Size = new System.Drawing.Size(121, 21);
             this.cbPalette.TabIndex = 2;
-            this.cbPalette.SelectedIndexChanged += new System.EventHandler(this.cbPalette_SelectedIndexChanged);
+            this.cbPalette.SelectedIndexChanged += this.cbPalette_SelectedIndexChanged;
             // 
             // cbRenderElement
             // 
-            this.cbRenderElement.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cbRenderElement.DropDownStyle = Majorsilence.Forms.ComboBoxStyle.DropDownList;
             this.cbRenderElement.Items.AddRange(new object[] {
             "Output",
             "NoOutput"});
@@ -361,7 +361,7 @@ namespace fyiReporting.RdlDesign
             this.cbRenderElement.Name = "cbRenderElement";
             this.cbRenderElement.Size = new System.Drawing.Size(121, 21);
             this.cbRenderElement.TabIndex = 3;
-            this.cbRenderElement.SelectedIndexChanged += new System.EventHandler(this.cbRenderElement_SelectedIndexChanged);
+            this.cbRenderElement.SelectedIndexChanged += this.cbRenderElement_SelectedIndexChanged;
             // 
             // label5
             // 
@@ -377,7 +377,7 @@ namespace fyiReporting.RdlDesign
             this.tbPercentWidth.Name = "tbPercentWidth";
             this.tbPercentWidth.Size = new System.Drawing.Size(48, 20);
             this.tbPercentWidth.TabIndex = 4;
-            this.tbPercentWidth.ValueChanged += new System.EventHandler(this.tbPercentWidth_ValueChanged);
+            this.tbPercentWidth.ValueChanged += this.tbPercentWidth_ValueChanged;
             // 
             // label6
             // 
@@ -393,7 +393,7 @@ namespace fyiReporting.RdlDesign
             this.tbNoRows.Name = "tbNoRows";
             this.tbNoRows.Size = new System.Drawing.Size(255, 20);
             this.tbNoRows.TabIndex = 5;
-            this.tbNoRows.TextChanged += new System.EventHandler(this.tbNoRows_TextChanged);
+            this.tbNoRows.TextChanged += this.tbNoRows_TextChanged;
             // 
             // label7
             // 
@@ -405,12 +405,12 @@ namespace fyiReporting.RdlDesign
             // 
             // cbDataSet
             // 
-            this.cbDataSet.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cbDataSet.DropDownStyle = Majorsilence.Forms.ComboBoxStyle.DropDownList;
             this.cbDataSet.Location = new System.Drawing.Point(156, 133);
             this.cbDataSet.Name = "cbDataSet";
             this.cbDataSet.Size = new System.Drawing.Size(255, 21);
             this.cbDataSet.TabIndex = 6;
-            this.cbDataSet.SelectedIndexChanged += new System.EventHandler(this.cbDataSet_SelectedIndexChanged);
+            this.cbDataSet.SelectedIndexChanged += this.cbDataSet_SelectedIndexChanged;
             // 
             // chkPageBreakStart
             // 
@@ -419,7 +419,7 @@ namespace fyiReporting.RdlDesign
             this.chkPageBreakStart.Size = new System.Drawing.Size(136, 24);
             this.chkPageBreakStart.TabIndex = 13;
             this.chkPageBreakStart.Text = "Page Break at Start";
-            this.chkPageBreakStart.CheckedChanged += new System.EventHandler(this.chkPageBreakStart_CheckedChanged);
+            this.chkPageBreakStart.CheckedChanged += this.chkPageBreakStart_CheckedChanged;
             // 
             // chkPageBreakEnd
             // 
@@ -428,7 +428,7 @@ namespace fyiReporting.RdlDesign
             this.chkPageBreakEnd.Size = new System.Drawing.Size(136, 24);
             this.chkPageBreakEnd.TabIndex = 14;
             this.chkPageBreakEnd.Text = "Page Break at End";
-            this.chkPageBreakEnd.CheckedChanged += new System.EventHandler(this.chkPageBreakEnd_CheckedChanged);
+            this.chkPageBreakEnd.CheckedChanged += this.chkPageBreakEnd_CheckedChanged;
             // 
             // cbChartData
             // 
@@ -436,7 +436,7 @@ namespace fyiReporting.RdlDesign
             this.cbChartData.Name = "cbChartData";
             this.cbChartData.Size = new System.Drawing.Size(255, 21);
             this.cbChartData.TabIndex = 7;
-            this.cbChartData.TextChanged += new System.EventHandler(this.cbChartData_Changed);
+            this.cbChartData.TextChanged += this.cbChartData_Changed;
             // 
             // cbDataLabel
             // 
@@ -445,7 +445,7 @@ namespace fyiReporting.RdlDesign
             this.cbDataLabel.Name = "cbDataLabel";
             this.cbDataLabel.Size = new System.Drawing.Size(254, 21);
             this.cbDataLabel.TabIndex = 17;
-            this.cbDataLabel.TextChanged += new System.EventHandler(this.cbChartData_Changed);
+            this.cbDataLabel.TextChanged += this.cbChartData_Changed;
             // 
             // chkDataLabel
             // 
@@ -456,7 +456,7 @@ namespace fyiReporting.RdlDesign
             this.chkDataLabel.TabIndex = 19;
             this.chkDataLabel.Text = "DataLabel";
             this.chkDataLabel.UseVisualStyleBackColor = true;
-            this.chkDataLabel.CheckedChanged += new System.EventHandler(this.chkDataLabel_CheckedChanged);
+            this.chkDataLabel.CheckedChanged += this.chkDataLabel_CheckedChanged;
             // 
             // bDataLabelExpr
             // 
@@ -468,7 +468,7 @@ namespace fyiReporting.RdlDesign
             this.bDataLabelExpr.TabIndex = 20;
             this.bDataLabelExpr.Text = "fx";
             this.bDataLabelExpr.UseVisualStyleBackColor = true;
-            this.bDataLabelExpr.Click += new System.EventHandler(this.bDataLabelExpr_Click);
+            this.bDataLabelExpr.Click += this.bDataLabelExpr_Click;
             // 
             // lData1
             // 
@@ -484,7 +484,7 @@ namespace fyiReporting.RdlDesign
             this.cbChartData2.Name = "cbChartData2";
             this.cbChartData2.Size = new System.Drawing.Size(255, 21);
             this.cbChartData2.TabIndex = 9;
-            this.cbChartData2.TextChanged += new System.EventHandler(this.cbChartData_Changed);
+            this.cbChartData2.TextChanged += this.cbChartData_Changed;
             // 
             // lData2
             // 
@@ -500,7 +500,7 @@ namespace fyiReporting.RdlDesign
             this.cbChartData3.Name = "cbChartData3";
             this.cbChartData3.Size = new System.Drawing.Size(255, 21);
             this.cbChartData3.TabIndex = 11;
-            this.cbChartData3.TextChanged += new System.EventHandler(this.cbChartData_Changed);
+            this.cbChartData3.TextChanged += this.cbChartData_Changed;
             // 
             // lData3
             // 
@@ -519,8 +519,8 @@ namespace fyiReporting.RdlDesign
             this.bDataExpr.TabIndex = 8;
             this.bDataExpr.Tag = "d1";
             this.bDataExpr.Text = "fx";
-            this.bDataExpr.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.bDataExpr.Click += new System.EventHandler(this.bDataExpr_Click);
+            this.bDataExpr.TextAlign = Majorsilence.Forms.ContentAlignment.MiddleLeft;
+            this.bDataExpr.Click += this.bDataExpr_Click;
             // 
             // bDataExpr3
             // 
@@ -531,8 +531,8 @@ namespace fyiReporting.RdlDesign
             this.bDataExpr3.TabIndex = 12;
             this.bDataExpr3.Tag = "d3";
             this.bDataExpr3.Text = "fx";
-            this.bDataExpr3.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.bDataExpr3.Click += new System.EventHandler(this.bDataExpr_Click);
+            this.bDataExpr3.TextAlign = Majorsilence.Forms.ContentAlignment.MiddleLeft;
+            this.bDataExpr3.Click += this.bDataExpr_Click;
             // 
             // bDataExpr2
             // 
@@ -543,8 +543,8 @@ namespace fyiReporting.RdlDesign
             this.bDataExpr2.TabIndex = 10;
             this.bDataExpr2.Tag = "d2";
             this.bDataExpr2.Text = "fx";
-            this.bDataExpr2.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.bDataExpr2.Click += new System.EventHandler(this.bDataExpr_Click);
+            this.bDataExpr2.TextAlign = Majorsilence.Forms.ContentAlignment.MiddleLeft;
+            this.bDataExpr2.Click += this.bDataExpr_Click;
             // 
             // cbVector
             // 
@@ -555,7 +555,7 @@ namespace fyiReporting.RdlDesign
             this.cbVector.Name = "cbVector";
             this.cbVector.Size = new System.Drawing.Size(80, 21);
             this.cbVector.TabIndex = 21;
-            this.cbVector.SelectedIndexChanged += new System.EventHandler(this.cbVector_SelectedIndexChanged);
+            this.cbVector.SelectedIndexChanged += this.cbVector_SelectedIndexChanged;
             // 
             // btnVectorExp
             // 
@@ -566,8 +566,8 @@ namespace fyiReporting.RdlDesign
             this.btnVectorExp.TabIndex = 22;
             this.btnVectorExp.Tag = "d4";
             this.btnVectorExp.Text = "fx";
-            this.btnVectorExp.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.btnVectorExp.Click += new System.EventHandler(this.bDataExpr_Click);
+            this.btnVectorExp.TextAlign = Majorsilence.Forms.ContentAlignment.MiddleLeft;
+            this.btnVectorExp.Click += this.bDataExpr_Click;
             // 
             // label8
             // 
@@ -586,8 +586,8 @@ namespace fyiReporting.RdlDesign
             this.button1.TabIndex = 24;
             this.button1.Tag = "d7";
             this.button1.Text = "fx";
-            this.button1.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.button1.Click += new System.EventHandler(this.bDataExpr_Click);
+            this.button1.TextAlign = Majorsilence.Forms.ContentAlignment.MiddleLeft;
+            this.button1.Click += this.bDataExpr_Click;
             // 
             // button2
             // 
@@ -598,9 +598,9 @@ namespace fyiReporting.RdlDesign
             this.button2.TabIndex = 25;
             this.button2.Tag = "d5";
             this.button2.Text = "fx";
-            this.button2.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.button2.TextAlign = Majorsilence.Forms.ContentAlignment.MiddleLeft;
             this.button2.Visible = false;
-            this.button2.Click += new System.EventHandler(this.bDataExpr_Click);
+            this.button2.Click += this.bDataExpr_Click;
             // 
             // button3
             // 
@@ -611,8 +611,8 @@ namespace fyiReporting.RdlDesign
             this.button3.TabIndex = 26;
             this.button3.Tag = "d6";
             this.button3.Text = "fx";
-            this.button3.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.button3.Click += new System.EventHandler(this.bDataExpr_Click);
+            this.button3.TextAlign = Majorsilence.Forms.ContentAlignment.MiddleLeft;
+            this.button3.Click += this.bDataExpr_Click;
             // 
             // ChartCtl
             // 
@@ -921,8 +921,8 @@ namespace fyiReporting.RdlDesign
             DialogExprEditor ee = new DialogExprEditor(_Draw, ctl.Text, _ReportItems[0], false);
             try
             {
-                DialogResult dlgr = ee.ShowDialog();
-                if (dlgr == DialogResult.OK)
+                Majorsilence.Forms.DialogResult dlgr = ee.ShowDialog();
+                if (dlgr == Majorsilence.Forms.DialogResult.OK)
                 {
                     ctl.Text = ee.Expression;
                     fChartData = true;
@@ -944,7 +944,7 @@ namespace fyiReporting.RdlDesign
             DialogExprEditor ee = new DialogExprEditor(_Draw, cbDataLabel.Text,_ReportItems[0] , false);
             try
             {
-                if (ee.ShowDialog() == DialogResult.OK)
+                if (ee.ShowDialog() == Majorsilence.Forms.DialogResult.OK)
                 {                 
                     cbDataLabel.Text = ee.Expression;
                 }

@@ -604,7 +604,7 @@ namespace Majorsilence.Reporting.RdlDesign.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Padding.
+        ///   Looks up a localized string similar to Majorsilence.Forms.Padding.
         /// </summary>
         internal static string DesignCtl_Undo_Padding {
             get {
@@ -1033,7 +1033,7 @@ namespace Majorsilence.Reporting.RdlDesign.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Image.
+        ///   Looks up a localized string similar to Majorsilence.Forms.Drawing.Image.
         /// </summary>
         internal static string DialogEmbeddedImages_ShowE_Image {
             get {
@@ -1809,7 +1809,7 @@ namespace Majorsilence.Reporting.RdlDesign.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Image.
+        ///   Looks up a localized string similar to Majorsilence.Forms.Drawing.Image.
         /// </summary>
         internal static string PropertyDialog_BuildReportItemTabs_Image {
             get {
@@ -2539,7 +2539,7 @@ namespace Majorsilence.Reporting.RdlDesign.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Image change.
+        ///   Looks up a localized string similar to Majorsilence.Forms.Drawing.Image change.
         /// </summary>
         internal static string SingleCtlDialog_Undo_ImageChange {
             get {
@@ -2674,7 +2674,7 @@ namespace Majorsilence.Reporting.RdlDesign.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to {0} Padding Invalid.
+        ///   Looks up a localized string similar to {0} Majorsilence.Forms.Padding Invalid.
         /// </summary>
         internal static string StyleCtl_Show_PaddingInvalid {
             get {
@@ -2899,7 +2899,7 @@ namespace Majorsilence.Reporting.RdlDesign.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Image.
+        ///   Looks up a localized string similar to Majorsilence.Forms.Drawing.Image.
         /// </summary>
         internal static string Tabs_Image {
             get {

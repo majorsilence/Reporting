@@ -1,0 +1,14 @@
+{
+  "StoreName": "Acme Robotics Retail",
+  "StoreAddress": "482 Foundry Street, Springfield, IL",
+  "ReceiptNumber": "R-58213",
+  "ReceiptDate": "2026-07-03 14:22",
+  "CashierName": "Dana",
+  "Lines": [
+    { "Description": "Servo Motor (SM-220)", "Quantity": 1, "UnitPrice": 84.50 },
+    { "Description": "Bearing Kit",           "Quantity": 2, "UnitPrice": 11.25 },
+    { "Description": "Calibration Toolkit",   "Quantity": 1, "UnitPrice": 42.00 }
+  ],
+  "TaxRatePercent": 7.25,
+  "PaymentMethod": "VISA ****4471"
+}

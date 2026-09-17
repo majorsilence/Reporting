@@ -3,13 +3,11 @@ using System;
 using System.Collections.Generic;
 using System.Collections;
 using System.Text;
-using System.Drawing;
 using System.ComponentModel;            // need this for the properties metadata
-using System.Drawing.Design;
 using System.Xml;
 using System.Globalization;
 using System.Windows.Forms;
-using System.Windows.Forms.Design;
+using Majorsilence.Forms.Design;
 
 namespace Majorsilence.Reporting.RdlDesign
 {
@@ -127,7 +125,7 @@ namespace Majorsilence.Reporting.RdlDesign
             using (DialogExprEditor de = new DialogExprEditor(pri.Draw, pe.Expression, pri.Node))
             {
                 // Display the UI editor dialog
-                if (editorService.ShowDialog(de) == DialogResult.OK)
+                if (editorService.ShowDialog(de) == Majorsilence.Forms.DialogResult.OK)
                 {
                     // Return the new property value from the UI editor form
                     return new PropertyExpr(de.Expression);

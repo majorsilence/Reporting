@@ -1,5 +1,4 @@
 using System;
-using System.Drawing;
 using System.Collections;
 using System.ComponentModel;
 using System.Windows.Forms;
@@ -46,7 +45,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			sfd.AddExtension = true;
             try
             {
-                if (sfd.ShowDialog() == DialogResult.OK)
+                if (sfd.ShowDialog() == Majorsilence.Forms.DialogResult.OK)
                     tbFilename.Text = sfd.FileName;
             }
             finally
@@ -88,17 +87,17 @@ namespace Majorsilence.Reporting.RdlDesign
 			}
 			catch (Exception ex)
 			{
-				MessageBox.Show(ex.Message, Strings.DialogDataSourceRef_bOK_Click_UnableCreateDSR);
+				Majorsilence.Forms.MessageBox.Show(ex.Message, Strings.DialogDataSourceRef_bOK_Click_UnableCreateDSR);
 				return;
 			}
 
-			DialogResult = DialogResult.OK;
+			DialogResult = Majorsilence.Forms.DialogResult.OK;
 		}
 
 		private void bTestConnection_Click(object sender, System.EventArgs e)
 		{
 			if (DesignerUtility.TestConnection(this.cbDataProvider.Text, tbConnection.Text))
-				MessageBox.Show(Strings.DialogDatabase_Show_ConnectionSuccessful, Strings.DesignerUtility_Show_TestConnection);
+				Majorsilence.Forms.MessageBox.Show(Strings.DialogDatabase_Show_ConnectionSuccessful, Strings.DesignerUtility_Show_TestConnection);
 
 		}
 

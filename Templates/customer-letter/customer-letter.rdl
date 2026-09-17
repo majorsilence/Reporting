@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Report xmlns="http://schemas.microsoft.com/sqlserver/reporting/2005/01/reportdefinition"
+        xmlns:rd="http://schemas.microsoft.com/SQLServer/reporting/reportdesigner">
+  <Description>Customer letter -- a mail-merge style letter with a personalized greeting and an embedded recent-orders summary.</Description>
+  <PageHeight>11in</PageHeight>
+  <PageWidth>8.5in</PageWidth>
+  <TopMargin>.75in</TopMargin>
+  <LeftMargin>1in</LeftMargin>
+  <RightMargin>1in</RightMargin>
+  <BottomMargin>.75in</BottomMargin>
+  <Width>6.5in</Width>
+
+  <DataSources>
+    <DataSource Name="DS1">
+      <ConnectionProperties>
+        <DataProvider>Json</DataProvider>
+        <ConnectString>file=sample-data.json</ConnectString>
+      </ConnectionProperties>
+    </DataSource>
+  </DataSources>
+
+  <DataSets>
+    <DataSet Name="Header">
+      <Query>
+        <DataSourceName>DS1</DataSourceName>
+        <CommandText>columns=LetterDate,CustomerName,CustomerAddress,SenderName,SenderAddress,SenderSignatory;table=root</CommandText>
+      </Query>
+      <Fields>
+        <Field Name="LetterDate"><DataField>LetterDate</DataField><rd:TypeName>System.String</rd:TypeName></Field>
+        <Field Name="CustomerName"><DataField>CustomerName</DataField><rd:TypeName>System.String</rd:TypeName></Field>
+        <Field Name="CustomerAddress"><DataField>CustomerAddress</DataField><rd:TypeName>System.String</rd:TypeName></Field>
+        <Field Name="SenderName"><DataField>SenderName</DataField><rd:TypeName>System.String</rd:TypeName></Field>
+        <Field Name="SenderAddress"><DataField>SenderAddress</DataField><rd:TypeName>System.String</rd:TypeName></Field>
+        <Field Name="SenderSignatory"><DataField>SenderSignatory</DataField><rd:TypeName>System.String</rd:TypeName></Field>
+      </Fields>
+    </DataSet>
+    <DataSet Name="RecentOrders">
+      <Query>
+        <DataSourceName>DS1</DataSourceName>
+        <CommandText>columns=OrderNumber,OrderDate,Total;table=root_RecentOrders</CommandText>
+      </Query>
+      <Fields>
+        <Field Name="OrderNumber"><DataField>OrderNumber</DataField><rd:TypeName>System.String</rd:TypeName></Field>
+        <Field Name="OrderDate"><DataField>OrderDate</DataField><rd:TypeName>System.String</rd:TypeName></Field>
+        <Field Name="Total"><DataField>Total</DataField><rd:TypeName>System.Double</rd:TypeName></Field>
+      </Fields>
+    </DataSet>
+  </DataSets>
+
+  <Body>
+    <Height>9in</Height>
+    <ReportItems>
+      <Textbox Name="SenderName">
+        <Top>0in</Top><Left>0in</Left><Width>6.5in</Width><Height>.2in</Height>
+        <Value>=First(Fields!SenderName.Value, "Header")</Value>
+        <Style><FontSize>11pt</FontSize><FontWeight>Bold</FontWeight><Color>#2C3E50</Color></Style>
+      </Textbox>
+      <Textbox Name="SenderAddress">
+        <Top>.22in</Top><Left>0in</Left><Width>6.5in</Width><Height>.2in</Height>
+        <Value>=First(Fields!SenderAddress.Value, "Header")</Value>
+        <Style><FontSize>9pt</FontSize><Color>Gray</Color></Style>
+      </Textbox>
+
+      <Textbox Name="LetterDate">
+        <Top>.7in</Top><Left>0in</Left><Width>6.5in</Width><Height>.2in</Height>
+        <Value>=First(Fields!LetterDate.Value, "Header")</Value>
+        <Style><FontSize>10pt</FontSize></Style>
+      </Textbox>
+
+      <Textbox Name="RecipientName">
+        <Top>1.1in</Top><Left>0in</Left><Width>4in</Width><Height>.2in</Height>
+        <Value>=First(Fields!CustomerName.Value, "Header")</Value>
+        <Style><FontSize>10pt</FontSize></Style>
+      </Textbox>
+      <Textbox Name="RecipientAddress">
+        <Top>1.3in</Top><Left>0in</Left><Width>4in</Width><Height>.4in</Height>
+        <CanGrow>true</CanGrow>
+        <Value>=First(Fields!CustomerAddress.Value, "Header")</Value>
+        <Style><FontSize>10pt</FontSize></Style>
+      </Textbox>
+
+      <Textbox Name="Salutation">
+        <Top>1.9in</Top><Left>0in</Left><Width>6.5in</Width><Height>.2in</Height>
+        <Value>=&quot;Dear &quot; &amp; First(Fields!CustomerName.Value, "Header") &amp; ","</Value>
+        <Style><FontSize>10pt</FontSize></Style>
+      </Textbox>
+
+      <Textbox Name="BodyIntro">
+        <Top>2.2in</Top><Left>0in</Left><Width>6.5in</Width><Height>.6in</Height>
+        <CanGrow>true</CanGrow>
+        <Value>Thank you for your continued business. As a valued customer, we wanted to share a quick summary of your recent orders with us and let you know about a few upcoming improvements to how we ship and support your account.</Value>
+        <Style><FontSize>10pt</FontSize></Style>
+      </Textbox>
+
+      <Textbox Name="OrdersHeading">
+        <Top>2.95in</Top><Left>0in</Left><Width>4in</Width><Height>.2in</Height>
+        <Value>Your recent orders:</Value>
+        <Style><FontSize>10pt</FontSize><FontWeight>Bold</FontWeight></Style>
+      </Textbox>
+
+      <Table Name="OrdersTable">
+        <DataSetName>RecentOrders</DataSetName>
+        <NoRows>No recent orders on file.</NoRows>
+        <Top>3.2in</Top>
+        <Left>0in</Left>
+        <TableColumns>
+          <TableColumn><Width>2.2in</Width></TableColumn>
+          <TableColumn><Width>2.2in</Width></TableColumn>
+          <TableColumn><Width>2.1in</Width></TableColumn>
+        </TableColumns>
+        <Header>
+          <TableRows>
+            <TableRow>
+              <Height>.2in</Height>
+              <TableCells>
+                <TableCell><ReportItems><Textbox Name="H_Order"><Value>Order #</Value><Style><FontWeight>Bold</FontWeight><BorderStyle><Bottom>Solid</Bottom></BorderStyle><BorderColor><Bottom>#CCCCCC</Bottom></BorderColor></Style></Textbox></ReportItems></TableCell>
+                <TableCell><ReportItems><Textbox Name="H_Date"><Value>Date</Value><Style><FontWeight>Bold</FontWeight><BorderStyle><Bottom>Solid</Bottom></BorderStyle><BorderColor><Bottom>#CCCCCC</Bottom></BorderColor></Style></Textbox></ReportItems></TableCell>
+                <TableCell><ReportItems><Textbox Name="H_Total"><Value>Total</Value><Style><FontWeight>Bold</FontWeight><TextAlign>Right</TextAlign><BorderStyle><Bottom>Solid</Bottom></BorderStyle><BorderColor><Bottom>#CCCCCC</Bottom></BorderColor></Style></Textbox></ReportItems></TableCell>
+              </TableCells>
+            </TableRow>
+          </TableRows>
+        </Header>
+        <Details>
+          <TableRows>
+            <TableRow>
+              <Height>.2in</Height>
+              <TableCells>
+                <TableCell><ReportItems><Textbox Name="D_Order"><Value>=Fields!OrderNumber.Value</Value><Style /></Textbox></ReportItems></TableCell>
+                <TableCell><ReportItems><Textbox Name="D_Date"><Value>=Fields!OrderDate.Value</Value><Style /></Textbox></ReportItems></TableCell>
+                <TableCell><ReportItems><Textbox Name="D_Total"><Value>=Format(Fields!Total.Value, "C2")</Value><Style><TextAlign>Right</TextAlign></Style></Textbox></ReportItems></TableCell>
+              </TableCells>
+            </TableRow>
+          </TableRows>
+        </Details>
+        <Footer>
+          <TableRows>
+            <TableRow>
+              <Height>.22in</Height>
+              <TableCells>
+                <TableCell><ColSpan>2</ColSpan><ReportItems><Textbox Name="F_Label"><Value>Total spent this period</Value><Style><FontWeight>Bold</FontWeight><BorderStyle><Top>Solid</Top></BorderStyle><BorderColor><Top>#CCCCCC</Top></BorderColor></Style></Textbox></ReportItems></TableCell>
+                <TableCell><ReportItems><Textbox Name="F_Total"><Value>=Format(Sum(Fields!Total.Value), "C2")</Value><Style><FontWeight>Bold</FontWeight><TextAlign>Right</TextAlign><BorderStyle><Top>Solid</Top></BorderStyle><BorderColor><Top>#CCCCCC</Top></BorderColor></Style></Textbox></ReportItems></TableCell>
+              </TableCells>
+            </TableRow>
+          </TableRows>
+        </Footer>
+      </Table>
+
+      <Textbox Name="BodyClosing">
+        <Top>4.6in</Top><Left>0in</Left><Width>6.5in</Width><Height>.6in</Height>
+        <CanGrow>true</CanGrow>
+        <Value>If you have any questions about an order or would like to discuss volume pricing for upcoming projects, please don't hesitate to reach out. We're glad to have you as a customer.</Value>
+        <Style><FontSize>10pt</FontSize></Style>
+      </Textbox>
+
+      <Textbox Name="ClosingLine">
+        <Top>5.3in</Top><Left>0in</Left><Width>3in</Width><Height>.2in</Height>
+        <Value>Sincerely,</Value>
+        <Style><FontSize>10pt</FontSize></Style>
+      </Textbox>
+      <Textbox Name="Signatory">
+        <Top>5.75in</Top><Left>0in</Left><Width>4in</Width><Height>.2in</Height>
+        <Value>=First(Fields!SenderSignatory.Value, "Header")</Value>
+        <Style><FontSize>10pt</FontSize><FontWeight>Bold</FontWeight></Style>
+      </Textbox>
+    </ReportItems>
+  </Body>
+</Report>

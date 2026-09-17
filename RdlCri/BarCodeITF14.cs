@@ -1,11 +1,7 @@
 using Majorsilence.Reporting.Rdl;
 using System;
 using System.Collections.Generic;
-#if DRAWINGCOMPAT
 using Draw2 = Majorsilence.Forms.Drawing;
-#else
-using Draw2 = System.Drawing;
-#endif
 using System.Xml;
 using System.ComponentModel;
 using ZXing;
@@ -32,33 +28,21 @@ namespace Majorsilence.Reporting.Cri
 
         private void InternalDraw(ref Draw2.Bitmap bm, string value)
         {
-#if DRAWINGCOMPAT
             var writer = new ZXing.SkiaSharp.BarcodeWriter();
-#elif NETSTANDARD2_0 || NET5_0_OR_GREATER
-            var writer = new ZXing.Windows.Compatibility.BarcodeWriter();
-#else
-            var writer = new ZXing.BarcodeWriter();
-#endif
             writer.Format = BarcodeFormat.ITF;
             writer.Options.Width = Math.Max(1, bm.Width);
             writer.Options.Height = Math.Max(1, bm.Height);
             writer.Options.Hints[EncodeHintType.CHARACTER_SET] = "UTF-8";
 
-#if NET8_0_OR_GREATER
             try
             {
                 System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
             }
             catch (InvalidOperationException) { }
-#endif
 
-#if DRAWINGCOMPAT
             // Majorsilence.Forms.Drawing declares the SKBitmap conversion on Image; the object it
             // hands back is a Bitmap, so the ref parameter's type needs the downcast.
             bm = (Draw2.Bitmap)(Draw2.Image)writer.Write(value);
-#else
-            bm = writer.Write(value);
-#endif
         }
 
         public string GetCustomReportItemXml()

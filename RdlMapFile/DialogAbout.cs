@@ -1,7 +1,7 @@
 
 using System;
 using System.Reflection;
-using System.Windows.Forms;
+using Majorsilence.Forms;
 using RdlMapFile.Resources;
 
 namespace Majorsilence.Reporting.RdlMapFile

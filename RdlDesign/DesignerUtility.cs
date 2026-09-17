@@ -29,7 +29,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			try 
 			{
                 if (!sc.StartsWith("="))            // don't even try when color is an expression
-				    c = ColorTranslator.FromHtml(sc);
+				    c = System.Windows.Forms.ColorTranslator.FromHtml(sc);
 			}
 			catch 
 			{	// Probably should report this error
@@ -125,7 +125,7 @@ namespace Majorsilence.Reporting.RdlDesign
             }
             catch
             {
-                MessageBox.Show(Strings.DesignerUtility_Show_SharedConnectionError, Strings.DesignerUtility_Show_TestConnection);
+                Majorsilence.Forms.MessageBox.Show(Strings.DesignerUtility_Show_SharedConnectionError, Strings.DesignerUtility_Show_TestConnection);
                 dsr.ResetPassword();			// make sure to prompt again for the password
                 return false;
             }
@@ -169,7 +169,7 @@ namespace Majorsilence.Reporting.RdlDesign
             }
             catch
             {
-                MessageBox.Show(Strings.DesignerUtility_Show_SharedConnectionError, Strings.DesignerUtility_Show_TestConnection);
+                Majorsilence.Forms.MessageBox.Show(Strings.DesignerUtility_Show_SharedConnectionError, Strings.DesignerUtility_Show_TestConnection);
                 dsr.ResetPassword();			// make sure to prompt again for the password
                 return false;
             }
@@ -197,8 +197,8 @@ namespace Majorsilence.Reporting.RdlDesign
 			IDbConnection cnSQL=null;
 			IDbCommand cmSQL=null;
 			IDataReader dr=null;	   
-			Cursor saveCursor=Cursor.Current;
-			Cursor.Current = Cursors.WaitCursor;
+			Majorsilence.Forms.Cursor saveCursor=Majorsilence.Forms.Cursor.Current;
+			Majorsilence.Forms.Cursor.Current = Cursors.WaitCursor;
 			try
 			{
 				// Open up a connection
@@ -240,7 +240,7 @@ namespace Majorsilence.Reporting.RdlDesign
 							dr.Close();
 					}
 				}
-				Cursor.Current=saveCursor;
+				Majorsilence.Forms.Cursor.Current=saveCursor;
 			}
 			return;
 		}
@@ -256,24 +256,20 @@ namespace Majorsilence.Reporting.RdlDesign
             string dataSourceReference = d.GetElementValue(dsNode, "DataSourceReference", null);
             if (dataSourceReference != null)
             {
-                //  This is not very pretty code since it is assuming the structure of the windows parenting.
-                //    But there isn't any other way to get this information from here.
-                Control p = d;
-                MDIChild mc = null;
-                while (p != null && !(p is RdlDesigner))
+                // Was: walk d.Parent looking for an MDIChild then an RdlDesigner ancestor. Form
+                // isn't Control-derived in System.Windows.Forms (see MIGRATION-NOTES.md's Form-vs-
+                // Control table), so a Control's .Parent chain can never reach either -- use
+                // FindForm()/MdiParent instead, which are how a Control actually finds its owning
+                // top-level window in this architecture.
+                MDIChild mc = d.FindForm() as MDIChild;
+                RdlDesigner rd = mc?.MdiParent as RdlDesigner;
+                if (rd == null || mc == null || mc.SourceFile == null)
                 {
-                    if (p is MDIChild)
-                        mc = (MDIChild)p;
-
-                    p = p.Parent;
-                }
-                if (p == null || mc == null || mc.SourceFile == null)
-                {
-                    MessageBox.Show(Strings.DataSetRowsCtl_ShowC_UnableLocateDSR);
+                    Majorsilence.Forms.MessageBox.Show(Strings.DataSetRowsCtl_ShowC_UnableLocateDSR);
                     return false;
                 }
                 Uri filename = new Uri(Path.GetDirectoryName(mc.SourceFile.LocalPath) + Path.DirectorySeparatorChar + dataSourceReference);
-                if (!DesignerUtility.GetSharedConnectionInfo((RdlDesigner)p, filename.LocalPath, out dataProvider, out connection))
+                if (!DesignerUtility.GetSharedConnectionInfo(rd, filename.LocalPath, out dataProvider, out connection))
                 {
                     return false;
                 }
@@ -358,11 +354,11 @@ namespace Majorsilence.Reporting.RdlDesign
 			}
 			catch (SqlException sqle)
 			{
-				MessageBox.Show(sqle.Message, Strings.DesignerUtility_Show_SQLError);
+				Majorsilence.Forms.MessageBox.Show(sqle.Message, Strings.DesignerUtility_Show_SQLError);
 			}
 			catch (Exception e)
 			{
-				MessageBox.Show(e.InnerException == null? e.Message:e.InnerException.Message, Strings.DesignerUtility_Show_Error);
+				Majorsilence.Forms.MessageBox.Show(e.InnerException == null? e.Message:e.InnerException.Message, Strings.DesignerUtility_Show_Error);
 			}
 
 			return cols;
@@ -374,8 +370,8 @@ namespace Majorsilence.Reporting.RdlDesign
 			IDbConnection cnSQL=null;
 			IDbCommand cmSQL=null;
 			IDataReader dr=null;	   
-			Cursor saveCursor=Cursor.Current;
-			Cursor.Current = Cursors.WaitCursor;
+			Majorsilence.Forms.Cursor saveCursor=Majorsilence.Forms.Cursor.Current;
+			Majorsilence.Forms.Cursor.Current = Cursors.WaitCursor;
 			try
 			{
 				// Open up a connection
@@ -398,11 +394,11 @@ namespace Majorsilence.Reporting.RdlDesign
 			}
 			catch (SqlException sqle)
 			{
-				MessageBox.Show(sqle.Message, Strings.DesignerUtility_Show_SQLError);
+				Majorsilence.Forms.MessageBox.Show(sqle.Message, Strings.DesignerUtility_Show_SQLError);
 			}
 			catch (Exception e)
 			{
-				MessageBox.Show(e.InnerException == null? e.Message:e.InnerException.Message, Strings.DesignerUtility_Show_Error);
+				Majorsilence.Forms.MessageBox.Show(e.InnerException == null? e.Message:e.InnerException.Message, Strings.DesignerUtility_Show_Error);
 			}
 			finally
 			{
@@ -417,7 +413,7 @@ namespace Majorsilence.Reporting.RdlDesign
 					cnSQL.Close();
 					cnSQL.Dispose();
 				}
-				Cursor.Current=saveCursor;
+				Majorsilence.Forms.Cursor.Current=saveCursor;
 			}
 			return cols;
 		}
@@ -439,8 +435,8 @@ namespace Majorsilence.Reporting.RdlDesign
 			IDbConnection cnSQL = null;
 			IDbCommand cmSQL = null;
 			IDataReader dr = null;
-			Cursor saveCursor = Cursor.Current;
-			Cursor.Current = Cursors.WaitCursor;
+			Majorsilence.Forms.Cursor saveCursor = Majorsilence.Forms.Cursor.Current;
+			Majorsilence.Forms.Cursor.Current = Cursors.WaitCursor;
 
 			// Get the schema information
 			try
@@ -452,7 +448,7 @@ namespace Majorsilence.Reporting.RdlDesign
 				cnSQL = RdlEngineConfig.GetConnection(dataProvider, connection);
 				if (cnSQL == null)
 				{
-					MessageBox.Show(string.Format(Strings.DesignerUtility_Show_ConnectDataProviderError,dataProvider), Strings.DesignerUtility_Show_SQLError);
+					Majorsilence.Forms.MessageBox.Show(string.Format(Strings.DesignerUtility_Show_ConnectDataProviderError,dataProvider), Strings.DesignerUtility_Show_SQLError);
 					return schemaList;
 				}
 				cnSQL.Open();
@@ -492,11 +488,11 @@ namespace Majorsilence.Reporting.RdlDesign
 			}
 			catch (SqlException sqle)
 			{
-				MessageBox.Show(sqle.Message, Strings.DesignerUtility_Show_SQLError);
+				Majorsilence.Forms.MessageBox.Show(sqle.Message, Strings.DesignerUtility_Show_SQLError);
 			}
 			catch (Exception e)
 			{
-				MessageBox.Show(e.InnerException == null? e.Message: e.InnerException.Message, Strings.DesignerUtility_Show_Error);
+				Majorsilence.Forms.MessageBox.Show(e.InnerException == null? e.Message: e.InnerException.Message, Strings.DesignerUtility_Show_Error);
 			}
 			finally
 			{
@@ -512,7 +508,7 @@ namespace Majorsilence.Reporting.RdlDesign
                         dr.Close();
                     }
 				}
-				Cursor.Current=saveCursor;
+				Majorsilence.Forms.Cursor.Current=saveCursor;
 			}
 			return schemaList;
 		}
@@ -658,7 +654,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			}
 			catch (Exception e)
 			{
-				MessageBox.Show(e.InnerException == null? e.Message: e.InnerException.Message, Strings.DesignerUtility_Show_OpenConnectionError);
+				Majorsilence.Forms.MessageBox.Show(e.InnerException == null? e.Message: e.InnerException.Message, Strings.DesignerUtility_Show_OpenConnectionError);
 			}
 			finally
 			{

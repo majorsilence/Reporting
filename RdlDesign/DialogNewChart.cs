@@ -1,5 +1,6 @@
+using System.Collections.Generic;
+using System.Linq;
 using System;
-using System.Drawing;
 using System.Collections;
 using System.ComponentModel;
 using System.Windows.Forms;
@@ -268,24 +269,24 @@ namespace Majorsilence.Reporting.RdlDesign
             string ctype = cbChartType.Text.ToLowerInvariant();
             if (cbChartData.Text.Length == 0 && lbChartSeries.Items.Count == 0) //Added second condition 05122007GJL
             {
-                MessageBox.Show(Strings.DialogNewChart_ShowC_FillExpression);
+                Majorsilence.Forms.MessageBox.Show(Strings.DialogNewChart_ShowC_FillExpression);
                 bFail = true;
             }
             else if (ctype == "scatter" && cbChartData2.Text.Length == 0 && lbChartSeries.Items.Count == 0)
             {
-                MessageBox.Show(Strings.DialogNewChart_ShowC_FillYExpression);
+                Majorsilence.Forms.MessageBox.Show(Strings.DialogNewChart_ShowC_FillYExpression);
                 bFail = true;
 
             }
             else if (ctype == "bubble" && (cbChartData2.Text.Length == 0 || cbChartData3.Text.Length == 0))
             {
-                MessageBox.Show(Strings.DialogNewChart_ShowC_FillYAndBubbleExpressions);
+                Majorsilence.Forms.MessageBox.Show(Strings.DialogNewChart_ShowC_FillYAndBubbleExpressions);
                 bFail = true;
             }
             if (bFail)
                 return;
             // apply the result
-            DialogResult = DialogResult.OK;
+            DialogResult = Majorsilence.Forms.DialogResult.OK;
         }
 
         private void cbDataSets_SelectedIndexChanged(object sender, System.EventArgs e)
@@ -301,7 +302,7 @@ namespace Majorsilence.Reporting.RdlDesign
 
         private void bCategory_Click(object sender, System.EventArgs e)
         {
-            ICollection sic = lbFields.SelectedIndices;
+            List<int> sic = lbFields.SelectedIndices.ToList();
             int count = sic.Count;
             foreach (int i in sic)
             {
@@ -314,7 +315,7 @@ namespace Majorsilence.Reporting.RdlDesign
 
         private void bSeries_Click(object sender, System.EventArgs e)
         {
-            ICollection sic = lbFields.SelectedIndices;
+            List<int> sic = lbFields.SelectedIndices.ToList();
             int count = sic.Count;
             foreach (int i in sic)
             {

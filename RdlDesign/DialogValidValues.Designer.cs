@@ -1,6 +1,5 @@
 using System;
 using System.Windows.Forms;
-using System.Drawing;
 using System.ComponentModel;
 using System.Collections;
 
@@ -17,7 +16,7 @@ private System.ComponentModel.Container components = null;
 
 		private void InitializeComponent()
 		{
-			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(DialogValidValues));
+			System.Windows.Forms.ComponentResourceManager resources = new System.Windows.Forms.ComponentResourceManager(typeof(DialogValidValues));
 			this.dgParms = new System.Windows.Forms.DataGridView();
 			this.bOK = new System.Windows.Forms.Button();
 			this.bCancel = new System.Windows.Forms.Button();
@@ -34,20 +33,20 @@ private System.ComponentModel.Container components = null;
 			// bOK
 			// 
 			resources.ApplyResources(this.bOK, "bOK");
-			this.bOK.DialogResult = System.Windows.Forms.DialogResult.OK;
+			this.bOK.DialogResult = Majorsilence.Forms.DialogResult.OK;
 			this.bOK.Name = "bOK";
 			// 
 			// bCancel
 			// 
 			resources.ApplyResources(this.bCancel, "bCancel");
-			this.bCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
+			this.bCancel.DialogResult = Majorsilence.Forms.DialogResult.Cancel;
 			this.bCancel.Name = "bCancel";
 			// 
 			// bDelete
 			// 
 			resources.ApplyResources(this.bDelete, "bDelete");
 			this.bDelete.Name = "bDelete";
-			this.bDelete.Click += new System.EventHandler(this.bDelete_Click);
+			this.bDelete.Click += this.bDelete_Click;
 			// 
 			// DialogValidValues
 			// 
@@ -63,7 +62,7 @@ private System.ComponentModel.Container components = null;
 			this.MinimizeBox = false;
 			this.Name = "DialogValidValues";
 			this.ShowInTaskbar = false;
-			this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
+			this.SizeGripStyle = Majorsilence.Forms.SizeGripStyle.Hide;
 			((System.ComponentModel.ISupportInitialize)(this.dgParms)).EndInit();
 			this.ResumeLayout(false);
 
