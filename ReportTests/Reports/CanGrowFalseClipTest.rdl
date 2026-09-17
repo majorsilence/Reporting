@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Report xmlns="http://schemas.microsoft.com/sqlserver/reporting/2005/01/reportdefinition">
+  <!-- Two boxes, one above the other, both the height of a fixed table row
+       (0.153in = 11.016pt) and neither allowed to grow.
+
+       The top one holds a value far too wide for it, so the engine word-wraps it
+       into more lines than 11pt of box can hold. With CanGrow=false those extra
+       lines must be clipped away: the box keeps the height the report gave it, and
+       what does not fit is not drawn. Painted instead, they land on top of the box
+       below - which in the report this came from is the next detail row.
+
+       Padding is stated at zero throughout so the arithmetic is the report's and
+       not the style defaults'. -->
+  <PageWidth>8.5in</PageWidth>
+  <PageHeight>11in</PageHeight>
+  <LeftMargin>0.5in</LeftMargin>
+  <RightMargin>0.5in</RightMargin>
+  <TopMargin>0.5in</TopMargin>
+  <BottomMargin>0.5in</BottomMargin>
+  <Width>7.5in</Width>
+  <Body>
+    <Height>2in</Height>
+    <ReportItems>
+      <Textbox Name="TooWide">
+        <Top>0.25in</Top>
+        <Left>0.25in</Left>
+        <Width>1in</Width>
+        <Height>0.153in</Height>
+        <CanGrow>false</CanGrow>
+        <Value>Our Wheels Follow Us Everywhere</Value>
+        <Style>
+          <FontFamily>Arial</FontFamily>
+          <FontSize>8pt</FontSize>
+          <PaddingLeft>0pt</PaddingLeft>
+          <PaddingRight>0pt</PaddingRight>
+          <PaddingTop>0pt</PaddingTop>
+          <PaddingBottom>0pt</PaddingBottom>
+        </Style>
+      </Textbox>
+      <Textbox Name="RowBelow">
+        <Top>0.403in</Top>
+        <Left>0.25in</Left>
+        <Width>3in</Width>
+        <Height>0.153in</Height>
+        <CanGrow>false</CanGrow>
+        <Value>Piccolo</Value>
+        <Style>
+          <FontFamily>Arial</FontFamily>
+          <FontSize>8pt</FontSize>
+          <PaddingLeft>0pt</PaddingLeft>
+          <PaddingRight>0pt</PaddingRight>
+          <PaddingTop>0pt</PaddingTop>
+          <PaddingBottom>0pt</PaddingBottom>
+        </Style>
+      </Textbox>
+      <Textbox Name="AllowedToGrow">
+        <Top>1in</Top>
+        <Left>0.25in</Left>
+        <Width>1in</Width>
+        <Height>0.153in</Height>
+        <CanGrow>true</CanGrow>
+        <Value>Our Wheels Follow Us Everywhere</Value>
+        <Style>
+          <FontFamily>Arial</FontFamily>
+          <FontSize>8pt</FontSize>
+          <PaddingLeft>0pt</PaddingLeft>
+          <PaddingRight>0pt</PaddingRight>
+          <PaddingTop>0pt</PaddingTop>
+          <PaddingBottom>0pt</PaddingBottom>
+        </Style>
+      </Textbox>
+      <Textbox Name="Fits">
+        <Top>1.5in</Top>
+        <Left>0.25in</Left>
+        <Width>3in</Width>
+        <Height>0.153in</Height>
+        <CanGrow>false</CanGrow>
+        <Value>Short</Value>
+        <Style>
+          <FontFamily>Arial</FontFamily>
+          <FontSize>8pt</FontSize>
+          <PaddingLeft>0pt</PaddingLeft>
+          <PaddingRight>0pt</PaddingRight>
+          <PaddingTop>0pt</PaddingTop>
+          <PaddingBottom>0pt</PaddingBottom>
+        </Style>
+      </Textbox>
+    </ReportItems>
+  </Body>
+</Report>

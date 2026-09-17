@@ -200,6 +200,27 @@ namespace Majorsilence.Reporting.Rdl
             if (!bNoClip && availableW > 0 && si.WritingMode != WritingModeEnum.tb_rl)
                 sa = RewrapLines(sa, baseStyle, availableW);
 
+            // A textbox that may not grow may not draw outside its own rectangle either.
+            // bWrap is the item's CanGrow: when it is false the box keeps the height the
+            // report gave it, so wrapped lines past that height belong to nothing and used
+            // to be painted straight over whatever sits below - in a table, the next row.
+            // Clipping them confines an over-long value to its own cell, which is what
+            // CanGrow=false means. Every other renderer already gets this for free: the
+            // drawing path hands the string to a layout rectangle and the graphics library
+            // clips it. This renderer places each line itself, so it has to say so.
+            //
+            // The pitch is si.FontSize because that is the pitch the loop below draws at,
+            // and never fewer than one line: a single line of text is routinely taller than
+            // the cell the report sizes for it, and dropping it would blank the report
+            // rather than clip it.
+            if (!bWrap && !bNoClip && height > 0 && sa.Length > 1 && si.FontSize > 0)
+            {
+                float availableH = height - si.PaddingTop - si.PaddingBottom;
+                int maxLines = Math.Max(1, (int)Math.Floor(availableH / si.FontSize));
+                if (sa.Length > maxLines)
+                    sa = sa.Take(maxLines).ToArray();
+            }
+
             if (!si.BackgroundColor.IsEmpty && height > 0 && width > 0)
                 iAddFillRect(x, y, width, height, si.BackgroundColor);
 
