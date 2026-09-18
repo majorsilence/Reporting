@@ -27,6 +27,21 @@ namespace Majorsilence.Reporting.Rdl
     [Serializable]
     internal class Image : ReportItem
     {
+        /// <summary>
+        /// Shared across every external image in every report. A HttpClient per fetch was
+        /// leaving a socket in TIME_WAIT each time, which exhausts the ephemeral port range
+        /// under any real load and defeats connection reuse to a host the engine is about to
+        /// ask again. One client is the documented way to use the type.
+        /// </summary>
+        private static readonly HttpClient ExternalImageClient = CreateExternalImageClient();
+
+        private static HttpClient CreateExternalImageClient()
+        {
+            var client = new HttpClient();
+            client.AddMajorsilenceReportingUserAgent();
+            return client;
+        }
+
         ImageSourceEnum _ImageSource;   // Identifies the source of the image:
         Expression _Value;      // See Source. Expected datatype is string or
                                 // binary, depending on Source. If the Value is
@@ -193,7 +208,11 @@ namespace Majorsilence.Reporting.Rdl
                 MemoryStream ostrm = new MemoryStream();
                 ImageFormat imf;
                 
-                switch (mtype.ToLower())
+                // Null-conditional deliberately: an unknown media type belongs in the default
+                // branch below, which re-encodes whatever was decoded. Throwing here instead
+                // discarded an image the engine had already loaded successfully, and the catch
+                // reported it as a load failure, which it was not.
+                switch (mtype?.ToLower())
                 {
                     case "image/jpeg":
                         imf = ImageFormat.Jpeg;
@@ -284,13 +303,34 @@ namespace Majorsilence.Reporting.Rdl
                             fname.StartsWith("file:") ||
                             fname.StartsWith("https:"))
                         {
-                            using (HttpClient client = new HttpClient())
+                            // The same URL is asked for at least twice per report — once while
+                            // the pages are built and again while they are drawn — and where it
+                            // names an API that renders the image on demand, the repeat costs
+                            // as much as the original.
+                            var cached = rpt.GetExternalImage(fname);
+                            if (cached != null)
                             {
-                                client.AddMajorsilenceReportingUserAgent();
-                                HttpResponseMessage response = await client.GetAsync(fname);
-                                response.EnsureSuccessStatusCode();
-                                strm = await response.Content.ReadAsStreamAsync();
+                                strm = new MemoryStream(cached.Content);
+                                mtype = cached.MimeType ?? mtype;
+                                break;
                             }
+
+                            HttpResponseMessage response = await ExternalImageClient.GetAsync(fname);
+                            response.EnsureSuccessStatusCode();
+                            // GetMimeType reads the extension off the URL, which an API
+                            // endpoint -- ".../render/image?source=..." -- does not
+                            // have, so it returns null and the caller's switch on
+                            // mtype.ToLower() throws into the catch that treats it as an
+                            // unloadable image. The response says what it sent; believe it.
+                            if (mtype == null)
+                                mtype = response.Content.Headers.ContentType?.MediaType;
+
+                            // Read to bytes rather than handing back the response stream: the
+                            // stream can be read once, and the cache has to serve the next
+                            // caller as well as this one.
+                            byte[] content = await response.Content.ReadAsByteArrayAsync();
+                            rpt.AddExternalImage(fname, content, mtype);
+                            strm = new MemoryStream(content);
                         }
                         else
                             strm = new FileStream(fname, System.IO.FileMode.Open, FileAccess.Read);

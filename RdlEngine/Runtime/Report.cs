@@ -30,6 +30,48 @@ namespace Majorsilence.Reporting.Rdl
 		internal ReportLog rl;	// report log
 		RCache _Cache;
 
+		// External images fetched over http, keyed by the resolved URL. Deliberately not in
+		// _Cache: ResetRenderCache replaces that between building the pages and rendering
+		// them, which is why every external image was fetched twice per report — once to lay
+		// it out and again to draw it. Where the URL is an API that renders the image on
+		// demand, the second call costs as much as the first and buys nothing.
+		readonly System.Collections.Concurrent.ConcurrentDictionary<string, ExternalImage> _ExternalImages =
+			new System.Collections.Concurrent.ConcurrentDictionary<string, ExternalImage>();
+
+		/// <summary>
+		/// The bytes and media type of an external image, held for the life of the report.
+		/// </summary>
+		internal sealed class ExternalImage
+		{
+			internal ExternalImage(byte[] content, string mimeType)
+			{
+				Content = content;
+				MimeType = mimeType;
+			}
+
+			internal byte[] Content { get; }
+			internal string MimeType { get; }
+		}
+
+		/// <summary>
+		/// The image previously fetched from this URL, or null. Callers get the bytes and open
+		/// their own stream over them: a stream is read once, and the same image is drawn more
+		/// than once.
+		/// </summary>
+		internal ExternalImage GetExternalImage(string url)
+		{
+			if (string.IsNullOrEmpty(url))
+				return null;
+			_ExternalImages.TryGetValue(url, out var image);
+			return image;
+		}
+
+		internal void AddExternalImage(string url, byte[] content, string mimeType)
+		{
+			if (!string.IsNullOrEmpty(url) && content != null)
+				_ExternalImages[url] = new ExternalImage(content, mimeType);
+		}
+
 		// Some report runtime variables
 		private string _Folder;			// folder name
 		private string _ReportName;		// report name
@@ -654,6 +696,10 @@ namespace Majorsilence.Reporting.Rdl
 				_Report = null;
 			}
 			_Cache = null;
+			// Held images can be large and there may be one per row; the report is done with
+			// them now, and holding them until the object is collected would be the whole
+			// point of the cache turning into a leak.
+			_ExternalImages.Clear();
 			_DataSources = null;
 			_CurrentPage = null;
 		}
