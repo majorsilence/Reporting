@@ -34,7 +34,7 @@ namespace Majorsilence.Reporting.RdlDesign
 		readonly Color OUTWORKAREACOLOR = Color.Azure; //out work area background color (on page, but in margin)
 		readonly Color OUTITEMCOLOR = Color.Salmon; //color of out work area parts of item 
 
-		const float RADIUS = 2.5f;
+		const float RADIUS = 4.0f;  // Increased from 2.5f for easier manipulation
         readonly Color BANDCOLOR = Color.LightGray;
 		const int BANDHEIGHT = 12;              // height of band (e.g. body, pageheader, pagefooter) in pts
 		const float LEFTGAP = 0f; // keep a gap on the left size of the screen
@@ -1136,7 +1136,8 @@ namespace Majorsilence.Reporting.RdlDesign
                 // adjust coordinates for scrolling
                 TempRect.X -= _hScroll - 1;
                 TempRect.Y -= _vScroll - 1;
-                ControlPaint.DrawGrid(g, Rectangle.Round(TempRect), SizeGridPt, Color.White);
+                // Use dot grid instead of line grid for better visibility
+                DrawDotGrid(TempRect, SizeGridPt, Color.DarkGray);
             }
 
 
@@ -1232,6 +1233,8 @@ namespace Majorsilence.Reporting.RdlDesign
 				{
 					if (this._SelectedReportItems.IndexOf(xNodeLoop) >= 0)
 						DrawSelected(xNodeLoop, rir);
+					else if (this.ShowReportItemOutline)
+						DrawUnselectedOutline(xNodeLoop, rir);
 				}
 			}
 		}
@@ -1992,6 +1995,19 @@ namespace Majorsilence.Reporting.RdlDesign
             
             }
 
+        }
+
+        private void DrawUnselectedOutline(XmlNode xNode, RectangleF r)
+        {
+            // Draw a subtle outline for unselected items to make them visible
+            if (xNode.Name == "Line")
+                return;  // Lines already have their own rendering
+
+            StyleInfo si = new StyleInfo();
+            si.BStyleBottom = si.BStyleLeft = si.BStyleTop = si.BStyleRight = BorderStyleEnum.Dotted;
+            si.BWidthBottom = si.BWidthLeft = si.BWidthRight = si.BWidthTop = 1;
+            si.BColorBottom = si.BColorLeft = si.BColorRight = si.BColorTop = Color.LightGray;
+            DrawBorder(si, r);
         }
 
         private void HighLightTableRegion(XmlNode xNode,RectangleF r)
@@ -3138,6 +3154,25 @@ namespace Majorsilence.Reporting.RdlDesign
 					p.Dispose();
 			}
 
+		}
+
+		private void DrawDotGrid(RectangleF rect, Size gridSize, Color dotColor)
+		{
+			// Draw a dot grid pattern within the specified rectangle
+			if (gridSize.Width <= 0 || gridSize.Height <= 0)
+				return;
+
+			using (SolidBrush brush = new SolidBrush(dotColor))
+			{
+				float dotSize = 1.5f;
+				for (float x = rect.X; x < rect.X + rect.Width; x += gridSize.Width)
+				{
+					for (float y = rect.Y; y < rect.Y + rect.Height; y += gridSize.Height)
+					{
+						g.FillEllipse(brush, x - dotSize / 2, y - dotSize / 2, dotSize, dotSize);
+					}
+				}
+			}
 		}
 
 		private void DrawLine(Color c, BorderStyleEnum bs, float w,  
