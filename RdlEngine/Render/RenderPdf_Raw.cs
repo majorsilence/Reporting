@@ -585,10 +585,10 @@ namespace Majorsilence.Reporting.Rdl
         private void AddAnnotations(float x, float y, float height, float width,
             string url, string tooltip)
         {
+            // ToolTips are an interactive-HTML feature; SSRS drops them in PDF output, and a
+            // Text annotation would show as a sticky-note icon on every tooltipped item.
             if (!string.IsNullOrEmpty(url))
                 _currentPage.AddLink(x, y, width, height, url);
-            else if (!string.IsNullOrEmpty(tooltip))
-                _currentPage.AddTooltip(x, y, width, height, tooltip);
         }
 
         private static LineStyle ConvertLineStyle(BorderStyleEnum ls)

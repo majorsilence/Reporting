@@ -41,18 +41,68 @@ namespace Majorsilence.Reporting.Rdl
 		static internal Color ColorFromHtml(string sc, Color dc, Report rpt)
 		{
 			Color c;
-			try 
+			if (TryColorFromHtml(sc, out c))
+				return c;
+
+			// Reports written in British English say LightGrey, and the CLR knows only
+			// LightGray -- 180 times in a single real-world report. Worth trying before
+			// giving up, because the failure is ugly: the name resolves to nothing and the
+			// renderers paint that as black, so a table row asking for LightGrey came out as
+			// a black band with its own text lost inside it.
+			string gray = GrayForGrey(sc);
+			if (gray != null && TryColorFromHtml(gray, out c))
+				return c;
+
+			if (rpt != null)
+				rpt.rl.LogError(4, string.Format("'{0}' is an invalid HTML color.", sc));
+			return dc;
+		}
+
+		/// <summary>
+		/// Whether a colour string names a colour, across both drawing back ends — which fail
+		/// differently, and neither of them usefully. System.Drawing's translator throws on a
+		/// name it does not know; the Majorsilence.Forms.Drawing one returns an unnamed, fully
+		/// transparent colour, so the caller cannot tell a failed parse from a real colour.
+		/// Both are failures and both have to be caught here, or a repair that works under one
+		/// back end silently does nothing under the other.
+		/// </summary>
+		private static bool TryColorFromHtml(string sc, out Color c)
+		{
+			try
 			{
 				c = ColorTranslator.FromHtml(sc);
 			}
-			catch 
+			catch
 			{
-				c = dc;
-				if (rpt != null)
-					rpt.rl.LogError(4, string.Format("'{0}' is an invalid HTML color.", sc));
+				c = Color.Empty;
+				return false;
 			}
 
-			return c;
+			return !NameFailedToResolve(c, sc);
+		}
+
+		/// <summary>
+		/// ColorTranslator.FromHtml does not throw on an unrecognised colour NAME: it hands
+		/// back an unnamed, fully transparent colour, so the catch above never fires and the
+		/// caller cannot tell a failed parse from a real colour. This is that signature.
+		/// <para>
+		/// A '#' literal is taken at its word: #00FFFFFF is transparent on purpose and must
+		/// not be second-guessed.
+		/// </para>
+		/// </summary>
+		private static bool NameFailedToResolve(Color c, string sc)
+		{
+			return c.A == 0
+				&& !c.IsKnownColor
+				&& !string.IsNullOrWhiteSpace(sc)
+				&& sc.TrimStart()[0] != '#';
+		}
+
+		/// <summary>The same name with the British spelling swapped, or null if it has none.</summary>
+		private static string GrayForGrey(string sc)
+		{
+			int i = sc.IndexOf("grey", StringComparison.OrdinalIgnoreCase);
+			return i < 0 ? null : sc.Substring(0, i) + "gray" + sc.Substring(i + 4);
 		}
 
 		static internal int Integer(string i)
