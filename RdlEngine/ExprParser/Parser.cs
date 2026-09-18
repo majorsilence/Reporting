@@ -492,17 +492,28 @@ namespace Majorsilence.Reporting.Rdl
 					ReportParameter p = idLookup.LookupParameter(method);
 					if (p == null)
 						throw new ParserException(string.Format(Strings.Parser_ErrorP_ParameterNotFound, method));
+                    // Parameters!X.Count, Parameters!X.Value.Count and Parameters!X.Label.Count
+                    // all mean the multi-value count; the bare form is what Report Builder emits.
+                    bool wantCount = false;
+                    if (thirdPart == "Count")
+                    {
+                        wantCount = true;
+                        thirdPart = "Value";
+                    }
                     int ci = thirdPart == null? -1: thirdPart.IndexOf(".Count");
                     if (ci > 0)
+                    {
+                        wantCount = true;
                         thirdPart = thirdPart.Substring(0, ci);
-                    FunctionReportParameter r;                    
+                    }
+                    FunctionReportParameter r;
 					if (thirdPart == null || thirdPart == "Value")
 						r = new FunctionReportParameter(p);
 					else if (thirdPart == "Label")
 						r = new FunctionReportParameterLabel(p);
 					else
 						throw new ParserException(string.Format(Strings.Parser_ErrorP_ParameterSupportsValueAndLabel, method));
-                    if (ci > 0)
+                    if (wantCount)
                         r.SetParameterMethod("Count", null);
                     
                     result = r;
