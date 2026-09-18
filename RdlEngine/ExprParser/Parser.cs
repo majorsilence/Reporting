@@ -182,14 +182,26 @@ namespace Majorsilence.Reporting.Rdl
 			IExpr lhs;
 			lhs = await MatchExprAddSub();
 			result = lhs;			// in case we get no matches
-			while ((t = curToken.Type) == TokenTypes.EQUAL ||
-				t == TokenTypes.NOTEQUAL ||
-				t == TokenTypes.GREATERTHAN ||
-				t == TokenTypes.GREATERTHANOREQUAL ||
-				t == TokenTypes.LESSTHAN ||
-				t == TokenTypes.LESSTHANOREQUAL ||
-				t == TokenTypes.LIKE)
+			while (true)
 			{
+				t = curToken.Type;
+				// VB "Is" comparison ("X Is Nothing"): the lexer sees a plain identifier, so
+				// promote it to an equality test here.
+				if (t == TokenTypes.IDENTIFIER
+					&& string.Equals(curToken.Value, "Is", StringComparison.OrdinalIgnoreCase))
+				{
+					t = TokenTypes.EQUAL;
+				}
+				else if (t != TokenTypes.EQUAL &&
+					t != TokenTypes.NOTEQUAL &&
+					t != TokenTypes.GREATERTHAN &&
+					t != TokenTypes.GREATERTHANOREQUAL &&
+					t != TokenTypes.LESSTHAN &&
+					t != TokenTypes.LESSTHANOREQUAL &&
+					t != TokenTypes.LIKE)
+				{
+					break;
+				}
 				curToken = tokens.Extract();
 				IExpr rhs;
 				rhs = await MatchExprAddSub();
@@ -263,11 +275,13 @@ namespace Majorsilence.Reporting.Rdl
 					case TokenTypes.MINUS:
 						if (bDecimal)
 							result = new FunctionMinusDecimal(lhs, rhs);
-						else if (bString)
-							throw new ParserException(Strings.Parser_ErrorP_MinusNeedNumbers + GetLocationInfo(curToken));
                         else if (bInt32)
                             result = new FunctionMinusInt32(lhs, rhs);
                         else
+							// A String-typed operand is routinely a parameter or field whose
+							// declared type is String but whose values are numeric
+							// ("=Parameters!Count.Value - 1"); SSRS coerces at runtime, so
+							// defer to FunctionMinus's numeric evaluation instead of refusing.
 							result = new FunctionMinus(lhs, rhs);
 						break;
 				}
@@ -286,7 +300,8 @@ namespace Majorsilence.Reporting.Rdl
 			result = lhs;			// in case we get no matches
 			while ((t = curToken.Type) == TokenTypes.FORWARDSLASH ||
 				t == TokenTypes.STAR ||
-				t == TokenTypes.MODULUS)
+				t == TokenTypes.MODULUS ||
+				t == TokenTypes.BACKSLASH)
 			{
 				curToken = tokens.Extract();
 				IExpr rhs;
@@ -309,6 +324,9 @@ namespace Majorsilence.Reporting.Rdl
 						break;
 					case TokenTypes.MODULUS:
 						result = new FunctionModulus(lhs, rhs);
+						break;
+					case TokenTypes.BACKSLASH:
+						result = new FunctionDivInteger(lhs, rhs);
 						break;
 				}
 				lhs = result;		// in case continue in the loop
@@ -375,7 +393,9 @@ namespace Majorsilence.Reporting.Rdl
 			else
 				result = await MatchBaseType();
 
-			return result;
+			// A ".ToString" suffix can follow any complete expression, not only the member
+			// references NormalizeMemberRef already handles.
+			return MatchPostfixToString(result);
 		}
 
 		// BaseType: FuncIdent | NUMBER | QUOTE   - note certain types are restricted in expressions
@@ -477,9 +497,10 @@ namespace Majorsilence.Reporting.Rdl
 						}
 					}
 
+					thirdPart = NormalizeMemberRef(thirdPart);
 					if (thirdPart == null || thirdPart == "Value")
 					{
-						result = new FunctionField(f);	
+						result = new FunctionField(f);
 					}
 					else if (thirdPart == "IsMissing")
 					{
@@ -492,17 +513,29 @@ namespace Majorsilence.Reporting.Rdl
 					ReportParameter p = idLookup.LookupParameter(method);
 					if (p == null)
 						throw new ParserException(string.Format(Strings.Parser_ErrorP_ParameterNotFound, method));
+                    thirdPart = NormalizeMemberRef(thirdPart);
+                    // Parameters!X.Count, Parameters!X.Value.Count and Parameters!X.Label.Count
+                    // all mean the multi-value count; the bare form is what Report Builder emits.
+                    bool wantCount = false;
+                    if (thirdPart == "Count")
+                    {
+                        wantCount = true;
+                        thirdPart = "Value";
+                    }
                     int ci = thirdPart == null? -1: thirdPart.IndexOf(".Count");
                     if (ci > 0)
+                    {
+                        wantCount = true;
                         thirdPart = thirdPart.Substring(0, ci);
-                    FunctionReportParameter r;                    
+                    }
+                    FunctionReportParameter r;
 					if (thirdPart == null || thirdPart == "Value")
 						r = new FunctionReportParameter(p);
 					else if (thirdPart == "Label")
 						r = new FunctionReportParameterLabel(p);
 					else
 						throw new ParserException(string.Format(Strings.Parser_ErrorP_ParameterSupportsValueAndLabel, method));
-                    if (ci > 0)
+                    if (wantCount)
                         r.SetParameterMethod("Count", null);
                     
                     result = r;
@@ -511,11 +544,20 @@ namespace Majorsilence.Reporting.Rdl
 					Textbox t = idLookup.LookupReportItem(method);
 					if (t == null)
 						throw new ParserException(string.Format(Strings.Parser_ErrorP_ItemNotFound, method));
+					thirdPart = NormalizeMemberRef(thirdPart);
 					if (thirdPart != null && thirdPart != "Value")
 						throw new ParserException(string.Format(Strings.Parser_ErrorP_ItemSupportsValue, method));
 					result = new FunctionTextbox(t, idLookup.ExpressionName);	
 					return (true, result);
 				case "globals":
+					// Globals!RenderFormat.Name (RDL 2008+): the active output format,
+					// commonly used to toggle export-only columns.
+					if (string.Equals(method, "RenderFormat", StringComparison.OrdinalIgnoreCase)
+						&& (thirdPart == null || string.Equals(thirdPart, "Name", StringComparison.OrdinalIgnoreCase)))
+					{
+						result = new FunctionRenderFormatName();
+						return (true, result);
+					}
 					e = idLookup.LookupGlobal(method);
 					if (e == null)
 						throw new ParserException(string.Format(Strings.Parser_ErrorP_GlobalsNotFound, method));
@@ -535,7 +577,12 @@ namespace Majorsilence.Reporting.Rdl
 					return (true, result);
 				default:
 					if (!bOnePart)
+					{
+						IExpr wellKnown = ResolveWellKnownConstant(fullname);
+						if (wellKnown != null)
+							return (true, wellKnown);
 						throw new ParserException(string.Format(Strings.Parser_ErrorP_UnknownIdentifer, fullname));
+					}
 
 					switch (method.ToLower())		// lexer should probably mark these
 					{
@@ -575,6 +622,15 @@ namespace Majorsilence.Reporting.Rdl
 				bool isRunningValue = method.ToLower() == "runningvalue";
 				int commasBeforeScope = isRunningValue ? 2 : 1;
 				int commaCount = 0;
+				// The first token after '(' is already in curToken, not in the stream. A
+				// zero-argument aggregate — IIf(CountRows() = 0, a, b) — otherwise scans past
+				// its own closing paren and captures the enclosing call's next argument as
+				// its scope; an opening paren in curToken likewise needs its level counted.
+				if (curToken.Type == TokenTypes.RPAREN)
+					level = -1;
+				else if (curToken.Type == TokenTypes.LPAREN)
+					level++;
+				if (level >= 0)
 				foreach(Token tok in tokens)
 				{
 					if(nextScope)
@@ -670,6 +726,12 @@ namespace Majorsilence.Reporting.Rdl
             }
 			else switch(method.ToLower())
 			{
+				case "ctype":	// VB conversion operator; second operand is a type, not a value
+					if (args.Length != 2)
+						throw new ParserException(Strings.Parser_ErrorP_Invalid_function_arguments + GetLocationInfo(curToken));
+					result = ResolveCType(args[0], args[1]);
+					break;
+				case "if":		// VB.NET ternary If(cond, a, b): same shape as IIF
 				case "iif":
 					if (args.Length != 3)
 						throw new ParserException(Strings.Parser_ErrorP_iff_function_requires_3_arguments + GetLocationInfo(curToken));
@@ -965,10 +1027,16 @@ namespace Majorsilence.Reporting.Rdl
 			if (args.Length >= indexOfScope)
 			{
 				string n = await args[indexOfScope-1].EvaluateString(null, null);
-				if (idLookup.IsPageScope)
-					throw new ParserException(string.Format(Strings.Parser_ErrorP_ScopeNotSpecifiedInHeaderOrFooter,n));
 
 				scope = idLookup.LookupScope(n);
+
+				// A page header/footer has no row context, so grouping scopes are meaningless
+				// there — but a scope naming a dataset aggregates over that dataset's rows,
+				// independent of the page, which is what RDL 2008+ page headers routinely do
+				// (e.g. =First(Fields!X.Value, "SomeDataSet") for a report-wide caption).
+				if (idLookup.IsPageScope && scope is not DataSetDefn)
+					throw new ParserException(string.Format(Strings.Parser_ErrorP_ScopeNotSpecifiedInHeaderOrFooter,n));
+
 				if (scope == null)
 				{
 					Identifier ie = args[indexOfScope-1] as Identifier;
@@ -1021,17 +1089,191 @@ namespace Majorsilence.Reporting.Rdl
             else
                 arrayMethod = null;
 
-            if (vf == null || vf == "Value")
+            if (vf == null || string.Equals(vf, "Value", StringComparison.OrdinalIgnoreCase))
                 result = new FunctionReportParameter(p);
-            else if (vf == "Label")
+            else if (string.Equals(vf, "Label", StringComparison.OrdinalIgnoreCase))
                 result = new FunctionReportParameterLabel(p);
             else
                 throw new ParserException(string.Format(Strings.Parser_ErrorP_ParameterSupportsValueAndLabel, pname));
+
+            // Parameters!X.Value.ToString() is a no-op accessor, not a multi-value method.
+            if (string.Equals(arrayMethod, "ToString", StringComparison.OrdinalIgnoreCase)
+                && (args == null || args.Length == 0))
+                return result;
 
             result.SetParameterMethod(arrayMethod, args);
 
             return result;
         }
+
+		/// <summary>
+		/// Multi-part identifiers that are really well-known constants: framework and VB
+		/// constants plus the VB enum values Report Builder writes into date functions.
+		/// Returns null when the name is not recognised.
+		/// </summary>
+		private static IExpr ResolveWellKnownConstant(string fullname)
+		{
+			string key = fullname.ToLowerInvariant();
+
+			if (key == "environment.newline" || key == "system.environment.newline")
+				return new ConstantString(Environment.NewLine);
+
+			if (key.StartsWith("microsoft.visualbasic.constants.") || key.StartsWith("constants."))
+			{
+				switch (key.Substring(key.LastIndexOf('.') + 1))
+				{
+					case "vbcrlf":
+					case "vbnewline": return new ConstantString("\r\n");
+					case "vbcr": return new ConstantString("\r");
+					case "vblf": return new ConstantString("\n");
+					case "vbtab": return new ConstantString("\t");
+				}
+				return null;
+			}
+
+			if (key.StartsWith("dateformat."))
+			{
+				switch (key.Substring("dateformat.".Length))
+				{
+					case "generaldate": return new ConstantInteger(0);
+					case "longdate": return new ConstantInteger(1);
+					case "shortdate": return new ConstantInteger(2);
+					case "longtime": return new ConstantInteger(3);
+					case "shorttime": return new ConstantInteger(4);
+				}
+				return null;
+			}
+
+			if (key.StartsWith("dateinterval."))
+			{
+				// The interval codes DateDiff/DatePart accept, per VB semantics.
+				switch (key.Substring("dateinterval.".Length))
+				{
+					case "year": return new ConstantString("yyyy");
+					case "quarter": return new ConstantString("q");
+					case "month": return new ConstantString("m");
+					case "dayofyear": return new ConstantString("y");
+					case "day": return new ConstantString("d");
+					case "weekofyear": return new ConstantString("ww");
+					case "weekday": return new ConstantString("w");
+					case "hour": return new ConstantString("h");
+					case "minute": return new ConstantString("n");
+					case "second": return new ConstantString("s");
+				}
+				return null;
+			}
+
+			return null;
+		}
+
+		/// <summary>
+		/// Canonicalises a Fields!/Parameters!/ReportItems! member reference: property names
+		/// are case-insensitive in SSRS, and no-op accessor suffixes that CLR-fluent report
+		/// authors write (.ToString(), .DateTime, .ToLocalTime()) reduce to the value itself.
+		/// </summary>
+		private static string NormalizeMemberRef(string part)
+		{
+			if (part == null)
+				return null;
+
+			foreach (string suffix in new[] { ".ToString()", ".ToString", ".ToLocalTime()", ".ToLocalTime", ".DateTime" })
+			{
+				if (part.EndsWith(suffix, StringComparison.OrdinalIgnoreCase))
+				{
+					part = part.Substring(0, part.Length - suffix.Length);
+					break;
+				}
+			}
+
+			if (string.Equals(part, "Value", StringComparison.OrdinalIgnoreCase)) return "Value";
+			if (string.Equals(part, "Label", StringComparison.OrdinalIgnoreCase)) return "Label";
+			if (string.Equals(part, "Count", StringComparison.OrdinalIgnoreCase)) return "Count";
+			if (string.Equals(part, "IsMissing", StringComparison.OrdinalIgnoreCase)) return "IsMissing";
+			if (part.StartsWith("Value.", StringComparison.OrdinalIgnoreCase)) return "Value" + part.Substring(5);
+			if (part.StartsWith("Label.", StringComparison.OrdinalIgnoreCase)) return "Label" + part.Substring(5);
+			return part;
+		}
+
+		/// <summary>
+		/// VB's CType(value, Type). Its second operand names a type rather than carrying a
+		/// value, so it never resolved as an ordinary function: the parser reached method
+		/// lookup with "CType", found nothing on VBFunctions, and reported the function as
+		/// unknown. A primitive target maps to the VB conversion of the same name --
+		/// CType(x, Integer) is CInt(x) -- and any other target passes the value through,
+		/// because the engine carries values as objects and a cast to a reference type
+		/// (GUID, in practice) has no run-time work to do before the value is
+		/// formatted.
+		/// </summary>
+		private IExpr ResolveCType(IExpr value, IExpr typeOperand)
+		{
+			Identifier typeName = typeOperand as Identifier;
+			if (typeName == null || typeName.Name == null)
+				throw new ParserException(Strings.Parser_ErrorP_Invalid_function_arguments + GetLocationInfo(curToken));
+
+			string conversion;
+			switch (typeName.Name.ToLowerInvariant())
+			{
+				case "string":                    conversion = "CStr";   break;
+				case "integer":  case "int32":    conversion = "CInt";   break;
+				case "short":    case "int16":    conversion = "CInt";   break;
+				case "long":     case "int64":    conversion = "CLng";   break;
+				case "double":                    conversion = "CDbl";   break;
+				case "single":                    conversion = "CSng";   break;
+				case "decimal":                   conversion = "CDec";   break;
+				case "boolean":                   conversion = "CBool";  break;
+				case "date":     case "datetime": conversion = "CDate";  break;
+				default:                          conversion = null;     break;
+			}
+
+			return conversion == null ? value : ResolveMethodCall(conversion, new IExpr[] { value });
+		}
+
+		/// <summary>
+		/// ".ToString" or ".ToString()" written after a complete expression, as in
+		/// CType(Fields!X.Value, GUID).ToString. NormalizeMemberRef already absorbed the
+		/// suffix when it was glued to a Fields!/Parameters! reference, but after a closing
+		/// paren the dot was left over and parsing stopped with "end of expression expected".
+		/// SSRS accepts it, so it reduces to the string conversion it names. A ToString that
+		/// carries a format argument is left alone: that is Format(), not a bare conversion,
+		/// and the caller should still see the original error rather than a silent misread.
+		/// </summary>
+		private IExpr MatchPostfixToString(IExpr expr)
+		{
+			while (expr != null && curToken.Type == TokenTypes.DOT && tokens.Count > 0)
+			{
+				Token name = tokens.Peek();
+				if (name.Type != TokenTypes.IDENTIFIER
+					|| !string.Equals(name.Value, "ToString", StringComparison.OrdinalIgnoreCase))
+					break;
+
+				name = tokens.Extract();			// "ToString"
+				if (tokens.Count == 0)
+				{	// nothing follows the suffix; put it back and let the caller report it
+					tokens.Push(name);
+					break;
+				}
+
+				Token after = tokens.Extract();		// what follows the suffix
+				if (after.Type == TokenTypes.LPAREN)
+				{
+					if (tokens.Count == 0 || tokens.Peek().Type != TokenTypes.RPAREN)
+					{	// ToString(format) is Format(), not a bare conversion: restore the
+						// stream untouched so the caller reports it as it always has
+						tokens.Push(after);
+						tokens.Push(name);
+						break;
+					}
+					tokens.Extract();				// the matching ")"
+					curToken = tokens.Count > 0 ? tokens.Extract() : after;
+				}
+				else
+					curToken = after;
+
+				expr = ResolveMethodCall("CStr", new IExpr[] { expr });
+			}
+
+			return expr;
+		}
 
 		private IExpr ResolveMethodCall(string fullname, IExpr[] args)
 		{
@@ -1093,8 +1335,10 @@ namespace Majorsilence.Reporting.Rdl
 			string syscls = null;
 
 			if (cType == null)
-			{	// ok try for some of the system functions
-				(cType, syscls) = cls switch
+			{	// ok try for some of the system functions; reports qualify these both ways
+				// ("Convert.ToInt32" and "System.Convert.ToInt32").
+				string clsKey = cls.StartsWith("System.", StringComparison.Ordinal) ? cls.Substring(7) : cls;
+				(cType, syscls) = clsKey switch
 				{
 					"Math"      => (typeof(System.Math),    "System.Math"),
 					"String"    => (typeof(string),          "System.String"),
@@ -1118,6 +1362,20 @@ namespace Majorsilence.Reporting.Rdl
 			IExpr result=null;
 
 			MethodInfo mInfo = XmlUtil.GetMethod(cType, method, argTypes);
+			if (mInfo == null && syscls != null && cType != typeof(VBFunctions))
+			{
+				// System-class overloads resolve by exact parse-time argument type, so an
+				// argument whose type could not be inferred (Object) never binds — e.g.
+				// Convert.ToBase64String(First(Fields!X.Value, "DS")). VBFunctions carries
+				// object-tolerant mirrors for exactly this case.
+				MethodInfo fallback = XmlUtil.GetMethod(typeof(VBFunctions), method, argTypes);
+				if (fallback != null)
+				{
+					cType = typeof(VBFunctions);
+					syscls = "Majorsilence.Reporting.Rdl.VBFunctions";
+					mInfo = fallback;
+				}
+			}
             if (mInfo == null)
             {
                 string err;

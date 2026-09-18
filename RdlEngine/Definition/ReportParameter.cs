@@ -226,10 +226,28 @@ namespace Majorsilence.Reporting.Rdl
 
             if (v is Guid)
             {
-                v = ((Guid)v).ToString("B"); 
+                v = ((Guid)v).ToString("B");
             }
+			// An empty-string value for a non-string parameter is what a report with a blank
+			// <DefaultValue><Values><Value/></Values></DefaultValue> supplies: it means "no
+			// value", not the empty string coerced to a date or number.
+			if (v is string emptyCheck && emptyCheck.Length == 0 && _dt != TypeCode.String)
+			{
+				rpt.Cache.AddReplace(this, "runtimevalue", null);
+				return;
+			}
 			if (!AllowBlank && _dt == TypeCode.String && (string) v == "")
-				throw new ArgumentException(string.Format("Empty string isn't allowed for {0}.", Name.Nm));
+			{
+				// A blank default on a non-AllowBlank parameter likewise means "unset";
+				// refusing it kills the whole render for a value the user never chose.
+				string blankErr = string.Format("Empty string isn't allowed for {0}; treated as no value.", Name.Nm);
+				if (rpt == null)
+					OwnerReport.rl.LogError(4, blankErr);
+				else
+					rpt.rl.LogError(4, blankErr);
+				rpt.Cache.AddReplace(this, "runtimevalue", null);
+				return;
+			}
 			try 
 			{
 				if (v is String && _NumericType)
@@ -261,14 +279,20 @@ namespace Majorsilence.Reporting.Rdl
             foreach (object v in vs)
             {
                 object rtv;
-                if (!AllowBlank && _dt == TypeCode.String && v.ToString() == "")
+                // Empty entries mean "no value" (blank defaults), not values to coerce or
+                // reject: skip them rather than failing the whole render.
+                if (v is string emptyEntry && emptyEntry.Length == 0
+                    && (_dt != TypeCode.String || !AllowBlank))
                 {
-                    string err = string.Format("Empty string isn't allowed for {0}.", Name.Nm);
-                    if (rpt == null)
-                        OwnerReport.rl.LogError(4, err);
-                    else
-                        rpt.rl.LogError(4, err);
-                    throw new ArgumentException(err);
+                    if (_dt == TypeCode.String)
+                    {
+                        string err = string.Format("Empty string isn't allowed for {0}; entry skipped.", Name.Nm);
+                        if (rpt == null)
+                            OwnerReport.rl.LogError(4, err);
+                        else
+                            rpt.rl.LogError(4, err);
+                    }
+                    continue;
                 }
                 try
                 {

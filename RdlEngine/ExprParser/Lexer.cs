@@ -124,6 +124,8 @@ namespace Majorsilence.Reporting.Rdl
 						}
 						else
 							return new Token(ch.ToString(), reader.Line, reader.Column, reader.Line, reader.Column, TokenTypes.FORWARDSLASH);
+					case '\\':	// VB integer division operator
+						return new Token(ch.ToString(), reader.Line, reader.Column, reader.Line, reader.Column, TokenTypes.BACKSLASH);
 					case '<':
 						if (reader.Peek() == '=')
 						{
@@ -142,6 +144,9 @@ namespace Majorsilence.Reporting.Rdl
 					case '"':
 					case '\'':
 						return ReadQuoted(ch);
+					case '“':	// Word-style smart quotes: authors paste format strings
+					case '”':	// from documents; either opens, either closes.
+						return ReadSmartQuoted();
                     case '{':
                         return ReadIdentifier(ch, 4); 
 					default:
@@ -366,6 +371,23 @@ namespace Majorsilence.Reporting.Rdl
                         return new Token(quoted.ToString(), startLine, startCol, reader.Line, reader.Column, TokenTypes.QUOTE);
                 }
     			quoted.Append(ch);
+			}
+			throw new ParserException(Strings.Lexer_ErrorP_UnterminatedString);
+		}
+
+		/// <summary>Reads a string delimited by Word-style smart quotes (U+201C / U+201D).</summary>
+		private Token ReadSmartQuoted()
+		{
+			int startLine = reader.Line;
+			int startCol = reader.Column;
+			StringBuilder quoted = new StringBuilder();
+
+			while (!reader.EndOfInput())
+			{
+				char ch = reader.GetNext();
+				if (ch == '“' || ch == '”')
+					return new Token(quoted.ToString(), startLine, startCol, reader.Line, reader.Column, TokenTypes.QUOTE);
+				quoted.Append(ch);
 			}
 			throw new ParserException(Strings.Lexer_ErrorP_UnterminatedString);
 		}

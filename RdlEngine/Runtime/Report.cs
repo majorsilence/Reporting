@@ -184,6 +184,7 @@ namespace Majorsilence.Reporting.Rdl
 				throw new ArgumentException("IStreamGen argument cannot be null.", "sg");
 			RenderHtml rh=null;
 
+			RenderFormatName = MapRenderFormatName(type);
 			PageNumber = 1;		// reset page numbers
 			TotalPages = 1;
 			IPresent ip;
@@ -685,6 +686,50 @@ namespace Majorsilence.Reporting.Rdl
                 return CultureInfo.CurrentCulture.ThreeLetterISOLanguageName;
             }
 			set { _ClientLanguage = value; }
+		}
+
+		/// <summary>
+		/// The client language exactly as supplied by the host, without the report-Language
+		/// fallback above. User!Language must read this: the fallback evaluates the report's
+		/// Language expression, and a report whose Language is "=User!Language" (a stock
+		/// Report Builder default) would otherwise recurse forever.
+		/// </summary>
+		internal string ClientLanguageRaw => _ClientLanguage;
+
+		/// <summary>
+		/// SSRS-style name of the format currently being rendered (Globals!RenderFormat.Name):
+		/// set at RunRender entry, empty before any render starts.
+		/// </summary>
+		internal string RenderFormatName { get; private set; } = "";
+
+		private static string MapRenderFormatName(OutputPresentationType type)
+		{
+			switch (type)
+			{
+				case OutputPresentationType.PDF:
+				case OutputPresentationType.PDFOldStyle:
+				case OutputPresentationType.RenderPdf_iTextSharp:
+				case OutputPresentationType.RenderPdf_Majorsilence:
+					return "PDF";
+				case OutputPresentationType.CSV: return "CSV";
+				case OutputPresentationType.XML: return "XML";
+				case OutputPresentationType.HTML:
+				case OutputPresentationType.ASPHTML:
+					return "HTML4.0";
+				case OutputPresentationType.MHTML: return "MHTML";
+				case OutputPresentationType.RTF: return "RTF";
+				case OutputPresentationType.Word:
+					return "WORDOPENXML";
+				case OutputPresentationType.Excel2007:
+				case OutputPresentationType.ExcelTableOnly:
+				case OutputPresentationType.Excel2007DataOnly:
+					return "EXCELOPENXML";
+				case OutputPresentationType.TIF:
+				case OutputPresentationType.TIFBW:
+					return "IMAGE";
+				default:
+					return type.ToString().ToUpperInvariant();
+			}
 		}
 
 		internal DataSourcesDefn ParentConnections

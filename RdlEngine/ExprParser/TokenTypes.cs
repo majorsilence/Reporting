@@ -1,4 +1,4 @@
-﻿
+
 using System;
 
 namespace Majorsilence.Reporting.Rdl
@@ -40,3 +40,4 @@ namespace Majorsilence.Reporting.Rdl
 		EOF
 	}
 }
+

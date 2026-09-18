@@ -1146,6 +1146,161 @@ namespace Majorsilence.Reporting.Rdl
             return str == null || str is DBNull ? "" : Convert.ToString(str).TrimEnd(' ');
         }
 
+        // ── VB date/format functions Report Builder emits ────────────────────────
+
+        /// <summary>VB Weekday: day of week with Sunday = 1.</summary>
+        static public int Weekday(object date)
+        {
+            return (int)Convert.ToDateTime(date).DayOfWeek + 1;
+        }
+
+        /// <summary>VB DatePart with the DateInterval string codes ("yyyy","q","m","d","w",...).</summary>
+        static public int DatePart(object interval, object date)
+        {
+            DateTime dt = Convert.ToDateTime(date);
+            switch (Convert.ToString(interval).ToLowerInvariant())
+            {
+                case "yyyy": return dt.Year;
+                case "q": return (dt.Month - 1) / 3 + 1;
+                case "m": return dt.Month;
+                case "y": return dt.DayOfYear;
+                case "d": return dt.Day;
+                case "ww": return System.Globalization.CultureInfo.CurrentCulture.Calendar.GetWeekOfYear(
+                    dt, System.Globalization.CalendarWeekRule.FirstDay, DayOfWeek.Sunday);
+                case "w": return (int)dt.DayOfWeek + 1;
+                case "h": return dt.Hour;
+                case "n": return dt.Minute;
+                case "s": return dt.Second;
+                default: throw new ArgumentException("DatePart: unknown interval '" + interval + "'");
+            }
+        }
+
+        /// <summary>VB FormatDateTime with the DateFormat enum values (0 GeneralDate .. 4 ShortTime).</summary>
+        static public string FormatDateTime(object date)
+        {
+            return FormatDateTime(date, 0);
+        }
+
+        static public string FormatDateTime(object date, object format)
+        {
+            DateTime dt = Convert.ToDateTime(date);
+            switch ((int)Convert.ToDouble(format))
+            {
+                case 1: return dt.ToString("D");
+                case 2: return dt.ToString("d");
+                case 3: return dt.ToString("T");
+                case 4: return dt.ToString("t");
+                default: return dt.ToString("G");
+            }
+        }
+
+        /// <summary>VB FormatCurrency.</summary>
+        static public string FormatCurrency(object value)
+        {
+            return FormatCurrency(value, 2);
+        }
+
+        static public string FormatCurrency(object value, object digits)
+        {
+            return Convert.ToDouble(value).ToString("C" + (int)Convert.ToDouble(digits));
+        }
+
+        /// <summary>Microsoft.VisualBasic.Interaction.IIf, reached via qualified calls.
+        /// Unlike the parser's IIF this evaluates both branches first.</summary>
+        static public object IIF(object condition, object truePart, object falsePart)
+        {
+            return Convert.ToBoolean(condition) ? truePart : falsePart;
+        }
+
+        /// <summary>System.Uri.EscapeDataString mirror (resolved via the fallback).</summary>
+        static public string EscapeDataString(object value)
+        {
+            return Uri.EscapeDataString(Convert.ToString(value) ?? "");
+        }
+
+        /// <summary>System.DateTime.Parse mirror (resolved via the fallback).</summary>
+        static public DateTime Parse(object value)
+        {
+            return Convert.ToDateTime(value);
+        }
+
+        /// <summary>Environment.NewLine written as a method call (resolved via the fallback).</summary>
+        static public string NewLine()
+        {
+            return Environment.NewLine;
+        }
+
+        /// <summary>VB TimeValue: the time-of-day portion of a date or time string.</summary>
+        static public DateTime TimeValue(object value)
+        {
+            DateTime dt = Convert.ToDateTime(value);
+            return new DateTime(1, 1, 1).Add(dt.TimeOfDay);
+        }
+
+        // ── System.Convert mirrors ────────────────────────────────────────────────
+        // Object-tolerant Base64 helpers: the real System.Convert overloads take string /
+        // byte[], which never bind when the parse-time argument type is Object (aggregates,
+        // fields of uninferred type). Resolved via the VBFunctions fallback in the parser.
+
+        static public byte[] FromBase64String(object encoded)
+        {
+            if (encoded == null || encoded is DBNull)
+                return Array.Empty<byte>();
+            return Convert.FromBase64String(Convert.ToString(encoded));
+        }
+
+        static public string ToBase64String(object data)
+        {
+            if (data == null || data is DBNull)
+                return "";
+            if (data is byte[] bytes)
+                return Convert.ToBase64String(bytes);
+            return Convert.ToBase64String(Encoding.UTF8.GetBytes(Convert.ToString(data)));
+        }
+
+        // ── Join ──────────────────────────────────────────────────────────────────
+        // VB's Join(array, delimiter). Report Builder emits it constantly for
+        // multi-value parameter display (=Join(Parameters!X.Value, ", ")). A
+        // multi-value parameter reference is TypeCode.Object evaluating to an
+        // ArrayList, hence the object-typed first argument; a scalar argument is
+        // treated as a one-element list, matching VB's tolerance.
+
+        static public string Join(object values)
+        {
+            return Join(values, " ");
+        }
+
+        static public string Join(object values, string delimiter)
+        {
+            if (values == null || values is DBNull)
+                return "";
+
+            if (values is string s)     // string is IEnumerable; VB treats it as a scalar
+                return s;
+
+            if (values is IEnumerable list)
+            {
+                var sb = new StringBuilder();
+                bool first = true;
+                foreach (object item in list)
+                {
+                    if (!first)
+                        sb.Append(delimiter);
+                    first = false;
+                    if (item != null && !(item is DBNull))
+                        sb.Append(Convert.ToString(item));
+                }
+                return sb.ToString();
+            }
+
+            return Convert.ToString(values);
+        }
+
+        static public string Join(object values, object delimiter)
+        {
+            return Join(values, delimiter == null || delimiter is DBNull ? " " : Convert.ToString(delimiter));
+        }
+
         static public string Mid(object str, object start)
         {
             return Mid(Convert.ToString(str), (int)Convert.ToDouble(start));

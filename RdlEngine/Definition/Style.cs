@@ -1132,30 +1132,35 @@ namespace Majorsilence.Reporting.Rdl
 				catch (CultureNotFoundException) { }
 			}
 
+			// tc is what the definition DECLARED; o is what actually arrived. They disagree
+			// more often than they ought to — a column declared Decimal carrying a Double NaN,
+			// for one — and an unboxing cast on a mismatch throws, where IFormattable below
+			// produces the very same text. Matching on the runtime type keeps the declared
+			// intent where it holds and stops a formatting difference becoming an exception.
 			switch (tc)
 			{
-				case TypeCode.DateTime:
-					return ((DateTime)o).ToString(format, ci);
-				case TypeCode.Int16:
-					return ((short)o).ToString(format, ci);
-				case TypeCode.UInt16:
-					return ((ushort)o).ToString(format, ci);
-				case TypeCode.Int32:
-					return ((int)o).ToString(format, ci);
-				case TypeCode.UInt32:
-					return ((uint)o).ToString(format, ci);
-				case TypeCode.Int64:
-					return ((long)o).ToString(format, ci);
-				case TypeCode.UInt64:
-					return ((ulong)o).ToString(format, ci);
-				case TypeCode.String:
-					return (string)o;
-				case TypeCode.Decimal:
-					return ((decimal)o).ToString(format, ci);
-				case TypeCode.Single:
-					return ((float)o).ToString(format, ci);
-				case TypeCode.Double:
-					return ((double)o).ToString(format, ci);
+				case TypeCode.DateTime when o is DateTime dateTime:
+					return dateTime.ToString(format, ci);
+				case TypeCode.Int16 when o is short int16:
+					return int16.ToString(format, ci);
+				case TypeCode.UInt16 when o is ushort uint16:
+					return uint16.ToString(format, ci);
+				case TypeCode.Int32 when o is int int32:
+					return int32.ToString(format, ci);
+				case TypeCode.UInt32 when o is uint uint32:
+					return uint32.ToString(format, ci);
+				case TypeCode.Int64 when o is long int64:
+					return int64.ToString(format, ci);
+				case TypeCode.UInt64 when o is ulong uint64:
+					return uint64.ToString(format, ci);
+				case TypeCode.String when o is string text:
+					return text;
+				case TypeCode.Decimal when o is decimal dec:
+					return dec.ToString(format, ci);
+				case TypeCode.Single when o is float single:
+					return single.ToString(format, ci);
+				case TypeCode.Double when o is double dbl:
+					return dbl.ToString(format, ci);
 				default:
 					return (o is IFormattable fmt)
 						? fmt.ToString(format, ci)
