@@ -2304,6 +2304,15 @@ namespace Majorsilence.Reporting.RdlDesign.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to mm.
+        /// </summary>
+        internal static string RdlDesigner_Status_mm {
+            get {
+                return ResourceManager.GetString("RdlDesigner_Status_mm", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to height.
         /// </summary>
         internal static string RdlDesigner_Status_Height {

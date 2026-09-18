@@ -91,10 +91,15 @@ namespace Majorsilence.Reporting.RdlDesign
 		/// <returns></returns>
 		private bool IsMetric()
 		{
-			if (MeasureUnits == "cm")
+			if (MeasureUnits == "cm" || MeasureUnits == "mm")
 				return true;
 			else
 				return false;
+		}
+
+		private bool IsMm()
+		{
+			return MeasureUnits == "mm";
 		}
 
 		/// <summary>
@@ -1328,10 +1333,20 @@ namespace Majorsilence.Reporting.RdlDesign
 			}
 
 			//   var rinfo = new RegionInfo(CultureInfo.CurrentCulture.Name);
-			var unit = IsMetric() ? Strings.RdlDesigner_Status_cm : Strings.RdlDesigner_Status_in;
+			string unit;
+			if (IsMm())
+				unit = Strings.RdlDesigner_Status_mm;
+			else if (IsMetric())
+				unit = Strings.RdlDesigner_Status_cm;
+			else
+				unit = Strings.RdlDesigner_Status_in;
 			var h = DesignXmlDraw.GetSize(e.Height) / DesignXmlDraw.POINTSIZED;
 
-			if (IsMetric())
+			if (IsMm())
+			{
+				h *= 25.4f;
+			}
+			else if (IsMetric())
 			{
 				h *= 2.54f;
 			}
@@ -3040,9 +3055,20 @@ namespace Majorsilence.Reporting.RdlDesign
 
 				var x = pos.X / m72;
 				var y = pos.Y / m72;
-				var unit = IsMetric() ? Strings.RdlDesigner_Status_cm : Strings.RdlDesigner_Status_in;
+				string unit;
+				if (IsMm())
+					unit = Strings.RdlDesigner_Status_mm;
+				else if (IsMetric())
+					unit = Strings.RdlDesigner_Status_cm;
+				else
+					unit = Strings.RdlDesigner_Status_in;
 
-				if (IsMetric())
+				if (IsMm())
+				{
+					x *= 25.4d;
+					y *= 25.4d;
+				}
+				else if (IsMetric())
 				{
 					x *= 2.54d;
 					y *= 2.54d;
@@ -3058,7 +3084,12 @@ namespace Majorsilence.Reporting.RdlDesign
 					var w = sz.Width / m72;
 					var h = sz.Height / m72;
 
-					if (IsMetric())
+					if (IsMm())
+					{
+						w *= 25.4d;
+						h *= 25.4d;
+					}
+					else if (IsMetric())
 					{
 						w *= 2.54d;
 						h *= 2.54d;
