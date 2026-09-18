@@ -23,6 +23,9 @@ https://github.com/majorsilence/Reporting/discussions
 # Documentation
 See the [projects wiki](https://github.com/majorsilence/My-FyiReporting/wiki).
 
+## Common Topics
+- **[Data Binding and Looping Through Data](docs/DataBinding-and-Looping.md)** - Learn how to bind data sources and loop through data using textboxes and tables
+
 # Download
 
 See the [downloads page](https://github.com/majorsilence/My-FyiReporting/wiki/Downloads).
