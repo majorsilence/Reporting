@@ -88,7 +88,12 @@ namespace Majorsilence.Reporting.Rdl
 			}
 			return dow;
 		}
-		
+
+        // Object-typed overload -- same reason as every other one in this file: the
+        // expression parser binds by the argument's *statically inferred* type, and a
+        // field reference commonly arrives as Object rather than a crisp DateTime.
+        static public int Weekday(object dt) => Weekday(ToDate(dt));
+
 		/// <summary>
 		/// Returns the integer day of week: 1=Monday, 2=Tuesday, ..., 7=Sunday
 		/// </summary>
@@ -413,6 +418,17 @@ namespace Majorsilence.Reporting.Rdl
             return DateAdd(interval, number, DateTime.Parse(date));
         }
 
+        // Object-typed overload -- same reason as Trim/Left/Right's object overloads
+        // above: the expression parser binds by the argument's *statically inferred*
+        // type, and a date arithmetic expression (e.g. a DateTime field minus an Int
+        // plus a literal) doesn't statically resolve to a crisp DateTime or string, so
+        // neither of the two typed overloads above ever matched and the call surfaced
+        // as "Function DateAdd is not known" despite DateAdd existing.
+        static public DateTime DateAdd(object interval, object number, object date)
+        {
+            return DateAdd(Convert.ToString(interval), Convert.ToDouble(number), ToDate(date));
+        }
+
         /// <summary>
         /// Returns a date to which a specified time interval has been added. 
         /// </summary>
@@ -574,6 +590,46 @@ namespace Majorsilence.Reporting.Rdl
                 case "h":    return Math.Floor((d2 - d1).TotalHours);
                 case "n":    return Math.Floor((d2 - d1).TotalMinutes);
                 case "s":    return Math.Floor((d2 - d1).TotalSeconds);
+                default:
+                    throw new ArgumentException(string.Format("Interval '{0}' is invalid or unsupported.", interval));
+            }
+        }
+
+        /// <summary>
+        /// Returns the specified component of a given date (VB.NET DatePart). Same
+        /// interval codes as DateAdd/DateDiff above. Object-typed for the same reflection-
+        /// binding reason as Year/Month/Day.
+        /// </summary>
+        /// <param name="interval">Interval code: yyyy, q, m, y, d, w, ww, h, n, s.</param>
+        /// <param name="date">The date to inspect.</param>
+        static public int DatePart(object interval, object date)
+        {
+            return DatePart(interval, date, 1);  // Crystal/VB default first day of week: Sunday
+        }
+
+        /// <summary>
+        /// 3-arg form: an explicit first-day-of-week (1=Sunday..7=Saturday, Crystal's own
+        /// DayOfWeek constants crSunday..crSaturday, mapped to these numbers by the
+        /// converter) shifts both "w" (weekday number relative to that first day) and "ww"
+        /// (week number, whose boundary depends on which day starts the week).
+        /// </summary>
+        static public int DatePart(object interval, object date, object firstDayOfWeek)
+        {
+            DateTime d = ToDate(date);
+            var startDay = (DayOfWeek)((Convert.ToInt32(firstDayOfWeek) - 1 + 7) % 7);
+            switch (Convert.ToString(interval))
+            {
+                case "yyyy": return d.Year;
+                case "q":    return (d.Month - 1) / 3 + 1;
+                case "m":    return d.Month;
+                case "y":    return d.DayOfYear;
+                case "d":    return d.Day;
+                case "w":    return (int)((d.DayOfWeek - startDay + 7) % 7) + 1;
+                case "ww":   return System.Globalization.CultureInfo.CurrentCulture.Calendar
+                                 .GetWeekOfYear(d, System.Globalization.CalendarWeekRule.FirstDay, startDay);
+                case "h":    return d.Hour;
+                case "n":    return d.Minute;
+                case "s":    return d.Second;
                 default:
                     throw new ArgumentException(string.Format("Interval '{0}' is invalid or unsupported.", interval));
             }
@@ -761,6 +817,10 @@ namespace Majorsilence.Reporting.Rdl
 			return str == null? null: str.ToLower();
 		}
 
+        // Object-typed overload -- see Left(object, object)'s comment for why (a
+        // parameter value is the common case here, e.g. LCase(Parameters!X.Value)).
+        static public string LCase(object str) => str == null ? null : LCase(Convert.ToString(str));
+
 		/// <summary>
 		/// Returns the left n characters from the string
 		/// </summary>
@@ -774,6 +834,17 @@ namespace Majorsilence.Reporting.Rdl
 			else
 				return str.Substring(0, count);
 		}
+
+        // Object-typed overload for the same reason as Trim/LTrim/RTrim's object
+        // overloads above: the expression parser binds by *exact* runtime argument
+        // type, and a parameter or an untyped field arrives as Object, so the
+        // string-typed overload above never matches and the call surfaces as the
+        // misleading "Function Left is not known" (it exists; the argument type just
+        // didn't bind).
+        static public string Left(object str, object count)
+        {
+            return Left(Convert.ToString(str), (int)Convert.ToDouble(count));
+        }
 
 		/// <summary>
 		/// Returns the length of the string
@@ -797,6 +868,12 @@ namespace Majorsilence.Reporting.Rdl
 
 			return str.TrimStart(' ');
 		}
+        /// <summary>
+        /// Crystal's own name for LTrim -- a separate function in Crystal's formula
+        /// library, not just alternate casing, so it needs its own dispatch entry
+        /// rather than relying on LTrim to be found.
+        /// </summary>
+        static public string TrimLeft(string str) => LTrim(str);
         /// <summary>
         /// Returns the portion of the string denoted by the start.
         /// </summary>
@@ -952,6 +1029,12 @@ namespace Majorsilence.Reporting.Rdl
 
 			return str.Substring(str.Length - length);
 		}
+
+        // Object-typed overload -- see Left(object, object)'s comment above for why.
+        static public string Right(object str, object length)
+        {
+            return Right(Convert.ToString(str), (int)Convert.ToDouble(length));
+        }
 		/// <summary>
 		/// Removes trailing blanks from string.
 		/// </summary>
@@ -964,6 +1047,8 @@ namespace Majorsilence.Reporting.Rdl
 
 			return str.TrimEnd(' ');
 		}
+        /// <summary>Crystal's own name for RTrim -- see TrimLeft's comment above.</summary>
+        static public string TrimRight(string str) => RTrim(str);
 		/// <summary>
 		/// Returns blank string of the specified length
 		/// </summary>
@@ -1071,6 +1156,9 @@ namespace Majorsilence.Reporting.Rdl
 		{
 			return str == null? null: str.ToUpper();
 		}
+
+        // Object-typed overload -- see LCase(object)'s comment above.
+        static public string UCase(object str) => str == null ? null : UCase(Convert.ToString(str));
         /// <summary>
         /// Rounds a number to zero decimal places
         /// </summary>
@@ -1145,6 +1233,10 @@ namespace Majorsilence.Reporting.Rdl
         {
             return str == null || str is DBNull ? "" : Convert.ToString(str).TrimEnd(' ');
         }
+
+        static public string TrimLeft(object str) => LTrim(str);
+
+        static public string TrimRight(object str) => RTrim(str);
 
         static public string Mid(object str, object start)
         {
@@ -1246,6 +1338,16 @@ namespace Majorsilence.Reporting.Rdl
         static public DateTime CDateTime(object value)
         {
             return value is DateTime d ? d : Convert.ToDateTime(value);
+        }
+
+        /// <summary>
+        /// Crystal also spells the year/month/day constructor CDateTime, alongside CDate --
+        /// same reasoning as CDate's own 3-arg overload above. With no time component
+        /// supplied, there is no distinction from CDate's result.
+        /// </summary>
+        static public DateTime CDateTime(object year, object month, object day)
+        {
+            return new DateTime(Convert.ToInt32(year), Convert.ToInt32(month), Convert.ToInt32(day));
         }
 
         /// <summary>
@@ -1461,6 +1563,12 @@ namespace Majorsilence.Reporting.Rdl
         {
             return (value is DateTime d ? d : Convert.ToDateTime(value)).Date;
         }
+
+        /// <summary>
+        /// Crystal's DateTimeToDate: same operation as DateValue above (drop the time
+        /// component of a DateTime), under Crystal's separate name for it.
+        /// </summary>
+        static public DateTime DateTimeToDate(object value) => DateValue(value);
 
         static public DateTime DateValue(object year, object month, object day)
         {

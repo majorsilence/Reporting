@@ -526,11 +526,18 @@ namespace Majorsilence.Reporting.Rdl
             int rowCount = 0;
             int maxRows = _RowLimit > 0 ? _RowLimit : int.MaxValue;
 
-            int fieldCount = flds.Items.Count;
+            // A DataSet whose RDL has no <Fields> element at all (a real, valid shape for
+            // a report with no database/formula/parameter fields -- e.g. a static
+            // boilerplate letter with only literal text) leaves the definition's Fields
+            // null, not an empty collection (see DataSetDefn.cs: _Fields stays null unless
+            // an actual <Fields> node was present to parse). Treat that the same as zero
+            // fields rather than dereferencing it.
+            int fieldCount = flds?.Items.Count ?? 0;
             foreach (DataRow dr in dt.Rows)
             {
                 Row or = new Row(rows, fieldCount);
                 // Loop thru the columns obtaining the data values by name
+                if (flds != null)
                 foreach (Field fld in flds.Items.Values)
                 {
                     // A calculated field has no DataField to read - its value comes from
