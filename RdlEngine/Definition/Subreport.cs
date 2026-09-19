@@ -271,6 +271,17 @@ namespace Majorsilence.Reporting.Rdl
 					rdlp.OverwriteConnectionString = OwnerReport.OverwriteConnectionString;
 					rdlp.OverwriteInSubreport = OwnerReport.OverwriteInSubreport;
 				}
+				// A parent report parsed with SkipDatabaseSchemaValidation (real, documented
+				// use case: "for SetData() workflows" per ReportDefn's own field comment --
+				// pushing data directly instead of connecting to a live database) was never
+				// propagated to its own subreports' *separate* RDLParser instance created
+				// here, unlike OverwriteConnectionString/OverwriteInSubreport right above.
+				// A subreport with its own DataSource then always tried a real DB connection
+				// regardless of the parent's setting, failing outright in exactly the
+				// SetData() scenario this flag exists to support ("System.Data.SqlClient.dll
+				// could not be found" / "Unable to connect to datasource" in an environment
+				// with no real database at all, confirmed via a real report's subreport).
+				rdlp.SkipDatabaseSchemaValidation = OwnerReport.SkipDatabaseSchemaValidation;
 
 				r = await rdlp.Parse(OwnerReport.GetObjectNumber());
 				OwnerReport.SetObjectNumber(r.ReportDefinition.GetObjectNumber());
