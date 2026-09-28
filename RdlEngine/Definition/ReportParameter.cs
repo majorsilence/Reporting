@@ -228,8 +228,30 @@ namespace Majorsilence.Reporting.Rdl
             {
                 v = ((Guid)v).ToString("B"); 
             }
-			if (!AllowBlank && _dt == TypeCode.String && (string) v == "")
+			// v isn't guaranteed to already be a string here -- a caller pushing typed
+			// data (e.g. a numeric field bound to a string-typed report parameter) hits
+			// this check before the Convert.ChangeType below gets a chance to coerce it,
+			// so the direct (string) cast throws InvalidCastException instead of the
+			// intended blank-string validation. Coerce the same way Convert.ChangeType
+			// would, purely for this emptiness check.
+			if (!AllowBlank && _dt == TypeCode.String && (v as string ?? v?.ToString() ?? "") == "")
 				throw new ArgumentException(string.Format("Empty string isn't allowed for {0}.", Name.Nm));
+
+			// An empty string reaching a *non*-String-typed parameter (Boolean, numeric,
+			// DateTime, ...) always failed the Convert.ChangeType coercion below,
+			// regardless of AllowBlank -- that leniency was only ever consulted for the
+			// String-typed case just above. A converted report's parameter can just as
+			// easily be fed a degraded/unresolvable field value (itself a deliberate ""
+			// fallback elsewhere in this pipeline, not a real value) into a Boolean or
+			// numeric-typed subreport parameter as into a String one, and AllowBlank's
+			// own stated intent already covers this case too: "a converted report has no
+			// way to prompt, so every parameter has to be renderable without a value" --
+			// extend the same leniency to every type, not just String.
+			if (AllowBlank && _dt != TypeCode.String && (v as string) == "")
+			{
+				rpt.Cache.AddReplace(this, "runtimevalue", null);
+				return;
+			}
 			try 
 			{
 				if (v is String && _NumericType)

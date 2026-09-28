@@ -286,7 +286,8 @@ namespace Majorsilence.Reporting.Rdl
 			result = lhs;			// in case we get no matches
 			while ((t = curToken.Type) == TokenTypes.FORWARDSLASH ||
 				t == TokenTypes.STAR ||
-				t == TokenTypes.MODULUS)
+				t == TokenTypes.MODULUS ||
+				t == TokenTypes.BACKSLASH)
 			{
 				curToken = tokens.Extract();
 				IExpr rhs;
@@ -309,6 +310,9 @@ namespace Majorsilence.Reporting.Rdl
 						break;
 					case TokenTypes.MODULUS:
 						result = new FunctionModulus(lhs, rhs);
+						break;
+					case TokenTypes.BACKSLASH:
+						result = new FunctionIntDiv(lhs, rhs);
 						break;
 				}
 				lhs = result;		// in case continue in the loop
@@ -398,7 +402,20 @@ namespace Majorsilence.Reporting.Rdl
 					r.result = new ConstantDouble(curToken.Value);
 					break;
 				case TokenTypes.INTEGER:
-					r.result = new ConstantInteger(curToken.Value);
+					// A real Crystal formula idiom pads a value to a fixed width by adding
+					// a large constant before taking a substring, e.g. CStr({X} +
+					// 10000000000) - the literal itself has no decimal point so the lexer
+					// tokenizes it INTEGER, but 10 billion exceeds Int32.MaxValue (~2.1
+					// billion) and ConstantInteger's constructor (a direct
+					// Convert.ToInt32(v)) throws "Value was either too large or too small
+					// for an Int32" - confirmed via the exact matching .NET message text,
+					// not guessed. A double represents integers exactly up to 2^53, so any
+					// literal too large for Int32 but within that range converts losslessly
+					// here; only literals beyond even that (unseen in this corpus) would
+					// still be lossy, same as Double already is generally.
+					r.result = long.TryParse(curToken.Value, out long lv) && (lv < int.MinValue || lv > int.MaxValue)
+						? new ConstantDouble(curToken.Value)
+						: new ConstantInteger(curToken.Value);
 					break;
 				case TokenTypes.QUOTE:
 					r.result = new ConstantString(curToken.Value);

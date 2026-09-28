@@ -66,9 +66,18 @@ namespace Majorsilence.Reporting.Rdl
 
 			Page p = pgs.CurrentPage;
 
+			// If the header's own content is taller than a whole page, moving to a new
+			// (equally-sized) page can never make it fit: RunPageNew -> RunPageHeader
+			// would re-enter this exact method with the same inputs and recurse without
+			// bound (confirmed via instrumentation: identical height/BottomOfPage on every
+			// call, current page already empty). Only retry on a fresh page when the
+			// current page actually has content on it already -- that's the case a new
+			// page can genuinely help with. Otherwise, render on this page as-is and let
+			// the content overflow rather than loop forever.
+			bool currentPageAlreadyHasContent = !pgs.CurrentPage.IsEmpty();
 			float height = p.YOffset + await HeightOfRows(pgs, row);
             height += await OwnerTable.GetPageFooterHeight(pgs, row);
-			if (height > pgs.BottomOfPage)
+			if (height > pgs.BottomOfPage && currentPageAlreadyHasContent)
 			{
 				Table t = OwnerTable;
                 await t.RunPageFooter(pgs, row, false);
