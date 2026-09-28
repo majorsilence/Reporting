@@ -70,23 +70,47 @@ namespace ReportTests
         }
 
         /// <summary>
-        /// The case from the review. Whatever String.Join does here, it must not come out as
-        /// the separator by itself -- that is VB's Join reading the arguments backwards.
+        /// The case from the review, and the common SSRS idiom for flattening a multi-value
+        /// parameter. It has to produce the values, and in particular must not come out as the
+        /// separator by itself -- that is VB's Join reading the arguments backwards.
         /// </summary>
         [Test]
-        public async Task StringJoin_DoesNotSilentlyBindToVbJoin()
+        public async Task StringJoin_JoinsAMultiValueParameter()
         {
             var (severity, html) = await Render(@"String.Join("", "", Parameters!M.Value)");
 
             Assert.That(html, Does.Not.Contain(">, <"),
                 "String.Join rendered its separator alone, so it bound to VB's Join with the "
-                + "arguments in the other order. An unresolvable overload has to stay an error.");
+                + "arguments in the other order.");
+            Assert.That(severity, Is.LessThan(8), "String.Join should parse and evaluate");
+            Assert.That(html, Does.Contain("a, b"));
+        }
 
-            // Either it resolves as String.Join and lists the values, or it does not resolve
-            // at all and the report says so. Both are honest; silence is not.
-            if (severity < 8)
-                Assert.That(html, Does.Contain("a, b"),
-                    "if String.Join binds at all it must produce the joined values");
+        /// <summary>
+        /// The separator keeps String.Join's meaning rather than VB's: String.Join joins with
+        /// nothing when the separator is Nothing, where VB's Join would default to a space.
+        /// </summary>
+        [Test]
+        public async Task StringJoin_WithNothingAsSeparator_JoinsWithNothing()
+        {
+            var (severity, html) = await Render(@"String.Join(Nothing, Parameters!M.Value)");
+
+            Assert.That(severity, Is.LessThan(8));
+            Assert.That(html, Does.Contain("ab"));
+        }
+
+        /// <summary>
+        /// The mirror only carries String's own methods. A VB function that String has no
+        /// static for must still fail to resolve, or the narrowing has been undone by the
+        /// back door -- VBFunctions.Trim(object) is the one that would catch this.
+        /// </summary>
+        [Test]
+        public async Task AVbFunctionIsNotReachableThroughTheStringMirror()
+        {
+            var (severity, _) = await Render(@"String.Trim(""  x  "")");
+
+            Assert.That(severity, Is.GreaterThanOrEqualTo(8),
+                "String.Trim is not a System.String static and must not fall through to VB's Trim");
         }
 
         /// <summary>

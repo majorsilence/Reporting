@@ -1392,24 +1392,29 @@ namespace Majorsilence.Reporting.Rdl
 			IExpr result=null;
 
 			MethodInfo mInfo = XmlUtil.GetMethod(cType, method, argTypes);
-			if (mInfo == null && cType == typeof(System.Convert))
+			if (mInfo == null)
 			{
-				// Convert's overloads resolve by exact parse-time argument type, so an
-				// argument whose type could not be inferred (Object) never binds — e.g.
-				// Convert.ToBase64String(First(Fields!X.Value, "DS")). VBFunctions carries
-				// object-tolerant mirrors named the same way, and for Convert they mean the
-				// same thing, so falling back to them recovers the expression.
+				// A system class's overloads resolve by exact parse-time argument type, so an
+				// argument whose type could not be inferred (Object) never binds -- e.g.
+				// Convert.ToBase64String(First(Fields!X.Value, "DS")), or String.Join over a
+				// multi-value parameter, which is an ArrayList. Each of these two classes has
+				// a mirror carrying object-tolerant versions under the same names, the same
+				// argument order and the same meaning.
 				//
-				// Only Convert. The other system classes must not fall back: VBFunctions has
-				// members that share a name with a System.String or System.Math method but
-				// take their arguments differently, and silently binding to those would turn
-				// a parse error into quietly wrong output. String.Join(", ", x) is the
-				// example -- VB's Join(values, delimiter) is the same name in the other order.
-				MethodInfo fallback = XmlUtil.GetMethod(typeof(VBFunctions), method, argTypes);
+				// Only these two, and only to their own mirror. VBFunctions is VB's runtime
+				// library and shares names with System methods that take their arguments
+				// differently -- VB's Join(values, delimiter) against String.Join(separator,
+				// values) -- so letting String or Math reach it would turn a parse error into
+				// quietly wrong text rather than a fix.
+				Type mirror = cType == typeof(System.Convert) ? typeof(VBFunctions)
+					: cType == typeof(string) ? typeof(StringFunctions)
+					: null;
+
+				MethodInfo fallback = mirror == null ? null : XmlUtil.GetMethod(mirror, method, argTypes);
 				if (fallback != null)
 				{
-					cType = typeof(VBFunctions);
-					syscls = "Majorsilence.Reporting.Rdl.VBFunctions";
+					cType = mirror;
+					syscls = mirror.FullName;
 					mInfo = fallback;
 				}
 			}
