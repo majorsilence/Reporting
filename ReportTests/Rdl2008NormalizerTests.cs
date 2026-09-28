@@ -19,7 +19,13 @@ namespace ReportTests
         private const string Rdl2008Namespace =
             "http://schemas.microsoft.com/sqlserver/reporting/2008/01/reportdefinition";
 
-        private static string TablixReport (string rowHierarchy, string rows, string columnHierarchy = null, string ns = Rdl2008Namespace)
+        /// <param name="tablixExtras">
+        /// Further children of the Tablix element: the 2008 vocabulary — SortExpressions,
+        /// RepeatRowHeaders, PageBreak — that has to be translated or deliberately dropped.
+        /// </param>
+        /// <param name="nameFieldType">rd:TypeName for the Name field, to exercise the type map.</param>
+        private static string TablixReport (string rowHierarchy, string rows, string columnHierarchy = null,
+            string ns = Rdl2008Namespace, string tablixExtras = "", string nameFieldType = "System.String")
         {
             columnHierarchy ??= @"<TablixMembers><TablixMember /><TablixMember /></TablixMembers>";
 
@@ -38,7 +44,7 @@ namespace ReportTests
     <DataSet Name=""Data"">
       <Query><DataSourceName>DS1</DataSourceName><CommandText>/* Local Query */</CommandText></Query>
       <Fields>
-        <Field Name=""Name""><DataField>Name</DataField><rd:TypeName>System.String</rd:TypeName></Field>
+        <Field Name=""Name""><DataField>Name</DataField><rd:TypeName>{nameFieldType}</rd:TypeName></Field>
         <Field Name=""Amount""><DataField>Amount</DataField><rd:TypeName>System.String</rd:TypeName></Field>
       </Fields>
     </DataSet>
@@ -55,6 +61,7 @@ namespace ReportTests
         </TablixBody>
         <TablixColumnHierarchy>{columnHierarchy}</TablixColumnHierarchy>
         <TablixRowHierarchy>{rowHierarchy}</TablixRowHierarchy>
+        {tablixExtras}
         <DataSetName>Data</DataSetName>
         <Top>0in</Top>
         <Height>0.5in</Height>
@@ -274,8 +281,9 @@ namespace ReportTests
         [Test]
         public async Task DynamicColumnHierarchy_IsReportedRatherThanMisrendered ()
         {
-            // A dynamic column hierarchy is a pivot, which belongs on Matrix; converting it to a
-            // Table would silently produce the wrong shape, so it must be refused loudly.
+            // A pivot whose shape the Matrix converter cannot express (here: one leaf column in
+            // the hierarchy but two body columns, and a header row mixed in with the row group)
+            // must still be refused loudly rather than rendered wrongly.
             const string dynamicColumns = @"
                 <TablixMembers>
                   <TablixMember><Group Name=""ColGroup""><GroupExpressions>
@@ -292,6 +300,318 @@ namespace ReportTests
 
             Assert.That (report.ErrorMaxSeverity, Is.GreaterThanOrEqualTo (8),
                 "an unsupported pivot layout should raise an error rather than render wrongly");
+        }
+
+
+        [Test]
+        public async Task NestedTablix_InsideACell_IsAlsoConverted ()
+        {
+            // Converting the outer Tablix clones its cells into the new Table, so an inner
+            // Tablix arrives as a fresh unconverted clone and needs a second pass.
+            var inner = @"<Tablix Name=""Inner"">
+                <TablixBody>
+                  <TablixColumns><TablixColumn><Width>2in</Width></TablixColumn></TablixColumns>
+                  <TablixRows><TablixRow><Height>0.25in</Height><TablixCells><TablixCell><CellContents>" +
+                    Textbox ("InnerCell", "=Fields!Name.Value") + @"
+                  </CellContents></TablixCell></TablixCells></TablixRow></TablixRows>
+                </TablixBody>
+                <TablixColumnHierarchy><TablixMembers><TablixMember /></TablixMembers></TablixColumnHierarchy>
+                <TablixRowHierarchy><TablixMembers><TablixMember><Group Name=""InnerDetails"" /></TablixMember></TablixMembers></TablixRowHierarchy>
+                <DataSetName>Data</DataSetName>
+              </Tablix>";
+
+            var rdl = TablixReport (HeaderThenDetail,
+                Row ("0.25in", Cell (Textbox ("H1", "Name")), Cell (Textbox ("H2", "Amount"))) +
+                Row ("0.25in", Cell (inner), Cell (Textbox ("D2", "=Fields!Amount.Value"))));
+
+            using var report = await ParseAsync (rdl);
+
+            Assert.That (report.ErrorMaxSeverity, Is.LessThanOrEqualTo (4),
+                "nested tablix rejected: " + string.Join (" | ", report.ErrorItems ?? new System.Collections.ArrayList ()));
+        }
+
+        [Test]
+        public async Task DesignerNamespaceElements_AreStripped ()
+        {
+            // rd:* elements are authoring metadata; inside CellContents the parser would treat
+            // one as a dropped report item.
+            var cellWithDesignerNoise = "<TablixCell><CellContents><rd:Selected>true</rd:Selected>" +
+                Textbox ("D1", "=Fields!Name.Value") + "</CellContents></TablixCell>";
+
+            var rdl = TablixReport (HeaderThenDetail,
+                Row ("0.25in", Cell (Textbox ("H1", "Name")), Cell (Textbox ("H2", "Amount"))) +
+                $"<TablixRow><Height>0.25in</Height><TablixCells>{cellWithDesignerNoise}" +
+                Cell (Textbox ("D2", "=Fields!Amount.Value")) + "</TablixCells></TablixRow>");
+
+            using var report = await ParseAsync (rdl);
+
+            var errors = string.Join (" | ", report.ErrorItems ?? new System.Collections.ArrayList ());
+            Assert.That (errors, Does.Not.Contain ("rd:Selected"), "designer element leaked: " + errors);
+            Assert.That (report.ErrorMaxSeverity, Is.LessThanOrEqualTo (4), errors);
+        }
+
+        [Test]
+        public async Task MultiValueParameter_BareCountProperty_Parses ()
+        {
+            // Report Builder emits Parameters!X.Count (not Parameters!X.Value.Count).
+            var rdl = TablixReport (HeaderThenDetail,
+                Row ("0.25in", Cell (Textbox ("H1", "=Parameters!Clinics.Count")), Cell (Textbox ("H2", "Amount"))) +
+                Row ("0.25in", Cell (Textbox ("D1", "=Fields!Name.Value")), Cell (Textbox ("D2", "=Fields!Amount.Value"))))
+                .Replace ("<DataSets>",
+                    @"<ReportParameters><ReportParameter Name=""Clinics""><DataType>String</DataType><MultiValue>true</MultiValue></ReportParameter></ReportParameters><DataSets>");
+
+            using var report = await ParseAsync (rdl);
+
+            Assert.That (report.ErrorMaxSeverity, Is.LessThanOrEqualTo (4),
+                "Count expression rejected: " + string.Join (" | ", report.ErrorItems ?? new System.Collections.ArrayList ()));
+        }
+        #region Matrix (dynamic column hierarchy)
+
+        /// <summary>
+        /// A Tablix whose column hierarchy pivots on data. Body dimensions default to one cell,
+        /// which is the leaf shape of a plain matrix; the groupings multiply it at run time.
+        /// </summary>
+        private static string MatrixTablixReport (string columnHierarchy, string rowHierarchy, string bodyRows,
+            int bodyColumns = 1, string corner = "")
+        {
+            var columns = string.Empty;
+            for (var i = 0; i < bodyColumns; i++)
+                columns += "<TablixColumn><Width>1in</Width></TablixColumn>";
+
+            return $@"<?xml version=""1.0"" encoding=""UTF-8""?>
+<Report xmlns=""{Rdl2008Namespace}"" xmlns:rd=""http://schemas.microsoft.com/SQLServer/reporting/reportdesigner"">
+  <DataSources>
+    <DataSource Name=""DS1"">
+      <ConnectionProperties>
+        <DataProvider>SQLite</DataProvider>
+        <ConnectString>Data Source=this-file-does-not-exist.db</ConnectString>
+      </ConnectionProperties>
+    </DataSource>
+  </DataSources>
+  <DataSets>
+    <DataSet Name=""Data"">
+      <Query><DataSourceName>DS1</DataSourceName><CommandText>/* Local Query */</CommandText></Query>
+      <Fields>
+        <Field Name=""Name""><DataField>Name</DataField><rd:TypeName>System.String</rd:TypeName></Field>
+        <Field Name=""Amount""><DataField>Amount</DataField><rd:TypeName>System.String</rd:TypeName></Field>
+      </Fields>
+    </DataSet>
+  </DataSets>
+  <Body>
+    <ReportItems>
+      <Tablix Name=""Pivot1"">
+        <TablixBody>
+          <TablixColumns>{columns}</TablixColumns>
+          <TablixRows>{bodyRows}</TablixRows>
+        </TablixBody>
+        <TablixColumnHierarchy><TablixMembers>{columnHierarchy}</TablixMembers></TablixColumnHierarchy>
+        <TablixRowHierarchy><TablixMembers>{rowHierarchy}</TablixMembers></TablixRowHierarchy>
+        {corner}
+        <RepeatColumnHeaders>true</RepeatColumnHeaders>
+        <DataSetName>Data</DataSetName>
+        <Top>0in</Top>
+        <Height>0.5in</Height>
+        <Width>4in</Width>
+      </Tablix>
+    </ReportItems>
+    <Height>2in</Height>
+  </Body>
+  <Width>6in</Width>
+</Report>";
+        }
+
+        private static string DynamicMember (string groupName, string groupExpression,
+            string headerTextbox = null, string sortExpression = null, string nested = null)
+            => $@"<TablixMember>
+                    <Group Name=""{groupName}"">
+                      <GroupExpressions><GroupExpression>{groupExpression}</GroupExpression></GroupExpressions>
+                    </Group>
+                    {(sortExpression == null ? string.Empty
+                        : $"<SortExpressions><SortExpression><Value>{sortExpression}</Value></SortExpression></SortExpressions>")}
+                    {(headerTextbox == null ? string.Empty
+                        : $"<TablixHeader><Size>0.3in</Size><CellContents>{headerTextbox}</CellContents></TablixHeader>")}
+                    {(nested == null ? string.Empty : $"<TablixMembers>{nested}</TablixMembers>")}
+                  </TablixMember>";
+
+        private static string StaticMember (string headerTextbox = null)
+            => headerTextbox == null
+                ? "<TablixMember />"
+                : $@"<TablixMember><TablixHeader><Size>1in</Size><CellContents>{headerTextbox}</CellContents></TablixHeader></TablixMember>";
+
+        [Test]
+        public async Task DynamicColumns_ConvertToMatrix_AndPivotTheData ()
+        {
+            // One column per distinct Name, one static row: the defining matrix behaviour.
+            var rdl = MatrixTablixReport (
+                DynamicMember ("ColName", "=Fields!Name.Value", Textbox ("ColHead", "=Fields!Name.Value")),
+                StaticMember (Textbox ("RowHead", "AmountsByName")),
+                Row ("0.25in", Cell (Textbox ("Data", "=First(Fields!Amount.Value)"))));
+
+            var html = await RenderHtml (rdl);
+
+            Assert.That (html, Does.Contain ("Widget"), "first group instance header missing");
+            Assert.That (html, Does.Contain ("Gadget"), "second group instance header missing");
+            Assert.That (html, Does.Contain ("10.00"), "first pivoted cell missing");
+            Assert.That (html, Does.Contain ("20.00"), "second pivoted cell missing");
+            Assert.That (html, Does.Contain ("AmountsByName"), "row header missing");
+        }
+
+        [Test]
+        public async Task DynamicRowsAndColumns_BothPivot ()
+        {
+            var rdl = MatrixTablixReport (
+                DynamicMember ("ColAmount", "=Fields!Amount.Value", Textbox ("ColHead", "=Fields!Amount.Value")),
+                DynamicMember ("RowName", "=Fields!Name.Value", Textbox ("RowHead", "=Fields!Name.Value")),
+                Row ("0.25in", Cell (Textbox ("Data", "=Count(Fields!Name.Value)"))));
+
+            var html = await RenderHtml (rdl);
+
+            Assert.That (html, Does.Contain ("Widget").And.Contain ("Gadget"), "row group headers missing");
+            Assert.That (html, Does.Contain ("10.00").And.Contain ("20.00"), "column group headers missing");
+        }
+
+        [Test]
+        public async Task ColumnGroupSort_IsCarriedAcross ()
+        {
+            // Data order is Widget then Gadget; an ascending sort must flip the column order,
+            // proving SortExpressions became 2005 Sorting rather than being dropped.
+            var rdl = MatrixTablixReport (
+                DynamicMember ("ColName", "=Fields!Name.Value", Textbox ("ColHead", "=Fields!Name.Value"),
+                    sortExpression: "=Fields!Name.Value"),
+                StaticMember (Textbox ("RowHead", "AmountsByName")),
+                Row ("0.25in", Cell (Textbox ("Data", "=First(Fields!Amount.Value)"))));
+
+            var html = await RenderHtml (rdl);
+
+            Assert.That (html.IndexOf ("Gadget", StringComparison.Ordinal),
+                Is.GreaterThanOrEqualTo (0).And.LessThan (html.IndexOf ("Widget", StringComparison.Ordinal)),
+                "ascending sort should put Gadget before Widget");
+        }
+
+        [Test]
+        public async Task CornerContent_IsPreserved ()
+        {
+            var corner = @"<TablixCorner><TablixCornerRows><TablixCornerRow>
+                             <TablixCornerCell><CellContents>" + Textbox ("CornerBox", "CornerLabel") + @"</CellContents></TablixCornerCell>
+                           </TablixCornerRow></TablixCornerRows></TablixCorner>";
+
+            var rdl = MatrixTablixReport (
+                DynamicMember ("ColName", "=Fields!Name.Value", Textbox ("ColHead", "=Fields!Name.Value")),
+                StaticMember (Textbox ("RowHead", "AmountsByName")),
+                Row ("0.25in", Cell (Textbox ("Data", "=First(Fields!Amount.Value)"))),
+                corner: corner);
+
+            var html = await RenderHtml (rdl);
+
+            Assert.That (html, Does.Contain ("CornerLabel"));
+        }
+
+        [Test]
+        public async Task StaticSiblingOfDynamicMember_IsRefused ()
+        {
+            // A static member alongside a dynamic one is a subtotal column. Converting without it
+            // would silently drop a totals column from the output, so the region must refuse.
+            var rdl = MatrixTablixReport (
+                DynamicMember ("ColName", "=Fields!Name.Value", Textbox ("ColHead", "=Fields!Name.Value")) +
+                StaticMember (Textbox ("TotalHead", "Total")),
+                StaticMember (Textbox ("RowHead", "AmountsByName")),
+                Row ("0.25in",
+                    Cell (Textbox ("Data", "=First(Fields!Amount.Value)")) +
+                    Cell (Textbox ("DataTotal", "=Sum(Fields!Amount.Value)"))),
+                bodyColumns: 2);
+
+            using var report = await ParseAsync (rdl);
+
+            Assert.That (report.ErrorMaxSeverity, Is.GreaterThanOrEqualTo (8),
+                "a subtotal layout the converter cannot express must refuse rather than drop the column");
+        }
+
+        #endregion
+
+        /// <summary>
+        /// A row-only Tablix becomes a Table, and 2008 puts its sort on the data region while
+        /// 2005 puts it on the detail rows. Untranslated, the rows come out in whatever order
+        /// the query returned — which is not what the report asked for, and says so nowhere.
+        /// </summary>
+        [Test]
+        public async Task DetailSort_IsCarriedAcross ()
+        {
+            var rdl = TablixReport (
+                HeaderThenDetail,
+                Row ("0.25in", Cell (Textbox ("H1", "Product")), Cell (Textbox ("H2", "Price"))) +
+                Row ("0.25in", Cell (Textbox ("D1", "=Fields!Name.Value")),
+                                Cell (Textbox ("D2", "=Fields!Amount.Value"))),
+                tablixExtras: @"<SortExpressions><SortExpression>
+                                  <Value>=Fields!Name.Value</Value><Direction>Ascending</Direction>
+                                </SortExpression></SortExpressions>");
+
+            var html = await RenderHtml (rdl);
+
+            // Data order is Widget then Gadget; ascending must flip them.
+            Assert.That (html.IndexOf ("Gadget", StringComparison.Ordinal),
+                Is.GreaterThanOrEqualTo (0).And.LessThan (html.IndexOf ("Widget", StringComparison.Ordinal)),
+                "detail rows should be sorted ascending by Name");
+        }
+
+        /// <summary>
+        /// The rest of the 2008 data-region vocabulary. RepeatRowHeaders has a 2005 equivalent
+        /// and is translated; the frozen-pane hints describe a scrolling viewport that
+        /// paginated output does not have, and are dropped. Either way the report must not
+        /// accumulate an "unknown element" warning per occurrence on every single render.
+        /// </summary>
+        [Test]
+        public async Task PaginationAndFrozenPaneHints_AreHandledWithoutWarnings ()
+        {
+            var rdl = TablixReport (
+                HeaderThenDetail,
+                Row ("0.25in", Cell (Textbox ("H1", "Product")), Cell (Textbox ("H2", "Price"))) +
+                Row ("0.25in", Cell (Textbox ("D1", "=Fields!Name.Value")),
+                                Cell (Textbox ("D2", "=Fields!Amount.Value"))),
+                tablixExtras: @"<RepeatRowHeaders>true</RepeatRowHeaders>
+                                <RepeatColumnHeaders>true</RepeatColumnHeaders>
+                                <FixedRowHeaders>true</FixedRowHeaders>
+                                <FixedColumnHeaders>true</FixedColumnHeaders>
+                                <PageBreak><BreakLocation>End</BreakLocation></PageBreak>");
+
+            using var report = await ParseAsync (rdl);
+
+            Assert.That (Warnings (report), Has.None.Contains ("Unknown Table element"),
+                "2008 data-region elements should be translated or dropped, not reported");
+        }
+
+        /// <summary>
+        /// TypeCode has no member for Guid or DateTimeOffset, so Object is the right answer;
+        /// formatting and comparison reach both through IFormattable and IComparable. What was
+        /// wrong was reporting a correct mapping as an unrecognised type, once per field, on
+        /// every render — eleven and eighteen times in one real report.
+        /// </summary>
+        [TestCase ("System.Guid")]
+        [TestCase ("System.DateTimeOffset")]
+        public async Task ClrTypesWithoutATypeCode_AreRecognised (string typeName)
+        {
+            var rdl = TablixReport (
+                HeaderThenDetail,
+                Row ("0.25in", Cell (Textbox ("H1", "Product")), Cell (Textbox ("H2", "Price"))) +
+                Row ("0.25in", Cell (Textbox ("D1", "=Fields!Name.Value")),
+                                Cell (Textbox ("D2", "=Fields!Amount.Value"))),
+                nameFieldType: typeName);
+
+            using var report = await ParseAsync (rdl);
+
+            Assert.That (Warnings (report), Has.None.Contains ("is not a recognized type"),
+                typeName + " should be a recognised type name");
+        }
+
+        private static string[] Warnings (Report report)
+        {
+            var items = report?.ErrorItems;
+            if (items == null)
+                return new string[0];
+
+            var messages = new string[items.Count];
+            for (var i = 0; i < items.Count; i++)
+                messages[i] = items[i]?.ToString () ?? string.Empty;
+            return messages;
         }
 
         private static async Task<string> RenderHtml (string rdl)
@@ -312,3 +632,4 @@ namespace ReportTests
         }
     }
 }
+

@@ -61,6 +61,12 @@ namespace Majorsilence.Reporting.Rdl
 					break;
                 case "Object":
 				case "TimeSpan":
+				// TypeCode has no member for these, so Object is the correct answer and not a
+				// fallback: formatting reaches them through IFormattable and comparison through
+				// IComparable either way. Naming them here stops a correct mapping being
+				// reported as an unrecognised type, once per field, on every render.
+				case "Guid":
+				case "DateTimeOffset":
                     rs = TypeCode.Object;
 					break;
 				default:		// user error
