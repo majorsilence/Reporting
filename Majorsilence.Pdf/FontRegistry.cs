@@ -93,6 +93,38 @@ namespace Majorsilence.Pdf
             return this;
         }
 
+        /// <summary>
+        /// Register every font installed in <paramref name="directory"/> under the family name
+        /// the font itself declares, as the operating system does - so that a report naming
+        /// "Impact" or "MICR Encoding" gets that font rather than a fallback.
+        ///
+        /// A family already registered is left exactly as it is, so explicit registrations and
+        /// their preferences win. Within a new family the first file found for each style is
+        /// used. Collections and CFF-outline fonts, which the embedder cannot use, are skipped.
+        /// A missing directory is not an error; it simply adds nothing.
+        /// </summary>
+        public FontRegistry AddInstalledFonts(string directory)
+        {
+            if (string.IsNullOrEmpty(directory) || !Directory.Exists(directory)) return this;
+
+            var found = new Dictionary<string, (string? r, string? b, string? i, string? bi)>(
+                StringComparer.OrdinalIgnoreCase);
+            foreach (var face in InstalledFontScanner.Scan(directory))
+            {
+                if (_families.ContainsKey(face.Family)) continue;
+                found.TryGetValue(face.Family, out var e);
+                if (face.Bold && face.Italic) e.bi ??= face.Path;
+                else if (face.Bold) e.b ??= face.Path;
+                else if (face.Italic) e.i ??= face.Path;
+                else e.r ??= face.Path;
+                found[face.Family] = e;
+            }
+
+            foreach (var kv in found)
+                AddFamily(kv.Key, kv.Value.r, kv.Value.b, kv.Value.i, kv.Value.bi);
+            return this;
+        }
+
         private static void RegisterFile(
             string path,
             Dictionary<string, (string? r, string? b, string? i, string? bi)> found)

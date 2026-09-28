@@ -200,6 +200,27 @@ namespace Majorsilence.Reporting.Rdl
             if (!bNoClip && availableW > 0 && si.WritingMode != WritingModeEnum.tb_rl)
                 sa = RewrapLines(sa, baseStyle, availableW);
 
+            // A textbox that may not grow may not draw outside its own rectangle either.
+            // bWrap is the item's CanGrow: when it is false the box keeps the height the
+            // report gave it, so wrapped lines past that height belong to nothing and used
+            // to be painted straight over whatever sits below - in a table, the next row.
+            // Clipping them confines an over-long value to its own cell, which is what
+            // CanGrow=false means. Every other renderer already gets this for free: the
+            // drawing path hands the string to a layout rectangle and the graphics library
+            // clips it. This renderer places each line itself, so it has to say so.
+            //
+            // The pitch is si.FontSize because that is the pitch the loop below draws at,
+            // and never fewer than one line: a single line of text is routinely taller than
+            // the cell the report sizes for it, and dropping it would blank the report
+            // rather than clip it.
+            if (!bWrap && !bNoClip && height > 0 && sa.Length > 1 && si.FontSize > 0)
+            {
+                float availableH = height - si.PaddingTop - si.PaddingBottom;
+                int maxLines = Math.Max(1, (int)Math.Floor(availableH / si.FontSize));
+                if (sa.Length > maxLines)
+                    sa = sa.Take(maxLines).ToArray();
+            }
+
             if (!si.BackgroundColor.IsEmpty && height > 0 && width > 0)
                 iAddFillRect(x, y, width, height, si.BackgroundColor);
 
@@ -434,6 +455,16 @@ namespace Majorsilence.Reporting.Rdl
                 TryAddFamily(reg, sysFolder, "Trebuchet MS",
                     r: "trebuc.ttf", b: "trebucbd.ttf",
                     i: "trebucit.ttf", bi: "trebucbi.ttf");
+
+                // Every other installed font, under the family name it declares. Without this
+                // any family not listed above rendered as Arial - Impact, Segoe UI, Arial Black,
+                // and a cheque's MICR font or a barcode font among them. The families above are
+                // registered first and are not overridden. Windows installs fonts per user as
+                // well as per machine, and a MICR or barcode font is as likely to be in either.
+                reg.AddInstalledFonts(sysFolder);
+                string localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+                if (!string.IsNullOrEmpty(localAppData))
+                    reg.AddInstalledFonts(Path.Combine(localAppData, "Microsoft", "Windows", "Fonts"));
             }
 
             // ── fallback chain ────────────────────────────────────────────────
@@ -503,13 +534,16 @@ namespace Majorsilence.Reporting.Rdl
                     return null; // handled as standard Type-1 below
 
                 default:
-                    // Check metric-compatible substitution table (Calibri→Carlito etc.)
+                    // The font itself, when it is there. A metric-compatible substitute is for
+                    // when it is not: with every installed font registered, a machine that has
+                    // both Calibri and Carlito (LibreOffice installs the latter) would otherwise
+                    // draw a report's Calibri in Carlito.
+                    if (_fontRegistry.Contains(face)) return face;
+
+                    // Metric-compatible substitution table (Calibri→Carlito etc.)
                     if (_embeddedFontMap.TryGetValue(face, out string mapped)
                         && _fontRegistry.Contains(mapped))
                         return mapped;
-
-                    // Try exact name
-                    if (_fontRegistry.Contains(face)) return face;
 
                     // Helvetica/Arial treated as sans-serif default
                     if (_fontRegistry.Contains("LiberationSans")) return "LiberationSans";
