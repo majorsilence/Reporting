@@ -436,10 +436,21 @@ namespace Majorsilence.Reporting.Rdl
         /// <param name="number">Numeric expression that is the number of interval you want to add. The numeric expression can either be positive, for dates in the future, or negative, for dates in the past.</param>
         /// <param name="date">The date to which interval is added.</param>
         /// <returns></returns>
+                /// <summary>
+        /// VB's interval codes are case-insensitive, and reports write them both ways --
+        /// "yyyy" and "YYYY", "d" and "D". Every code is lower case and none of them collide
+        /// once folded, so folding here is the whole of it. An unknown code still reaches the
+        /// default arm and throws, which is what tells a report author they mistyped one.
+        /// </summary>
+        static private string Interval(object interval)
+        {
+            return Convert.ToString(interval).ToLowerInvariant();
+        }
+
         static public DateTime DateAdd(string interval, double number, DateTime date)
         {
             
-            switch (interval)
+            switch (Interval(interval))
             {
                 case "yyyy":        // year 
                     date = date.AddYears((int) Math.Round(number, 0));
@@ -577,7 +588,7 @@ namespace Majorsilence.Reporting.Rdl
         {
             DateTime d1 = date1 is DateTime dt1 ? dt1 : DateTime.Parse(Convert.ToString(date1));
             DateTime d2 = date2 is DateTime dt2 ? dt2 : DateTime.Parse(Convert.ToString(date2));
-            switch (Convert.ToString(interval))
+            switch (Interval(interval))
             {
                 case "yyyy": return d2.Year - d1.Year;
                 case "q":    return (d2.Year - d1.Year) * 4 + (d2.Month - 1) / 3 - (d1.Month - 1) / 3;
@@ -617,7 +628,7 @@ namespace Majorsilence.Reporting.Rdl
         {
             DateTime d = ToDate(date);
             var startDay = (DayOfWeek)((Convert.ToInt32(firstDayOfWeek) - 1 + 7) % 7);
-            switch (Convert.ToString(interval))
+            switch (Interval(interval))
             {
                 case "yyyy": return d.Year;
                 case "q":    return (d.Month - 1) / 3 + 1;

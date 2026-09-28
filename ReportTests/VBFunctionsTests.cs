@@ -131,6 +131,77 @@ namespace ReportTests
             Assert.That(result.Day, Is.EqualTo(6));
         }
 
+        // ── Interval codes are case-insensitive ──────────────────────────────────
+        //
+        // VB's are, and reports are written both ways. Getting this wrong is not a wrong
+        // answer but a dead report: the interval falls through to the default arm and
+        // throws, so one "YYYY" somewhere in an expression takes the whole render with it.
+
+        [TestCase("YYYY", 2022, 6, 15)]
+        [TestCase("M", 2020, 8, 15)]
+        [TestCase("D", 2020, 6, 17)]
+        [TestCase("Q", 2020, 12, 15)]
+        [TestCase("WW", 2020, 6, 29)]
+        public void DateAdd_UppercaseInterval_MatchesTheLowercaseOne(
+            string interval, int year, int month, int day)
+        {
+            var result = VBFunctions.DateAdd(interval, 2, new DateTime(2020, 6, 15));
+
+            Assert.That(result, Is.EqualTo(new DateTime(year, month, day)));
+        }
+
+        [TestCase("YYYY", 2020)]
+        [TestCase("Q", 2)]
+        [TestCase("M", 6)]
+        [TestCase("D", 15)]
+        [TestCase("H", 13)]
+        [TestCase("N", 45)]
+        [TestCase("S", 30)]
+        public void DatePart_UppercaseInterval_ReturnsTheSameComponent(string interval, int expected)
+        {
+            var when = new DateTime(2020, 6, 15, 13, 45, 30);
+
+            Assert.That(VBFunctions.DatePart(interval, when), Is.EqualTo(expected));
+            Assert.That(VBFunctions.DatePart(interval.ToLowerInvariant(), when), Is.EqualTo(expected));
+        }
+
+        /// <summary>
+        /// "M" is the month and "N" the minute whichever way they are cased -- folding the
+        /// case must not let one become the other.
+        /// </summary>
+        [Test]
+        public void DatePart_MonthAndMinute_DoNotCollideWhenCaseIsFolded()
+        {
+            var when = new DateTime(2020, 6, 15, 13, 45, 30);
+
+            Assert.Multiple(() => {
+                Assert.That(VBFunctions.DatePart("M", when), Is.EqualTo(6), "M is the month");
+                Assert.That(VBFunctions.DatePart("m", when), Is.EqualTo(6), "m is the month");
+                Assert.That(VBFunctions.DatePart("N", when), Is.EqualTo(45), "N is the minute");
+                Assert.That(VBFunctions.DatePart("n", when), Is.EqualTo(45), "n is the minute");
+            });
+        }
+
+        [Test]
+        public void DateDiff_UppercaseInterval_MatchesTheLowercaseOne()
+        {
+            var from = new DateTime(2020, 1, 1);
+            var to = new DateTime(2021, 4, 15);
+
+            Assert.That(VBFunctions.DateDiff("YYYY", from, to), Is.EqualTo(VBFunctions.DateDiff("yyyy", from, to)));
+            Assert.That(VBFunctions.DateDiff("M", from, to), Is.EqualTo(VBFunctions.DateDiff("m", from, to)));
+            Assert.That(VBFunctions.DateDiff("WW", from, to), Is.EqualTo(VBFunctions.DateDiff("ww", from, to)));
+        }
+
+        /// <summary>
+        /// Folding the case must not quietly accept a code that is simply wrong: a mistyped
+        /// interval is still the report author's mistake to see.
+        /// </summary>
+        [Test]
+        public void AnInvalidInterval_StillThrowsWhateverItsCase() =>
+            Assert.Throws<ArgumentException>(() =>
+                VBFunctions.DatePart("XYZ", new DateTime(2020, 1, 1)));
+
         // ── String functions ─────────────────────────────────────────────────────
 
         [TestCase("Hello", 3, "Hel")]
