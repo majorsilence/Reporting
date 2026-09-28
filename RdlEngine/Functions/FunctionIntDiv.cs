@@ -1,8 +1,5 @@
 
 using System;
-using System.Collections;
-using System.IO;
-using System.Reflection;
 using System.Threading.Tasks;
 using Majorsilence.Reporting.Rdl;
 
@@ -10,10 +7,10 @@ using Majorsilence.Reporting.Rdl;
 namespace Majorsilence.Reporting.Rdl
 {
 	/// <summary>
-	/// Integer division operator of form lhs \ rhs (VB's "\", distinct from "/"): both
-	/// operands are truncated to whole numbers first, then divided, discarding any
-	/// remainder. Mirrors FunctionDiv's shape exactly, substituting truncated-long
-	/// arithmetic for the core division.
+	/// Integer division operator of form lhs \ rhs (VB's "\", distinct from "/"). As in VB,
+	/// each operand is first made a whole number the way CLng does - rounded, halves to the
+	/// even number - and the quotient drops its remainder: 7.5 \ 2 is 8 \ 2 = 4, 2.5 \ 1 is 2.
+	/// The result is a Long.
 	/// </summary>
 	[Serializable]
 	internal class FunctionIntDiv : FunctionBinary, IExpr
@@ -37,72 +34,62 @@ namespace Majorsilence.Reporting.Rdl
 		{
 			_lhs = await _lhs.ConstantOptimization();
 			_rhs = await _rhs.ConstantOptimization();
-			bool bLeftConst = await _lhs.IsConstant();
-			bool bRightConst = await _rhs.IsConstant();
-			if (bLeftConst && bRightConst)
-			{
-				double d = await EvaluateDouble(null, null);
-				return new ConstantDouble(d);
-			}
-			else if (bRightConst)
-			{
-				double d = await _rhs.EvaluateDouble(null, null);
-				if (d == 1)
-					return _lhs;
-			}
-			else if (bLeftConst)
-			{
-				double d = await _lhs.EvaluateDouble(null, null);
-				if (d == 0)
-					return new ConstantDouble(0);
-			}
 
+			// Nothing to fold into (there is no Long constant) and no shortcuts: x \ 1 is not
+			// x, since x is rounded, and 0 \ x still fails when x rounds to 0.
 			return this;
 		}
 
 		// Evaluate is for interpretation (and is relatively slow)
 		public async Task<object> Evaluate(Report rpt, Row row)
 		{
-			return await EvaluateDouble(rpt, row);
+			return await EvaluateInt64(rpt, row);
+		}
+
+		private async Task<long> EvaluateInt64(Report rpt, Row row)
+		{
+			long lhs = ToLong(await _lhs.EvaluateDouble(rpt, row));
+			long rhs = ToLong(await _rhs.EvaluateDouble(rpt, row));
+
+			return lhs / rhs;		// DivideByZeroException when rhs rounds to 0, as in VB
+		}
+
+		// CLng: the nearest whole number, halves to even; OverflowException outside Long.
+		private static long ToLong(double d)
+		{
+			return checked((long)Math.Round(d, MidpointRounding.ToEven));
 		}
 
 		public async Task<double> EvaluateDouble(Report rpt, Row row)
 		{
-			long lhs = (long)await _lhs.EvaluateDouble(rpt, row);
-			long rhs = (long)await _rhs.EvaluateDouble(rpt, row);
-
-			return (double)(lhs / rhs);
+			return await EvaluateInt64(rpt, row);
 		}
 
 		public async Task<decimal> EvaluateDecimal(Report rpt, Row row)
 		{
-			double result = await EvaluateDouble(rpt, row);
-
-			return Convert.ToDecimal(result);
+			return await EvaluateInt64(rpt, row);
 		}
 
 		public async Task<int> EvaluateInt32(Report rpt, Row row)
 		{
-			double result = await EvaluateDouble(rpt, row);
-
-			return Convert.ToInt32(result);
+			return checked((int)await EvaluateInt64(rpt, row));
 		}
 
 		public async Task<string> EvaluateString(Report rpt, Row row)
 		{
-			double result = await EvaluateDouble(rpt, row);
+			long result = await EvaluateInt64(rpt, row);
 			return result.ToString();
 		}
 
 		public async Task<DateTime> EvaluateDateTime(Report rpt, Row row)
 		{
-			double result = await EvaluateDouble(rpt, row);
+			long result = await EvaluateInt64(rpt, row);
 			return Convert.ToDateTime(result);
 		}
 
 		public async Task<bool> EvaluateBoolean(Report rpt, Row row)
 		{
-			double result = await EvaluateDouble(rpt, row);
+			long result = await EvaluateInt64(rpt, row);
 			return Convert.ToBoolean(result);
 		}
 	}

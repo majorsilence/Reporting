@@ -229,13 +229,13 @@ namespace Majorsilence.Reporting.Rdl
 			TokenTypes t;           // remember the type
 			IExpr result=null;
 			IExpr lhs;
-			lhs = await MatchExprMultDiv();
+			lhs = await MatchExprIntDiv();
 			result = lhs;			// in case we get no matches
 			while ((t = curToken.Type) == TokenTypes.PLUS || t == TokenTypes.PLUSSTRING || t == TokenTypes.MINUS)
 			{
 				curToken = tokens.Extract();
 				IExpr rhs;
-				rhs = await MatchExprMultDiv();
+				rhs = await MatchExprIntDiv();
 				TypeCode lt = lhs.GetTypeCode();
 				TypeCode rt = rhs.GetTypeCode();
 				bool bDecimal = (rt == TypeCode.Decimal &&
@@ -276,6 +276,20 @@ namespace Majorsilence.Reporting.Rdl
 			return result;
 		}
 
+		// IntDivRhs: "\" Term IntDivRhs. VB ranks integer division below * and /, so
+		// 7 \ 2 * 2 is 7 \ 4.
+		private async Task<IExpr> MatchExprIntDiv()
+		{
+			IExpr lhs = await MatchExprMultDiv();
+			while (curToken.Type == TokenTypes.BACKSLASH)
+			{
+				curToken = tokens.Extract();
+				IExpr rhs = await MatchExprMultDiv();
+				lhs = new FunctionIntDiv(lhs, rhs);
+			}
+			return lhs;
+		}
+
 		// TermRhs: MultDivOperator Factor TermRhs
 		private async Task<IExpr> MatchExprMultDiv()
 		{
@@ -286,8 +300,7 @@ namespace Majorsilence.Reporting.Rdl
 			result = lhs;			// in case we get no matches
 			while ((t = curToken.Type) == TokenTypes.FORWARDSLASH ||
 				t == TokenTypes.STAR ||
-				t == TokenTypes.MODULUS ||
-				t == TokenTypes.BACKSLASH)
+				t == TokenTypes.MODULUS)
 			{
 				curToken = tokens.Extract();
 				IExpr rhs;
@@ -310,9 +323,6 @@ namespace Majorsilence.Reporting.Rdl
 						break;
 					case TokenTypes.MODULUS:
 						result = new FunctionModulus(lhs, rhs);
-						break;
-					case TokenTypes.BACKSLASH:
-						result = new FunctionIntDiv(lhs, rhs);
 						break;
 				}
 				lhs = result;		// in case continue in the loop
