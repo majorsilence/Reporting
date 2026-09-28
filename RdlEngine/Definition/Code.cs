@@ -39,7 +39,19 @@ namespace Majorsilence.Reporting.Rdl
 			}
 			else
 			{
-				_Assembly = GetAssembly();
+				try
+				{
+					_Assembly = GetAssembly();
+				}
+				catch (PlatformNotSupportedException)
+				{
+					// CodeDOM VB compilation only exists on .NET Framework. Surface a report
+					// error rather than crashing the parse: callers can then refuse or degrade
+					// per their own policy, and every other report keeps rendering.
+					OwnerReport.rl.LogError(8,
+						"The report's <Code> element requires VB.NET compilation, which is not " +
+						"supported on this platform; register a CodeProviderFactory or remove the Code element.");
+				}
 			}
 		}
 		
