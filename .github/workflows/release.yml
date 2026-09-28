@@ -1,0 +1,152 @@
+name: Release
+
+# Builds everything a Majorsilence Reporting release ships and collects it into a DRAFT
+# GitHub Release.
+#
+# - Tag push (v26.0.4 or version_26.0.4) -> builds the zips and NuGet packages on every
+#                                           platform, creates the draft release.
+# - workflow_dispatch                    -> same builds, artifacts only, no release; a dry run
+#                                           before tagging.
+#
+# The version comes from Directory.Build.props, as it does for build-release.ps1 and the AOT
+# scripts. A tag is a claim about that version, so a tag that disagrees with it fails the run
+# instead of releasing 26.0.3 packages under a 26.0.4 name.
+#
+# Publishing to nuget.org is a SEPARATE workflow (publish-nuget.yml), triggered only when a
+# human clicks "Publish release" on the draft this workflow creates. This workflow never has
+# nuget.org credentials.
+
+on:
+  push:
+    tags:
+      - 'v[0-9]*'
+      - 'version_[0-9]*'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+
+jobs:
+  version:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.resolve.outputs.version }}
+      is_release: ${{ steps.resolve.outputs.is_release }}
+    steps:
+      - uses: actions/checkout@v6
+
+      - id: resolve
+        shell: bash
+        run: |
+          set -euo pipefail
+          VERSION=$(sed -n 's:.*<Version>\(.*\)</Version>.*:\1:p' Directory.Build.props | head -n1)
+          if [ -z "$VERSION" ]; then
+            echo "::error::No <Version> in Directory.Build.props"
+            exit 1
+          fi
+          if [ "${{ github.ref_type }}" = "tag" ]; then
+            TAG_VERSION="${GITHUB_REF_NAME#version_}"
+            TAG_VERSION="${TAG_VERSION#v}"
+            if [ "$TAG_VERSION" != "$VERSION" ]; then
+              echo "::error::Tag $GITHUB_REF_NAME says $TAG_VERSION but Directory.Build.props says $VERSION"
+              exit 1
+            fi
+            echo "is_release=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "is_release=false" >> "$GITHUB_OUTPUT"
+          fi
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "Version: $VERSION"
+
+  # The designer/viewer/rdlcmd zips and every NuGet package (both the Release and the
+  # Release-DrawingCompat flavours), then the Windows AOT zips. build-release.ps1 clears
+  # build-output when it starts, so the AOT script has to run after it.
+  windows:
+    needs: version
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0   # full history so SourceLink embeds correct commit info
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 10.0.x
+      - name: Build release zips and NuGet packages
+        run: ./build-release.ps1
+      - name: Build AOT Windows
+        run: ./build-release-aot-windows.ps1
+      - uses: actions/upload-artifact@v6
+        with:
+          name: release-windows
+          path: |
+            Release-Builds/build-output/*.zip
+            Release-Builds/build-output/*.nupkg
+            Release-Builds/build-output/*.snupkg
+          if-no-files-found: error
+
+  aot:
+    needs: version
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: linux-x64
+            os: ubuntu-latest
+            script: ./build-release-aot-linux.ps1 -Arch x64
+          - name: linux-arm64
+            os: ubuntu-24.04-arm
+            script: ./build-release-aot-linux.ps1 -Arch arm64
+          - name: osx
+            os: macos-latest
+            script: ./build-release-aot-osx.ps1
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v6
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 10.0.x
+      - name: Build AOT ${{ matrix.name }}
+        shell: pwsh
+        run: ${{ matrix.script }}
+      - uses: actions/upload-artifact@v6
+        with:
+          name: release-aot-${{ matrix.name }}
+          path: Release-Builds/build-output/*.zip
+          if-no-files-found: error
+
+  release:
+    needs: [version, windows, aot]
+    if: needs.version.outputs.is_release == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write   # to create the draft release
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Stage release files
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p release
+          find artifacts -type f \( -name '*.zip' -o -name '*.nupkg' -o -name '*.snupkg' \) \
+            -exec cp {} release/ \;
+          ls -lh release
+
+      # Nothing here touches nuget.org: publish-nuget.yml pushes these same packages once a
+      # human publishes the draft.
+      - name: Create GitHub Release (draft)
+        uses: softprops/action-gh-release@v2
+        with:
+          name: Majorsilence Reporting ${{ needs.version.outputs.version }}
+          generate_release_notes: true
+          draft: true
+          files: release/*
