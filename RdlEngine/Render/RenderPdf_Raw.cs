@@ -455,6 +455,16 @@ namespace Majorsilence.Reporting.Rdl
                 TryAddFamily(reg, sysFolder, "Trebuchet MS",
                     r: "trebuc.ttf", b: "trebucbd.ttf",
                     i: "trebucit.ttf", bi: "trebucbi.ttf");
+
+                // Every other installed font, under the family name it declares. Without this
+                // any family not listed above rendered as Arial - Impact, Segoe UI, Arial Black,
+                // and a cheque's MICR font or a barcode font among them. The families above are
+                // registered first and are not overridden. Windows installs fonts per user as
+                // well as per machine, and a MICR or barcode font is as likely to be in either.
+                reg.AddInstalledFonts(sysFolder);
+                string localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+                if (!string.IsNullOrEmpty(localAppData))
+                    reg.AddInstalledFonts(Path.Combine(localAppData, "Microsoft", "Windows", "Fonts"));
             }
 
             // ── fallback chain ────────────────────────────────────────────────
@@ -524,13 +534,16 @@ namespace Majorsilence.Reporting.Rdl
                     return null; // handled as standard Type-1 below
 
                 default:
-                    // Check metric-compatible substitution table (Calibri→Carlito etc.)
+                    // The font itself, when it is there. A metric-compatible substitute is for
+                    // when it is not: with every installed font registered, a machine that has
+                    // both Calibri and Carlito (LibreOffice installs the latter) would otherwise
+                    // draw a report's Calibri in Carlito.
+                    if (_fontRegistry.Contains(face)) return face;
+
+                    // Metric-compatible substitution table (Calibri→Carlito etc.)
                     if (_embeddedFontMap.TryGetValue(face, out string mapped)
                         && _fontRegistry.Contains(mapped))
                         return mapped;
-
-                    // Try exact name
-                    if (_fontRegistry.Contains(face)) return face;
 
                     // Helvetica/Arial treated as sans-serif default
                     if (_fontRegistry.Contains("LiberationSans")) return "LiberationSans";

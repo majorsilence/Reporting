@@ -14,6 +14,109 @@ namespace Majorsilence.Pdf.Tests
     [TestFixture]
     public class FontRegistryTests
     {
+        // ── installed fonts, by the family each declares ─────────────────────
+        //
+        // A report names a font by its family - "Impact", "MICR Encoding" - and the file on
+        // disk can be called anything. Registering only a fixed list meant every other family
+        // rendered as Arial, a cheque's MICR line and a barcode font included.
+
+        private static string NewFontDir()
+        {
+            string dir = Path.Combine(Path.GetTempPath(), "fontscan-" + Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(dir);
+            return dir;
+        }
+
+        private static string DeclaredFamily(string path)
+        {
+            Assert.That(InstalledFontScanner.TryRead(path, out var face), Is.True, path);
+            return face.Family;
+        }
+
+        [Test]
+        public void AddInstalledFonts_FindsAFontByTheFamilyItDeclares_NotItsFileName()
+        {
+            var regular = SystemSansRegular;
+            Assume.That(regular, Is.Not.Null, "no system sans font on this machine");
+            string family = DeclaredFamily(regular!);
+
+            string dir = NewFontDir();
+            string copy = Path.Combine(dir, "zz_nothing_like_the_name.ttf");
+            File.Copy(regular!, copy);
+
+            var reg = new FontRegistry().AddInstalledFonts(dir);
+
+            Assert.That(reg.Contains(family), Is.True, $"registered as \"{family}\"");
+            Assert.That(reg.Resolve(family, false, false)?.Path, Is.EqualTo(copy));
+        }
+
+        [Test]
+        public void AddInstalledFonts_PlacesEachFileByItsOwnBoldAndItalicBits()
+        {
+            var regular = SystemSansRegular;
+            var bold = SystemSansBold;
+            Assume.That(regular, Is.Not.Null);
+            Assume.That(bold, Is.Not.Null);
+            string family = DeclaredFamily(regular!);
+            Assume.That(DeclaredFamily(bold!), Is.EqualTo(family), "regular and bold are one family");
+
+            // Names that sort the bold file first and say nothing about which is which.
+            string dir = NewFontDir();
+            string boldCopy = Path.Combine(dir, "a.ttf");
+            string regularCopy = Path.Combine(dir, "b.ttf");
+            File.Copy(bold!, boldCopy);
+            File.Copy(regular!, regularCopy);
+
+            var reg = new FontRegistry().AddInstalledFonts(dir);
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(reg.Resolve(family, false, false)?.Path, Is.EqualTo(regularCopy));
+                Assert.That(reg.Resolve(family, true, false)?.Path, Is.EqualTo(boldCopy));
+            });
+        }
+
+        [Test]
+        public void AddInstalledFonts_LeavesAnExplicitlyRegisteredFamilyAlone()
+        {
+            var regular = SystemSansRegular;
+            var bold = SystemSansBold;
+            Assume.That(regular, Is.Not.Null);
+            Assume.That(bold, Is.Not.Null);
+            string family = DeclaredFamily(regular!);
+
+            string dir = NewFontDir();
+            File.Copy(regular!, Path.Combine(dir, "installed.ttf"));
+
+            // Registered first, deliberately pointing somewhere else.
+            var reg = new FontRegistry().AddFamily(family, regular: bold!).AddInstalledFonts(dir);
+
+            Assert.That(reg.Resolve(family, false, false)?.Path, Is.EqualTo(bold));
+        }
+
+        [Test]
+        public void AddInstalledFonts_SkipsACollectionItCannotEmbed()
+        {
+            string? ttc = FindFont(@"C:\Windows\Fonts\cambria.ttc", @"C:\Windows\Fonts\msgothic.ttc");
+            Assume.That(ttc, Is.Not.Null, "no font collection on this machine");
+
+            // Named .ttf, so only the file's own header can give it away.
+            string dir = NewFontDir();
+            string copy = Path.Combine(dir, "collection.ttf");
+            File.Copy(ttc!, copy);
+
+            Assert.That(InstalledFontScanner.TryRead(copy, out _), Is.False);
+            Assert.That(InstalledFontScanner.Scan(dir), Is.Empty);
+        }
+
+        [Test]
+        public void AddInstalledFonts_AMissingDirectoryAddsNothing()
+        {
+            var reg = new FontRegistry().AddInstalledFonts(
+                Path.Combine(Path.GetTempPath(), "no-such-font-dir-" + Guid.NewGuid().ToString("N")));
+            Assert.That(reg.Contains("Arial"), Is.False);
+        }
+
         // ── helpers ──────────────────────────────────────────────────────────
 
         private static string? FindFont(params string[] paths)
