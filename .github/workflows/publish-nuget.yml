@@ -1,0 +1,82 @@
+name: Publish to nuget.org
+
+# Pushes a release's NuGet packages to nuget.org using Trusted Publishing (OIDC): no
+# long-lived API key is stored in this repo.
+#
+# Trigger: only when a human clicks "Publish release" on a GitHub Release (release.yml creates
+# them as drafts on a tag push). Publishing the draft is the deliberate approval step; pushing
+# a tag or to main never publishes anything.
+#
+# The packages are the ones attached to the release, not a rebuild, so what reaches nuget.org
+# is byte-for-byte what was reviewed on the draft.
+#
+# One-time setup on nuget.org:
+#   nuget.org -> your username -> Trusted Publishing -> add policy
+#     Repository Owner: majorsilence
+#     Repository:       Reporting
+#     Workflow File:    publish-nuget.yml
+#     Environment:      (leave blank; this workflow doesn't use one)
+# and a repository variable NUGET_USER holding the nuget.org user name that owns the policy.
+
+on:
+  release:
+    types: [published]
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+
+jobs:
+  publish:
+    if: startsWith(github.event.release.tag_name, 'v')
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write   # required for NuGet/login's OIDC token exchange
+      contents: read
+    steps:
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Download the release's packages
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.event.release.tag_name }}
+        run: |
+          set -euo pipefail
+          gh release download "$TAG" --repo "$GITHUB_REPOSITORY" \
+            --pattern '*.nupkg' --pattern '*.snupkg' --dir nupkg
+          VERSION="${TAG#version_}"
+          VERSION="${VERSION#v}"
+          # A package from some other version attached by hand would otherwise go out with this one.
+          stray=$(find nupkg -name '*.nupkg' ! -name "*.$VERSION.nupkg")
+          if [ -n "$stray" ]; then
+            echo "::error::Packages that are not version $VERSION: $stray"
+            exit 1
+          fi
+          if ! ls nupkg/*.nupkg > /dev/null 2>&1; then
+            echo "::error::Release $TAG has no .nupkg assets"
+            exit 1
+          fi
+          ls -lh nupkg
+
+      # Exchanges this job's short-lived GitHub OIDC token for a ~1-hour nuget.org API key, per
+      # the Trusted Publishing policy configured on nuget.org (see header comment).
+      - name: NuGet login (OIDC -> temp API key)
+        uses: NuGet/login@v1
+        id: login
+        with:
+          user: ${{ vars.NUGET_USER }}
+
+      # Each .snupkg sitting next to its .nupkg is pushed to the symbol server along with it.
+      - name: Push to nuget.org
+        shell: bash
+        run: |
+          set -euo pipefail
+          dotnet nuget push "nupkg/*.nupkg" \
+            --api-key "${{ steps.login.outputs.NUGET_API_KEY }}" \
+            --source https://api.nuget.org/v3/index.json \
+            --skip-duplicate
