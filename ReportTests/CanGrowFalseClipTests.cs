@@ -70,16 +70,18 @@ namespace ReportTests
             });
 
             // The whole page: exactly one line in each of the three no-grow boxes, plus the
-            // three the grown box is entitled to. Any extra line is overflow somewhere.
-            Assert.That(lines.Count, Is.EqualTo(6),
-                "6 lines: 1 clipped + 1 row below + 3 grown + 1 short. Lines drawn were: "
+            // lines the grown box is entitled to - however many the value wraps into, which
+            // depends on the font's metrics. Any other line is overflow somewhere.
+            int grownLines = GrownBoxLines(lines).Count;
+            Assert.That(lines.Count, Is.EqualTo(3 + grownLines),
+                $"1 clipped + 1 row below + {grownLines} grown + 1 short. Lines drawn were: "
                 + string.Join(" | ", lines.Select(l => $"{l.baseline:F1}:{l.text}")));
         }
 
         /// <summary>
         /// The opposite direction: CanGrow=true still grows. The same value in the same
-        /// 1in-wide, 0.153in-tall box wraps to three lines and all three are drawn, because
-        /// a box that may grow has no height to overflow.
+        /// 1in-wide, 0.153in-tall box wraps onto more than one line and every line is drawn,
+        /// because a box that may grow has no height to overflow.
         ///
         /// This one is a guard, not a reproduction: it holds both with the clipping and
         /// without it, and its job is to fail if the clipping ever reaches a box that is
@@ -90,22 +92,33 @@ namespace ReportTests
         {
             IReadOnlyList<Letter> letters = await RenderFixture();
             var lines = LinesByBaseline(letters);
+            var grownLines = GrownBoxLines(lines);
 
-            // The grown box is the three lines immediately above the short value at the
-            // bottom of the page - anchored that way rather than by index, so that how many
-            // lines the boxes above it drew cannot move the ones being asserted here.
-            int shortLine = lines.FindIndex(l => l.text.Trim() == "Short");
-            Assert.That(shortLine, Is.GreaterThanOrEqualTo(3), "the short value renders last");
+            Assert.That(grownLines.Count, Is.GreaterThan(1), "the value is too wide for one line of its box");
 
             // Letters only: PdfPig reports the inter-word space as a glyph of its own and
             // what this test is about is which lines were drawn, not how they are spaced.
-            string grown = new string(
-                string.Concat(lines.Skip(shortLine - 3).Take(3).Select(l => l.text))
+            string grown = new string(string.Concat(grownLines.Select(l => l.text))
                 .Where(char.IsLetter).ToArray());
 
             Assert.That(grown, Is.EqualTo("OurWheelsFollowUsEverywhere"),
                 "every wrapped line of a CanGrow=true box is drawn. Lines drawn were: "
                 + string.Join(" | ", lines.Select(l => $"{l.baseline:F1}:{l.text}")));
+        }
+
+        /// <summary>
+        /// The grown box's lines: everything between the row below the clipped box and the
+        /// short value at the bottom of the page. Anchored on those two rather than counted,
+        /// because how many lines the value wraps into is the font's business.
+        /// </summary>
+        private static List<(double baseline, string text)> GrownBoxLines(
+            List<(double baseline, string text)> lines)
+        {
+            int rowBelow = lines.FindIndex(l => l.text.Trim() == "Piccolo");
+            int shortLine = lines.FindIndex(l => l.text.Trim() == "Short");
+            Assert.That(rowBelow, Is.GreaterThanOrEqualTo(0), "the row below the clipped box renders");
+            Assert.That(shortLine, Is.GreaterThan(rowBelow), "the short value renders last");
+            return lines.Skip(rowBelow + 1).Take(shortLine - rowBelow - 1).ToList();
         }
 
         private async Task<IReadOnlyList<Letter>> RenderFixture()

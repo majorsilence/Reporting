@@ -198,7 +198,7 @@ namespace Majorsilence.Reporting.Rdl
             // rotated line into several that then get drawn on top of each other.
             float availableW = width - si.PaddingLeft - si.PaddingRight;
             if (!bNoClip && availableW > 0 && si.WritingMode != WritingModeEnum.tb_rl)
-                sa = RewrapLines(sa, baseStyle, availableW);
+                sa = RewrapLines(RejoinSoftWraps(sa), baseStyle, availableW);
 
             // A textbox that may not grow may not draw outside its own rectangle either.
             // bWrap is the item's CanGrow: when it is false the box keeps the height the
@@ -320,6 +320,29 @@ namespace Majorsilence.Reporting.Rdl
         }
 
         // ── PDF-accurate text re-wrapping ─────────────────────────────────────
+
+        // RenderBase breaks a long line after the space that ends a word and keeps that space,
+        // while a line that ends a paragraph has its trailing spaces trimmed. So a line ending
+        // in a space was split only because the graphics library measured the text too wide
+        // for the box, not because the PDF font does. Rejoining those lets RewrapLines break
+        // them against the metrics that are actually drawn. Without it, a line measured a
+        // fraction too wide lost its last word once the box clipped the second line.
+        internal static string[] RejoinSoftWraps(string[] lines)
+        {
+            var joined = new List<string>(lines.Length);
+            var current = new System.Text.StringBuilder();
+            foreach (string line in lines)
+            {
+                current.Append(line);
+                if (!string.IsNullOrEmpty(line) && line[line.Length - 1] == ' ')
+                    continue;
+                joined.Add(current.ToString());
+                current.Clear();
+            }
+            if (current.Length > 0)
+                joined.Add(current.ToString());
+            return joined.ToArray();
+        }
 
         // RenderBase wraps text with System.Drawing metrics; we re-check each
         // line against the actual PDF font metrics and split further if needed.
