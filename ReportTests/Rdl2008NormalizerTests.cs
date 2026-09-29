@@ -614,6 +614,103 @@ namespace ReportTests
             return messages;
         }
 
+
+        [Test]
+        public async Task MultiValueParameter_JoinFunction_Parses ()
+        {
+            var rdl = TablixReport (HeaderThenDetail,
+                Row ("0.25in", Cell (Textbox ("H1", @"=Join(Parameters!Clinics.Value, "", "")")), Cell (Textbox ("H2", "Amount"))) +
+                Row ("0.25in", Cell (Textbox ("D1", "=Fields!Name.Value")), Cell (Textbox ("D2", "=Fields!Amount.Value"))))
+                .Replace ("<DataSets>",
+                    @"<ReportParameters><ReportParameter Name=""Clinics""><DataType>String</DataType><MultiValue>true</MultiValue></ReportParameter></ReportParameters><DataSets>");
+
+            using var report = await ParseAsync (rdl);
+
+            Assert.That (report.ErrorMaxSeverity, Is.LessThanOrEqualTo (4),
+                "Join expression rejected: " + string.Join (" | ", report.ErrorItems ?? new System.Collections.ArrayList ()));
+        }
+
+        [Test]
+        public async Task DataSetScopedAggregate_InPageHeader_ParsesAndEvaluates ()
+        {
+            // RDL 2008+ page headers routinely carry =First(Fields!X.Value, "SomeDataSet")
+            // for report-wide captions; the scope names a dataset, so no row context is needed.
+            var rdl = TablixReport (HeaderThenDetail,
+                Row ("0.25in", Cell (Textbox ("H1", "Name")), Cell (Textbox ("H2", "Amount"))) +
+                Row ("0.25in", Cell (Textbox ("D1", "=Fields!Name.Value")), Cell (Textbox ("D2", "=Fields!Amount.Value"))))
+                .Replace ("<Body>",
+                    @"<PageHeader><Height>0.5in</Height><PrintOnFirstPage>true</PrintOnFirstPage><PrintOnLastPage>true</PrintOnLastPage>
+                        <ReportItems>" + Textbox ("PH1", @"=First(Fields!Name.Value, ""Data"")") + @"</ReportItems>
+                      </PageHeader><Body>");
+
+            var html = await RenderHtml (rdl);
+
+            Assert.That (html, Does.Contain ("Widget"), "page header aggregate did not evaluate");
+        }
+
+        [Test]
+        public async Task ReportLanguage_UserLanguage_DoesNotRecurse ()
+        {
+            // <Language>=User!Language</Language> is a stock Report Builder default. Before
+            // the ClientLanguageRaw split, User!Language evaluated Report.ClientLanguage,
+            // whose fallback re-evaluated the report Language expression: infinite mutual
+            // async recursion that hung rendering forever.
+            var rdl = TablixReport (HeaderThenDetail,
+                Row ("0.25in", Cell (Textbox ("H1", "Name")), Cell (Textbox ("H2", "Amount"))) +
+                Row ("0.25in", Cell (Textbox ("D1", "=Fields!Name.Value")), Cell (Textbox ("D2", "=Fields!Amount.Value"))))
+                .Replace ("<Body>", "<Language>=User!Language</Language><Body>");
+
+            var render = RenderHtml (rdl);
+            var winner = await Task.WhenAny (render, Task.Delay (TimeSpan.FromSeconds (30)));
+
+            Assert.That (winner, Is.SameAs (render), "render did not complete: User!Language recursion");
+            Assert.That (await render, Does.Contain ("Widget"));
+        }
+
+        [Test]
+        public async Task RealWorldExpressionCompat_Battery_Parses ()
+        {
+            // Expression shapes that real-world reports actually contain:
+            // qualified/lowercased members, VB constants and enums, Is Nothing, smart
+            // quotes, and the VB date/format functions Report Builder emits.
+            var cells =
+                Row ("0.25in",
+                    Cell (Textbox ("B1", @"=Fields!Name.Value.ToString")),
+                    Cell (Textbox ("B2", @"=Join(Parameters!Clinics.label, "", "")"))) +
+                Row ("0.25in",
+                    Cell (Textbox ("B3", @"=First(Fields!Name.Value, ""Data"") &amp; Environment.NewLine &amp; ""x""")),
+                    Cell (Textbox ("B4", @"=IIf(Parameters!Note.Value Is Nothing, ""none"", ""set"")"))) +
+                Row ("0.25in",
+                    Cell (Textbox ("B5", "=WeekdayName(Weekday(Fields!When.Value))")),
+                    Cell (Textbox ("B6", @"=DatePart(""m"", Fields!When.Value) &amp; FormatCurrency(Fields!Amount.Value, 2)"))) +
+                Row ("0.25in",
+                    Cell (Textbox ("B7", @"=IF(Fields!Amount.Value &gt; ""1"", ""hi"", ""lo"") &amp; Microsoft.VisualBasic.Constants.vbCrLf")),
+                    Cell (Textbox ("B8", "=Format(Fields!When.Value,“dd/MM/yyyy”)"))) +
+                Row ("0.25in",
+                    Cell (Textbox ("B9", @"=System.Convert.ToBase64String(First(Fields!Name.Value, ""Data""))")),
+                    Cell (Textbox ("B10", @"=FormatDateTime(Fields!When.Value, DateFormat.ShortDate)")));
+
+            var hierarchy = @"
+                <TablixMembers>
+                  <TablixMember><Group Name=""Details"" />
+                    <TablixMembers><TablixMember /><TablixMember /><TablixMember /><TablixMember /><TablixMember /></TablixMembers>
+                  </TablixMember>
+                </TablixMembers>";
+
+            var rdl = TablixReport (hierarchy, cells)
+                .Replace ("<DataSets>",
+                    @"<ReportParameters>
+                        <ReportParameter Name=""Clinics""><DataType>String</DataType><MultiValue>true</MultiValue></ReportParameter>
+                        <ReportParameter Name=""Note""><DataType>String</DataType><Nullable>true</Nullable></ReportParameter>
+                      </ReportParameters><DataSets>")
+                .Replace (@"<Field Name=""Amount"">",
+                    @"<Field Name=""When""><DataField>When</DataField><rd:TypeName>System.DateTime</rd:TypeName></Field><Field Name=""Amount"">");
+
+            using var report = await ParseAsync (rdl);
+
+            Assert.That (report.ErrorMaxSeverity, Is.LessThanOrEqualTo (4),
+                "battery failed: " + string.Join (" | ", report.ErrorItems ?? new System.Collections.ArrayList ()));
+        }
         private static async Task<string> RenderHtml (string rdl)
         {
             using var report = await ParseAsync (rdl);
@@ -632,4 +729,8 @@ namespace ReportTests
         }
     }
 }
+
+
+
+
 

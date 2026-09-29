@@ -436,10 +436,21 @@ namespace Majorsilence.Reporting.Rdl
         /// <param name="number">Numeric expression that is the number of interval you want to add. The numeric expression can either be positive, for dates in the future, or negative, for dates in the past.</param>
         /// <param name="date">The date to which interval is added.</param>
         /// <returns></returns>
+                /// <summary>
+        /// VB's interval codes are case-insensitive, and reports write them both ways --
+        /// "yyyy" and "YYYY", "d" and "D". Every code is lower case and none of them collide
+        /// once folded, so folding here is the whole of it. An unknown code still reaches the
+        /// default arm and throws, which is what tells a report author they mistyped one.
+        /// </summary>
+        static private string Interval(object interval)
+        {
+            return Convert.ToString(interval).ToLowerInvariant();
+        }
+
         static public DateTime DateAdd(string interval, double number, DateTime date)
         {
             
-            switch (interval)
+            switch (Interval(interval))
             {
                 case "yyyy":        // year 
                     date = date.AddYears((int) Math.Round(number, 0));
@@ -577,7 +588,7 @@ namespace Majorsilence.Reporting.Rdl
         {
             DateTime d1 = date1 is DateTime dt1 ? dt1 : DateTime.Parse(Convert.ToString(date1));
             DateTime d2 = date2 is DateTime dt2 ? dt2 : DateTime.Parse(Convert.ToString(date2));
-            switch (Convert.ToString(interval))
+            switch (Interval(interval))
             {
                 case "yyyy": return d2.Year - d1.Year;
                 case "q":    return (d2.Year - d1.Year) * 4 + (d2.Month - 1) / 3 - (d1.Month - 1) / 3;
@@ -617,7 +628,7 @@ namespace Majorsilence.Reporting.Rdl
         {
             DateTime d = ToDate(date);
             var startDay = (DayOfWeek)((Convert.ToInt32(firstDayOfWeek) - 1 + 7) % 7);
-            switch (Convert.ToString(interval))
+            switch (Interval(interval))
             {
                 case "yyyy": return d.Year;
                 case "q":    return (d.Month - 1) / 3 + 1;
@@ -1237,6 +1248,133 @@ namespace Majorsilence.Reporting.Rdl
         static public string TrimLeft(object str) => LTrim(str);
 
         static public string TrimRight(object str) => RTrim(str);
+        // ── VB date/format functions Report Builder emits ────────────────────────
+
+        /// <summary>VB FormatDateTime with the DateFormat enum values (0 GeneralDate .. 4 ShortTime).</summary>
+        static public string FormatDateTime(object date)
+        {
+            return FormatDateTime(date, 0);
+        }
+
+        static public string FormatDateTime(object date, object format)
+        {
+            DateTime dt = Convert.ToDateTime(date);
+            switch ((int)Convert.ToDouble(format))
+            {
+                case 1: return dt.ToString("D");
+                case 2: return dt.ToString("d");
+                case 3: return dt.ToString("T");
+                case 4: return dt.ToString("t");
+                default: return dt.ToString("G");
+            }
+        }
+
+        /// <summary>VB FormatCurrency.</summary>
+        static public string FormatCurrency(object value)
+        {
+            return FormatCurrency(value, 2);
+        }
+
+        static public string FormatCurrency(object value, object digits)
+        {
+            return Convert.ToDouble(value).ToString("C" + (int)Convert.ToDouble(digits));
+        }
+
+        /// <summary>Microsoft.VisualBasic.Interaction.IIf, reached via qualified calls.
+        /// Unlike the parser's IIF this evaluates both branches first.</summary>
+        static public object IIF(object condition, object truePart, object falsePart)
+        {
+            return Convert.ToBoolean(condition) ? truePart : falsePart;
+        }
+
+        /// <summary>System.Uri.EscapeDataString mirror (resolved via the fallback).</summary>
+        static public string EscapeDataString(object value)
+        {
+            return Uri.EscapeDataString(Convert.ToString(value) ?? "");
+        }
+
+        /// <summary>System.DateTime.Parse mirror (resolved via the fallback).</summary>
+        static public DateTime Parse(object value)
+        {
+            return Convert.ToDateTime(value);
+        }
+
+        /// <summary>Environment.NewLine written as a method call (resolved via the fallback).</summary>
+        static public string NewLine()
+        {
+            return Environment.NewLine;
+        }
+
+        /// <summary>VB TimeValue: the time-of-day portion of a date or time string.</summary>
+        static public DateTime TimeValue(object value)
+        {
+            DateTime dt = Convert.ToDateTime(value);
+            return new DateTime(1, 1, 1).Add(dt.TimeOfDay);
+        }
+
+        // ── System.Convert mirrors ────────────────────────────────────────────────
+        // Object-tolerant Base64 helpers: the real System.Convert overloads take string /
+        // byte[], which never bind when the parse-time argument type is Object (aggregates,
+        // fields of uninferred type). Resolved via the VBFunctions fallback in the parser.
+
+        static public byte[] FromBase64String(object encoded)
+        {
+            if (encoded == null || encoded is DBNull)
+                return Array.Empty<byte>();
+            return Convert.FromBase64String(Convert.ToString(encoded));
+        }
+
+        static public string ToBase64String(object data)
+        {
+            if (data == null || data is DBNull)
+                return "";
+            if (data is byte[] bytes)
+                return Convert.ToBase64String(bytes);
+            return Convert.ToBase64String(Encoding.UTF8.GetBytes(Convert.ToString(data)));
+        }
+
+        // ── Join ──────────────────────────────────────────────────────────────────
+        // VB's Join(array, delimiter). Report Builder emits it constantly for
+        // multi-value parameter display (=Join(Parameters!X.Value, ", ")). A
+        // multi-value parameter reference is TypeCode.Object evaluating to an
+        // ArrayList, hence the object-typed first argument; a scalar argument is
+        // treated as a one-element list, matching VB's tolerance.
+
+        static public string Join(object values)
+        {
+            return Join(values, " ");
+        }
+
+        static public string Join(object values, string delimiter)
+        {
+            if (values == null || values is DBNull)
+                return "";
+
+            if (values is string s)     // string is IEnumerable; VB treats it as a scalar
+                return s;
+
+            if (values is IEnumerable list)
+            {
+                var sb = new StringBuilder();
+                bool first = true;
+                foreach (object item in list)
+                {
+                    if (!first)
+                        sb.Append(delimiter);
+                    first = false;
+                    if (item != null && !(item is DBNull))
+                        sb.Append(Convert.ToString(item));
+                }
+                return sb.ToString();
+            }
+
+            return Convert.ToString(values);
+        }
+
+        static public string Join(object values, object delimiter)
+        {
+            return Join(values, delimiter == null || delimiter is DBNull ? " " : Convert.ToString(delimiter));
+        }
 
         static public string Mid(object str, object start)
         {

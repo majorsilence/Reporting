@@ -59,10 +59,13 @@ namespace Majorsilence.Reporting.Rdl
         }
 		public Task<string> EvaluateString(Report rpt, Row row)
 		{
-			if (rpt == null || rpt.ClientLanguage == null)
-				return Task.FromResult(CultureInfo.CurrentCulture.ThreeLetterISOLanguageName);
+			// Read the raw host-supplied language, never Report.ClientLanguage: that getter
+			// falls back to evaluating the report's Language expression, and when Language is
+			// "=User!Language" (a stock Report Builder default) the two recurse forever.
+			if (rpt == null || rpt.ClientLanguageRaw == null)
+				return Task.FromResult(CultureInfo.CurrentCulture.Name);
 			else
-				return Task.FromResult(rpt.ClientLanguage);
+				return Task.FromResult(rpt.ClientLanguageRaw);
 		}
 
 		public Task<DateTime> EvaluateDateTime(Report rpt, Row row)

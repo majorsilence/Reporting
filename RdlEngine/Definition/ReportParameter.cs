@@ -226,31 +226,39 @@ namespace Majorsilence.Reporting.Rdl
 
             if (v is Guid)
             {
-                v = ((Guid)v).ToString("B"); 
+                v = ((Guid)v).ToString("B");
             }
-			// v isn't guaranteed to already be a string here -- a caller pushing typed
-			// data (e.g. a numeric field bound to a string-typed report parameter) hits
-			// this check before the Convert.ChangeType below gets a chance to coerce it,
-			// so the direct (string) cast throws InvalidCastException instead of the
-			// intended blank-string validation. Coerce the same way Convert.ChangeType
-			// would, purely for this emptiness check.
-			if (!AllowBlank && _dt == TypeCode.String && (v as string ?? v?.ToString() ?? "") == "")
-				throw new ArgumentException(string.Format("Empty string isn't allowed for {0}.", Name.Nm));
-
-			// An empty string reaching a *non*-String-typed parameter (Boolean, numeric,
-			// DateTime, ...) always failed the Convert.ChangeType coercion below,
-			// regardless of AllowBlank -- that leniency was only ever consulted for the
-			// String-typed case just above. A converted report's parameter can just as
-			// easily be fed a degraded/unresolvable field value (itself a deliberate ""
-			// fallback elsewhere in this pipeline, not a real value) into a Boolean or
-			// numeric-typed subreport parameter as into a String one, and AllowBlank's
-			// own stated intent already covers this case too: "a converted report has no
-			// way to prompt, so every parameter has to be renderable without a value" --
-			// extend the same leniency to every type, not just String.
-			if (AllowBlank && _dt != TypeCode.String && (v as string) == "")
+			// One path for a blank value, whatever the declared type. A blank arrives from a
+			// report whose <DefaultValue><Values><Value/></Values></DefaultValue> is empty,
+			// or from a degraded field value elsewhere in this pipeline; in neither case did
+			// anyone choose the empty string, and in neither case can a converted report
+			// prompt for a better one. Treating it as "no value" keeps the render alive,
+			// where coercing it to a date or number throws and refusing it kills the report.
+			//
+			// v is not guaranteed to be a string: a caller pushing typed data (a numeric
+			// field bound to a string-typed parameter) reaches here before Convert.ChangeType
+			// below can coerce it, so a direct (string) cast throws InvalidCastException
+			// instead of performing the blank check. Coerce the way ChangeType would, purely
+			// to ask whether it is empty.
+			if ((v as string ?? v?.ToString() ?? "") == "")
 			{
-				rpt.Cache.AddReplace(this, "runtimevalue", null);
-				return;
+				if (!AllowBlank && _dt == TypeCode.String)
+				{
+					// AllowBlank=false says the author did not want an empty string. Report
+					// that, but do not fail the render over a value the user never chose.
+					string blankErr = string.Format(
+						"Empty string isn't allowed for {0}; treated as no value.", Name.Nm);
+					if (rpt == null)
+						OwnerReport.rl.LogError(4, blankErr);
+					else
+						rpt.rl.LogError(4, blankErr);
+				}
+
+				if (!AllowBlank || _dt != TypeCode.String)
+				{
+					rpt.Cache.AddReplace(this, "runtimevalue", null);
+					return;
+				}
 			}
 			try 
 			{
@@ -283,14 +291,20 @@ namespace Majorsilence.Reporting.Rdl
             foreach (object v in vs)
             {
                 object rtv;
-                if (!AllowBlank && _dt == TypeCode.String && v.ToString() == "")
+                // Empty entries mean "no value" (blank defaults), not values to coerce or
+                // reject: skip them rather than failing the whole render.
+                if (v is string emptyEntry && emptyEntry.Length == 0
+                    && (_dt != TypeCode.String || !AllowBlank))
                 {
-                    string err = string.Format("Empty string isn't allowed for {0}.", Name.Nm);
-                    if (rpt == null)
-                        OwnerReport.rl.LogError(4, err);
-                    else
-                        rpt.rl.LogError(4, err);
-                    throw new ArgumentException(err);
+                    if (_dt == TypeCode.String)
+                    {
+                        string err = string.Format("Empty string isn't allowed for {0}; entry skipped.", Name.Nm);
+                        if (rpt == null)
+                            OwnerReport.rl.LogError(4, err);
+                        else
+                            rpt.rl.LogError(4, err);
+                    }
+                    continue;
                 }
                 try
                 {
