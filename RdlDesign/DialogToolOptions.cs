@@ -160,6 +160,8 @@ namespace Majorsilence.Reporting.RdlDesign
                             _DesktopUnits = xNodeLoop;
                             if (xNodeLoop.InnerText.ToLower() == "inches")
                                 this.radioButtonInches.Checked = true;
+                            else if (xNodeLoop.InnerText.ToLower() == "mm")
+                                this.radioButtonMm.Checked = true;
                             else
                                 this.radioButtonCm.Checked = true;
                             break;
@@ -234,6 +236,8 @@ namespace Majorsilence.Reporting.RdlDesign
                     _RdlDesigner.HelpUrl = this.tbHelpUrl.Text;
                     if (this.radioButtonInches.Checked == true)
                         RdlDesigner.MeasureUnits = "inches";
+                    else if (this.radioButtonMm.Checked == true)
+                        RdlDesigner.MeasureUnits = "mm";
                     else
                         RdlDesigner.MeasureUnits = "cm";
                     HandleShows();
@@ -322,7 +326,7 @@ namespace Majorsilence.Reporting.RdlDesign
                 _DesktopConfig.AppendChild(_DesktopUnits);
             }
 
-            _DesktopUnits.InnerText = this.radioButtonInches.Checked == true ? "inches" : "cm";
+            _DesktopUnits.InnerText = this.radioButtonInches.Checked == true ? "inches" : (this.radioButtonMm.Checked == true ? "mm" : "cm");
 
             Directory.CreateDirectory(Path.GetDirectoryName(optFileName)); //Create directory if not exist
             _DesktopDocument.Save(optFileName);
@@ -650,6 +654,11 @@ namespace Majorsilence.Reporting.RdlDesign
         }
 
         private void RadioButtonCm_CheckedChanged(object sender, EventArgs e)
+        {
+            bDesktop = true;
+        }
+
+        private void RadioButtonMm_CheckedChanged(object sender, EventArgs e)
         {
             bDesktop = true;
         }

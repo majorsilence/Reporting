@@ -198,6 +198,36 @@
   <data name="&gt;&gt;radioButtonCm.ZOrder" xml:space="preserve">
     <value>0</value>
   </data>
+  <data name="radioButtonMm.AutoSize" type="System.Boolean, mscorlib">
+    <value>True</value>
+  </data>
+  <data name="radioButtonMm.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+    <value>NoControl</value>
+  </data>
+  <data name="radioButtonMm.Location" type="System.Drawing.Point, System.Drawing">
+    <value>18, 78</value>
+  </data>
+  <data name="radioButtonMm.Size" type="System.Drawing.Size, System.Drawing">
+    <value>43, 17</value>
+  </data>
+  <data name="radioButtonMm.TabIndex" type="System.Int32, mscorlib">
+    <value>2</value>
+  </data>
+  <data name="radioButtonMm.Text" xml:space="preserve">
+    <value>mm</value>
+  </data>
+  <data name="&gt;&gt;radioButtonMm.Name" xml:space="preserve">
+    <value>radioButtonMm</value>
+  </data>
+  <data name="&gt;&gt;radioButtonMm.Type" xml:space="preserve">
+    <value>System.Windows.Forms.RadioButton, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;radioButtonMm.Parent" xml:space="preserve">
+    <value>groupBox1</value>
+  </data>
+  <data name="&gt;&gt;radioButtonMm.ZOrder" xml:space="preserve">
+    <value>1</value>
+  </data>
   <data name="radioButtonInches.AutoSize" type="System.Boolean, mscorlib">
     <value>True</value>
   </data>
@@ -226,13 +256,13 @@
     <value>groupBox1</value>
   </data>
   <data name="&gt;&gt;radioButtonInches.ZOrder" xml:space="preserve">
-    <value>1</value>
+    <value>2</value>
   </data>
   <data name="groupBox1.Location" type="System.Drawing.Point, System.Drawing">
     <value>291, 84</value>
   </data>
   <data name="groupBox1.Size" type="System.Drawing.Size, System.Drawing">
-    <value>158, 87</value>
+    <value>158, 107</value>
   </data>
   <data name="groupBox1.TabIndex" type="System.Int32, mscorlib">
     <value>14</value>
