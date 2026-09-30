@@ -1,0 +1,264 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Report xmlns="http://schemas.microsoft.com/sqlserver/reporting/2005/01/reportdefinition" xmlns:rd="http://schemas.microsoft.com/SQLServer/reporting/reportdesigner">
+  <Description>Example report demonstrating HTML textbox functionality in Majorsilence Reporting</Description>
+  <Author>Majorsilence Reporting</Author>
+  <PageWidth>8.5in</PageWidth>
+  <PageHeight>11in</PageHeight>
+  <LeftMargin>0.5in</LeftMargin>
+  <RightMargin>0.5in</RightMargin>
+  <TopMargin>0.5in</TopMargin>
+  <BottomMargin>0.5in</BottomMargin>
+  <DataSources>
+    <DataSource Name="DummyDataSource">
+      <ConnectionProperties>
+        <DataProvider>SQL</DataProvider>
+        <ConnectString></ConnectString>
+      </ConnectionProperties>
+    </DataSource>
+  </DataSources>
+  <DataSets>
+    <DataSet Name="SampleData">
+      <Query>
+        <DataSourceName>DummyDataSource</DataSourceName>
+        <CommandText>SELECT 'John Doe' as CustomerName, 'john.doe@example.com' as Email, 150.50 as Total, 5 as OrderCount</CommandText>
+      </Query>
+      <Fields>
+        <Field Name="CustomerName">
+          <DataField>CustomerName</DataField>
+        </Field>
+        <Field Name="Email">
+          <DataField>Email</DataField>
+        </Field>
+        <Field Name="Total">
+          <DataField>Total</DataField>
+        </Field>
+        <Field Name="OrderCount">
+          <DataField>OrderCount</DataField>
+        </Field>
+      </Fields>
+    </DataSet>
+  </DataSets>
+  <Body>
+    <ReportItems>
+      <!-- Example 1: Simple HTML with formatting -->
+      <Textbox Name="Example1Title">
+        <Top>0.25in</Top>
+        <Left>0.25in</Left>
+        <Width>7in</Width>
+        <Height>0.5in</Height>
+        <Value>Example 1: Simple HTML Formatting</Value>
+        <Style>
+          <FontSize>14pt</FontSize>
+          <FontWeight>Bold</FontWeight>
+          <Color>DarkBlue</Color>
+        </Style>
+      </Textbox>
+      
+      <Textbox Name="Example1Content">
+        <Top>0.85in</Top>
+        <Left>0.25in</Left>
+        <Width>7in</Width>
+        <Height>1.5in</Height>
+        <CanGrow>true</CanGrow>
+        <Value>="&lt;p&gt;This is a paragraph with &lt;b&gt;bold text&lt;/b&gt;, &lt;i&gt;italic text&lt;/i&gt;, and &lt;span style='color: red;'&gt;colored text&lt;/span&gt;.&lt;/p&gt;" &amp;
+               "&lt;p&gt;You can use &lt;big&gt;bigger&lt;/big&gt; and &lt;small&gt;smaller&lt;/small&gt; text sizes.&lt;/p&gt;" &amp;
+               "&lt;p&gt;Monospace text: &lt;code&gt;System.out.println('Hello');&lt;/code&gt;&lt;/p&gt;"</Value>
+        <Style>
+          <Format>html</Format>
+          <BorderStyle>
+            <Default>Solid</Default>
+          </BorderStyle>
+          <BorderColor>
+            <Default>LightGray</Default>
+          </BorderColor>
+          <BorderWidth>
+            <Default>1pt</Default>
+          </BorderWidth>
+          <PaddingLeft>5pt</PaddingLeft>
+          <PaddingRight>5pt</PaddingRight>
+          <PaddingTop>5pt</PaddingTop>
+          <PaddingBottom>5pt</PaddingBottom>
+        </Style>
+      </Textbox>
+
+      <!-- Example 2: Lists -->
+      <Textbox Name="Example2Title">
+        <Top>2.5in</Top>
+        <Left>0.25in</Left>
+        <Width>7in</Width>
+        <Height>0.5in</Height>
+        <Value>Example 2: Lists</Value>
+        <Style>
+          <FontSize>14pt</FontSize>
+          <FontWeight>Bold</FontWeight>
+          <Color>DarkBlue</Color>
+        </Style>
+      </Textbox>
+      
+      <Textbox Name="Example2Content">
+        <Top>3.1in</Top>
+        <Left>0.25in</Left>
+        <Width>7in</Width>
+        <Height>2in</Height>
+        <CanGrow>true</CanGrow>
+        <Value>="&lt;p&gt;&lt;b&gt;Unordered List:&lt;/b&gt;&lt;/p&gt;" &amp;
+               "&lt;ul&gt;" &amp;
+               "&lt;li&gt;First item&lt;/li&gt;" &amp;
+               "&lt;li&gt;Second item&lt;/li&gt;" &amp;
+               "&lt;li&gt;Third item&lt;/li&gt;" &amp;
+               "&lt;/ul&gt;" &amp;
+               "&lt;p&gt;&lt;b&gt;Ordered List:&lt;/b&gt;&lt;/p&gt;" &amp;
+               "&lt;ol&gt;" &amp;
+               "&lt;li&gt;First step&lt;/li&gt;" &amp;
+               "&lt;li&gt;Second step&lt;/li&gt;" &amp;
+               "&lt;li&gt;Third step&lt;/li&gt;" &amp;
+               "&lt;/ol&gt;"</Value>
+        <Style>
+          <Format>html</Format>
+          <BorderStyle>
+            <Default>Solid</Default>
+          </BorderStyle>
+          <BorderColor>
+            <Default>LightGray</Default>
+          </BorderColor>
+          <BorderWidth>
+            <Default>1pt</Default>
+          </BorderWidth>
+          <PaddingLeft>5pt</PaddingLeft>
+          <PaddingRight>5pt</PaddingRight>
+          <PaddingTop>5pt</PaddingTop>
+          <PaddingBottom>5pt</PaddingBottom>
+        </Style>
+      </Textbox>
+
+      <!-- Example 3: Links and horizontal rules -->
+      <Textbox Name="Example3Title">
+        <Top>5.25in</Top>
+        <Left>0.25in</Left>
+        <Width>7in</Width>
+        <Height>0.5in</Height>
+        <Value>Example 3: Links and Horizontal Rules</Value>
+        <Style>
+          <FontSize>14pt</FontSize>
+          <FontWeight>Bold</FontWeight>
+          <Color>DarkBlue</Color>
+        </Style>
+      </Textbox>
+      
+      <Textbox Name="Example3Content">
+        <Top>5.85in</Top>
+        <Left>0.25in</Left>
+        <Width>7in</Width>
+        <Height>1.5in</Height>
+        <CanGrow>true</CanGrow>
+        <Value>="&lt;p&gt;Visit our website: &lt;a href='https://github.com/majorsilence/My-FyiReporting'&gt;Majorsilence Reporting&lt;/a&gt;&lt;/p&gt;" &amp;
+               "&lt;hr/&gt;" &amp;
+               "&lt;p&gt;For support, email: &lt;a href='mailto:support@example.com'&gt;support@example.com&lt;/a&gt;&lt;/p&gt;" &amp;
+               "&lt;hr/&gt;" &amp;
+               "&lt;p&gt;&lt;span style='font-size: small;'&gt;Horizontal rules help separate content.&lt;/span&gt;&lt;/p&gt;"</Value>
+        <Style>
+          <Format>html</Format>
+          <BorderStyle>
+            <Default>Solid</Default>
+          </BorderStyle>
+          <BorderColor>
+            <Default>LightGray</Default>
+          </BorderColor>
+          <BorderWidth>
+            <Default>1pt</Default>
+          </BorderWidth>
+          <PaddingLeft>5pt</PaddingLeft>
+          <PaddingRight>5pt</PaddingRight>
+          <PaddingTop>5pt</PaddingTop>
+          <PaddingBottom>5pt</PaddingBottom>
+        </Style>
+      </Textbox>
+
+      <!-- Example 4: Mixed styling -->
+      <Textbox Name="Example4Title">
+        <Top>7.5in</Top>
+        <Left>0.25in</Left>
+        <Width>7in</Width>
+        <Height>0.5in</Height>
+        <Value>Example 4: Complex Styling</Value>
+        <Style>
+          <FontSize>14pt</FontSize>
+          <FontWeight>Bold</FontWeight>
+          <Color>DarkBlue</Color>
+        </Style>
+      </Textbox>
+      
+      <Textbox Name="Example4Content">
+        <Top>8.1in</Top>
+        <Left>0.25in</Left>
+        <Width>7in</Width>
+        <Height>2in</Height>
+        <CanGrow>true</CanGrow>
+        <Value>="&lt;div style='font-family: Arial;'&gt;" &amp;
+               "&lt;p style='background-color: lightyellow;'&gt;&lt;b&gt;Important Notice:&lt;/b&gt;&lt;/p&gt;" &amp;
+               "&lt;p&gt;This text uses &lt;span style='color: #FF6600; font-weight: bold;'&gt;custom colors&lt;/span&gt; " &amp;
+               "and &lt;span style='background-color: lightblue;'&gt;background colors&lt;/span&gt;.&lt;/p&gt;" &amp;
+               "&lt;p&gt;&lt;font face='Courier New' size='3'&gt;You can also use the font tag&lt;/font&gt; " &amp;
+               "for &lt;font color='green' size='4'&gt;different effects&lt;/font&gt;.&lt;/p&gt;" &amp;
+               "&lt;/div&gt;"</Value>
+        <Style>
+          <Format>html</Format>
+          <BorderStyle>
+            <Default>Solid</Default>
+          </BorderStyle>
+          <BorderColor>
+            <Default>LightGray</Default>
+          </BorderColor>
+          <BorderWidth>
+            <Default>1pt</Default>
+          </BorderWidth>
+          <PaddingLeft>5pt</PaddingLeft>
+          <PaddingRight>5pt</PaddingRight>
+          <PaddingTop>5pt</PaddingTop>
+          <PaddingBottom>5pt</PaddingBottom>
+        </Style>
+      </Textbox>
+
+    </ReportItems>
+    <Height>10.5in</Height>
+  </Body>
+  <PageHeader>
+    <Height>0.75in</Height>
+    <PrintOnFirstPage>true</PrintOnFirstPage>
+    <PrintOnLastPage>true</PrintOnLastPage>
+    <ReportItems>
+      <Textbox Name="HeaderTitle">
+        <Top>0.1in</Top>
+        <Left>0.25in</Left>
+        <Width>7in</Width>
+        <Height>0.5in</Height>
+        <Value>HTML Textbox Examples - Majorsilence Reporting</Value>
+        <Style>
+          <FontSize>18pt</FontSize>
+          <FontWeight>Bold</FontWeight>
+          <Color>Navy</Color>
+          <TextAlign>Center</TextAlign>
+        </Style>
+      </Textbox>
+    </ReportItems>
+  </PageHeader>
+  <PageFooter>
+    <Height>0.5in</Height>
+    <PrintOnFirstPage>true</PrintOnFirstPage>
+    <PrintOnLastPage>true</PrintOnLastPage>
+    <ReportItems>
+      <Textbox Name="FooterPageNumber">
+        <Top>0.1in</Top>
+        <Left>0.25in</Left>
+        <Width>7in</Width>
+        <Height>0.25in</Height>
+        <Value>="Page " &amp; Globals!PageNumber &amp; " of " &amp; Globals!TotalPages</Value>
+        <Style>
+          <FontSize>10pt</FontSize>
+          <TextAlign>Center</TextAlign>
+          <Color>Gray</Color>
+        </Style>
+      </Textbox>
+    </ReportItems>
+  </PageFooter>
+</Report>
