@@ -29,16 +29,16 @@
         private void InitializeComponent()
         {
             this.rdlViewer1 = new Majorsilence.Reporting.RdlViewer.RdlViewer();
-            this.ButtonReloadReport = new System.Windows.Forms.Button();
-            this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
+            this.ButtonReloadReport = new Majorsilence.Forms.Button();
+            this.openFileDialog1 = new Majorsilence.Forms.OpenFileDialog();
             this.SuspendLayout();
             // 
             // rdlViewer1
             // 
-            this.rdlViewer1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.rdlViewer1.Cursor = System.Windows.Forms.Cursors.Default;
+            this.rdlViewer1.Anchor = ((Majorsilence.Forms.AnchorStyles)((((Majorsilence.Forms.AnchorStyles.Top | Majorsilence.Forms.AnchorStyles.Bottom)
+            | Majorsilence.Forms.AnchorStyles.Left)
+            | Majorsilence.Forms.AnchorStyles.Right)));
+            this.rdlViewer1.Cursor = Majorsilence.Forms.Cursors.Default;
             this.rdlViewer1.Folder = null;
             this.rdlViewer1.HighlightAll = false;
             this.rdlViewer1.HighlightAllColor = System.Drawing.Color.Fuchsia;
@@ -80,7 +80,7 @@
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.AutoScaleMode = (Majorsilence.Forms.AutoScaleMode)Majorsilence.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(672, 412);
             this.Controls.Add(this.ButtonReloadReport);
             this.Controls.Add(this.rdlViewer1);
@@ -93,8 +93,8 @@
         #endregion
 
         private Majorsilence.Reporting.RdlViewer.RdlViewer rdlViewer1;
-        internal System.Windows.Forms.Button ButtonReloadReport;
-        private System.Windows.Forms.OpenFileDialog openFileDialog1;
+        internal Majorsilence.Forms.Button ButtonReloadReport;
+        private Majorsilence.Forms.OpenFileDialog openFileDialog1;
     }
 }
 

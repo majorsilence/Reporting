@@ -3,9 +3,8 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Drawing;
 using System.Data;
-using System.Windows.Forms;
+using Majorsilence.Forms;
 using System.Xml;
 using System.Text;
 using System.IO;
@@ -17,7 +16,7 @@ namespace Majorsilence.Reporting.RdlDesign
 	/// <summary>
 	/// CustomReportItemCtl provides property values for a CustomReportItem
 	/// </summary>
-	internal class CustomReportItemCtl : System.Windows.Forms.UserControl, IProperty
+	internal class CustomReportItemCtl : Majorsilence.Forms.UserControl, IProperty
 	{
         private List<XmlNode> _ReportItems;
         private DesignXmlDraw _Draw;
@@ -85,10 +84,10 @@ namespace Majorsilence.Reporting.RdlDesign
 		/// </summary>
 		private void InitializeComponent()
 		{
-			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(CustomReportItemCtl));
+			Majorsilence.Forms.ComponentResourceManager resources = new Majorsilence.Forms.ComponentResourceManager(typeof(CustomReportItemCtl));
             this.DoubleBuffered = true;
-			this.pgProps = new System.Windows.Forms.PropertyGrid();
-			this.bExpr = new System.Windows.Forms.Button();
+			this.pgProps = new Majorsilence.Forms.PropertyGrid();
+			this.bExpr = new Majorsilence.Forms.Button();
 			this.SuspendLayout();
 			// 
 			// pgProps
@@ -101,7 +100,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			resources.ApplyResources(this.bExpr, "bExpr");
 			this.bExpr.Name = "bExpr";
 			this.bExpr.Tag = "sd";
-			this.bExpr.Click += new System.EventHandler(this.bExpr_Click);
+			this.bExpr.Click += this.bExpr_Click;
 			// 
 			// CustomReportItemCtl
 			// 

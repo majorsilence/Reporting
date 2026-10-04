@@ -1,0 +1,18 @@
+{
+  "ReportTitle": "Q2 2026 Sales Dashboard",
+  "GeneratedDate": "2026-07-01",
+  "MonthlySales": [
+    { "Month": "Apr", "MonthOrder": 1, "Region": "East", "Revenue": 42500 },
+    { "Month": "Apr", "MonthOrder": 1, "Region": "West", "Revenue": 38200 },
+    { "Month": "May", "MonthOrder": 2, "Region": "East", "Revenue": 47800 },
+    { "Month": "May", "MonthOrder": 2, "Region": "West", "Revenue": 41100 },
+    { "Month": "Jun", "MonthOrder": 3, "Region": "East", "Revenue": 51200 },
+    { "Month": "Jun", "MonthOrder": 3, "Region": "West", "Revenue": 46700 }
+  ],
+  "ProductLines": [
+    { "ProductLine": "Servo Motors",      "Revenue": 118400, "UnitsSold": 1420 },
+    { "ProductLine": "Bearings",          "Revenue": 61200,  "UnitsSold": 5340 },
+    { "ProductLine": "Custom Fabrication", "Revenue": 87900, "UnitsSold": 310 },
+    { "ProductLine": "Calibration Services", "Revenue": 60000, "UnitsSold": 240 }
+  ]
+}

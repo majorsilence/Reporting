@@ -1,10 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-#if DRAWINGCOMPAT
 using Draw2 = Majorsilence.Forms.Drawing;
-#else
-using Draw2 = System.Drawing;
-#endif
 using Majorsilence.Reporting.Rdl;
 using System.Text;
 using System.Xml;

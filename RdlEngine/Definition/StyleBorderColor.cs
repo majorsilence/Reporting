@@ -5,11 +5,7 @@ using System.Xml;
 using System.Text;
 using System.Threading.Tasks;
 
-#if DRAWINGCOMPAT
 using Draw2 = Majorsilence.Forms.Drawing;
-#else
-using Draw2 = System.Drawing;
-#endif
 using System.Globalization;
 
 namespace Majorsilence.Reporting.Rdl

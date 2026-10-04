@@ -4,11 +4,12 @@
     <TargetFrameworks>net8.0;net10.0</TargetFrameworks>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <Configurations>Debug;Release;Debug-DrawingCompat;Release-DrawingCompat</Configurations>
+    <Configurations>Debug;Release</Configurations>
     <Platforms>AnyCPU</Platforms>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <PackageId>Majorsilence.Reporting.WebDesigner</PackageId>
-    <Description>Web-based RDL report designer Web Component with ASP.NET Core preview/save/load endpoints.</Description>
+    <Description>Web-based RDL report designer for Majorsilence Reporting — embeddable Web Component with Blazor, React, and Angular wrappers plus ASP.NET Core preview/save/load endpoints. Design reports in the browser, no Windows required. Targets .NET 8 and .NET 10.</Description>
+    <PackageTags>rdl;rdlc;ssrs;reporting;report-designer;blazor;webcomponents;cross-platform;dotnet</PackageTags>
     <AddRazorSupportForMvc>true</AddRazorSupportForMvc>
     <IsPackable>true</IsPackable>
   </PropertyGroup>

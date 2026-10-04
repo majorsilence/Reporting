@@ -1,3 +1,4 @@
+using Majorsilence.Forms;
 using Majorsilence.Reporting.RdlDesign;
 using System.Globalization;
 

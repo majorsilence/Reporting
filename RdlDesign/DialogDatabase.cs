@@ -3,7 +3,7 @@ using System.Drawing;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Windows.Forms;
+using Majorsilence.Forms;
 using System.Text;
 using System.Data;
 using System.Data.OleDb;
@@ -964,7 +964,7 @@ namespace Majorsilence.Reporting.RdlDesign
             return _StashConnection;
         }
 
-        private void tvTablesColumns_BeforeExpand(object sender, System.Windows.Forms.TreeViewCancelEventArgs e)
+        private void tvTablesColumns_BeforeExpand(object sender, Majorsilence.Forms.TreeViewCancelEventArgs e)
         {
             tvTablesColumns_ExpandTable(e.Node);
         }
@@ -972,6 +972,9 @@ namespace Majorsilence.Reporting.RdlDesign
         private void tvTablesColumns_ExpandTable(TreeNode tNode)
         {
             if (tNode.Parent == null)	// Check for Tables or Views
+                return;
+
+            if (tNode.FirstNode == null)	// A leaf (e.g. a column node) -- nothing to expand
                 return;
 
             if (tNode.FirstNode.Text != "")	// Have we already filled it out?
@@ -998,21 +1001,21 @@ namespace Majorsilence.Reporting.RdlDesign
             tvTablesColumns.EndUpdate();
         }
 
-        private void tbSQL_DragEnter(object sender, System.Windows.Forms.DragEventArgs e)
+        private void tbSQL_DragEnter(object sender, Majorsilence.Forms.DragEventArgs e)
         {
             if (e.Data.GetDataPresent(DataFormats.Text))	// only accept text
                 e.Effect = DragDropEffects.Copy;
         }
 
-        private void tbSQL_DragDrop(object sender, System.Windows.Forms.DragEventArgs e)
+        private void tbSQL_DragDrop(object sender, Majorsilence.Forms.DragEventArgs e)
         {
             if (e.Data.GetDataPresent(DataFormats.Text))
                 tbSQL.SelectedText = (string)e.Data.GetData(DataFormats.Text);
         }
 
-        private void tvTablesColumns_MouseDown(object sender, System.Windows.Forms.MouseEventArgs e)
+        private void tvTablesColumns_MouseDown(object sender, Majorsilence.Forms.MouseEventArgs e)
         {
-            TreeNode node = tvTablesColumns.GetNodeAt(e.X, e.Y);
+            TreeNode node = (TreeNode)tvTablesColumns.GetNodeAt(e.X, e.Y);
             if (node == null || node.Parent == null)
                 return;
 
@@ -1024,11 +1027,11 @@ namespace Majorsilence.Reporting.RdlDesign
                     tvTablesColumns_ExpandTable(node);	// make sure we've obtained the columns
 
                     dragText = "SELECT ";
-                    TreeNode next = node.FirstNode;
+                    TreeNode next = (TreeNode)node.FirstNode;
                     while (true)
                     {
                         dragText += DesignerUtility.NormalizeSqlName(next.Text);
-                        next = next.NextNode;
+                        next = (TreeNode)next.NextNode;
                         if (next == null)
                             break;
                         dragText += ", ";
@@ -1047,7 +1050,7 @@ namespace Majorsilence.Reporting.RdlDesign
         }
 
 
-        private void DialogDatabase_Closed(object sender, System.Windows.Forms.FormClosedEventArgs e)
+        private void DialogDatabase_Closed(object sender, Majorsilence.Forms.FormClosedEventArgs e)
         {
             if (_TempFileName != null)
                 File.Delete(_TempFileName);
@@ -1287,7 +1290,7 @@ namespace Majorsilence.Reporting.RdlDesign
                 tvTablesColumns.SelectedNode.Parent == null)
                 return;		// this is the Tables/Views node
 
-            TreeNode node = tvTablesColumns.SelectedNode;
+            TreeNode node = (TreeNode)tvTablesColumns.SelectedNode;
             string t = node.Text;
             if (tbSQL.Text == "")
             {
@@ -1296,11 +1299,11 @@ namespace Majorsilence.Reporting.RdlDesign
                     tvTablesColumns_ExpandTable(node);	// make sure we've obtained the columns
 
                     StringBuilder sb = new StringBuilder("SELECT ");
-                    TreeNode next = node.FirstNode;
+                    TreeNode next = (TreeNode)node.FirstNode;
                     while (true)
                     {
                         sb.Append(DesignerUtility.NormalizeSqlName(next.Text));
-                        next = next.NextNode;
+                        next = (TreeNode)next.NextNode;
                         if (next == null)
                             break;
                         sb.Append(", ");
@@ -1464,7 +1467,7 @@ namespace Majorsilence.Reporting.RdlDesign
             }
         }
 
-        private void buttonSqliteSelectDatabase_Click(object sender, EventArgs e)
+        private async void buttonSqliteSelectDatabase_Click(object sender, EventArgs e)
         {
             OpenFileDialog ofd = new OpenFileDialog();
             try
@@ -1474,7 +1477,7 @@ namespace Majorsilence.Reporting.RdlDesign
                 
                 try
                 {
-                    if (ofd.ShowDialog(this) != DialogResult.OK)
+                    if (await ofd.ShowDialogAsync(this) != DialogResult.OK)
                     {
                         return;
                     }
@@ -1515,11 +1518,7 @@ namespace Majorsilence.Reporting.RdlDesign
         {
             try
             {
-#if NET6_0_OR_GREATER
                 Microsoft.Data.Sql.SqlDataSourceEnumerator instance = Microsoft.Data.Sql.SqlDataSourceEnumerator.Instance;
-#else
-                System.Data.Sql.SqlDataSourceEnumerator instance = System.Data.Sql.SqlDataSourceEnumerator.Instance;
-#endif
                 DataTable dt;
                 dt = instance.GetDataSources();
 

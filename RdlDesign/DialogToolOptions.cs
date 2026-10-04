@@ -6,7 +6,7 @@ using System.IO;
 using System.Reflection;
 using System.Resources;
 using System.Threading;
-using System.Windows.Forms;
+using Majorsilence.Forms;
 using System.Xml;
 using Majorsilence.Reporting.RdlDesign.Resources;
 
@@ -476,7 +476,7 @@ namespace Majorsilence.Reporting.RdlDesign
             bDesktop = true;
         }
 
-        private void bBrowse_Click(object sender, System.EventArgs e)
+        private async void bBrowse_Click(object sender, System.EventArgs e)
         {
             FolderBrowserDialog fbd = new FolderBrowserDialog();
             // Set the help text description for the FolderBrowserDialog.
@@ -491,7 +491,7 @@ namespace Majorsilence.Reporting.RdlDesign
 
             try
             {
-                if (fbd.ShowDialog(this) == DialogResult.Cancel)
+                if (await fbd.ShowDialogAsync(this) == DialogResult.Cancel)
                     return;
 
                 tbDirectory.Text = fbd.SelectedPath;
@@ -553,7 +553,7 @@ namespace Majorsilence.Reporting.RdlDesign
             this.bToolbar = true;   // tabbed interface is part of the toolbar
         }
 
-        private void bAddMap_Click(object sender, EventArgs e)
+        private async void bAddMap_Click(object sender, EventArgs e)
         {
             OpenFileDialog ofd = new OpenFileDialog();
             ofd.InitialDirectory = AppDomain.CurrentDomain.BaseDirectory;
@@ -564,7 +564,7 @@ namespace Majorsilence.Reporting.RdlDesign
             ofd.Multiselect = true;
             try
             {
-                if (ofd.ShowDialog(this) == DialogResult.OK)
+                if (await ofd.ShowDialogAsync(this) == DialogResult.OK)
                 {
                     foreach (string file in ofd.FileNames)
                     {

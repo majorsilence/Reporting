@@ -3,9 +3,8 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Drawing;
 using System.Data;
-using System.Windows.Forms;
+using Majorsilence.Forms;
 using System.Xml;
 using Majorsilence.Reporting.RdlDesign.Resources;
 
@@ -14,36 +13,36 @@ namespace Majorsilence.Reporting.RdlDesign
 	/// <summary>
 	/// Summary description for ReportCtl.
 	/// </summary>
-	internal class PositionCtl : System.Windows.Forms.UserControl, IProperty
+	internal class PositionCtl : Majorsilence.Forms.UserControl, IProperty
 	{
         private List<XmlNode> _ReportItems;
 		private DesignXmlDraw _Draw;
 		bool fName, fLeft, fTop, fWidth, fHeight, fZIndex, fColSpan;
 		bool fCanGrow, fCanShrink, fHideDuplicates, fToggleImage, fDataElementStyle;
-		private System.Windows.Forms.Label label5;
-		private System.Windows.Forms.Label label6;
-		private System.Windows.Forms.Label label7;
-		private System.Windows.Forms.Label label8;
-		private System.Windows.Forms.Label label9;
-		private System.Windows.Forms.TextBox tbWidth;
-		private System.Windows.Forms.TextBox tbTop;
-		private System.Windows.Forms.TextBox tbLeft;
-		private System.Windows.Forms.NumericUpDown tbZIndex;
-		private System.Windows.Forms.Label label1;
-		private System.Windows.Forms.TextBox tbName;
-		private System.Windows.Forms.TextBox tbHeight;
-		private System.Windows.Forms.GroupBox gbPosition;
-		private System.Windows.Forms.Label lblColSpan;
-		private System.Windows.Forms.NumericUpDown tbColSpan;
-		private System.Windows.Forms.GroupBox gbText;
-		private System.Windows.Forms.CheckBox chkCanGrow;
-		private System.Windows.Forms.CheckBox chkCanShrink;
-		private System.Windows.Forms.Label label2;
-		private System.Windows.Forms.ComboBox cbHideDuplicates;
-		private System.Windows.Forms.Label label3;
-		private System.Windows.Forms.ComboBox cbDataElementStyle;
-		private System.Windows.Forms.Label label4;
-		private System.Windows.Forms.ComboBox cbToggleImage;
+		private Majorsilence.Forms.Label label5;
+		private Majorsilence.Forms.Label label6;
+		private Majorsilence.Forms.Label label7;
+		private Majorsilence.Forms.Label label8;
+		private Majorsilence.Forms.Label label9;
+		private Majorsilence.Forms.TextBox tbWidth;
+		private Majorsilence.Forms.TextBox tbTop;
+		private Majorsilence.Forms.TextBox tbLeft;
+		private Majorsilence.Forms.NumericUpDown tbZIndex;
+		private Majorsilence.Forms.Label label1;
+		private Majorsilence.Forms.TextBox tbName;
+		private Majorsilence.Forms.TextBox tbHeight;
+		private Majorsilence.Forms.GroupBox gbPosition;
+		private Majorsilence.Forms.Label lblColSpan;
+		private Majorsilence.Forms.NumericUpDown tbColSpan;
+		private Majorsilence.Forms.GroupBox gbText;
+		private Majorsilence.Forms.CheckBox chkCanGrow;
+		private Majorsilence.Forms.CheckBox chkCanShrink;
+		private Majorsilence.Forms.Label label2;
+		private Majorsilence.Forms.ComboBox cbHideDuplicates;
+		private Majorsilence.Forms.Label label3;
+		private Majorsilence.Forms.ComboBox cbDataElementStyle;
+		private Majorsilence.Forms.Label label4;
+		private Majorsilence.Forms.ComboBox cbToggleImage;
 		/// <summary> 
 		/// Required designer variable.
 		/// </summary>
@@ -146,32 +145,32 @@ namespace Majorsilence.Reporting.RdlDesign
 		/// </summary>
 		private void InitializeComponent()
 		{
-			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(PositionCtl));
+			Majorsilence.Forms.ComponentResourceManager resources = new Majorsilence.Forms.ComponentResourceManager(typeof(PositionCtl));
             this.DoubleBuffered = true;
-			this.gbPosition = new System.Windows.Forms.GroupBox();
-			this.tbHeight = new System.Windows.Forms.TextBox();
-			this.label7 = new System.Windows.Forms.Label();
-			this.tbWidth = new System.Windows.Forms.TextBox();
-			this.label8 = new System.Windows.Forms.Label();
-			this.tbTop = new System.Windows.Forms.TextBox();
-			this.label6 = new System.Windows.Forms.Label();
-			this.tbLeft = new System.Windows.Forms.TextBox();
-			this.label5 = new System.Windows.Forms.Label();
-			this.label9 = new System.Windows.Forms.Label();
-			this.tbZIndex = new System.Windows.Forms.NumericUpDown();
-			this.label1 = new System.Windows.Forms.Label();
-			this.tbName = new System.Windows.Forms.TextBox();
-			this.lblColSpan = new System.Windows.Forms.Label();
-			this.tbColSpan = new System.Windows.Forms.NumericUpDown();
-			this.gbText = new System.Windows.Forms.GroupBox();
-			this.cbToggleImage = new System.Windows.Forms.ComboBox();
-			this.label4 = new System.Windows.Forms.Label();
-			this.cbDataElementStyle = new System.Windows.Forms.ComboBox();
-			this.label3 = new System.Windows.Forms.Label();
-			this.cbHideDuplicates = new System.Windows.Forms.ComboBox();
-			this.label2 = new System.Windows.Forms.Label();
-			this.chkCanShrink = new System.Windows.Forms.CheckBox();
-			this.chkCanGrow = new System.Windows.Forms.CheckBox();
+			this.gbPosition = new Majorsilence.Forms.GroupBox();
+			this.tbHeight = new Majorsilence.Forms.TextBox();
+			this.label7 = new Majorsilence.Forms.Label();
+			this.tbWidth = new Majorsilence.Forms.TextBox();
+			this.label8 = new Majorsilence.Forms.Label();
+			this.tbTop = new Majorsilence.Forms.TextBox();
+			this.label6 = new Majorsilence.Forms.Label();
+			this.tbLeft = new Majorsilence.Forms.TextBox();
+			this.label5 = new Majorsilence.Forms.Label();
+			this.label9 = new Majorsilence.Forms.Label();
+			this.tbZIndex = new Majorsilence.Forms.NumericUpDown();
+			this.label1 = new Majorsilence.Forms.Label();
+			this.tbName = new Majorsilence.Forms.TextBox();
+			this.lblColSpan = new Majorsilence.Forms.Label();
+			this.tbColSpan = new Majorsilence.Forms.NumericUpDown();
+			this.gbText = new Majorsilence.Forms.GroupBox();
+			this.cbToggleImage = new Majorsilence.Forms.ComboBox();
+			this.label4 = new Majorsilence.Forms.Label();
+			this.cbDataElementStyle = new Majorsilence.Forms.ComboBox();
+			this.label3 = new Majorsilence.Forms.Label();
+			this.cbHideDuplicates = new Majorsilence.Forms.ComboBox();
+			this.label2 = new Majorsilence.Forms.Label();
+			this.chkCanShrink = new Majorsilence.Forms.CheckBox();
+			this.chkCanGrow = new Majorsilence.Forms.CheckBox();
 			this.gbPosition.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.tbZIndex)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.tbColSpan)).BeginInit();
@@ -198,7 +197,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			// 
 			resources.ApplyResources(this.tbHeight, "tbHeight");
 			this.tbHeight.Name = "tbHeight";
-			this.tbHeight.TextChanged += new System.EventHandler(this.tbHeight_TextChanged);
+			this.tbHeight.TextChanged += this.tbHeight_TextChanged;
 			// 
 			// label7
 			// 
@@ -209,7 +208,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			// 
 			resources.ApplyResources(this.tbWidth, "tbWidth");
 			this.tbWidth.Name = "tbWidth";
-			this.tbWidth.TextChanged += new System.EventHandler(this.tbWidth_TextChanged);
+			this.tbWidth.TextChanged += this.tbWidth_TextChanged;
 			// 
 			// label8
 			// 
@@ -220,7 +219,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			// 
 			resources.ApplyResources(this.tbTop, "tbTop");
 			this.tbTop.Name = "tbTop";
-			this.tbTop.TextChanged += new System.EventHandler(this.tbTop_TextChanged);
+			this.tbTop.TextChanged += this.tbTop_TextChanged;
 			// 
 			// label6
 			// 
@@ -231,7 +230,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			// 
 			resources.ApplyResources(this.tbLeft, "tbLeft");
 			this.tbLeft.Name = "tbLeft";
-			this.tbLeft.TextChanged += new System.EventHandler(this.tbLeft_TextChanged);
+			this.tbLeft.TextChanged += this.tbLeft_TextChanged;
 			// 
 			// label5
 			// 
@@ -252,7 +251,7 @@ namespace Majorsilence.Reporting.RdlDesign
             0,
             0});
 			this.tbZIndex.Name = "tbZIndex";
-			this.tbZIndex.ValueChanged += new System.EventHandler(this.tbZIndex_ValueChanged);
+			this.tbZIndex.ValueChanged += this.tbZIndex_ValueChanged;
 			// 
 			// label1
 			// 
@@ -263,8 +262,8 @@ namespace Majorsilence.Reporting.RdlDesign
 			// 
 			resources.ApplyResources(this.tbName, "tbName");
 			this.tbName.Name = "tbName";
-			this.tbName.TextChanged += new System.EventHandler(this.tbName_TextChanged);
-			this.tbName.Validating += new System.ComponentModel.CancelEventHandler(this.tbName_Validating);
+			this.tbName.TextChanged += this.tbName_TextChanged;
+			this.tbName.Validating += this.tbName_Validating;
 			// 
 			// lblColSpan
 			// 
@@ -290,7 +289,7 @@ namespace Majorsilence.Reporting.RdlDesign
             0,
             0,
             0});
-			this.tbColSpan.ValueChanged += new System.EventHandler(this.tbColSpan_ValueChanged);
+			this.tbColSpan.ValueChanged += this.tbColSpan_ValueChanged;
 			// 
 			// gbText
 			// 
@@ -314,8 +313,8 @@ namespace Majorsilence.Reporting.RdlDesign
             resources.GetString("cbToggleImage.Items1"),
             resources.GetString("cbToggleImage.Items2")});
 			this.cbToggleImage.Name = "cbToggleImage";
-			this.cbToggleImage.SelectedIndexChanged += new System.EventHandler(this.cbToggleImage_Changed);
-			this.cbToggleImage.TextChanged += new System.EventHandler(this.cbToggleImage_Changed);
+			this.cbToggleImage.SelectedIndexChanged += this.cbToggleImage_Changed;
+			this.cbToggleImage.TextChanged += this.cbToggleImage_Changed;
 			// 
 			// label4
 			// 
@@ -325,13 +324,13 @@ namespace Majorsilence.Reporting.RdlDesign
 			// cbDataElementStyle
 			// 
 			resources.ApplyResources(this.cbDataElementStyle, "cbDataElementStyle");
-			this.cbDataElementStyle.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+			this.cbDataElementStyle.DropDownStyle = Majorsilence.Forms.ComboBoxStyle.DropDownList;
 			this.cbDataElementStyle.Items.AddRange(new object[] {
             resources.GetString("cbDataElementStyle.Items"),
             resources.GetString("cbDataElementStyle.Items1"),
             resources.GetString("cbDataElementStyle.Items2")});
 			this.cbDataElementStyle.Name = "cbDataElementStyle";
-			this.cbDataElementStyle.SelectedIndexChanged += new System.EventHandler(this.cbDataElementStyle_SelectedIndexChanged);
+			this.cbDataElementStyle.SelectedIndexChanged += this.cbDataElementStyle_SelectedIndexChanged;
 			// 
 			// label3
 			// 
@@ -341,9 +340,9 @@ namespace Majorsilence.Reporting.RdlDesign
 			// cbHideDuplicates
 			// 
 			resources.ApplyResources(this.cbHideDuplicates, "cbHideDuplicates");
-			this.cbHideDuplicates.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+			this.cbHideDuplicates.DropDownStyle = Majorsilence.Forms.ComboBoxStyle.DropDownList;
 			this.cbHideDuplicates.Name = "cbHideDuplicates";
-			this.cbHideDuplicates.SelectedIndexChanged += new System.EventHandler(this.cbHideDuplicates_SelectedIndexChanged);
+			this.cbHideDuplicates.SelectedIndexChanged += this.cbHideDuplicates_SelectedIndexChanged;
 			// 
 			// label2
 			// 
@@ -354,13 +353,13 @@ namespace Majorsilence.Reporting.RdlDesign
 			// 
 			resources.ApplyResources(this.chkCanShrink, "chkCanShrink");
 			this.chkCanShrink.Name = "chkCanShrink";
-			this.chkCanShrink.CheckedChanged += new System.EventHandler(this.chkCanShrink_CheckedChanged);
+			this.chkCanShrink.CheckedChanged += this.chkCanShrink_CheckedChanged;
 			// 
 			// chkCanGrow
 			// 
 			resources.ApplyResources(this.chkCanGrow, "chkCanGrow");
 			this.chkCanGrow.Name = "chkCanGrow";
-			this.chkCanGrow.CheckedChanged += new System.EventHandler(this.chkCanGrow_CheckedChanged);
+			this.chkCanGrow.CheckedChanged += this.chkCanGrow_CheckedChanged;
 			// 
 			// PositionCtl
 			// 

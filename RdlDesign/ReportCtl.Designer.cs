@@ -1,6 +1,5 @@
 using System;
-using System.Windows.Forms;
-using System.Drawing;
+using Majorsilence.Forms;
 using System.ComponentModel;
 using System.Collections;
 
@@ -10,68 +9,68 @@ namespace Majorsilence.Reporting.RdlDesign
 	{
 		#region Windows Form Designer generated code
 		private DesignXmlDraw _Draw;
-private System.Windows.Forms.TextBox tbReportAuthor;
-private System.Windows.Forms.TextBox tbReportDescription;
-private System.Windows.Forms.Label label3;
-private System.Windows.Forms.Label label2;
-private System.Windows.Forms.GroupBox groupBox1;
-private System.Windows.Forms.Label label1;
-private System.Windows.Forms.Label label4;
-private System.Windows.Forms.TextBox tbPageWidth;
-private System.Windows.Forms.TextBox tbPageHeight;
-private System.Windows.Forms.GroupBox groupBox2;
-private System.Windows.Forms.TextBox tbMarginLeft;
-private System.Windows.Forms.Label label5;
-private System.Windows.Forms.TextBox tbMarginRight;
-private System.Windows.Forms.Label label6;
-private System.Windows.Forms.TextBox tbMarginBottom;
-private System.Windows.Forms.Label label7;
-private System.Windows.Forms.TextBox tbMarginTop;
-private System.Windows.Forms.Label label8;
-private System.Windows.Forms.TextBox tbWidth;
-private System.Windows.Forms.Label label9;
-private System.Windows.Forms.GroupBox groupBox3;
-private System.Windows.Forms.GroupBox groupBox4;
-private System.Windows.Forms.CheckBox chkPFFirst;
-private System.Windows.Forms.CheckBox chkPHFirst;
-private System.Windows.Forms.CheckBox chkPHLast;
-private System.Windows.Forms.CheckBox chkPFLast;
+private Majorsilence.Forms.TextBox tbReportAuthor;
+private Majorsilence.Forms.TextBox tbReportDescription;
+private Majorsilence.Forms.Label label3;
+private Majorsilence.Forms.Label label2;
+private Majorsilence.Forms.GroupBox groupBox1;
+private Majorsilence.Forms.Label label1;
+private Majorsilence.Forms.Label label4;
+private Majorsilence.Forms.TextBox tbPageWidth;
+private Majorsilence.Forms.TextBox tbPageHeight;
+private Majorsilence.Forms.GroupBox groupBox2;
+private Majorsilence.Forms.TextBox tbMarginLeft;
+private Majorsilence.Forms.Label label5;
+private Majorsilence.Forms.TextBox tbMarginRight;
+private Majorsilence.Forms.Label label6;
+private Majorsilence.Forms.TextBox tbMarginBottom;
+private Majorsilence.Forms.Label label7;
+private Majorsilence.Forms.TextBox tbMarginTop;
+private Majorsilence.Forms.Label label8;
+private Majorsilence.Forms.TextBox tbWidth;
+private Majorsilence.Forms.Label label9;
+private Majorsilence.Forms.GroupBox groupBox3;
+private Majorsilence.Forms.GroupBox groupBox4;
+private Majorsilence.Forms.CheckBox chkPFFirst;
+private Majorsilence.Forms.CheckBox chkPHFirst;
+private Majorsilence.Forms.CheckBox chkPHLast;
+private Majorsilence.Forms.CheckBox chkPFLast;
 private ComboBox cbPageSize;
 private Label label11;
 private System.ComponentModel.Container components = null;
 
 		private void InitializeComponent()
 		{
-			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ReportCtl));
+			Majorsilence.Forms.ComponentResourceManager resources = new Majorsilence.Forms.ComponentResourceManager(typeof(ReportCtl));
             this.DoubleBuffered = true;
-			this.tbReportAuthor = new System.Windows.Forms.TextBox();
-			this.tbReportDescription = new System.Windows.Forms.TextBox();
-			this.label3 = new System.Windows.Forms.Label();
-			this.label2 = new System.Windows.Forms.Label();
-			this.groupBox1 = new System.Windows.Forms.GroupBox();
-			this.cbPageSize = new System.Windows.Forms.ComboBox();
-			this.label11 = new System.Windows.Forms.Label();
-			this.tbPageHeight = new System.Windows.Forms.TextBox();
-			this.tbPageWidth = new System.Windows.Forms.TextBox();
-			this.label4 = new System.Windows.Forms.Label();
-			this.label1 = new System.Windows.Forms.Label();
-			this.groupBox2 = new System.Windows.Forms.GroupBox();
-			this.tbMarginBottom = new System.Windows.Forms.TextBox();
-			this.label7 = new System.Windows.Forms.Label();
-			this.tbMarginTop = new System.Windows.Forms.TextBox();
-			this.label8 = new System.Windows.Forms.Label();
-			this.tbMarginRight = new System.Windows.Forms.TextBox();
-			this.label6 = new System.Windows.Forms.Label();
-			this.tbMarginLeft = new System.Windows.Forms.TextBox();
-			this.label5 = new System.Windows.Forms.Label();
-			this.tbWidth = new System.Windows.Forms.TextBox();
-			this.label9 = new System.Windows.Forms.Label();
-			this.groupBox3 = new System.Windows.Forms.GroupBox();
-			this.chkPHLast = new System.Windows.Forms.CheckBox();
-			this.chkPHFirst = new System.Windows.Forms.CheckBox();
-			this.groupBox4 = new System.Windows.Forms.GroupBox();
-			this.chkPFLast = new System.Windows.Forms.CheckBox();
-			this.chkPFFirst = new System.Windows.Forms.CheckBox();
+			this.tbReportAuthor = new Majorsilence.Forms.TextBox();
+			this.tbReportDescription = new Majorsilence.Forms.TextBox();
+			this.label3 = new Majorsilence.Forms.Label();
+			this.label2 = new Majorsilence.Forms.Label();
+			this.groupBox1 = new Majorsilence.Forms.GroupBox();
+			this.cbPageSize = new Majorsilence.Forms.ComboBox();
+			this.label11 = new Majorsilence.Forms.Label();
+			this.tbPageHeight = new Majorsilence.Forms.TextBox();
+			this.tbPageWidth = new Majorsilence.Forms.TextBox();
+			this.label4 = new Majorsilence.Forms.Label();
+			this.label1 = new Majorsilence.Forms.Label();
+			this.groupBox2 = new Majorsilence.Forms.GroupBox();
+			this.tbMarginBottom = new Majorsilence.Forms.TextBox();
+			this.label7 = new Majorsilence.Forms.Label();
+			this.tbMarginTop = new Majorsilence.Forms.TextBox();
+			this.label8 = new Majorsilence.Forms.Label();
+			this.tbMarginRight = new Majorsilence.Forms.TextBox();
+			this.label6 = new Majorsilence.Forms.Label();
+			this.tbMarginLeft = new Majorsilence.Forms.TextBox();
+			this.label5 = new Majorsilence.Forms.Label();
+			this.tbWidth = new Majorsilence.Forms.TextBox();
+			this.label9 = new Majorsilence.Forms.Label();
+			this.groupBox3 = new Majorsilence.Forms.GroupBox();
+			this.chkPHLast = new Majorsilence.Forms.CheckBox();
+			this.chkPHFirst = new Majorsilence.Forms.CheckBox();
+			this.groupBox4 = new Majorsilence.Forms.GroupBox();
+			this.chkPFLast = new Majorsilence.Forms.CheckBox();
+			this.chkPFFirst = new Majorsilence.Forms.CheckBox();
 			this.groupBox1.SuspendLayout();
 			this.groupBox2.SuspendLayout();
 			this.groupBox3.SuspendLayout();
@@ -113,10 +112,10 @@ private System.ComponentModel.Container components = null;
 			// cbPageSize
 			// 
 			resources.ApplyResources(this.cbPageSize, "cbPageSize");
-			this.cbPageSize.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+			this.cbPageSize.DropDownStyle = Majorsilence.Forms.ComboBoxStyle.DropDownList;
 			this.cbPageSize.FormattingEnabled = true;
 			this.cbPageSize.Name = "cbPageSize";
-			this.cbPageSize.SelectedIndexChanged += new System.EventHandler(this.cbPageSize_SelectedIndexChanged);
+			this.cbPageSize.SelectedIndexChanged += this.cbPageSize_SelectedIndexChanged;
 			// 
 			// label11
 			// 
@@ -128,14 +127,14 @@ private System.ComponentModel.Container components = null;
 			resources.ApplyResources(this.tbPageHeight, "tbPageHeight");
 			this.tbPageHeight.Name = "tbPageHeight";
 			this.tbPageHeight.Tag = "Page Height";
-			this.tbPageHeight.Validating += new System.ComponentModel.CancelEventHandler(this.tbSize_Validating);
+			this.tbPageHeight.Validating += this.tbSize_Validating;
 			// 
 			// tbPageWidth
 			// 
 			resources.ApplyResources(this.tbPageWidth, "tbPageWidth");
 			this.tbPageWidth.Name = "tbPageWidth";
 			this.tbPageWidth.Tag = "Page Width";
-			this.tbPageWidth.Validating += new System.ComponentModel.CancelEventHandler(this.tbSize_Validating);
+			this.tbPageWidth.Validating += this.tbSize_Validating;
 			// 
 			// label4
 			// 
@@ -166,7 +165,7 @@ private System.ComponentModel.Container components = null;
 			resources.ApplyResources(this.tbMarginBottom, "tbMarginBottom");
 			this.tbMarginBottom.Name = "tbMarginBottom";
 			this.tbMarginBottom.Tag = "Bottom Margin";
-			this.tbMarginBottom.Validating += new System.ComponentModel.CancelEventHandler(this.tbSize_Validating);
+			this.tbMarginBottom.Validating += this.tbSize_Validating;
 			// 
 			// label7
 			// 
@@ -178,7 +177,7 @@ private System.ComponentModel.Container components = null;
 			resources.ApplyResources(this.tbMarginTop, "tbMarginTop");
 			this.tbMarginTop.Name = "tbMarginTop";
 			this.tbMarginTop.Tag = "Top Margin";
-			this.tbMarginTop.Validating += new System.ComponentModel.CancelEventHandler(this.tbSize_Validating);
+			this.tbMarginTop.Validating += this.tbSize_Validating;
 			// 
 			// label8
 			// 
@@ -190,7 +189,7 @@ private System.ComponentModel.Container components = null;
 			resources.ApplyResources(this.tbMarginRight, "tbMarginRight");
 			this.tbMarginRight.Name = "tbMarginRight";
 			this.tbMarginRight.Tag = "Right Margin";
-			this.tbMarginRight.Validating += new System.ComponentModel.CancelEventHandler(this.tbSize_Validating);
+			this.tbMarginRight.Validating += this.tbSize_Validating;
 			// 
 			// label6
 			// 
@@ -202,7 +201,7 @@ private System.ComponentModel.Container components = null;
 			resources.ApplyResources(this.tbMarginLeft, "tbMarginLeft");
 			this.tbMarginLeft.Name = "tbMarginLeft";
 			this.tbMarginLeft.Tag = "Left Margin";
-			this.tbMarginLeft.Validating += new System.ComponentModel.CancelEventHandler(this.tbSize_Validating);
+			this.tbMarginLeft.Validating += this.tbSize_Validating;
 			// 
 			// label5
 			// 
@@ -214,7 +213,7 @@ private System.ComponentModel.Container components = null;
 			resources.ApplyResources(this.tbWidth, "tbWidth");
 			this.tbWidth.Name = "tbWidth";
 			this.tbWidth.Tag = "Width";
-			this.tbWidth.Validating += new System.ComponentModel.CancelEventHandler(this.tbSize_Validating);
+			this.tbWidth.Validating += this.tbSize_Validating;
 			// 
 			// label9
 			// 

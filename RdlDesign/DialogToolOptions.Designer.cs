@@ -1,44 +1,43 @@
 using System;
-using System.Windows.Forms;
-using System.Drawing;
+using Majorsilence.Forms;
 using System.ComponentModel;
 using System.Collections;
 
 namespace Majorsilence.Reporting.RdlDesign
 {
-    public partial class DialogToolOptions : System.Windows.Forms.Form
+    public partial class DialogToolOptions : Majorsilence.Forms.Form
 	{
 		#region Windows Form Designer generated code
 		RdlDesigner _RdlDesigner;
-private System.Windows.Forms.Button bOK;
-private System.Windows.Forms.Button bCancel;
-private System.Windows.Forms.TabControl tabControl1;
-private System.Windows.Forms.TabPage tpGeneral;
-private System.Windows.Forms.TabPage tpToolbar;
-private System.Windows.Forms.Label label1;
-private System.Windows.Forms.TextBox tbRecentFilesMax;
-private System.Windows.Forms.Label label2;
-private System.Windows.Forms.Label label3;
-private System.Windows.Forms.TextBox tbHelpUrl;
-private System.Windows.Forms.ListBox lbOperation;
-private System.Windows.Forms.ListBox lbToolbar;
-private System.Windows.Forms.Label label4;
-private System.Windows.Forms.Label label5;
-private System.Windows.Forms.Button bCopyItem;
-private System.Windows.Forms.Button bUp;
-private System.Windows.Forms.Button bDown;
-private System.Windows.Forms.Button bReset;
-private System.Windows.Forms.Button bRemove;
-private System.Windows.Forms.Button bApply;
-private System.Windows.Forms.TabPage tpDesktop;
-private System.Windows.Forms.Label label6;
-private System.Windows.Forms.TextBox tbPort;
-private System.Windows.Forms.Label label7;
-private System.Windows.Forms.Label label8;
-private System.Windows.Forms.Label label9;
-private System.Windows.Forms.TextBox tbDirectory;
-private System.Windows.Forms.CheckBox ckLocal;
-private System.Windows.Forms.Button bBrowse;
+private Majorsilence.Forms.Button bOK;
+private Majorsilence.Forms.Button bCancel;
+private Majorsilence.Forms.TabControl tabControl1;
+private Majorsilence.Forms.TabPage tpGeneral;
+private Majorsilence.Forms.TabPage tpToolbar;
+private Majorsilence.Forms.Label label1;
+private Majorsilence.Forms.TextBox tbRecentFilesMax;
+private Majorsilence.Forms.Label label2;
+private Majorsilence.Forms.Label label3;
+private Majorsilence.Forms.TextBox tbHelpUrl;
+private Majorsilence.Forms.ListBox lbOperation;
+private Majorsilence.Forms.ListBox lbToolbar;
+private Majorsilence.Forms.Label label4;
+private Majorsilence.Forms.Label label5;
+private Majorsilence.Forms.Button bCopyItem;
+private Majorsilence.Forms.Button bUp;
+private Majorsilence.Forms.Button bDown;
+private Majorsilence.Forms.Button bReset;
+private Majorsilence.Forms.Button bRemove;
+private Majorsilence.Forms.Button bApply;
+private Majorsilence.Forms.TabPage tpDesktop;
+private Majorsilence.Forms.Label label6;
+private Majorsilence.Forms.TextBox tbPort;
+private Majorsilence.Forms.Label label7;
+private Majorsilence.Forms.Label label8;
+private Majorsilence.Forms.Label label9;
+private Majorsilence.Forms.TextBox tbDirectory;
+private Majorsilence.Forms.CheckBox ckLocal;
+private Majorsilence.Forms.Button bBrowse;
 private CheckBox cbEditLines;
 private CheckBox cbOutline;
 private CheckBox cbTabInterface;
@@ -58,58 +57,58 @@ private System.ComponentModel.Container components = null;
 
 		private void InitializeComponent()
 		{
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(DialogToolOptions));
-            this.bOK = new System.Windows.Forms.Button();
-            this.bCancel = new System.Windows.Forms.Button();
-            this.tabControl1 = new System.Windows.Forms.TabControl();
-            this.tpGeneral = new System.Windows.Forms.TabPage();
-            this.groupBox1 = new System.Windows.Forms.GroupBox();
-            this.radioButtonCm = new System.Windows.Forms.RadioButton();
-            this.radioButtonInches = new System.Windows.Forms.RadioButton();
-            this.label12 = new System.Windows.Forms.Label();
-            this.comboXmlEndingLine = new System.Windows.Forms.ComboBox();
-            this.label11 = new System.Windows.Forms.Label();
-            this.tbLanguage = new System.Windows.Forms.ComboBox();
-            this.cbShowReportWaitDialog = new System.Windows.Forms.CheckBox();
-            this.gbPropLoc = new System.Windows.Forms.GroupBox();
-            this.chkPBAutoHide = new System.Windows.Forms.CheckBox();
-            this.rbPBBottom = new System.Windows.Forms.RadioButton();
-            this.rbPBTop = new System.Windows.Forms.RadioButton();
-            this.rbPBLeft = new System.Windows.Forms.RadioButton();
-            this.rbPBRight = new System.Windows.Forms.RadioButton();
-            this.cbTabInterface = new System.Windows.Forms.CheckBox();
-            this.cbOutline = new System.Windows.Forms.CheckBox();
-            this.cbEditLines = new System.Windows.Forms.CheckBox();
-            this.tbHelpUrl = new System.Windows.Forms.TextBox();
-            this.label3 = new System.Windows.Forms.Label();
-            this.label2 = new System.Windows.Forms.Label();
-            this.tbRecentFilesMax = new System.Windows.Forms.TextBox();
-            this.label1 = new System.Windows.Forms.Label();
-            this.tpToolbar = new System.Windows.Forms.TabPage();
-            this.bRemove = new System.Windows.Forms.Button();
-            this.bReset = new System.Windows.Forms.Button();
-            this.bDown = new System.Windows.Forms.Button();
-            this.bUp = new System.Windows.Forms.Button();
-            this.bCopyItem = new System.Windows.Forms.Button();
-            this.label5 = new System.Windows.Forms.Label();
-            this.label4 = new System.Windows.Forms.Label();
-            this.lbToolbar = new System.Windows.Forms.ListBox();
-            this.lbOperation = new System.Windows.Forms.ListBox();
-            this.tpDesktop = new System.Windows.Forms.TabPage();
-            this.bBrowse = new System.Windows.Forms.Button();
-            this.tbDirectory = new System.Windows.Forms.TextBox();
-            this.label9 = new System.Windows.Forms.Label();
-            this.label8 = new System.Windows.Forms.Label();
-            this.label7 = new System.Windows.Forms.Label();
-            this.ckLocal = new System.Windows.Forms.CheckBox();
-            this.tbPort = new System.Windows.Forms.TextBox();
-            this.label6 = new System.Windows.Forms.Label();
-            this.tabPage1 = new System.Windows.Forms.TabPage();
-            this.label10 = new System.Windows.Forms.Label();
-            this.bRemoveMap = new System.Windows.Forms.Button();
-            this.bAddMap = new System.Windows.Forms.Button();
-            this.lbMaps = new System.Windows.Forms.ListBox();
-            this.bApply = new System.Windows.Forms.Button();
+            Majorsilence.Forms.ComponentResourceManager resources = new Majorsilence.Forms.ComponentResourceManager(typeof(DialogToolOptions));
+            this.bOK = new Majorsilence.Forms.Button();
+            this.bCancel = new Majorsilence.Forms.Button();
+            this.tabControl1 = new Majorsilence.Forms.TabControl();
+            this.tpGeneral = new Majorsilence.Forms.TabPage();
+            this.groupBox1 = new Majorsilence.Forms.GroupBox();
+            this.radioButtonCm = new Majorsilence.Forms.RadioButton();
+            this.radioButtonInches = new Majorsilence.Forms.RadioButton();
+            this.label12 = new Majorsilence.Forms.Label();
+            this.comboXmlEndingLine = new Majorsilence.Forms.ComboBox();
+            this.label11 = new Majorsilence.Forms.Label();
+            this.tbLanguage = new Majorsilence.Forms.ComboBox();
+            this.cbShowReportWaitDialog = new Majorsilence.Forms.CheckBox();
+            this.gbPropLoc = new Majorsilence.Forms.GroupBox();
+            this.chkPBAutoHide = new Majorsilence.Forms.CheckBox();
+            this.rbPBBottom = new Majorsilence.Forms.RadioButton();
+            this.rbPBTop = new Majorsilence.Forms.RadioButton();
+            this.rbPBLeft = new Majorsilence.Forms.RadioButton();
+            this.rbPBRight = new Majorsilence.Forms.RadioButton();
+            this.cbTabInterface = new Majorsilence.Forms.CheckBox();
+            this.cbOutline = new Majorsilence.Forms.CheckBox();
+            this.cbEditLines = new Majorsilence.Forms.CheckBox();
+            this.tbHelpUrl = new Majorsilence.Forms.TextBox();
+            this.label3 = new Majorsilence.Forms.Label();
+            this.label2 = new Majorsilence.Forms.Label();
+            this.tbRecentFilesMax = new Majorsilence.Forms.TextBox();
+            this.label1 = new Majorsilence.Forms.Label();
+            this.tpToolbar = new Majorsilence.Forms.TabPage();
+            this.bRemove = new Majorsilence.Forms.Button();
+            this.bReset = new Majorsilence.Forms.Button();
+            this.bDown = new Majorsilence.Forms.Button();
+            this.bUp = new Majorsilence.Forms.Button();
+            this.bCopyItem = new Majorsilence.Forms.Button();
+            this.label5 = new Majorsilence.Forms.Label();
+            this.label4 = new Majorsilence.Forms.Label();
+            this.lbToolbar = new Majorsilence.Forms.ListBox();
+            this.lbOperation = new Majorsilence.Forms.ListBox();
+            this.tpDesktop = new Majorsilence.Forms.TabPage();
+            this.bBrowse = new Majorsilence.Forms.Button();
+            this.tbDirectory = new Majorsilence.Forms.TextBox();
+            this.label9 = new Majorsilence.Forms.Label();
+            this.label8 = new Majorsilence.Forms.Label();
+            this.label7 = new Majorsilence.Forms.Label();
+            this.ckLocal = new Majorsilence.Forms.CheckBox();
+            this.tbPort = new Majorsilence.Forms.TextBox();
+            this.label6 = new Majorsilence.Forms.Label();
+            this.tabPage1 = new Majorsilence.Forms.TabPage();
+            this.label10 = new Majorsilence.Forms.Label();
+            this.bRemoveMap = new Majorsilence.Forms.Button();
+            this.bAddMap = new Majorsilence.Forms.Button();
+            this.lbMaps = new Majorsilence.Forms.ListBox();
+            this.bApply = new Majorsilence.Forms.Button();
             this.tabControl1.SuspendLayout();
             this.tpGeneral.SuspendLayout();
             this.groupBox1.SuspendLayout();
@@ -123,12 +122,12 @@ private System.ComponentModel.Container components = null;
             // 
             resources.ApplyResources(this.bOK, "bOK");
             this.bOK.Name = "bOK";
-            this.bOK.Click += new System.EventHandler(this.bOK_Click);
+            this.bOK.Click += this.bOK_Click;
             // 
             // bCancel
             // 
             this.bCancel.CausesValidation = false;
-            this.bCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
+            this.bCancel.DialogResult = Majorsilence.Forms.DialogResult.Cancel;
             resources.ApplyResources(this.bCancel, "bCancel");
             this.bCancel.Name = "bCancel";
             // 
@@ -176,7 +175,7 @@ private System.ComponentModel.Container components = null;
             resources.ApplyResources(this.radioButtonCm, "radioButtonCm");
             this.radioButtonCm.Name = "radioButtonCm";
             this.radioButtonCm.UseVisualStyleBackColor = true;
-            this.radioButtonCm.CheckedChanged += new System.EventHandler(this.RadioButtonCm_CheckedChanged);
+            this.radioButtonCm.CheckedChanged += this.RadioButtonCm_CheckedChanged;
             // 
             // radioButtonInches
             // 
@@ -185,7 +184,7 @@ private System.ComponentModel.Container components = null;
             this.radioButtonInches.Name = "radioButtonInches";
             this.radioButtonInches.TabStop = true;
             this.radioButtonInches.UseVisualStyleBackColor = true;
-            this.radioButtonInches.CheckedChanged += new System.EventHandler(this.RadioButtonInches_CheckedChanged);
+            this.radioButtonInches.CheckedChanged += this.RadioButtonInches_CheckedChanged;
             // 
             // label12
             // 
@@ -194,7 +193,7 @@ private System.ComponentModel.Container components = null;
             // 
             // comboXmlEndingLine
             // 
-            this.comboXmlEndingLine.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.comboXmlEndingLine.DropDownStyle = Majorsilence.Forms.ComboBoxStyle.DropDownList;
             this.comboXmlEndingLine.FormattingEnabled = true;
             resources.ApplyResources(this.comboXmlEndingLine, "comboXmlEndingLine");
             this.comboXmlEndingLine.Name = "comboXmlEndingLine";
@@ -206,11 +205,11 @@ private System.ComponentModel.Container components = null;
             // 
             // tbLanguage
             // 
-            this.tbLanguage.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.tbLanguage.DropDownStyle = Majorsilence.Forms.ComboBoxStyle.DropDownList;
             this.tbLanguage.FormattingEnabled = true;
             resources.ApplyResources(this.tbLanguage, "tbLanguage");
             this.tbLanguage.Name = "tbLanguage";
-            this.tbLanguage.SelectedIndexChanged += new System.EventHandler(this.Desktop_Changed);
+            this.tbLanguage.SelectedIndexChanged += this.Desktop_Changed;
             // 
             // cbShowReportWaitDialog
             // 
@@ -268,7 +267,7 @@ private System.ComponentModel.Container components = null;
             resources.ApplyResources(this.cbTabInterface, "cbTabInterface");
             this.cbTabInterface.Name = "cbTabInterface";
             this.cbTabInterface.UseVisualStyleBackColor = true;
-            this.cbTabInterface.CheckedChanged += new System.EventHandler(this.cbTabInterface_CheckedChanged);
+            this.cbTabInterface.CheckedChanged += this.cbTabInterface_CheckedChanged;
             // 
             // cbOutline
             // 
@@ -326,31 +325,31 @@ private System.ComponentModel.Container components = null;
             // 
             resources.ApplyResources(this.bRemove, "bRemove");
             this.bRemove.Name = "bRemove";
-            this.bRemove.Click += new System.EventHandler(this.bRemove_Click);
+            this.bRemove.Click += this.bRemove_Click;
             // 
             // bReset
             // 
             resources.ApplyResources(this.bReset, "bReset");
             this.bReset.Name = "bReset";
-            this.bReset.Click += new System.EventHandler(this.bReset_Click);
+            this.bReset.Click += this.bReset_Click;
             // 
             // bDown
             // 
             resources.ApplyResources(this.bDown, "bDown");
             this.bDown.Name = "bDown";
-            this.bDown.Click += new System.EventHandler(this.bDown_Click);
+            this.bDown.Click += this.bDown_Click;
             // 
             // bUp
             // 
             resources.ApplyResources(this.bUp, "bUp");
             this.bUp.Name = "bUp";
-            this.bUp.Click += new System.EventHandler(this.bUp_Click);
+            this.bUp.Click += this.bUp_Click;
             // 
             // bCopyItem
             // 
             resources.ApplyResources(this.bCopyItem, "bCopyItem");
             this.bCopyItem.Name = "bCopyItem";
-            this.bCopyItem.Click += new System.EventHandler(this.bCopyItem_Click);
+            this.bCopyItem.Click += this.bCopyItem_Click;
             // 
             // label5
             // 
@@ -390,13 +389,13 @@ private System.ComponentModel.Container components = null;
             // 
             resources.ApplyResources(this.bBrowse, "bBrowse");
             this.bBrowse.Name = "bBrowse";
-            this.bBrowse.Click += new System.EventHandler(this.bBrowse_Click);
+            this.bBrowse.Click += this.bBrowse_Click;
             // 
             // tbDirectory
             // 
             resources.ApplyResources(this.tbDirectory, "tbDirectory");
             this.tbDirectory.Name = "tbDirectory";
-            this.tbDirectory.TextChanged += new System.EventHandler(this.Desktop_Changed);
+            this.tbDirectory.TextChanged += this.Desktop_Changed;
             // 
             // label9
             // 
@@ -417,13 +416,13 @@ private System.ComponentModel.Container components = null;
             // 
             resources.ApplyResources(this.ckLocal, "ckLocal");
             this.ckLocal.Name = "ckLocal";
-            this.ckLocal.CheckedChanged += new System.EventHandler(this.Desktop_Changed);
+            this.ckLocal.CheckedChanged += this.Desktop_Changed;
             // 
             // tbPort
             // 
             resources.ApplyResources(this.tbPort, "tbPort");
             this.tbPort.Name = "tbPort";
-            this.tbPort.TextChanged += new System.EventHandler(this.Desktop_Changed);
+            this.tbPort.TextChanged += this.Desktop_Changed;
             // 
             // label6
             // 
@@ -450,14 +449,14 @@ private System.ComponentModel.Container components = null;
             resources.ApplyResources(this.bRemoveMap, "bRemoveMap");
             this.bRemoveMap.Name = "bRemoveMap";
             this.bRemoveMap.UseVisualStyleBackColor = true;
-            this.bRemoveMap.Click += new System.EventHandler(this.bRemoveMap_Click);
+            this.bRemoveMap.Click += this.bRemoveMap_Click;
             // 
             // bAddMap
             // 
             resources.ApplyResources(this.bAddMap, "bAddMap");
             this.bAddMap.Name = "bAddMap";
             this.bAddMap.UseVisualStyleBackColor = true;
-            this.bAddMap.Click += new System.EventHandler(this.bAddMap_Click);
+            this.bAddMap.Click += this.bAddMap_Click;
             // 
             // lbMaps
             // 
@@ -469,7 +468,7 @@ private System.ComponentModel.Container components = null;
             // 
             resources.ApplyResources(this.bApply, "bApply");
             this.bApply.Name = "bApply";
-            this.bApply.Click += new System.EventHandler(this.bApply_Click);
+            this.bApply.Click += this.bApply_Click;
             // 
             // DialogToolOptions
             // 
@@ -480,12 +479,12 @@ private System.ComponentModel.Container components = null;
             this.Controls.Add(this.tabControl1);
             this.Controls.Add(this.bCancel);
             this.Controls.Add(this.bOK);
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
+            this.FormBorderStyle = Majorsilence.Forms.FormBorderStyle.FixedDialog;
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "DialogToolOptions";
             this.ShowInTaskbar = false;
-            this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
+            this.SizeGripStyle = Majorsilence.Forms.SizeGripStyle.Hide;
             this.tabControl1.ResumeLayout(false);
             this.tpGeneral.ResumeLayout(false);
             this.tpGeneral.PerformLayout();

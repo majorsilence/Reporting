@@ -1,11 +1,11 @@
-﻿using ScintillaNET;
+using Majorsilence.Reporting.RdlDesign.Syntax;
 using System.Drawing;
 
 namespace Majorsilence.Reporting.RdlDesign.Syntax
 {
     public static class  ScintillaXMLStyle
     {
-        public static void ConfigureScintillaStyle(ScintillaNET.Scintilla scintilla)
+        public static void ConfigureScintillaStyle(Majorsilence.Reporting.RdlDesign.Syntax.Scintilla scintilla)
         {
             // Reset the styles
             scintilla.StyleResetDefault();

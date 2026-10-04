@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Report xmlns="http://schemas.microsoft.com/sqlserver/reporting/2005/01/reportdefinition"
+        xmlns:rd="http://schemas.microsoft.com/SQLServer/reporting/reportdesigner">
+  <Description>Certificate -- a landscape achievement/completion certificate with a decorative border.</Description>
+  <PageHeight>8.5in</PageHeight>
+  <PageWidth>11in</PageWidth>
+  <TopMargin>.5in</TopMargin>
+  <LeftMargin>.5in</LeftMargin>
+  <RightMargin>.5in</RightMargin>
+  <BottomMargin>.5in</BottomMargin>
+  <Width>10in</Width>
+
+  <DataSources>
+    <DataSource Name="DS1">
+      <ConnectionProperties>
+        <DataProvider>Json</DataProvider>
+        <ConnectString>file=sample-data.json</ConnectString>
+      </ConnectionProperties>
+    </DataSource>
+  </DataSources>
+
+  <DataSets>
+    <DataSet Name="Header">
+      <Query>
+        <DataSourceName>DS1</DataSourceName>
+        <CommandText>columns=CertificateTitle,RecipientName,AchievementText,CourseName,IssueDate,IssuerName,SignatoryName,SignatoryTitle;table=root</CommandText>
+      </Query>
+      <Fields>
+        <Field Name="CertificateTitle"><DataField>CertificateTitle</DataField><rd:TypeName>System.String</rd:TypeName></Field>
+        <Field Name="RecipientName"><DataField>RecipientName</DataField><rd:TypeName>System.String</rd:TypeName></Field>
+        <Field Name="AchievementText"><DataField>AchievementText</DataField><rd:TypeName>System.String</rd:TypeName></Field>
+        <Field Name="CourseName"><DataField>CourseName</DataField><rd:TypeName>System.String</rd:TypeName></Field>
+        <Field Name="IssueDate"><DataField>IssueDate</DataField><rd:TypeName>System.String</rd:TypeName></Field>
+        <Field Name="IssuerName"><DataField>IssuerName</DataField><rd:TypeName>System.String</rd:TypeName></Field>
+        <Field Name="SignatoryName"><DataField>SignatoryName</DataField><rd:TypeName>System.String</rd:TypeName></Field>
+        <Field Name="SignatoryTitle"><DataField>SignatoryTitle</DataField><rd:TypeName>System.String</rd:TypeName></Field>
+      </Fields>
+    </DataSet>
+  </DataSets>
+
+  <Body>
+    <Height>7.5in</Height>
+    <ReportItems>
+      <Rectangle Name="OuterFrame">
+        <Top>0in</Top><Left>0in</Left><Width>10in</Width><Height>7.5in</Height>
+        <Style><BorderStyle><Default>Solid</Default></BorderStyle><BorderColor><Default>#7030A0</Default></BorderColor><BorderWidth><Default>3pt</Default></BorderWidth></Style>
+        <ReportItems>
+          <Rectangle Name="InnerFrame">
+            <Top>.15in</Top><Left>.15in</Left><Width>9.7in</Width><Height>7.2in</Height>
+            <Style><BorderStyle><Default>Solid</Default></BorderStyle><BorderColor><Default>#2C3E50</Default></BorderColor><BorderWidth><Default>1pt</Default></BorderWidth></Style>
+          </Rectangle>
+
+          <Textbox Name="IssuerName">
+            <Top>.5in</Top><Left>0in</Left><Width>10in</Width><Height>.24in</Height>
+            <Value>=First(Fields!IssuerName.Value, "Header")</Value>
+            <Style><FontSize>12pt</FontSize><Color>Gray</Color><TextAlign>Center</TextAlign></Style>
+          </Textbox>
+
+          <Textbox Name="CertTitle">
+            <Top>1in</Top><Left>0in</Left><Width>10in</Width><Height>.5in</Height>
+            <Value>=First(Fields!CertificateTitle.Value, "Header")</Value>
+            <Style><FontSize>30pt</FontSize><FontWeight>Bold</FontWeight><Color>#2C3E50</Color><TextAlign>Center</TextAlign></Style>
+          </Textbox>
+
+          <Line Name="TitleDivider">
+            <Top>1.75in</Top><Left>3.5in</Left><Height>0in</Height><Width>3in</Width>
+            <Style><BorderStyle><Default>Solid</Default></BorderStyle><BorderColor><Default>#7030A0</Default></BorderColor><BorderWidth><Default>1.5pt</Default></BorderWidth></Style>
+          </Line>
+
+          <Textbox Name="ThisIsToCertify">
+            <Top>2.1in</Top><Left>0in</Left><Width>10in</Width><Height>.24in</Height>
+            <Value>This is to certify that</Value>
+            <Style><FontSize>12pt</FontSize><TextAlign>Center</TextAlign></Style>
+          </Textbox>
+
+          <Textbox Name="RecipientName">
+            <Top>2.55in</Top><Left>0in</Left><Width>10in</Width><Height>.55in</Height>
+            <Value>=First(Fields!RecipientName.Value, "Header")</Value>
+            <Style><FontSize>28pt</FontSize><FontWeight>Bold</FontWeight><Color>#7030A0</Color><TextAlign>Center</TextAlign></Style>
+          </Textbox>
+
+          <Textbox Name="AchievementLine">
+            <Top>3.25in</Top><Left>1in</Left><Width>8in</Width><Height>.24in</Height>
+            <Value>=First(Fields!AchievementText.Value, "Header")</Value>
+            <Style><FontSize>12pt</FontSize><TextAlign>Center</TextAlign></Style>
+          </Textbox>
+
+          <Textbox Name="CourseName">
+            <Top>3.6in</Top><Left>1in</Left><Width>8in</Width><Height>.4in</Height>
+            <CanGrow>true</CanGrow>
+            <Value>=First(Fields!CourseName.Value, "Header")</Value>
+            <Style><FontSize>16pt</FontSize><FontWeight>Bold</FontWeight><Color>#2C3E50</Color><TextAlign>Center</TextAlign></Style>
+          </Textbox>
+
+          <Textbox Name="IssueDate">
+            <Top>4.3in</Top><Left>0in</Left><Width>10in</Width><Height>.24in</Height>
+            <Value>=&quot;Issued &quot; &amp; First(Fields!IssueDate.Value, "Header")</Value>
+            <Style><FontSize>11pt</FontSize><Color>Gray</Color><TextAlign>Center</TextAlign></Style>
+          </Textbox>
+
+          <Line Name="SignatureLine">
+            <Top>6.3in</Top><Left>3.5in</Left><Height>0in</Height><Width>3in</Width>
+            <Style><BorderStyle><Default>Solid</Default></BorderStyle><BorderColor><Default>Black</Default></BorderColor></Style>
+          </Line>
+          <Textbox Name="SignatoryName">
+            <Top>6.4in</Top><Left>0in</Left><Width>10in</Width><Height>.22in</Height>
+            <Value>=First(Fields!SignatoryName.Value, "Header")</Value>
+            <Style><FontSize>11pt</FontSize><FontWeight>Bold</FontWeight><TextAlign>Center</TextAlign></Style>
+          </Textbox>
+          <Textbox Name="SignatoryTitle">
+            <Top>6.62in</Top><Left>0in</Left><Width>10in</Width><Height>.2in</Height>
+            <Value>=First(Fields!SignatoryTitle.Value, "Header")</Value>
+            <Style><FontSize>9pt</FontSize><Color>Gray</Color><TextAlign>Center</TextAlign></Style>
+          </Textbox>
+        </ReportItems>
+      </Rectangle>
+    </ReportItems>
+  </Body>
+</Report>

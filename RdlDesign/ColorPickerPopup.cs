@@ -1,9 +1,10 @@
 
 using System;
 using System.Drawing;
+using Majorsilence.Forms.Drawing;
 using System.Collections;
 using System.ComponentModel;
-using System.Windows.Forms;
+using Majorsilence.Forms;
 
 namespace Majorsilence.Reporting.RdlDesign
 {
@@ -111,7 +112,7 @@ namespace Majorsilence.Reporting.RdlDesign
 
         private void ColorPickerPopup_KeyPress(object sender, KeyPressEventArgs e)
         {
-            if ((int)e.KeyChar == (int)System.Windows.Forms.Keys.Escape)
+            if ((int)e.KeyChar == (int)Majorsilence.Forms.Keys.Escape)
             {
                 Hide();
             }

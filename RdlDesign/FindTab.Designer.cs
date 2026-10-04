@@ -1,70 +1,69 @@
 using System;
-using System.Windows.Forms;
-using System.Drawing;
+using Majorsilence.Forms;
 using System.ComponentModel;
 using System.Collections;
 
 namespace Majorsilence.Reporting.RdlDesign
 {
-    internal partial class FindTab : System.Windows.Forms.Form
+    internal partial class FindTab : Majorsilence.Forms.Form
 	{
 		#region Windows Form Designer generated code
 
-		private System.Windows.Forms.Label label1;
-private System.Windows.Forms.TextBox txtFind;
-private System.Windows.Forms.RadioButton radioUp;
-private System.Windows.Forms.RadioButton radioDown;
-private System.Windows.Forms.GroupBox groupBox1;
-private System.Windows.Forms.CheckBox chkCase;
-public System.Windows.Forms.TabPage tabGoTo;
-private System.Windows.Forms.Label label4;
-private System.Windows.Forms.TextBox txtLine;
-private System.Windows.Forms.Button btnNext;
+		private Majorsilence.Forms.Label label1;
+private Majorsilence.Forms.TextBox txtFind;
+private Majorsilence.Forms.RadioButton radioUp;
+private Majorsilence.Forms.RadioButton radioDown;
+private Majorsilence.Forms.GroupBox groupBox1;
+private Majorsilence.Forms.CheckBox chkCase;
+public Majorsilence.Forms.TabPage tabGoTo;
+private Majorsilence.Forms.Label label4;
+private Majorsilence.Forms.TextBox txtLine;
+private Majorsilence.Forms.Button btnNext;
 private RdlEditPreview rdlEdit;
-private System.Windows.Forms.Button btnGoto;
-private System.Windows.Forms.Button btnCancel;
-public System.Windows.Forms.TabPage tabReplace;
-private System.Windows.Forms.Button btnFindNext;
-private System.Windows.Forms.CheckBox chkMatchCase;
-private System.Windows.Forms.Button btnReplaceAll;
-private System.Windows.Forms.Button btnReplace;
-private System.Windows.Forms.TextBox txtFindR;
-private System.Windows.Forms.Label label3;
-private System.Windows.Forms.Label label2;
-private System.Windows.Forms.TextBox txtReplace;
-private System.Windows.Forms.Button bCloseReplace;
-private System.Windows.Forms.Button bCloseGoto;
-public System.Windows.Forms.TabControl tcFRG;
+private Majorsilence.Forms.Button btnGoto;
+private Majorsilence.Forms.Button btnCancel;
+public Majorsilence.Forms.TabPage tabReplace;
+private Majorsilence.Forms.Button btnFindNext;
+private Majorsilence.Forms.CheckBox chkMatchCase;
+private Majorsilence.Forms.Button btnReplaceAll;
+private Majorsilence.Forms.Button btnReplace;
+private Majorsilence.Forms.TextBox txtFindR;
+private Majorsilence.Forms.Label label3;
+private Majorsilence.Forms.Label label2;
+private Majorsilence.Forms.TextBox txtReplace;
+private Majorsilence.Forms.Button bCloseReplace;
+private Majorsilence.Forms.Button bCloseGoto;
+public Majorsilence.Forms.TabControl tcFRG;
 private System.ComponentModel.Container components = null;
 
 		private void InitializeComponent()
 		{
-			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FindTab));
-			this.tcFRG = new System.Windows.Forms.TabControl();
-			this.tabFind = new System.Windows.Forms.TabPage();
-			this.btnCancel = new System.Windows.Forms.Button();
-			this.btnNext = new System.Windows.Forms.Button();
-			this.chkCase = new System.Windows.Forms.CheckBox();
-			this.groupBox1 = new System.Windows.Forms.GroupBox();
-			this.radioUp = new System.Windows.Forms.RadioButton();
-			this.radioDown = new System.Windows.Forms.RadioButton();
-			this.label1 = new System.Windows.Forms.Label();
-			this.txtFind = new System.Windows.Forms.TextBox();
-			this.tabReplace = new System.Windows.Forms.TabPage();
-			this.bCloseReplace = new System.Windows.Forms.Button();
-			this.btnFindNext = new System.Windows.Forms.Button();
-			this.chkMatchCase = new System.Windows.Forms.CheckBox();
-			this.btnReplaceAll = new System.Windows.Forms.Button();
-			this.btnReplace = new System.Windows.Forms.Button();
-			this.txtFindR = new System.Windows.Forms.TextBox();
-			this.label3 = new System.Windows.Forms.Label();
-			this.label2 = new System.Windows.Forms.Label();
-			this.txtReplace = new System.Windows.Forms.TextBox();
-			this.tabGoTo = new System.Windows.Forms.TabPage();
-			this.bCloseGoto = new System.Windows.Forms.Button();
-			this.txtLine = new System.Windows.Forms.TextBox();
-			this.label4 = new System.Windows.Forms.Label();
-			this.btnGoto = new System.Windows.Forms.Button();
+			Majorsilence.Forms.ComponentResourceManager resources = new Majorsilence.Forms.ComponentResourceManager(typeof(FindTab));
+			this.tcFRG = new Majorsilence.Forms.TabControl();
+			this.tabFind = new Majorsilence.Forms.TabPage();
+			this.btnCancel = new Majorsilence.Forms.Button();
+			this.btnNext = new Majorsilence.Forms.Button();
+			this.chkCase = new Majorsilence.Forms.CheckBox();
+			this.groupBox1 = new Majorsilence.Forms.GroupBox();
+			this.radioUp = new Majorsilence.Forms.RadioButton();
+			this.radioDown = new Majorsilence.Forms.RadioButton();
+			this.label1 = new Majorsilence.Forms.Label();
+			this.txtFind = new Majorsilence.Forms.TextBox();
+			this.tabReplace = new Majorsilence.Forms.TabPage();
+			this.bCloseReplace = new Majorsilence.Forms.Button();
+			this.btnFindNext = new Majorsilence.Forms.Button();
+			this.chkMatchCase = new Majorsilence.Forms.CheckBox();
+			this.btnReplaceAll = new Majorsilence.Forms.Button();
+			this.btnReplace = new Majorsilence.Forms.Button();
+			this.txtFindR = new Majorsilence.Forms.TextBox();
+			this.label3 = new Majorsilence.Forms.Label();
+			this.label2 = new Majorsilence.Forms.Label();
+			this.txtReplace = new Majorsilence.Forms.TextBox();
+			this.tabGoTo = new Majorsilence.Forms.TabPage();
+			this.bCloseGoto = new Majorsilence.Forms.Button();
+			this.txtLine = new Majorsilence.Forms.TextBox();
+			this.label4 = new Majorsilence.Forms.Label();
+			this.btnGoto = new Majorsilence.Forms.Button();
 			this.tcFRG.SuspendLayout();
 			this.tabFind.SuspendLayout();
 			this.groupBox1.SuspendLayout();
@@ -80,8 +79,8 @@ private System.ComponentModel.Container components = null;
 			resources.ApplyResources(this.tcFRG, "tcFRG");
 			this.tcFRG.Name = "tcFRG";
 			this.tcFRG.SelectedIndex = 0;
-			this.tcFRG.SelectedIndexChanged += new System.EventHandler(this.tcFRG_SelectedIndexChanged);
-			this.tcFRG.Enter += new System.EventHandler(this.tcFRG_Enter);
+			this.tcFRG.SelectedIndexChanged += this.tcFRG_SelectedIndexChanged;
+			this.tcFRG.Enter += this.tcFRG_Enter;
 			// 
 			// tabFind
 			// 
@@ -97,16 +96,16 @@ private System.ComponentModel.Container components = null;
 			// 
 			// btnCancel
 			// 
-			this.btnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
+			this.btnCancel.DialogResult = Majorsilence.Forms.DialogResult.Cancel;
 			resources.ApplyResources(this.btnCancel, "btnCancel");
 			this.btnCancel.Name = "btnCancel";
-			this.btnCancel.Click += new System.EventHandler(this.btnCancel_Click);
+			this.btnCancel.Click += this.btnCancel_Click;
 			// 
 			// btnNext
 			// 
 			resources.ApplyResources(this.btnNext, "btnNext");
 			this.btnNext.Name = "btnNext";
-			this.btnNext.Click += new System.EventHandler(this.btnNext_Click);
+			this.btnNext.Click += this.btnNext_Click;
 			// 
 			// chkCase
 			// 
@@ -142,7 +141,7 @@ private System.ComponentModel.Container components = null;
 			// 
 			resources.ApplyResources(this.txtFind, "txtFind");
 			this.txtFind.Name = "txtFind";
-			this.txtFind.TextChanged += new System.EventHandler(this.txtFind_TextChanged);
+			this.txtFind.TextChanged += this.txtFind_TextChanged;
 			// 
 			// tabReplace
 			// 
@@ -163,13 +162,13 @@ private System.ComponentModel.Container components = null;
 			// 
 			resources.ApplyResources(this.bCloseReplace, "bCloseReplace");
 			this.bCloseReplace.Name = "bCloseReplace";
-			this.bCloseReplace.Click += new System.EventHandler(this.btnCancel_Click);
+			this.bCloseReplace.Click += this.btnCancel_Click;
 			// 
 			// btnFindNext
 			// 
 			resources.ApplyResources(this.btnFindNext, "btnFindNext");
 			this.btnFindNext.Name = "btnFindNext";
-			this.btnFindNext.Click += new System.EventHandler(this.btnFindNext_Click);
+			this.btnFindNext.Click += this.btnFindNext_Click;
 			// 
 			// chkMatchCase
 			// 
@@ -180,19 +179,19 @@ private System.ComponentModel.Container components = null;
 			// 
 			resources.ApplyResources(this.btnReplaceAll, "btnReplaceAll");
 			this.btnReplaceAll.Name = "btnReplaceAll";
-			this.btnReplaceAll.Click += new System.EventHandler(this.btnReplaceAll_Click);
+			this.btnReplaceAll.Click += this.btnReplaceAll_Click;
 			// 
 			// btnReplace
 			// 
 			resources.ApplyResources(this.btnReplace, "btnReplace");
 			this.btnReplace.Name = "btnReplace";
-			this.btnReplace.Click += new System.EventHandler(this.btnReplace_Click);
+			this.btnReplace.Click += this.btnReplace_Click;
 			// 
 			// txtFindR
 			// 
 			resources.ApplyResources(this.txtFindR, "txtFindR");
 			this.txtFindR.Name = "txtFindR";
-			this.txtFindR.TextChanged += new System.EventHandler(this.txtFindR_TextChanged);
+			this.txtFindR.TextChanged += this.txtFindR_TextChanged;
 			// 
 			// label3
 			// 
@@ -223,7 +222,7 @@ private System.ComponentModel.Container components = null;
 			// 
 			resources.ApplyResources(this.bCloseGoto, "bCloseGoto");
 			this.bCloseGoto.Name = "bCloseGoto";
-			this.bCloseGoto.Click += new System.EventHandler(this.btnCancel_Click);
+			this.bCloseGoto.Click += this.btnCancel_Click;
 			// 
 			// txtLine
 			// 
@@ -239,7 +238,7 @@ private System.ComponentModel.Container components = null;
 			// 
 			resources.ApplyResources(this.btnGoto, "btnGoto");
 			this.btnGoto.Name = "btnGoto";
-			this.btnGoto.Click += new System.EventHandler(this.btnGoto_Click);
+			this.btnGoto.Click += this.btnGoto_Click;
 			// 
 			// FindTab
 			// 
@@ -248,7 +247,7 @@ private System.ComponentModel.Container components = null;
 			this.Controls.Add(this.tcFRG);
 			this.Name = "FindTab";
 			this.TopMost = true;
-			this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.FindTab_FormClosed);
+			this.FormClosed += this.FindTab_FormClosed;
 			this.tcFRG.ResumeLayout(false);
 			this.tabFind.ResumeLayout(false);
 			this.tabFind.PerformLayout();

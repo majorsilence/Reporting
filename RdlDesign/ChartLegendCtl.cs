@@ -3,9 +3,8 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Drawing;
 using System.Data;
-using System.Windows.Forms;
+using Majorsilence.Forms;
 using System.Xml;
 
 namespace Majorsilence.Reporting.RdlDesign
@@ -13,17 +12,17 @@ namespace Majorsilence.Reporting.RdlDesign
 	/// <summary>
 	/// Summary description for ChartCtl.
 	/// </summary>
-	internal class ChartLegendCtl : System.Windows.Forms.UserControl, IProperty
+	internal class ChartLegendCtl : Majorsilence.Forms.UserControl, IProperty
 	{
         private List<XmlNode> _ReportItems;
 		private DesignXmlDraw _Draw;
 		bool fVisible, fLayout, fPosition, fInsidePlotArea;
-		private System.Windows.Forms.Label label1;
-		private System.Windows.Forms.Label label2;
-		private System.Windows.Forms.ComboBox cbPosition;
-		private System.Windows.Forms.ComboBox cbLayout;
-		private System.Windows.Forms.CheckBox chkVisible;
-		private System.Windows.Forms.CheckBox chkInsidePlotArea;
+		private Majorsilence.Forms.Label label1;
+		private Majorsilence.Forms.Label label2;
+		private Majorsilence.Forms.ComboBox cbPosition;
+		private Majorsilence.Forms.ComboBox cbLayout;
+		private Majorsilence.Forms.CheckBox chkVisible;
+		private Majorsilence.Forms.CheckBox chkInsidePlotArea;
 		/// <summary> 
 		/// Required designer variable.
 		/// </summary>
@@ -74,14 +73,14 @@ namespace Majorsilence.Reporting.RdlDesign
 		/// </summary>
 		private void InitializeComponent()
 		{
-			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ChartLegendCtl));
+			Majorsilence.Forms.ComponentResourceManager resources = new Majorsilence.Forms.ComponentResourceManager(typeof(ChartLegendCtl));
             this.DoubleBuffered = true;
-			this.label1 = new System.Windows.Forms.Label();
-			this.label2 = new System.Windows.Forms.Label();
-			this.cbPosition = new System.Windows.Forms.ComboBox();
-			this.cbLayout = new System.Windows.Forms.ComboBox();
-			this.chkVisible = new System.Windows.Forms.CheckBox();
-			this.chkInsidePlotArea = new System.Windows.Forms.CheckBox();
+			this.label1 = new Majorsilence.Forms.Label();
+			this.label2 = new Majorsilence.Forms.Label();
+			this.cbPosition = new Majorsilence.Forms.ComboBox();
+			this.cbLayout = new Majorsilence.Forms.ComboBox();
+			this.chkVisible = new Majorsilence.Forms.CheckBox();
+			this.chkInsidePlotArea = new Majorsilence.Forms.CheckBox();
 			this.SuspendLayout();
 			// 
 			// label1
@@ -97,7 +96,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			// cbPosition
 			// 
 			resources.ApplyResources(this.cbPosition, "cbPosition");
-			this.cbPosition.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+			this.cbPosition.DropDownStyle = Majorsilence.Forms.ComboBoxStyle.DropDownList;
 			this.cbPosition.Items.AddRange(new object[] {
             resources.GetString("cbPosition.Items"),
             resources.GetString("cbPosition.Items1"),
@@ -112,30 +111,30 @@ namespace Majorsilence.Reporting.RdlDesign
             resources.GetString("cbPosition.Items10"),
             resources.GetString("cbPosition.Items11")});
 			this.cbPosition.Name = "cbPosition";
-			this.cbPosition.SelectedIndexChanged += new System.EventHandler(this.cbPosition_SelectedIndexChanged);
+			this.cbPosition.SelectedIndexChanged += this.cbPosition_SelectedIndexChanged;
 			// 
 			// cbLayout
 			// 
 			resources.ApplyResources(this.cbLayout, "cbLayout");
-			this.cbLayout.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+			this.cbLayout.DropDownStyle = Majorsilence.Forms.ComboBoxStyle.DropDownList;
 			this.cbLayout.Items.AddRange(new object[] {
             resources.GetString("cbLayout.Items"),
             resources.GetString("cbLayout.Items1"),
             resources.GetString("cbLayout.Items2")});
 			this.cbLayout.Name = "cbLayout";
-			this.cbLayout.SelectedIndexChanged += new System.EventHandler(this.cbLayout_SelectedIndexChanged);
+			this.cbLayout.SelectedIndexChanged += this.cbLayout_SelectedIndexChanged;
 			// 
 			// chkVisible
 			// 
 			resources.ApplyResources(this.chkVisible, "chkVisible");
 			this.chkVisible.Name = "chkVisible";
-			this.chkVisible.CheckedChanged += new System.EventHandler(this.chkVisible_CheckedChanged);
+			this.chkVisible.CheckedChanged += this.chkVisible_CheckedChanged;
 			// 
 			// chkInsidePlotArea
 			// 
 			resources.ApplyResources(this.chkInsidePlotArea, "chkInsidePlotArea");
 			this.chkInsidePlotArea.Name = "chkInsidePlotArea";
-			this.chkInsidePlotArea.CheckedChanged += new System.EventHandler(this.chkInsidePlotArea_CheckedChanged);
+			this.chkInsidePlotArea.CheckedChanged += this.chkInsidePlotArea_CheckedChanged;
 			// 
 			// ChartLegendCtl
 			// 

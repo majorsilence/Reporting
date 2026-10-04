@@ -2,11 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
-#if DRAWINGCOMPAT
 using Draw2 = Majorsilence.Forms.Drawing;
-#else
-using Draw2 = System.Drawing;
-#endif
 using System.ComponentModel;            // need this for the properties metadata
 using System.Xml;
 using System.Text.RegularExpressions;

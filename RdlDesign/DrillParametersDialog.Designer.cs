@@ -1,33 +1,32 @@
 using System;
-using System.Windows.Forms;
-using System.Drawing;
+using Majorsilence.Forms;
 using System.ComponentModel;
 using System.Collections;
 
 namespace Majorsilence.Reporting.RdlDesign
 {
-    internal partial class DrillParametersDialog : System.Windows.Forms.Form
+    internal partial class DrillParametersDialog : Majorsilence.Forms.Form
 	{
 		#region Windows Form Designer generated code
-private System.Windows.Forms.Label label1;
-private System.Windows.Forms.Button bFile;
-private System.Windows.Forms.TextBox tbReportFile;
-private System.Windows.Forms.DataGridView dgParms;
-private System.Windows.Forms.Button bRefreshParms;
-private System.Windows.Forms.Button bOK;
-private System.Windows.Forms.Button bCancel;
+private Majorsilence.Forms.Label label1;
+private Majorsilence.Forms.Button bFile;
+private Majorsilence.Forms.TextBox tbReportFile;
+private Majorsilence.Forms.DataGridView dgParms;
+private Majorsilence.Forms.Button bRefreshParms;
+private Majorsilence.Forms.Button bOK;
+private Majorsilence.Forms.Button bCancel;
 private System.ComponentModel.Container components = null;
 
 		private void InitializeComponent()
 		{
-			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(DrillParametersDialog));
-			this.dgParms = new System.Windows.Forms.DataGridView();
-			this.label1 = new System.Windows.Forms.Label();
-			this.tbReportFile = new System.Windows.Forms.TextBox();
-			this.bFile = new System.Windows.Forms.Button();
-			this.bRefreshParms = new System.Windows.Forms.Button();
-			this.bOK = new System.Windows.Forms.Button();
-			this.bCancel = new System.Windows.Forms.Button();
+			Majorsilence.Forms.ComponentResourceManager resources = new Majorsilence.Forms.ComponentResourceManager(typeof(DrillParametersDialog));
+			this.dgParms = new Majorsilence.Forms.DataGridView();
+			this.label1 = new Majorsilence.Forms.Label();
+			this.tbReportFile = new Majorsilence.Forms.TextBox();
+			this.bFile = new Majorsilence.Forms.Button();
+			this.bRefreshParms = new Majorsilence.Forms.Button();
+			this.bOK = new Majorsilence.Forms.Button();
+			this.bCancel = new Majorsilence.Forms.Button();
 			((System.ComponentModel.ISupportInitialize)(this.dgParms)).BeginInit();
 			this.SuspendLayout();
 			// 
@@ -51,26 +50,26 @@ private System.ComponentModel.Container components = null;
 			// 
 			resources.ApplyResources(this.bFile, "bFile");
 			this.bFile.Name = "bFile";
-			this.bFile.Click += new System.EventHandler(this.bFile_Click);
+			this.bFile.Click += this.bFile_Click;
 			// 
 			// bRefreshParms
 			// 
 			resources.ApplyResources(this.bRefreshParms, "bRefreshParms");
 			this.bRefreshParms.Name = "bRefreshParms";
-			this.bRefreshParms.Click += new System.EventHandler(this.bRefreshParms_Click);
+			this.bRefreshParms.Click += this.bRefreshParms_Click;
 			// 
 			// bOK
 			// 
 			resources.ApplyResources(this.bOK, "bOK");
-			this.bOK.DialogResult = System.Windows.Forms.DialogResult.OK;
+			this.bOK.DialogResult = Majorsilence.Forms.DialogResult.OK;
 			this.bOK.Name = "bOK";
-			this.bOK.Click += new System.EventHandler(this.bOK_Click);
+			this.bOK.Click += this.bOK_Click;
 			// 
 			// bCancel
 			// 
 			resources.ApplyResources(this.bCancel, "bCancel");
 			this.bCancel.CausesValidation = false;
-			this.bCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
+			this.bCancel.DialogResult = Majorsilence.Forms.DialogResult.Cancel;
 			this.bCancel.Name = "bCancel";
 			// 
 			// DrillParametersDialog
@@ -86,12 +85,12 @@ private System.ComponentModel.Container components = null;
 			this.Controls.Add(this.tbReportFile);
 			this.Controls.Add(this.label1);
 			this.Controls.Add(this.dgParms);
-			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
+			this.FormBorderStyle = Majorsilence.Forms.FormBorderStyle.FixedDialog;
 			this.MaximizeBox = false;
 			this.MinimizeBox = false;
 			this.Name = "DrillParametersDialog";
 			this.ShowInTaskbar = false;
-			this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
+			this.SizeGripStyle = Majorsilence.Forms.SizeGripStyle.Hide;
 			((System.ComponentModel.ISupportInitialize)(this.dgParms)).EndInit();
 			this.ResumeLayout(false);
 			this.PerformLayout();

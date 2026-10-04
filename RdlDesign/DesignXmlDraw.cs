@@ -5,15 +5,16 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Drawing.Drawing2D;
-using System.Drawing.Imaging;
+using Majorsilence.Forms.Drawing;
+using Majorsilence.Forms.Drawing.Drawing2D;
+using Majorsilence.Forms.Drawing.Imaging;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
-using System.Windows.Forms;
+using Majorsilence.Forms;
 using System.Xml;
 using System.ComponentModel;
 
@@ -1516,6 +1517,11 @@ namespace Majorsilence.Reporting.RdlDesign
             string type = GetCustomReportItemType(tNode.InnerText);
            
             ICustomReportItem cri = null;
+            // ICustomReportItem.DrawDesignerImage needs Majorsilence.Forms.Drawing.Bitmap (the
+            // RdlEngine plugin interface's own DRAWINGCOMPAT type) -- bridge to the UI framework's
+            // Bitmap via a PNG round-trip through a MemoryStream, since neither exposes a public
+            // SKBitmap accessor the other assembly can use directly.
+            Majorsilence.Forms.Drawing.Bitmap engineBm = null;
             Bitmap bm = null;
             try
             {
@@ -1526,8 +1532,14 @@ namespace Majorsilence.Reporting.RdlDesign
                     width = 1;
                 if (height <= 0)
                     height = 1;
-                bm = new Bitmap(width, height);
-                cri.DrawDesignerImage(ref bm);
+                engineBm = new Majorsilence.Forms.Drawing.Bitmap(width, height);
+                cri.DrawDesignerImage(ref engineBm);
+                using (var ms = new MemoryStream())
+                {
+                    engineBm.Save(ms, Majorsilence.Forms.Drawing.Imaging.ImageFormat.Png);
+                    ms.Position = 0;
+                    bm = new Bitmap(ms);
+                }
                 DrawImageSized(xNode,ImageSizingEnum.Clip, bm, si, ir);
                 DrawBorder(si, ir);
             }
@@ -1539,6 +1551,8 @@ namespace Majorsilence.Reporting.RdlDesign
             {
                 if (cri != null)
                     cri.Dispose();
+                if (engineBm != null)
+                    engineBm.Dispose();
                 if (bm != null)
                     bm.Dispose();
             }
@@ -1623,12 +1637,12 @@ namespace Majorsilence.Reporting.RdlDesign
 			byte[] ba = Convert.FromBase64String(id.InnerText);
 			
 			Stream strm=null;
-			System.Drawing.Image im=null;
+			Majorsilence.Forms.Drawing.Image im=null;
 			bool bResize=false;
 			try 
 			{
 				strm = new MemoryStream(ba);
-				im = System.Drawing.Image.FromStream(strm);	 
+				im = Majorsilence.Forms.Drawing.Image.FromStream(strm);	 
 				// Draw based on sizing options
                 // Josh: adds base rectangle so the "paper" size is known when drawing image.
                 bResize = DrawImageSized(iNode, im, si, r, rBase); 
@@ -1647,7 +1661,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			return bResize;
 		}
 
-        private System.Drawing.Image GetImageEmbedded(string emName)
+        private Majorsilence.Forms.Drawing.Image GetImageEmbedded(string emName)
         {
             // First we need to find the embedded image list
             XmlNode emNode = this.GetNamedChildNode(rDoc.LastChild, "EmbeddedImages");
@@ -1675,11 +1689,11 @@ namespace Majorsilence.Reporting.RdlDesign
             byte[] ba = Convert.FromBase64String(id.InnerText);
 
             Stream strm = null;
-            System.Drawing.Image im = null;
+            Majorsilence.Forms.Drawing.Image im = null;
             try
             {
                 strm = new MemoryStream(ba);
-                im = System.Drawing.Image.FromStream(strm);
+                im = Majorsilence.Forms.Drawing.Image.FromStream(strm);
             }
             catch 
             {
@@ -1698,7 +1712,7 @@ namespace Majorsilence.Reporting.RdlDesign
         private async Task<bool> DrawImageExternal(XmlNode iNode, XmlNode sNode, XmlNode vNode, StyleInfo si, RectangleF r)
         {
             Stream strm = null;
-            System.Drawing.Image im = null;
+            Majorsilence.Forms.Drawing.Image im = null;
             bool bResize = false;
             try
             {
@@ -1723,7 +1737,7 @@ namespace Majorsilence.Reporting.RdlDesign
                     {
                         strm = new FileStream(fname, FileMode.Open, FileAccess.Read, FileShare.Read);
                     }
-                    im = System.Drawing.Image.FromStream(strm);
+                    im = Majorsilence.Forms.Drawing.Image.FromStream(strm);
                     // Draw based on sizing options
                     bResize = DrawImageSized(iNode, im, si, r);
                 }
@@ -1802,7 +1816,7 @@ namespace Majorsilence.Reporting.RdlDesign
 					break;
 				case ImageSizingEnum.Clip:
 					Region saveRegion = g.Clip;
-					Region clipRegion = new Region(g.Clip.GetRegionData());
+					Region clipRegion = g.Clip.Clone();
 					//RectangleF r3 = new RectangleF(PointsX(r2.Left), PointsY(r2.Top), PointsX(r2.Width), PointsY(r2.Height));
 					clipRegion.Intersect(r2);
 					g.Clip = clipRegion;
@@ -2392,7 +2406,7 @@ namespace Majorsilence.Reporting.RdlDesign
 		private async Task<RectangleF> DrawTextbox(XmlNode xNode, RectangleF r)
 		{
 			StyleInfo si = await GetStyleInfo(xNode);
-			if (si.Color == Color.Empty)
+			if (si.Color.IsEmpty)
 				si.Color = Color.Black;
 
 			XmlNode v = GetNamedChildNode(xNode, "Value");
@@ -2612,7 +2626,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			Color clr;
 			try
 			{
-				clr = ColorTranslator.FromHtml(c);
+				clr = Majorsilence.Forms.ColorTranslator.FromHtml(c);
 			}
 			catch
 			{
@@ -2650,13 +2664,13 @@ namespace Majorsilence.Reporting.RdlDesign
 						break;
 				}
 			}
-			if (si.BColorLeft == Color.Empty)
+			if (si.BColorLeft.IsEmpty)
 				si.BColorLeft = dColor;
-			if (si.BColorRight == Color.Empty)
+			if (si.BColorRight.IsEmpty)
 				si.BColorRight = dColor;
-			if (si.BColorTop == Color.Empty)
+			if (si.BColorTop.IsEmpty)
 				si.BColorTop = dColor;
-			if (si.BColorBottom == Color.Empty)
+			if (si.BColorBottom.IsEmpty)
 				si.BColorBottom = dColor;
 		}
 
@@ -2751,7 +2765,7 @@ namespace Majorsilence.Reporting.RdlDesign
         {
             //  TODO: this is problematic since it require a PageImage
             Stream strm = null;
-            System.Drawing.Image im = null;
+            Majorsilence.Forms.Drawing.Image im = null;
             ImageRepeat repeat = ImageRepeat.Repeat;
             string source = null;
             string val = null;
@@ -2814,7 +2828,7 @@ namespace Majorsilence.Reporting.RdlDesign
                     }
                     else
                         strm = new FileStream(val, FileMode.Open, FileAccess.Read, FileShare.Read);
-                    im = System.Drawing.Image.FromStream(strm);
+                    im = Majorsilence.Forms.Drawing.Image.FromStream(strm);
                 }
                 else   // Embedded case
                 {
@@ -2823,12 +2837,12 @@ namespace Majorsilence.Reporting.RdlDesign
                 int height = im.Height;							// save height and width
                 int width = im.Width;
                 MemoryStream ostrm = new MemoryStream();
-                System.Drawing.Imaging.ImageCodecInfo[] info;
+                Majorsilence.Forms.Drawing.Imaging.ImageCodecInfo[] info;
                 info = ImageCodecInfo.GetImageEncoders();
                 EncoderParameters encoderParameters;
                 encoderParameters = new EncoderParameters(1);
                 encoderParameters.Param[0] = new EncoderParameter(Encoder.Quality, 100L);
-                System.Drawing.Imaging.ImageCodecInfo codec = null;
+                Majorsilence.Forms.Drawing.Imaging.ImageCodecInfo codec = null;
                 for (int i = 0; i < info.Length; i++)
                 {
                     if (info[i].FormatDescription == "JPEG")
@@ -2841,7 +2855,7 @@ namespace Majorsilence.Reporting.RdlDesign
 
                 byte[] ba = ostrm.ToArray();
                 ostrm.Close();
-                si.BackgroundImage = new PageImage(ImageFormat.Jpeg, ba, width, height);	// Create an image
+                si.BackgroundImage = new PageImage(Majorsilence.Forms.Drawing.Imaging.ImageFormat.Jpeg, ba, width, height);	// Create an image
                 si.BackgroundImage.Repeat = repeat;
             }
             catch
@@ -3007,7 +3021,7 @@ namespace Majorsilence.Reporting.RdlDesign
         private void DrawImageBackground(PageImage pi, StyleInfo si, RectangleF r)
         {
             Stream strm = null;
-            System.Drawing.Image im = null;
+            Majorsilence.Forms.Drawing.Image im = null;
             try
             {
                 RectangleF r2 = new RectangleF(r.Left + si.PaddingLeft,
@@ -3016,7 +3030,7 @@ namespace Majorsilence.Reporting.RdlDesign
                     r.Height - (si.PaddingTop + si.PaddingBottom));
 
                 strm = new MemoryStream(pi.GetImageData((int)r2.Width, (int)r2.Height));
-                im = System.Drawing.Image.FromStream(strm);
+                im = Majorsilence.Forms.Drawing.Image.FromStream(strm);
 
                 int repeatX = 0;
                 int repeatY = 0;
@@ -3051,7 +3065,7 @@ namespace Majorsilence.Reporting.RdlDesign
                 float startY = dr.Top;
 
                 Region saveRegion = g.Clip;
-                Region clipRegion = new Region(g.Clip.GetRegionData());
+                Region clipRegion = g.Clip.Clone();
  
                 clipRegion.Intersect(dr);
                 g.Clip = clipRegion;
@@ -3331,7 +3345,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			DrawBorder(si, r); // Draw the border if needed
 		}
 
-		internal void PasteImage(XmlNode parent, System.Drawing.Bitmap img, PointF p)
+		internal void PasteImage(XmlNode parent, Majorsilence.Forms.Drawing.Bitmap img, PointF p)
 		{
             // Josh: Adds a default ZIndex of 1 to paste above "background". 
 			string t = string.Format(NumberFormatInfo.InvariantInfo,

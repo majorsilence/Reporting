@@ -2,10 +2,9 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;            // need this for the properties metadata
-using System.Drawing.Design;
 using System.Globalization;
-using System.Windows.Forms;
-using System.Windows.Forms.Design;
+using Majorsilence.Forms;
+using Majorsilence.Forms.Design;
 
 namespace Majorsilence.Reporting.RdlDesign
 {

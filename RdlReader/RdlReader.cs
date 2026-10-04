@@ -2,8 +2,8 @@
 using System;
 using System.Drawing;
 using System.Collections;
-using System.Windows.Forms;
-using System.Drawing.Printing;
+using Majorsilence.Forms;
+using Majorsilence.Forms.Printing;
 using System.Xml;
 using System.IO;
 using RdlReader.Resources;
@@ -44,7 +44,7 @@ namespace Majorsilence.Reporting.RdlReader
 
             Application.AddMessageFilter(this);
 
-            this.Closing += new System.ComponentModel.CancelEventHandler(this.RdlReader_Closing);
+            this.Closing += this.RdlReader_Closing;
             _GetPassword = new Rdl.NeedPassword(this.GetPassword);
 
             this.Load += RdlReader_Load;
@@ -62,7 +62,7 @@ namespace Majorsilence.Reporting.RdlReader
             {
                 foreach (var dict in _CurrentFiles)
                 {
-                    MDIChild mc = new MDIChild(this.ClientRectangle.Width * 3 / 4, this.ClientRectangle.Height * 3 / 4);
+                    MDIChild mc = new MDIChild(this.ClientSize.Width * 3 / 4, this.ClientSize.Height * 3 / 4);
                     mc.MdiParent = this;
                     mc.Viewer.GetDataSourceReferencePassword = _GetPassword;
 
@@ -91,27 +91,19 @@ namespace Majorsilence.Reporting.RdlReader
         /// </summary>
         /// <param name="m"></param>
         /// <returns></returns>
+        // This was raw Win32 message-loop plumbing (user32.dll WindowFromPoint/SendMessage P/Invoke,
+        // WM_MOUSEWHEEL constant matching) to route mousewheel scrolling to whatever MDI child is
+        // under the cursor even without focus -- fundamentally Windows-only and would fail at
+        // runtime on Linux/macOS even if it compiled. It's also already dead code under
+        // Majorsilence.Forms: Application.AddMessageFilter is a documented no-op (nothing ever
+        // calls PreFilterMessage), and Avalonia's own input pipeline routes wheel events to the
+        // control under the pointer by default anyway -- the behavior this hack was working
+        // around doesn't exist here. Kept the IMessageFilter interface for API shape, gutted the
+        // Win32-specific body.
         public bool PreFilterMessage(ref Message m)
         {
-            if (m.Msg == 0x20a)
-            {
-                // WM_MOUSEWHEEL, find the control at screen position m.LParam
-                Point pos = new Point(m.LParam.ToInt32() & 0xffff, m.LParam.ToInt32() >> 16);
-                IntPtr hWnd = WindowFromPoint(pos);
-                if (hWnd != IntPtr.Zero && hWnd != m.HWnd && Control.FromHandle(hWnd) != null)
-                {
-                    SendMessage(hWnd, m.Msg, m.WParam, m.LParam);
-                    return true;
-                }
-            }
             return false;
         }
-
-        // P/Invoke declarations
-        [DllImport("user32.dll")]
-        private static extern IntPtr WindowFromPoint(Point pt);
-        [DllImport("user32.dll")]
-        private static extern IntPtr SendMessage(IntPtr hWnd, int msg, IntPtr wp, IntPtr lp);
 
         /// <summary>
         /// Clean up any resources being used.
@@ -232,6 +224,14 @@ namespace Majorsilence.Reporting.RdlReader
             Application.Run(new RdlReader());
         }
 
+        // Majorsilence.Forms has no real print-spooler access (its PrintDocument always renders
+        // straight to a PDF file -- see MIGRATION-NOTES.md's D2 writeup), so the `-print
+        // <printername>` CLI flag's actual job -- silently sending a report to a named OS
+        // printer with no file left behind -- can't be done at all under this stack; there's no
+        // printer-selection API to redirect to. Best-effort replacement: render straight to a
+        // PDF next to the source report instead of throwing, so the flag still produces useful
+        // output for batch/automation use, but printerName is otherwise unused/undocumented as a
+        // known gap.
         public static async Task SilentPrint(string reportPath, string parameters, string printerName = null)
         {
             var rdlViewer = new Majorsilence.Reporting.RdlViewer.RdlViewer();
@@ -240,33 +240,11 @@ namespace Majorsilence.Reporting.RdlReader
             rdlViewer.Parameters = parameters;
             await rdlViewer.Rebuild();
 
-            var pd = new PrintDocument();
-            pd.DocumentName = rdlViewer.SourceFile.LocalPath;
-            pd.PrinterSettings.FromPage = 1;
-            pd.PrinterSettings.ToPage = rdlViewer.PageCount;
-            pd.PrinterSettings.MaximumPage = rdlViewer.PageCount;
-            pd.PrinterSettings.MinimumPage = 1;
-            pd.DefaultPageSettings.Landscape = rdlViewer.PageWidth > rdlViewer.PageHeight;
-            pd.PrintController = new StandardPrintController();
-            // convert pt to hundredths of an inch.
-            pd.DefaultPageSettings.PaperSize = new PaperSize(
-                "",
-                (int)((rdlViewer.PageWidth / 72.27) * 100),
-                (int)((rdlViewer.PageHeight / 72.27) * 100));
-
-            if (!string.IsNullOrWhiteSpace(printerName) && printerName != SET_DEFAULT_PRINTER)
-            {
-                pd.DefaultPageSettings.PrinterSettings.PrinterName = printerName;
-            }
+            string outputPdfPath = Path.ChangeExtension(reportPath, ".pdf");
 
             try
             {
-                if (pd.PrinterSettings.PrintRange == PrintRange.Selection)
-                {
-                    pd.PrinterSettings.FromPage = rdlViewer.PageCurrent;
-                }
-
-                await rdlViewer.Print(pd);
+                await rdlViewer.SaveAs(outputPdfPath, Majorsilence.Reporting.Rdl.OutputPresentationType.PDF);
             }
             catch (Exception ex)
             {
@@ -354,7 +332,7 @@ namespace Majorsilence.Reporting.RdlReader
             }
         }
 
-        private async void menuRecentItem_Click(object sender, System.EventArgs e)
+        private async void menuRecentItem_Click(object sender, EventArgs e)
         {
             ToolStripMenuItem m = (ToolStripMenuItem)sender;
             Uri file = new Uri(m.Text.Substring(2));
@@ -379,7 +357,7 @@ namespace Majorsilence.Reporting.RdlReader
             }
             if (mcOpen == null)
             {
-                MDIChild mc = new MDIChild(this.ClientRectangle.Width * 3 / 4, this.ClientRectangle.Height * 3 / 4);
+                MDIChild mc = new MDIChild(this.ClientSize.Width * 3 / 4, this.ClientSize.Height * 3 / 4);
                 mc.MdiParent = this;
                 mc.Viewer.GetDataSourceReferencePassword = _GetPassword;
                 await mc.SetSourceFile(file);
@@ -404,30 +382,20 @@ namespace Majorsilence.Reporting.RdlReader
 
             printChild = mc;
 
-            PrintDocument pd = new PrintDocument();
-            pd.DocumentName = mc.SourceFile.LocalPath;
-            pd.PrinterSettings.FromPage = 1;
-            pd.PrinterSettings.ToPage = mc.Viewer.PageCount;
-            pd.PrinterSettings.MaximumPage = mc.Viewer.PageCount;
-            pd.PrinterSettings.MinimumPage = 1;
-            if (mc.Viewer.PageWidth > mc.Viewer.PageHeight)
-                pd.DefaultPageSettings.Landscape = true;
-            else
-                pd.DefaultPageSettings.Landscape = false;
-
-            PrintDialog dlg = new PrintDialog();
-            dlg.Document = pd;
-            dlg.AllowSelection = true;
-            dlg.AllowSomePages = true;
-            if (dlg.ShowDialog() == DialogResult.OK)
+            // No real print-spooler integration under Majorsilence.Forms -- see MIGRATION-NOTES.md
+            // (D2) and RdlViewer.Forms/ViewerToolstrip.cs's PrintClicked for the same redesign.
+            // Majorsilence.Forms.PrintDialog is a no-op stub with no real UI, so go straight to
+            // "export as PDF" instead of pretending to show a print dialog.
+            SaveFileDialog sfd = new SaveFileDialog
+            {
+                Filter = "PDF files (*.pdf)|*.pdf",
+                FileName = Path.GetFileNameWithoutExtension(mc.SourceFile.LocalPath) + ".pdf",
+            };
+            if ( sfd.ShowDialog(this) == DialogResult.OK)
             {
                 try
                 {
-                    if (pd.PrinterSettings.PrintRange == PrintRange.Selection)
-                    {
-                        pd.PrinterSettings.FromPage = mc.Viewer.PageCurrent;
-                    }
-                    await mc.Viewer.Print(pd);
+                    await mc.Viewer.SaveAs(sfd.FileName, Majorsilence.Reporting.Rdl.OutputPresentationType.PDF);
                 }
                 catch (Exception ex)
                 {
@@ -461,7 +429,7 @@ namespace Majorsilence.Reporting.RdlReader
             else
                 sfd.FileName = "*.pdf";
 
-            if (sfd.ShowDialog(this) != DialogResult.OK)
+            if ( sfd.ShowDialog(this) != DialogResult.OK)
                 return;
 
             // save the report in a rendered format 
@@ -532,13 +500,13 @@ namespace Majorsilence.Reporting.RdlReader
             return;
         }
 
-        private void menuHelpAbout_Click(object sender, System.EventArgs ea)
+        private void menuHelpAbout_Click(object sender, EventArgs ea)
         {
             DialogAbout dlg = new DialogAbout();
             dlg.ShowDialog();
         }
 
-        private void menuCopy_Click(object sender, System.EventArgs ea)
+        private void menuCopy_Click(object sender, EventArgs ea)
         {
             MDIChild mc = this.ActiveMdiChild as MDIChild;
             if (mc == null || !mc.Viewer.CanCopy)
@@ -547,7 +515,7 @@ namespace Majorsilence.Reporting.RdlReader
             mc.Viewer.Copy();
         }
 
-        private async void menuFind_Click(object sender, System.EventArgs ea)
+        private async void menuFind_Click(object sender, EventArgs ea)
         {
             MDIChild mc = this.ActiveMdiChild as MDIChild;
             if (mc == null)
@@ -558,7 +526,7 @@ namespace Majorsilence.Reporting.RdlReader
             await mc.Viewer.FindNext();
         }
 
-        private void menuSelection_Click(object sender, System.EventArgs ea)
+        private void menuSelection_Click(object sender, EventArgs ea)
         {
             MDIChild mc = this.ActiveMdiChild as MDIChild;
             if (mc == null)
@@ -760,7 +728,7 @@ namespace Majorsilence.Reporting.RdlReader
             {
                 string menuText = string.Format("&{0} {1}", mi++, (string)(_RecentFiles.GetValueList()[i]));
                 ToolStripMenuItem m = new ToolStripMenuItem(menuText);
-                m.Click += new EventHandler(this.menuRecentItem_Click);
+                m.Click += this.menuRecentItem_Click;
                 recentFilesToolStripMenuItem.DropDownItems.Add(m);
             }
         }

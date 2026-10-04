@@ -1,0 +1,12 @@
+{
+  "name": "Account Statement",
+  "slug": "account-statement",
+  "description": "A statement of transactions grouped by month with a running balance column.",
+  "tags": ["business", "finance", "letter-size"],
+  "dataProvider": "Json",
+  "parameters": [],
+  "dataContract": {
+    "root": ["AccountNumber", "AccountHolderName", "AccountHolderAddress", "StatementPeriodStart", "StatementPeriodEnd", "OpeningBalance"],
+    "root.Transactions[]": ["Date", "Description", "Amount"]
+  }
+}

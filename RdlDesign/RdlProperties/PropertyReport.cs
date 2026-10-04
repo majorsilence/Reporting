@@ -2,11 +2,10 @@ using Majorsilence.Reporting.RdlDesign.Resources;
 
 using System;
 using System.ComponentModel;            // need this for the properties metadata
-using System.Drawing.Design;
 using System.Globalization;
 using System.Text;
-using System.Windows.Forms;
-using System.Windows.Forms.Design;
+using Majorsilence.Forms;
+using Majorsilence.Forms.Design;
 using System.Xml;
 
 namespace Majorsilence.Reporting.RdlDesign

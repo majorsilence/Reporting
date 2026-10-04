@@ -1,11 +1,10 @@
 
 using System;
-using System.Drawing;
 using System.Collections;
 using System.ComponentModel;
-using System.Windows.Forms;
+using Majorsilence.Forms;
 using System.Data;
-using System.Drawing.Printing;
+using Majorsilence.Forms.Printing;
 using Majorsilence.Reporting.Rdl;
 using Majorsilence.Reporting.RdlViewer;
 using System.Threading.Tasks;
@@ -26,7 +25,7 @@ namespace Majorsilence.Reporting.RdlReader
             // 
             // rdlViewer1
             // 
-            this.rdlViewer1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.rdlViewer1.Dock = Majorsilence.Forms.DockStyle.Fill;
             this.rdlViewer1.Location = new System.Drawing.Point(0, 0);
             this.rdlViewer1.Name = "rdlViewer1";
             this.rdlViewer1.Size = new System.Drawing.Size(width, height);
@@ -34,7 +33,8 @@ namespace Majorsilence.Reporting.RdlReader
             // 
             // RdlReader
             // 
-            this.AutoScaleBaseSize = new System.Drawing.Size(5, 13);
+            // AutoScaleBaseSize (legacy font-based dialog-unit scaling) has no Majorsilence.Forms
+            // equivalent and isn't needed -- Avalonia-backed rendering handles DPI scaling itself.
             this.ClientSize = new System.Drawing.Size(width, height);
             this.Controls.Add(this.rdlViewer1);
             this.Name = "";
@@ -80,7 +80,7 @@ namespace Majorsilence.Reporting.RdlReader
 
 		private void InitializeComponent()
 		{
-			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MDIChild));
+			Majorsilence.Forms.ComponentResourceManager resources = new Majorsilence.Forms.ComponentResourceManager(typeof(MDIChild));
 			this.SuspendLayout();
 			// 
 			// MDIChild

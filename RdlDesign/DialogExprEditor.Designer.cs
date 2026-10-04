@@ -1,12 +1,11 @@
 using System;
-using System.Windows.Forms;
-using System.Drawing;
+using Majorsilence.Forms;
 using System.ComponentModel;
 using System.Collections;
 
 namespace Majorsilence.Reporting.RdlDesign
 {
-    public partial class DialogExprEditor : System.Windows.Forms.Form
+    public partial class DialogExprEditor : Majorsilence.Forms.Form
 	{
 		#region Windows Form Designer generated code
 		private DesignXmlDraw _Draw;
@@ -22,16 +21,16 @@ private System.ComponentModel.Container components = null;
 
 		private void InitializeComponent()
 		{
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(DialogExprEditor));
-            this.splitContainer1 = new System.Windows.Forms.SplitContainer();
-            this.tvOp = new System.Windows.Forms.TreeView();
-            this.bCopy = new System.Windows.Forms.Button();
-            this.lOp = new System.Windows.Forms.Label();
-            this.scintilla1 = new ScintillaNET.Scintilla();
-            this.lExpr = new System.Windows.Forms.Label();
-            this.panel1 = new System.Windows.Forms.Panel();
-            this.bCancel = new System.Windows.Forms.Button();
-            this.bOK = new System.Windows.Forms.Button();
+            Majorsilence.Forms.ComponentResourceManager resources = new Majorsilence.Forms.ComponentResourceManager(typeof(DialogExprEditor));
+            this.splitContainer1 = new Majorsilence.Forms.SplitContainer();
+            this.tvOp = new Majorsilence.Forms.TreeView();
+            this.bCopy = new Majorsilence.Forms.Button();
+            this.lOp = new Majorsilence.Forms.Label();
+            this.scintilla1 = new Majorsilence.Reporting.RdlDesign.Syntax.Scintilla();
+            this.lExpr = new Majorsilence.Forms.Label();
+            this.panel1 = new Majorsilence.Forms.Panel();
+            this.bCancel = new Majorsilence.Forms.Button();
+            this.bOK = new Majorsilence.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
@@ -59,13 +58,13 @@ private System.ComponentModel.Container components = null;
             // 
             resources.ApplyResources(this.tvOp, "tvOp");
             this.tvOp.Name = "tvOp";
-            this.tvOp.DoubleClick += new System.EventHandler(this.tvOp_DoubleClick);
+            this.tvOp.DoubleClick += this.tvOp_DoubleClick;
             // 
             // bCopy
             // 
             resources.ApplyResources(this.bCopy, "bCopy");
             this.bCopy.Name = "bCopy";
-            this.bCopy.Click += new System.EventHandler(this.bCopy_Click);
+            this.bCopy.Click += this.bCopy_Click;
             // 
             // lOp
             // 
@@ -76,9 +75,9 @@ private System.ComponentModel.Container components = null;
             // 
             resources.ApplyResources(this.scintilla1, "scintilla1");
             this.scintilla1.HScrollBar = false;
-            this.scintilla1.Lexer = ScintillaNET.Lexer.VbScript;
+            this.scintilla1.Lexer = Majorsilence.Reporting.RdlDesign.Syntax.Lexer.VbScript;
             this.scintilla1.Name = "scintilla1";
-            this.scintilla1.WrapMode = ScintillaNET.WrapMode.Word;
+            this.scintilla1.WrapMode = Majorsilence.Reporting.RdlDesign.Syntax.WrapMode.Word;
             // 
             // lExpr
             // 
@@ -95,15 +94,15 @@ private System.ComponentModel.Container components = null;
             // bCancel
             // 
             resources.ApplyResources(this.bCancel, "bCancel");
-            this.bCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
+            this.bCancel.DialogResult = Majorsilence.Forms.DialogResult.Cancel;
             this.bCancel.Name = "bCancel";
             // 
             // bOK
             // 
             resources.ApplyResources(this.bOK, "bOK");
-            this.bOK.DialogResult = System.Windows.Forms.DialogResult.OK;
+            this.bOK.DialogResult = Majorsilence.Forms.DialogResult.OK;
             this.bOK.Name = "bOK";
-            this.bOK.Click += new System.EventHandler(this.bOK_Click);
+            this.bOK.Click += this.bOK_Click;
             // 
             // DialogExprEditor
             // 
@@ -111,12 +110,12 @@ private System.ComponentModel.Container components = null;
             this.CancelButton = this.bCancel;
             this.Controls.Add(this.splitContainer1);
             this.Controls.Add(this.panel1);
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.SizableToolWindow;
+            this.FormBorderStyle = Majorsilence.Forms.FormBorderStyle.SizableToolWindow;
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "DialogExprEditor";
             this.ShowInTaskbar = false;
-            this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Show;
+            this.SizeGripStyle = Majorsilence.Forms.SizeGripStyle.Show;
             this.splitContainer1.Panel1.ResumeLayout(false);
             this.splitContainer1.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).EndInit();
@@ -139,6 +138,6 @@ private System.ComponentModel.Container components = null;
 			base.Dispose( disposing );
 		}
 
-		private ScintillaNET.Scintilla scintilla1;
+		private Majorsilence.Reporting.RdlDesign.Syntax.Scintilla scintilla1;
 	}
 }

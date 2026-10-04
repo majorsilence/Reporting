@@ -1,12 +1,11 @@
 using System;
-using System.Windows.Forms;
-using System.Drawing;
+using Majorsilence.Forms;
 using System.ComponentModel;
 using System.Collections;
 
 namespace Majorsilence.Reporting.RdlMapFile
 {
-    public partial class DialogFindByKey : System.Windows.Forms.Form
+    public partial class DialogFindByKey : Majorsilence.Forms.Form
 	{
 		#region Windows Form Designer generated code
 		private DesignXmlDraw _Draw;
@@ -18,11 +17,11 @@ private System.ComponentModel.Container components = null;
 
 		private void InitializeComponent()
 		{
-			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(DialogFindByKey));
-			this.label1 = new System.Windows.Forms.Label();
-			this.bOK = new System.Windows.Forms.Button();
-			this.bCancel = new System.Windows.Forms.Button();
-			this.lbKeyList = new System.Windows.Forms.ListBox();
+			Majorsilence.Forms.ComponentResourceManager resources = new Majorsilence.Forms.ComponentResourceManager(typeof(DialogFindByKey));
+			this.label1 = new Majorsilence.Forms.Label();
+			this.bOK = new Majorsilence.Forms.Button();
+			this.bCancel = new Majorsilence.Forms.Button();
+			this.lbKeyList = new Majorsilence.Forms.ListBox();
 			this.SuspendLayout();
 			// 
 			// label1
@@ -35,22 +34,22 @@ private System.ComponentModel.Container components = null;
 			resources.ApplyResources(this.bOK, "bOK");
 			this.bOK.Name = "bOK";
 			this.bOK.UseVisualStyleBackColor = true;
-			this.bOK.Click += new System.EventHandler(this.bOK_Click);
+			this.bOK.Click += this.bOK_Click;
 			// 
 			// bCancel
 			// 
 			resources.ApplyResources(this.bCancel, "bCancel");
-			this.bCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
+			this.bCancel.DialogResult = Majorsilence.Forms.DialogResult.Cancel;
 			this.bCancel.Name = "bCancel";
 			this.bCancel.UseVisualStyleBackColor = true;
-			this.bCancel.Click += new System.EventHandler(this.bCancel_Click);
+			this.bCancel.Click += this.bCancel_Click;
 			// 
 			// lbKeyList
 			// 
 			resources.ApplyResources(this.lbKeyList, "lbKeyList");
 			this.lbKeyList.FormattingEnabled = true;
 			this.lbKeyList.Name = "lbKeyList";
-			this.lbKeyList.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
+			this.lbKeyList.SelectionMode = Majorsilence.Forms.SelectionMode.MultiExtended;
 			// 
 			// DialogFindByKey
 			// 
@@ -61,12 +60,12 @@ private System.ComponentModel.Container components = null;
 			this.Controls.Add(this.bCancel);
 			this.Controls.Add(this.bOK);
 			this.Controls.Add(this.label1);
-			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
+			this.FormBorderStyle = Majorsilence.Forms.FormBorderStyle.FixedDialog;
 			this.MaximizeBox = false;
 			this.MinimizeBox = false;
 			this.Name = "DialogFindByKey";
 			this.ShowInTaskbar = false;
-			this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
+			this.SizeGripStyle = Majorsilence.Forms.SizeGripStyle.Hide;
 			this.ResumeLayout(false);
 			this.PerformLayout();
 
