@@ -133,7 +133,7 @@ namespace Majorsilence.Reporting.Rdl
             try
             {
                 cn = RdlEngineConfig.GetConnection(_ConnectionProperties.DataProvider,
-                    await _ConnectionProperties.Connectstring(rpt));
+                    await ConnectstringFor(rpt));
                 if (cn != null)
                 {
 					if (cn is DbConnection dbConnection)
@@ -182,7 +182,7 @@ namespace Majorsilence.Reporting.Rdl
             try
             {
                 cn = RdlEngineConfig.GetConnection(_ConnectionProperties.DataProvider,
-                    await _ConnectionProperties.Connectstring(rpt));
+                    await ConnectstringFor(rpt));
                 if (cn != null)
                 {
                     if (cn is DbConnection dbConnection)
@@ -203,6 +203,45 @@ namespace Majorsilence.Reporting.Rdl
 
             ConnectDataSourceLogInfoAndCache(rpt, cn);
             return rc;
+        }
+
+        // The connection string the provider is given. A JSON data source's relative file= path is
+        // relative to the report, as <Rows File="..."/> is: the provider opened it against the process's
+        // working directory, so a report and its data file that worked from one place failed from
+        // another -- Examples/JsonToPdf/Employees.rdl reported "Could not find file" when opened in the
+        // designer, which runs from wherever it was launched.
+        private async Task<string> ConnectstringFor(Report rpt)
+        {
+            string cs = await _ConnectionProperties.Connectstring(rpt);
+
+            if (!string.Equals(_ConnectionProperties.DataProvider, "Json", StringComparison.OrdinalIgnoreCase))
+                return cs;
+
+            return ResolveRelativeFile(cs, rpt == null ? OwnerReport.ParseFolder : rpt.Folder);
+        }
+
+        // Rewrites a relative file= value in a ;-separated connection string to an absolute path under
+        // folder. Absolute paths, URLs and everything else in the string are left as they are.
+        internal static string ResolveRelativeFile(string connectString, string folder)
+        {
+            if (string.IsNullOrEmpty(connectString) || string.IsNullOrEmpty(folder))
+                return connectString;
+
+            string[] parts = connectString.Split(';');
+            for (int i = 0; i < parts.Length; i++)
+            {
+                int eq = parts[i].IndexOf('=');
+                if (eq < 0 || !string.Equals(parts[i].Substring(0, eq).Trim(), "file", StringComparison.OrdinalIgnoreCase))
+                    continue;
+
+                string path = parts[i].Substring(eq + 1).Trim();
+                if (path.Length == 0 || path.Contains("://") || Path.IsPathRooted(path))
+                    continue;
+
+                parts[i] = parts[i].Substring(0, eq + 1) + Path.GetFullPath(Path.Combine(folder, path));
+            }
+
+            return string.Join(";", parts);
         }
 
         private void ConnectDataSourceLogInfoAndCache(Report rpt, IDbConnection cn)
