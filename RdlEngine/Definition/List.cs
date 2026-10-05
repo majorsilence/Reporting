@@ -370,12 +370,13 @@ namespace Majorsilence.Reporting.Rdl
 	                        p.AddObject(border);
                         }
 
+                        int firstItem = p.Count;
                         if (_ReportItems != null)
                             await _ReportItems.RunPage(pgs, row, listoffset);
 
                         if (p == pgs.CurrentPage)       // did subitems force new page?
                         {   // no use the height of the list
-                            p.YOffset = saveYoffset + height;
+                            p.YOffset = saveYoffset + GrownHeight(p, firstItem, saveYoffset, height);
                         }
                         else
                         {   // got forced to new page; just add the padding on
@@ -402,14 +403,15 @@ namespace Majorsilence.Reporting.Rdl
                     if (p.YOffset + height > pagebottom && !p.IsEmpty())		// need another page for this row?
                         p = RunPageNew(pgs, p);					// yes; if at end this page is empty
                     float saveYoffset = p.YOffset;              // this can be affected by other page items
-                    
+
+                    int firstItem = p.Count;
                     if (_ReportItems != null)
                         await _ReportItems.RunPage(pgs, row, listoffset);
 
 
                     if (p == pgs.CurrentPage)       // did subitems force new page?
                     {   // no use the height of the list
-                        p.YOffset = saveYoffset + height;
+                        p.YOffset = saveYoffset + GrownHeight(p, firstItem, saveYoffset, height);
                     }
                     else
                     {   // got forced to new page; just add the padding on
@@ -457,6 +459,30 @@ namespace Majorsilence.Reporting.Rdl
 		{
 			get { return  _Grouping; }
 			set {  _Grouping = value; }
+		}
+
+		// The height one list instance actually took on the page. HeightOfList only knows about CanGrow
+		// textboxes, but a subreport or a nested table, list or matrix grows with its data too, and the
+		// instance was still closed off at its designed height: the next instance was drawn over the
+		// rows that did not fit (a department list whose employees subreport ran into the next
+		// department). The instance grows by however far the items it just placed reach below their
+		// designed bottom, so the space designed under them is kept.
+		private float GrownHeight(Page p, int firstItem, float top, float height)
+		{
+			if (_ReportItems == null || firstItem >= p.Count)
+				return height;
+
+			float designedBottom = 0;
+			foreach (ReportItem ri in _ReportItems.Items)
+				designedBottom = Math.Max(designedBottom,
+					(ri.Top == null ? 0 : ri.Top.Points) + (ri.Height == null ? 0 : ri.Height.Points));
+
+			float actualBottom = top;
+			for (int i = firstItem; i < p.Count; i++)
+				actualBottom = Math.Max(actualBottom, p[i].Y + p[i].H);
+
+			float spaceBelow = Math.Max(0, this.HeightOrOwnerHeight - designedBottom);
+			return Math.Max(height, actualBottom - top + spaceBelow);
 		}
 
 		internal async Task<float> HeightOfList(Report rpt, Graphics g, Row r)
