@@ -946,7 +946,7 @@ namespace Majorsilence.Reporting.Rdl
             TypeCode tc;
             if (dp.DataLabel.Value == null)
             {       // No DataLabel value specified so we use the actual value
-                v = ce.Value.EvaluateDouble(rpt, lrow);
+                v = await ce.Value.EvaluateDouble(rpt, lrow);
                 tc = TypeCode.Double;
             }
             else
