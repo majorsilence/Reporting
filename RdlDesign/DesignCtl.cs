@@ -1096,11 +1096,21 @@ namespace Majorsilence.Reporting.RdlDesign
             if (_awaitingFollowUpPaint)
             {
                 _awaitingFollowUpPaint = false;
-                return;
+
+                // Our own follow-up paint can be merged with an external one -- a resize that landed
+                // after the render finished. The buffer is then the wrong size, and showing it as the
+                // final frame left the surface drawn at its old size.
+                if (_buffer != null && _buffer.Width == Math.Max(1, _DrawPanel.Width) && _buffer.Height == Math.Max(1, _DrawPanel.Height))
+                    return;
             }
 
             _ = Internal_DrawPanelPaintAsync();
         }
+
+        // A paint asked for while a render was already running. It was dropped, so a window maximized
+        // while its first render was in flight (an MDI child opened maximized at startup) kept the
+        // smaller render. Re-rendered once the running one finishes instead.
+        private bool _renderRequestedDuringPaint;
 
         private async Task Internal_DrawPanelPaintAsync()
         {
@@ -1108,8 +1118,12 @@ namespace Majorsilence.Reporting.RdlDesign
             lock (this)
             {
                 if (_InPaint)
+                {
+                    _renderRequestedDuringPaint = true;
                     return;
+                }
                 _InPaint = true;
+                _renderRequestedDuringPaint = false;
             }
 
             try
@@ -1147,10 +1161,15 @@ namespace Majorsilence.Reporting.RdlDesign
             }
             finally
             {
+                bool again;
                 lock (this)
                 {
                     _InPaint = false;
+                    again = _renderRequestedDuringPaint;
                 }
+
+                if (again)
+                    _ = Internal_DrawPanelPaintAsync();
             }
         }
 
