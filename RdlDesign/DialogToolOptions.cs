@@ -107,6 +107,15 @@ namespace Majorsilence.Reporting.RdlDesign
 
         private void InitDesktop()
         {
+            // No file yet is the normal first-run state, not an error: the defaults apply, and Apply
+            // writes the file (HandleDesktop builds the document when there is none). Reporting it put
+            // a "could not find config.xml" error box in front of every first opening of Options.
+            if (!File.Exists(optFileName))
+            {
+                SetDesktopDefaults();
+                return;
+            }
+
             try
             {
                 XmlDocument xDoc = _DesktopDocument = new XmlDocument();
@@ -171,11 +180,18 @@ namespace Majorsilence.Reporting.RdlDesign
             catch (Exception ex)
             {		// Didn't sucessfully get the startup state: use defaults
                 MessageBox.Show(string.Format(Strings.DialogToolOptions_Show_ConfigError, ex.Message), Strings.DialogToolOptions_Show_Options);
-                this.tbPort.Text = "8080";
-                this.ckLocal.Checked = true;
-                this.tbDirectory.Text = "Examples";
+                SetDesktopDefaults();
             }
 
+        }
+
+        private void SetDesktopDefaults()
+        {
+            _DesktopDocument = null;
+            _DesktopConfig = null;
+            this.tbPort.Text = "8080";
+            this.ckLocal.Checked = true;
+            this.tbDirectory.Text = "Examples";
         }
 
         private void InitMaps()

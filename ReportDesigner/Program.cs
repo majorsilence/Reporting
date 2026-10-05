@@ -51,6 +51,12 @@ namespace ReportDesigner
                 thread.CurrentUICulture = thread.CurrentCulture;
 
                 Application.EnableVisualStyles();
+                // WinForms on .NET draws every control without a font of its own in the system message-box
+                // font (Segoe UI 9pt on Windows); Majorsilence.Forms defaults to the .NET Framework's
+                // Microsoft Sans Serif 8.25pt. Matching the former keeps this designer the size the
+                // System.Windows.Forms one is -- its legacy dialogs scale up from the 8.25pt they were
+                // laid out against (AutoScaleBaseSize), as they do there.
+                Application.SetDefaultFont(SystemFonts.MessageBoxFont);
                 Application.DoEvents();
                 Application.Run(new RdlDesigner(ipcChannelPortName, true));
                 return;
