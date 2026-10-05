@@ -146,7 +146,7 @@ namespace Majorsilence.Reporting.Rdl
                 if (strm == null)
                 {
                     rpt.rl.LogError(4, string.Format("Unable to load image {0}.", 
-                        this._Value==null?"": this._Value.EvaluateString(rpt, row)));
+                        this._Value==null?"": await this._Value.EvaluateString(rpt, row)));
                     return null;
                 }
                 im = Draw2.Image.FromStream(strm);
