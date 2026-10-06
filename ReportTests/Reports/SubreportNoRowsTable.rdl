@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Report Name="SubreportNoRowsTable">
+  <Description>Subreport half of the no-rows test with a data region: a table over a dataset that returns no rows, nested in a Rectangle so the data region is found below the top level.</Description>
+  <DataSources>
+    <DataSource Name="DS1">
+      <ConnectionProperties>
+        <DataProvider>Microsoft.Data.Sqlite</DataProvider>
+        <ConnectString>Data Source=northwindEF.db</ConnectString>
+        <IntegratedSecurity>false</IntegratedSecurity>
+      </ConnectionProperties>
+    </DataSource>
+  </DataSources>
+  <DataSets>
+    <DataSet Name="Rows">
+      <Query>
+        <DataSourceName>DS1</DataSourceName>
+        <CommandText>SELECT CustomerID AS Item FROM Orders WHERE 1 = 0</CommandText>
+      </Query>
+      <Fields>
+        <Field Name="Item">
+          <DataField>Item</DataField>
+        </Field>
+      </Fields>
+    </DataSet>
+  </DataSets>
+  <Body>
+    <Height>1in</Height>
+    <ReportItems>
+      <Rectangle Name="TableFrame">
+        <Top>0in</Top>
+        <Left>0in</Left>
+        <Height>1in</Height>
+        <Width>3in</Width>
+        <ReportItems>
+          <Table Name="ItemTable">
+            <DataSetName>Rows</DataSetName>
+            <Top>0in</Top>
+            <Left>0in</Left>
+            <Width>3in</Width>
+            <TableColumns>
+              <TableColumn>
+                <Width>3in</Width>
+              </TableColumn>
+            </TableColumns>
+            <Header>
+              <TableRows>
+                <TableRow>
+                  <Height>0.25in</Height>
+                  <TableCells>
+                    <TableCell>
+                      <ReportItems>
+                        <Textbox Name="ItemHeader">
+                          <Value>TABLE-HEADER</Value>
+                        </Textbox>
+                      </ReportItems>
+                    </TableCell>
+                  </TableCells>
+                </TableRow>
+              </TableRows>
+            </Header>
+            <Details>
+              <TableRows>
+                <TableRow>
+                  <Height>0.25in</Height>
+                  <TableCells>
+                    <TableCell>
+                      <ReportItems>
+                        <Textbox Name="ItemCell">
+                          <Value>=Fields!Item.Value</Value>
+                        </Textbox>
+                      </ReportItems>
+                    </TableCell>
+                  </TableCells>
+                </TableRow>
+              </TableRows>
+            </Details>
+          </Table>
+        </ReportItems>
+      </Rectangle>
+    </ReportItems>
+  </Body>
+  <Width>6in</Width>
+  <PageWidth>8.5in</PageWidth>
+  <PageHeight>11in</PageHeight>
+</Report>
