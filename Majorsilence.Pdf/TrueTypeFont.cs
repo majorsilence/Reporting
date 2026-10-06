@@ -53,25 +53,33 @@ namespace Majorsilence.Pdf
 
         public TrueTypeFont(string path) : this(File.ReadAllBytes(path)) { }
 
-        public TrueTypeFont(byte[] data)
+        public TrueTypeFont(byte[] data) : this(data, 0) { }
+
+        /// <summary>
+        /// Open one font of a TrueType collection. <paramref name="faceIndex"/> is ignored for a
+        /// single-font file.
+        /// </summary>
+        public TrueTypeFont(byte[] data, int faceIndex)
         {
             _data = data;
-            _fontOffset = DetectFontOffset();
+            _fontOffset = DetectFontOffset(faceIndex);
             Parse();
         }
 
         // Returns the byte offset of the sfnt OffsetTable within _data.
-        // For a plain TTF/OTF this is 0; for a TTC we jump to the first font entry.
-        private int DetectFontOffset()
+        // For a plain TTF/OTF this is 0; for a TTC we jump to the requested font entry.
+        private int DetectFontOffset(int faceIndex)
         {
             if (_data.Length < 4) return 0;
             // TTC magic: 't','t','c','f'
             if (_data[0] == 0x74 && _data[1] == 0x74 && _data[2] == 0x63 && _data[3] == 0x66)
             {
-                // numFonts at offset 8; first font's OffsetTable offset at offset 12
-                if (_data.Length >= 16)
+                // numFonts at offset 8; the font offsets follow from offset 12
+                int numFonts = _data.Length >= 12 ? S32(_data, 8) : 0;
+                if (faceIndex < 0 || faceIndex >= numFonts) faceIndex = 0;
+                if (_data.Length >= 16 + faceIndex * 4)
                 {
-                    int off = S32(_data, 12);
+                    int off = S32(_data, 12 + faceIndex * 4);
                     if (off > 0 && off < _data.Length - 12) return off;
                 }
             }

@@ -19,25 +19,30 @@ namespace Majorsilence.Pdf
     /// folder of several hundred fonts is scanned quickly; the result is kept per folder for
     /// the life of the process.
     ///
-    /// Only files the embedder can use are returned: TrueType outlines in a single-font file.
-    /// A collection (<c>.ttc</c>) and a CFF-outline <c>.otf</c> are skipped.
+    /// Only fonts the embedder can use are returned: TrueType outlines, in a single-font file
+    /// or as any font of a collection (<c>.ttc</c>, where Microsoft YaHei, SimSun and the Yu
+    /// Gothic and Meiryo families live). A CFF-outline <c>.otf</c> is skipped.
     /// </summary>
     internal static class InstalledFontScanner
     {
         internal readonly struct Face
         {
-            internal Face(string family, bool bold, bool italic, string path)
+            internal Face(string family, bool bold, bool italic, string path, int faceIndex = 0)
             {
                 Family = family;
                 Bold = bold;
                 Italic = italic;
                 Path = path;
+                FaceIndex = faceIndex;
             }
 
             internal string Family { get; }
             internal bool Bold { get; }
             internal bool Italic { get; }
             internal string Path { get; }
+
+            /// <summary>Which font of a collection; 0 for a single-font file.</summary>
+            internal int FaceIndex { get; }
         }
 
         private static readonly ConcurrentDictionary<string, IReadOnlyList<Face>> Cache =
@@ -55,13 +60,14 @@ namespace Majorsilence.Pdf
             var files = new List<string>();
             files.AddRange(Directory.GetFiles(folder, "*.ttf"));
             files.AddRange(Directory.GetFiles(folder, "*.otf"));
+            files.AddRange(Directory.GetFiles(folder, "*.ttc"));
             files.Sort(StringComparer.OrdinalIgnoreCase);
 
             foreach (var file in files)
             {
                 try
                 {
-                    if (TryRead(file, out var face)) faces.Add(face);
+                    faces.AddRange(ReadFaces(file));
                 }
                 catch (IOException) { }
                 catch (UnauthorizedAccessException) { }
@@ -69,22 +75,55 @@ namespace Majorsilence.Pdf
             return faces;
         }
 
-        /// <summary>Read one file's family and style, or false if it is not a usable font.</summary>
+        /// <summary>Read a single-font file's family and style, or false if it is not a usable font.</summary>
         internal static bool TryRead(string path, out Face face)
         {
-            face = default;
+            var faces = ReadFaces(path);
+            face = faces.Count > 0 ? faces[0] : default;
+            return faces.Count > 0;
+        }
+
+        /// <summary>
+        /// Every usable font in a file: one for a plain font, each member of a collection.
+        /// </summary>
+        internal static IReadOnlyList<Face> ReadFaces(string path)
+        {
+            var faces = new List<Face>();
             using var fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read);
-            var head = new byte[12];
-            if (fs.Read(head, 0, 12) != 12) return false;
+            var head = ReadAt(fs, 0, 12);
+            if (head.Length != 12) return faces;
+
+            if (ReadU32(head, 0) == 0x74746366) // 'ttcf'
+            {
+                uint numFonts = ReadU32(head, 8);
+                // A real collection holds a handful; a bogus count must not drive a huge read.
+                if (numFonts == 0 || numFonts > 64) return faces;
+                var offsets = ReadAt(fs, 12, (int)numFonts * 4);
+                if (offsets.Length != numFonts * 4) return faces;
+                for (int n = 0; n < numFonts; n++)
+                    if (TryReadFace(fs, ReadU32(offsets, n * 4), path, n, out var f)) faces.Add(f);
+            }
+            else if (TryReadFace(fs, 0, path, 0, out var single))
+            {
+                faces.Add(single);
+            }
+            return faces;
+        }
+
+        private static bool TryReadFace(FileStream fs, uint fontOffset, string path, int faceIndex, out Face face)
+        {
+            face = default;
+            var head = ReadAt(fs, fontOffset, 12);
+            if (head.Length != 12) return false;
 
             uint tag = ReadU32(head, 0);
-            // 0x00010000 is TrueType; 'true' is the old Apple spelling. 'OTTO' is CFF outlines
-            // and 'ttcf' a collection, neither of which the embedder handles.
+            // 0x00010000 is TrueType; 'true' is the old Apple spelling. 'OTTO' is CFF outlines,
+            // which the embedder does not handle.
             if (tag != 0x00010000 && tag != 0x74727565) return false;
 
             int numTables = ReadU16(head, 4);
-            var dir = new byte[numTables * 16];
-            if (fs.Read(dir, 0, dir.Length) != dir.Length) return false;
+            var dir = ReadAt(fs, fontOffset + 12, numTables * 16);
+            if (dir.Length != numTables * 16) return false;
 
             uint nameOff = 0, nameLen = 0, os2Off = 0, os2Len = 0, headOff = 0;
             bool hasGlyf = false;
@@ -125,7 +164,7 @@ namespace Majorsilence.Pdf
                 bold = italic = false;
             }
 
-            face = new Face(family!.Trim(), bold, italic, path);
+            face = new Face(family!.Trim(), bold, italic, path, faceIndex);
             return true;
         }
 

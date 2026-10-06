@@ -32,9 +32,16 @@ namespace Majorsilence.Pdf.Internal
         {
             if (!_cache.TryGetValue(source.CacheKey, out var ttf))
             {
-                ttf = source.Path != null
-                    ? GetOrLoad(source.Path)          // reuse path branch (already caches)
-                    : new TrueTypeFont(source.Data!);
+                if (source.Path == null)
+                    ttf = new TrueTypeFont(source.Data!);
+                else if (source.FaceIndex == 0)
+                    ttf = GetOrLoad(source.Path);     // reuse path branch (already caches)
+                else
+                {
+                    if (!File.Exists(source.Path))
+                        throw new FileNotFoundException($"Font file not found: {source.Path}", source.Path);
+                    ttf = new TrueTypeFont(File.ReadAllBytes(source.Path), source.FaceIndex);
+                }
                 _cache[source.CacheKey] = ttf;
             }
             return ttf;
