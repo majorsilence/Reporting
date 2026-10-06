@@ -195,7 +195,12 @@ namespace Majorsilence.Reporting.Rdl
 
             float yOffset;
 
-            if (bRows)  // Only run subreport if have a row in some Dataset
+            // Run the subreport when some dataset returned a row, or when it has nothing to
+            // repeat over rows. A subreport built around a table, list, matrix or chart has
+            // nothing to show without rows and prints its NoRows message instead. One with no
+            // data region - text, images, lines, the parameter values its parent passed - is
+            // complete without a row, and printing nothing in its place lost all of it.
+            if (bRows || !HasDataRegion(_ReportDefn.Body.ReportItems))
             {
                 //
                 // Run the subreport -- this is the major effort in creating the display objects in the page
@@ -232,6 +237,22 @@ namespace Majorsilence.Reporting.Rdl
 
 			SetPagePositionEnd(pgs, yOffset);
 		}
+
+        // Whether any item here, or inside a Rectangle here, is a data region. A nested
+        // Subreport is not one: it decides for itself whether it has rows.
+        private static bool HasDataRegion(ReportItems items)
+        {
+            if (items == null)
+                return false;
+            foreach (ReportItem ri in items.Items)
+            {
+                if (ri is DataRegion)
+                    return true;
+                if (ri is Rectangle rect && HasDataRegion(rect.ReportItems))
+                    return true;
+            }
+            return false;
+        }
 
         internal override void RemoveWC(Report rpt)
         {

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Report Name="SubreportNoRowsTest">
+  <Description>Two subreports whose datasets return no rows. One has no data region, only text and a parameter value, and is drawn anyway. The other is built around a table and shows its NoRows message instead.</Description>
+  <Body>
+    <Height>4in</Height>
+    <ReportItems>
+      <Textbox Name="MainBox">
+        <Top>0in</Top>
+        <Left>0in</Left>
+        <Height>0.25in</Height>
+        <Width>3in</Width>
+        <Value>="MAIN-REPORT"</Value>
+      </Textbox>
+      <Subreport Name="StaticSub">
+        <Top>0.5in</Top>
+        <Left>0in</Left>
+        <Height>1in</Height>
+        <Width>6in</Width>
+        <ReportName>SubreportNoRowsStatic</ReportName>
+        <Parameters>
+          <Parameter Name="Who">
+            <Value>="PARAM-VALUE"</Value>
+          </Parameter>
+        </Parameters>
+        <NoRows>STATIC-NO-ROWS</NoRows>
+      </Subreport>
+      <Subreport Name="TableSub">
+        <Top>2in</Top>
+        <Left>0in</Left>
+        <Height>1in</Height>
+        <Width>6in</Width>
+        <ReportName>SubreportNoRowsTable</ReportName>
+        <NoRows>TABLE-NO-ROWS</NoRows>
+      </Subreport>
+    </ReportItems>
+  </Body>
+  <Width>6in</Width>
+  <PageWidth>8.5in</PageWidth>
+  <PageHeight>11in</PageHeight>
+</Report>
