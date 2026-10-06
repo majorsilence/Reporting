@@ -94,19 +94,190 @@ namespace Majorsilence.Pdf.Tests
             Assert.That(reg.Resolve(family, false, false)?.Path, Is.EqualTo(bold));
         }
 
-        [Test]
-        public void AddInstalledFonts_SkipsACollectionItCannotEmbed()
+        // A TrueType collection holds several fonts that share tables; Microsoft YaHei, SimSun,
+        // MingLiU, Yu Gothic and Meiryo ship only as collections. There is no collection to
+        // rely on in every test environment, so one is assembled from two bundled fonts.
+
+        private static string? BundledFont(string name)
         {
-            string? ttc = FindFont(@"C:\Windows\Fonts\cambria.ttc", @"C:\Windows\Fonts\msgothic.ttc");
-            Assume.That(ttc, Is.Not.Null, "no font collection on this machine");
+            if (!BundledFontsExist) return null;
+            string p = Path.Combine(BundledFontsDir, name);
+            return File.Exists(p) ? p : null;
+        }
 
-            // Named .ttf, so only the file's own header can give it away.
+        private static byte[] BuildCollection(params byte[][] fonts)
+        {
+            int headerLen = 12 + 4 * fonts.Length;
+            var output = new MemoryStream();
+            var bases = new int[fonts.Length];
+            int cursor = headerLen;
+            for (int i = 0; i < fonts.Length; i++)
+            {
+                bases[i] = cursor;
+                cursor += fonts[i].Length + (4 - fonts[i].Length % 4) % 4;
+            }
+
+            void U32(Stream st, uint v) =>
+                st.Write(new[] { (byte)(v >> 24), (byte)(v >> 16), (byte)(v >> 8), (byte)v }, 0, 4);
+
+            output.Write(new byte[] { (byte)'t', (byte)'t', (byte)'c', (byte)'f' }, 0, 4);
+            U32(output, 0x00010000);
+            U32(output, (uint)fonts.Length);
+            foreach (int b in bases) U32(output, (uint)b);
+
+            for (int i = 0; i < fonts.Length; i++)
+            {
+                // table offsets in a collection are from the start of the file, not the font
+                var font = (byte[])fonts[i].Clone();
+                int numTables = (font[4] << 8) | font[5];
+                for (int t = 0; t < numTables; t++)
+                {
+                    int o = 12 + t * 16 + 8;
+                    uint off = ((uint)font[o] << 24) | ((uint)font[o + 1] << 16) | ((uint)font[o + 2] << 8) | font[o + 3];
+                    off += (uint)bases[i];
+                    font[o] = (byte)(off >> 24); font[o + 1] = (byte)(off >> 16);
+                    font[o + 2] = (byte)(off >> 8); font[o + 3] = (byte)off;
+                }
+                output.Write(font, 0, font.Length);
+                for (int pad = (4 - font.Length % 4) % 4; pad > 0; pad--) output.WriteByte(0);
+            }
+            return output.ToArray();
+        }
+
+        private static string WriteCollection(string dir, string file = "pair.ttc")
+        {
+            string? regular = BundledFont("LiberationSans-Regular.ttf");
+            string? bold = BundledFont("LiberationSans-Bold.ttf");
+            Assume.That(regular, Is.Not.Null, "bundled fonts not available");
+            Assume.That(bold, Is.Not.Null, "bundled fonts not available");
+            string path = Path.Combine(dir, file);
+            File.WriteAllBytes(path, BuildCollection(File.ReadAllBytes(regular!), File.ReadAllBytes(bold!)));
+            return path;
+        }
+
+        [Test]
+        public void AddInstalledFonts_RegistersEveryFontOfACollection()
+        {
             string dir = NewFontDir();
-            string copy = Path.Combine(dir, "collection.ttf");
-            File.Copy(ttc!, copy);
+            string ttc = WriteCollection(dir);
 
-            Assert.That(InstalledFontScanner.TryRead(copy, out _), Is.False);
-            Assert.That(InstalledFontScanner.Scan(dir), Is.Empty);
+            var faces = InstalledFontScanner.ReadFaces(ttc);
+
+            Assert.That(faces.Count, Is.EqualTo(2));
+            Assert.That(faces[0].FaceIndex, Is.EqualTo(0));
+            Assert.That(faces[1].FaceIndex, Is.EqualTo(1));
+            Assert.That(faces[0].Bold, Is.False);
+            Assert.That(faces[1].Bold, Is.True);
+
+            var reg = new FontRegistry().AddInstalledFonts(dir);
+            string family = faces[0].Family;
+            Assert.That(reg.Contains(family), Is.True);
+            Assert.That(reg.Resolve(family, false, false)?.FaceIndex, Is.EqualTo(0));
+            var boldSrc = reg.Resolve(family, true, false);
+            Assert.That(boldSrc?.Path, Is.EqualTo(ttc));
+            Assert.That(boldSrc?.FaceIndex, Is.EqualTo(1));
+        }
+
+        [Test]
+        public void TrueTypeFont_OpensTheRequestedFontOfACollection()
+        {
+            string dir = NewFontDir();
+            string ttc = WriteCollection(dir);
+            byte[] data = File.ReadAllBytes(ttc);
+
+            var first = new TrueTypeFont(data, 0);
+            var second = new TrueTypeFont(data, 1);
+
+            Assert.That(first.PostScriptName, Does.Not.Contain("Bold"));
+            Assert.That(second.PostScriptName, Does.Contain("Bold"));
+            Assert.That(second.GetGlyphId('A'), Is.Not.EqualTo((ushort)0));
+        }
+
+        [Test]
+        public void ACollectionFontRendersIntoAPdf()
+        {
+            string dir = NewFontDir();
+            string ttc = WriteCollection(dir);
+            var reg = new FontRegistry().AddInstalledFonts(dir);
+            string family = InstalledFontScanner.ReadFaces(ttc)[0].Family;
+
+            byte[] bytes = PdfDocument.Create()
+                .WithFontRegistry(reg)
+                .AddPage(PageSizes.A4, canvas =>
+                    canvas.DrawText("Collection bold", 72, 100,
+                        TextStyle.Default.WithFamily(family).WithBold().WithSize(14)))
+                .ToBytes();
+
+            AssertValidPdf(bytes);
+            using var parsed = PdfPig.Open(bytes);
+            Assert.That(parsed.GetPage(1).Text, Does.Contain("Collection"));
+        }
+
+        [Test]
+        public void ReadFaces_IgnoresACollectionWithABogusFontCount()
+        {
+            string dir = NewFontDir();
+            string path = Path.Combine(dir, "bogus.ttc");
+            File.WriteAllBytes(path, new byte[]
+            { (byte)'t', (byte)'t', (byte)'c', (byte)'f', 0, 1, 0, 0, 0x7F, 0xFF, 0xFF, 0xFF });
+
+            Assert.That(InstalledFontScanner.ReadFaces(path), Is.Empty);
+        }
+
+        // ── CJK fallback ─────────────────────────────────────────────────────
+
+        private static string? SystemCjkFont => FindFont(
+            @"C:\Windows\Fonts\simhei.ttf",
+            "/usr/share/fonts/truetype/droid/DroidSansFallbackFull.ttf",
+            "/usr/share/fonts/truetype/wqy/wqy-microhei.ttc");
+
+        [Test]
+        public void CjkText_InALatinFont_IsDrawnFromTheFallbackChain_NotAsBoxes()
+        {
+            string? cjk = SystemCjkFont;
+            Assume.That(cjk, Is.Not.Null, "no CJK font on this machine");
+            Assume.That(BundledFontsExist, "Bundled fonts directory not found");
+
+            var registry = new FontRegistry()
+                .AddDirectory(BundledFontsDir)
+                .AddFamily("CjkFallback", cjk!)
+                .AddFallback("CjkFallback");
+            const string text = "Report 产品统计";
+
+            byte[] bytes = PdfDocument.Create()
+                .WithFontRegistry(registry)
+                .AddPage(PageSizes.A4, canvas =>
+                {
+                    var style = TextStyle.Default.WithFamily("LiberationSans").WithSize(14);
+                    canvas.DrawText(text, 72, 100, style);
+                })
+                .ToBytes();
+
+            AssertValidPdf(bytes);
+            using var parsed = PdfPig.Open(bytes);
+            Assert.That(parsed.GetPage(1).Text, Does.Contain("产品统计"));
+        }
+
+        [Test]
+        public void MeasureTextWidth_UsesTheFallbackFontForCharactersThePrimaryLacks()
+        {
+            string? cjk = SystemCjkFont;
+            Assume.That(cjk, Is.Not.Null, "no CJK font on this machine");
+            Assume.That(BundledFontsExist, "Bundled fonts directory not found");
+
+            var registry = new FontRegistry()
+                .AddDirectory(BundledFontsDir)
+                .AddFamily("CjkFallback", cjk!)
+                .AddFallback("CjkFallback");
+            var style = TextStyle.Default.WithFamily("LiberationSans").WithSize(20);
+            float width = 0;
+
+            PdfDocument.Create()
+                .WithFontRegistry(registry)
+                .AddPage(PageSizes.A4, canvas => width = canvas.MeasureTextWidth("产品统计", style));
+
+            // Four full-width ideographs, about one em each - not the primary's .notdef widths.
+            Assert.That(width, Is.GreaterThan(4 * 20 * 0.8f));
         }
 
         [Test]

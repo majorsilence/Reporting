@@ -55,6 +55,18 @@ namespace Majorsilence.Pdf
             return this;
         }
 
+        /// <summary>
+        /// Register a font family from <see cref="FontSource"/> values, which can name one font
+        /// of a TrueType collection (<c>.ttc</c>).
+        /// </summary>
+        public FontRegistry AddFamily(string name,
+            FontSource? regular, FontSource? bold, FontSource? italic, FontSource? boldItalic)
+        {
+            if (string.IsNullOrEmpty(name)) throw new ArgumentNullException(nameof(name));
+            _families[name] = new FontFamily(name, regular, bold, italic, boldItalic);
+            return this;
+        }
+
         /// <summary>Register a font family by providing raw TTF byte arrays for each variant.</summary>
         public FontRegistry AddFamily(string name,
             byte[]? regular = null, byte[]? bold = null,
@@ -100,23 +112,25 @@ namespace Majorsilence.Pdf
         ///
         /// A family already registered is left exactly as it is, so explicit registrations and
         /// their preferences win. Within a new family the first file found for each style is
-        /// used. Collections and CFF-outline fonts, which the embedder cannot use, are skipped.
+        /// used. Every font of a TrueType collection (<c>.ttc</c>) is registered; CFF-outline fonts,
+        /// which the embedder cannot use, are skipped.
         /// A missing directory is not an error; it simply adds nothing.
         /// </summary>
         public FontRegistry AddInstalledFonts(string directory)
         {
             if (string.IsNullOrEmpty(directory) || !Directory.Exists(directory)) return this;
 
-            var found = new Dictionary<string, (string? r, string? b, string? i, string? bi)>(
+            var found = new Dictionary<string, (FontSource? r, FontSource? b, FontSource? i, FontSource? bi)>(
                 StringComparer.OrdinalIgnoreCase);
             foreach (var face in InstalledFontScanner.Scan(directory))
             {
                 if (_families.ContainsKey(face.Family)) continue;
                 found.TryGetValue(face.Family, out var e);
-                if (face.Bold && face.Italic) e.bi ??= face.Path;
-                else if (face.Bold) e.b ??= face.Path;
-                else if (face.Italic) e.i ??= face.Path;
-                else e.r ??= face.Path;
+                var src = FontSource.FromPath(face.Path, face.FaceIndex);
+                if (face.Bold && face.Italic) e.bi ??= src;
+                else if (face.Bold) e.b ??= src;
+                else if (face.Italic) e.i ??= src;
+                else e.r ??= src;
                 found[face.Family] = e;
             }
 
@@ -241,14 +255,20 @@ namespace Majorsilence.Pdf
         /// <summary>Raw TTF/OTF bytes, or <c>null</c> when a file path is used.</summary>
         public byte[]?  Data     { get; }
 
+        /// <summary>
+        /// Which font of a TrueType collection (<c>.ttc</c>) to use; 0 for a single-font file.
+        /// </summary>
+        public int FaceIndex { get; }
+
         /// <summary>Unique key used for caching within a document.</summary>
         internal string CacheKey { get; }
 
-        private FontSource(string? path, byte[]? data, string cacheKey)
+        private FontSource(string? path, byte[]? data, string cacheKey, int faceIndex = 0)
         {
-            Path     = path;
-            Data     = data;
-            CacheKey = cacheKey;
+            Path      = path;
+            Data      = data;
+            CacheKey  = cacheKey;
+            FaceIndex = faceIndex;
         }
 
         /// <summary>Create a <see cref="FontSource"/> backed by a file.</summary>
@@ -256,6 +276,18 @@ namespace Majorsilence.Pdf
         {
             if (string.IsNullOrEmpty(path)) throw new ArgumentNullException(nameof(path));
             return new FontSource(path, null, path);
+        }
+
+        /// <summary>
+        /// Create a <see cref="FontSource"/> for one font of a TrueType collection file.
+        /// </summary>
+        public static FontSource FromPath(string path, int faceIndex)
+        {
+            if (string.IsNullOrEmpty(path)) throw new ArgumentNullException(nameof(path));
+            if (faceIndex < 0) throw new ArgumentOutOfRangeException(nameof(faceIndex));
+            return faceIndex == 0
+                ? new FontSource(path, null, path)
+                : new FontSource(path, null, path + "#" + faceIndex, faceIndex);
         }
 
         /// <summary>Create a <see cref="FontSource"/> backed by raw bytes.</summary>
