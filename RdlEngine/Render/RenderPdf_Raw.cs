@@ -498,7 +498,52 @@ namespace Majorsilence.Reporting.Rdl
                 if (reg.Contains(fb)) { reg.AddFallback(fb); break; }
             }
 
+            AddCjkFallbacks(reg);
+
             return reg;
+        }
+
+        // Latin fonts have no CJK glyphs, so Chinese, Japanese or Korean text in a font the
+        // machine lacks - or in a Latin font - would draw as .notdef boxes. A CJK family goes
+        // on the end of the fallback chain so those characters come from it instead. The chain
+        // is consulted per character and its fonts are only loaded when a string needs them.
+        // Only TrueType-outline fonts can be embedded, so Noto Sans CJK (CFF) is not usable.
+        private static readonly string[] CjkFallbackFamilies =
+        {
+            // Windows
+            "Microsoft YaHei", "Microsoft JhengHei", "Yu Gothic", "Malgun Gothic",
+            "SimSun", "SimHei", "DengXian", "MingLiU", "MS Gothic",
+            // Linux
+            "WenQuanYi Micro Hei", "WenQuanYi Zen Hei", "Droid Sans Fallback",
+            "AR PL UMing CN", "AR PL UKai CN",
+            // macOS
+            "PingFang SC", "PingFang TC", "STHeiti", "Apple SD Gothic Neo",
+        };
+
+        private static readonly string[] CjkFontDirectories =
+        {
+            "/usr/share/fonts/truetype/wqy",
+            "/usr/share/fonts/wenquanyi/wqy-microhei",
+            "/usr/share/fonts/wenquanyi/wqy-zenhei",
+            "/usr/share/fonts/truetype/droid",
+            "/usr/share/fonts/truetype/arphic",
+            "/usr/share/fonts/opentype/noto",
+            "/System/Library/Fonts",
+            "/Library/Fonts",
+        };
+
+        private void AddCjkFallbacks(FontRegistry reg)
+        {
+            // Windows fonts were all registered above; elsewhere the CJK fonts live in
+            // folders that are not otherwise scanned.
+            if (IsOSX || _osPlatform == (int)PlatformID.Unix)
+            {
+                foreach (string dir in CjkFontDirectories)
+                    reg.AddInstalledFonts(dir);
+            }
+
+            foreach (string family in CjkFallbackFamilies)
+                if (reg.Contains(family)) reg.AddFallback(family);
         }
 
         // Register a font family only if at least one variant file exists.

@@ -99,16 +99,9 @@ namespace Majorsilence.Pdf
                 // ── TTF path (explicit file or registry family) ───────────────
                 var primaryTtf = _fontCache.GetOrLoad(primarySource);
 
-                // Build fallback chain: registry fallbacks not already used as primary
-                var fallbacks = new List<(TrueTypeFont ttf, FontSource src)>();
-                if (_registry != null)
-                {
-                    foreach (var fbSrc in _registry.GetFallbackSources(style.IsBold, style.IsItalic))
-                    {
-                        if (fbSrc.CacheKey == primarySource.CacheKey) continue;
-                        fallbacks.Add((_fontCache.GetOrLoad(fbSrc), fbSrc));
-                    }
-                }
+                // Registry fallbacks not already used as primary; none are loaded when the
+                // primary font covers the whole string.
+                var fallbacks = LoadFallbacks(text, primaryTtf, primarySource, style);
 
                 // Segment text so each run uses the first font that has every glyph.
                 var segments = SegmentByFont(text, primaryTtf, primarySource, fallbacks);
@@ -363,6 +356,37 @@ namespace Majorsilence.Pdf
             }
             points.Reverse();
             return string.Concat(points);
+        }
+
+        // The fallback fonts a string needs. A fallback chain can hold large CJK fonts, so they
+        // are only loaded when the primary font lacks a glyph for something in the text.
+        private List<(TrueTypeFont ttf, FontSource src)> LoadFallbacks(
+            string text, TrueTypeFont primaryTtf, FontSource primarySrc, TextStyle style)
+        {
+            var fallbacks = new List<(TrueTypeFont ttf, FontSource src)>();
+            if (_registry == null || CoversText(primaryTtf, text)) return fallbacks;
+
+            foreach (var fbSrc in _registry.GetFallbackSources(style.IsBold, style.IsItalic))
+            {
+                if (fbSrc.CacheKey == primarySrc.CacheKey) continue;
+                fallbacks.Add((_fontCache.GetOrLoad(fbSrc), fbSrc));
+            }
+            return fallbacks;
+        }
+
+        private static bool CoversText(TrueTypeFont font, string text)
+        {
+            for (int i = 0; i < text.Length; i++)
+            {
+                int cp = text[i];
+                if (char.IsHighSurrogate(text[i]) && i + 1 < text.Length && char.IsLowSurrogate(text[i + 1]))
+                {
+                    cp = char.ConvertToUtf32(text[i], text[i + 1]);
+                    i++;
+                }
+                if (font.GetGlyphId(cp) == 0) return false;
+            }
+            return true;
         }
 
         // Segment text into runs where each run uses the same font.
@@ -706,7 +730,18 @@ namespace Majorsilence.Pdf
             {
                 var src = _registry.Resolve(style.FontFamily, style.IsBold, style.IsItalic);
                 if (src != null)
-                    return _fontCache.GetOrLoad(src).GetWidthPoint(text, style.FontSize);
+                {
+                    var primary = _fontCache.GetOrLoad(src);
+                    var fallbacks = LoadFallbacks(text, primary, src, style);
+                    if (fallbacks.Count == 0)
+                        return primary.GetWidthPoint(text, style.FontSize);
+
+                    // Width of each run in the font that will draw it.
+                    float total = 0f;
+                    foreach (var (segText, segTtf, _) in SegmentByFont(text, primary, src, fallbacks))
+                        total += segTtf.GetWidthPoint(segText, style.FontSize);
+                    return total;
+                }
             }
 
             return MeasureStandardFontWidth(EscapeWinAnsi(text), style);
