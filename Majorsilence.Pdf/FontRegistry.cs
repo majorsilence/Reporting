@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace Majorsilence.Pdf
 {
@@ -116,13 +117,23 @@ namespace Majorsilence.Pdf
         /// which the embedder cannot use, are skipped.
         /// A missing directory is not an error; it simply adds nothing.
         /// </summary>
-        public FontRegistry AddInstalledFonts(string directory)
+        public FontRegistry AddInstalledFonts(string directory) => AddInstalledFonts(directory, includeSubfolders: false);
+
+        /// <summary>
+        /// As <see cref="AddInstalledFonts(string)"/>, and with <paramref name="includeSubfolders"/>
+        /// every folder below it too, which is how Linux and macOS lay fonts out: a folder per
+        /// package or family under <c>/usr/share/fonts</c>, under any name. The faces of all of
+        /// them are gathered before any family is registered, so a family whose styles are in
+        /// different folders is still one family. A folder that cannot be read is skipped.
+        /// </summary>
+        public FontRegistry AddInstalledFonts(string directory, bool includeSubfolders)
         {
             if (string.IsNullOrEmpty(directory) || !Directory.Exists(directory)) return this;
 
+            var folders = includeSubfolders ? FolderTree(directory) : new List<string> { directory };
             var found = new Dictionary<string, (FontSource? r, FontSource? b, FontSource? i, FontSource? bi)>(
                 StringComparer.OrdinalIgnoreCase);
-            foreach (var face in InstalledFontScanner.Scan(directory))
+            foreach (var face in folders.SelectMany(InstalledFontScanner.Scan))
             {
                 if (_families.ContainsKey(face.Family)) continue;
                 found.TryGetValue(face.Family, out var e);
@@ -137,6 +148,36 @@ namespace Majorsilence.Pdf
             foreach (var kv in found)
                 AddFamily(kv.Key, kv.Value.r, kv.Value.b, kv.Value.i, kv.Value.bi);
             return this;
+        }
+
+        // A folder and every folder below it, in a stable order. A folder already seen (a
+        // symbolic link back up the tree) is not walked again, and the walk stops a few levels
+        // down, which no font layout needs to go past.
+        private static List<string> FolderTree(string root)
+        {
+            const int MaxDepth = 8;
+            var folders = new List<string>();
+            var seen = new HashSet<string>(StringComparer.Ordinal);
+            var pending = new Stack<(string Path, int Depth)>();
+            pending.Push((root, 0));
+            while (pending.Count > 0)
+            {
+                var (folder, depth) = pending.Pop();
+                string full;
+                try { full = Path.GetFullPath(folder); }
+                catch (Exception ex) when (ex is ArgumentException || ex is NotSupportedException || ex is PathTooLongException) { continue; }
+                if (!seen.Add(full)) continue;
+                folders.Add(full);
+                if (depth >= MaxDepth) continue;
+
+                string[] children;
+                try { children = Directory.GetDirectories(full); }
+                catch (Exception ex) when (ex is IOException || ex is UnauthorizedAccessException) { continue; }
+                Array.Sort(children, StringComparer.OrdinalIgnoreCase);
+                for (int i = children.Length - 1; i >= 0; i--)
+                    pending.Push((children[i], depth + 1));
+            }
+            return folders;
         }
 
         private static void RegisterFile(

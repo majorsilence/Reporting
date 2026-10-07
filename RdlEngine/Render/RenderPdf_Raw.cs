@@ -448,6 +448,18 @@ namespace Majorsilence.Reporting.Rdl
                         reg.AddDirectory(dir);
                 }
             }
+
+            // Every other installed font, under the family name it declares, as on Windows
+            // below. Without this, a font installed anywhere but the few folders above, or named
+            // any other way, was never found: Microsoft's core fonts install as
+            // /usr/share/fonts/truetype/msttcorefonts/Arial.ttf, so a report asking for Arial got
+            // the fallback even where Arial was installed. Families registered above keep their
+            // registration. Fonts live a folder or more below these roots, so the walk goes down.
+            if (IsOSX || _osPlatform == (int)PlatformID.Unix)
+            {
+                foreach (string dir in InstalledFontRoots())
+                    reg.AddInstalledFonts(dir, includeSubfolders: true);
+            }
             else
             {
                 // Windows: abbreviated filenames (arial.ttf, arialbd.ttf, etc.)
@@ -582,19 +594,42 @@ namespace Majorsilence.Reporting.Rdl
             }
         }
 
+        // Where Linux and macOS keep installed fonts, system-wide and per user.
+        private IEnumerable<string> InstalledFontRoots()
+        {
+            string home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+            if (IsOSX)
+            {
+                yield return "/System/Library/Fonts";
+                yield return "/Library/Fonts";
+                if (!string.IsNullOrEmpty(home)) yield return Path.Combine(home, "Library", "Fonts");
+            }
+            else
+            {
+                yield return "/usr/share/fonts";
+                yield return "/usr/local/share/fonts";
+                if (!string.IsNullOrEmpty(home))
+                {
+                    yield return Path.Combine(home, ".local", "share", "fonts");
+                    yield return Path.Combine(home, ".fonts");
+                }
+            }
+        }
+
         private string MapFaceToRegistryFamily(string face)
         {
             switch (face)
             {
+                // The font itself when it is installed, as for every other family below; the
+                // metric-compatible Liberation font only when it is not.
                 case "Times New Roman":
-                    // Prefer metric-compatible bundled fonts, then system
-                    if (_fontRegistry.Contains("LiberationSerif"))  return "LiberationSerif";
                     if (_fontRegistry.Contains("Times New Roman"))  return "Times New Roman";
+                    if (_fontRegistry.Contains("LiberationSerif"))  return "LiberationSerif";
                     return null;
 
                 case "Courier New":
-                    if (_fontRegistry.Contains("LiberationMono"))   return "LiberationMono";
                     if (_fontRegistry.Contains("Courier New"))      return "Courier New";
+                    if (_fontRegistry.Contains("LiberationMono"))   return "LiberationMono";
                     return null;
 
                 case "Symbol":
