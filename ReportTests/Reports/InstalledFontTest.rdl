@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Report Name="InstalledFontTest">
+  <Description>One line in Arial and one in Times New Roman, to see which installed font each is drawn in.</Description>
+  <Body>
+    <Height>1in</Height>
+    <ReportItems>
+      <Textbox Name="ArialBox">
+        <Top>0in</Top>
+        <Left>0in</Left>
+        <Height>0.3in</Height>
+        <Width>4in</Width>
+        <Value>ARIALTEXT</Value>
+        <Style><FontFamily>Arial</FontFamily><FontSize>12pt</FontSize></Style>
+      </Textbox>
+      <Textbox Name="TimesBox">
+        <Top>0.5in</Top>
+        <Left>0in</Left>
+        <Height>0.3in</Height>
+        <Width>4in</Width>
+        <Value>TIMESTEXT</Value>
+        <Style><FontFamily>Times New Roman</FontFamily><FontSize>12pt</FontSize></Style>
+      </Textbox>
+    </ReportItems>
+  </Body>
+  <Width>6in</Width>
+  <PageWidth>8.5in</PageWidth>
+  <PageHeight>11in</PageHeight>
+</Report>
