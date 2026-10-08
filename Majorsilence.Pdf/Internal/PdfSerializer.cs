@@ -339,7 +339,7 @@ namespace Majorsilence.Pdf.Internal
             {
                 sigObjIdx   = objects.Count;
                 int sObjNum = objects.Count + 1;
-                var spb     = _sigHandler!.BuildPlaceholder();
+                var spb     = _sigHandler!.BuildPlaceholder(sObjNum, _encryptor);
                 sigPlaceholderBytes = spb;
                 objects.Add(spb);
 
@@ -823,13 +823,15 @@ namespace Majorsilence.Pdf.Internal
             }
         }
 
-        private static byte[] BuildSigWidgetObj(int objNum, int sigObjNum, int pageObjNum) =>
+        // The signature objects encrypt their strings like every other object in an encrypted document
+        // (#363): the widget's /T and the appearance stream were written in cleartext.
+        private byte[] BuildSigWidgetObj(int objNum, int sigObjNum, int pageObjNum) =>
             Latin1.GetBytes(
                 $"<< /Type /Annot /Subtype /Widget /FT /Sig " +
-                $"/T (Signature) /V {sigObjNum} 0 R " +
+                $"/T {EncLitStr(objNum, "Signature")} /V {sigObjNum} 0 R " +
                 $"/Rect [0 0 0 0] /P {pageObjNum} 0 R /F 4 >>");
 
-        private static byte[] BuildSigWidgetObjVisible(
+        private byte[] BuildSigWidgetObjVisible(
             int objNum, int sigObjNum, int pageObjNum, int apObjNum,
             (float X, float Y, float Width, float Height, string? SignerName) app)
         {
@@ -842,13 +844,13 @@ namespace Majorsilence.Pdf.Internal
 
             return Latin1.GetBytes(
                 $"<< /Type /Annot /Subtype /Widget /FT /Sig " +
-                $"/T (Signature) /V {sigObjNum} 0 R " +
+                $"/T {EncLitStr(objNum, "Signature")} /V {sigObjNum} 0 R " +
                 $"/Rect [{Fmt(x1)} {Fmt(y1)} {Fmt(x2)} {Fmt(y2)}] " +
                 $"/P {pageObjNum} 0 R /F 4 " +
                 $"/AP << /N {apObjNum} 0 R >> >>");
         }
 
-        private static byte[] BuildSigAppearanceObj(
+        private byte[] BuildSigAppearanceObj(
             int objNum,
             (float X, float Y, float Width, float Height, string? SignerName) app)
         {
@@ -872,7 +874,8 @@ namespace Majorsilence.Pdf.Internal
             content.Append("ET\n");
             content.Append("Q\n");
 
-            byte[] streamBytes = Latin1.GetBytes(content.ToString());
+            byte[] plain       = Latin1.GetBytes(content.ToString());
+            byte[] streamBytes = _encryptor != null ? _encryptor.EncryptStream(objNum, 0, plain) : plain;
             string resources =
                 "<< /Font << /Helv << /Type /Font /Subtype /Type1 /BaseFont /Helvetica >> >> >>";
             string hdr =
