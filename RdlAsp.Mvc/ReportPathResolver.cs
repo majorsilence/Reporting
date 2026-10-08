@@ -23,13 +23,14 @@ namespace Majorsilence.Reporting.RdlAsp
             }
 
             string rootFull = Path.GetFullPath(root);
-            if (!rootFull.EndsWith(Path.DirectorySeparatorChar) && !rootFull.EndsWith(Path.AltDirectorySeparatorChar))
+            char last = rootFull[rootFull.Length - 1];
+            if (last != Path.DirectorySeparatorChar && last != Path.AltDirectorySeparatorChar)
             {
                 rootFull += Path.DirectorySeparatorChar;
             }
 
             string full = Path.GetFullPath(Path.Combine(rootFull, file));
-            var comparison = OperatingSystem.IsWindows() ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
+            var comparison = Path.DirectorySeparatorChar == '\\' ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
             return full.StartsWith(rootFull, comparison) ? full : null;
         }
 
