@@ -1854,6 +1854,7 @@ class ReportDesigner extends HTMLElement {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
         body:    JSON.stringify({
+          connectionName:   src.name, // resolved to a server-configured connection
           dataProvider:     src.dataProvider,
           connectionString: src.connectString,
           commandText:      dset.commandText,

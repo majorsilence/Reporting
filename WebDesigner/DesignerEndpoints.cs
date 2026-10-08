@@ -147,21 +147,28 @@ public static class DesignerEndpoints
             catch
             {
                 return Results.BadRequest(
-                    "Expected JSON body: {\"dataProvider\":\"...\",\"connectionString\":\"...\",\"commandText\":\"...\"}");
+                    "Expected JSON body: {\"connectionName\":\"...\",\"commandText\":\"...\"}");
             }
 
-            if (body is null
-                || string.IsNullOrWhiteSpace(body.DataProvider)
-                || string.IsNullOrWhiteSpace(body.ConnectionString))
-                return Results.BadRequest("dataProvider and connectionString are required.");
+            if (body is null)
+                return Results.BadRequest("A JSON body is required.");
+
+            var target = SchemaConnectionResolver.Resolve(
+                options.SchemaConnections,
+                options.AllowClientConnectionStrings,
+                body.ConnectionName,
+                body.DataProvider,
+                body.ConnectionString,
+                out var resolveError);
+            if (target is null)
+                return Results.BadRequest(resolveError);
 
             try
             {
-                var conn = RdlEngineConfig.GetConnection(
-                    body.DataProvider.Trim(), body.ConnectionString.Trim());
+                var conn = RdlEngineConfig.GetConnection(target.DataProvider, target.ConnectionString);
 
                 if (conn is null)
-                    return Results.BadRequest($"Unknown data provider '{body.DataProvider}'.");
+                    return Results.BadRequest($"Unknown data provider '{target.DataProvider}'.");
 
                 conn.Open();
                 using (conn as IDisposable) // dispose if provider implements it
@@ -236,7 +243,9 @@ internal sealed class RdlSaveRequest
 
 internal sealed class RdlSchemaRequest
 {
-    public string  DataProvider    { get; set; } = string.Empty;
-    public string  ConnectionString { get; set; } = string.Empty;
+    /// <summary>Name of a connection in RdlDesignerOptions.SchemaConnections (the data source name).</summary>
+    public string? ConnectionName   { get; set; }
+    public string? DataProvider     { get; set; }
+    public string? ConnectionString { get; set; }
     public string? CommandText      { get; set; }
 }
