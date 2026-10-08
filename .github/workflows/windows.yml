@@ -2,14 +2,14 @@ name: windows
 
 on:
   push:
-    branches: [main]
+    branches: [main, "release/**"]
     # Version tags additionally create a draft GitHub Release (see the release-draft job
     # below) -- publishing that release's packages to nuget.org happens separately, in
     # publish-nuget.yml, only when a human clicks "Publish release" on the draft.
     tags:
       - 'v*'
   pull_request:
-    branches: [main]
+    branches: [main, "release/**"]
 
 jobs:
   windows-build:
