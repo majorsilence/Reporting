@@ -14,7 +14,7 @@ dotnet add package Majorsilence.Reporting.RdlEngine.SkiaSharp
 dotnet add package Majorsilence.Reporting.RdlCri.SkiaSharp
 ```
 
-**The core engine supports Linux, macOS, and Windows for server-side report generation. Only the WinForms-based designer and viewer are Windows-only.**
+**The core engine, report designer, and report viewer all support Linux, macOS, and Windows — the designer and viewer are built on [Majorsilence.Forms](https://github.com/majorsilence/Majorsilence.Forms), a cross-platform WinForms-API-compatible framework. Existing System.Windows.Forms host apps can still embed them as real WinForms controls via `Majorsilence.Forms.WinForms`'s `ToWinFormsControl()`.**
 
 If you have any question about Majorsilence Reporting or want to discuss it, a discussion group is available here:
 
@@ -140,6 +140,18 @@ Majorsilence Reporting is developed with the following workflow:
 If it doesn't have a feature that you want it to have, add it.  If it has a bug you need fixed, fix it.
 
 See [Contribute](https://github.com/majorsilence/My-FyiReporting/wiki/Contribute).
+
+## Branches and releases
+
+Versions are `year.release.build`.
+
+| Branch | Purpose |
+| --- | --- |
+| `release/26.0.x` | Stable 26.0.x line. Only bug fixes and security fixes. Tagged `v26.0.N`. |
+| `main` | Development toward the 27.x.x releases planned for 2027. Includes the modernization work. |
+
+* Fixes for the stable line target `release/26.0.x` and are then merged or cherry-picked forward into `main`.
+* New features and breaking changes target `main`.
 
 # Benchmarks
 

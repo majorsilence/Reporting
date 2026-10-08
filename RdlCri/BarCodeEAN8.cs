@@ -2,12 +2,8 @@
 using System.Collections.Generic;
 using System.Text;
 using Majorsilence.Reporting.Rdl;
-#if DRAWINGCOMPAT
 using Majorsilence.Forms.Drawing;
 using System.Drawing;  // value types (Color, Point, Size, Rectangle, ...) come from System.Drawing.Primitives
-#else
-using System.Drawing;
-#endif
 using System.ComponentModel;
 using System.Xml;
 

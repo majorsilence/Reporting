@@ -2,17 +2,9 @@
 using System.Collections;
 using System.Text;
 using System.Text.RegularExpressions;
-#if DRAWINGCOMPAT
 using Draw = Majorsilence.Forms.Drawing;
-#else
-using Draw = System.Drawing;
-#endif
 
-#if DRAWINGCOMPAT
 namespace Majorsilence.Forms.Drawing
-#else
-namespace System.Drawing
-#endif
 {
     public class GraphicsExtended
     {

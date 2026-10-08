@@ -12,6 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using Majorsilence.Forms.WinForms;
 
 namespace SampleDesignerControlWPF
 {
@@ -20,16 +21,20 @@ namespace SampleDesignerControlWPF
     /// </summary>
     public partial class MainWindow : Window
     {
+        private readonly Majorsilence.Reporting.RdlDesign.RdlUserControl reportDesigner = new()
+        {
+            Dock = Majorsilence.Forms.DockStyle.Fill,
+        };
+
         public MainWindow()
         {
             InitializeComponent();
+            windowsFormsHost1.Child = reportDesigner.ToWinFormsControl();
         }
 
         private void Window_Loaded_1(object sender, RoutedEventArgs e)
         {
-            System.Windows.Forms.Application.EnableVisualStyles();
             reportDesigner.OpenFile(@"C:\Users\Peter\Projects\My-FyiReporting\Examples\Examples\FileDirectoryTest.rdl");
-
         }
     }
 }

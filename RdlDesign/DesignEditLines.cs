@@ -3,9 +3,10 @@ using System;
 using System.Collections;
 using System.ComponentModel;
 using System.Drawing;
-using System.Drawing.Drawing2D;
-using System.Drawing.Imaging;
-using System.Windows.Forms;
+using Majorsilence.Forms.Drawing;
+using Majorsilence.Forms.Drawing.Drawing2D;
+using Majorsilence.Forms.Drawing.Imaging;
+using Majorsilence.Forms;
 using System.Globalization;
 using System.Net;
 
@@ -17,7 +18,7 @@ namespace Majorsilence.Reporting.RdlDesign
 	/// </summary>
     public class DesignEditLines : UserControl, System.ComponentModel.ISupportInitialize
     {
-        System.Windows.Forms.RichTextBox editor=null;
+        Majorsilence.Forms.RichTextBox editor=null;
         int saveTbEditorLines = -1;
         int _LineHeight = -1;
 
@@ -27,23 +28,23 @@ namespace Majorsilence.Reporting.RdlDesign
             // force to double buffering for smoother drawing
             this.DoubleBuffered = true;
 
-            this.Paint += new PaintEventHandler(DesignEditLinesPaint);
+            this.Paint += DesignEditLinesPaint;
         }
 
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        internal System.Windows.Forms.RichTextBox Editor
+        internal Majorsilence.Forms.RichTextBox Editor
         {
             get { return editor; }
             set 
             { 
                 editor = value;
-                editor.TextChanged += new System.EventHandler(editor_TextChanged);
-                editor.Resize += new System.EventHandler(editor_Resize);
-                editor.VScroll += new System.EventHandler(editor_VScroll);
+                editor.TextChanged += editor_TextChanged;
+                editor.Resize += editor_Resize;
+                editor.VScroll += editor_VScroll;
             }
         }
 
-		private void DesignEditLinesPaint(object sender, System.Windows.Forms.PaintEventArgs e)
+		private void DesignEditLinesPaint(object sender, Majorsilence.Forms.PaintEventArgs e)
         {
             Lines_Draw(e.Graphics);
         } 

@@ -1,0 +1,92 @@
+@namespace Majorsilence.Reporting.WebDesigner.Components
+@inject IJSRuntime JS
+@implements IAsyncDisposable
+
+@*
+  Blazor wrapper around the <report-viewer> vanilla JS Web Component.
+
+  Usage (Blazor Server / WASM):
+
+    @using Majorsilence.Reporting.WebDesigner.Components
+
+    <RdlReportViewer @ref="_viewer"
+                     RenderEndpoint="/rdl-viewer/render"
+                     ParametersEndpoint="/rdl-viewer/parameters"
+                     ReportName="Invoice"
+                     style="display:block;height:900px" />
+
+    <button @onclick="Refresh">Refresh</button>
+
+    @code {
+        RdlReportViewer _viewer = default!;
+
+        async Task Refresh() => await _viewer.RefreshAsync();
+    }
+
+  The component lazy-loads rdl-viewer.js the first time it mounts — no <script>
+  tag is needed in _Host.cshtml / index.html.
+*@
+
+<report-viewer @ref="_el"
+               render-endpoint="@RenderEndpoint"
+               parameters-endpoint="@(ParametersEndpoint ?? string.Empty)"
+               report-name="@(ReportName ?? string.Empty)"
+               rdl="@(Rdl ?? string.Empty)"
+               @attributes="AdditionalAttributes">
+</report-viewer>
+
+@code {
+    // ── Parameters ───────────────────────────────────────────────────────────
+
+    /// <summary>POST endpoint that renders a report to HTML, PDF, CSV, or XLSX.</summary>
+    [Parameter] public string RenderEndpoint { get; set; } = "/rdl-viewer/render";
+
+    /// <summary>GET endpoint (base path, report name is appended) that returns report-parameter metadata.</summary>
+    [Parameter] public string? ParametersEndpoint { get; set; }
+
+    /// <summary>Name of a report on the server. Mutually exclusive with <see cref="Rdl"/>.</summary>
+    [Parameter] public string? ReportName { get; set; }
+
+    /// <summary>Inline RDL XML to render. Mutually exclusive with <see cref="ReportName"/>.</summary>
+    [Parameter] public string? Rdl { get; set; }
+
+    /// <summary>Allows arbitrary HTML attributes (e.g. style, class) to pass through to the host element.</summary>
+    [Parameter(CaptureUnmatchedValues = true)]
+    public Dictionary<string, object>? AdditionalAttributes { get; set; }
+
+    // ── Private state ────────────────────────────────────────────────────────
+
+    private ElementReference _el;
+    private IJSObjectReference? _interop;
+
+    // ── Lifecycle ────────────────────────────────────────────────────────────
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender) return;
+
+        _interop = await JS.InvokeAsync<IJSObjectReference>(
+            "import",
+            "/_content/Majorsilence.Reporting.WebDesigner/rdl-viewer/viewer-interop.js");
+    }
+
+    // ── Public API ───────────────────────────────────────────────────────────
+
+    /// <summary>Re-render the report with its current parameter values.</summary>
+    public async Task RefreshAsync()
+    {
+        if (_interop is null) return;
+        await _interop.InvokeVoidAsync("refresh", _el);
+    }
+
+    // ── Disposal ─────────────────────────────────────────────────────────────
+
+    public async ValueTask DisposeAsync()
+    {
+        if (_interop is not null)
+        {
+            try { await _interop.DisposeAsync(); }
+            catch (JSDisconnectedException) { }
+        }
+    }
+}

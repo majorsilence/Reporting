@@ -1,8 +1,9 @@
+using System.Collections.Generic;
+using System.Linq;
 using System;
-using System.Drawing;
 using System.Collections;
 using System.ComponentModel;
-using System.Windows.Forms;
+using Majorsilence.Forms;
 using System.Text;
 using System.Xml;
 using Majorsilence.Reporting.Rdl;
@@ -301,7 +302,7 @@ namespace Majorsilence.Reporting.RdlDesign
 
         private void bCategory_Click(object sender, System.EventArgs e)
         {
-            ICollection sic = lbFields.SelectedIndices;
+            List<int> sic = lbFields.SelectedIndices.ToList();
             int count = sic.Count;
             foreach (int i in sic)
             {
@@ -314,7 +315,7 @@ namespace Majorsilence.Reporting.RdlDesign
 
         private void bSeries_Click(object sender, System.EventArgs e)
         {
-            ICollection sic = lbFields.SelectedIndices;
+            List<int> sic = lbFields.SelectedIndices.ToList();
             int count = sic.Count;
             foreach (int i in sic)
             {

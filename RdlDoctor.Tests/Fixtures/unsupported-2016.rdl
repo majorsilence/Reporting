@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Report xmlns="http://schemas.microsoft.com/sqlserver/reporting/2016/01/reportdefinition">
+  <Body>
+    <ReportItems>
+      <Tablix Name="Tablix1">
+      </Tablix>
+      <Gauge Name="Gauge1">
+      </Gauge>
+      <Textbox Name="LookupBox">
+        <Value>=Lookup(Fields!Key.Value, Fields!Key.Value, Fields!Val.Value, "OtherDataSet")</Value>
+      </Textbox>
+      <FunkyWidget Name="Whatever">
+      </FunkyWidget>
+    </ReportItems>
+    <Height>3in</Height>
+  </Body>
+  <Width>6in</Width>
+</Report>

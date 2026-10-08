@@ -1,0 +1,18 @@
+{
+  "InvoiceNumber": "INV-2026-0143",
+  "InvoiceDate": "2026-06-15",
+  "DueDate": "2026-07-15",
+  "CompanyName": "Acme Robotics LLC",
+  "CompanyAddress": "482 Foundry Street, Springfield, IL 62701",
+  "CustomerName": "Northwind Traders",
+  "CustomerAddress": "900 Lakeview Ave, Suite 200, Chicago, IL 60601",
+  "Lines": [
+    { "Description": "Servo Motor Assembly (Model SM-220)", "Quantity": 12, "UnitPrice": 84.50 },
+    { "Description": "Precision Bearing Kit",                "Quantity": 24, "UnitPrice": 11.25 },
+    { "Description": "Custom Bracket Fabrication",           "Quantity": 6,  "UnitPrice": 42.00 },
+    { "Description": "On-site Calibration (per hour)",       "Quantity": 8,  "UnitPrice": 95.00 },
+    { "Description": "Shipping and Handling",                "Quantity": 1,  "UnitPrice": 65.00 }
+  ],
+  "TaxRatePercent": 7.25,
+  "Notes": "Payment due within 30 days. Please reference the invoice number on all remittances."
+}

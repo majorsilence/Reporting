@@ -3,9 +3,8 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Drawing;
 using System.Data;
-using System.Windows.Forms;
+using Majorsilence.Forms;
 using System.Xml;
 using System.IO;
 using Majorsilence.Reporting.RdlDesign.Resources;
@@ -15,34 +14,34 @@ namespace Majorsilence.Reporting.RdlDesign
 	/// <summary>
 	/// Summary description for StyleCtl.
 	/// </summary>
-	internal class InteractivityCtl : System.Windows.Forms.UserControl, IProperty
+	internal class InteractivityCtl : Majorsilence.Forms.UserControl, IProperty
 	{
         private List<XmlNode> _ReportItems;
 		private DesignXmlDraw _Draw;
         private List<DrillParameter> _DrillParameters;
 		// flags for controlling whether syntax changed for a particular property
 		private bool fBookmark, fAction, fHidden, fToggle;
-		private System.Windows.Forms.GroupBox groupBox1;
-		private System.Windows.Forms.GroupBox grpBoxVisibility;
-		private System.Windows.Forms.Label label1;
-		private System.Windows.Forms.TextBox tbBookmark;
-		private System.Windows.Forms.RadioButton rbHyperlink;
-		private System.Windows.Forms.RadioButton rbBookmarkLink;
-		private System.Windows.Forms.RadioButton rbDrillthrough;
-		private System.Windows.Forms.TextBox tbHyperlink;
-		private System.Windows.Forms.TextBox tbBookmarkLink;
-		private System.Windows.Forms.TextBox tbDrillthrough;
-		private System.Windows.Forms.Button bParameters;
-		private System.Windows.Forms.Label label2;
-		private System.Windows.Forms.Label label3;
-		private System.Windows.Forms.TextBox tbHidden;
-		private System.Windows.Forms.ComboBox cbToggle;
-		private System.Windows.Forms.RadioButton rbNoAction;
-		private System.Windows.Forms.Button bDrillthrough;
-		private System.Windows.Forms.Button bHidden;
-		private System.Windows.Forms.Button bBookmarkLink;
-		private System.Windows.Forms.Button bHyperlink;
-		private System.Windows.Forms.Button bBookmark;
+		private Majorsilence.Forms.GroupBox groupBox1;
+		private Majorsilence.Forms.GroupBox grpBoxVisibility;
+		private Majorsilence.Forms.Label label1;
+		private Majorsilence.Forms.TextBox tbBookmark;
+		private Majorsilence.Forms.RadioButton rbHyperlink;
+		private Majorsilence.Forms.RadioButton rbBookmarkLink;
+		private Majorsilence.Forms.RadioButton rbDrillthrough;
+		private Majorsilence.Forms.TextBox tbHyperlink;
+		private Majorsilence.Forms.TextBox tbBookmarkLink;
+		private Majorsilence.Forms.TextBox tbDrillthrough;
+		private Majorsilence.Forms.Button bParameters;
+		private Majorsilence.Forms.Label label2;
+		private Majorsilence.Forms.Label label3;
+		private Majorsilence.Forms.TextBox tbHidden;
+		private Majorsilence.Forms.ComboBox cbToggle;
+		private Majorsilence.Forms.RadioButton rbNoAction;
+		private Majorsilence.Forms.Button bDrillthrough;
+		private Majorsilence.Forms.Button bHidden;
+		private Majorsilence.Forms.Button bBookmarkLink;
+		private Majorsilence.Forms.Button bHyperlink;
+		private Majorsilence.Forms.Button bBookmark;
 		/// <summary> 
 		/// Required designer variable.
 		/// </summary>
@@ -154,29 +153,29 @@ namespace Majorsilence.Reporting.RdlDesign
 		/// </summary>
 		private void InitializeComponent()
 		{
-			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(InteractivityCtl));
+			Majorsilence.Forms.ComponentResourceManager resources = new Majorsilence.Forms.ComponentResourceManager(typeof(InteractivityCtl));
             this.DoubleBuffered = true;
-			this.grpBoxVisibility = new System.Windows.Forms.GroupBox();
-			this.bHidden = new System.Windows.Forms.Button();
-			this.cbToggle = new System.Windows.Forms.ComboBox();
-			this.tbHidden = new System.Windows.Forms.TextBox();
-			this.label3 = new System.Windows.Forms.Label();
-			this.label2 = new System.Windows.Forms.Label();
-			this.groupBox1 = new System.Windows.Forms.GroupBox();
-			this.bBookmarkLink = new System.Windows.Forms.Button();
-			this.bHyperlink = new System.Windows.Forms.Button();
-			this.rbNoAction = new System.Windows.Forms.RadioButton();
-			this.bParameters = new System.Windows.Forms.Button();
-			this.bDrillthrough = new System.Windows.Forms.Button();
-			this.tbDrillthrough = new System.Windows.Forms.TextBox();
-			this.tbBookmarkLink = new System.Windows.Forms.TextBox();
-			this.tbHyperlink = new System.Windows.Forms.TextBox();
-			this.rbDrillthrough = new System.Windows.Forms.RadioButton();
-			this.rbBookmarkLink = new System.Windows.Forms.RadioButton();
-			this.rbHyperlink = new System.Windows.Forms.RadioButton();
-			this.label1 = new System.Windows.Forms.Label();
-			this.tbBookmark = new System.Windows.Forms.TextBox();
-			this.bBookmark = new System.Windows.Forms.Button();
+			this.grpBoxVisibility = new Majorsilence.Forms.GroupBox();
+			this.bHidden = new Majorsilence.Forms.Button();
+			this.cbToggle = new Majorsilence.Forms.ComboBox();
+			this.tbHidden = new Majorsilence.Forms.TextBox();
+			this.label3 = new Majorsilence.Forms.Label();
+			this.label2 = new Majorsilence.Forms.Label();
+			this.groupBox1 = new Majorsilence.Forms.GroupBox();
+			this.bBookmarkLink = new Majorsilence.Forms.Button();
+			this.bHyperlink = new Majorsilence.Forms.Button();
+			this.rbNoAction = new Majorsilence.Forms.RadioButton();
+			this.bParameters = new Majorsilence.Forms.Button();
+			this.bDrillthrough = new Majorsilence.Forms.Button();
+			this.tbDrillthrough = new Majorsilence.Forms.TextBox();
+			this.tbBookmarkLink = new Majorsilence.Forms.TextBox();
+			this.tbHyperlink = new Majorsilence.Forms.TextBox();
+			this.rbDrillthrough = new Majorsilence.Forms.RadioButton();
+			this.rbBookmarkLink = new Majorsilence.Forms.RadioButton();
+			this.rbHyperlink = new Majorsilence.Forms.RadioButton();
+			this.label1 = new Majorsilence.Forms.Label();
+			this.tbBookmark = new Majorsilence.Forms.TextBox();
+			this.bBookmark = new Majorsilence.Forms.Button();
 			this.grpBoxVisibility.SuspendLayout();
 			this.groupBox1.SuspendLayout();
 			this.SuspendLayout();
@@ -197,20 +196,20 @@ namespace Majorsilence.Reporting.RdlDesign
 			resources.ApplyResources(this.bHidden, "bHidden");
 			this.bHidden.Name = "bHidden";
 			this.bHidden.Tag = "visibility";
-			this.bHidden.Click += new System.EventHandler(this.bExpr_Click);
+			this.bHidden.Click += this.bExpr_Click;
 			// 
 			// cbToggle
 			// 
 			resources.ApplyResources(this.cbToggle, "cbToggle");
 			this.cbToggle.Name = "cbToggle";
-			this.cbToggle.SelectedIndexChanged += new System.EventHandler(this.cbToggle_SelectedIndexChanged);
-			this.cbToggle.TextChanged += new System.EventHandler(this.cbToggle_SelectedIndexChanged);
+			this.cbToggle.SelectedIndexChanged += this.cbToggle_SelectedIndexChanged;
+			this.cbToggle.TextChanged += this.cbToggle_SelectedIndexChanged;
 			// 
 			// tbHidden
 			// 
 			resources.ApplyResources(this.tbHidden, "tbHidden");
 			this.tbHidden.Name = "tbHidden";
-			this.tbHidden.TextChanged += new System.EventHandler(this.tbHidden_TextChanged);
+			this.tbHidden.TextChanged += this.tbHidden_TextChanged;
 			// 
 			// label3
 			// 
@@ -244,68 +243,68 @@ namespace Majorsilence.Reporting.RdlDesign
 			resources.ApplyResources(this.bBookmarkLink, "bBookmarkLink");
 			this.bBookmarkLink.Name = "bBookmarkLink";
 			this.bBookmarkLink.Tag = "bookmarklink";
-			this.bBookmarkLink.Click += new System.EventHandler(this.bExpr_Click);
+			this.bBookmarkLink.Click += this.bExpr_Click;
 			// 
 			// bHyperlink
 			// 
 			resources.ApplyResources(this.bHyperlink, "bHyperlink");
 			this.bHyperlink.Name = "bHyperlink";
 			this.bHyperlink.Tag = "hyperlink";
-			this.bHyperlink.Click += new System.EventHandler(this.bExpr_Click);
+			this.bHyperlink.Click += this.bExpr_Click;
 			// 
 			// rbNoAction
 			// 
 			resources.ApplyResources(this.rbNoAction, "rbNoAction");
 			this.rbNoAction.Name = "rbNoAction";
-			this.rbNoAction.CheckedChanged += new System.EventHandler(this.rbAction_CheckedChanged);
+			this.rbNoAction.CheckedChanged += this.rbAction_CheckedChanged;
 			// 
 			// bParameters
 			// 
 			resources.ApplyResources(this.bParameters, "bParameters");
 			this.bParameters.Name = "bParameters";
-			this.bParameters.Click += new System.EventHandler(this.bParameters_Click);
+			this.bParameters.Click += this.bParameters_Click;
 			// 
 			// bDrillthrough
 			// 
 			resources.ApplyResources(this.bDrillthrough, "bDrillthrough");
 			this.bDrillthrough.Name = "bDrillthrough";
-			this.bDrillthrough.Click += new System.EventHandler(this.bDrillthrough_Click);
+			this.bDrillthrough.Click += this.bDrillthrough_Click;
 			// 
 			// tbDrillthrough
 			// 
 			resources.ApplyResources(this.tbDrillthrough, "tbDrillthrough");
 			this.tbDrillthrough.Name = "tbDrillthrough";
-			this.tbDrillthrough.TextChanged += new System.EventHandler(this.tbAction_TextChanged);
+			this.tbDrillthrough.TextChanged += this.tbAction_TextChanged;
 			// 
 			// tbBookmarkLink
 			// 
 			resources.ApplyResources(this.tbBookmarkLink, "tbBookmarkLink");
 			this.tbBookmarkLink.Name = "tbBookmarkLink";
-			this.tbBookmarkLink.TextChanged += new System.EventHandler(this.tbAction_TextChanged);
+			this.tbBookmarkLink.TextChanged += this.tbAction_TextChanged;
 			// 
 			// tbHyperlink
 			// 
 			resources.ApplyResources(this.tbHyperlink, "tbHyperlink");
 			this.tbHyperlink.Name = "tbHyperlink";
-			this.tbHyperlink.TextChanged += new System.EventHandler(this.tbAction_TextChanged);
+			this.tbHyperlink.TextChanged += this.tbAction_TextChanged;
 			// 
 			// rbDrillthrough
 			// 
 			resources.ApplyResources(this.rbDrillthrough, "rbDrillthrough");
 			this.rbDrillthrough.Name = "rbDrillthrough";
-			this.rbDrillthrough.CheckedChanged += new System.EventHandler(this.rbAction_CheckedChanged);
+			this.rbDrillthrough.CheckedChanged += this.rbAction_CheckedChanged;
 			// 
 			// rbBookmarkLink
 			// 
 			resources.ApplyResources(this.rbBookmarkLink, "rbBookmarkLink");
 			this.rbBookmarkLink.Name = "rbBookmarkLink";
-			this.rbBookmarkLink.CheckedChanged += new System.EventHandler(this.rbAction_CheckedChanged);
+			this.rbBookmarkLink.CheckedChanged += this.rbAction_CheckedChanged;
 			// 
 			// rbHyperlink
 			// 
 			resources.ApplyResources(this.rbHyperlink, "rbHyperlink");
 			this.rbHyperlink.Name = "rbHyperlink";
-			this.rbHyperlink.CheckedChanged += new System.EventHandler(this.rbAction_CheckedChanged);
+			this.rbHyperlink.CheckedChanged += this.rbAction_CheckedChanged;
 			// 
 			// label1
 			// 
@@ -322,7 +321,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			resources.ApplyResources(this.bBookmark, "bBookmark");
 			this.bBookmark.Name = "bBookmark";
 			this.bBookmark.Tag = "bookmark";
-			this.bBookmark.Click += new System.EventHandler(this.bExpr_Click);
+			this.bBookmark.Click += this.bExpr_Click;
 			// 
 			// InteractivityCtl
 			// 

@@ -29,21 +29,21 @@ namespace Majorsilence.Reporting.RdlDesign
 		/// </summary>
 		private void InitializeComponent()
 		{
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(QueryParametersCtl));
+            Majorsilence.Forms.ComponentResourceManager resources = new Majorsilence.Forms.ComponentResourceManager(typeof(QueryParametersCtl));
             this.DoubleBuffered = true;
-            this.dgParms = new System.Windows.Forms.DataGridView();
-            this.dgtbName = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dgtbValue = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.bValueExpr = new System.Windows.Forms.Button();
-            this.bDelete = new System.Windows.Forms.Button();
+            this.dgParms = new Majorsilence.Forms.DataGridView();
+            this.dgtbName = new Majorsilence.Forms.DataGridViewTextBoxColumn();
+            this.dgtbValue = new Majorsilence.Forms.DataGridViewTextBoxColumn();
+            this.bValueExpr = new Majorsilence.Forms.Button();
+            this.bDelete = new Majorsilence.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.dgParms)).BeginInit();
             this.SuspendLayout();
             // 
             // dgParms
             // 
             resources.ApplyResources(this.dgParms, "dgParms");
-            this.dgParms.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
-            this.dgParms.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
+            this.dgParms.AutoSizeColumnsMode = Majorsilence.Forms.DataGridViewAutoSizeColumnsMode.Fill;
+            this.dgParms.Columns.AddRange(new Majorsilence.Forms.DataGridViewColumn[] {
             this.dgtbName,
             this.dgtbValue});
             this.dgParms.Name = "dgParms";
@@ -65,13 +65,13 @@ namespace Majorsilence.Reporting.RdlDesign
             resources.ApplyResources(this.bValueExpr, "bValueExpr");
             this.bValueExpr.Name = "bValueExpr";
             this.bValueExpr.Tag = "value";
-            this.bValueExpr.Click += new System.EventHandler(this.bValueExpr_Click);
+            this.bValueExpr.Click += this.bValueExpr_Click;
             // 
             // bDelete
             // 
             resources.ApplyResources(this.bDelete, "bDelete");
             this.bDelete.Name = "bDelete";
-            this.bDelete.Click += new System.EventHandler(this.bDelete_Click);
+            this.bDelete.Click += this.bDelete_Click;
             // 
             // QueryParametersCtl
             // 
@@ -86,10 +86,10 @@ namespace Majorsilence.Reporting.RdlDesign
 		}
 		#endregion
 				
-		private System.Windows.Forms.DataGridView dgParms;
-		private System.Windows.Forms.DataGridViewTextBoxColumn dgtbName;
-		private System.Windows.Forms.DataGridViewTextBoxColumn dgtbValue;
-        private System.Windows.Forms.Button bValueExpr;
-        private System.Windows.Forms.Button bDelete;
+		private Majorsilence.Forms.DataGridView dgParms;
+		private Majorsilence.Forms.DataGridViewTextBoxColumn dgtbName;
+		private Majorsilence.Forms.DataGridViewTextBoxColumn dgtbValue;
+        private Majorsilence.Forms.Button bValueExpr;
+        private Majorsilence.Forms.Button bDelete;
     }
 }

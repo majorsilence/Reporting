@@ -1,0 +1,291 @@
+# Majorsilence.Forms migration report
+
+- **Input:** `/home/peter/source/repos/Reporting/RdlDesign/Majorsilence.Reporting.ReportDesigner.csproj`
+- **Output:** `/home/peter/source/repos/Reporting/RdlDesign.Forms`
+- **Backend:** Avalonia
+- **Reference mode:** Package
+- **Target framework:** preserve version, drop -windows suffix
+- **Mode:** write
+
+## Summary
+
+- Files scanned: **283**
+- Files changed: **248**
+- Manual-review items: **18**
+
+## Changed files (248)
+
+- `[proj]` Majorsilence.Reporting.ReportDesigner.csproj
+- `[src]` DialogListOfStrings.cs
+- `[src]` DesignerUtility.cs
+- `[src]` BackgroundCtl.cs
+- `[src]` ImageCtl.cs
+- `[src]` InteractivityCtl.cs
+- `[src]` ReportXmlCtl.cs
+- `[src]` DrillParametersDialog.cs
+- `[src]` DataSetsCtl.cs
+- `[src]` DataSetsCtl.Designer.cs
+- `[src]` DialogValidateRdl.Designer.cs
+- `[src]` DialogNewChart.cs
+- `[src]` DialogEmbeddedImages.Designer.cs
+- `[src]` FiltersCtl.cs
+- `[src]` MatrixView.cs
+- `[src]` QueryParametersCtl.Designer.cs
+- `[src]` PositionCtl.cs
+- `[src]` DialogNewTable.cs
+- `[src]` DialogNewMatrix.Designer.cs
+- `[src]` SQLCtl.Designer.cs
+- `[src]` DialogDataSources.cs
+- `[src]` ModulesClassesCtl.cs
+- `[src]` DesignCtl.Designer.cs
+- `[src]` DataSetRowsCtl.cs
+- `[src]` TableRowCtl.cs
+- `[src]` GridCtl.cs
+- `[src]` DialogAbout.cs
+- `[src]` DialogValidValues.cs
+- `[src]` DialogDataSourceRef.cs
+- `[src]` ColorPickerPopup.cs
+- `[src]` SubreportCtl.cs
+- `[src]` DesignRuler.cs
+- `[src]` SQLCtl.cs
+- `[src]` PropertyDialog.cs
+- `[src]` RdlEditPreview.cs
+- `[src]` DialogListOfStrings.Designer.cs
+- `[src]` FindTab.Designer.cs
+- `[src]` RdlUserControl.cs
+- `[src]` ListCtl.cs
+- `[src]` RdlDesigner.Designer.cs
+- `[src]` PropertyDialog.Designer.cs
+- `[src]` DialogExprEditor.cs
+- `[src]` SimpleButton.cs
+- `[src]` DialogEmbeddedImages.cs
+- `[src]` PropertyCtl.cs
+- `[src]` TableCtl.cs
+- `[src]` DialogNewChart.Designer.cs
+- `[src]` DialogFilterOperator.Designer.cs
+- `[src]` SimpleToggle.cs
+- `[src]` DialogDataSources.Designer.cs
+- `[src]` StyleBorderCtl.cs
+- `[src]` ColorPickerPopup.Designer.cs
+- `[src]` DrillParametersDialog.Designer.cs
+- `[src]` DialogAbout.Designer.cs
+- `[src]` DialogDataSourceRef.Designer.cs
+- `[src]` ChartCtl.cs
+- `[src]` QueryParametersCtl.cs
+- `[src]` StaticSeriesCtl.Designer.cs
+- `[src]` StaticSeriesCtl - Copy.cs
+- `[src]` DialogValidateRdl.cs
+- `[src]` DialogDatabase.Designer.cs
+- `[src]` DialogToolOptions.cs
+- `[src]` DialogToolOptions.Designer.cs
+- `[src]` DialogValidValues.Designer.cs
+- `[src]` DialogDatabase.cs
+- `[src]` CodeCtl.cs
+- `[src]` FontCtl.cs
+- `[src]` DesignCtl.cs
+- `[src]` UserZoomControl.cs
+- `[src]` ChartLegendCtl.cs
+- `[src]` TableColumnCtl.cs
+- `[src]` StaticSeriesCtl.cs
+- `[src]` SingleCtlDialog.cs
+- `[src]` DataSetRowsCtl.Designer.cs
+- `[src]` DialogNewMatrix.cs
+- `[src]` ChartCtl - Copy.cs
+- `[src]` DesignXmlDraw.cs
+- `[src]` DesignEditLines.cs
+- `[src]` BodyCtl.cs
+- `[src]` ColorPicker.cs
+- `[src]` DialogExprEditor.Designer.cs
+- `[src]` RdlDesigner.cs
+- `[src]` VisibilityCtl.cs
+- `[src]` UserZoomControl.Designer.cs
+- `[src]` ReportParameterCtl.cs
+- `[src]` MatrixCtl.cs
+- `[src]` ChartAxisCtl.cs
+- `[src]` SortingCtl.cs
+- `[src]` StyleCtl.cs
+- `[src]` MDIChild.cs
+- `[src]` StyleTextCtl.cs
+- `[src]` MDIChild.Designer.cs
+- `[src]` DialogNewTable.Designer.cs
+- `[src]` ReportParameterCtl.Designer.cs
+- `[src]` ReportCtl.cs
+- `[src]` ReportCtl.Designer.cs
+- `[src]` SingleCtlDialog.Designer.cs
+- `[src]` GroupingCtl.cs
+- `[src]` FindTab.cs
+- `[src]` RdlUserControl.Designer.cs
+- `[src]` CustomReportItemCtl.cs
+- `[src]` DialogFilterOperator.cs
+- `[src]` ToolStripUserZoomControl.cs
+- `[src]` Properties/Resources.Designer.cs
+- `[src]` RdlProperties/PropertyVisibility.cs
+- `[src]` RdlProperties/PropertyExpr.cs
+- `[src]` RdlProperties/PropertyGrouping.cs
+- `[src]` RdlProperties/PropertyTable.cs
+- `[src]` RdlProperties/PropertyBorder.cs
+- `[src]` RdlProperties/PropertyAppearance.cs
+- `[src]` RdlProperties/PropertyFilters.cs
+- `[src]` RdlProperties/PropertyMatrix.cs
+- `[src]` RdlProperties/PropertyTableTab.cs
+- `[src]` RdlProperties/PropertyImage.cs
+- `[src]` RdlProperties/PropertyReport.cs
+- `[src]` RdlProperties/PropertyBackground.cs
+- `[src]` RdlProperties/PropertySorting.cs
+- `[src]` RdlProperties/PropertyAction.cs
+- `[src]` RdlProperties/PropertySubreport.cs
+- `[src]` Syntax/ScintillaExprStyle.cs
+- `[src]` Syntax/RdlScriptLexer.cs
+- `[src]` Syntax/ScintillaXMLStyle.cs
+- `[src]` Syntax/ScintillaSqlStyle.cs
+- `[resx]` SingleCtlDialog.ru-RU.resx
+- `[resx]` ModulesClassesCtl.ru-RU.resx
+- `[resx]` DialogDatabase.resx
+- `[resx]` DialogNewChart.ru-RU.resx
+- `[resx]` QueryParametersCtl.resx
+- `[resx]` ReportParameterCtl.resx
+- `[resx]` TableCtl.ru-RU.resx
+- `[resx]` DialogFilterOperator.ru-RU.resx
+- `[resx]` MDIChild.ru-RU.resx
+- `[resx]` DesignCtl.resx
+- `[resx]` ChartCtl.ru-RU.resx
+- `[resx]` FindTab.ru-RU.resx
+- `[resx]` StyleCtl.resx
+- `[resx]` DialogEmbeddedImages.ru-RU.resx
+- `[resx]` DialogListOfStrings.resx
+- `[resx]` TableColumnCtl.ru-RU.resx
+- `[resx]` DialogValidValues.resx
+- `[resx]` ListCtl.resx
+- `[resx]` CustomReportItemCtl.resx
+- `[resx]` MatrixCtl.resx
+- `[resx]` SingleCtlDialog.resx
+- `[resx]` DialogExprEditor.ru-RU.resx
+- `[resx]` RdlDesigner.resx
+- `[resx]` RdlEditPreview.resx
+- `[resx]` DataSetRowsCtl.ru-RU.resx
+- `[resx]` GridCtl.resx
+- `[resx]` GroupingCtl.ru-RU.resx
+- `[resx]` StyleBorderCtl.ru-RU.resx
+- `[resx]` DialogNewMatrix.resx
+- `[resx]` DialogValidateRdl.resx
+- `[resx]` QueryParametersCtl.ru-RU.resx
+- `[resx]` SQLCtl.ru-RU.resx
+- `[resx]` FontCtl.ru-RU.resx
+- `[resx]` StaticSeriesCtl.resx
+- `[resx]` DialogListOfStrings.ru-RU.resx
+- `[resx]` FontCtl.resx
+- `[resx]` FindTab.resx
+- `[resx]` ReportParameterCtl.ru-RU.resx
+- `[resx]` PropertyCtl.ru-RU.resx
+- `[resx]` DialogDataSources.ru-RU.resx
+- `[resx]` DialogDataSourceRef.ru-RU.resx
+- `[resx]` DialogNewTable.resx
+- `[resx]` ListCtl.ru-RU.resx
+- `[resx]` DialogToolOptions.ru-RU.resx
+- `[resx]` DialogFilterOperator.resx
+- `[resx]` DrillParametersDialog.resx
+- `[resx]` DesignCtl.ru-RU.resx
+- `[resx]` GroupingCtl.resx
+- `[resx]` TableColumnCtl.resx
+- `[resx]` StyleBorderCtl.resx
+- `[resx]` ReportXmlCtl.resx
+- `[resx]` ChartAxisCtl.ru-RU.resx
+- `[resx]` DialogDataSourceRef.resx
+- `[resx]` ChartLegendCtl.ru-RU.resx
+- `[resx]` ColorPickerPopup.resx
+- `[resx]` FiltersCtl.resx
+- `[resx]` MatrixCtl.ru-RU.resx
+- `[resx]` DialogAbout.ru-RU.resx
+- `[resx]` GridCtl.ru-RU.resx
+- `[resx]` RdlUserControl.ru-RU.resx
+- `[resx]` SubreportCtl.resx
+- `[resx]` StyleCtl.ru-RU.resx
+- `[resx]` DrillParametersDialog.ru-RU.resx
+- `[resx]` DialogDatabase.ru-RU.resx
+- `[resx]` SortingCtl.ru-RU.resx
+- `[resx]` ReportCtl.ru-RU.resx
+- `[resx]` DialogValidateRdl.ru-RU.resx
+- `[resx]` ImageCtl.resx
+- `[resx]` DialogEmbeddedImages.resx
+- `[resx]` TableRowCtl.resx
+- `[resx]` RdlDesigner.ru-RU.resx
+- `[resx]` BodyCtl.resx
+- `[resx]` MDIChild.resx
+- `[resx]` PropertyDialog.resx
+- `[resx]` DataSetsCtl.resx
+- `[resx]` SortingCtl.resx
+- `[resx]` DataSetRowsCtl.resx
+- `[resx]` ImageCtl.ru-RU.resx
+- `[resx]` ReportXmlCtl.ru-RU.resx
+- `[resx]` DataSetsCtl.ru-RU.resx
+- `[resx]` SubreportCtl.ru-RU.resx
+- `[resx]` BodyCtl.ru-RU.resx
+- `[resx]` VisibilityCtl.ru-RU.resx
+- `[resx]` PositionCtl.ru-RU.resx
+- `[resx]` StyleTextCtl.ru-RU.resx
+- `[resx]` VisibilityCtl.resx
+- `[resx]` DialogToolOptions.resx
+- `[resx]` DialogDataSources.resx
+- `[resx]` DialogAbout.resx
+- `[resx]` TableRowCtl.ru-RU.resx
+- `[resx]` BackgroundCtl.ru-RU.resx
+- `[resx]` DialogValidValues.ru-RU.resx
+- `[resx]` DialogNewTable.ru-RU.resx
+- `[resx]` ChartAxisCtl.resx
+- `[resx]` StyleTextCtl.resx
+- `[resx]` PropertyCtl.resx
+- `[resx]` ModulesClassesCtl.resx
+- `[resx]` StaticSeriesCtl.ru-RU.resx
+- `[resx]` PropertyDialog.ru-RU.resx
+- `[resx]` SQLCtl.resx
+- `[resx]` TableCtl.resx
+- `[resx]` CodeCtl.ru-RU.resx
+- `[resx]` RdlEditPreview.ru-RU.resx
+- `[resx]` ReportCtl.resx
+- `[resx]` RdlUserControl.resx
+- `[resx]` InteractivityCtl.ru-RU.resx
+- `[resx]` FiltersCtl.ru-RU.resx
+- `[resx]` ChartCtl.resx
+- `[resx]` PositionCtl.resx
+- `[resx]` ChartLegendCtl.resx
+- `[resx]` CodeCtl.resx
+- `[resx]` DialogExprEditor.resx
+- `[resx]` DialogNewChart.resx
+- `[resx]` DialogNewMatrix.ru-RU.resx
+- `[resx]` BackgroundCtl.resx
+- `[resx]` InteractivityCtl.resx
+- `[resx]` Properties/Resources.resx
+- `[resx]` RdlProperties/Descriptions.resx
+- `[resx]` RdlProperties/DisplayNames.resx
+- `[resx]` RdlProperties/Categories.ru-RU.resx
+- `[resx]` RdlProperties/DisplayNames.ru-RU.resx
+- `[resx]` RdlProperties/Categories.resx
+- `[resx]` RdlProperties/Descriptions.ru-RU.resx
+- `[resx]` Resources/Strings.ru-RU.resx
+- `[resx]` Resources/Strings.resx
+
+## Manual review (18)
+
+These could not be converted automatically and need a human:
+
+- SimpleButton.cs: uses 'ImageAttributes' (System.Drawing.Common) which has no Majorsilence.Forms.Drawing equivalent — review manually
+- SimpleToggle.cs: uses 'ImageAttributes' (System.Drawing.Common) which has no Majorsilence.Forms.Drawing equivalent — review manually
+- DesignXmlDraw.cs: uses 'Encoder' (System.Drawing.Common) which has no Majorsilence.Forms.Drawing equivalent — review manually
+- DesignXmlDraw.cs: uses 'EncoderParameter' (System.Drawing.Common) which has no Majorsilence.Forms.Drawing equivalent — review manually
+- DesignXmlDraw.cs: uses 'EncoderParameters' (System.Drawing.Common) which has no Majorsilence.Forms.Drawing equivalent — review manually
+- RdlProperties/PropertyVisibility.cs: references 'System.Drawing.Design', which has no Majorsilence equivalent — review manually
+- RdlProperties/PropertyExpr.cs: references 'System.Drawing.Design', which has no Majorsilence equivalent — review manually
+- RdlProperties/PropertyGrouping.cs: references 'System.Drawing.Design', which has no Majorsilence equivalent — review manually
+- RdlProperties/PropertyTable.cs: references 'System.Drawing.Design', which has no Majorsilence equivalent — review manually
+- RdlProperties/PropertyBorder.cs: references 'System.Drawing.Design', which has no Majorsilence equivalent — review manually
+- RdlProperties/PropertyAppearance.cs: references 'System.Drawing.Design', which has no Majorsilence equivalent — review manually
+- RdlProperties/PropertyFilters.cs: references 'System.Drawing.Design', which has no Majorsilence equivalent — review manually
+- RdlProperties/PropertyImage.cs: references 'System.Drawing.Design', which has no Majorsilence equivalent — review manually
+- RdlProperties/PropertyReport.cs: references 'System.Drawing.Design', which has no Majorsilence equivalent — review manually
+- RdlProperties/PropertyBackground.cs: references 'System.Drawing.Design', which has no Majorsilence equivalent — review manually
+- RdlProperties/PropertySorting.cs: references 'System.Drawing.Design', which has no Majorsilence equivalent — review manually
+- RdlProperties/PropertyAction.cs: references 'System.Drawing.Design', which has no Majorsilence equivalent — review manually
+- RdlProperties/PropertySubreport.cs: references 'System.Drawing.Design', which has no Majorsilence equivalent — review manually
+
+---
+_Generated by majorsilence-migrate. Review the changes and build before committing._

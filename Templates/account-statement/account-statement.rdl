@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Report xmlns="http://schemas.microsoft.com/sqlserver/reporting/2005/01/reportdefinition"
+        xmlns:rd="http://schemas.microsoft.com/SQLServer/reporting/reportdesigner">
+  <Description>Account statement -- opening balance, transactions grouped by month with a running balance column.</Description>
+  <PageHeight>11in</PageHeight>
+  <PageWidth>8.5in</PageWidth>
+  <TopMargin>.5in</TopMargin>
+  <LeftMargin>.6in</LeftMargin>
+  <RightMargin>.6in</RightMargin>
+  <BottomMargin>.5in</BottomMargin>
+  <Width>7.3in</Width>
+
+  <DataSources>
+    <DataSource Name="DS1">
+      <ConnectionProperties>
+        <DataProvider>Json</DataProvider>
+        <ConnectString>file=sample-data.json</ConnectString>
+      </ConnectionProperties>
+    </DataSource>
+  </DataSources>
+
+  <DataSets>
+    <DataSet Name="Header">
+      <Query>
+        <DataSourceName>DS1</DataSourceName>
+        <CommandText>columns=AccountNumber,AccountHolderName,AccountHolderAddress,StatementPeriodStart,StatementPeriodEnd,OpeningBalance;table=root</CommandText>
+      </Query>
+      <Fields>
+        <Field Name="AccountNumber"><DataField>AccountNumber</DataField><rd:TypeName>System.Text.Json.JsonElement</rd:TypeName></Field>
+        <Field Name="AccountHolderName"><DataField>AccountHolderName</DataField><rd:TypeName>System.Text.Json.JsonElement</rd:TypeName></Field>
+        <Field Name="AccountHolderAddress"><DataField>AccountHolderAddress</DataField><rd:TypeName>System.Text.Json.JsonElement</rd:TypeName></Field>
+        <Field Name="StatementPeriodStart"><DataField>StatementPeriodStart</DataField><rd:TypeName>System.Text.Json.JsonElement</rd:TypeName></Field>
+        <Field Name="StatementPeriodEnd"><DataField>StatementPeriodEnd</DataField><rd:TypeName>System.Text.Json.JsonElement</rd:TypeName></Field>
+        <Field Name="OpeningBalance"><DataField>OpeningBalance</DataField><rd:TypeName>System.Text.Json.JsonElement</rd:TypeName></Field>
+      </Fields>
+    </DataSet>
+    <DataSet Name="Transactions">
+      <Query>
+        <DataSourceName>DS1</DataSourceName>
+        <CommandText>columns=Date,Description,Amount;table=root_Transactions</CommandText>
+      </Query>
+      <Fields>
+        <Field Name="Date"><DataField>Date</DataField><rd:TypeName>System.String</rd:TypeName></Field>
+        <Field Name="Description"><DataField>Description</DataField><rd:TypeName>System.Text.Json.JsonElement</rd:TypeName></Field>
+        <Field Name="Amount"><DataField>Amount</DataField><rd:TypeName>System.Double</rd:TypeName></Field>
+      </Fields>
+    </DataSet>
+  </DataSets>
+
+  <Body>
+    <Height>9in</Height>
+    <ReportItems>
+      <Textbox Name="Title">
+        <Top>0in</Top><Left>0in</Left><Width>4in</Width><Height>.28in</Height>
+        <Value>Account Statement</Value>
+        <Style><FontSize>18pt</FontSize><FontWeight>Bold</FontWeight><Color>#2C3E50</Color></Style>
+      </Textbox>
+      <Textbox Name="Period">
+        <Top>.32in</Top><Left>0in</Left><Width>4in</Width><Height>.2in</Height>
+        <Value>=First(Fields!StatementPeriodStart.Value, "Header") &amp; "  to  " &amp; First(Fields!StatementPeriodEnd.Value, "Header")</Value>
+        <Style><FontSize>10pt</FontSize><Color>Gray</Color></Style>
+      </Textbox>
+
+      <Textbox Name="AccountLabel">
+        <Top>.7in</Top><Left>0in</Left><Width>1.3in</Width><Height>.18in</Height>
+        <Value>Account #</Value>
+        <Style><FontSize>9pt</FontSize><Color>Gray</Color></Style>
+      </Textbox>
+      <Textbox Name="AccountValue">
+        <Top>.7in</Top><Left>1.3in</Left><Width>2in</Width><Height>.18in</Height>
+        <Value>=First(Fields!AccountNumber.Value, "Header")</Value>
+        <Style><FontSize>9pt</FontSize><FontWeight>Bold</FontWeight></Style>
+      </Textbox>
+      <Textbox Name="HolderName">
+        <Top>.7in</Top><Left>4.8in</Left><Width>2.5in</Width><Height>.18in</Height>
+        <Value>=First(Fields!AccountHolderName.Value, "Header")</Value>
+        <Style><FontSize>9pt</FontSize><FontWeight>Bold</FontWeight><TextAlign>Right</TextAlign></Style>
+      </Textbox>
+      <Textbox Name="HolderAddress">
+        <Top>.88in</Top><Left>4.8in</Left><Width>2.5in</Width><Height>.3in</Height>
+        <CanGrow>true</CanGrow>
+        <Value>=First(Fields!AccountHolderAddress.Value, "Header")</Value>
+        <Style><FontSize>9pt</FontSize><TextAlign>Right</TextAlign></Style>
+      </Textbox>
+
+      <Textbox Name="OpeningLabel">
+        <Top>1.3in</Top><Left>0in</Left><Width>2in</Width><Height>.2in</Height>
+        <Value>Opening Balance</Value>
+        <Style><FontSize>9pt</FontSize><Color>Gray</Color></Style>
+      </Textbox>
+      <Textbox Name="OpeningValue">
+        <Top>1.3in</Top><Left>5.6in</Left><Width>1.7in</Width><Height>.2in</Height>
+        <Value>=Format(First(Fields!OpeningBalance.Value, "Header"), "C2")</Value>
+        <Style><FontSize>9pt</FontSize><FontWeight>Bold</FontWeight><TextAlign>Right</TextAlign></Style>
+      </Textbox>
+
+      <Table Name="TransactionsTable">
+        <DataSetName>Transactions</DataSetName>
+        <NoRows>No transactions in this statement period.</NoRows>
+        <Top>1.7in</Top>
+        <Left>0in</Left>
+        <TableColumns>
+          <TableColumn><Width>.9in</Width></TableColumn>
+          <TableColumn><Width>3.4in</Width></TableColumn>
+          <TableColumn><Width>1.5in</Width></TableColumn>
+          <TableColumn><Width>1.5in</Width></TableColumn>
+        </TableColumns>
+        <Header>
+          <TableRows>
+            <TableRow>
+              <Height>.22in</Height>
+              <TableCells>
+                <TableCell><ReportItems><Textbox Name="H_Date"><Value>Date</Value><Style><FontWeight>Bold</FontWeight><BackgroundColor>#2C3E50</BackgroundColor><Color>White</Color><PaddingLeft>4pt</PaddingLeft><VerticalAlign>Middle</VerticalAlign></Style></Textbox></ReportItems></TableCell>
+                <TableCell><ReportItems><Textbox Name="H_Desc"><Value>Description</Value><Style><FontWeight>Bold</FontWeight><BackgroundColor>#2C3E50</BackgroundColor><Color>White</Color><PaddingLeft>4pt</PaddingLeft><VerticalAlign>Middle</VerticalAlign></Style></Textbox></ReportItems></TableCell>
+                <TableCell><ReportItems><Textbox Name="H_Amt"><Value>Amount</Value><Style><FontWeight>Bold</FontWeight><BackgroundColor>#2C3E50</BackgroundColor><Color>White</Color><TextAlign>Right</TextAlign><PaddingRight>4pt</PaddingRight><VerticalAlign>Middle</VerticalAlign></Style></Textbox></ReportItems></TableCell>
+                <TableCell><ReportItems><Textbox Name="H_Bal"><Value>Balance</Value><Style><FontWeight>Bold</FontWeight><BackgroundColor>#2C3E50</BackgroundColor><Color>White</Color><TextAlign>Right</TextAlign><PaddingRight>4pt</PaddingRight><VerticalAlign>Middle</VerticalAlign></Style></Textbox></ReportItems></TableCell>
+              </TableCells>
+            </TableRow>
+          </TableRows>
+          <RepeatOnNewPage>true</RepeatOnNewPage>
+        </Header>
+        <TableGroups>
+          <TableGroup>
+            <Grouping Name="MonthGroup">
+              <GroupExpressions>
+                <GroupExpression>=Left(Fields!Date.Value &amp; "", 7)</GroupExpression>
+              </GroupExpressions>
+            </Grouping>
+            <Header>
+              <TableRows>
+                <TableRow>
+                  <Height>.2in</Height>
+                  <TableCells>
+                    <TableCell>
+                      <ColSpan>4</ColSpan>
+                      <ReportItems><Textbox Name="G_Month"><Value>=Left(Fields!Date.Value &amp; "", 7)</Value><Style><FontWeight>Bold</FontWeight><BackgroundColor>#F3EEFA</BackgroundColor><PaddingLeft>4pt</PaddingLeft><Color>#7030A0</Color></Style></Textbox></ReportItems>
+                    </TableCell>
+                  </TableCells>
+                </TableRow>
+              </TableRows>
+            </Header>
+          </TableGroup>
+        </TableGroups>
+        <Details>
+          <TableRows>
+            <TableRow>
+              <Height>.2in</Height>
+              <TableCells>
+                <TableCell><ReportItems><Textbox Name="D_Date"><Value>=Fields!Date.Value</Value><Style><PaddingLeft>4pt</PaddingLeft></Style></Textbox></ReportItems></TableCell>
+                <TableCell><ReportItems><Textbox Name="D_Desc"><Value>=Fields!Description.Value</Value><CanGrow>true</CanGrow><Style><PaddingLeft>4pt</PaddingLeft></Style></Textbox></ReportItems></TableCell>
+                <TableCell><ReportItems><Textbox Name="D_Amt"><Value>=Format(Fields!Amount.Value, "C2")</Value><Style><TextAlign>Right</TextAlign><PaddingRight>4pt</PaddingRight><Color>=IIf(Left(Format(Fields!Amount.Value, "0.00") &amp; "", 1) = "-", "#C0392B", "#1E8449")</Color></Style></Textbox></ReportItems></TableCell>
+                <TableCell><ReportItems><Textbox Name="D_Bal"><Value>=Format(First(Fields!OpeningBalance.Value, "Header") + RunningValue(Fields!Amount.Value, "Sum"), "C2")</Value><Style><TextAlign>Right</TextAlign><PaddingRight>4pt</PaddingRight></Style></Textbox></ReportItems></TableCell>
+              </TableCells>
+            </TableRow>
+          </TableRows>
+        </Details>
+      </Table>
+
+      <Textbox Name="ClosingLabel">
+        <Top>4.6in</Top><Left>4.6in</Left><Width>1.6in</Width><Height>.24in</Height>
+        <Value>Closing Balance</Value>
+        <Style><FontSize>11pt</FontSize><FontWeight>Bold</FontWeight><TextAlign>Right</TextAlign></Style>
+      </Textbox>
+      <Textbox Name="ClosingValue">
+        <Top>4.6in</Top><Left>6.2in</Left><Width>1.1in</Width><Height>.24in</Height>
+        <Value>=Format(First(Fields!OpeningBalance.Value, "Header") + Sum(Fields!Amount.Value, "Transactions"), "C2")</Value>
+        <Style><FontSize>11pt</FontSize><FontWeight>Bold</FontWeight><TextAlign>Right</TextAlign><Color>#7030A0</Color></Style>
+      </Textbox>
+    </ReportItems>
+  </Body>
+
+  <PageFooter>
+    <Height>16pt</Height>
+    <PrintOnFirstPage>true</PrintOnFirstPage>
+    <PrintOnLastPage>true</PrintOnLastPage>
+    <ReportItems>
+      <Textbox Name="PageNum">
+        <Top>1pt</Top><Left>0in</Left><Width>3in</Width><Height>14pt</Height>
+        <Value>=Globals!PageNumber &amp; " of " &amp; Globals!TotalPages</Value>
+        <Style><FontSize>8pt</FontSize><Color>Gray</Color></Style>
+      </Textbox>
+    </ReportItems>
+  </PageFooter>
+</Report>

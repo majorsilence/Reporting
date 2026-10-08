@@ -28,13 +28,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-#if DRAWINGCOMPAT
 using Draw2 = Majorsilence.Forms.Drawing;
-#else
-using Draw2 = System.Drawing;
-using System.Drawing.Imaging;
-using System.Runtime.InteropServices;
-#endif
 
 namespace Majorsilence.Reporting.Rdl
 {
@@ -47,9 +41,6 @@ namespace Majorsilence.Reporting.Rdl
         Report r;               // report
         Stream tw;               // where the output is going
 
-#if !DRAWINGCOMPAT
-        Draw2.Bitmap _tif;
-#endif
 
         float DpiX = 200F;
         float DpiY = 200F;
@@ -97,7 +88,6 @@ namespace Majorsilence.Reporting.Rdl
         {
             int pageNo = 1;
 
-#if DRAWINGCOMPAT
             using var tiffWriter = new Majorsilence.Forms.Drawing.Imaging.TiffWriter(tw);
             foreach (Page p in pgs)
             {
@@ -119,48 +109,6 @@ namespace Majorsilence.Reporting.Rdl
                 pageNo++;
             }
             tiffWriter.Finish();
-#else
-            // STEP: processing a page.
-            foreach (Page p in pgs)
-            {
-                Draw2.Bitmap bm = CreateObjectBitmap();
-                Draw2.Graphics g = Draw2.Graphics.FromImage(bm);
-
-                g.PageUnit = Draw2.GraphicsUnit.Pixel;
-                g.ScaleTransform(1, 1);
-
-                DpiX = g.DpiX;
-                DpiY = g.DpiY;
-
-                // STEP: Fill backgroup
-                g.FillRectangle(Draw2.Brushes.White, 0F, 0F, (float)bm.Width, (float)bm.Height);
-
-                // STEP: draw page to bitmap
-                await ProcessPage(g, p);
-
-                // STEP:
-                Draw2.Bitmap bm2 = ConvertToBitonal(bm);
-
-                if (pageNo == 1)
-                    _tif = bm2;
-
-                SaveBitmap(_tif, bm2, tw, pageNo);
-
-                pageNo++;
-            }
-
-            if (_tif != null)
-            {
-                // STEP: prepare encoder parameters
-                Draw2.Imaging.EncoderParameters encoderParams = new Draw2.Imaging.EncoderParameters(1);
-                encoderParams.Param[0] = new Draw2.Imaging.EncoderParameter(
-                    Draw2.Imaging.Encoder.SaveFlag, (long)Draw2.Imaging.EncoderValue.Flush
-                );
-
-                // STEP:
-                _tif.SaveAdd(encoderParams);
-            }
-#endif
 
             return;
         }
@@ -569,7 +517,6 @@ namespace Majorsilence.Reporting.Rdl
                     g.DrawImage(im, ir);
                     break;
                 case ImageSizingEnum.Clip:
-#if DRAWINGCOMPAT
                     var clipState = g.Save();
                     g.IntersectClip(r2);
                     if (DpiX == im.HorizontalResolution && DpiY == im.VerticalResolution)
@@ -578,23 +525,6 @@ namespace Majorsilence.Reporting.Rdl
                         ir = new System.Drawing.Rectangle(Convert.ToInt32(r2.Left), Convert.ToInt32(r2.Top), Convert.ToInt32(r2.Width), Convert.ToInt32(r2.Height));
                     g.DrawImage(im, ir);
                     g.Restore(clipState);
-#else
-                    Draw2.Region saveRegion = g.Clip;
-                    Draw2.Region clipRegion = new Draw2.Region(g.Clip.GetRegionData());
-                    clipRegion.Intersect(r2);
-                    g.Clip = clipRegion;
-                    if (DpiX == im.HorizontalResolution &&
-                        DpiY == im.VerticalResolution)
-                    {
-                        ir = new System.Drawing.Rectangle(Convert.ToInt32(r2.Left), Convert.ToInt32(r2.Top),
-                                                        im.Width, im.Height);
-                    }
-                    else
-                        ir = new System.Drawing.Rectangle(Convert.ToInt32(r2.Left), Convert.ToInt32(r2.Top),
-                                           Convert.ToInt32(r2.Width), Convert.ToInt32(r2.Height));
-                    g.DrawImage(im, ir);
-                    g.Clip = saveRegion;
-#endif
                     break;
                 case ImageSizingEnum.FitProportional:
                     float ratioIm = (float)im.Height / (float)im.Width;
@@ -703,7 +633,6 @@ namespace Majorsilence.Reporting.Rdl
         }
 
         #region TIFF image handler
-#if DRAWINGCOMPAT
         private SkiaSharp.SKBitmap CreateObjectSkBitmap()
         {
             return new SkiaSharp.SKBitmap(
@@ -711,176 +640,7 @@ namespace Majorsilence.Reporting.Rdl
                 Convert.ToInt32(r.ReportDefinition.PageHeight.Size / 2540F * DpiY)
             );
         }
-#else
-        private Draw2.Bitmap CreateObjectBitmap()
-        {
-            float dpiX = 200F;
-            float dpiY = 200F;
 
-            Draw2.Bitmap bm = new Draw2.Bitmap(
-                Convert.ToInt32(r.ReportDefinition.PageWidth.Size / 2540F * dpiX),
-                Convert.ToInt32(r.ReportDefinition.PageHeight.Size / 2540F * dpiY)
-            );
-
-            bm.MakeTransparent(System.Drawing.Color.White);
-            bm.SetResolution(dpiX, dpiY);
-
-            return bm;
-        }
-#endif
-
-#if !DRAWINGCOMPAT
-        private Draw2.Bitmap ConvertToBitonal(Draw2.Bitmap original)
-        {
-            if (_RenderColor)
-                return original;
-
-            Draw2.Bitmap source = null;
-
-            // If original bitmap is not already in 32 BPP, ARGB format, then convert
-            if (original.PixelFormat != Draw2.Imaging.PixelFormat.Format32bppArgb)
-            {
-                source = new Draw2.Bitmap(original.Width, original.Height, Draw2.Imaging.PixelFormat.Format32bppArgb);
-                source.SetResolution(original.HorizontalResolution, original.VerticalResolution);
-                using (Draw2.Graphics g = Draw2.Graphics.FromImage(source))
-                {
-                    g.DrawImageUnscaled(original, 0, 0);
-                }
-            }
-            else
-            {
-                source = original;
-            }
-
-            // Lock source bitmap in memory
-            Draw2.Imaging.BitmapData sourceData = source.LockBits(new System.Drawing.Rectangle(0, 0, source.Width, source.Height),
-                Draw2.Imaging.ImageLockMode.ReadOnly,
-                Draw2.Imaging.PixelFormat.Format32bppArgb);
-
-            // Copy image data to binary array
-            int imageSize = sourceData.Stride * sourceData.Height;
-            byte[] sourceBuffer = new byte[imageSize];
-            Marshal.Copy(sourceData.Scan0, sourceBuffer, 0, imageSize);
-
-            // Unlock source bitmap
-            source.UnlockBits(sourceData);
-
-            // Create destination bitmap
-            Draw2.Bitmap destination = new Draw2.Bitmap(source.Width, source.Height, Draw2.Imaging.PixelFormat.Format1bppIndexed);
-
-            // Set resolution
-            destination.SetResolution(source.HorizontalResolution, source.VerticalResolution);
-
-            // Lock destination bitmap in memory
-            Draw2.Imaging.BitmapData destinationData = destination.LockBits(new System.Drawing.Rectangle(0, 0, destination.Width, destination.Height),
-                Draw2.Imaging.ImageLockMode.WriteOnly, Draw2.Imaging.PixelFormat.Format1bppIndexed);
-
-            // Create destination buffer
-            imageSize = destinationData.Stride * destinationData.Height;
-            byte[] destinationBuffer = new byte[imageSize];
-
-            int sourceIndex = 0;
-            int destinationIndex = 0;
-            int pixelTotal = 0;
-            byte destinationValue = 0;
-            int pixelValue = 128;
-            int height = source.Height;
-            int width = source.Width;
-            int threshold = 500;
-
-            // Iterate lines
-            for (int y = 0; y < height; y++)
-            {
-                sourceIndex = y * sourceData.Stride;
-                destinationIndex = y * destinationData.Stride;
-                destinationValue = 0;
-                pixelValue = 128;
-
-                // Iterate pixels
-                for (int x = 0; x < width; x++)
-                {
-                    // Compute pixel brightness (i.e. total of Red, Green, and Blue values)
-                    pixelTotal = sourceBuffer[sourceIndex + 1] + sourceBuffer[sourceIndex + 2] + sourceBuffer[sourceIndex + 3];
-                    if (pixelTotal > threshold)
-                    {
-                        destinationValue += (byte)pixelValue;
-                    }
-                    if (pixelValue == 1)
-                    {
-                        destinationBuffer[destinationIndex] = destinationValue;
-                        destinationIndex++;
-                        destinationValue = 0;
-                        pixelValue = 128;
-                    }
-                    else
-                    {
-                        pixelValue >>= 1;
-                    }
-                    sourceIndex += 4;
-                }
-                if (pixelValue != 128)
-                {
-                    destinationBuffer[destinationIndex] = destinationValue;
-                }
-            }
-
-            // Copy binary image data to destination bitmap
-            Marshal.Copy(destinationBuffer, 0, destinationData.Scan0, imageSize);
-
-            // Unlock destination bitmap
-            destination.UnlockBits(destinationData);
-
-            // Return
-            return destination;
-        }
-
-        private void SaveBitmap(Draw2.Bitmap tif, Draw2.Bitmap bm, Stream st, int pageNo)
-        {
-            if (pageNo == 1)
-            {
-                // Handling saving first page
-
-                // STEP: Prepare ImageCodecInfo for saving
-                ImageCodecInfo info = null;
-
-                foreach (ImageCodecInfo i in ImageCodecInfo.GetImageEncoders())
-                {
-                    if (i.MimeType == "image/tiff")
-                    {
-                        info = i;
-                        break;
-                    }
-                }
-
-                // STEP: Prepare parameters
-                Draw2.Imaging.EncoderParameters encoderParams = new Draw2.Imaging.EncoderParameters(2);
-
-                encoderParams.Param[0] = new Draw2.Imaging.EncoderParameter(
-                    Draw2.Imaging.Encoder.SaveFlag, (long)Draw2.Imaging.EncoderValue.MultiFrame
-                );
-
-                encoderParams.Param[1] = new Draw2.Imaging.EncoderParameter(
-                    Draw2.Imaging.Encoder.Compression,
-                    (long)(_RenderColor ? Draw2.Imaging.EncoderValue.CompressionLZW : Draw2.Imaging.EncoderValue.CompressionCCITT3)
-                );
-
-                // STEP: Save bitmap
-                tif.Save(st, info, encoderParams);
-            }
-            else
-            {
-                // STEP: Prepare parameters
-                Draw2.Imaging.EncoderParameters encoderParams = new Draw2.Imaging.EncoderParameters(1);
-
-                encoderParams.Param[0] = new Draw2.Imaging.EncoderParameter(
-                    Draw2.Imaging.Encoder.SaveFlag, (long)Draw2.Imaging.EncoderValue.FrameDimensionPage
-                );
-
-                // STEP: Save bitmap
-                tif.SaveAdd(bm, encoderParams);
-            }
-        }
-#endif
         #endregion
 
         internal float PixelsX(float x)

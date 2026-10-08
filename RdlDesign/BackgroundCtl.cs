@@ -3,9 +3,8 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Drawing;
 using System.Data;
-using System.Windows.Forms;
+using Majorsilence.Forms;
 using System.Xml;
 using Majorsilence.Reporting.RdlDesign.Resources;
 
@@ -14,24 +13,24 @@ namespace Majorsilence.Reporting.RdlDesign
 	/// <summary>
 	/// Summary description for StyleCtl.
 	/// </summary>
-	internal class BackgroundCtl : System.Windows.Forms.UserControl, IProperty
+	internal class BackgroundCtl : Majorsilence.Forms.UserControl, IProperty
 	{
         private List<XmlNode> _ReportItems;
 		private DesignXmlDraw _Draw;
 		// flags for controlling whether syntax changed for a particular property
 		private bool fEndColor, fBackColor, fGradient, fBackImage;
-		private System.Windows.Forms.GroupBox groupBox1;
-		private System.Windows.Forms.Label label3;
-		private System.Windows.Forms.Button bBackColor;
-		private System.Windows.Forms.Label label10;
-		private System.Windows.Forms.Label label15;
-		private System.Windows.Forms.ComboBox cbEndColor;
-		private System.Windows.Forms.ComboBox cbBackColor;
-		private System.Windows.Forms.Button bEndColor;
-        private System.Windows.Forms.ComboBox cbGradient;
-		private System.Windows.Forms.Button bGradient;
-		private System.Windows.Forms.Button bExprBackColor;
-        private System.Windows.Forms.Button bExprEndColor;
+		private Majorsilence.Forms.GroupBox groupBox1;
+		private Majorsilence.Forms.Label label3;
+		private Majorsilence.Forms.Button bBackColor;
+		private Majorsilence.Forms.Label label10;
+		private Majorsilence.Forms.Label label15;
+		private Majorsilence.Forms.ComboBox cbEndColor;
+		private Majorsilence.Forms.ComboBox cbBackColor;
+		private Majorsilence.Forms.Button bEndColor;
+        private Majorsilence.Forms.ComboBox cbGradient;
+		private Majorsilence.Forms.Button bGradient;
+		private Majorsilence.Forms.Button bExprBackColor;
+        private Majorsilence.Forms.Button bExprEndColor;
         private GroupBox groupBox2;
         private Button bExternalExpr;
         private Button bEmbeddedExpr;
@@ -151,37 +150,37 @@ namespace Majorsilence.Reporting.RdlDesign
 		/// </summary>
 		private void InitializeComponent()
 		{
-			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(BackgroundCtl));
-			this.groupBox1 = new System.Windows.Forms.GroupBox();
-			this.bGradient = new System.Windows.Forms.Button();
-			this.bExprBackColor = new System.Windows.Forms.Button();
-			this.bExprEndColor = new System.Windows.Forms.Button();
-			this.bEndColor = new System.Windows.Forms.Button();
-			this.cbBackColor = new System.Windows.Forms.ComboBox();
-			this.cbEndColor = new System.Windows.Forms.ComboBox();
-			this.label15 = new System.Windows.Forms.Label();
-			this.cbGradient = new System.Windows.Forms.ComboBox();
-			this.label10 = new System.Windows.Forms.Label();
-			this.bBackColor = new System.Windows.Forms.Button();
-			this.label3 = new System.Windows.Forms.Label();
-			this.groupBox2 = new System.Windows.Forms.GroupBox();
-			this.bRepeatExpr = new System.Windows.Forms.Button();
-			this.rbNone = new System.Windows.Forms.RadioButton();
-			this.cbRepeat = new System.Windows.Forms.ComboBox();
-			this.label1 = new System.Windows.Forms.Label();
-			this.bExternalExpr = new System.Windows.Forms.Button();
-			this.bEmbeddedExpr = new System.Windows.Forms.Button();
-			this.bMimeExpr = new System.Windows.Forms.Button();
-			this.bDatabaseExpr = new System.Windows.Forms.Button();
-			this.bEmbedded = new System.Windows.Forms.Button();
-			this.bExternal = new System.Windows.Forms.Button();
-			this.tbValueExternal = new System.Windows.Forms.TextBox();
-			this.cbValueDatabase = new System.Windows.Forms.ComboBox();
-			this.cbMIMEType = new System.Windows.Forms.ComboBox();
-			this.cbValueEmbedded = new System.Windows.Forms.ComboBox();
-			this.rbDatabase = new System.Windows.Forms.RadioButton();
-			this.rbEmbedded = new System.Windows.Forms.RadioButton();
-			this.rbExternal = new System.Windows.Forms.RadioButton();
+			Majorsilence.Forms.ComponentResourceManager resources = new Majorsilence.Forms.ComponentResourceManager(typeof(BackgroundCtl));
+			this.groupBox1 = new Majorsilence.Forms.GroupBox();
+			this.bGradient = new Majorsilence.Forms.Button();
+			this.bExprBackColor = new Majorsilence.Forms.Button();
+			this.bExprEndColor = new Majorsilence.Forms.Button();
+			this.bEndColor = new Majorsilence.Forms.Button();
+			this.cbBackColor = new Majorsilence.Forms.ComboBox();
+			this.cbEndColor = new Majorsilence.Forms.ComboBox();
+			this.label15 = new Majorsilence.Forms.Label();
+			this.cbGradient = new Majorsilence.Forms.ComboBox();
+			this.label10 = new Majorsilence.Forms.Label();
+			this.bBackColor = new Majorsilence.Forms.Button();
+			this.label3 = new Majorsilence.Forms.Label();
+			this.groupBox2 = new Majorsilence.Forms.GroupBox();
+			this.bRepeatExpr = new Majorsilence.Forms.Button();
+			this.rbNone = new Majorsilence.Forms.RadioButton();
+			this.cbRepeat = new Majorsilence.Forms.ComboBox();
+			this.label1 = new Majorsilence.Forms.Label();
+			this.bExternalExpr = new Majorsilence.Forms.Button();
+			this.bEmbeddedExpr = new Majorsilence.Forms.Button();
+			this.bMimeExpr = new Majorsilence.Forms.Button();
+			this.bDatabaseExpr = new Majorsilence.Forms.Button();
+			this.bEmbedded = new Majorsilence.Forms.Button();
+			this.bExternal = new Majorsilence.Forms.Button();
+			this.tbValueExternal = new Majorsilence.Forms.TextBox();
+			this.cbValueDatabase = new Majorsilence.Forms.ComboBox();
+			this.cbMIMEType = new Majorsilence.Forms.ComboBox();
+			this.cbValueEmbedded = new Majorsilence.Forms.ComboBox();
+			this.rbDatabase = new Majorsilence.Forms.RadioButton();
+			this.rbEmbedded = new Majorsilence.Forms.RadioButton();
+			this.rbExternal = new Majorsilence.Forms.RadioButton();
 			this.groupBox1.SuspendLayout();
 			this.groupBox2.SuspendLayout();
 			this.SuspendLayout();
@@ -208,41 +207,41 @@ namespace Majorsilence.Reporting.RdlDesign
 			resources.ApplyResources(this.bGradient, "bGradient");
 			this.bGradient.Name = "bGradient";
 			this.bGradient.Tag = "bgradient";
-			this.bGradient.Click += new System.EventHandler(this.bExpr_Click);
+			this.bGradient.Click += this.bExpr_Click;
 			// 
 			// bExprBackColor
 			// 
 			resources.ApplyResources(this.bExprBackColor, "bExprBackColor");
 			this.bExprBackColor.Name = "bExprBackColor";
 			this.bExprBackColor.Tag = "bcolor";
-			this.bExprBackColor.Click += new System.EventHandler(this.bExpr_Click);
+			this.bExprBackColor.Click += this.bExpr_Click;
 			// 
 			// bExprEndColor
 			// 
 			resources.ApplyResources(this.bExprEndColor, "bExprEndColor");
 			this.bExprEndColor.Name = "bExprEndColor";
 			this.bExprEndColor.Tag = "bendcolor";
-			this.bExprEndColor.Click += new System.EventHandler(this.bExpr_Click);
+			this.bExprEndColor.Click += this.bExpr_Click;
 			// 
 			// bEndColor
 			// 
 			resources.ApplyResources(this.bEndColor, "bEndColor");
 			this.bEndColor.Name = "bEndColor";
-			this.bEndColor.Click += new System.EventHandler(this.bColor_Click);
+			this.bEndColor.Click += this.bColor_Click;
 			// 
 			// cbBackColor
 			// 
 			resources.ApplyResources(this.cbBackColor, "cbBackColor");
 			this.cbBackColor.Name = "cbBackColor";
-			this.cbBackColor.SelectedIndexChanged += new System.EventHandler(this.cbBackColor_SelectedIndexChanged);
-			this.cbBackColor.TextChanged += new System.EventHandler(this.cbBackColor_SelectedIndexChanged);
+			this.cbBackColor.SelectedIndexChanged += this.cbBackColor_SelectedIndexChanged;
+			this.cbBackColor.TextChanged += this.cbBackColor_SelectedIndexChanged;
 			// 
 			// cbEndColor
 			// 
 			resources.ApplyResources(this.cbEndColor, "cbEndColor");
 			this.cbEndColor.Name = "cbEndColor";
-			this.cbEndColor.SelectedIndexChanged += new System.EventHandler(this.cbEndColor_SelectedIndexChanged);
-			this.cbEndColor.TextChanged += new System.EventHandler(this.cbEndColor_SelectedIndexChanged);
+			this.cbEndColor.SelectedIndexChanged += this.cbEndColor_SelectedIndexChanged;
+			this.cbEndColor.TextChanged += this.cbEndColor_SelectedIndexChanged;
 			// 
 			// label15
 			// 
@@ -252,9 +251,9 @@ namespace Majorsilence.Reporting.RdlDesign
 			// cbGradient
 			// 
 			resources.ApplyResources(this.cbGradient, "cbGradient");
-			this.cbGradient.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+			this.cbGradient.DropDownStyle = Majorsilence.Forms.ComboBoxStyle.DropDownList;
 			this.cbGradient.Name = "cbGradient";
-			this.cbGradient.SelectedIndexChanged += new System.EventHandler(this.cbGradient_SelectedIndexChanged);
+			this.cbGradient.SelectedIndexChanged += this.cbGradient_SelectedIndexChanged;
 			// 
 			// label10
 			// 
@@ -265,7 +264,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			// 
 			resources.ApplyResources(this.bBackColor, "bBackColor");
 			this.bBackColor.Name = "bBackColor";
-			this.bBackColor.Click += new System.EventHandler(this.bColor_Click);
+			this.bBackColor.Click += this.bColor_Click;
 			// 
 			// label3
 			// 
@@ -305,20 +304,20 @@ namespace Majorsilence.Reporting.RdlDesign
 			// 
 			resources.ApplyResources(this.rbNone, "rbNone");
 			this.rbNone.Name = "rbNone";
-			this.rbNone.CheckedChanged += new System.EventHandler(this.rbSource_CheckedChanged);
+			this.rbNone.CheckedChanged += this.rbSource_CheckedChanged;
 			// 
 			// cbRepeat
 			// 
 			resources.ApplyResources(this.cbRepeat, "cbRepeat");
-			this.cbRepeat.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+			this.cbRepeat.DropDownStyle = Majorsilence.Forms.ComboBoxStyle.DropDownList;
 			this.cbRepeat.Items.AddRange(new object[] {
             resources.GetString("cbRepeat.Items"),
             resources.GetString("cbRepeat.Items1"),
             resources.GetString("cbRepeat.Items2"),
             resources.GetString("cbRepeat.Items3")});
 			this.cbRepeat.Name = "cbRepeat";
-			this.cbRepeat.SelectedIndexChanged += new System.EventHandler(this.BackImage_Changed);
-			this.cbRepeat.TextChanged += new System.EventHandler(this.BackImage_Changed);
+			this.cbRepeat.SelectedIndexChanged += this.BackImage_Changed;
+			this.cbRepeat.TextChanged += this.BackImage_Changed;
 			// 
 			// label1
 			// 
@@ -330,53 +329,53 @@ namespace Majorsilence.Reporting.RdlDesign
 			resources.ApplyResources(this.bExternalExpr, "bExternalExpr");
 			this.bExternalExpr.Name = "bExternalExpr";
 			this.bExternalExpr.Tag = "external";
-			this.bExternalExpr.Click += new System.EventHandler(this.bExpr_Click);
+			this.bExternalExpr.Click += this.bExpr_Click;
 			// 
 			// bEmbeddedExpr
 			// 
 			resources.ApplyResources(this.bEmbeddedExpr, "bEmbeddedExpr");
 			this.bEmbeddedExpr.Name = "bEmbeddedExpr";
 			this.bEmbeddedExpr.Tag = "embedded";
-			this.bEmbeddedExpr.Click += new System.EventHandler(this.bExpr_Click);
+			this.bEmbeddedExpr.Click += this.bExpr_Click;
 			// 
 			// bMimeExpr
 			// 
 			resources.ApplyResources(this.bMimeExpr, "bMimeExpr");
 			this.bMimeExpr.Name = "bMimeExpr";
 			this.bMimeExpr.Tag = "mime";
-			this.bMimeExpr.Click += new System.EventHandler(this.bExpr_Click);
+			this.bMimeExpr.Click += this.bExpr_Click;
 			// 
 			// bDatabaseExpr
 			// 
 			resources.ApplyResources(this.bDatabaseExpr, "bDatabaseExpr");
 			this.bDatabaseExpr.Name = "bDatabaseExpr";
 			this.bDatabaseExpr.Tag = "database";
-			this.bDatabaseExpr.Click += new System.EventHandler(this.bExpr_Click);
+			this.bDatabaseExpr.Click += this.bExpr_Click;
 			// 
 			// bEmbedded
 			// 
 			resources.ApplyResources(this.bEmbedded, "bEmbedded");
 			this.bEmbedded.Name = "bEmbedded";
-			this.bEmbedded.Click += new System.EventHandler(this.bEmbedded_Click);
+			this.bEmbedded.Click += this.bEmbedded_Click;
 			// 
 			// bExternal
 			// 
 			resources.ApplyResources(this.bExternal, "bExternal");
 			this.bExternal.Name = "bExternal";
-			this.bExternal.Click += new System.EventHandler(this.bExternal_Click);
+			this.bExternal.Click += this.bExternal_Click;
 			// 
 			// tbValueExternal
 			// 
 			resources.ApplyResources(this.tbValueExternal, "tbValueExternal");
 			this.tbValueExternal.Name = "tbValueExternal";
-			this.tbValueExternal.TextChanged += new System.EventHandler(this.BackImage_Changed);
+			this.tbValueExternal.TextChanged += this.BackImage_Changed;
 			// 
 			// cbValueDatabase
 			// 
 			resources.ApplyResources(this.cbValueDatabase, "cbValueDatabase");
 			this.cbValueDatabase.Name = "cbValueDatabase";
-			this.cbValueDatabase.SelectedIndexChanged += new System.EventHandler(this.BackImage_Changed);
-			this.cbValueDatabase.TextChanged += new System.EventHandler(this.BackImage_Changed);
+			this.cbValueDatabase.SelectedIndexChanged += this.BackImage_Changed;
+			this.cbValueDatabase.TextChanged += this.BackImage_Changed;
 			// 
 			// cbMIMEType
 			// 
@@ -388,33 +387,33 @@ namespace Majorsilence.Reporting.RdlDesign
             resources.GetString("cbMIMEType.Items3"),
             resources.GetString("cbMIMEType.Items4")});
 			this.cbMIMEType.Name = "cbMIMEType";
-			this.cbMIMEType.SelectedIndexChanged += new System.EventHandler(this.BackImage_Changed);
-			this.cbMIMEType.TextChanged += new System.EventHandler(this.BackImage_Changed);
+			this.cbMIMEType.SelectedIndexChanged += this.BackImage_Changed;
+			this.cbMIMEType.TextChanged += this.BackImage_Changed;
 			// 
 			// cbValueEmbedded
 			// 
 			resources.ApplyResources(this.cbValueEmbedded, "cbValueEmbedded");
 			this.cbValueEmbedded.Name = "cbValueEmbedded";
-			this.cbValueEmbedded.SelectedIndexChanged += new System.EventHandler(this.BackImage_Changed);
-			this.cbValueEmbedded.TextChanged += new System.EventHandler(this.BackImage_Changed);
+			this.cbValueEmbedded.SelectedIndexChanged += this.BackImage_Changed;
+			this.cbValueEmbedded.TextChanged += this.BackImage_Changed;
 			// 
 			// rbDatabase
 			// 
 			resources.ApplyResources(this.rbDatabase, "rbDatabase");
 			this.rbDatabase.Name = "rbDatabase";
-			this.rbDatabase.CheckedChanged += new System.EventHandler(this.rbSource_CheckedChanged);
+			this.rbDatabase.CheckedChanged += this.rbSource_CheckedChanged;
 			// 
 			// rbEmbedded
 			// 
 			resources.ApplyResources(this.rbEmbedded, "rbEmbedded");
 			this.rbEmbedded.Name = "rbEmbedded";
-			this.rbEmbedded.CheckedChanged += new System.EventHandler(this.rbSource_CheckedChanged);
+			this.rbEmbedded.CheckedChanged += this.rbSource_CheckedChanged;
 			// 
 			// rbExternal
 			// 
 			resources.ApplyResources(this.rbExternal, "rbExternal");
 			this.rbExternal.Name = "rbExternal";
-			this.rbExternal.CheckedChanged += new System.EventHandler(this.rbSource_CheckedChanged);
+			this.rbExternal.CheckedChanged += this.rbSource_CheckedChanged;
 			// 
 			// BackgroundCtl
 			// 
@@ -463,9 +462,9 @@ namespace Majorsilence.Reporting.RdlDesign
 
                 RdlDesigner.SetCustomColors(cd.CustomColors);
                 if (sender == this.bEndColor)
-                    cbEndColor.Text = ColorTranslator.ToHtml(cd.Color);
+                    cbEndColor.Text = Majorsilence.Forms.ColorTranslator.ToHtml(cd.Color);
                 else if (sender == this.bBackColor)
-                    cbBackColor.Text = ColorTranslator.ToHtml(cd.Color);
+                    cbBackColor.Text = Majorsilence.Forms.ColorTranslator.ToHtml(cd.Color);
             }
             finally
             {

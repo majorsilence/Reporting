@@ -1,6 +1,5 @@
 using System;
-using System.Windows.Forms;
-using System.Drawing;
+using Majorsilence.Forms;
 using System.ComponentModel;
 using System.Collections;
 
@@ -25,11 +24,11 @@ private VScrollBar _vScroll;
 
 private void InitializeComponent()
 {
-			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(RdlViewer));
+			Majorsilence.Forms.ComponentResourceManager resources = new Majorsilence.Forms.ComponentResourceManager(typeof(RdlViewer));
             this.DoubleBuffered = true;
-			this._RunButton = new System.Windows.Forms.Button();
-			this._hScroll = new System.Windows.Forms.HScrollBar();
-			this._vScroll = new System.Windows.Forms.VScrollBar();
+			this._RunButton = new Majorsilence.Forms.Button();
+			this._hScroll = new Majorsilence.Forms.HScrollBar();
+			this._vScroll = new Majorsilence.Forms.VScrollBar();
 			this._DrawPanel = new Majorsilence.Reporting.RdlViewer.PageDrawing();
 			this.SuspendLayout();
 			// 
@@ -44,21 +43,21 @@ private void InitializeComponent()
 			// 
 			resources.ApplyResources(this._hScroll, "_hScroll");
 			this._hScroll.Name = "_hScroll";
-			this._hScroll.Scroll += new System.Windows.Forms.ScrollEventHandler(this.OnHScroll);
+			this._hScroll.Scroll += this.OnHScroll;
 			// 
 			// _vScroll
 			// 
 			resources.ApplyResources(this._vScroll, "_vScroll");
 			this._vScroll.Name = "_vScroll";
-			this._vScroll.Scroll += new System.Windows.Forms.ScrollEventHandler(this.OnVScroll);
+			this._vScroll.Scroll += this.OnVScroll;
 			// 
 			// _DrawPanel
 			// 
 			resources.ApplyResources(this._DrawPanel, "_DrawPanel");
-			this._DrawPanel.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+			this._DrawPanel.BorderStyle = Majorsilence.Forms.BorderStyle.FixedSingle;
 			this._DrawPanel.Name = "_DrawPanel";
-			this._DrawPanel.Paint += new System.Windows.Forms.PaintEventHandler(this.DrawPanelPaint);
-			this._DrawPanel.KeyDown += new System.Windows.Forms.KeyEventHandler(this.DrawPanelKeyDown);
+			this._DrawPanel.Paint += this.DrawPanelPaint;
+			this._DrawPanel.KeyDown += this.DrawPanelKeyDown;
 			this._DrawPanel.Resize += new System.EventHandler(this.DrawPanelResize);
 			// 
 			// RdlViewer

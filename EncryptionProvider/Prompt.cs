@@ -1,4 +1,4 @@
-#if WINDOWS || NET48
+#if WINDOWS
 using System;
 using System.Collections.Generic;
 using System.Drawing;

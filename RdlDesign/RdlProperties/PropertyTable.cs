@@ -3,14 +3,12 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Text;
-using System.Drawing;
-using System.Drawing.Design;
 using System.ComponentModel;            // need this for the properties metadata
 using System.Xml;
 using System.Text.RegularExpressions;
 using System.Globalization;
-using System.Windows.Forms;
-using System.Windows.Forms.Design;
+using Majorsilence.Forms;
+using Majorsilence.Forms.Design;
 using Majorsilence.Reporting.Rdl;
 using Majorsilence.Reporting.RdlDesign.Resources;
 

@@ -2,9 +2,8 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Drawing;
 using System.Data;
-using System.Windows.Forms;
+using Majorsilence.Forms;
 using System.Text;
 using System.Xml;
 using System.IO;
@@ -20,16 +19,16 @@ namespace Majorsilence.Reporting.RdlDesign
     /// <summary>
     /// Summary description for CodeCtl.
     /// </summary>
-    internal class CodeCtl : System.Windows.Forms.UserControl, IProperty
+    internal class CodeCtl : Majorsilence.Forms.UserControl, IProperty
     {
         static internal long Counter;			// counter used for unique expression count
         private DesignXmlDraw _Draw;
-        private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.Button bCheckSyntax;
-        private System.Windows.Forms.Panel panel1;
-        private System.Windows.Forms.TextBox tbCode;
-		private System.Windows.Forms.ListBox lbErrors;
-        private System.Windows.Forms.Label label2;
+        private Majorsilence.Forms.Label label1;
+        private Majorsilence.Forms.Button bCheckSyntax;
+        private Majorsilence.Forms.Panel panel1;
+        private Majorsilence.Forms.TextBox tbCode;
+		private Majorsilence.Forms.ListBox lbErrors;
+        private Majorsilence.Forms.Label label2;
         /// <summary> 
         /// Required designer variable.
         /// </summary>
@@ -88,14 +87,14 @@ namespace Majorsilence.Reporting.RdlDesign
         /// </summary>
         private void InitializeComponent()
         {
-			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(CodeCtl));
+			Majorsilence.Forms.ComponentResourceManager resources = new Majorsilence.Forms.ComponentResourceManager(typeof(CodeCtl));
             this.DoubleBuffered = true;
-			this.label1 = new System.Windows.Forms.Label();
-			this.bCheckSyntax = new System.Windows.Forms.Button();
-			this.panel1 = new System.Windows.Forms.Panel();
-			this.tbCode = new System.Windows.Forms.TextBox();
-			this.lbErrors = new System.Windows.Forms.ListBox();
-			this.label2 = new System.Windows.Forms.Label();
+			this.label1 = new Majorsilence.Forms.Label();
+			this.bCheckSyntax = new Majorsilence.Forms.Button();
+			this.panel1 = new Majorsilence.Forms.Panel();
+			this.tbCode = new Majorsilence.Forms.TextBox();
+			this.lbErrors = new Majorsilence.Forms.ListBox();
+			this.label2 = new Majorsilence.Forms.Label();
 			this.panel1.SuspendLayout();
 			this.SuspendLayout();
 			// 
@@ -108,7 +107,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			// 
 			resources.ApplyResources(this.bCheckSyntax, "bCheckSyntax");
 			this.bCheckSyntax.Name = "bCheckSyntax";
-			this.bCheckSyntax.Click += new System.EventHandler(this.bCheckSyntax_Click);
+			this.bCheckSyntax.Click += this.bCheckSyntax_Click;
 			// 
 			// panel1
 			// 
@@ -129,7 +128,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			// 
 			resources.ApplyResources(this.lbErrors, "lbErrors");
 			this.lbErrors.Name = "lbErrors";
-			this.lbErrors.SelectedIndexChanged += new System.EventHandler(this.lbErrors_SelectedIndexChanged);
+			this.lbErrors.SelectedIndexChanged += this.lbErrors_SelectedIndexChanged;
 			// 
 			// label2
 			// 

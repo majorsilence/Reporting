@@ -1,7 +1,7 @@
-﻿using System;
-using System.Windows.Forms;
-using System.Drawing.Printing;
-using System.Drawing;
+using System;
+using Majorsilence.Forms;
+using Majorsilence.Forms.Printing;
+using Majorsilence.Forms.Drawing;
 using System.Resources;
 using System.Reflection;
 using System.IO;
@@ -69,24 +69,20 @@ namespace Majorsilence.Reporting.RdlViewer
                 return;
             }
 
-            PrintDocument pd = new PrintDocument();
-            pd.DocumentName = Viewer.SourceFile.LocalPath;
-            pd.PrinterSettings.FromPage = 1;
-            pd.PrinterSettings.ToPage = Viewer.PageCount;
-            pd.PrinterSettings.MaximumPage = Viewer.PageCount;
-            pd.PrinterSettings.MinimumPage = 1;
-            pd.DefaultPageSettings.Landscape = Viewer.PageWidth > Viewer.PageHeight ? true : false;
-            using (PrintDialog dlg = new PrintDialog())
+            // No real print-spooler integration -- see MIGRATION-NOTES.md and RdlViewer.cs's
+            // comment where Print(PrintDocument) used to live. Majorsilence.Forms.PrintDialog is
+            // a no-op stub with no real UI anyway, so don't pretend to show one; go straight to
+            // "export as PDF" (the same path the Save As toolbar button already uses) and let the
+            // user print from their OS's own PDF viewer.
+            var dlg = new SaveFileDialog
             {
-                dlg.Document = pd;
-                dlg.AllowSelection = true;
-                dlg.AllowSomePages = true;
-                if (dlg.ShowDialog() == DialogResult.OK)
-                {
-                    await Viewer.Print(pd);
-                }
+                Filter = "PDF files (*.pdf)|*.pdf",
+                FileName = System.IO.Path.GetFileNameWithoutExtension(Viewer.SourceFile.LocalPath) + ".pdf",
+            };
+            if (dlg.ShowDialog() == DialogResult.OK)
+            {
+                await Viewer.SaveAs(dlg.FileName, Majorsilence.Reporting.Rdl.OutputPresentationType.PDF);
             }
-
         }
 
         private async void SaveAsClicked(object sender, System.EventArgs e)
@@ -239,14 +235,14 @@ namespace Majorsilence.Reporting.RdlViewer
             this.Items.Add(new ToolStripButton("Open", GetImage("fyiReporting.RdlViewer.Resources.document-open.png"), OpenClicked));
             this.Items.Add(new ToolStripButton("Save As", GetImage("fyiReporting.RdlViewer.Resources.document-save.png"), SaveAsClicked));
             this.Items.Add(new ToolStripButton("Print", GetImage("fyiReporting.RdlViewer.Resources.document-print.png"), PrintClicked));
-            this.Items.Add(new ToolStripButton("<<", null, FirstPageClicked));
-            this.Items.Add(new ToolStripButton("<", null, PreviousPageClicked));
-            this.Items.Add(new ToolStripButton(">", null, NextPageClicked));
-            this.Items.Add(new ToolStripButton(">>", null, LastPageClicked));
+            this.Items.Add(new ToolStripButton("<<", (Image)null, FirstPageClicked));
+            this.Items.Add(new ToolStripButton("<", (Image)null, PreviousPageClicked));
+            this.Items.Add(new ToolStripButton(">", (Image)null, NextPageClicked));
+            this.Items.Add(new ToolStripButton(">>", (Image)null, LastPageClicked));
             this.Items.Add(this.currentPage);
             this.Items.Add(this.pageCount);
-            this.Items.Add(new ToolStripButton("Zoom In", null, ZoomInClicked));
-            this.Items.Add(new ToolStripButton("Zoom Out", null, ZoomOutClicked));
+            this.Items.Add(new ToolStripButton("Zoom In", (Image)null, ZoomInClicked));
+            this.Items.Add(new ToolStripButton("Zoom Out", (Image)null, ZoomOutClicked));
         }
 
 

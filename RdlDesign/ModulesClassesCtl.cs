@@ -2,9 +2,8 @@
 using System;
 using System.Collections;
 using System.ComponentModel;
-using System.Drawing;
 using System.Data;
-using System.Windows.Forms;
+using Majorsilence.Forms;
 using System.Xml;
 using System.IO;
 
@@ -13,18 +12,18 @@ namespace Majorsilence.Reporting.RdlDesign
 	/// <summary>
 	/// Summary description for ModulesClassesCtl.
 	/// </summary>
-	internal class ModulesClassesCtl : System.Windows.Forms.UserControl, IProperty
+	internal class ModulesClassesCtl : Majorsilence.Forms.UserControl, IProperty
 	{
 		private DesignXmlDraw _Draw;
 		private DataTable _DTCM;
 		private DataTable _DTCL;
 
-		private System.Windows.Forms.Label label1;
-		private System.Windows.Forms.Button bDeleteCM;
-		private System.Windows.Forms.DataGridView dgCodeModules;
-		private System.Windows.Forms.Button bDeleteClass;
-		private System.Windows.Forms.DataGridView dgClasses;
-		private System.Windows.Forms.Label label2;
+		private Majorsilence.Forms.Label label1;
+		private Majorsilence.Forms.Button bDeleteCM;
+		private Majorsilence.Forms.DataGridView dgCodeModules;
+		private Majorsilence.Forms.Button bDeleteClass;
+		private Majorsilence.Forms.DataGridView dgClasses;
+		private Majorsilence.Forms.Label label2;
 		/// <summary> 
 		/// Required designer variable.
 		/// </summary>
@@ -124,14 +123,14 @@ namespace Majorsilence.Reporting.RdlDesign
 		/// </summary>
 		private void InitializeComponent()
 		{
-			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ModulesClassesCtl));
+			Majorsilence.Forms.ComponentResourceManager resources = new Majorsilence.Forms.ComponentResourceManager(typeof(ModulesClassesCtl));
             this.DoubleBuffered = true;
-			this.label1 = new System.Windows.Forms.Label();
-			this.bDeleteCM = new System.Windows.Forms.Button();
-			this.dgCodeModules = new System.Windows.Forms.DataGridView();
-			this.bDeleteClass = new System.Windows.Forms.Button();
-			this.dgClasses = new System.Windows.Forms.DataGridView();
-			this.label2 = new System.Windows.Forms.Label();
+			this.label1 = new Majorsilence.Forms.Label();
+			this.bDeleteCM = new Majorsilence.Forms.Button();
+			this.dgCodeModules = new Majorsilence.Forms.DataGridView();
+			this.bDeleteClass = new Majorsilence.Forms.Button();
+			this.dgClasses = new Majorsilence.Forms.DataGridView();
+			this.label2 = new Majorsilence.Forms.Label();
 			((System.ComponentModel.ISupportInitialize)(this.dgCodeModules)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.dgClasses)).BeginInit();
 			this.SuspendLayout();
@@ -145,7 +144,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			// 
 			resources.ApplyResources(this.bDeleteCM, "bDeleteCM");
 			this.bDeleteCM.Name = "bDeleteCM";
-			this.bDeleteCM.Click += new System.EventHandler(this.bDeleteCM_Click);
+			this.bDeleteCM.Click += this.bDeleteCM_Click;
 			// 
 			// dgCodeModules
 			// 
@@ -157,7 +156,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			// 
 			resources.ApplyResources(this.bDeleteClass, "bDeleteClass");
 			this.bDeleteClass.Name = "bDeleteClass";
-			this.bDeleteClass.Click += new System.EventHandler(this.bDeleteClass_Click);
+			this.bDeleteClass.Click += this.bDeleteClass_Click;
 			// 
 			// dgClasses
 			// 

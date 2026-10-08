@@ -3,11 +3,10 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Drawing;
 using System.Data;
-using System.Windows.Forms;
+using Majorsilence.Forms;
 using System.Xml;
-using System.Drawing.Printing;
+using Majorsilence.Forms.Printing;
 using Majorsilence.Reporting.RdlDesign.Resources;
 
 namespace Majorsilence.Reporting.RdlDesign
@@ -15,7 +14,7 @@ namespace Majorsilence.Reporting.RdlDesign
     /// <summary>
     /// Summary description for ReportCtl.
     /// </summary>
-    internal partial class ReportCtl : System.Windows.Forms.UserControl, IProperty
+    internal partial class ReportCtl : Majorsilence.Forms.UserControl, IProperty
     {
         public ReportCtl(DesignXmlDraw dxDraw)
         {

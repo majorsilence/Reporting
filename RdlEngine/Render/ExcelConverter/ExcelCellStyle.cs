@@ -1,9 +1,5 @@
 using System;
-#if DRAWINGCOMPAT
 using Drawing = Majorsilence.Forms.Drawing;
-#else
-using Drawing = System.Drawing;
-#endif
 using Majorsilence.Reporting.Rdl;
 
 namespace RdlEngine.Render.ExcelConverter

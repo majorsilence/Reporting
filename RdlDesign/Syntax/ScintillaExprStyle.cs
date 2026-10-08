@@ -1,4 +1,4 @@
-﻿using ScintillaNET;
+using Majorsilence.Reporting.RdlDesign.Syntax;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
