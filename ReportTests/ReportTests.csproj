@@ -21,6 +21,8 @@
 		<ProjectReference Include="..\RdlEngine\Majorsilence.Reporting.RdlEngine.csproj" />
 	</ItemGroup>
 	<ItemGroup>
+		<!-- No dependencies, so it is compiled here instead of referencing the web project. -->
+		<Compile Include="..\WebDesigner\SchemaConnectionResolver.cs" Link="SchemaConnectionResolver.cs" />
 		<!-- No dependencies, so it is compiled here instead of referencing the ASP.NET project. -->
 		<Compile Include="..\RdlAsp.Mvc\ReportPathResolver.cs" Link="ReportPathResolver.cs" />
 	</ItemGroup>
