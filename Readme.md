@@ -141,6 +141,18 @@ If it doesn't have a feature that you want it to have, add it.  If it has a bug 
 
 See [Contribute](https://github.com/majorsilence/My-FyiReporting/wiki/Contribute).
 
+## Branches and releases
+
+Versions are `year.release.build`.
+
+| Branch | Purpose |
+| --- | --- |
+| `release/26.0.x` | Stable 26.0.x line. Only bug fixes and security fixes. Tagged `v26.0.N`. |
+| `main` | Development toward the 27.x.x releases planned for 2027. Includes the modernization work. |
+
+* Fixes for the stable line target `release/26.0.x` and are then merged or cherry-picked forward into `main`.
+* New features and breaking changes target `main`.
+
 # Benchmarks
 
 ## one
