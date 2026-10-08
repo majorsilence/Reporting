@@ -50,6 +50,54 @@ namespace Majorsilence.Pdf.Tests
             Assert.That(reg.Resolve(family, false, false)?.Path, Is.EqualTo(copy));
         }
 
+        // Linux keeps fonts a folder or more below /usr/share/fonts, a folder per package or
+        // family, under any file name: Microsoft's core fonts install as
+        // truetype/msttcorefonts/Arial.ttf. A search of the top folder alone found none of them.
+        [Test]
+        public void AddInstalledFonts_WithSubfolders_FindsAFontFoldersDown()
+        {
+            var regular = SystemSansRegular;
+            Assume.That(regular, Is.Not.Null, "no system sans font on this machine");
+            string family = DeclaredFamily(regular!);
+
+            string root = NewFontDir();
+            string nested = Path.Combine(root, "truetype", "vendor");
+            Directory.CreateDirectory(nested);
+            string copy = Path.Combine(nested, "zz_nothing_like_the_name.ttf");
+            File.Copy(regular!, copy);
+
+            Assert.That(new FontRegistry().AddInstalledFonts(root).Contains(family), Is.False,
+                "the top folder alone holds no font");
+            var reg = new FontRegistry().AddInstalledFonts(root, includeSubfolders: true);
+            Assert.That(reg.Resolve(family, false, false)?.Path, Is.EqualTo(Path.GetFullPath(copy)));
+        }
+
+        // The faces of every folder are gathered before a family is registered, so a family
+        // whose styles were installed into different folders is still one family.
+        [Test]
+        public void AddInstalledFonts_WithSubfolders_JoinsAFamilyAcrossFolders()
+        {
+            var regular = SystemSansRegular;
+            var bold = SystemSansBold;
+            Assume.That(regular, Is.Not.Null);
+            Assume.That(bold, Is.Not.Null);
+            string family = DeclaredFamily(regular!);
+            Assume.That(DeclaredFamily(bold!), Is.EqualTo(family), "regular and bold are one family");
+
+            string root = NewFontDir();
+            Directory.CreateDirectory(Path.Combine(root, "a"));
+            Directory.CreateDirectory(Path.Combine(root, "b"));
+            string regularCopy = Path.Combine(root, "a", "r.ttf");
+            string boldCopy = Path.Combine(root, "b", "x.ttf");
+            File.Copy(regular!, regularCopy);
+            File.Copy(bold!, boldCopy);
+
+            var reg = new FontRegistry().AddInstalledFonts(root, includeSubfolders: true);
+
+            Assert.That(reg.Resolve(family, false, false)?.Path, Is.EqualTo(Path.GetFullPath(regularCopy)));
+            Assert.That(reg.Resolve(family, true, false)?.Path, Is.EqualTo(Path.GetFullPath(boldCopy)));
+        }
+
         [Test]
         public void AddInstalledFonts_PlacesEachFileByItsOwnBoldAndItalicBits()
         {
