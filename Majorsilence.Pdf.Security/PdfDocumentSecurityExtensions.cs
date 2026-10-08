@@ -78,8 +78,8 @@ namespace Majorsilence.Pdf.Security
 
             internal SignatureHandlerAdapter(PdfSignatureOptions opts) { _opts = opts; }
 
-            public byte[] BuildPlaceholder() =>
-                PdfSigner.BuildPlaceholder(_opts);
+            public byte[] BuildPlaceholder(int objNum, IStreamEncryptor? encryptor) =>
+                PdfSigner.BuildPlaceholder(_opts, objNum, encryptor);
 
             public void Fixup(MemoryStream ms, byte[] placeholderBytes, long bodyOffset) =>
                 PdfSigner.Fixup(ms, placeholderBytes, bodyOffset, _opts);

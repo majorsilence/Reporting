@@ -9,6 +9,7 @@ using System.Security.Cryptography;
 using System.Security.Cryptography.Pkcs;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
+using Majorsilence.Pdf.Internal;   // IStreamEncryptor (friend)
 
 namespace Majorsilence.Pdf.Security.Internal
 {
@@ -34,21 +35,49 @@ namespace Majorsilence.Pdf.Security.Internal
         private static readonly Oid TsaUnsignedAttrOid =
             new Oid("1.2.840.113549.1.9.16.2.14");
 
-        internal static byte[] BuildPlaceholder(PdfSignatureOptions opts)
+        // objNum and encryptor: in an encrypted document every string is encrypted for the object it
+        // belongs to (ISO 32000-1 §7.6.1). /Name, /Reason, /Location and /M were written in cleartext,
+        // so a conforming reader "decrypted" them into garbage and pyHanko could not validate the
+        // signature at all (#363). /Contents is the one string the standard leaves unencrypted, and
+        // /ByteRange holds only integers, so Fixup's markers are unaffected: an encrypted string is a
+        // hex literal and cannot contain "[0000000000 " or "/Contents <".
+        internal static byte[] BuildPlaceholder(PdfSignatureOptions opts, int objNum, IStreamEncryptor? encryptor)
         {
+            string Text(string value) => encryptor != null
+                ? encryptor.EncryptPdfString(objNum, 0, TextStringBytes(value))
+                : $"({EscapePdf(value)})";
+
             var sb = new StringBuilder();
             sb.Append("<< /Type /Sig /Filter /Adobe.PPKLite /SubFilter /adbe.pkcs7.detached\n");
             sb.Append("   /ByteRange [0000000000 0000000000 0000000000 0000000000]\n");
             sb.Append($"   /Contents <{new string('0', PlaceholderBytes * 2)}>\n");
             if (!string.IsNullOrEmpty(opts.SignerName))
-                sb.Append($"   /Name ({EscapePdf(opts.SignerName!)})\n");
+                sb.Append($"   /Name {Text(opts.SignerName!)}\n");
             if (!string.IsNullOrEmpty(opts.Reason))
-                sb.Append($"   /Reason ({EscapePdf(opts.Reason!)})\n");
+                sb.Append($"   /Reason {Text(opts.Reason!)}\n");
             if (!string.IsNullOrEmpty(opts.Location))
-                sb.Append($"   /Location ({EscapePdf(opts.Location!)})\n");
-            sb.Append($"   /M (D:{DateTime.UtcNow:yyyyMMddHHmmss}Z)\n");
+                sb.Append($"   /Location {Text(opts.Location!)}\n");
+            sb.Append($"   /M {Text($"D:{DateTime.UtcNow:yyyyMMddHHmmss}Z")}\n");
             sb.Append(">>");
             return Latin1.GetBytes(sb.ToString());
+        }
+
+        // The bytes of a PDF text string: Latin-1 when every character fits, which is what the
+        // cleartext literal above writes, else UTF-16BE with its byte-order mark.
+        private static byte[] TextStringBytes(string value)
+        {
+            foreach (char c in value) {
+                if (c > 0xFF) {
+                    var utf16 = Encoding.BigEndianUnicode.GetBytes(value);
+                    var bytes = new byte[utf16.Length + 2];
+                    bytes[0] = 0xFE;
+                    bytes[1] = 0xFF;
+                    Buffer.BlockCopy(utf16, 0, bytes, 2, utf16.Length);
+                    return bytes;
+                }
+            }
+
+            return Latin1.GetBytes(value);
         }
 
         internal static void Fixup(
