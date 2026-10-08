@@ -473,27 +473,30 @@ namespace Majorsilence.Reporting.RdlAsp
 
         private string FindReportFile(string file)
         {
-            string foundFile = null;
-            foundFile = Path.Combine(_settings.ReportsFolder, file);
-            
-            if (!System.IO.File.Exists(foundFile))
+            // The file name comes from the request: it must stay inside the reports folder.
+            string foundFile = ReportPathResolver.ResolveWithin(_settings.ReportsFolder, file);
+
+            if (foundFile == null || !System.IO.File.Exists(foundFile))
             {
-                // recursively search for the file in the content root path
-                // This is a workaround for the case where the file might be in a subdirectory
-                // of the content root path, but the path provided is not absolute.
+                foundFile = null;
+
+                // Fall back to searching the content root for a bare file name. The search is not
+                // given directory parts or wildcards, so it can only find a file by its exact name.
                 // TODO: read search directory from configuration
-                var di = new DirectoryInfo(_webHostEnvironment.ContentRootPath);
-                FileInfo[] files = di.GetFiles(file, SearchOption.AllDirectories);
-                if (files.Length > 0)
+                if (ReportPathResolver.IsBareFileName(file))
                 {
-                    foundFile = files[0].FullName;
+                    var di = new DirectoryInfo(_webHostEnvironment.ContentRootPath);
+                    FileInfo[] files = di.GetFiles(file, SearchOption.AllDirectories);
+                    if (files.Length > 0)
+                    {
+                        foundFile = files[0].FullName;
+                    }
                 }
             }
 
-            // If the file exists, return the full path
-            if (!System.IO.File.Exists(foundFile))
+            if (foundFile == null)
             {
-                AddError(8, "Report file '{0}' does not exist.", foundFile);
+                AddError(8, "Report file '{0}' does not exist.", file);
                 return null;
             }
 
