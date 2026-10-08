@@ -4,6 +4,7 @@
 using System;
 using System.IO;
 using System.IO.Compression;
+using System.Linq;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
@@ -347,6 +348,95 @@ namespace Majorsilence.Pdf.Tests
             string text = Encoding.Latin1.GetString(pdf);
             Assert.That(text, Does.Contain("/Reason (Approved)"));
             Assert.That(text, Does.Contain("/Location (Toronto)"));
+        }
+
+        // ── encrypted + signed (#363) ─────────────────────────────────────────
+        //
+        // In an encrypted document every string is encrypted for its object, except the signature's
+        // /Contents (ISO 32000-1 §7.6.1). The signature dictionary's /Name, /Reason, /Location and /M,
+        // the widget's /T and the visible appearance stream were written in cleartext, so a conforming
+        // reader decrypted them into garbage and pyHanko could not validate the signature at all.
+
+        private static byte[] MakeEncryptedSignedPdf(X509Certificate2 cert, bool visible = false)
+        {
+            var sig = new PdfSignatureOptions(cert)
+                .WithReason("Approved")
+                .WithSignerName("Alice")
+                .WithLocation("Toronto");
+
+            if (visible)
+                sig = sig.WithAppearance(72, 600, 180, 40);
+
+            var security = PdfSecurity.Protect(userPassword: string.Empty, ownerPassword: "owner")
+                .WithPermissions(PdfPermissions.None);
+
+            return MakePdf(doc => doc.WithSecurity(security).WithSignature(sig));
+        }
+
+        [TestCase(false)]
+        [TestCase(true)]
+        public void EncryptedAndSigned_WritesNoSignatureStringInCleartext(bool visible)
+        {
+            using var cert = CreateTestCert();
+            string text = Encoding.Latin1.GetString(MakeEncryptedSignedPdf(cert, visible));
+
+            Assert.That(text, Does.Not.Contain("(Signature)"));
+            Assert.That(text, Does.Not.Contain("/M (D:"));
+            Assert.That(text, Does.Not.Contain("(Approved)"));
+            Assert.That(text, Does.Not.Contain("(Alice)"));
+            Assert.That(text, Does.Not.Contain("(Toronto)"));
+            Assert.That(text, Does.Not.Contain("Digitally Signed"));
+        }
+
+        [Test]
+        public void EncryptedAndSigned_ReaderDecryptsTheSignatureStrings()
+        {
+            using var cert = CreateTestCert();
+            byte[] pdf = MakeEncryptedSignedPdf(cert);
+
+            using var reader = UglyToad.PdfPig.PdfDocument.Open(pdf,
+                new UglyToad.PdfPig.ParsingOptions { Password = string.Empty });
+
+            Assert.That(reader.TryGetForm(out var form), Is.True);
+            var field = form.Fields.Single(f => f is UglyToad.PdfPig.AcroForms.Fields.AcroSignatureField);
+            Assert.That(field.Information.PartialName, Is.EqualTo("Signature"));
+
+            var sigRef = (UglyToad.PdfPig.Tokens.IndirectReferenceToken)field.Dictionary.Data["V"];
+            var sigDict = (UglyToad.PdfPig.Tokens.DictionaryToken)reader.Structure.GetObject(sigRef.Data).Data;
+
+            string Str(string key) => ((UglyToad.PdfPig.Tokens.IDataToken<string>)sigDict.Data[key]).Data;
+
+            Assert.That(Str("Reason"), Is.EqualTo("Approved"));
+            Assert.That(Str("Name"), Is.EqualTo("Alice"));
+            Assert.That(Str("Location"), Is.EqualTo("Toronto"));
+            Assert.That(Str("M"), Does.StartWith("D:").And.EndWith("Z"));
+        }
+
+        [Test]
+        public void EncryptedAndSigned_SignatureVerifiesOverItsByteRange()
+        {
+            using var cert = CreateTestCert();
+            byte[] pdf = MakeEncryptedSignedPdf(cert);
+            string text = Encoding.Latin1.GetString(pdf);
+
+            int br = text.IndexOf("/ByteRange [", StringComparison.Ordinal) + "/ByteRange [".Length;
+            var range = text.Substring(br, text.IndexOf(']', br) - br)
+                .Split(' ', StringSplitOptions.RemoveEmptyEntries).Select(long.Parse).ToArray();
+
+            // The signed bytes: everything but the /Contents hex string.
+            var signedBytes = pdf.Take((int)range[1]).Concat(pdf.Skip((int)range[2]).Take((int)range[3])).ToArray();
+            Assert.That(range[2] + range[3], Is.EqualTo(pdf.Length), "the byte range covers the whole file");
+
+            // /Contents <hex> sits in the gap; its DER length says how much of the zero padding is signature.
+            string hex = text.Substring((int)range[1] + 1, (int)(range[2] - range[1] - 2));
+            byte[] contents = Convert.FromHexString(hex);
+            int derLength = contents[1] == 0x82 ? 4 + (contents[2] << 8 | contents[3]) : 3 + contents[2];
+
+            var cms = new System.Security.Cryptography.Pkcs.SignedCms(
+                new System.Security.Cryptography.Pkcs.ContentInfo(signedBytes), detached: true);
+            cms.Decode(contents.AsSpan(0, derLength));
+
+            Assert.DoesNotThrow(() => cms.CheckSignature(verifySignatureOnly: true));
         }
 
         // ── PdfSignatureOptions immutability ─────────────────────────────────

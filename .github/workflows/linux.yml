@@ -44,6 +44,37 @@ jobs:
           path: Release-Builds/build-output/*.zip
           retention-days: 1
 
+  # Signed and encrypted+signed PDFs, checked by an independent validator. Majorsilence.Pdf's own reader
+  # and writer can agree on a mistake every other reader rejects (#363: signature strings in cleartext
+  # inside an encrypted PDF), so the unit tests alone are not enough.
+  pdf-signature-validation:
+    runs-on: ubuntu-latest
+    env:
+      MAJORSILENCE_PDF_VALIDATION_DIR: ${{ github.workspace }}/pdf-validation-samples
+    steps:
+      - uses: actions/checkout@v6
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 10.0.x
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+      - name: Install pyHanko
+        run: python -m pip install "pyhanko==0.37.0" "pyhanko-certvalidator==0.32.1"
+      - name: Write signed PDF samples
+        run: dotnet test Majorsilence.Pdf.Tests/Majorsilence.Pdf.Tests.csproj -c Release -f net10.0 --filter "TestCategory=PdfValidationSamples" --verbosity normal
+      - name: Validate PDF signatures with pyHanko
+        run: python .github/scripts/validate_pdf_signatures.py "$MAJORSILENCE_PDF_VALIDATION_DIR"
+      - name: Archive PDF samples
+        if: failure()
+        uses: actions/upload-artifact@v6
+        with:
+          name: pdf-validation-samples
+          path: ${{ github.workspace }}/pdf-validation-samples
+          retention-days: 7
+
   linux-arm64-aot:
     runs-on: ubuntu-24.04-arm
     steps:

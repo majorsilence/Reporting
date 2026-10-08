@@ -12,7 +12,12 @@ namespace Majorsilence.Pdf.Internal
     {
         // Build the body bytes for the signature dictionary object (placeholder state).
         // /ByteRange and /Contents contain fixed-width zeros that are filled in later.
-        byte[] BuildPlaceholder();
+        //
+        // objNum    – the object number the dictionary is written as
+        // encryptor – the document's encryptor, or null when it is not encrypted. In an encrypted
+        //             document every string is encrypted for its object (ISO 32000-1 §7.6.1) except
+        //             the signature's /Contents, so /Name, /Reason, /Location and /M go through it.
+        byte[] BuildPlaceholder(int objNum, IStreamEncryptor? encryptor);
 
         // Called after the complete PDF (including xref/trailer) has been written to ms.
         // Seeks into ms, writes the real /ByteRange values, creates and writes the
