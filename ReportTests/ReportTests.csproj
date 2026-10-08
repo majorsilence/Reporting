@@ -20,6 +20,10 @@
 		<ProjectReference Include="..\RdlCri\Majorsilence.Reporting.RdlCri.csproj" />
 		<ProjectReference Include="..\RdlEngine\Majorsilence.Reporting.RdlEngine.csproj" />
 	</ItemGroup>
+	<ItemGroup>
+		<!-- No dependencies, so it is compiled here instead of referencing the ASP.NET project. -->
+		<Compile Include="..\RdlAsp.Mvc\ReportPathResolver.cs" Link="ReportPathResolver.cs" />
+	</ItemGroup>
 	<!-- The compat packages ship net8.0/net10.0 only, so the net48 inner build (where
 	     DRAWINGCOMPAT is never defined) must not reference them. Matches RdlEngine. -->
 	<ItemGroup Condition="'$(DrawingCompat)' == 'true'">
