@@ -59,8 +59,6 @@ namespace Majorsilence.Reporting.Rdl
 		}
 
 		// Evaluate is for interpretation  (and is relatively slow)
-		[RequiresDynamicCode("Invokes methods by name at runtime; not AOT-compatible")]
-		[RequiresUnreferencedCode("Type members may be removed by the trimmer")]
 		public async Task<object> Evaluate(Report rpt, Row row)
 		{
 			// get the results
@@ -92,20 +90,60 @@ namespace Majorsilence.Reporting.Rdl
             else
                 argTypes = Type.GetTypeArray(argResults);
 
-			// We can definitely optimize this by caching some info TODO
-
 			// Get ready to call the function
-			object returnVal;
-			Type theClassType= Type.GetType(_Cls, true, true);
-            MethodInfo mInfo = XmlUtil.GetMethod(theClassType, _Func, argTypes);
+			Type theClassType = ResolveSystemType(_Cls);
+			MethodInfo mInfo = GetCachedMethod(theClassType, argTypes);
             if (mInfo == null)
             {
                 throw new Exception(string.Format(Strings.FunctionSystem_Error_MethodNotFound, _Func, _Cls));
             }
 
-            returnVal = mInfo.Invoke(theClassType, argResults);
+			return mInfo.Invoke(theClassType, argResults);
+		}
 
-			return returnVal;
+		// The class name always comes from the parser's closed set of built-in classes, so it is
+		// mapped with typeof (which the trimmer and AOT compiler can see) instead of Type.GetType.
+		[return: DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods)]
+		static Type ResolveSystemType(string cls)
+		{
+			return cls switch
+			{
+				"System.Math" => typeof(System.Math),
+				"System.String" => typeof(string),
+				"System.Convert" => typeof(System.Convert),
+				"Majorsilence.Reporting.Rdl.Financial" => typeof(Financial),
+				"Majorsilence.Reporting.Rdl.VBFunctions" => typeof(VBFunctions),
+				"Majorsilence.Reporting.Rdl.StringFunctions" => typeof(StringFunctions),
+				_ => throw new ArgumentException("Unknown system class: " + cls, nameof(cls)),
+			};
+		}
+
+		// Overload resolution is the slow part; remember the last answer for this call site.
+		// A single immutable entry is swapped in, so concurrent renders can share this expression.
+		sealed class MethodCacheEntry
+		{
+			internal MethodCacheEntry(string cls, string func, Type[] argTypes, MethodInfo method)
+			{
+				Cls = cls; Func = func; ArgTypes = argTypes; Method = method;
+			}
+			internal readonly string Cls, Func;
+			internal readonly Type[] ArgTypes;
+			internal readonly MethodInfo Method;
+		}
+		MethodCacheEntry? _cache;
+
+		MethodInfo GetCachedMethod(
+			[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods)] Type theClassType,
+			Type[] argTypes)
+		{
+			MethodCacheEntry? c = _cache;
+			if (c != null && c.Cls == _Cls && c.Func == _Func && c.ArgTypes.AsSpan().SequenceEqual(argTypes))
+				return c.Method;
+
+			MethodInfo mInfo = XmlUtil.GetMethod(theClassType, _Func, argTypes);
+			if (mInfo != null)
+				_cache = new MethodCacheEntry(_Cls, _Func, argTypes, mInfo);
+			return mInfo;
 		}
 
 		public async Task<double> EvaluateDouble(Report rpt, Row row)

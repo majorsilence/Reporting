@@ -247,8 +247,15 @@ namespace Majorsilence.Reporting.Rdl
             return ra;
         }
 
-        [RequiresUnreferencedCode("Type members may be removed by the trimmer")]
-        static internal MethodInfo GetMethod(Type t, string method, Type[] argTypes)
+        // Base-type walk: the trimmer keeps inherited public methods of a type annotated with
+        // PublicMethods, so BaseType.GetMethod is covered by the annotation on 't'.
+        [UnconditionalSuppressMessage("Trimming", "IL2075",
+            Justification = "Public methods of base types are preserved along with the annotated derived type.")]
+        [UnconditionalSuppressMessage("Trimming", "IL2070",
+            Justification = "Every lookup here uses BindingFlags.Public only; the analyzer asks for NonPublicMethods because of the IgnoreCase flag.")]
+        static internal MethodInfo GetMethod(
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods)] Type t,
+            string method, Type[] argTypes)
         {
             if (t == null || method == null)
                 return null;

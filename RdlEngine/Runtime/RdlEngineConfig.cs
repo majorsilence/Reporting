@@ -843,6 +843,23 @@ namespace Majorsilence.Reporting.Rdl
             return false;
         }
 
+        /// <summary>
+        /// Returns the type pre-registered with <see cref="RegisterType"/>, or null. The return
+        /// carries the same annotation as RegisterType's parameter, so callers can reflect over
+        /// it without trim warnings.
+        /// </summary>
+        [return: DynamicallyAccessedMembers(
+            DynamicallyAccessedMemberTypes.PublicMethods |
+            DynamicallyAccessedMemberTypes.PublicConstructors)]
+        [UnconditionalSuppressMessage("Trimming", "IL2073",
+            Justification = "Types only enter _registeredTypes through RegisterType, whose parameter has this annotation.")]
+        internal static Type? GetRegisteredType(string name)
+        {
+            if (_registeredTypes != null && _registeredTypes.TryGetValue(name, out Type? type))
+                return type;
+            return null;
+        }
+
         internal static bool TryGetInstanceFactory(string name, out Func<object>? factory)
         {
             if (_instanceFactories != null && _instanceFactories.TryGetValue(name, out factory))
