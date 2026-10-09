@@ -23,9 +23,9 @@ jobs:
       - name: Build GtkViewer
         run: dotnet build -c Release MajorsilenceReporting-Linux-GtkViewer.slnx
       - name: Build MajorsilenceReporting
-        run: dotnet build -c Release -p:EnableWindowsTargeting=true MajorsilenceReporting.slnx
+        run: dotnet build -c Release MajorsilenceReporting.slnx
       - name: Test
-        run: dotnet test -c Release -p:EnableWindowsTargeting=true MajorsilenceReporting.slnx --filter "TestCategory!=Containers" --verbosity normal --collect:"XPlat Code Coverage" --logger:"trx"
+        run: dotnet test -c Release MajorsilenceReporting.slnx --filter "TestCategory!=Containers" --verbosity normal --collect:"XPlat Code Coverage" --logger:"trx"
       - name: Test Report
         uses: dorny/test-reporter@v2
         if: success() || failure()
@@ -33,6 +33,16 @@ jobs:
           name: unit tests
           path: "**/TestResults/*.trx"
           reporter: dotnet-trx
+      - name: SBOM
+        uses: CycloneDX/gh-dotnet-generate-sbom@v1
+        with:
+          path: ./MajorsilenceReporting.slnx
+      - name: Archive SBOM
+        uses: actions/upload-artifact@v6
+        with:
+          name: sbom
+          path: sbom.xml
+          retention-days: 1
       - name: Build AOT Linux x64
         id: aot_build
         shell: pwsh

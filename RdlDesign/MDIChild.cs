@@ -186,38 +186,12 @@ namespace Majorsilence.Reporting.RdlDesign
             return FileSave(file, rdl);
         }
 
-        // EncryptionProvider.Prompt.ShowDialog is compiled only under `#if WINDOWS || NET48`
-        // (a raw System.Windows.Forms.Form, never migrated) -- unavailable to this project's
-        // plain net8.0/net10.0 TFM. Same replacement as RdlViewer.Forms/RdlViewer.cs's
-        // PromptForPasskey: a small local dialog built directly on Majorsilence.Forms, using the
-        // default CenterScreen StartPosition instead of Prompt's manual Screen.FromControl/
-        // WorkingArea centering math.
-        private static string PromptForPasskey(string text, string caption)
-        {
-            using var prompt = new Majorsilence.Forms.Form
-            {
-                Size = new System.Drawing.Size(500, 200),
-                FormBorderStyle = Majorsilence.Forms.FormBorderStyle.FixedDialog,
-                Text = caption,
-            };
-            var textLabel = new Majorsilence.Forms.Label { Left = 50, Top = 20, Width = 400, Height = 60, Text = text };
-            var textBox = new Majorsilence.Forms.TextBox { Left = 50, Top = 100, Width = 400 };
-            var confirmation = new Majorsilence.Forms.Button { Text = "OK", Left = 350, Width = 100, Top = 120 };
-            confirmation.Click += (sender, e) => { prompt.Close(); };
-            prompt.Controls.Add(textBox);
-            prompt.Controls.Add(confirmation);
-            prompt.Controls.Add(textLabel);
-            prompt.AcceptButton = confirmation;
-            prompt.ShowDialog();
-            return textBox.Text;
-        }
-
         private String doPossibleEncryption(Uri file, String rdl)
         {
             String extension = Path.GetExtension(file.LocalPath);
             if (extension.Equals(".encrypted"))
             {
-                StringEncryption enc = new StringEncryption(PromptForPasskey("Please enter passkey", "Passkey?"));
+                StringEncryption enc = new StringEncryption(Prompt.ShowDialog("Please enter passkey", "Passkey?"));
                 try
                 {
                     rdl = enc.Encrypt(rdl);
@@ -420,7 +394,7 @@ namespace Majorsilence.Reporting.RdlDesign
                 
                 try
                 {
-                    StringEncryption enc = new StringEncryption(PromptForPasskey("Please enter the passkey", "Passkey?"));
+                    StringEncryption enc = new StringEncryption(Prompt.ShowDialog("Please enter the passkey", "Passkey?"));
                     rdl = enc.Decrypt(rdl);
                 }
                 catch (Exception)

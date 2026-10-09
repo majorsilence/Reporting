@@ -63,12 +63,13 @@ jobs:
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
           echo "Version: $VERSION"
 
-  # The designer/viewer/rdlcmd zips and every NuGet package (both the Release and the
-  # Release-DrawingCompat flavours), then the Windows AOT zips. build-release.ps1 clears
-  # build-output when it starts, so the AOT script has to run after it.
-  windows:
+  # The designer/viewer/rdlcmd zips and every NuGet package. Every project is plain
+  # net8.0/net10.0 now, and the Windows self-contained RdlCmd builds are ordinary
+  # (non-AOT) publishes, so none of this needs Windows. build-release.ps1 clears build-output
+  # when it starts, which is why it is its own job and not a step in front of an AOT build.
+  packages:
     needs: version
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
         with:
@@ -78,16 +79,33 @@ jobs:
         with:
           dotnet-version: 10.0.x
       - name: Build release zips and NuGet packages
+        shell: pwsh
         run: ./build-release.ps1
-      - name: Build AOT Windows
-        run: ./build-release-aot-windows.ps1
       - uses: actions/upload-artifact@v6
         with:
-          name: release-windows
+          name: release-packages
           path: |
             Release-Builds/build-output/*.zip
             Release-Builds/build-output/*.nupkg
             Release-Builds/build-output/*.snupkg
+          if-no-files-found: error
+
+  # Native AOT cannot cross-compile, so the Windows AOT binaries are built on Windows.
+  aot-windows:
+    needs: version
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 10.0.x
+      - name: Build AOT Windows
+        run: ./build-release-aot-windows.ps1
+      - uses: actions/upload-artifact@v6
+        with:
+          name: release-aot-windows
+          path: Release-Builds/build-output/*.zip
           if-no-files-found: error
 
   aot:
@@ -122,7 +140,7 @@ jobs:
           if-no-files-found: error
 
   release:
-    needs: [version, windows, aot]
+    needs: [version, packages, aot-windows, aot]
     if: needs.version.outputs.is_release == 'true'
     runs-on: ubuntu-latest
     permissions:
