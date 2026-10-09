@@ -4,6 +4,7 @@ using System.Collections;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Majorsilence.Reporting.RdlEngine.Resources;
 
@@ -68,8 +69,6 @@ namespace Majorsilence.Reporting.Rdl
 		}
 
 		// Evaluate is for interpretation  (and is relatively slow)
-		[RequiresDynamicCode("Invokes methods by name at runtime; not AOT-compatible")]
-		[RequiresUnreferencedCode("Type members may be removed by the trimmer")]
 		public async Task<object> Evaluate(Report rpt, Row row)
 		{
 			// get the results
@@ -86,22 +85,44 @@ namespace Majorsilence.Reporting.Rdl
 			// we build the arguments based on the type
 			Type[] argTypes = bUseArg? _ArgTypes: Type.GetTypeArray(argResults);
 
-			// We can definitely optimize this by caching some info TODO
-
 			// Get ready to call the function
-			Object returnVal;
-			Type theClassType = _Cm != null
-				? _Cm[_Cls]
-				: (RdlEngineConfig.TryGetRegisteredType(_Cls, out Type? rt) ? rt : null);
-            MethodInfo mInfo = XmlUtil.GetMethod(theClassType, _Func, argTypes);
+			MethodInfo mInfo = ResolveMethod(argTypes, out Type? theClassType);
             if (mInfo == null)
             {
                 throw new Exception(string.Format(Strings.FunctionCustomStatic_Error_MethodNotFoundInClass, _Func, _Cls));
             }
 
-            returnVal = mInfo.Invoke(theClassType, argResults);
+            Object returnVal = mInfo.Invoke(theClassType, argResults);
 
 			return returnVal;
+		}
+
+		// A class registered with RdlEngineConfig.RegisterType carries the trimmer annotation, so it
+		// is reflected over without warnings. Classes that come from <CodeModules> are loaded from
+		// assemblies at runtime, which is not possible under Native AOT.
+		[UnconditionalSuppressMessage("Trimming", "IL2026",
+			Justification = "CodeModules classes are only reachable when the report declares <CodeModules>, which already requires an assembly load that is flagged where it happens; the registered-type path above is trim-safe.")]
+		MethodInfo? ResolveMethod(Type[] argTypes, out Type? theClassType)
+		{
+			if (_Cm == null)
+			{
+				Type? registered = RdlEngineConfig.GetRegisteredType(_Cls);
+				theClassType = registered;
+				return registered == null ? null : XmlUtil.GetMethod(registered, _Func, argTypes);
+			}
+
+			if (!RuntimeFeature.IsDynamicCodeSupported)
+				throw new PlatformNotSupportedException(
+					"Classes loaded from <CodeModules> are not supported under Native AOT. Register the class with RdlEngineConfig.RegisterType instead.");
+			return ResolveFromCodeModules(argTypes, out theClassType);
+		}
+
+		[RequiresDynamicCode("Classes in loaded CodeModules are resolved at runtime; not AOT-compatible")]
+		[RequiresUnreferencedCode("Type members may be removed by the trimmer")]
+		MethodInfo? ResolveFromCodeModules(Type[] argTypes, out Type? theClassType)
+		{
+			theClassType = _Cm![_Cls];
+			return XmlUtil.GetMethod(theClassType, _Func, argTypes);
 		}
 
 		public async Task<double> EvaluateDouble(Report rpt, Row row)

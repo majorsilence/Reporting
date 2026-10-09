@@ -5,6 +5,7 @@ using System.Collections;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using Majorsilence.Reporting.RdlEngine.Resources;
 using Majorsilence.Reporting.Rdl;
 using System.Threading.Tasks;
@@ -70,8 +71,6 @@ namespace Majorsilence.Reporting.Rdl
 		}
 
 		// Evaluate is for interpretation  (and is relatively slow)
-		[RequiresDynamicCode("Invokes methods by name at runtime; not AOT-compatible")]
-		[RequiresUnreferencedCode("Type members may be removed by the trimmer")]
 		public async Task<object> Evaluate(Report rpt, Row row)
 		{
 			// get the results
@@ -91,23 +90,40 @@ namespace Majorsilence.Reporting.Rdl
 			// we build the arguments based on the type
 			Type[] argTypes = bUseArg || bNull? _ArgTypes: Type.GetTypeArray(argResults);
 
-			// We can definitely optimize this by caching some info TODO
-
 			// Get ready to call the function
-			Object returnVal;
-
 			object inst = _Rc.Instance(rpt);
-			Type theClassType=inst.GetType();
-            MethodInfo mInfo = XmlUtil.GetMethod(theClassType, _Func, argTypes);
+			MethodInfo mInfo = ResolveMethod(inst, argTypes);
             if (mInfo == null)
             {
                 throw new Exception(string.Format(Strings.FunctionCustomInstance_Error_MethodNotFoundInClass, _Func, _Cls));
             }
-            
-            returnVal = mInfo.Invoke(inst, argResults);
+
+            object returnVal = mInfo.Invoke(inst, argResults);
 
 			return returnVal;
 		}
+
+		// A class registered with RdlEngineConfig.RegisterType carries the trimmer annotation, so it
+		// is reflected over without warnings. Any other instance type has to be inspected through
+		// inst.GetType(), whose members the trimmer may have removed.
+		[UnconditionalSuppressMessage("Trimming", "IL2026",
+			Justification = "Unregistered instance types only occur for classes loaded from <CodeModules> or created by an unannotated factory; the registered-type path is trim-safe and the fallback is guarded by IsDynamicCodeSupported.")]
+		MethodInfo? ResolveMethod(object inst, Type[] argTypes)
+		{
+			Type? registered = _Rc.ClassName == null ? null : RdlEngineConfig.GetRegisteredType(_Rc.ClassName);
+			if (registered != null)
+				return XmlUtil.GetMethod(registered, _Func, argTypes);
+
+			if (!RuntimeFeature.IsDynamicCodeSupported)
+				throw new PlatformNotSupportedException(
+					"Instance class '" + _Rc.ClassName + "' is not registered. Under Native AOT call RdlEngineConfig.RegisterType for it as well as RegisterInstanceFactory.");
+			return ResolveFromInstanceType(inst, argTypes);
+		}
+
+		[RequiresDynamicCode("Reflects over an unregistered instance type; not AOT-compatible")]
+		[RequiresUnreferencedCode("Type members may be removed by the trimmer")]
+		MethodInfo? ResolveFromInstanceType(object inst, Type[] argTypes)
+			=> XmlUtil.GetMethod(inst.GetType(), _Func, argTypes);
 
 		public async Task<double> EvaluateDouble(Report rpt, Row row)
 		{
