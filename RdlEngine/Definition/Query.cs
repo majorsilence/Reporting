@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Globalization;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using Majorsilence.Reporting.RdlEngine.Resources;
 using System.Threading.Tasks;
 using System.Data.Common;
@@ -378,8 +379,18 @@ namespace Majorsilence.Reporting.Rdl
 
         }
 
+        // Object rows are mapped through the runtime type of each item. Callers that can name the
+        // item type should use SetDataCore with an annotated type instead.
         [RequiresUnreferencedCode("Reflects over user-provided object types to map fields; members may be trimmed")]
-        internal async Task SetData(Report rpt, IEnumerable ie, Fields flds, Filters f, bool collection = false)
+        internal Task SetData(Report rpt, IEnumerable ie, Fields flds, Filters f, bool collection = false)
+            => SetDataCore(rpt, ie, flds, f, collection, null);
+
+        /// <param name="mappedType">
+        /// The type whose public fields and properties are matched to the dataset fields when
+        /// <paramref name="collection"/> is false. Null means use each item's runtime type.
+        /// </param>
+        internal async Task SetDataCore(Report rpt, IEnumerable ie, Fields flds, Filters f, bool collection,
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicFields | DynamicallyAccessedMemberTypes.PublicProperties)] Type mappedType)
         {
             if (ie == null)         // Does user want to remove user data?
             {
@@ -397,9 +408,6 @@ namespace Majorsilence.Reporting.Rdl
             Field[] orderedFields = null;
             foreach (object dt in ie)
             {
-                // Get the type.
-                Type myType = dt.GetType();
-
                 // Build the row
                 Row or = new Row(rows, fieldCount);
 
@@ -440,21 +448,13 @@ namespace Majorsilence.Reporting.Rdl
                     // Go thru each field and try to obtain a value
                     foreach (Field fld in flds)
                     {
-                        // Get the type and fields of FieldInfoClass.
-                        FieldInfo fi = myType.GetField(fld.Name.Nm, BindingFlags.Instance | BindingFlags.Public);
-                        if (fi != null)
+                        if (mappedType != null)
                         {
-                            or.Data[fld.ColumnNumber] = fi.GetValue(dt);
+                            if (TryReadMember(mappedType, fld.Name.Nm, dt, out object value))
+                                or.Data[fld.ColumnNumber] = value;
                         }
-                        else
-                        {
-                            // Try getting it as a property as well
-                            PropertyInfo pi = myType.GetProperty(fld.Name.Nm, BindingFlags.Instance | BindingFlags.Public);
-                            if (pi != null)
-                            {
-                                or.Data[fld.ColumnNumber] = pi.GetValue(dt, null);
-                            }
-                        }
+                        else if (TryReadMemberOfRuntimeType(dt, fld.Name.Nm, out object value2))
+                            or.Data[fld.ColumnNumber] = value2;
                     }
                 }
 
@@ -667,11 +667,42 @@ namespace Majorsilence.Reporting.Rdl
         /// True if the command now binds by name. Callers must pass this to
         /// <see cref="AddParameters"/>, which names parameters differently in each mode.
         /// </returns>
+        [UnconditionalSuppressMessage("Trimming", "IL2075",
+            Justification = "BindByName is an optional, best-effort provider property. If the trimmer removed it the lookup returns null and this is a no-op.")]
+        private static PropertyInfo GetBindByNameProperty(IDbCommand cmd)
+            => cmd.GetType().GetProperty("BindByName");
+
+        // Matches a public field, then a public property, by name (case sensitive).
+        private static bool TryReadMember(
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicFields | DynamicallyAccessedMemberTypes.PublicProperties)] Type type,
+            string name, object instance, out object value)
+        {
+            FieldInfo fi = type.GetField(name, BindingFlags.Instance | BindingFlags.Public);
+            if (fi != null)
+            {
+                value = fi.GetValue(instance);
+                return true;
+            }
+            PropertyInfo pi = type.GetProperty(name, BindingFlags.Instance | BindingFlags.Public);
+            if (pi != null)
+            {
+                value = pi.GetValue(instance, null);
+                return true;
+            }
+            value = null;
+            return false;
+        }
+
+        [UnconditionalSuppressMessage("Trimming", "IL2072",
+            Justification = "Only reached from the unannotated SetData overload, which is itself marked RequiresUnreferencedCode.")]
+        private static bool TryReadMemberOfRuntimeType(object instance, string name, out object value)
+            => TryReadMember(instance.GetType(), name, instance, out value);
+
         private static bool TrySetBindByName(IDbCommand cmd)
         {
             try
             {
-                var pi = cmd.GetType().GetProperty("BindByName");
+                var pi = GetBindByNameProperty(cmd);
                 if (pi != null && pi.CanWrite && pi.PropertyType == typeof(bool))
                 {
                     pi.SetValue(cmd, true, null);
@@ -751,12 +782,41 @@ namespace Majorsilence.Reporting.Rdl
                 if (pvalue is ArrayList)    // Probably a MultiValue Report parameter result
                 {
                     ArrayList ar = (ArrayList)pvalue;
-                    dp.Value = ar.ToArray(ar[0].GetType());
+                    dp.Value = ToTypedArray(ar);
                 }
                 else
                     dp.Value = pvalue;
                 cmSQL.Parameters.Add(dp);
             }
+        }
+
+        // A multi-value parameter becomes a strongly typed array so providers can bind it as a list.
+        // The common element types are handled without reflection; any other type needs
+        // ArrayList.ToArray(Type), which is unavailable under Native AOT (fall back to object[]).
+        private static Array ToTypedArray(ArrayList ar)
+        {
+            Type t = ar[0].GetType();
+            if (t == typeof(string)) return CopyToArray<string>(ar);
+            if (t == typeof(int)) return CopyToArray<int>(ar);
+            if (t == typeof(long)) return CopyToArray<long>(ar);
+            if (t == typeof(short)) return CopyToArray<short>(ar);
+            if (t == typeof(byte)) return CopyToArray<byte>(ar);
+            if (t == typeof(decimal)) return CopyToArray<decimal>(ar);
+            if (t == typeof(double)) return CopyToArray<double>(ar);
+            if (t == typeof(float)) return CopyToArray<float>(ar);
+            if (t == typeof(bool)) return CopyToArray<bool>(ar);
+            if (t == typeof(DateTime)) return CopyToArray<DateTime>(ar);
+            if (t == typeof(Guid)) return CopyToArray<Guid>(ar);
+            if (RuntimeFeature.IsDynamicCodeSupported)
+                return ar.ToArray(t);
+            return ar.ToArray();
+        }
+
+        private static T[] CopyToArray<T>(ArrayList ar)
+        {
+            T[] result = new T[ar.Count];
+            ar.CopyTo(result);
+            return result;
         }
 
         /// <summary>

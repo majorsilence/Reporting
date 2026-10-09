@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.CompilerServices;
 using System.Diagnostics.CodeAnalysis;
 using System.Xml;
 using System.Collections;
@@ -670,6 +671,10 @@ namespace Majorsilence.Reporting.Rdl
             }
         }
 
+        // The custom report item type named in the config file is found by loading its assembly at
+        // runtime (already flagged at XmlUtil.AssemblyLoadFrom), so there is no way to annotate it.
+        [UnconditionalSuppressMessage("Trimming", "IL2072",
+            Justification = "The type comes from an assembly loaded at runtime from the config file; AOT apps register custom report items with RegisterCustomReportItem instead.")]
         static void GetCustomReportItem(Dictionary<string, CustomReportItemEntry> crieDir, XmlNode xNode)
         {
             string friendlyTypeName = null;
@@ -738,8 +743,6 @@ namespace Majorsilence.Reporting.Rdl
             }
         }
 
-        [RequiresDynamicCode("Falls back to Activator.CreateInstance when no factory is registered; call RegisterCustomReportItem<T> for AOT")]
-        [RequiresUnreferencedCode("Custom report item types resolved from config may be trimmed; call RegisterCustomReportItem<T> for AOT")]
         public static ICustomReportItem CreateCustomReportItem(string friendlyTypeName)
         {
             CustomReportItemEntry crie = null;
@@ -756,7 +759,9 @@ namespace Majorsilence.Reporting.Rdl
             return (ICustomReportItem)Activator.CreateInstance(crie.Type)!;
         }
 
-        public static void DeclareNewCustomReportItem(string itemName, Type type)
+        public static void DeclareNewCustomReportItem(
+            string itemName,
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)] Type type)
         {
             if (!typeof(ICustomReportItem).IsAssignableFrom(type))
                 throw new ArgumentException("The type does not implement the ICustomReportItem interface: " +
@@ -878,7 +883,7 @@ namespace Majorsilence.Reporting.Rdl
                     return true;
                 if (_UseCompression == 0)   // we've tried to init and failed 
                     return false;
-                Init();                  // initialize compression 
+                EnsureInit();            // initialize compression 
                 return _UseCompression == 1;   // and return the status 
             }
         }
@@ -978,7 +983,7 @@ namespace Majorsilence.Reporting.Rdl
                 return null;
             if (_UseCompression == -1)   // make sure we're init'ed 
             {
-                Init();
+                EnsureInit();
                 if (_UseCompression != 1)
                     return null;
             }
@@ -1000,6 +1005,24 @@ namespace Majorsilence.Reporting.Rdl
         internal string ErrorMsg
         {
             get { return _ErrorMsg; }
+        }
+
+        // A compression module named in the config file is loaded from an assembly at runtime, which
+        // Native AOT cannot do; there the built-in Deflate stream is used instead (state 2).
+        [UnconditionalSuppressMessage("Trimming", "IL2026",
+            Justification = "Only runs when a compression CodeModule is configured, and only when dynamic code is supported; the AOT path never loads it.")]
+        void EnsureInit()
+        {
+            if (!RuntimeFeature.IsDynamicCodeSupported)
+            {
+                lock (this)
+                {
+                    if (_UseCompression == -1)
+                        _UseCompression = 2;
+                }
+                return;
+            }
+            Init();
         }
 
         [RequiresDynamicCode("Loads compression assemblies at runtime; not AOT-compatible")]
@@ -1072,11 +1095,15 @@ namespace Majorsilence.Reporting.Rdl
     internal class CustomReportItemEntry
     {
         internal string ItemName;
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)]
         internal Type? Type;
         internal Func<ICustomReportItem>? Factory;
         internal string? ErrorMsg;
 
-        internal CustomReportItemEntry(string itemName, Type? type, string? msg)
+        internal CustomReportItemEntry(
+            string itemName,
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)] Type? type,
+            string? msg)
         {
             Type = type;
             ItemName = itemName;
