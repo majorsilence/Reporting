@@ -1066,7 +1066,7 @@ project references `Majorsilence.Forms.WinFormsShims.Compat` any more (D11/D12 a
 
 - **`LibRdlWpfViewer` removed.** It only wrapped the viewer in a `WindowsFormsHost`. WPF apps now use
   the regular `RdlViewer` with `Majorsilence.Forms.Wpf`'s `ToWpfElement()`; see
-  `docs/hosting-controls.md`, which also covers WinForms (`ToWinFormsControl()`), Avalonia, Uno,
+  the wiki page `27x-Hosting-Controls`, which also covers WinForms (`ToWinFormsControl()`), Avalonia, Uno,
   GTK 4 and the terminal backend.
 - **`EncryptionProvider` is now plain `net8.0;net10.0`** and references Majorsilence.Forms. `Prompt`
   (the passkey dialog) was a raw `System.Windows.Forms.Form` under `#if WINDOWS`; it is now a
