@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Report Name="RectangleGrowsTest">
+  <Description>A bordered Rectangle holding a Subreport that grows past it, a textbox placed below that Rectangle, and beside them a Rectangle whose contents do not grow.</Description>
+  <Body>
+    <Height>3in</Height>
+    <ReportItems>
+      <Rectangle Name="Frame">
+        <Top>0.5in</Top>
+        <Left>0in</Left>
+        <Height>0.25in</Height>
+        <Width>3in</Width>
+        <Style>
+          <BorderStyle>
+            <Default>Solid</Default>
+          </BorderStyle>
+        </Style>
+        <ReportItems>
+          <Subreport Name="Tall">
+            <Top>0in</Top>
+            <Left>0in</Left>
+            <Height>0.25in</Height>
+            <Width>3in</Width>
+            <ReportName>RectangleGrowsSub</ReportName>
+          </Subreport>
+        </ReportItems>
+      </Rectangle>
+      <Textbox Name="Below">
+        <Top>0.9in</Top>
+        <Left>0in</Left>
+        <Height>0.25in</Height>
+        <Width>3in</Width>
+        <Value>="BELOW-FRAME"</Value>
+      </Textbox>
+      <Rectangle Name="Fixed">
+        <Top>0.5in</Top>
+        <Left>4in</Left>
+        <Height>0.5in</Height>
+        <Width>2in</Width>
+        <Style>
+          <BorderStyle>
+            <Default>Solid</Default>
+          </BorderStyle>
+        </Style>
+        <ReportItems>
+          <Textbox Name="FixedText">
+            <Top>0in</Top>
+            <Left>0in</Left>
+            <Height>0.25in</Height>
+            <Width>2in</Width>
+            <Value>="FIXED-TEXT"</Value>
+          </Textbox>
+        </ReportItems>
+      </Rectangle>
+    </ReportItems>
+  </Body>
+  <Width>6.5in</Width>
+  <PageWidth>8.5in</PageWidth>
+  <PageHeight>11in</PageHeight>
+</Report>

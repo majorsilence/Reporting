@@ -109,8 +109,11 @@ namespace Majorsilence.Reporting.Rdl
                     float saveY = p.YOffset;
        //             p.YOffset += (Top == null ? 0 : this.Top.Points);
                     p.YOffset = pr.Y;       // top of rectangle is base for contained report items
+                    int firstContained = p.Count;
                     await _ReportItems.RunPage(pgs, row, GetOffsetCalc(pgs.Report) + LeftCalc(r));
                     p.YOffset = saveY;
+                    if (pgs.CurrentPage == p)
+                        GrowToContents(p, firstContained, pr);
                 }
 
                 // Handle page breaking at end
@@ -124,6 +127,23 @@ namespace Majorsilence.Reporting.Rdl
             SetPagePositionEnd(pgs, pr.Y + pr.H);
 
 			return;
+        }
+
+        // A rectangle grows with what it holds, as in SSRS: a subreport or a growing text box
+        // can print past its designed bottom, and the border, the background and the items
+        // placed below the rectangle follow it down. Only on the rectangle's own page.
+        private static void GrowToContents(Page p, int firstContained, PageRectangle pr)
+        {
+            float bottom = pr.Y + pr.H;
+            for (int i = firstContained; i < p.Count; i++)
+            {
+                PageItem pi = p[i];
+                float itemBottom = pi is PageLine pl ? Math.Max(pl.Y, pl.Y2) : pi.Y + pi.H;
+                bottom = Math.Max(bottom, itemBottom);
+            }
+            pr.H = bottom - pr.Y;
+            if (pr.SI.BackgroundImage != null)
+                pr.SI.BackgroundImage.H = pr.H;
         }
 
         internal override void RemoveWC(Report rpt)
