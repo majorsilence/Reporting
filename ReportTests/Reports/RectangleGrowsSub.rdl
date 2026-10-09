@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Report Name="RectangleGrowsSub">
+  <Description>Subreport half of the Rectangle growth test: a body 2.25in tall, placed in a 0.25in Subreport.</Description>
+  <Body>
+    <Height>2.25in</Height>
+    <ReportItems>
+      <Textbox Name="SubTop">
+        <Top>0in</Top>
+        <Left>0in</Left>
+        <Height>0.25in</Height>
+        <Width>3in</Width>
+        <Value>="SUB-TOP"</Value>
+      </Textbox>
+      <Textbox Name="SubBottom">
+        <Top>2in</Top>
+        <Left>0in</Left>
+        <Height>0.25in</Height>
+        <Width>3in</Width>
+        <Value>="SUB-BOTTOM"</Value>
+      </Textbox>
+    </ReportItems>
+  </Body>
+  <Width>3in</Width>
+  <PageWidth>8.5in</PageWidth>
+  <PageHeight>11in</PageHeight>
+</Report>
