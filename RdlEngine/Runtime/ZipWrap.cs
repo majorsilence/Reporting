@@ -18,8 +18,10 @@ namespace Majorsilence.Reporting.Rdl
 
         public static string ZipError => string.Empty;
 
-        [RequiresUnreferencedCode("PropertySettingByEnum uses reflection to set enum properties by name")]
-        public static void PropertySettingByEnum(object classInstance, Type classType, string propertyName, string desiredValue)
+        public static void PropertySettingByEnum(
+            object classInstance,
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)] Type classType,
+            string propertyName, string desiredValue)
         {
             PropertyInfo? pi = classType.GetProperty(propertyName);
             if (pi != null)

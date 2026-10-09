@@ -1,6 +1,7 @@
 
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Xml;
 using System.Collections;
 using System.Collections.Generic;
@@ -239,6 +240,7 @@ namespace Majorsilence.Reporting.Rdl
             await Query.SetData(rpt, xmlDoc, _Fields, _Filters);
 		}
 
+		[RequiresUnreferencedCode("Reflects over user-provided object types to map fields; members may be trimmed")]
 		internal async Task SetData(Report rpt, IEnumerable ie)
 		{
             await Query.SetData(rpt, ie, _Fields, _Filters);
