@@ -32,6 +32,9 @@ namespace Majorsilence.Reporting.Rdl
             // MySql.Data (Oracle's connector, the config file's "MySQL.NET") cannot open a connection under
             // Native AOT: its static initializer uses System.Configuration, which is not AOT-compatible.
             // MySqlConnector is; reports that name either provider get it when running as an AOT binary.
+            RdlEngineConfig.RegisterDataProvider("Oracle.ManagedDataAccess",
+                cs => new Oracle.ManagedDataAccess.Client.OracleConnection(cs),
+                tableSelect: "select OWNER || '.' || TABLE_NAME from ALL_TABLES WHERE TABLESPACE_NAME NOT IN ('SYSTEM', 'SYSAUX')");
             RdlEngineConfig.RegisterDataProvider("MySqlConnector",
                 cs => new MySqlConnector.MySqlConnection(cs),
                 tableSelect: "show tables", replaceParameters: true);
