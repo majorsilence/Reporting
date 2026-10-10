@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Report Name="SubreportPlacement">
+  <Description>Textbox then a Subreport lower in the same Rectangle (Left 16pt); issue 377.</Description>
+  <Body>
+    <Height>3in</Height>
+    <ReportItems>
+      <Rectangle Name="Frame">
+        <Top>0in</Top>
+        <Left>16pt</Left>
+        <Height>100pt</Height>
+        <Width>4in</Width>
+        <ReportItems>
+          <Textbox Name="Above">
+            <Top>12pt</Top>
+            <Left>0pt</Left>
+            <Height>11.25pt</Height>
+            <Width>2in</Width>
+            <Value>="ABOVE"</Value>
+          </Textbox>
+          <Subreport Name="Sub">
+            <Top>34pt</Top>
+            <Left>0pt</Left>
+            <Height>20pt</Height>
+            <Width>3in</Width>
+            <ReportName>SubreportPlacementSub</ReportName>
+          </Subreport>
+        </ReportItems>
+      </Rectangle>
+    </ReportItems>
+  </Body>
+  <Width>6.5in</Width>
+  <PageWidth>8.5in</PageWidth>
+  <PageHeight>11in</PageHeight>
+</Report>

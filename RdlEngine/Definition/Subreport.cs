@@ -145,6 +145,9 @@ namespace Majorsilence.Reporting.Rdl
 			r.ParentConnections = saveDS;				// restore the data connnections
 		}
 
+        // How far the container (a Rectangle) shifts the subreport right of the report margin
+        internal float ContainerOffset { get; private set; }
+
         async override internal Task RunPage(Pages pgs, Row row)
 		{
 			Report r = pgs.Report;
@@ -192,6 +195,14 @@ namespace Majorsilence.Reporting.Rdl
 			SetPageLeft(r);				// Set the Left attribute since this will be the margin for this report
 
 			SetPagePositionBegin(pgs);
+
+			if (TC == null)
+			{	// SetPagePositionBegin leaves YOffset at the bottom of the item above (or the top
+				// of the container); the subreport adds no gap of its own, so add it here.
+				pgs.CurrentPage.YOffset += RelativeY(r);
+				// and the container's offset, which is part of the body's left margin
+				ContainerOffset = (Parent as ReportItems).GetXOffset(r) - OwnerReport.LeftMargin.Points;
+			}
 
             float yOffset;
 

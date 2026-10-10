@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Report Name="SubreportPlacementSub">
+  <Body>
+    <Height>20pt</Height>
+    <ReportItems>
+      <Textbox Name="SubText">
+        <Top>0pt</Top>
+        <Left>0pt</Left>
+        <Height>10.75pt</Height>
+        <Width>2in</Width>
+        <Value>="SUB-FIRST"</Value>
+      </Textbox>
+    </ReportItems>
+  </Body>
+  <Width>3in</Width>
+  <PageWidth>8.5in</PageWidth>
+  <PageHeight>11in</PageHeight>
+</Report>
