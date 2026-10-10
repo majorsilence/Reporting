@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Data;
 
 namespace Majorsilence.Reporting.Data
@@ -29,6 +30,7 @@ namespace Majorsilence.Reporting.Data
 
         // Map our filtered indices to the inner reader
         public object GetValue(int i) => _innerReader.GetValue(_columnMap[i]);
+        [return: DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicFields | DynamicallyAccessedMemberTypes.PublicProperties)]
         public Type GetFieldType(int i) => _innerReader.GetFieldType(_columnMap[i]);
 
         // Override indexers

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
@@ -75,6 +76,7 @@ namespace Majorsilence.Reporting.Data
         // field's detected type was DBNull regardless of its real data -- silently breaking any
         // <, >, or = comparison on that field, since Filter.ApplyCompare's DBNull case always
         // returns -1 for a non-null right-hand side.
+        [return: DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicFields | DynamicallyAccessedMemberTypes.PublicProperties)]
         public Type GetFieldType(int i)
         {
             if (i < 0 || i >= _fieldNames.Length)
@@ -98,6 +100,8 @@ namespace Majorsilence.Reporting.Data
         public int RecordsAffected => -1;
 
         // Not implemented for brevity
+        [UnconditionalSuppressMessage("Trimming", "IL2111",
+            Justification = "typeof(Type) is only the CLR type of the schema table's DataType column; nothing reflects over Type's own members.")]
         public DataTable GetSchemaTable()
         {
             DataTable schemaTable = new DataTable();

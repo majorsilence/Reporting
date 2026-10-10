@@ -1,5 +1,6 @@
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Xml;
 using System.Xml.XPath;
 using System.Data;
@@ -284,6 +285,9 @@ namespace Majorsilence.Reporting.Data
 			return Convert.ToByte(_Data[i]);
 		}
 
+		[return: DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicFields | DynamicallyAccessedMemberTypes.PublicProperties)]
+		[UnconditionalSuppressMessage("Trimming", "IL2073",
+		    Justification = "The Type only describes a column's data type; the engine reads its TypeCode and never reflects over its members.")]
 		public Type GetFieldType(int i)
 		{
 			return this._Types[i] as Type;

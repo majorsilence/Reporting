@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Report xmlns="http://schemas.microsoft.com/sqlserver/reporting/2005/01/reportdefinition">
+  <Code>Public Function Twice(ByVal x As Integer) As Integer
+    Return x * 2
+  End Function</Code>
+  <DataSources>
+    <DataSource Name="DS1">
+      <ConnectionProperties>
+        <DataProvider>WebService</DataProvider>
+        <ConnectString>http://example.com/service.asmx?WSDL</ConnectString>
+      </ConnectionProperties>
+    </DataSource>
+  </DataSources>
+  <Body><Height>1in</Height></Body>
+</Report>

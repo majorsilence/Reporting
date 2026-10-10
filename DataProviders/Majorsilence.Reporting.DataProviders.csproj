@@ -13,6 +13,8 @@
 		<TargetFrameworks>net8.0;net10.0</TargetFrameworks>
 		<WarningsAsErrors>4014</WarningsAsErrors>
         <IsPackable>true</IsPackable>
+		<IsAotCompatible>true</IsAotCompatible>
+		<EnableTrimAnalyzer>true</EnableTrimAnalyzer>
 	</PropertyGroup>
 	<ItemGroup>
 		<Reference Update="System">
