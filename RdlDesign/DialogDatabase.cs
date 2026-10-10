@@ -346,6 +346,35 @@ namespace Majorsilence.Reporting.RdlDesign
 
         }
 
+        /// <summary>
+        /// Pre set the report parameters that a new report will contain.  The parameters are
+        /// written into the generated report and are saved with it, so they are available
+        /// when designing the report and can later be given values by the viewer.
+        /// </summary>
+        /// <param name="parameters">The parameters to add to the new report.</param>
+        public void SetParameters(IEnumerable<DefaultReportParameter> parameters)
+        {
+            if (parameters == null)
+                return;
+            foreach (DefaultReportParameter p in parameters)
+            {
+                if (string.IsNullOrWhiteSpace(p.Name))
+                    continue;
+                ReportParm rp = new ReportParm(p.Name.Trim())
+                {
+                    DataType = string.IsNullOrEmpty(p.DataType) ? "String" : p.DataType,
+                    Prompt = p.Prompt,
+                    AllowNull = p.AllowNull,
+                    AllowBlank = p.AllowBlank,
+                };
+                if (p.DefaultValue != null)
+                    rp.DefaultValue = new List<string> { p.DefaultValue };
+                reportParameterCtl1.lbParameters.Items.Add(rp);
+            }
+            if (reportParameterCtl1.lbParameters.Items.Count > 0)
+                reportParameterCtl1.lbParameters.SelectedIndex = 0;
+        }
+
         public string ResultReport
         {
             get { return _ResultReport; }
@@ -1661,5 +1690,19 @@ namespace Majorsilence.Reporting.RdlDesign
             DBConnection.Enabled = !rbEmpty.Checked;
             DBSql.Enabled= !rbEmpty.Checked;
         }
+    }
+
+    /// <summary>
+    /// Describes a report parameter to preset in a new report.  See <see cref="DialogDatabase.SetParameters"/>.
+    /// </summary>
+    public class DefaultReportParameter
+    {
+        public string Name { get; set; }
+        /// <summary>RDL data type: String, Boolean, DateTime, Integer or Float.</summary>
+        public string DataType { get; set; } = "String";
+        public string Prompt { get; set; }
+        public string DefaultValue { get; set; }
+        public bool AllowNull { get; set; }
+        public bool AllowBlank { get; set; }
     }
 }
