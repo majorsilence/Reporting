@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Text;
 using System.Xml;
 
@@ -375,6 +376,7 @@ namespace Majorsilence.Reporting.Rdl
             foreach (var kind in UnsupportedItems) {
                 var found = FindDescendants (root, kind);
                 var replaced = 0;
+                var approximated = 0;
 
                 foreach (var item in found) {
                     // Only report items: a Map or Indicator name can also be an unrelated child
@@ -382,6 +384,16 @@ namespace Majorsilence.Reporting.Rdl
                     var parent = item.ParentNode as XmlElement;
                     if (parent == null || (parent.LocalName != "ReportItems" && parent.LocalName != "CellContents"))
                         continue;
+
+                    // A gauge panel is approximated with items the engine can draw; see the converter.
+                    if (kind == "GaugePanel") {
+                        var approximation = Rdl2008GaugeConverter.ToRectangle (item);
+                        if (approximation != null) {
+                            parent.ReplaceChild (approximation, item);
+                            approximated++;
+                            continue;
+                        }
+                    }
 
                     var doc = item.OwnerDocument;
                     var rectangle = doc.CreateElement ("Rectangle", item.NamespaceURI);
@@ -395,6 +407,11 @@ namespace Majorsilence.Reporting.Rdl
 
                     parent.ReplaceChild (rectangle, item);
                     replaced++;
+                }
+
+                if (approximated > 0) {
+                    rl?.LogError (4, $"The report contains {approximated} {kind} item(s), which are approximated: " +
+                        "indicators as coloured boxes and numbers, gauges as a bar on their scale.");
                 }
 
                 if (replaced > 0) {
@@ -1694,6 +1711,17 @@ namespace Majorsilence.Reporting.Rdl
             Set ("Top", rowIndex == 0 ? "0in" : Sum (i => LevelSize (columnLevels, i), rowIndex));
             Set ("Width", colSpan > 1 ? Sum (i => LevelSize (rowLevels, i), colSpan, cellIndex) : LevelSize (rowLevels, cellIndex));
             Set ("Height", rowSpan > 1 ? Sum (i => LevelSize (columnLevels, i), rowSpan, rowIndex) : LevelSize (columnLevels, rowIndex));
+        }
+
+        /// <summary>A percentage of a size, in the size's own unit (25 of "4in" is "1in"), or null if either is unreadable.</summary>
+        internal static string ScalePercent (string size, string percent)
+        {
+            if (string.IsNullOrWhiteSpace (size) || !double.TryParse (percent?.Trim ().TrimEnd ('%'), NumberStyles.Float,
+                    CultureInfo.InvariantCulture, out var p))
+                return null;
+
+            var parsed = ParseSize (size);
+            return parsed == null ? null : FormatSize (parsed.Value.Value * p / 100.0, parsed.Value.Unit);
         }
 
         private static (double Value, string Unit)? ParseSize (string size)
