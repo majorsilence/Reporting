@@ -218,13 +218,13 @@ namespace Majorsilence.Reporting.RdlDesign
                     };
                     var xw = XmlWriter.Create(sw, settings);
 			
-                    // A List isn't part of the 2008+ (RDLC) schema; write it as a Tablix. Done on a
+                    // List and Table aren't part of the 2008+ (RDLC) schema; write them as a Tablix. Done on a
                     // copy so the document being edited keeps the List the designer understands.
                     var toWrite = _ReportDoc;
-                    if (Rdl2008Exporter.NeedsListConversion(_ReportDoc))
+                    if (Rdl2008Exporter.NeedsConversion(_ReportDoc))
                     {
                         toWrite = (XmlDocument)_ReportDoc.CloneNode(true);
-                        Rdl2008Exporter.ConvertListsToTablix(toWrite);
+                        Rdl2008Exporter.ConvertToTablix(toWrite);
                     }
                     toWrite.WriteContentTo(xw);
                     xw.Close();

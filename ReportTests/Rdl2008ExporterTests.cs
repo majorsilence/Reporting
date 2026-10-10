@@ -65,7 +65,7 @@ namespace ReportTests
         {
             var doc = Load (ReportWith (Rdl2010, SimpleList));
 
-            var converted = Rdl2008Exporter.ConvertListsToTablix (doc);
+            var converted = Rdl2008Exporter.ConvertToTablix (doc);
 
             Assert.That (converted, Is.EqualTo (1));
             Assert.That (doc.GetElementsByTagName ("List"), Is.Empty, "<List> is not in the RDLC schema");
@@ -88,8 +88,8 @@ namespace ReportTests
         {
             var doc = Load (ReportWith (Rdl2005, SimpleList));
 
-            Assert.That (Rdl2008Exporter.NeedsListConversion (doc), Is.False);
-            Assert.That (Rdl2008Exporter.ConvertListsToTablix (doc), Is.EqualTo (0));
+            Assert.That (Rdl2008Exporter.NeedsConversion (doc), Is.False);
+            Assert.That (Rdl2008Exporter.ConvertToTablix (doc), Is.EqualTo (0));
             Assert.That (doc.GetElementsByTagName ("List"), Has.Count.EqualTo (1), "List is valid in 2005");
         }
 
@@ -99,7 +99,7 @@ namespace ReportTests
             var doc = Load (ReportWith (Rdl2010,
                 @"<List Name=""L""><Height>1in</Height><Width>1in</Width><ReportItems /></List>"));
 
-            Rdl2008Exporter.ConvertListsToTablix (doc);
+            Rdl2008Exporter.ConvertToTablix (doc);
 
             Assert.That (First (doc, "Group"), Is.Null);
         }
@@ -114,7 +114,7 @@ namespace ReportTests
   <ReportItems />
 </List>"));
 
-            Rdl2008Exporter.ConvertListsToTablix (doc);
+            Rdl2008Exporter.ConvertToTablix (doc);
 
             var group = First (doc, "Group");
             Assert.That (group.GetAttribute ("Name"), Is.EqualTo ("ByName"));
@@ -137,7 +137,7 @@ namespace ReportTests
   </ReportItems>
 </List>"));
 
-            var converted = Rdl2008Exporter.ConvertListsToTablix (doc);
+            var converted = Rdl2008Exporter.ConvertToTablix (doc);
 
             Assert.That (converted, Is.EqualTo (2));
             Assert.That (doc.GetElementsByTagName ("List"), Is.Empty);
@@ -153,7 +153,7 @@ namespace ReportTests
   <Sorting><SortBy><SortExpression>=Fields!Name.Value</SortExpression></SortBy></Sorting>
   <ReportItems><Textbox Name=""T1""><Height>0.25in</Height><Width>1in</Width><Value>=Fields!Name.Value</Value></Textbox></ReportItems>
 </List>"));
-            Rdl2008Exporter.ConvertListsToTablix (doc);
+            Rdl2008Exporter.ConvertToTablix (doc);
 
             Rdl2008Normalizer.Normalize (doc, null);
 
@@ -264,11 +264,81 @@ namespace ReportTests
             Assert.That (Text (group["Footer"]), Is.EqualTo ("subtotal"));
         }
 
+        private const string GroupedTable = @"
+<Table Name=""Sales""><DataSetName>Data</DataSetName><Height>1.25in</Height><Width>2in</Width>
+  <TableColumns><TableColumn><Width>2in</Width></TableColumn></TableColumns>
+  <Header><RepeatOnNewPage>true</RepeatOnNewPage><TableRows><TableRow><Height>0.25in</Height><TableCells><TableCell><ReportItems><Textbox Name=""H""><Value>Title</Value></Textbox></ReportItems></TableCell></TableCells></TableRow></TableRows></Header>
+  <TableGroups><TableGroup>
+    <Grouping Name=""ByName""><GroupExpressions><GroupExpression>=Fields!Name.Value</GroupExpression></GroupExpressions></Grouping>
+    <Sorting><SortBy><SortExpression>=Fields!Name.Value</SortExpression></SortBy></Sorting>
+    <Header><TableRows><TableRow><Height>0.25in</Height><TableCells><TableCell><ReportItems><Textbox Name=""GH""><Value>group head</Value></Textbox></ReportItems></TableCell></TableCells></TableRow></TableRows></Header>
+    <Footer><TableRows><TableRow><Height>0.25in</Height><TableCells><TableCell><ReportItems><Textbox Name=""GF""><Value>subtotal</Value></Textbox></ReportItems></TableCell></TableCells></TableRow></TableRows></Footer>
+  </TableGroup></TableGroups>
+  <Details><TableRows><TableRow><Height>0.25in</Height><TableCells><TableCell><ReportItems><Textbox Name=""D""><Value>detail</Value></Textbox></ReportItems></TableCell></TableCells></TableRow></TableRows></Details>
+  <Footer><TableRows><TableRow><Height>0.25in</Height><TableCells><TableCell><ReportItems><Textbox Name=""F""><Value>total</Value></Textbox></ReportItems></TableCell></TableCells></TableRow></TableRows></Footer>
+</Table>";
+
+        [Test]
+        public void Table_InRdlcNamespace_IsWrittenAsTablixWithRowHierarchy ()
+        {
+            var doc = Load (ReportWith (Rdl2010, GroupedTable));
+
+            Assert.That (Rdl2008Exporter.ConvertToTablix (doc), Is.EqualTo (1));
+
+            Assert.That (doc.GetElementsByTagName ("Table"), Is.Empty, "<Table> is not in the RDLC schema");
+            var tablix = First (doc, "Tablix");
+            Assert.That (tablix.GetAttribute ("Name"), Is.EqualTo ("Sales"));
+            var texts = tablix["TablixBody"]["TablixRows"].SelectNodes (".//*[local-name()='Value']").Cast<XmlNode> ()
+                .Select (n => n.InnerText).ToArray ();
+            Assert.That (texts, Is.EqualTo (new[] { "Title", "group head", "detail", "subtotal", "total" }),
+                "body rows must follow the order the hierarchy visits them");
+            Assert.That (doc.GetElementsByTagName ("Group"), Has.Count.EqualTo (2), "ByName plus the details group");
+            Assert.That (First (doc, "RepeatOnNewPage").InnerText, Is.EqualTo ("true"));
+        }
+
+        [Test]
+        public void Table_ColSpan_GetsPlaceholderCells ()
+        {
+            var doc = Load (ReportWith (Rdl2010, @"
+<Table Name=""T""><TableColumns><TableColumn><Width>1in</Width></TableColumn><TableColumn><Width>1in</Width></TableColumn></TableColumns>
+  <Details><TableRows><TableRow><Height>0.25in</Height><TableCells>
+    <TableCell><ColSpan>2</ColSpan><ReportItems><Textbox Name=""X""><Value>wide</Value></Textbox></ReportItems></TableCell>
+  </TableCells></TableRow></TableRows></Details>
+</Table>"));
+
+            Rdl2008Exporter.ConvertToTablix (doc);
+
+            Assert.That (doc.GetElementsByTagName ("TablixCell"), Has.Count.EqualTo (2));
+            Assert.That (First (doc, "CellContents")["ColSpan"].InnerText, Is.EqualTo ("2"));
+        }
+
+        [Test]
+        public void RoundTrip_GroupedTableSurvivesExportAndImport ()
+        {
+            var doc = Load (ReportWith (Rdl2010, GroupedTable));
+            Rdl2008Exporter.ConvertToTablix (doc);
+
+            Rdl2008Normalizer.Normalize (doc, null);
+
+            var table = First (doc, "Table");
+            Assert.That (table, Is.Not.Null);
+            string Text (XmlNode n) => string.Concat (n.SelectNodes (".//*[local-name()='Value']").Cast<XmlNode> ().Select (v => v.InnerText));
+            Assert.That (Text (table["Header"]), Is.EqualTo ("Title"));
+            Assert.That (table["Header"]["RepeatOnNewPage"].InnerText, Is.EqualTo ("true"));
+            Assert.That (Text (table["Details"]), Is.EqualTo ("detail"));
+            Assert.That (Text (table["Footer"]), Is.EqualTo ("total"));
+            var group = table["TableGroups"]["TableGroup"];
+            Assert.That (group["Grouping"].GetAttribute ("Name"), Is.EqualTo ("ByName"));
+            Assert.That (Text (group["Header"]), Is.EqualTo ("group head"));
+            Assert.That (Text (group["Footer"]), Is.EqualTo ("subtotal"));
+            Assert.That (group["Sorting"]["SortBy"]["SortExpression"].InnerText, Is.EqualTo ("=Fields!Name.Value"));
+        }
+
         [Test]
         public async Task ExportedReport_ParsesInTheEngine ()
         {
             var doc = Load (ReportWith (Rdl2010, SimpleList));
-            Rdl2008Exporter.ConvertListsToTablix (doc);
+            Rdl2008Exporter.ConvertToTablix (doc);
 
             var parser = new RDLParser (doc.OuterXml) { SkipDatabaseSchemaValidation = true };
             using var report = await parser.Parse ();
