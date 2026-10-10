@@ -39,7 +39,7 @@ namespace RdlEngine.Render.ExcelConverter
 			Lines = new List<ExcelLine>();
 		}
 
-		public void AddImage(Majorsilence.Reporting.Rdl.Image image, byte[] data)
+		public void AddImage(ReportItem image, byte[] data)
 		{
 			var img = new ExcelImage(image, data);
 			float top = image.Top.Points;
