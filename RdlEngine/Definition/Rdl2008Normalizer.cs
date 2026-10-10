@@ -125,13 +125,6 @@ namespace Majorsilence.Reporting.Rdl
 
             var sectionList = ChildrenNamed (sections, "ReportSection");
 
-            // Multiple sections are separate page sequences with their own bodies, which the 2005
-            // model cannot express; keeping the first is better than losing the report entirely.
-            if (sectionList.Count > 1) {
-                rl?.LogError (4, $"Report has {sectionList.Count} ReportSections; only the first is " +
-                    "rendered. Multiple sections are not supported.");
-            }
-
             if (sectionList.Count > 0) {
                 foreach (var child in Children (sectionList[0])) {
                     sectionList[0].RemoveChild (child);
@@ -139,7 +132,65 @@ namespace Majorsilence.Reporting.Rdl
                 }
             }
 
+            // Further sections are separate page sequences with their own body and page setup, which
+            // the 2005 model (one body, one header and footer) cannot express. Their bodies are
+            // stacked below the first, each in a rectangle that starts a new page; their own page
+            // headers, footers and margins are dropped.
+            if (sectionList.Count > 1)
+                AppendLaterSections (report, sectionList, rl);
+
             report.RemoveChild (sections);
+        }
+
+        private static void AppendLaterSections (XmlElement report, List<XmlElement> sections, ReportLog rl)
+        {
+            var body = FindChild (report, "Body");
+            var items = FindChild (body, "ReportItems");
+            var offset = ParseSize (FindChild (body, "Height")?.InnerText ?? string.Empty);
+            if (body == null || offset == null) {
+                rl?.LogError (4, $"Report has {sections.Count} ReportSections; only the first is rendered " +
+                    "(its body height could not be read to place the others).");
+                return;
+            }
+            if (items == null) {
+                items = report.OwnerDocument.CreateElement ("ReportItems", report.NamespaceURI);
+                body.AppendChild (items);
+            }
+
+            var doc = report.OwnerDocument;
+            var ns = report.NamespaceURI;
+            var unit = offset.Value.Unit;
+            var top = offset.Value.Value;
+            var dropped = 0;
+
+            for (var i = 1; i < sections.Count; i++) {
+                var laterBody = FindChild (sections[i], "Body");
+                var height = ParseSize (FindChild (laterBody, "Height")?.InnerText ?? string.Empty);
+                if (laterBody == null || height == null || height.Value.Unit != unit) {
+                    dropped++;
+                    continue;
+                }
+
+                var rectangle = doc.CreateElement ("Rectangle", ns);
+                rectangle.SetAttribute ("Name", "RdlSection" + (i + 1));
+                rectangle.AppendChild (CreateTextElement (doc, ns, "Top", FormatSize (top, unit)));
+                rectangle.AppendChild (CreateTextElement (doc, ns, "Left", "0" + unit));
+                rectangle.AppendChild (CreateTextElement (doc, ns, "Height", FormatSize (height.Value.Value, unit)));
+                rectangle.AppendChild (CreateTextElement (doc, ns, "Width", FindChild (sections[i], "Width")?.InnerText
+                    ?? FindChild (report, "Width")?.InnerText ?? "0" + unit));
+                rectangle.AppendChild (CreateTextElement (doc, ns, "PageBreakAtStart", "true"));
+                var inner = FindChild (laterBody, "ReportItems");
+                if (inner != null)
+                    rectangle.AppendChild (inner.CloneNode (true));
+                items.AppendChild (rectangle);
+
+                top += height.Value.Value;
+            }
+
+            FindChild (body, "Height").InnerText = FormatSize (top, unit);
+            rl?.LogError (4, $"Report has {sections.Count} ReportSections; the later ones are stacked below the first, " +
+                "each starting on a new page, and their own page headers, footers and margins are not used." +
+                (dropped > 0 ? $" {dropped} section(s) could not be placed and were skipped." : string.Empty));
         }
 
         private static XmlElement FindReportElement (XmlDocument doc)
