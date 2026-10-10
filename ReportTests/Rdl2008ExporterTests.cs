@@ -887,6 +887,31 @@ namespace ReportTests
         }
 
         [Test]
+        public void RoundTrip_TableColumnVisibilityIsKept ()
+        {
+            var doc = Load (ReportWith (Rdl2010, @"
+<Table Name=""T""><TableColumns><TableColumn><Width>1in</Width></TableColumn><TableColumn><Width>1in</Width><Visibility><Hidden>true</Hidden></Visibility></TableColumn></TableColumns>
+  <Header><TableRows><TableRow><Height>0.25in</Height><TableCells>
+    <TableCell><ReportItems><Textbox Name=""A""><Value>a</Value></Textbox></ReportItems></TableCell>
+    <TableCell><ReportItems><Textbox Name=""B""><Value>b</Value></Textbox></ReportItems></TableCell></TableCells></TableRow></TableRows></Header>
+  <Details><TableRows><TableRow><Height>0.25in</Height><TableCells>
+    <TableCell><ReportItems><Textbox Name=""C""><Value>c</Value></Textbox></ReportItems></TableCell>
+    <TableCell><ReportItems><Textbox Name=""D""><Value>d</Value></Textbox></ReportItems></TableCell></TableCells></TableRow></TableRows></Details>
+</Table>"));
+            Rdl2008Exporter.ConvertToTablix (doc);
+
+            var members = First (doc, "TablixColumnHierarchy")["TablixMembers"].ChildNodes;
+            Assert.That (members[0]["Visibility"], Is.Null);
+            Assert.That (members[1]["Visibility"]["Hidden"].InnerText, Is.EqualTo ("true"));
+
+            Rdl2008Normalizer.Normalize (doc, null);
+
+            var columns = First (doc, "TableColumns").ChildNodes;
+            Assert.That (columns[0]["Visibility"], Is.Null);
+            Assert.That (columns[1]["Visibility"]["Hidden"].InnerText, Is.EqualTo ("true"));
+        }
+
+        [Test]
         public async Task ExportedReport_ParsesInTheEngine ()
         {
             var doc = Load (ReportWith (Rdl2010, SimpleList));

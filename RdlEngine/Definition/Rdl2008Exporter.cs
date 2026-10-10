@@ -521,8 +521,8 @@ namespace Majorsilence.Reporting.Rdl
             if (name.Length > 0)
                 tablix.SetAttribute ("Name", name);
 
-            var columnWidths = Kids (Child (table, "TableColumns"), "TableColumn")
-                .ConvertAll (c => Child (c, "Width")?.InnerText ?? "1in");
+            var tableColumns = Kids (Child (table, "TableColumns"), "TableColumn");
+            var columnWidths = tableColumns.ConvertAll (c => Child (c, "Width")?.InnerText ?? "1in");
             var bodyRows = El (doc, ns, "TablixRows");
 
             XmlElement BuildRow (XmlElement tableRow)
@@ -655,11 +655,15 @@ namespace Majorsilence.Reporting.Rdl
 
             var columns = El (doc, ns, "TablixColumns");
             var columnMembers = El (doc, ns, "TablixMembers");
-            foreach (var width in columnWidths) {
+            for (var c = 0; c < columnWidths.Count; c++) {
                 var column = El (doc, ns, "TablixColumn");
-                column.AppendChild (El (doc, ns, "Width", width));
+                column.AppendChild (El (doc, ns, "Width", columnWidths[c]));
                 columns.AppendChild (column);
-                columnMembers.AppendChild (El (doc, ns, "TablixMember"));
+                var columnMember = El (doc, ns, "TablixMember");
+                var columnVisibility = Child (tableColumns[c], "Visibility");
+                if (columnVisibility != null)
+                    columnMember.AppendChild (columnVisibility.CloneNode (true));
+                columnMembers.AppendChild (columnMember);
             }
 
             var body = El (doc, ns, "TablixBody");

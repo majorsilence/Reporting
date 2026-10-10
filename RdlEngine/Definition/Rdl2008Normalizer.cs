@@ -501,7 +501,7 @@ namespace Majorsilence.Reporting.Rdl
             if (pageBreak != null)
                 AppendPageBreak (table, doc, ns, pageBreak);
 
-            table.AppendChild (BuildTableColumns (doc, ns, FindChild (body, "TablixColumns")));
+            table.AppendChild (BuildTableColumns (doc, ns, FindChild (body, "TablixColumns"), FindChild (tablix, "TablixColumnHierarchy")));
 
             if (groupedPlan != null) {
                 AppendGroupedSections (table, doc, ns, rows, groupedPlan, repeatHeaderRows, sortExpressions);
@@ -902,15 +902,24 @@ namespace Majorsilence.Reporting.Rdl
             return false;
         }
 
-        private static XmlElement BuildTableColumns (XmlDocument doc, string ns, XmlElement tablixColumns)
+        private static XmlElement BuildTableColumns (XmlDocument doc, string ns, XmlElement tablixColumns,
+            XmlElement columnHierarchy = null)
         {
             var columns = doc.CreateElement ("TableColumns", ns);
+            // 2008 hangs a column's Visibility on its hierarchy member, 2005 on the column.
+            var members = ChildrenNamed (FindChild (columnHierarchy, "TablixMembers"), "TablixMember");
+            var index = 0;
 
             foreach (var tablixColumn in ChildrenNamed (tablixColumns, "TablixColumn")) {
                 var column = doc.CreateElement ("TableColumn", ns);
 
                 foreach (var child in Children (tablixColumn))
                     column.AppendChild (child.CloneNode (true));
+
+                var visibility = index < members.Count ? FindChild (members[index], "Visibility") : null;
+                if (visibility != null && FindChild (column, "Visibility") == null)
+                    column.AppendChild (visibility.CloneNode (true));
+                index++;
 
                 columns.AppendChild (column);
             }
