@@ -105,5 +105,70 @@ namespace ReportTests
             Assert.That (sparklineWarnings, Is.EqualTo (1));
             Assert.That (report.ErrorItems.Cast<string> ().First (e => e.Contains ("GaugePanel")), Does.Contain ("3"));
         }
+
+        private static string TwoSectionReport (string firstHeight = "1in", string secondHeight = "2in") => $@"<?xml version=""1.0"" encoding=""utf-8""?>
+<Report xmlns=""http://schemas.microsoft.com/sqlserver/reporting/2016/01/reportdefinition"">
+  <ReportSections>
+    <ReportSection>
+      <Body><Height>{firstHeight}</Height><ReportItems>
+        <Textbox Name=""A""><Top>0in</Top><Left>0in</Left><Height>0.25in</Height><Width>2in</Width><Paragraphs><Paragraph><TextRuns><TextRun><Value>First section text</Value><Style /></TextRun></TextRuns><Style /></Paragraph></Paragraphs></Textbox>
+      </ReportItems></Body>
+      <Width>5in</Width>
+      <Page><PageHeight>11in</PageHeight><PageWidth>8.5in</PageWidth></Page>
+    </ReportSection>
+    <ReportSection>
+      <Body><Height>{secondHeight}</Height><ReportItems>
+        <Textbox Name=""B""><Top>0.5in</Top><Left>0in</Left><Height>0.25in</Height><Width>2in</Width><Paragraphs><Paragraph><TextRuns><TextRun><Value>Second section text</Value><Style /></TextRun></TextRuns><Style /></Paragraph></Paragraphs></Textbox>
+      </ReportItems></Body>
+      <Width>5in</Width>
+    </ReportSection>
+  </ReportSections>
+</Report>";
+
+        [Test]
+        public async Task LaterReportSections_AreStackedBelowTheFirstOnNewPages ()
+        {
+            RdlEngineConfig.RdlEngineConfigInit ();
+            var parser = new RDLParser (TwoSectionReport ()) { SkipDatabaseSchemaValidation = true };
+            using var report = await parser.Parse ();
+
+            var messages = report.ErrorItems == null ? new string[0] : report.ErrorItems.Cast<string> ().ToArray ();
+            Assert.That (report.ErrorMaxSeverity, Is.LessThanOrEqualTo (4), string.Join (" | ", messages));
+            Assert.That (messages.Count (m => m.Contains ("ReportSections")), Is.EqualTo (1));
+
+            await report.RunGetData (null);
+            using var memory = new MemoryStreamGen ();
+            await report.RunRender (memory, OutputPresentationType.HTML);
+            var html = memory.GetText ();
+
+            Assert.That (html, Does.Contain ("First section text"));
+            Assert.That (html, Does.Contain ("Second section text"), "the second section must not be dropped");
+        }
+
+        [Test]
+        public void LaterReportSections_SitBelowTheFirstBody ()
+        {
+            var doc = new System.Xml.XmlDocument ();
+            doc.LoadXml (TwoSectionReport ());
+
+            Rdl2008Normalizer.Normalize (doc, null);
+
+            var rectangle = doc.GetElementsByTagName ("Rectangle").Cast<System.Xml.XmlElement> ().Single (r => r.GetAttribute ("Name") == "RdlSection2");
+            var ns = rectangle.NamespaceURI;
+            Assert.That (rectangle["Top", ns].InnerText, Is.EqualTo ("1in"), "below the first body");
+            Assert.That (rectangle["PageBreakAtStart", ns].InnerText, Is.EqualTo ("true"));
+            Assert.That (doc.DocumentElement["Body", ns]["Height", ns].InnerText, Is.EqualTo ("3in"), "the body grows to hold both");
+        }
+
+        [Test]
+        public async Task ReportSectionsWithUnreadableHeights_KeepOnlyTheFirstAndSaySo ()
+        {
+            RdlEngineConfig.RdlEngineConfigInit ();
+            var parser = new RDLParser (TwoSectionReport (secondHeight: "=Code.Height()")) { SkipDatabaseSchemaValidation = true };
+            using var report = await parser.Parse ();
+
+            var messages = report.ErrorItems.Cast<string> ().ToArray ();
+            Assert.That (messages.Single (m => m.Contains ("ReportSections")), Does.Contain ("could not be placed"));
+        }
     }
 }
