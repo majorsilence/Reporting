@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Xml;
 using System.Data;
 using System.Collections;
@@ -82,6 +83,7 @@ namespace Majorsilence.Reporting.Data
         public object this[int i] => _rootReader[i];
         public object this[string name] => _rootReader[name];
         public bool IsDBNull(int i) => _rootReader.IsDBNull(i);
+        [return: DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicFields | DynamicallyAccessedMemberTypes.PublicProperties)]
         public Type GetFieldType(int i) => _rootReader.GetFieldType(i);
 
         public void Close() => _rootReader.Close();

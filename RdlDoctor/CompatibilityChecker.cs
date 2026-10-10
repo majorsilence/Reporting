@@ -69,6 +69,7 @@ public static class CompatibilityChecker
         CheckCodeModulesAndClasses(doc, findings);  // DOC008
         CheckExternalResources(doc, folder, findings); // DOC009
         CheckRdlcQuirks(doc, filePath, findings);   // DOC010
+        CheckNativeAotSupport(doc, findings);       // DOC011
 
         return findings;
     }
@@ -226,6 +227,35 @@ public static class CompatibilityChecker
         {
             findings.Add(new Finding("DOC008", FindingSeverity.Info,
                 "Report declares <Classes> without <CodeModules>. The class names in <Classes> must resolve against either a loaded CodeModule assembly or a type pre-registered via RdlEngineConfig.RegisterType/RegisterInstanceFactory (see the Native AOT and Trimming Support docs) -- otherwise instance creation fails at render time."));
+        }
+    }
+
+    // Things that cannot work in an app published with Native AOT (assemblies cannot be loaded or
+    // compiled at runtime). Informational: they are fine in a normal .NET app.
+    private static void CheckNativeAotSupport(XDocument doc, List<Finding> findings)
+    {
+        const string how = "Not supported when the app is published with Native AOT; see the Native AOT and Trimming page on the wiki.";
+
+        if (doc.Descendants().Any(e => e.Name.LocalName == "Code" && e.Parent?.Name.LocalName == "Report"))
+        {
+            findings.Add(new Finding("DOC011", FindingSeverity.Info,
+                $"The report's <Code> element is compiled as VB.NET at runtime. {how} Register a code provider with RdlEngineConfig.RegisterCodeProvider, or move the logic into a class registered with RegisterType."));
+        }
+
+        if (doc.Descendants().Any(e => e.Name.LocalName == "CodeModule"))
+        {
+            findings.Add(new Finding("DOC011", FindingSeverity.Info,
+                $"<CodeModules> loads assemblies at runtime. {how} Register the classes with RdlEngineConfig.RegisterType / RegisterInstanceFactory instead."));
+        }
+
+        foreach (var provider in doc.Descendants().Where(e => e.Name.LocalName == "DataProvider"))
+        {
+            if (string.Equals(provider.Value.Trim(), "WebService", StringComparison.OrdinalIgnoreCase))
+            {
+                findings.Add(new Finding("DOC011", FindingSeverity.Info,
+                    $"<DataProvider>WebService</DataProvider> generates a proxy assembly from the WSDL at runtime. {how} Call the service in your code and push the rows with DataSet.SetData."));
+                break;
+            }
         }
     }
 

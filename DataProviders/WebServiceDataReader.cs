@@ -1,5 +1,7 @@
 
 using System;
+using System.Runtime.CompilerServices;
+using System.Diagnostics.CodeAnalysis;
 using System.Xml;
 using System.Xml.XPath;
 using System.Data;
@@ -42,8 +44,18 @@ namespace Majorsilence.Reporting.Data
 		ArrayList _Names;			// names of the columns
 		ArrayList _Types;			// types of the columns
 
+		// The WSDL provider compiles a proxy assembly and invokes it by reflection, which Native AOT
+		// cannot do; fail with a clear message there instead of deep inside the generator.
+		[UnconditionalSuppressMessage("Trimming", "IL2026",
+			Justification = "Guarded by RuntimeFeature.IsDynamicCodeSupported; this provider is documented as unsupported under Native AOT.")]
+		[UnconditionalSuppressMessage("AOT", "IL3050",
+			Justification = "Guarded by RuntimeFeature.IsDynamicCodeSupported (the analyzer only recognises that guard on net9.0+).")]
 		public WebServiceDataReader(System.Data.CommandBehavior behavior, WebServiceConnection conn, WebServiceCommand cmd)
 		{
+			if (!RuntimeFeature.IsDynamicCodeSupported)
+				throw new PlatformNotSupportedException(
+					"The WSDL web service data provider generates a proxy assembly at runtime and is not supported under Native AOT. " +
+					"Call the service in your code and push the results with DataSet.SetData instead.");
 			_wsconn = conn;
 			_wscmd = cmd;
 			_behavior = behavior;
@@ -61,6 +73,8 @@ namespace Majorsilence.Reporting.Data
 			return;
 		}
 
+		[RequiresDynamicCode("The WSDL web service provider generates and loads a proxy assembly at runtime; not AOT-compatible")]
+		[RequiresUnreferencedCode("The generated proxy and the result types are reflected over by name")]
 		void BuildData(WebServiceWsdl wsw)
 		{
 			_RowData = new ArrayList();
@@ -80,6 +94,8 @@ namespace Majorsilence.Reporting.Data
 			_ie = _RowData.GetEnumerator();
 		}
 
+		[RequiresDynamicCode("The WSDL web service provider generates and loads a proxy assembly at runtime; not AOT-compatible")]
+		[RequiresUnreferencedCode("The generated proxy and the result types are reflected over by name")]
 		void GetDataProperties(string name, Type t, object data, ref int ci, ref object[] row)
 		{
 			// Handle arrays
@@ -148,6 +164,8 @@ namespace Majorsilence.Reporting.Data
 			}
 		}
 
+		[RequiresDynamicCode("The WSDL web service provider generates and loads a proxy assembly at runtime; not AOT-compatible")]
+		[RequiresUnreferencedCode("The generated proxy and the result types are reflected over by name")]
 		void BuildMetaData(WebServiceWsdl wsw)
 		{
 			_Names = new ArrayList();
@@ -158,6 +176,8 @@ namespace Majorsilence.Reporting.Data
 			GetProperties(null, mi.ReturnType);
 		}
 
+		[RequiresDynamicCode("The WSDL web service provider generates and loads a proxy assembly at runtime; not AOT-compatible")]
+		[RequiresUnreferencedCode("The generated proxy and the result types are reflected over by name")]
 		void GetProperties(string name, Type t)
 		{
 			// Handle arrays
@@ -317,6 +337,9 @@ namespace Majorsilence.Reporting.Data
 			return Convert.ToByte(_Data[i]);
 		}
 
+		[return: DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicFields | DynamicallyAccessedMemberTypes.PublicProperties)]
+		[UnconditionalSuppressMessage("Trimming", "IL2073",
+		    Justification = "The Type only describes a column's data type; the engine reads its TypeCode and never reflects over its members.")]
 		public Type GetFieldType(int i)
 		{
 			return this._Types[i] as Type;

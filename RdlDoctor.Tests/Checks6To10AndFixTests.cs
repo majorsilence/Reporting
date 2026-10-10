@@ -71,6 +71,24 @@ namespace RdlDoctor.Tests
         }
 
         [Test]
+        public async Task NativeAotUnsupportedFeatures_AreFlagged()
+        {
+            var findings = await CompatibilityChecker.CheckAsync(Fixture("native-aot.rdl"));
+            var doc011 = findings.Where(f => f.Id == "DOC011").ToList();
+
+            Assert.That(doc011.Any(f => f.Message.Contains("<Code>")), Is.True);
+            Assert.That(doc011.Any(f => f.Message.Contains("WebService")), Is.True);
+            Assert.That(doc011.Any(f => f.Message.Contains("<CodeModules>")), Is.False, "no CodeModules in this report");
+        }
+
+        [Test]
+        public async Task CodeModules_AreFlaggedForNativeAot()
+        {
+            var findings = await CompatibilityChecker.CheckAsync(Fixture("checks6-10.rdl"));
+            Assert.That(findings.Any(f => f.Id == "DOC011" && f.Message.Contains("<CodeModules>")), Is.True);
+        }
+
+        [Test]
         public async Task RdlcDataSetWithNoQuery_ProducesInformationalNote()
         {
             var findings = await CompatibilityChecker.CheckAsync(Fixture("classes-only.rdlc"));

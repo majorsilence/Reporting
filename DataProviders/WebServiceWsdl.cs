@@ -1,5 +1,6 @@
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Xml;
 using System.Data;
 using System.Collections;
@@ -28,6 +29,8 @@ namespace Majorsilence.Reporting.Data
 		string _url;					// url for this assembly
 		Assembly _WsdlAssembly;			// Assembly ready for invokation
 
+		[RequiresDynamicCode("The WSDL web service provider generates and loads a proxy assembly at runtime; not AOT-compatible")]
+		[RequiresUnreferencedCode("The generated proxy and the result types are reflected over by name")]
 		static internal WebServiceWsdl GetWebServiceWsdl(string url)
 		{
 			WebServiceWsdl w = _cache[url] as WebServiceWsdl;
@@ -42,6 +45,8 @@ namespace Majorsilence.Reporting.Data
 			_cache.Clear();
 		}
 
+		[RequiresDynamicCode("The WSDL web service provider generates and loads a proxy assembly at runtime; not AOT-compatible")]
+		[RequiresUnreferencedCode("The generated proxy and the result types are reflected over by name")]
 		public MethodInfo GetMethodInfo(string service, string operation)
 		{
 			// Create an instance of the service object proxy   
@@ -58,6 +63,8 @@ namespace Majorsilence.Reporting.Data
 		}
 
 		// Invoke the operation for the requested service
+		[RequiresDynamicCode("The WSDL web service provider generates and loads a proxy assembly at runtime; not AOT-compatible")]
+		[RequiresUnreferencedCode("The generated proxy and the result types are reflected over by name")]
 		public object Invoke(string service, string operation, DataParameterCollection dpc, int timeout)
 		{
 			// Create an instance of the service object proxy
@@ -91,6 +98,8 @@ namespace Majorsilence.Reporting.Data
 		}
 
 		// constructor
+		[RequiresDynamicCode("The WSDL web service provider generates and loads a proxy assembly at runtime; not AOT-compatible")]
+		[RequiresUnreferencedCode("The generated proxy and the result types are reflected over by name")]
 		private WebServiceWsdl(string url)
 		{
 			_url = url;						
