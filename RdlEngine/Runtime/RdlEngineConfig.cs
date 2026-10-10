@@ -34,6 +34,41 @@ namespace Majorsilence.Reporting.Rdl
         static Func<Report, RdlCodeFunctions>? _codeProviderFactory = null;
         static Dictionary<string, Type>? _registeredTypes = null;
         static Dictionary<string, Func<object>>? _instanceFactories = null;
+        static Dictionary<string, RegisteredDataProvider>? _dataProviders = null;
+
+        sealed class RegisteredDataProvider
+        {
+            internal RegisteredDataProvider(Func<string, IDbConnection> factory, string tableSelect, bool replaceParameters)
+            {
+                Factory = factory; TableSelect = tableSelect; ReplaceParameters = replaceParameters;
+            }
+            internal readonly Func<string, IDbConnection> Factory;
+            internal readonly string TableSelect;
+            internal readonly bool ReplaceParameters;
+        }
+
+        static RegisteredDataProvider? FindRegisteredProvider(string provider) =>
+            _dataProviders != null && provider != null && _dataProviders.TryGetValue(provider, out var p) ? p : null;
+
+        /// <summary>
+        /// AOT-safe: registers a database provider by name, so reports that name it in
+        /// &lt;DataProvider&gt; get their connection from <paramref name="factory"/> instead of the
+        /// provider's assembly being loaded by file name from the config file (which Native AOT cannot do).
+        /// A registered provider takes precedence over a config-file entry of the same name.
+        /// </summary>
+        /// <param name="provider">The &lt;DataProvider&gt; value, e.g. "Microsoft.Data.Sqlite". Case-insensitive.</param>
+        /// <param name="factory">Creates the connection from the report's connection string, e.g. <c>cs =&gt; new SqliteConnection(cs)</c>.</param>
+        /// <param name="tableSelect">Optional query that lists tables, used by the designer's data source dialog.</param>
+        /// <param name="replaceParameters">True when the driver cannot bind named parameters and the engine should substitute literals (as the config does for MySQL).</param>
+        public static void RegisterDataProvider(string provider, Func<string, IDbConnection> factory,
+            string? tableSelect = null, bool replaceParameters = false)
+        {
+            if (string.IsNullOrEmpty(provider)) throw new ArgumentException("A provider name is required.", nameof(provider));
+            if (factory == null) throw new ArgumentNullException(nameof(factory));
+            _dataProviders ??= new Dictionary<string, RegisteredDataProvider>(StringComparer.OrdinalIgnoreCase);
+            _dataProviders[provider] = new RegisteredDataProvider(factory,
+                tableSelect ?? "SELECT TABLE_NAME, TABLE_TYPE FROM INFORMATION_SCHEMA.TABLES ORDER BY 2, 1", replaceParameters);
+        }
 
         static public string DirectoryLoadedFrom
         {
@@ -535,6 +570,9 @@ namespace Majorsilence.Reporting.Rdl
         public static IDbConnection GetConnection(string provider, string cstring)
         {
             IDbConnection cn = null;
+            var registered = FindRegisteredProvider(provider);
+            if (registered != null)
+                return registered.Factory(cstring);
             switch (provider.ToLower())
             {
                 case "odbc":
@@ -600,6 +638,9 @@ namespace Majorsilence.Reporting.Rdl
 
         static public bool DoParameterReplacement(string provider, IDbConnection cn)
         {
+            var registered = FindRegisteredProvider(provider);
+            if (registered != null)
+                return registered.ReplaceParameters;
             if (SqlEntries == null)
                 RdlEngineConfigInit();
             SqlConfigEntry sce = SqlEntries[provider] as SqlConfigEntry;
@@ -608,6 +649,9 @@ namespace Majorsilence.Reporting.Rdl
 
         static public string GetTableSelect(string provider, IDbConnection cn)
         {
+            var registered = FindRegisteredProvider(provider);
+            if (registered != null)
+                return registered.TableSelect;
             if (SqlEntries == null)
                 RdlEngineConfigInit();
             SqlConfigEntry sce = SqlEntries[provider] as SqlConfigEntry;
@@ -634,15 +678,18 @@ namespace Majorsilence.Reporting.Rdl
         {
             if (SqlEntries == null)
                 RdlEngineConfigInit();
-            if (SqlEntries.Count == 0)
-                return null;
-            string[] items = new string[SqlEntries.Count];
-            int i = 0;
+            var names = new List<string>();
             foreach (SqlConfigEntry sce in SqlEntries.Values)
+                names.Add(sce.Provider);
+            if (_dataProviders != null)
             {
-                items[i++] = sce.Provider;
+                foreach (string registered in _dataProviders.Keys)
+                {
+                    if (!names.Exists(n => string.Equals(n, registered, StringComparison.OrdinalIgnoreCase)))
+                        names.Add(registered);
+                }
             }
-            return items;
+            return names.Count == 0 ? null : names.ToArray();
         }
 
         static public string[] GetCustomReportTypes()

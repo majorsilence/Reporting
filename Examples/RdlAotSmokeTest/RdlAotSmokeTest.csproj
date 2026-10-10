@@ -16,6 +16,14 @@
     <ProjectReference Include="..\..\RdlCri\Majorsilence.Reporting.RdlCri.csproj" />
   </ItemGroup>
   <ItemGroup>
+    <!-- The same drivers RdlCmd references; RegisterDataProvider (AotDataProviders.cs) is how AOT finds them. -->
+    <PackageReference Include="Microsoft.Data.SqlClient" />
+    <PackageReference Include="Microsoft.Data.Sqlite" />
+    <PackageReference Include="MySql.Data" />
+    <PackageReference Include="Npgsql" />
+    <Compile Include="..\..\RdlCmd\AotDataProviders.cs" Link="AotDataProviders.cs" />
+  </ItemGroup>
+  <ItemGroup>
     <None Include="..\..\RdlEngine\RdlEngineConfig.xml" Link="RdlEngineConfig.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

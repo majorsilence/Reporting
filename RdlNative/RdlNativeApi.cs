@@ -79,6 +79,7 @@ public static class RdlNativeApi
     private static void EnsureInit()
     {
         if (Interlocked.CompareExchange(ref s_initDone, 1, 0) == 0)
+            AotDataProviders.RegisterIfAot();
             RdlEngineConfig.RdlEngineConfigInit();
     }
 

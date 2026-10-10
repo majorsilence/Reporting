@@ -62,6 +62,25 @@ if ($LASTEXITCODE -ne 0) {
     throw "RDL engine Native AOT smoke test failed (exit code $LASTEXITCODE) -- see Examples/RdlAotSmokeTest/Program.cs"
 }
 
+# The AOT RdlCmd must be able to run a report against a real database: drivers are found by
+# RegisterDataProvider under AOT (RdlCmd/AotDataProviders.cs), not by loading their assemblies.
+$rdlcmdAotExe = Join-Path $CURRENTPATH "RdlCmd" "bin" $pConfigurationCompat $pTargetFrameworkGeneric "$smokeTestRid-aot" "publish" "RdlCmd"
+$rdlcmdCheckDir = Join-Path ([System.IO.Path]::GetTempPath()) "rdlcmd-aot-check-$([guid]::NewGuid().ToString("N"))"
+Remove-Item $rdlcmdCheckDir -Recurse -ErrorAction Ignore
+New-Item -ItemType Directory -Force -Path $rdlcmdCheckDir | Out-Null
+Copy-Item (Join-Path $CURRENTPATH "ReportTests" "Reports" "PushedDataCalculatedFieldTest.rdl") $rdlcmdCheckDir
+Copy-Item (Join-Path $CURRENTPATH "Examples" "northwindEF.db") $rdlcmdCheckDir
+Push-Location $rdlcmdCheckDir
+try {
+    & $rdlcmdAotExe "/fPushedDataCalculatedFieldTest.rdl" "/tcsv" "/o$rdlcmdCheckDir"
+    if ($LASTEXITCODE -ne 0) { throw "AOT RdlCmd failed (exit code $LASTEXITCODE) running a SQLite report" }
+    $csv = Get-Content (Join-Path $rdlcmdCheckDir "PushedDataCalculatedFieldTest.csv") -Raw
+    if ($csv -notmatch "ALFKI") { throw "AOT RdlCmd ran but the SQLite report has no data: $csv" }
+} finally {
+    Pop-Location
+}
+Write-Host "AOT RdlCmd SQLite report check passed ($smokeTestRid)."
+
 $buildoutputpath_rdlcmd_aot = Join-Path $CURRENTPATH "Release-Builds" "build-output" "majorsilence-reporting-rdlcmd-aot"
 $buildoutputpath_rdlnative  = Join-Path $CURRENTPATH "Release-Builds" "build-output" "majorsilence-reporting-rdlnative"
 $buildoutputpath_pdfnative  = Join-Path $CURRENTPATH "Release-Builds" "build-output" "majorsilence-pdfnative"
