@@ -448,6 +448,14 @@ namespace Majorsilence.Reporting.Rdl
                                                r.Width - si.PaddingLeft - si.PaddingRight,
                                                r.Height - si.PaddingTop - si.PaddingBottom);
 
+                // rl-bt: the horizontal layout, turned half a revolution about the middle of the box
+                var rotState = g.Save();
+                if (si.WritingMode == WritingModeEnum.rl_bt)
+                {
+                    g.TranslateTransform(r.Left + r.Width / 2f, r.Top + r.Height / 2f);
+                    g.RotateTransform(180);
+                    g.TranslateTransform(-(r.Left + r.Width / 2f), -(r.Top + r.Height / 2f));
+                }
                 drawBrush = new Draw2.SolidBrush(si.Color);
                 if (pt.NoClip)   // request not to clip text
                 {
@@ -457,6 +465,7 @@ namespace Majorsilence.Reporting.Rdl
                 {
                     g.DrawString(pt.Text, drawFont, drawBrush, r2, drawFormat);
                 }
+                g.Restore(rotState);
 
             }
             finally

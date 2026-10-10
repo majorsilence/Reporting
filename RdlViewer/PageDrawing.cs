@@ -1460,6 +1460,14 @@ namespace Majorsilence.Reporting.RdlViewer
                    r.Height - si.PaddingTop - si.PaddingBottom);
                 } 
 
+                // rl-bt: the horizontal layout, turned half a revolution about the middle of the box
+                var rotState = g.Save();
+                if (si.WritingMode == WritingModeEnum.rl_bt)
+                {
+                    g.TranslateTransform(r.Left + r.Width / 2f, r.Top + r.Height / 2f);
+                    g.RotateTransform(180);
+                    g.TranslateTransform(-(r.Left + r.Width / 2f), -(r.Top + r.Height / 2f));
+                }
                 drawBrush = new SolidBrush(ToSysColor(si.Color));
                 if (si.TextAlign == TextAlignEnum.Justified)
                 {
@@ -1481,6 +1489,7 @@ namespace Majorsilence.Reporting.RdlViewer
                     g.DrawString(pt.Text, drawFont, drawBrush, r2, drawFormat);
                     HighlightString(g, pt, r2, drawFont, drawFormat);
                 }
+                g.Restore(rotState);
                 if (SelectTool)
                 {
                     if (pt.AllowSelect && _SelectList.Contains(pt))

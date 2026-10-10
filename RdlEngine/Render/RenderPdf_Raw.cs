@@ -228,7 +228,7 @@ namespace Majorsilence.Reporting.Rdl
                 float startX = x + si.PaddingLeft;
                 float startY = y + si.PaddingTop + i * si.FontSize;
 
-                if (si.WritingMode == WritingModeEnum.lr_tb)
+                if (si.WritingMode == WritingModeEnum.lr_tb || si.WritingMode == WritingModeEnum.rl_bt)
                 {
                     switch (si.TextAlign)
                     {
@@ -262,6 +262,33 @@ namespace Majorsilence.Reporting.Rdl
                             if (height > 0)
                                 startY = y + height - si.PaddingBottom - si.FontSize * (sa.Length - i);
                             break;
+                    }
+
+                    if (si.WritingMode == WritingModeEnum.rl_bt)
+                    {
+                        // Lay the line out as horizontal text, then turn it half a revolution about
+                        // the centre of the box: the line's start lands on the opposite corner and the
+                        // text runs back along it, upside down. Alignment and line order flip with it.
+                        float cx = x + width / 2f, cy = y + height / 2f;
+                        float rx = 2 * cx - startX, ry = 2 * cy - (startY + si.FontSize);
+                        float rEndX = 2 * cx - (startX + textwidth);
+                        _currentPage.DrawText(text, rx, ry, baseStyle.WithUpsideDown());
+                        switch (si.TextDecoration)
+                        {
+                            case TextDecorationEnum.Underline:
+                                AddLine(rEndX, ry - 1, rx, ry - 1, 1, si.Color, BorderStyleEnum.Solid);
+                                break;
+                            case TextDecorationEnum.LineThrough:
+                                {
+                                    float ly = 2 * cy - (startY + si.FontSize / 2f + 1);
+                                    AddLine(rEndX, ly, rx, ly, 1, si.Color, BorderStyleEnum.Solid);
+                                }
+                                break;
+                            case TextDecorationEnum.Overline:
+                                AddLine(rEndX, 2 * cy - (startY + 1), rx, 2 * cy - (startY + 1), 1, si.Color, BorderStyleEnum.Solid);
+                                break;
+                        }
+                        continue;
                     }
 
                     _currentPage.DrawText(text, startX, startY + si.FontSize, baseStyle);

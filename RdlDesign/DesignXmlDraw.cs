@@ -3307,6 +3307,7 @@ namespace Majorsilence.Reporting.RdlDesign
 				{
 					case WritingModeEnum.lr_tb:
 					case WritingModeEnum.tb_rl:
+					case WritingModeEnum.rl_bt:
 						drawRectangle = new RectangleF(
 							r.Left + si.PaddingLeft - _hScroll,
 							r.Top + si.PaddingTop - _vScroll,
@@ -3329,6 +3330,14 @@ namespace Majorsilence.Reporting.RdlDesign
 				if(si.WritingMode == WritingModeEnum.tb_lr)
 				{
 					g.RotateTransform(270);
+				}
+				else if (si.WritingMode == WritingModeEnum.rl_bt)
+				{
+					// half a revolution about the middle of the (scrolled) box
+					float cx = drawRectangle.Left + drawRectangle.Width / 2f, cy = drawRectangle.Top + drawRectangle.Height / 2f;
+					g.TranslateTransform(cx, cy);
+					g.RotateTransform(180);
+					g.TranslateTransform(-cx, -cy);
 				}
 
 				drawBrush = new SolidBrush(si.Color);

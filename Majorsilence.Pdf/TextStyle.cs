@@ -62,6 +62,12 @@ namespace Majorsilence.Pdf
         public bool IsVertical { get; private set; }
 
         /// <summary>
+        /// When <c>true</c> the text is rotated 180° about its anchor point, so it runs
+        /// right-to-left and upside down, ending at <c>x</c>.
+        /// </summary>
+        public bool IsUpsideDown { get; private set; }
+
+        /// <summary>
         /// When <c>true</c> the Unicode code points in the text string are reversed before
         /// rendering, producing visual right-to-left output (suitable for Hebrew and pre-shaped
         /// Arabic).  Combine with <see cref="TextAlignment.Right"/> so that <c>x</c> is treated
@@ -131,6 +137,12 @@ namespace Majorsilence.Pdf
         public TextStyle WithVertical(bool vertical = true)
         {
             var s = Clone(); s.IsVertical = vertical; return s;
+        }
+
+        /// <summary>Rotate text 180° about its anchor point.</summary>
+        public TextStyle WithUpsideDown(bool upsideDown = true)
+        {
+            var s = Clone(); s.IsUpsideDown = upsideDown; return s;
         }
 
         /// <summary>

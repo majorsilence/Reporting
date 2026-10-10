@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Report xmlns="http://schemas.microsoft.com/sqlserver/reporting/2005/01/reportdefinition">
+  <!-- One left-aligned, top-aligned textbox in the non-standard rl-bt writing mode:
+       horizontal text turned 180 degrees, so it must read upside down from the box's
+       bottom-right corner. Padding is zero so the arithmetic is the report's. -->
+  <PageWidth>8.5in</PageWidth>
+  <PageHeight>11in</PageHeight>
+  <LeftMargin>0.5in</LeftMargin>
+  <RightMargin>0.5in</RightMargin>
+  <TopMargin>0.5in</TopMargin>
+  <BottomMargin>0.5in</BottomMargin>
+  <Width>7.5in</Width>
+  <Body>
+    <Height>2in</Height>
+    <ReportItems>
+      <Textbox Name="Upside">
+        <Top>0.5in</Top>
+        <Left>1in</Left>
+        <Width>3in</Width>
+        <Height>0.5in</Height>
+        <CanGrow>false</CanGrow>
+        <Value>Hello</Value>
+        <Style>
+          <FontFamily>Arial</FontFamily>
+          <FontSize>12pt</FontSize>
+          <WritingMode>rl-bt</WritingMode>
+          <PaddingLeft>0pt</PaddingLeft>
+          <PaddingRight>0pt</PaddingRight>
+          <PaddingTop>0pt</PaddingTop>
+          <PaddingBottom>0pt</PaddingBottom>
+        </Style>
+      </Textbox>
+    </ReportItems>
+  </Body>
+</Report>

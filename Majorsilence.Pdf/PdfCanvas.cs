@@ -85,8 +85,11 @@ namespace Majorsilence.Pdf
 
             sb.Append("q\n");
 
+            bool rotated = style.IsVertical || style.IsUpsideDown;
             if (style.IsVertical)
                 sb.Append($"{F(0)} {F(1)} {F(-1)} {F(0)} {F(x)} {F(pdfY)} cm\n");
+            else if (style.IsUpsideDown)
+                sb.Append($"{F(-1)} {F(0)} {F(0)} {F(-1)} {F(x)} {F(pdfY)} cm\n");
             else
                 sb.Append("1 0 0 1 0 0 cm\n");
 
@@ -112,7 +115,7 @@ namespace Majorsilence.Pdf
 
                 foreach (var (segText, segTtf, segSrc) in segments)
                 {
-                    if (segTtf.IsColorBitmapOnly && !style.IsVertical)
+                    if (segTtf.IsColorBitmapOnly && !rotated)
                     {
                         // Close any open BT block before emitting image XObjects.
                         if (inBt) { sb.Append("ET\n"); inBt = false; }
@@ -172,7 +175,7 @@ namespace Majorsilence.Pdf
                         if (!inBt)
                         {
                             sb.Append("BT\n");
-                            if (style.IsVertical)
+                            if (rotated)
                                 // The vertical CTM below already places (x, pdfY) at the local origin,
                                 // so Td 0 0 anchors the run there -- the same baseline-start convention
                                 // the horizontal branch uses. Td 0 FontSize used to shift the whole run
@@ -210,7 +213,7 @@ namespace Majorsilence.Pdf
 
                 sb.Append("BT\n");
                 sb.Append($"/{font.PdfName} {F(style.FontSize)} Tf\n");
-                if (style.IsVertical)
+                if (rotated)
                     // See the matching comment in the TTF path above: Td 0 0 anchors at (x, pdfY)
                     // through the vertical CTM, matching the horizontal branch's baseline-start.
                     sb.Append($"{F(0)} {F(0)} Td\n");
