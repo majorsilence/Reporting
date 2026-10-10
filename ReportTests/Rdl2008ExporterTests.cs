@@ -605,18 +605,86 @@ namespace ReportTests
             Assert.That (First (doc, "Matrix").ChildNodes.Cast<XmlNode> ().Count (n => n.Name == "fyi:ColumnSet"), Is.EqualTo (1));
         }
 
-        [Test]
-        public void Import_SiblingRowGroups_AreStillRefused ()
-        {
-            var xml = PivotWithSubtotals.Replace ($"<TablixMember>{Header ("RegionTotal", "Grand total")}</TablixMember>",
+        /// <summary>A pivot with sibling row groups: Region rows, then OtherRows rows.</summary>
+        private static string PivotWithSiblingRowGroups ()
+            => PivotWithSubtotals.Replace ($"<TablixMember>{Header ("RegionTotal", "Grand total")}</TablixMember>",
                 $@"<TablixMember><Group Name=""OtherRows""><GroupExpressions><GroupExpression>=Fields!Name.Value</GroupExpression></GroupExpressions></Group>{Header ("OtherRowHead", "=Fields!Name.Value")}</TablixMember>");
-            var doc = Load (ReportWith (Rdl2010, xml));
+
+        [Test]
+        public void Import_SiblingRowGroups_BecomeRowSets ()
+        {
+            var doc = Load (ReportWith (Rdl2010, PivotWithSiblingRowGroups ()));
             var log = new ReportLog ();
 
             Rdl2008Normalizer.Normalize (doc, log);
 
-            Assert.That (First (doc, "Matrix"), Is.Null, "sibling row groups still have no Matrix equivalent");
-            Assert.That (First (doc, "Tablix"), Is.Not.Null, "and are left in place rather than rendered wrongly");
+            var matrix = First (doc, "Matrix");
+            Assert.That (matrix, Is.Not.Null, "sibling row groups are stacked, not refused");
+            Assert.That (log.MaxSeverity, Is.LessThan (8));
+            Assert.That (matrix["RowGroupings"]["RowGrouping"]["DynamicRows"]["Grouping"].GetAttribute ("Name"), Is.EqualTo ("Region"));
+            var set = matrix.ChildNodes.Cast<XmlNode> ().Single (n => n.Name == "fyi:RowSet");
+            Assert.That (set["RowGroupings"]["RowGrouping"]["DynamicRows"]["Grouping"].GetAttribute ("Name"), Is.EqualTo ("OtherRows"));
+            Assert.That (matrix["MatrixRows"].ChildNodes, Has.Count.EqualTo (1));
+            Assert.That (set["MatrixRows"].ChildNodes, Has.Count.EqualTo (1));
+            Assert.That (set["MatrixRows"].FirstChild["Height"].InnerText, Is.EqualTo ("0.25in"));
+        }
+
+        [Test]
+        public async Task SiblingRowGroups_RenderStacked ()
+        {
+            var xml = ReportWith (Rdl2010, PivotWithSiblingRowGroups ().Replace ("Sum(Fields!Name.Value)", "Count(Fields!Name.Value)"));
+            var parser = new RDLParser (xml) { SkipDatabaseSchemaValidation = true };
+            using var report = await parser.Parse ();
+            Assert.That (report.ErrorMaxSeverity, Is.LessThanOrEqualTo (4), string.Join (" | ", report.ErrorItems?.Cast<string> () ?? Enumerable.Empty<string> ()));
+
+            var data = new System.Data.DataTable ();
+            data.Columns.Add ("Name", typeof (string));
+            data.Rows.Add ("Alpha");
+            data.Rows.Add ("Beta");
+            await report.DataSets["Data"].SetData (data);
+            await report.RunGetData (null);
+            using var memory = new MemoryStreamGen ();
+            await report.RunRender (memory, OutputPresentationType.HTML);
+            var html = memory.GetText ();
+
+            // Alpha and Beta head the columns once, then label the Region rows, then the OtherRows rows.
+            Assert.That (System.Text.RegularExpressions.Regex.Matches (html, "Alpha").Count, Is.EqualTo (3));
+            Assert.That (System.Text.RegularExpressions.Regex.Matches (html, "Beta").Count, Is.EqualTo (3));
+        }
+
+        [Test]
+        public void RoundTrip_SiblingRowGroupsSurviveExportAndImport ()
+        {
+            var doc = Load (ReportWith (Rdl2010, PivotWithSiblingRowGroups ()));
+            Rdl2008Normalizer.Normalize (doc, null);   // as the designer opens it
+
+            Rdl2008Exporter.ConvertToTablix (doc);     // as it saves
+
+            var tablix = First (doc, "Tablix");
+            var members = tablix["TablixRowHierarchy"]["TablixMembers"].ChildNodes;
+            Assert.That (members, Has.Count.EqualTo (2), "two sibling row groups again");
+            Assert.That (members[0]["Group"].GetAttribute ("Name"), Is.EqualTo ("Region"));
+            Assert.That (members[1]["Group"].GetAttribute ("Name"), Is.EqualTo ("OtherRows"));
+            Assert.That (tablix["TablixBody"]["TablixRows"].ChildNodes, Has.Count.EqualTo (2));
+            Assert.That (tablix["TablixBody"]["TablixRows"].FirstChild["TablixCells"].ChildNodes, Has.Count.EqualTo (2), "detail and total column");
+            Assert.That (doc.GetElementsByTagName ("fyi:RowSet"), Is.Empty);
+
+            Rdl2008Normalizer.Normalize (doc, null);
+            Assert.That (First (doc, "Matrix").ChildNodes.Cast<XmlNode> ().Count (n => n.Name == "fyi:RowSet"), Is.EqualTo (1));
+        }
+
+        [Test]
+        public void Import_SiblingGroupsOnBothAxes_AreStillRefused ()
+        {
+            var both = PivotWithSiblingRowGroups ().Replace ($"<TablixMember>{Header ("YearTotal", "Total", "0.25in")}</TablixMember>",
+                $@"<TablixMember><Group Name=""OtherCols""><GroupExpressions><GroupExpression>=Fields!Name.Value</GroupExpression></GroupExpressions></Group>{Header ("OtherColHead", "=Fields!Name.Value", "0.25in")}</TablixMember>");
+            var doc = Load (ReportWith (Rdl2010, both));
+            var log = new ReportLog ();
+
+            Rdl2008Normalizer.Normalize (doc, log);
+
+            Assert.That (First (doc, "Matrix"), Is.Null, "crossing sibling row groups with sibling column groups is not supported");
+            Assert.That (First (doc, "Tablix"), Is.Not.Null);
             Assert.That (log.MaxSeverity, Is.GreaterThanOrEqualTo (8));
         }
 
@@ -731,7 +799,14 @@ namespace ReportTests
   <MatrixRows><MatrixRow><Height>0.25in</Height><MatrixCells><MatrixCell><ReportItems><Textbox Name=""SetCell""><Value>=Count(Fields!Name.Value)</Value></Textbox></ReportItems></MatrixCell></MatrixCells></MatrixRow></MatrixRows>
   <MatrixColumns><MatrixColumn><Width>1in</Width></MatrixColumn></MatrixColumns>
 </fyi:ColumnSet></Matrix>");
-            foreach (var (label, region) in new[] { ("List", SimpleList), ("Table", GroupedTable), ("Matrix", SalesMatrix), ("Matrix with subtotal", matrixWithTotals), ("Matrix with column sets", matrixWithSets), ("Chart", Rdl2008ChartTests.Chart2005) }) {
+            var matrixWithRowSets = SalesMatrix.Replace ("</Matrix>", @"<fyi:RowSet xmlns:fyi=""http://www.fyireporting.com/schemas"">
+  <RowGroupings><RowGrouping><Width>1in</Width><DynamicRows>
+    <Grouping Name=""ByRegionRows""><GroupExpressions><GroupExpression>=Fields!Name.Value</GroupExpression></GroupExpressions></Grouping>
+    <ReportItems><Textbox Name=""RowSetHead""><Value>=Fields!Name.Value</Value></Textbox></ReportItems>
+  </DynamicRows></RowGrouping></RowGroupings>
+  <MatrixRows><MatrixRow><Height>0.25in</Height><MatrixCells><MatrixCell><ReportItems><Textbox Name=""RowSetCell""><Value>=Count(Fields!Name.Value)</Value></Textbox></ReportItems></MatrixCell></MatrixCells></MatrixRow></MatrixRows>
+</fyi:RowSet></Matrix>");
+            foreach (var (label, region) in new[] { ("List", SimpleList), ("Table", GroupedTable), ("Matrix", SalesMatrix), ("Matrix with subtotal", matrixWithTotals), ("Matrix with column sets", matrixWithSets), ("Matrix with row sets", matrixWithRowSets), ("Chart", Rdl2008ChartTests.Chart2005) }) {
                 var doc = Load (ReportWith (ns, region));
                 // What the designer holds besides the region: page setup, a page header and a
                 // bordered textbox, all in the 2005 spelling.
