@@ -175,11 +175,26 @@ namespace Majorsilence.Reporting.RdlDesign
             get { return _GetPassword; }
         }
 
+        /// <summary>
+        /// Parameters preset in every report created with the New Report wizard.
+        /// </summary>
+        public List<DefaultReportParameter> NewReportParameters { get; } = new List<DefaultReportParameter>();
+
+        /// <summary>
+        /// Optional connection preset in the New Report wizard.
+        /// </summary>
+        public string NewReportConnectionString { get; set; }
+        public bool NewReportHideConnectionTab { get; set; }
+        public DialogDatabase.ConnectionType NewReportConnectionType { get; set; } = DialogDatabase.ConnectionType.MSSQL;
+
         private void newToolStripButton1_Click(object sender, EventArgs e)
         {
             using (DialogDatabase dlgDB = new DialogDatabase(this))
             {
                 dlgDB.StartPosition = FormStartPosition.CenterParent;
+                if (!string.IsNullOrEmpty(NewReportConnectionString))
+                    dlgDB.SetConnection(NewReportConnectionString, NewReportHideConnectionTab, NewReportConnectionType);
+                dlgDB.SetParameters(NewReportParameters);
                 dlgDB.FormBorderStyle = FormBorderStyle.SizableToolWindow;
 
                 // show modally
