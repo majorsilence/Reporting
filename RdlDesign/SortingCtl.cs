@@ -119,6 +119,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			// 
 			resources.ApplyResources(this.dgSorting, "dgSorting");
 			this.dgSorting.Name = "dgSorting";
+			this.dgSorting.CurrentCellDirtyStateChanged += this.dgSorting_CurrentCellDirtyStateChanged;
 			// 
 			// bDelete
 			// 
@@ -186,6 +187,19 @@ namespace Majorsilence.Reporting.RdlDesign
 				_Draw.CreateElement(sNode, "SortExpression", expr);
 				_Draw.CreateElement(sNode, "Direction", dir?"Ascending":"Descending");
 			}
+		}
+
+		// Commit a checkbox toggle as soon as it happens so a direct click on the
+		// checkbox takes effect without first selecting the row / leaving the cell.
+		internal static bool ShouldCommitOnDirty(DataGridViewCell cell)
+		{
+			return cell is DataGridViewCheckBoxCell;
+		}
+
+		private void dgSorting_CurrentCellDirtyStateChanged(object sender, System.EventArgs e)
+		{
+			if (ShouldCommitOnDirty(dgSorting.CurrentCell) && dgSorting.IsCurrentCellDirty)
+				dgSorting.CommitEdit(DataGridViewDataErrorContexts.Commit);
 		}
 
 		private void bDelete_Click(object sender, System.EventArgs e)
