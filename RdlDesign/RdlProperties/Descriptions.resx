@@ -150,6 +150,9 @@
   <data name="Appearance_WritingMode" xml:space="preserve">
     <value>Text is written horizontally (lr-tb), vertically downward (tb-rl), vertically upward (tb-lr) or horizontally rotated 180 degrees (rl-bt, not in the RDL standard; Excel export leaves it unrotated).</value>
   </data>
+  <data name="Appearance_LineHeight" xml:space="preserve">
+    <value>Distance between the baselines of successive lines of text, e.g. 14pt. Leave at the default to use the font size.</value>
+  </data>
   <data name="BackgroundImage_MIMEType" xml:space="preserve">
     <value>When Source is Database MIMEType describes the type of image.</value>
   </data>

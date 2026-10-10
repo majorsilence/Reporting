@@ -208,10 +208,11 @@ namespace Majorsilence.Reporting.Rdl
             // and never fewer than one line: a single line of text is routinely taller than
             // the cell the report sizes for it, and dropping it would blank the report
             // rather than clip it.
-            if (!bWrap && !bNoClip && height > 0 && sa.Length > 1 && si.FontSize > 0)
+            float pitch = LinePitch(si);
+            if (!bWrap && !bNoClip && height > 0 && sa.Length > 1 && pitch > 0)
             {
                 float availableH = height - si.PaddingTop - si.PaddingBottom;
-                int maxLines = Math.Max(1, (int)Math.Floor(availableH / si.FontSize));
+                int maxLines = Math.Max(1, (int)Math.Floor(availableH / pitch));
                 if (sa.Length > maxLines)
                     sa = sa.Take(maxLines).ToArray();
             }
@@ -226,7 +227,7 @@ namespace Majorsilence.Reporting.Rdl
 
                 float textwidth = _currentPage.MeasureTextWidth(text, baseStyle);
                 float startX = x + si.PaddingLeft;
-                float startY = y + si.PaddingTop + i * si.FontSize;
+                float startY = y + si.PaddingTop + i * pitch;
 
                 if (si.WritingMode == WritingModeEnum.lr_tb || si.WritingMode == WritingModeEnum.rl_bt)
                 {
@@ -254,13 +255,13 @@ namespace Majorsilence.Reporting.Rdl
                                        - si.FontSize / 2f;
                                 if (sa.Length > 1)
                                     startY += sa.Length % 2 == 0
-                                        ? -(((sa.Length / 2) - i) * si.FontSize) + si.FontSize / 2f
-                                        : -(((sa.Length / 2) - i) * si.FontSize);
+                                        ? -(((sa.Length / 2) - i) * pitch) + pitch / 2f
+                                        : -(((sa.Length / 2) - i) * pitch);
                             }
                             break;
                         case VerticalAlignEnum.Bottom:
                             if (height > 0)
-                                startY = y + height - si.PaddingBottom - si.FontSize * (sa.Length - i);
+                                startY = y + height - si.PaddingBottom - pitch * (sa.Length - i - 1) - si.FontSize;
                             break;
                     }
 
@@ -334,13 +335,13 @@ namespace Majorsilence.Reporting.Rdl
 
                     if (si.WritingMode == WritingModeEnum.tb_rl)
                     {
-                        float baseX = x + width - si.PaddingRight - si.FontSize * 0.8f - i * si.FontSize;
+                        float baseX = x + width - si.PaddingRight - si.FontSize * 0.8f - i * pitch;
                         _currentPage.DrawText(text, baseX, y + si.PaddingTop + offset,
                             baseStyle.WithVerticalDown());
                     }
                     else
                     {
-                        float baseX = x + si.PaddingLeft + si.FontSize * 0.8f + i * si.FontSize;
+                        float baseX = x + si.PaddingLeft + si.FontSize * 0.8f + i * pitch;
                         _currentPage.DrawText(text, baseX, y + height - si.PaddingBottom - offset,
                             baseStyle.WithVertical());
                     }
@@ -349,6 +350,13 @@ namespace Majorsilence.Reporting.Rdl
 
             AddAnnotations(x, y, height, width, url, tooltip);
             iAddBorder(si, x, y, height, width);
+        }
+
+        // Distance between successive baselines: the style's LineHeight when one is set,
+        // otherwise the font size.
+        private static float LinePitch(StyleInfo si)
+        {
+            return si.LineHeight > 0 ? si.LineHeight : si.FontSize;
         }
 
         // ── PDF-accurate text re-wrapping ─────────────────────────────────────

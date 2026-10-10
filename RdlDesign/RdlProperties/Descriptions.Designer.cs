@@ -158,6 +158,14 @@ namespace Majorsilence.Reporting.RdlDesign.RdlProperties {
                 return ResourceManager.GetString("Appearance_WritingMode", resourceCulture);
             }
         }
+        /// <summary>
+        ///   Looks up a localized string similar to Distance between the baselines of successive lines of text, e.g. 14pt. Leave at the default to use the font size..
+        /// </summary>
+        internal static string Appearance_LineHeight {
+            get {
+                return ResourceManager.GetString("Appearance_LineHeight", resourceCulture);
+            }
+        }
         
         /// <summary>
         ///   Looks up a localized string similar to Background color..
