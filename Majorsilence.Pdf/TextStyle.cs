@@ -62,6 +62,12 @@ namespace Majorsilence.Pdf
         public bool IsVertical { get; private set; }
 
         /// <summary>
+        /// When <c>true</c> the text is rotated 90° clockwise, so it reads top-to-bottom with the
+        /// tops of the letters pointing right.
+        /// </summary>
+        public bool IsVerticalDown { get; private set; }
+
+        /// <summary>
         /// When <c>true</c> the text is rotated 180° about its anchor point, so it runs
         /// right-to-left and upside down, ending at <c>x</c>.
         /// </summary>
@@ -137,6 +143,12 @@ namespace Majorsilence.Pdf
         public TextStyle WithVertical(bool vertical = true)
         {
             var s = Clone(); s.IsVertical = vertical; return s;
+        }
+
+        /// <summary>Rotate text 90° clockwise (reads top-to-bottom).</summary>
+        public TextStyle WithVerticalDown(bool down = true)
+        {
+            var s = Clone(); s.IsVerticalDown = down; return s;
         }
 
         /// <summary>Rotate text 180° about its anchor point.</summary>

@@ -192,7 +192,7 @@ namespace Majorsilence.Reporting.Rdl
             // thickness, not its available length, so wrapping against it here would split one
             // rotated line into several that then get drawn on top of each other.
             float availableW = width - si.PaddingLeft - si.PaddingRight;
-            if (!bNoClip && availableW > 0 && si.WritingMode != WritingModeEnum.tb_rl)
+            if (!bNoClip && availableW > 0 && si.WritingMode != WritingModeEnum.tb_rl && si.WritingMode != WritingModeEnum.tb_lr)
                 sa = RewrapLines(RejoinSoftWraps(sa), baseStyle, availableW);
 
             // A textbox that may not grow may not draw outside its own rectangle either.
@@ -318,22 +318,32 @@ namespace Majorsilence.Reporting.Rdl
                 }
                 else
                 {
-                    startX += si.FontSize / 4f;
+                    // Vertical text. TextAlign runs along the text, which is now the box's
+                    // height; lines stack across its width.
+                    //   tb-rl: reads downward, tops of the letters to the right, first line at the right edge.
+                    //   tb-lr: reads upward, tops to the left, first line at the left edge.
+                    float inner = height - si.PaddingTop - si.PaddingBottom;
+                    float offset;       // distance of the run's start from the start edge of its direction
                     switch (si.TextAlign)
                     {
-                        case TextAlignEnum.Center:
-                            if (height > 0)
-                                startY = y + si.PaddingLeft
-                                       + (height - si.PaddingLeft - si.PaddingRight) / 2f
-                                       - textwidth / 2f;
-                            break;
-                        case TextAlignEnum.Right:
-                            if (width > 0)
-                                startY = y + height - textwidth - si.PaddingRight;
-                            break;
+                        case TextAlignEnum.Center: offset = (inner - textwidth) / 2f; break;
+                        case TextAlignEnum.Right:  offset = inner - textwidth;        break;
+                        default:                   offset = 0f;                       break;
                     }
-                    _currentPage.DrawText(text, startX, startY + si.FontSize,
-                        baseStyle.WithVertical());
+                    if (height <= 0) offset = 0f;
+
+                    if (si.WritingMode == WritingModeEnum.tb_rl)
+                    {
+                        float baseX = x + width - si.PaddingRight - si.FontSize * 0.8f - i * si.FontSize;
+                        _currentPage.DrawText(text, baseX, y + si.PaddingTop + offset,
+                            baseStyle.WithVerticalDown());
+                    }
+                    else
+                    {
+                        float baseX = x + si.PaddingLeft + si.FontSize * 0.8f + i * si.FontSize;
+                        _currentPage.DrawText(text, baseX, y + height - si.PaddingBottom - offset,
+                            baseStyle.WithVertical());
+                    }
                 }
             }
 

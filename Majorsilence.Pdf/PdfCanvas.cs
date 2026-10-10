@@ -85,9 +85,11 @@ namespace Majorsilence.Pdf
 
             sb.Append("q\n");
 
-            bool rotated = style.IsVertical || style.IsUpsideDown;
+            bool rotated = style.IsVertical || style.IsVerticalDown || style.IsUpsideDown;
             if (style.IsVertical)
                 sb.Append($"{F(0)} {F(1)} {F(-1)} {F(0)} {F(x)} {F(pdfY)} cm\n");
+            else if (style.IsVerticalDown)
+                sb.Append($"{F(0)} {F(-1)} {F(1)} {F(0)} {F(x)} {F(pdfY)} cm\n");
             else if (style.IsUpsideDown)
                 sb.Append($"{F(-1)} {F(0)} {F(0)} {F(-1)} {F(x)} {F(pdfY)} cm\n");
             else

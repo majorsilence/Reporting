@@ -1468,6 +1468,18 @@ namespace Majorsilence.Reporting.RdlViewer
                     g.RotateTransform(180);
                     g.TranslateTransform(-(r.Left + r.Width / 2f), -(r.Top + r.Height / 2f));
                 }
+                else if (si.WritingMode == WritingModeEnum.tb_lr)
+                {
+                    // read upward: lay the text out in a box with width and height swapped, then
+                    // stand it up a quarter turn counter-clockwise about the middle of the real box
+                    float cx = r.Left + r.Width / 2f, cy = r.Top + r.Height / 2f;
+                    float k = g.PageUnit == GraphicsUnit.Pixel ? g.DpiX / 72f : 1f;
+                    r2 = new RectangleF(cx - r.Height / 2f + si.PaddingBottom * k, cy - r.Width / 2f + si.PaddingLeft * k,
+                        r.Height - (si.PaddingTop + si.PaddingBottom) * k, r.Width - (si.PaddingLeft + si.PaddingRight) * k);
+                    g.TranslateTransform(cx, cy);
+                    g.RotateTransform(270);
+                    g.TranslateTransform(-cx, -cy);
+                }
                 drawBrush = new SolidBrush(ToSysColor(si.Color));
                 if (si.TextAlign == TextAlignEnum.Justified)
                 {
