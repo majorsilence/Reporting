@@ -57,7 +57,12 @@ namespace Majorsilence.Reporting.Rdl
         /// <summary>
         /// Rewrites the document in place. Safe to call on a 2005 document (it does nothing).
         /// </summary>
-        internal static void Normalize (XmlDocument doc, ReportLog rl)
+        /// <param name="forEditing">
+        /// True when the designer is opening the file: unsupported report items and the version-only
+        /// elements (ReportID, DataSourceID, ...) stay in the tree so that saving writes them back.
+        /// Rendering passes false, which swaps and removes them so the parser sees only what it knows.
+        /// </param>
+        internal static void Normalize (XmlDocument doc, ReportLog rl, bool forEditing = false)
         {
             var report = FindReportElement (doc);
             if (report == null)
@@ -67,8 +72,45 @@ namespace Majorsilence.Reporting.Rdl
             UnwrapPage (report);
             NormalizeBorders (report);
             NormalizeTextboxes (report, rl);
+            if (!forEditing)
+                ReplaceUnsupportedItems (report, rl);
+            NormalizeActionsAndNoRows (report);
+            NormalizeCharts (report, rl);
             NormalizeTablixes (report, rl);
-            RemoveVersionOnlyElements (report);
+            if (!forEditing)
+                RemoveVersionOnlyElements (report);
+        }
+
+        /// <summary>Rewrites each 2008+ chart into the model the engine renders.</summary>
+        private static void NormalizeCharts (XmlElement root, ReportLog rl)
+        {
+            foreach (var chart in FindDescendants (root, "Chart")) {
+                if (chart.ParentNode != null && Rdl2008ChartConverter.Is2008Chart (chart))
+                    chart.ParentNode.ReplaceChild (Rdl2008ChartConverter.ToEngine (chart, rl), chart);
+            }
+        }
+
+        /// <summary>
+        /// 2008 wraps a report item's action in ActionInfo/Actions/Action and calls the empty-data
+        /// message NoRowsMessage; 2005 has Action and NoRows directly on the item.
+        /// </summary>
+        private static void NormalizeActionsAndNoRows (XmlElement root)
+        {
+            foreach (var message in FindDescendants (root, "NoRowsMessage")) {
+                var renamed = message.OwnerDocument.CreateElement ("NoRows", message.NamespaceURI);
+                renamed.InnerText = message.InnerText;
+                message.ParentNode.ReplaceChild (renamed, message);
+            }
+
+            foreach (var info in FindDescendants (root, "ActionInfo")) {
+                var first = FindChild (FindChild (info, "Actions"), "Action");
+                if (first == null) {
+                    info.ParentNode.RemoveChild (info);
+                    continue;
+                }
+                // 2005 allows one action per item; the first is the one a click follows.
+                info.ParentNode.ReplaceChild (first, info);
+            }
         }
 
         /// <summary>
@@ -316,6 +358,52 @@ namespace Majorsilence.Reporting.Rdl
 
         #endregion
 
+        #region Unsupported items
+
+        // Report items added after RDL 2005 that have no counterpart in the engine. Left in place
+        // they surface as "unknown element" and, inside a Tablix cell, break the converted table.
+        private static readonly string[] UnsupportedItems = { "Map", "Sparkline", "DataBar", "Indicator", "GaugePanel" };
+
+        /// <summary>
+        /// Swaps each unsupported item for an empty Rectangle with the same position and size, so
+        /// the layout around it holds, and reports them in one warning per kind.
+        /// </summary>
+        private static void ReplaceUnsupportedItems (XmlElement root, ReportLog rl)
+        {
+            foreach (var kind in UnsupportedItems) {
+                var found = FindDescendants (root, kind);
+                var replaced = 0;
+
+                foreach (var item in found) {
+                    // Only report items: a Map or Indicator name can also be an unrelated child
+                    // element (an Indicator's own properties, a Textbox's nested value).
+                    var parent = item.ParentNode as XmlElement;
+                    if (parent == null || (parent.LocalName != "ReportItems" && parent.LocalName != "CellContents"))
+                        continue;
+
+                    var doc = item.OwnerDocument;
+                    var rectangle = doc.CreateElement ("Rectangle", item.NamespaceURI);
+                    var name = item.GetAttribute ("Name");
+                    rectangle.SetAttribute ("Name", string.IsNullOrEmpty (name) ? "RdlUnsupported" + (++_generatedNameCounter) : name);
+                    foreach (var keep in new[] { "Top", "Left", "Height", "Width", "ZIndex", "Visibility" }) {
+                        var source = FindChild (item, keep);
+                        if (source != null)
+                            rectangle.AppendChild (source.CloneNode (true));
+                    }
+
+                    parent.ReplaceChild (rectangle, item);
+                    replaced++;
+                }
+
+                if (replaced > 0) {
+                    rl?.LogError (4, $"The report contains {replaced} {kind} item(s), which are not supported " +
+                        "yet; each is replaced by an empty placeholder of the same size.");
+                }
+            }
+        }
+
+        #endregion
+
         #region Tablix
 
         private static void NormalizeTablixes (XmlElement root, ReportLog rl)
@@ -423,7 +511,7 @@ namespace Majorsilence.Reporting.Rdl
             if (pageBreak != null)
                 AppendPageBreak (table, doc, ns, pageBreak);
 
-            table.AppendChild (BuildTableColumns (doc, ns, FindChild (body, "TablixColumns")));
+            table.AppendChild (BuildTableColumns (doc, ns, FindChild (body, "TablixColumns"), FindChild (tablix, "TablixColumnHierarchy")));
 
             if (groupedPlan != null) {
                 AppendGroupedSections (table, doc, ns, rows, groupedPlan, repeatHeaderRows, sortExpressions);
@@ -824,15 +912,24 @@ namespace Majorsilence.Reporting.Rdl
             return false;
         }
 
-        private static XmlElement BuildTableColumns (XmlDocument doc, string ns, XmlElement tablixColumns)
+        private static XmlElement BuildTableColumns (XmlDocument doc, string ns, XmlElement tablixColumns,
+            XmlElement columnHierarchy = null)
         {
             var columns = doc.CreateElement ("TableColumns", ns);
+            // 2008 hangs a column's Visibility on its hierarchy member, 2005 on the column.
+            var members = ChildrenNamed (FindChild (columnHierarchy, "TablixMembers"), "TablixMember");
+            var index = 0;
 
             foreach (var tablixColumn in ChildrenNamed (tablixColumns, "TablixColumn")) {
                 var column = doc.CreateElement ("TableColumn", ns);
 
                 foreach (var child in Children (tablixColumn))
                     column.AppendChild (child.CloneNode (true));
+
+                var visibility = index < members.Count ? FindChild (members[index], "Visibility") : null;
+                if (visibility != null && FindChild (column, "Visibility") == null)
+                    column.AppendChild (visibility.CloneNode (true));
+                index++;
 
                 columns.AppendChild (column);
             }
@@ -987,6 +1084,7 @@ namespace Majorsilence.Reporting.Rdl
         {
             internal XmlElement Dynamic;
             internal List<XmlElement> Statics;
+            internal XmlElement Subtotal;   // a headed static leaf beside the group: its total
         }
 
         /// <summary>
@@ -1014,17 +1112,25 @@ namespace Majorsilence.Reporting.Rdl
             var bodyColumns = ChildrenNamed (FindChild (body, "TablixColumns"), "TablixColumn");
             var bodyRows = ChildrenNamed (FindChild (body, "TablixRows"), "TablixRow");
 
-            if (bodyColumns.Count != LeafCount (columnLevels) || bodyRows.Count != LeafCount (rowLevels)) {
+            // Subtotals add body rows and columns beyond the detail ones; the Matrix repeats its one
+            // cell template, so only the detail range is kept.
+            var columnRange = LeafRange (FindChild (tablix, "TablixColumnHierarchy"));
+            var rowRange = LeafRange (FindChild (tablix, "TablixRowHierarchy"));
+
+            if (bodyColumns.Count != columnRange.Total || bodyRows.Count != rowRange.Total
+                || columnRange.Count != LeafCount (columnLevels) || rowRange.Count != LeafCount (rowLevels)) {
                 rl?.LogError (8, $"Tablix '{name}' has a {bodyRows.Count}x{bodyColumns.Count} body but its " +
-                    $"hierarchies describe {LeafCount (rowLevels)}x{LeafCount (columnLevels)} leaf cell(s); " +
+                    $"hierarchies describe {rowRange.Total}x{columnRange.Total} leaf cell(s); " +
                     "this pivot layout is not supported yet and the region was ignored.");
                 return null;
             }
+            bodyColumns = bodyColumns.GetRange (columnRange.Start, columnRange.Count);
+            bodyRows = bodyRows.GetRange (rowRange.Start, rowRange.Count);
 
             // Matrix cells cannot span, and a placeholder for a spanned-over position would shift
             // every later cell in its row.
             foreach (var bodyRow in bodyRows) {
-                foreach (var cell in ChildrenNamed (FindChild (bodyRow, "TablixCells"), "TablixCell")) {
+                foreach (var cell in ChildrenNamed (FindChild (bodyRow, "TablixCells"), "TablixCell").GetRange (columnRange.Start, columnRange.Count)) {
                     if (FindChild (cell, "CellContents") == null) {
                         rl?.LogError (8, $"Tablix '{name}' has merged (spanned) cells in its pivot body; " +
                             "this layout is not supported yet and the region was ignored.");
@@ -1032,6 +1138,7 @@ namespace Majorsilence.Reporting.Rdl
                     }
                 }
             }
+
 
             var doc = tablix.OwnerDocument;
             var ns = tablix.NamespaceURI;
@@ -1075,7 +1182,8 @@ namespace Majorsilence.Reporting.Rdl
                     matrixRow.AppendChild (height.CloneNode (true));
 
                 var matrixCells = doc.CreateElement ("MatrixCells", ns);
-                foreach (var cell in ChildrenNamed (FindChild (bodyRow, "TablixCells"), "TablixCell")) {
+                var rowCells = ChildrenNamed (FindChild (bodyRow, "TablixCells"), "TablixCell");
+                foreach (var cell in rowCells.GetRange (columnRange.Start, columnRange.Count)) {
                     var matrixCell = doc.CreateElement ("MatrixCell", ns);
                     matrixCell.AppendChild (BuildSingleItem (doc, ns, FindChild (cell, "CellContents")));
                     matrixCells.AppendChild (matrixCell);
@@ -1126,12 +1234,23 @@ namespace Majorsilence.Reporting.Rdl
                     return levels;
                 }
 
+                // One group plus one headed static leaf is a subtotal, which 2005 expresses as the
+                // group's Subtotal element.
+                var groups = members.FindAll (m => FindChild (m, "Group") != null);
+                var statics = members.FindAll (m => FindChild (m, "Group") == null);
+                if (members.Count == 2 && groups.Count == 1 && statics[0].SelectSingleNode ("*[local-name()='TablixMembers']") == null
+                    && FindChild (statics[0], "TablixHeader") != null) {
+                    levels.Add (new AxisLevel { Dynamic = groups[0], Subtotal = statics[0] });
+                    var groupNested = FindChild (groups[0], "TablixMembers");
+                    members = groupNested == null ? new List<XmlElement> () : ChildrenNamed (groupNested, "TablixMember");
+                    continue;
+                }
+
                 if (members.Count != 1) {
-                    // A static member alongside a grouped one is a subtotal; grouped siblings are
-                    // adjacent pivots. Either way there is no uniform-level Matrix equivalent, and
-                    // converting without them would silently drop rows or columns.
+                    // Grouped siblings are adjacent pivots, which have no uniform-level Matrix
+                    // equivalent; converting without them would silently drop rows or columns.
                     rl?.LogError (8, $"Tablix '{tablixName}' mixes grouped and static members on its {axis} " +
-                        "hierarchy (adjacent groups or subtotals); this pivot layout is not supported yet " +
+                        "hierarchy (adjacent groups or stacked headers); this pivot layout is not supported yet " +
                         "and the region was ignored.");
                     return null;
                 }
@@ -1164,6 +1283,40 @@ namespace Majorsilence.Reporting.Rdl
             var last = levels[levels.Count - 1];
             if (last.Statics != null && last.Statics.Count == 1 && FindChild (last.Statics[0], "TablixHeader") == null)
                 levels.RemoveAt (levels.Count - 1);
+        }
+
+        /// <summary>
+        /// Leaves of a hierarchy in document order, and the contiguous run of them that holds detail
+        /// cells -- the path through the groups, as opposed to subtotal leaves beside it.
+        /// </summary>
+        private static (int Total, int Start, int Count) LeafRange (XmlElement hierarchy)
+        {
+            var top = FindChild (hierarchy, "TablixMembers");
+            return top == null ? (1, 0, 1) : RangeOf (ChildrenNamed (top, "TablixMember"));
+
+            (int Total, int Start, int Count) RangeOf (List<XmlElement> members)
+            {
+                var hasGroup = members.Exists (m => FindChild (m, "Group") != null);
+                var total = 0;
+                var start = 0;
+                var count = 0;
+
+                foreach (var member in members) {
+                    var nested = FindChild (member, "TablixMembers");
+                    var (t, s, c) = nested == null ? (1, 0, 1) : RangeOf (ChildrenNamed (nested, "TablixMember"));
+
+                    if (!hasGroup) {
+                        // The innermost run of static members: every one is a detail leaf.
+                        count += c;
+                    } else if (FindChild (member, "Group") != null) {
+                        start = total + s;
+                        count = c;
+                    }
+                    total += t;
+                }
+
+                return (total, hasGroup ? start : 0, count);
+            }
         }
 
         private static int LeafCount (List<AxisLevel> levels)
@@ -1204,6 +1357,11 @@ namespace Majorsilence.Reporting.Rdl
                         dynamic.AppendChild (visibility.CloneNode (true));
 
                     dynamic.AppendChild (BuildSingleItem (doc, ns, HeaderContents (level.Dynamic)));
+                    if (level.Subtotal != null) {
+                        var subtotal = doc.CreateElement ("Subtotal", ns);
+                        subtotal.AppendChild (BuildSingleItem (doc, ns, HeaderContents (level.Subtotal)));
+                        dynamic.AppendChild (subtotal);
+                    }
                     grouping.AppendChild (dynamic);
                 } else {
                     var size = "0in";
@@ -1335,12 +1493,20 @@ namespace Majorsilence.Reporting.Rdl
                     if (contents == null)
                         continue;   // spanned-over placeholder
 
+                    var colSpan = SpanOf (contents, "ColSpan");
+                    var rowSpan = SpanOf (contents, "RowSpan");
+                    // A lone item covering the whole header block is simply the Corner's content;
+                    // 2005 sizes it to the corner itself.
+                    var coversCorner = cellIndex == 0 && rowIndex == 0
+                        && colSpan >= Math.Max (rowLevels.Count, 1) && rowSpan >= Math.Max (columnLevels.Count, 1);
+
                     foreach (var child in Children (contents)) {
                         if (child.LocalName == "ColSpan" || child.LocalName == "RowSpan")
                             continue;
 
                         var item = (XmlElement)child.CloneNode (true);
-                        PositionCornerItem (doc, ns, item, cellIndex, rowIndex, rowLevels, columnLevels);
+                        if (!coversCorner)
+                            PositionCornerItem (doc, ns, item, cellIndex, rowIndex, colSpan, rowSpan, rowLevels, columnLevels);
                         items.Add (item);
                     }
                 }
@@ -1368,8 +1534,11 @@ namespace Majorsilence.Reporting.Rdl
         /// Sets Top/Left/Width/Height on a corner item from the sizes of the levels before it.
         /// Sizes in mixed units are left unset; the layout degrades but nothing is lost.
         /// </summary>
+        private static int SpanOf (XmlElement contents, string name)
+            => int.TryParse (FindChild (contents, name)?.InnerText, out var span) && span > 1 ? span : 1;
+
         private static void PositionCornerItem (XmlDocument doc, string ns, XmlElement item,
-            int cellIndex, int rowIndex, List<AxisLevel> rowLevels, List<AxisLevel> columnLevels)
+            int cellIndex, int rowIndex, int colSpan, int rowSpan, List<AxisLevel> rowLevels, List<AxisLevel> columnLevels)
         {
             string LevelSize (List<AxisLevel> levels, int index)
             {
@@ -1398,11 +1567,11 @@ namespace Majorsilence.Reporting.Rdl
                 item.AppendChild (element);
             }
 
-            string Sum (Func<int, string> sizeAt, int count)
+            string Sum (Func<int, string> sizeAt, int count, int first = 0)
             {
                 double total = 0;
                 string unit = null;
-                for (var i = 0; i < count; i++) {
+                for (var i = first; i < first + count; i++) {
                     var size = sizeAt (i);
                     if (size == null)
                         return null;
@@ -1419,8 +1588,8 @@ namespace Majorsilence.Reporting.Rdl
 
             Set ("Left", cellIndex == 0 ? "0in" : Sum (i => LevelSize (rowLevels, i), cellIndex));
             Set ("Top", rowIndex == 0 ? "0in" : Sum (i => LevelSize (columnLevels, i), rowIndex));
-            Set ("Width", LevelSize (rowLevels, cellIndex));
-            Set ("Height", LevelSize (columnLevels, rowIndex));
+            Set ("Width", colSpan > 1 ? Sum (i => LevelSize (rowLevels, i), colSpan, cellIndex) : LevelSize (rowLevels, cellIndex));
+            Set ("Height", rowSpan > 1 ? Sum (i => LevelSize (columnLevels, i), rowSpan, rowIndex) : LevelSize (columnLevels, rowIndex));
         }
 
         private static (double Value, string Unit)? ParseSize (string size)

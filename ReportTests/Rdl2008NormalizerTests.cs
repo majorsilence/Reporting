@@ -507,10 +507,10 @@ namespace ReportTests
         }
 
         [Test]
-        public async Task StaticSiblingOfDynamicMember_IsRefused ()
+        public async Task StaticSiblingOfDynamicMember_BecomesASubtotal ()
         {
-            // A static member alongside a dynamic one is a subtotal column. Converting without it
-            // would silently drop a totals column from the output, so the region must refuse.
+            // A static member alongside a dynamic one is a subtotal column. 2005 expresses it as
+            // the group's Subtotal, so the totals header survives and the column is not dropped.
             var rdl = MatrixTablixReport (
                 DynamicMember ("ColName", "=Fields!Name.Value", Textbox ("ColHead", "=Fields!Name.Value")) +
                 StaticMember (Textbox ("TotalHead", "Total")),
@@ -520,10 +520,9 @@ namespace ReportTests
                     Cell (Textbox ("DataTotal", "=Sum(Fields!Amount.Value)"))),
                 bodyColumns: 2);
 
-            using var report = await ParseAsync (rdl);
+            var html = await RenderHtml (rdl);
 
-            Assert.That (report.ErrorMaxSeverity, Is.GreaterThanOrEqualTo (8),
-                "a subtotal layout the converter cannot express must refuse rather than drop the column");
+            Assert.That (html, Does.Contain ("Total"), "the subtotal column header should render");
         }
 
         #endregion
