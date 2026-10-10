@@ -650,7 +650,7 @@ namespace ReportTests
 
             var matrixWithTotals = SalesMatrix.Replace ("</DynamicColumns>",
                 @"<Subtotal><ReportItems><Textbox Name=""TT""><Value>Total</Value></Textbox></ReportItems></Subtotal></DynamicColumns>");
-            foreach (var (label, region) in new[] { ("List", SimpleList), ("Table", GroupedTable), ("Matrix", SalesMatrix), ("Matrix with subtotal", matrixWithTotals) }) {
+            foreach (var (label, region) in new[] { ("List", SimpleList), ("Table", GroupedTable), ("Matrix", SalesMatrix), ("Matrix with subtotal", matrixWithTotals), ("Chart", Rdl2008ChartTests.Chart2005) }) {
                 var doc = Load (ReportWith (ns, region));
                 // What the designer holds besides the region: page setup, a page header and a
                 // bordered textbox, all in the 2005 spelling.
@@ -850,7 +850,6 @@ namespace ReportTests
                 "child element 'Rows'",               // DataSet inline rows
                 "child element 'PageBreakCondition'", // Group
                 "child element 'MarginLeft'",         // not a real RDL element
-                "child element 'Type'",               // 2005 Chart, see #409
                 "cannot contain child element",       // FilterValue/Expression
             };
 

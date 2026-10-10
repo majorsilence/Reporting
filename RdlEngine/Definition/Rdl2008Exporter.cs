@@ -52,7 +52,7 @@ namespace Majorsilence.Reporting.Rdl
 
             var lists = new List<XmlElement> ();
             Collect (root, lists);
-            return lists.Count > 0 || Textboxes2005 (root).Count > 0 || Styles2005 (root).Count > 0 || NeedsSections (root) || FixQuirks (root, apply: false) > 0;
+            return lists.Count > 0 || Textboxes2005 (root).Count > 0 || Styles2005 (root).Count > 0 || NeedsSections (root) || FixQuirks (root, apply: false) > 0 || Charts2005 (root).Count > 0;
         }
 
         // XML Schema booleans are lower case; 2005 files often hold "True"/"False".
@@ -140,6 +140,24 @@ namespace Majorsilence.Reporting.Rdl
             }
 
             return count;
+        }
+
+        private static List<XmlElement> Charts2005 (XmlElement root)
+        {
+            var found = new List<XmlElement> ();
+            void Walk (XmlElement element)
+            {
+                foreach (XmlNode node in element.ChildNodes) {
+                    if (node is not XmlElement child)
+                        continue;
+                    if (child.LocalName == "Chart" && child.NamespaceURI == root.NamespaceURI && Rdl2008ChartConverter.Is2005Chart (child)
+                        && !Rdl2008ChartConverter.Is2008Chart (child))
+                        found.Add (child);
+                    Walk (child);
+                }
+            }
+            Walk (root);
+            return found;
         }
 
         private static bool Is2008 (XmlElement root)
@@ -343,6 +361,11 @@ namespace Majorsilence.Reporting.Rdl
             foreach (var style in Styles2005 (root))
                 ConvertBorders (style);
             FixQuirks (root, apply: true);
+            foreach (var chart in Charts2005 (root)) {
+                var converted = Rdl2008ChartConverter.FromEngine (chart);
+                if (converted != null)
+                    chart.ParentNode.ReplaceChild (converted, chart);
+            }
 
             var count = 0;
             foreach (var list in lists) {

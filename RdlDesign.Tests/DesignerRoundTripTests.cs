@@ -203,5 +203,35 @@ namespace Majorsilence.Reporting.RdlDesign.Tests
             Assert.That(saved, Does.Contain("<AutoRefresh>0</AutoRefresh>"));
             Assert.That(saved, Does.Contain("Inch"));
         }
+
+        // A 2008+ chart opens as the chart model the designer edits and saves back in the 2008+ model.
+        [Test]
+        public void OpenRdlcWithChart_EditsAs2005ChartAndSavesAs2008()
+        {
+            const string rdlc = @"<?xml version=""1.0"" encoding=""utf-8""?>
+<Report xmlns=""http://schemas.microsoft.com/sqlserver/reporting/2008/01/reportdefinition"">
+  <Body><Height>3in</Height><ReportItems>
+    <Chart Name=""C1"">
+      <ChartCategoryHierarchy><ChartMembers><ChartMember><Group Name=""G""><GroupExpressions><GroupExpression>=Fields!Name.Value</GroupExpression></GroupExpressions></Group><Label>=Fields!Name.Value</Label></ChartMember></ChartMembers></ChartCategoryHierarchy>
+      <ChartData><ChartSeriesCollection><ChartSeries Name=""S""><ChartDataPoints><ChartDataPoint><ChartDataPointValues><Y>=Sum(Fields!Amount.Value)</Y></ChartDataPointValues></ChartDataPoint></ChartDataPoints><Type>Line</Type><Subtype>Plain</Subtype></ChartSeries></ChartSeriesCollection></ChartData>
+      <ChartTitles><ChartTitle Name=""Default""><Caption>Trend</Caption></ChartTitle></ChartTitles>
+      <Top>0in</Top><Left>0in</Left><Height>3in</Height><Width>5in</Width>
+    </Chart>
+  </ReportItems></Body>
+  <Width>6in</Width>
+</Report>";
+
+            var design = new DesignCtl();
+            design.ReportSource = rdlc;
+
+            var chart = (System.Xml.XmlElement)design.ReportDocument.GetElementsByTagName("Chart")[0];
+            Assert.That(chart["Type", chart.NamespaceURI].InnerText, Is.EqualTo("Line"));
+            Assert.That(chart["Title", chart.NamespaceURI]["Caption", chart.NamespaceURI].InnerText, Is.EqualTo("Trend"));
+
+            var saved = design.ReportSource;
+            Assert.That(saved, Does.Contain("<ChartSeriesCollection>"));
+            Assert.That(saved, Does.Contain("<ChartTitle Name=\"Default\">"));
+            Assert.That(saved, Does.Not.Contain("<CategoryGroupings>"));
+        }
     }
 }

@@ -75,9 +75,19 @@ namespace Majorsilence.Reporting.Rdl
             if (!forEditing)
                 ReplaceUnsupportedItems (report, rl);
             NormalizeActionsAndNoRows (report);
+            NormalizeCharts (report, rl);
             NormalizeTablixes (report, rl);
             if (!forEditing)
                 RemoveVersionOnlyElements (report);
+        }
+
+        /// <summary>Rewrites each 2008+ chart into the model the engine renders.</summary>
+        private static void NormalizeCharts (XmlElement root, ReportLog rl)
+        {
+            foreach (var chart in FindDescendants (root, "Chart")) {
+                if (chart.ParentNode != null && Rdl2008ChartConverter.Is2008Chart (chart))
+                    chart.ParentNode.ReplaceChild (Rdl2008ChartConverter.ToEngine (chart, rl), chart);
+            }
         }
 
         /// <summary>
