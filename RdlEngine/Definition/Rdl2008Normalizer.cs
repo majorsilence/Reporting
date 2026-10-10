@@ -1378,7 +1378,15 @@ namespace Majorsilence.Reporting.Rdl
 
                 var only = members[0];
                 if (FindChild (only, "Group") == null) {
-                    rl?.LogError (8, $"Tablix '{tablixName}' has stacked static members on its {axis} " +
+                    // A labelled static member with members inside it is a one-member static level
+                    // above the rest (a heading over the pivot); 2005 spells it StaticColumns/StaticRows.
+                    if (FindChild (only, "TablixHeader") != null && FindChild (only, "TablixMembers") != null) {
+                        levels.Add (new AxisLevel { Statics = new List<XmlElement> { only } });
+                        members = ChildrenNamed (FindChild (only, "TablixMembers"), "TablixMember");
+                        continue;
+                    }
+
+                    rl?.LogError (8, $"Tablix '{tablixName}' has an unlabelled static member holding others on its {axis} " +
                         "hierarchy; this pivot layout is not supported yet and the region was ignored.");
                     return null;
                 }
@@ -1427,8 +1435,14 @@ namespace Majorsilence.Reporting.Rdl
                     var (t, s, c) = nested == null ? (1, 0, 1) : RangeOf (ChildrenNamed (nested, "TablixMember"));
 
                     if (!hasGroup) {
-                        // The innermost run of static members: every one is a detail leaf.
-                        count += c;
+                        if (nested != null && members.Count == 1) {
+                            // A heading over the rest: the detail cells are the ones inside it.
+                            start = s;
+                            count = c;
+                        } else {
+                            // The innermost run of static members: every one is a detail leaf.
+                            count += c;
+                        }
                     } else if (FindChild (member, "Group") != null) {
                         start = total + s;
                         count = c;
@@ -1436,7 +1450,7 @@ namespace Majorsilence.Reporting.Rdl
                     total += t;
                 }
 
-                return (total, hasGroup ? start : 0, count);
+                return (total, start, count);
             }
         }
 
