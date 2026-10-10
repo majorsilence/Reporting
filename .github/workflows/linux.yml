@@ -61,6 +61,57 @@ jobs:
           REPORTING_REPO_ROOT: ${{ github.workspace }}
           PYTHONPATH: ${{ github.workspace }}/reporting-python/src
         run: python3 -m unittest discover -s reporting-python/tests -p "test_report_native.py" -v
+      # The same end-to-end check for the Ruby, PHP and Rust wrappers. Each wrapper's own native
+      # test suite renders reports through the published AOT library; the wrappers' default branches
+      # are checked out, so a wrapper that stops working against the library fails this job.
+      - name: Check out the Ruby wrapper
+        uses: actions/checkout@v6
+        with:
+          repository: majorsilence/reporting-ruby
+          path: reporting-ruby
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.3"
+          bundler-cache: true
+          working-directory: reporting-ruby
+      - name: Run the Ruby wrapper tests against the AOT rdlnative library
+        working-directory: reporting-ruby
+        env:
+          RDLNATIVE_LIB: ${{ github.workspace }}/RdlNative/bin/Release/net10.0/linux-x64-aot/publish/rdlnative.so
+          REPORTING_REPO_ROOT: ${{ github.workspace }}
+        run: bundle exec ruby -Ilib test/test_report_native.rb
+      - name: Check out the PHP wrapper
+        uses: actions/checkout@v6
+        with:
+          repository: majorsilence/reporting-php
+          path: reporting-php
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.3"
+          extensions: ffi
+          tools: composer
+          coverage: none
+      - name: Run the PHP wrapper tests against the AOT rdlnative library
+        working-directory: reporting-php
+        env:
+          RDLNATIVE_LIB: ${{ github.workspace }}/RdlNative/bin/Release/net10.0/linux-x64-aot/publish/rdlnative.so
+          REPORTING_REPO_ROOT: ${{ github.workspace }}
+        run: |
+          composer install --no-interaction --prefer-dist
+          ./vendor/bin/phpunit
+      - name: Check out the Rust wrapper
+        uses: actions/checkout@v6
+        with:
+          repository: majorsilence/reporting-rust
+          path: reporting-rust
+      - name: Run the Rust wrapper tests against the AOT rdlnative library
+        working-directory: reporting-rust
+        env:
+          RDLNATIVE_LIB: ${{ github.workspace }}/RdlNative/bin/Release/net10.0/linux-x64-aot/publish/rdlnative.so
+          REPORTING_REPO_ROOT: ${{ github.workspace }}
+        run: cargo test --test integration
       - name: Archive AOT artifacts
         uses: actions/upload-artifact@v6
         with:
