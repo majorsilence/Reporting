@@ -475,7 +475,10 @@ namespace Majorsilence.Reporting.Rdl
                 }
                 else
                 {
-                    g.DrawString(pt.Text, drawFont, drawBrush, r2, drawFormat);
+                    if (si.LineHeight > 0)
+                        Draw2.GraphicsExtended.DrawStringLineHeight(g, pt.Text, drawFont, drawBrush, r2, drawFormat, si.LineHeight);
+                    else
+                        g.DrawString(pt.Text, drawFont, drawBrush, r2, drawFormat);
                 }
                 g.Restore(rotState);
 

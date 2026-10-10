@@ -234,7 +234,11 @@ namespace Majorsilence.Reporting.UI.RdlAvalonia.Viewer
             {
                 var stringFormat = GetStringFormat(pt);
                 var textRect = ApplyPadding(rect, pt.SI);
-                g.DrawString(pt.Text, font, brush, textRect, stringFormat);
+                if (pt.SI != null && pt.SI.LineHeight > 0)
+                    Drawing.GraphicsExtended.DrawStringLineHeightPitch(g, pt.Text, font, brush, textRect, stringFormat,
+                        (float)ConvertYtoPixels(pt.SI.LineHeight));
+                else
+                    g.DrawString(pt.Text, font, brush, textRect, stringFormat);
                 font.Dispose();
                 brush.Dispose();
             }

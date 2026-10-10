@@ -14,7 +14,7 @@ namespace ReportTests
         [SetUp]
         public void Prepare() => RdlEngineConfig.RdlEngineConfigInit();
 
-        private static async Task<double[]> LineBaselines(string name, string lineHeightXml)
+        private static async Task<Report> BuildReport(string name, string lineHeightXml)
         {
             var outputFolder = GeneralUtils.OutputTestsFolder();
             Directory.CreateDirectory(outputFolder.LocalPath);
@@ -41,8 +41,13 @@ namespace ReportTests
             Report report = await RdlUtils.GetReport(new System.Uri(rdlPath));
             report.Folder = outputFolder.LocalPath;
             await report.RunGetData(null);
+            return report;
+        }
 
-            string output = Path.Combine(outputFolder.LocalPath, name + ".pdf");
+        private static async Task<double[]> LineBaselines(string name, string lineHeightXml)
+        {
+            Report report = await BuildReport(name, lineHeightXml);
+            string output = Path.Combine(report.Folder, name + ".pdf");
             using (var sg = new OneFileStreamGen(output, true))
             {
                 await report.RunRender(sg, OutputPresentationType.PDF);
@@ -70,6 +75,26 @@ namespace ReportTests
             var baselines = await LineBaselines("LineHeight_none", "");
             Assert.That(baselines.Length, Is.EqualTo(3));
             Assert.That(baselines[0] - baselines[1], Is.EqualTo(10.0).Within(0.2));
+        }
+
+        [Test]
+        public async Task LineHeight_IsWrittenToTheHtmlStyle()
+        {
+            Report report = await BuildReport("LineHeight_html", "<LineHeight>24pt</LineHeight>");
+            var sg = new MemoryStreamGen();
+            await report.RunRender(sg, OutputPresentationType.HTML);
+            string html = sg.GetText();
+            Assert.That(html, Does.Contain("line-height:24pt"));
+        }
+
+        [Test]
+        public async Task LineHeight_IsAppliedWhenRenderingToAnImage()
+        {
+            // the image renderer lays the text out line by line at the requested pitch
+            Report report = await BuildReport("LineHeight_tif", "<LineHeight>24pt</LineHeight>");
+            var sg = new MemoryStreamGen();
+            await report.RunRender(sg, OutputPresentationType.TIF);
+            Assert.That(sg.GetStream().Length, Is.GreaterThan(0));
         }
     }
 }

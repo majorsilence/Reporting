@@ -8,6 +8,59 @@ namespace Majorsilence.Forms.Drawing
 {
     public class GraphicsExtended
     {
+        /// <summary>
+        /// Draws wrapped text with an explicit baseline-to-baseline distance (the RDL LineHeight
+        /// style, in points) instead of the font's own line pitch, which Graphics.DrawString
+        /// cannot vary. Lines are broken at newlines and at word boundaries against the
+        /// rectangle's width, then each is drawn in its own slot; horizontal and vertical
+        /// alignment come from <paramref name="format"/>.
+        /// </summary>
+        public static void DrawStringLineHeight(Draw.Graphics g, string s, Draw.Font font, Draw.Brush brush,
+            System.Drawing.RectangleF rect, Draw.StringFormat format, float lineHeightPoints)
+        {
+            float pitch = g.PageUnit == Draw.GraphicsUnit.Pixel ? lineHeightPoints * g.DpiX / 72f : lineHeightPoints;
+            DrawStringLineHeightPitch(g, s, font, brush, rect, format, pitch);
+        }
+
+        /// <summary>As <see cref="DrawStringLineHeight"/>, with the line pitch already in the graphics' own units.</summary>
+        public static void DrawStringLineHeightPitch(Draw.Graphics g, string s, Draw.Font font, Draw.Brush brush,
+            System.Drawing.RectangleF rect, Draw.StringFormat format, float pitch)
+        {
+            var lines = new System.Collections.Generic.List<string>();
+            foreach (string para in s.Replace("\r\n", "\n").Replace('\r', '\n').Split('\n'))
+            {
+                string cur = "";
+                foreach (string word in para.Split(' '))
+                {
+                    string trial = cur.Length == 0 ? word : cur + " " + word;
+                    if (cur.Length > 0 && g.MeasureString(trial, font).Width > rect.Width)
+                    {
+                        lines.Add(cur);
+                        cur = word;
+                    }
+                    else
+                        cur = trial;
+                }
+                lines.Add(cur);
+            }
+
+            float top = rect.Top;
+            float total = lines.Count * pitch;
+            if (format.LineAlignment == Draw.StringAlignment.Center)
+                top += (rect.Height - total) / 2f;
+            else if (format.LineAlignment == Draw.StringAlignment.Far)
+                top += rect.Height - total;
+
+            using (var lineFormat = new Draw.StringFormat(format))
+            {
+                lineFormat.LineAlignment = Draw.StringAlignment.Near;
+                lineFormat.FormatFlags |= Draw.StringFormatFlags.NoWrap;
+                for (int i = 0; i < lines.Count; i++)
+                    g.DrawString(lines[i], font, brush,
+                        new System.Drawing.RectangleF(rect.Left, top + i * pitch, rect.Width, pitch), lineFormat);
+            }
+        }
+
         //drawstring justified without paragraph format
         public static void DrawStringJustified(Draw.Graphics graphics, string s, 
             Draw.Font font, Draw.Brush brush, System.Drawing.RectangleF layoutRectangle)
