@@ -10,6 +10,7 @@ using System.Drawing;   // Color, and its ColorTranslator: Majorsilence.Forms.Dr
                         // does not reimplement the System.Drawing.Primitives value types
 using ColorTranslator = Majorsilence.Forms.Drawing.ColorTranslator;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 
 namespace Majorsilence.Reporting.Rdl
 {
@@ -150,11 +151,16 @@ namespace Majorsilence.Reporting.Rdl
             return rs.ToString();
         }
 
+		[UnconditionalSuppressMessage("AOT", "IL3050",
+			Justification = "Guarded by RuntimeFeature.IsDynamicCodeSupported; the analyzer only recognises that guard when targeting net9.0 or later.")]
 		static internal void XslTrans(string xslFile, string inXml, Stream outResult)
 		{
 			XmlDocument xDoc = new XmlDocument();
 			xDoc.LoadXml(inXml);
 
+            if (!RuntimeFeature.IsDynamicCodeSupported)
+                throw new PlatformNotSupportedException(
+                    "XSLT data transforms compile the stylesheet to IL at runtime, which Native AOT does not support.");
             XslCompiledTransform xslt = new XslCompiledTransform();
 
 			//Load the stylesheet.
@@ -179,9 +185,19 @@ namespace Majorsilence.Reporting.Rdl
 		/// </summary>
 		/// <param name="s"></param>
 		/// <returns></returns>
-		[RequiresDynamicCode("Loading assemblies at runtime is not supported under Native AOT")]
+		// The one place a report- or config-named assembly is loaded (<CodeModules>, config-file data
+		// providers, custom report items, compression). That is impossible under Native AOT, so it
+		// fails there with a clear message; AOT apps register what they need instead
+		// (RdlEngineConfig.RegisterType / RegisterInstanceFactory / RegisterCustomReportItem).
+		[UnconditionalSuppressMessage("Trimming", "IL2026",
+			Justification = "Loading an assembly by path is dynamic by nature: the app owns preserving what the loaded assembly needs, and under Native AOT this throws before loading.")]
 		static internal Assembly AssemblyLoadFrom(string s)
 		{
+			if (!RuntimeFeature.IsDynamicCodeSupported)
+				throw new PlatformNotSupportedException(
+					"Loading the assembly '" + s + "' at runtime is not supported under Native AOT. " +
+					"Register the types the report uses with RdlEngineConfig.RegisterType, RegisterInstanceFactory " +
+					"or RegisterCustomReportItem instead of naming a <CodeModule>.");
 			Assembly ra=null;
 			try
 			{	// try 1) loading just from name
@@ -209,7 +225,10 @@ namespace Majorsilence.Reporting.Rdl
 			return ra;
 		}
 
-        [RequiresDynamicCode("Loading assemblies at runtime is not supported under Native AOT")]
+        [UnconditionalSuppressMessage("Trimming", "IL2026",
+            Justification = "Only called from AssemblyLoadFrom, which throws before this under Native AOT.")]
+        [UnconditionalSuppressMessage("SingleFile", "IL3002",
+            Justification = "Only called from AssemblyLoadFrom, which throws before this under Native AOT; Module.Name is only used to match an already loaded assembly by file name.")]
         static Assembly AssemblyLoadFromPvt(string file, params string[] dir)
         {
             Assembly ra = null;

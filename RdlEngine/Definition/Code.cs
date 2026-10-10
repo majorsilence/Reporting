@@ -30,6 +30,10 @@ namespace Majorsilence.Reporting.Rdl
 		Assembly _Assembly;		// the compiled assembly
 		bool _HasRegisteredProvider;	// true when an RdlCodeFunctions factory is registered (AOT path)
 
+		[UnconditionalSuppressMessage("Trimming", "IL2026",
+			Justification = "GetAssembly compiles VB source and loads the result from disk; it is only called when dynamic code is supported (never under Native AOT).")]
+		[UnconditionalSuppressMessage("AOT", "IL3050",
+			Justification = "Guarded by RuntimeFeature.IsDynamicCodeSupported; the analyzer only recognises that guard when targeting net9.0 or later.")]
 		internal Code(ReportDefn r, ReportLink p, XmlNode xNode) : base(r, p)
 		{
 			_Source = xNode.InnerText;
@@ -41,6 +45,8 @@ namespace Majorsilence.Reporting.Rdl
 			{
 				try
 				{
+					if (!RuntimeFeature.IsDynamicCodeSupported)
+						throw new PlatformNotSupportedException();
 					_Assembly = GetAssembly();
 				}
 				catch (PlatformNotSupportedException)
@@ -61,6 +67,8 @@ namespace Majorsilence.Reporting.Rdl
 		}
 
 		[RequiresDynamicCode("Compiles and loads VB source at runtime via VBCodeProvider; not AOT-compatible")]
+		[UnconditionalSuppressMessage("Trimming", "IL2026",
+			Justification = "Compiles VB source and loads the result by path; inherently dynamic and unavailable under Native AOT.")]
 		private Assembly GetAssembly()
 		{
 			// .NET Framework always supports dynamic code (JIT); the property only
@@ -184,6 +192,8 @@ namespace Majorsilence.Reporting.Rdl
 			//   or instantiation of object complains
 		}
 
+		[UnconditionalSuppressMessage("Trimming", "IL2058",
+			Justification = "_Assembly only exists when the VB source was compiled at runtime (Native AOT uses a registered code provider and returns before this).")]
 		internal Type CodeType()
 		{
 			// The RdlCodeFunctions path doesn't need a Type — FunctionCode dispatches by name
@@ -207,6 +217,8 @@ namespace Majorsilence.Reporting.Rdl
 			return t;
 		}
 
+		[UnconditionalSuppressMessage("Trimming", "IL2058",
+			Justification = "_Assembly only exists when the VB source was compiled at runtime (Native AOT uses a registered code provider and returns before this).")]
 		internal object Load(Report rpt)
 		{
 			WorkClass wc = GetWC(rpt);

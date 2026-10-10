@@ -1,6 +1,7 @@
 
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Xml;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -52,6 +53,8 @@ namespace Majorsilence.Reporting.Rdl
 			return Task.CompletedTask;
 		}
 
+		[UnconditionalSuppressMessage("Trimming", "IL2058",
+			Justification = "The type comes from a CodeModules assembly loaded at runtime, impossible under Native AOT; classes registered with RegisterInstanceFactory are created above, before this.")]
 		internal object Load(Report rpt)
 		{
 			WorkClass wc = GetWC(rpt);

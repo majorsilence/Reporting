@@ -530,6 +530,8 @@ namespace Majorsilence.Reporting.Rdl
             sce.ReplaceParameters = replaceparameters;
         }
 
+        [UnconditionalSuppressMessage("Trimming", "IL2058",
+            Justification = "Only for a provider declared in the config file, whose assembly XmlUtil.AssemblyLoadFrom loads at runtime (impossible under Native AOT). Built-in providers are created above.")]
         public static IDbConnection GetConnection(string provider, string cstring)
         {
             IDbConnection cn = null;
@@ -675,6 +677,10 @@ namespace Majorsilence.Reporting.Rdl
         // runtime (already flagged at XmlUtil.AssemblyLoadFrom), so there is no way to annotate it.
         [UnconditionalSuppressMessage("Trimming", "IL2072",
             Justification = "The type comes from an assembly loaded at runtime from the config file; AOT apps register custom report items with RegisterCustomReportItem instead.")]
+        [UnconditionalSuppressMessage("SingleFile", "IL3000",
+            Justification = "Assembly.Location is only compared against a configured CodeModule path; an empty string (single-file/AOT) just means no match.")]
+        [UnconditionalSuppressMessage("Trimming", "IL2026",
+            Justification = "Assembly.GetType on an assembly loaded from the config file at runtime; AOT apps register custom report items instead.")]
         static void GetCustomReportItem(Dictionary<string, CustomReportItemEntry> crieDir, XmlNode xNode)
         {
             string friendlyTypeName = null;
@@ -985,6 +991,8 @@ namespace Majorsilence.Reporting.Rdl
             return (b << 16) | a;
         }
 
+        [UnconditionalSuppressMessage("Trimming", "IL2058",
+            Justification = "_Assembly is only set for a compression module named in the config file, loaded at runtime (never under Native AOT, where the built-in Deflate stream is used).")]
         internal Stream GetStream(Stream str)
         {
             if (_UseCompression == 2)
@@ -1028,6 +1036,8 @@ namespace Majorsilence.Reporting.Rdl
         // Native AOT cannot do; there the built-in Deflate stream is used instead (state 2).
         [UnconditionalSuppressMessage("Trimming", "IL2026",
             Justification = "Only runs when a compression CodeModule is configured, and only when dynamic code is supported; the AOT path never loads it.")]
+        [UnconditionalSuppressMessage("AOT", "IL3050",
+        	Justification = "Guarded by RuntimeFeature.IsDynamicCodeSupported; the analyzer only recognises that guard when targeting net9.0 or later.")]
         void EnsureInit()
         {
             if (!RuntimeFeature.IsDynamicCodeSupported)

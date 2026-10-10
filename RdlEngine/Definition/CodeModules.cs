@@ -1,6 +1,7 @@
 
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Collections;
 using System.Collections.Generic;
 using System.Xml;
@@ -46,6 +47,8 @@ namespace Majorsilence.Reporting.Rdl
 		/// Return the Type given a class name.  Checks the AOT pre-registration first,
 		/// then searches the CodeModules that are specified in the report.
 		/// </summary>
+		[UnconditionalSuppressMessage("Trimming", "IL2026",
+			Justification = "Only reaches a loaded CodeModule assembly, which cannot exist under Native AOT (XmlUtil.AssemblyLoadFrom throws there); registered types are returned before this.")]
 		internal Type this[string s]
 		{
 			get
