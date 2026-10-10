@@ -64,6 +64,16 @@ namespace Majorsilence.Reporting.Rdl
             "Scalar", "Transaction",
         };
 
+        private const string EngineNamespace = "http://www.fyireporting.com/schemas";
+
+        // The engine's own extension elements sit in the default namespace in its 2005 files. Schemas
+        // only allow foreign elements in another namespace, so they move to the engine's fyi one,
+        // which the engine reads under the same names.
+        private static bool IsEngineExtension (string name, string parent)
+            => (name == "Rows" && parent == "DataSet")
+               || (name == "PageBreakCondition" && (parent == "Grouping" || parent == "Table" || parent == "Matrix" || parent == "List" || parent == "Chart"))
+               || (name == "Source" && parent == "CustomReportItem");
+
         private const string DesignerNamespace = "http://schemas.microsoft.com/SQLServer/reporting/reportdesigner";
 
         /// <summary>
@@ -116,6 +126,14 @@ namespace Majorsilence.Reporting.Rdl
                     count++;
                     if (apply)
                         e.InnerText = e.InnerText == "AttributeNormal" ? "Attribute" : "Element";
+                } else if (IsEngineExtension (e.LocalName, parentName)) {
+                    count++;
+                    if (apply) {
+                        var moved = doc.CreateElement ("fyi", e.LocalName, EngineNamespace);
+                        while (e.FirstChild != null)
+                            moved.AppendChild (e.FirstChild);
+                        e.ParentNode.ReplaceChild (moved, e);
+                    }
                 } else if (e.LocalName == "TypeName" && parentName == "Field") {
                     count++;
                     if (apply) {

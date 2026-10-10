@@ -77,6 +77,7 @@ namespace Majorsilence.Reporting.Rdl
 					_PageBreakAtEnd = XmlUtil.Boolean(xNodeLoop.InnerText, OwnerReport.rl);
 					break;
                 case "pagebreakcondition":
+                case "fyi:pagebreakcondition":
                     _PageBreakCondition = new Expression(OwnerReport, this, xNodeLoop, ExpressionType.Boolean);
                     break;
                 case "filters":
