@@ -1269,48 +1269,67 @@ namespace Majorsilence.Reporting.Rdl
         {
             var name = tablix.GetAttribute ("Name");
             var body = FindChild (tablix, "TablixBody");
+            var columnHierarchy = FindChild (tablix, "TablixColumnHierarchy");
 
-            var columnLevels = ReadAxisLevels (FindChild (tablix, "TablixColumnHierarchy"), "column", name, rl);
-            if (columnLevels == null)
-                return null;
+            // Sibling column groups (Year columns beside Region columns, say) become column sets
+            // laid out side by side; anything else is a single set.
+            var topColumns = ChildrenNamed (FindChild (columnHierarchy, "TablixMembers"), "TablixMember");
+            var siblingGroups = topColumns.Count > 1 && topColumns.TrueForAll (m => FindChild (m, "Group") != null);
+            var memberSets = new List<List<XmlElement>> ();
+            if (siblingGroups)
+                topColumns.ForEach (m => memberSets.Add (new List<XmlElement> { m }));
+            else
+                memberSets.Add (topColumns);
+
+            var sets = new List<(List<AxisLevel> Levels, (int Total, int Start, int Count) Range)> ();
+            var leavesBefore = 0;
+            foreach (var members in memberSets) {
+                var levels = ReadAxisLevelsOf (members, "column", name, rl);
+                if (levels == null)
+                    return null;
+                TrimBareLeafLevel (levels);
+                var range = LeafRangeOf (members);
+                sets.Add ((levels, (range.Total, leavesBefore + range.Start, range.Count)));
+                leavesBefore += range.Total;
+            }
 
             var rowLevels = ReadAxisLevels (FindChild (tablix, "TablixRowHierarchy"), "row", name, rl);
             if (rowLevels == null)
                 return null;
-
-            TrimBareLeafLevel (columnLevels);
             TrimBareLeafLevel (rowLevels);
 
-            var bodyColumns = ChildrenNamed (FindChild (body, "TablixColumns"), "TablixColumn");
-            var bodyRows = ChildrenNamed (FindChild (body, "TablixRows"), "TablixRow");
+            var allBodyColumns = ChildrenNamed (FindChild (body, "TablixColumns"), "TablixColumn");
+            var allBodyRows = ChildrenNamed (FindChild (body, "TablixRows"), "TablixRow");
 
             // Subtotals add body rows and columns beyond the detail ones; the Matrix repeats its one
             // cell template, so only the detail range is kept.
-            var columnRange = LeafRange (FindChild (tablix, "TablixColumnHierarchy"));
             var rowRange = LeafRange (FindChild (tablix, "TablixRowHierarchy"));
 
-            if (bodyColumns.Count != columnRange.Total || bodyRows.Count != rowRange.Total
-                || columnRange.Count != LeafCount (columnLevels) || rowRange.Count != LeafCount (rowLevels)) {
-                rl?.LogError (8, $"Tablix '{name}' has a {bodyRows.Count}x{bodyColumns.Count} body but its " +
-                    $"hierarchies describe {rowRange.Total}x{columnRange.Total} leaf cell(s); " +
+            var columnsMatch = allBodyColumns.Count == leavesBefore;
+            foreach (var set in sets)
+                columnsMatch &= set.Range.Count == LeafCount (set.Levels);
+            if (!columnsMatch || allBodyRows.Count != rowRange.Total || rowRange.Count != LeafCount (rowLevels)) {
+                rl?.LogError (8, $"Tablix '{name}' has a {allBodyRows.Count}x{allBodyColumns.Count} body but its " +
+                    $"hierarchies describe {rowRange.Total}x{leavesBefore} leaf cell(s); " +
                     "this pivot layout is not supported yet and the region was ignored.");
                 return null;
             }
-            bodyColumns = bodyColumns.GetRange (columnRange.Start, columnRange.Count);
-            bodyRows = bodyRows.GetRange (rowRange.Start, rowRange.Count);
+            var bodyRows = allBodyRows.GetRange (rowRange.Start, rowRange.Count);
 
             // Matrix cells cannot span, and a placeholder for a spanned-over position would shift
             // every later cell in its row.
             foreach (var bodyRow in bodyRows) {
-                foreach (var cell in ChildrenNamed (FindChild (bodyRow, "TablixCells"), "TablixCell").GetRange (columnRange.Start, columnRange.Count)) {
-                    if (FindChild (cell, "CellContents") == null) {
-                        rl?.LogError (8, $"Tablix '{name}' has merged (spanned) cells in its pivot body; " +
-                            "this layout is not supported yet and the region was ignored.");
-                        return null;
+                var rowCells = ChildrenNamed (FindChild (bodyRow, "TablixCells"), "TablixCell");
+                foreach (var set in sets) {
+                    foreach (var cell in rowCells.GetRange (set.Range.Start, set.Range.Count)) {
+                        if (FindChild (cell, "CellContents") == null) {
+                            rl?.LogError (8, $"Tablix '{name}' has merged (spanned) cells in its pivot body; " +
+                                "this layout is not supported yet and the region was ignored.");
+                            return null;
+                        }
                     }
                 }
             }
-
 
             var doc = tablix.OwnerDocument;
             var ns = tablix.NamespaceURI;
@@ -1338,13 +1357,37 @@ namespace Majorsilence.Reporting.Rdl
                 }
             }
 
-            var corner = BuildCorner (doc, ns, FindChild (tablix, "TablixCorner"), rowLevels, columnLevels, rl, name);
+            // The corner is sized across the deepest set of column headers.
+            var deepest = sets[0].Levels;
+            foreach (var set in sets) {
+                if (set.Levels.Count > deepest.Count)
+                    deepest = set.Levels;
+            }
+            var corner = BuildCorner (doc, ns, FindChild (tablix, "TablixCorner"), rowLevels, deepest, rl, name);
             if (corner != null)
                 matrix.AppendChild (corner);
 
-            matrix.AppendChild (BuildGroupings (doc, ns, columnLevels, isColumnAxis: true));
+            matrix.AppendChild (BuildGroupings (doc, ns, sets[0].Levels, isColumnAxis: true));
             matrix.AppendChild (BuildGroupings (doc, ns, rowLevels, isColumnAxis: false));
+            matrix.AppendChild (BuildMatrixRows (doc, ns, bodyRows, sets[0].Range));
+            matrix.AppendChild (BuildMatrixColumns (doc, ns, allBodyColumns, sets[0].Range));
 
+            // Later sets travel as fyi:ColumnSet; the engine builds each and lays them beside the first.
+            for (var i = 1; i < sets.Count; i++) {
+                var columnSet = doc.CreateElement ("fyi", "ColumnSet", EngineNamespace);
+                columnSet.AppendChild (BuildGroupings (doc, ns, sets[i].Levels, isColumnAxis: true));
+                columnSet.AppendChild (BuildMatrixRows (doc, ns, bodyRows, sets[i].Range));
+                columnSet.AppendChild (BuildMatrixColumns (doc, ns, allBodyColumns, sets[i].Range));
+                matrix.AppendChild (columnSet);
+            }
+
+            return matrix;
+        }
+
+        private const string EngineNamespace = "http://www.fyireporting.com/schemas";
+
+        private static XmlElement BuildMatrixRows (XmlDocument doc, string ns, List<XmlElement> bodyRows, (int Total, int Start, int Count) range)
+        {
             var matrixRows = doc.CreateElement ("MatrixRows", ns);
             foreach (var bodyRow in bodyRows) {
                 var matrixRow = doc.CreateElement ("MatrixRow", ns);
@@ -1355,7 +1398,7 @@ namespace Majorsilence.Reporting.Rdl
 
                 var matrixCells = doc.CreateElement ("MatrixCells", ns);
                 var rowCells = ChildrenNamed (FindChild (bodyRow, "TablixCells"), "TablixCell");
-                foreach (var cell in rowCells.GetRange (columnRange.Start, columnRange.Count)) {
+                foreach (var cell in rowCells.GetRange (range.Start, range.Count)) {
                     var matrixCell = doc.CreateElement ("MatrixCell", ns);
                     matrixCell.AppendChild (BuildSingleItem (doc, ns, FindChild (cell, "CellContents")));
                     matrixCells.AppendChild (matrixCell);
@@ -1364,10 +1407,13 @@ namespace Majorsilence.Reporting.Rdl
                 matrixRow.AppendChild (matrixCells);
                 matrixRows.AppendChild (matrixRow);
             }
-            matrix.AppendChild (matrixRows);
+            return matrixRows;
+        }
 
+        private static XmlElement BuildMatrixColumns (XmlDocument doc, string ns, List<XmlElement> bodyColumns, (int Total, int Start, int Count) range)
+        {
             var matrixColumns = doc.CreateElement ("MatrixColumns", ns);
-            foreach (var bodyColumn in bodyColumns) {
+            foreach (var bodyColumn in bodyColumns.GetRange (range.Start, range.Count)) {
                 var matrixColumn = doc.CreateElement ("MatrixColumn", ns);
 
                 var width = FindChild (bodyColumn, "Width");
@@ -1376,9 +1422,7 @@ namespace Majorsilence.Reporting.Rdl
 
                 matrixColumns.AppendChild (matrixColumn);
             }
-            matrix.AppendChild (matrixColumns);
-
-            return matrix;
+            return matrixColumns;
         }
 
         /// <summary>
@@ -1388,9 +1432,13 @@ namespace Majorsilence.Reporting.Rdl
         /// </summary>
         private static List<AxisLevel> ReadAxisLevels (XmlElement hierarchy, string axis, string tablixName, ReportLog rl)
         {
-            var levels = new List<AxisLevel> ();
             var top = FindChild (hierarchy, "TablixMembers");
-            var members = top == null ? new List<XmlElement> () : ChildrenNamed (top, "TablixMember");
+            return ReadAxisLevelsOf (top == null ? new List<XmlElement> () : ChildrenNamed (top, "TablixMember"), axis, tablixName, rl);
+        }
+
+        private static List<AxisLevel> ReadAxisLevelsOf (List<XmlElement> members, string axis, string tablixName, ReportLog rl)
+        {
+            var levels = new List<AxisLevel> ();
 
             while (members.Count > 0) {
                 var allLeafStatic = true;
@@ -1472,7 +1520,12 @@ namespace Majorsilence.Reporting.Rdl
         private static (int Total, int Start, int Count) LeafRange (XmlElement hierarchy)
         {
             var top = FindChild (hierarchy, "TablixMembers");
-            return top == null ? (1, 0, 1) : RangeOf (ChildrenNamed (top, "TablixMember"));
+            return top == null ? (1, 0, 1) : LeafRangeOf (ChildrenNamed (top, "TablixMember"));
+        }
+
+        private static (int Total, int Start, int Count) LeafRangeOf (List<XmlElement> topMembers)
+        {
+            return RangeOf (topMembers);
 
             (int Total, int Start, int Count) RangeOf (List<XmlElement> members)
             {
