@@ -16,7 +16,7 @@
 // Excel / TIFF renderers, every way of pushing data (DataTable, IDataReader, XmlDocument, objects,
 // dictionaries), and database drivers: a real SQLite query through RegisterDataProvider, and the
 // SQL Server, PostgreSQL and MySQL drivers constructing connections and commands, plus a real query
-// against each of those servers when RDL_SMOKE_POSTGRES / RDL_SMOKE_MYSQL / RDL_SMOKE_SQLSERVER hold a
+// against each of those servers when RDL_SMOKE_POSTGRES / _MYSQL / _ORACLE / _SQLSERVER hold a
 // connection string.
 //
 // The reports declare a data source only because the schema needs one; no database is opened
@@ -369,7 +369,8 @@ await Scenario("PDF encryption and a digital signature applied by the engine", a
 // Live servers. These run only when a connection string is supplied in the environment (CI starts the
 // servers as service containers; see .github/workflows/aot-databases.yml), otherwise they are skipped.
 // Each one creates a table, then has the engine itself run a parameterised query against it.
-async Task LiveDatabase(string name, string envVar, string provider, string createSql)
+async Task LiveDatabase(string name, string envVar, string provider, string createSql,
+    string selectSql = "SELECT name, qty FROM smoke_items WHERE qty >= @Min ORDER BY qty")
 {
     var cs = Environment.GetEnvironmentVariable(envVar);
     if (string.IsNullOrWhiteSpace(cs))
@@ -390,7 +391,7 @@ async Task LiveDatabase(string name, string envVar, string provider, string crea
                 cmd.ExecuteNonQuery();
             }
         }
-        var rdl = ReportBuilder.SqlTable(provider, cs, "SELECT name, qty FROM smoke_items WHERE qty >= @Min ORDER BY qty", new[] { "name", "qty" });
+        var rdl = ReportBuilder.SqlTable(provider, cs, selectSql, new[] { "name", "qty" });
         var parser = new RDLParser(rdl) { Folder = work };
         using var report = await parser.Parse();
         if (report.ErrorMaxSeverity > 4)
@@ -407,6 +408,9 @@ async Task LiveDatabase(string name, string envVar, string provider, string crea
 
 await LiveDatabase("PostgreSQL server query", "RDL_SMOKE_POSTGRES", "PostgreSQL", "CREATE TABLE smoke_items(name text, qty int)");
 await LiveDatabase("MySQL server query (MySQL.NET name, served by MySqlConnector under AOT)", "RDL_SMOKE_MYSQL", "MySQL.NET", "CREATE TABLE smoke_items(name varchar(50), qty int)");
+await LiveDatabase("Oracle server query", "RDL_SMOKE_ORACLE", "Oracle.ManagedDataAccess", "CREATE TABLE smoke_items(name VARCHAR2(50), qty NUMBER(9))",
+    // Oracle folds unquoted names to upper case, and binds the one parameter positionally.
+    "SELECT name AS \"name\", qty AS \"qty\" FROM smoke_items WHERE qty >= :Min ORDER BY qty");
 await LiveDatabase("SQL Server query", "RDL_SMOKE_SQLSERVER", "Microsoft.Data.SqlClient", "CREATE TABLE smoke_items(name nvarchar(50), qty int)");
 
 try { Directory.Delete(work, true); } catch { /* temp files; not worth failing over */ }

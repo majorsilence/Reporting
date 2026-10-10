@@ -21,6 +21,7 @@
 		<PackageReference Include="Microsoft.Data.Sqlite" />
 		<PackageReference Include="MySql.Data" />
 		<PackageReference Include="MySqlConnector" />
+		<PackageReference Include="Oracle.ManagedDataAccess.Core" />
 		<PackageReference Include="Npgsql" />
 	</ItemGroup>
 	<ItemGroup>

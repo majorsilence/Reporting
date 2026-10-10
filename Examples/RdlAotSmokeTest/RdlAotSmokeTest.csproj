@@ -21,6 +21,7 @@
     <PackageReference Include="Microsoft.Data.Sqlite" />
     <PackageReference Include="MySqlConnector" />
     <PackageReference Include="Npgsql" />
+    <PackageReference Include="Oracle.ManagedDataAccess.Core" />
     <Compile Include="..\..\RdlCmd\AotDataProviders.cs" Link="AotDataProviders.cs" />
   </ItemGroup>
   <ItemGroup>
