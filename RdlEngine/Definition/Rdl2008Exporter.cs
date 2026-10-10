@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Xml;
 
 namespace Majorsilence.Reporting.Rdl
@@ -33,7 +34,75 @@ namespace Majorsilence.Reporting.Rdl
 
             var lists = new List<XmlElement> ();
             Collect (root, lists);
-            return lists.Count > 0;
+            return lists.Count > 0 || Textboxes2005 (root).Count > 0;
+        }
+
+        private static List<XmlElement> Textboxes2005 (XmlElement root)
+        {
+            var found = new List<XmlElement> ();
+            void Walk (XmlElement element)
+            {
+                foreach (XmlNode node in element.ChildNodes) {
+                    if (node is not XmlElement child)
+                        continue;
+                    if (child.LocalName == "Textbox" && child.NamespaceURI == root.NamespaceURI
+                        && Child (child, "Value") != null && Child (child, "Paragraphs") == null)
+                        found.Add (child);
+                    Walk (child);
+                }
+            }
+            Walk (root);
+            return found;
+        }
+
+        // Style children that 2008 keeps on the text run / the paragraph; the rest stay on the Textbox.
+        private static readonly HashSet<string> RunStyle = new HashSet<string> {
+            "FontFamily", "FontSize", "FontStyle", "FontWeight", "Format", "TextDecoration", "Color", "Language",
+        };
+        private static readonly HashSet<string> ParagraphStyle = new HashSet<string> { "TextAlign", "LineHeight" };
+
+        /// <summary>
+        /// 2005's Textbox holds one Value and puts all formatting on its Style. 2008 requires
+        /// Paragraphs/Paragraph/TextRuns/TextRun, with font and colour on the run and alignment on
+        /// the paragraph. Rdl2008Normalizer reads this form back into a single Value and Style.
+        /// </summary>
+        private static void ConvertTextbox (XmlElement textbox)
+        {
+            var doc = textbox.OwnerDocument;
+            var ns = textbox.NamespaceURI;
+            var value = Child (textbox, "Value");
+            var style = Child (textbox, "Style");
+
+            var runStyle = El (doc, ns, "Style");
+            var paragraphStyle = El (doc, ns, "Style");
+            if (style != null) {
+                foreach (XmlNode node in new List<XmlNode> (style.ChildNodes.Cast<XmlNode> ())) {
+                    if (node is not XmlElement e)
+                        continue;
+                    if (RunStyle.Contains (e.LocalName)) {
+                        style.RemoveChild (e);
+                        runStyle.AppendChild (e);
+                    } else if (ParagraphStyle.Contains (e.LocalName)) {
+                        style.RemoveChild (e);
+                        paragraphStyle.AppendChild (e);
+                    }
+                }
+            }
+
+            var run = El (doc, ns, "TextRun");
+            run.AppendChild (El (doc, ns, "Value", value.InnerText));
+            run.AppendChild (runStyle);
+            var runs = El (doc, ns, "TextRuns");
+            runs.AppendChild (run);
+            var paragraph = El (doc, ns, "Paragraph");
+            paragraph.AppendChild (runs);
+            paragraph.AppendChild (paragraphStyle);
+            var paragraphs = El (doc, ns, "Paragraphs");
+            paragraphs.AppendChild (paragraph);
+
+            textbox.ReplaceChild (paragraphs, value);
+            if (style != null && !style.HasChildNodes)
+                textbox.RemoveChild (style);
         }
 
         /// <summary>
@@ -52,6 +121,11 @@ namespace Majorsilence.Reporting.Rdl
             var lists = new List<XmlElement> ();
             Collect (root, lists);
             lists.Reverse ();
+
+            // Textboxes first: converting a region clones its contents, and a clone of an
+            // already-converted Textbox is still correct, while the reverse would revisit them.
+            foreach (var textbox in Textboxes2005 (root))
+                ConvertTextbox (textbox);
 
             var count = 0;
             foreach (var list in lists) {

@@ -257,3 +257,6 @@ obj/
 
 # Local NuGet feed for iterating on unreleased Majorsilence.Forms builds (see MIGRATION-NOTES.md).
 /.local-nuget-feed
+
+# Microsoft RDL schemas are downloaded locally, see ReportTests/Schemas/README.md
+ReportTests/Schemas/*.xsd

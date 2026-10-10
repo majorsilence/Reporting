@@ -406,6 +406,86 @@ namespace ReportTests
         }
 
         [Test]
+        public void Textbox_IsWrittenWithParagraphsAndTextRuns ()
+        {
+            var doc = Load (ReportWith (Rdl2010, @"
+<Textbox Name=""Title""><Top>0in</Top><Height>0.25in</Height><Width>2in</Width><Value>Hello</Value>
+  <Style><FontFamily>Arial</FontFamily><FontSize>12pt</FontSize><TextAlign>Center</TextAlign><BackgroundColor>Yellow</BackgroundColor></Style>
+</Textbox>"));
+
+            Assert.That (Rdl2008Exporter.NeedsConversion (doc), Is.True);
+            Rdl2008Exporter.ConvertToTablix (doc);
+
+            var textbox = First (doc, "Textbox");
+            Assert.That (textbox["Value"], Is.Null, "a 2008 Textbox has no direct Value");
+            var run = textbox["Paragraphs"]["Paragraph"]["TextRuns"]["TextRun"];
+            Assert.That (run["Value"].InnerText, Is.EqualTo ("Hello"));
+            Assert.That (run["Style"]["FontFamily"].InnerText, Is.EqualTo ("Arial"));
+            Assert.That (run["Style"]["FontSize"].InnerText, Is.EqualTo ("12pt"));
+            Assert.That (textbox["Paragraphs"]["Paragraph"]["Style"]["TextAlign"].InnerText, Is.EqualTo ("Center"));
+            Assert.That (textbox["Style"]["BackgroundColor"].InnerText, Is.EqualTo ("Yellow"), "box styling stays on the Textbox");
+            Assert.That (textbox["Style"]["FontFamily"], Is.Null);
+        }
+
+        [Test]
+        public void Textbox_RoundTripKeepsValueAndStyle ()
+        {
+            var doc = Load (ReportWith (Rdl2010, @"
+<Textbox Name=""Title""><Height>0.25in</Height><Width>2in</Width><Value>=Fields!Name.Value</Value>
+  <Style><FontWeight>Bold</FontWeight><TextAlign>Right</TextAlign></Style>
+</Textbox>"));
+            Rdl2008Exporter.ConvertToTablix (doc);
+
+            Rdl2008Normalizer.Normalize (doc, null);
+
+            var textbox = First (doc, "Textbox");
+            Assert.That (textbox["Value"].InnerText, Is.EqualTo ("=Fields!Name.Value"));
+            Assert.That (textbox["Style"]["FontWeight"].InnerText, Is.EqualTo ("Bold"));
+            Assert.That (textbox["Style"]["TextAlign"].InnerText, Is.EqualTo ("Right"));
+        }
+
+        [Test]
+        public void Textbox_AlreadyInTheRichTextForm_IsLeftAlone ()
+        {
+            var doc = Load (ReportWith (Rdl2010, @"
+<Textbox Name=""T""><Paragraphs><Paragraph><TextRuns><TextRun><Value>x</Value><Style /></TextRun></TextRuns><Style /></Paragraph></Paragraphs></Textbox>"));
+
+            Assert.That (Rdl2008Exporter.NeedsConversion (doc), Is.False);
+        }
+
+        /// <summary>
+        /// Validates exported output against Microsoft's own schema. The XSD is not redistributed
+        /// here; download ReportDefinition.xsd from
+        /// https://schemas.microsoft.com/sqlserver/reporting/2008/01/reportdefinition/ and set
+        /// RDL_XSD_2008 to its path to run this.
+        /// </summary>
+        [Test]
+        public void ExportedRegions_ValidateAgainstTheMicrosoft2008Schema ()
+        {
+            var xsdPath = System.Environment.GetEnvironmentVariable ("RDL_XSD_2008");
+            if (string.IsNullOrEmpty (xsdPath) || !System.IO.File.Exists (xsdPath))
+                Assert.Ignore ("Set RDL_XSD_2008 to a local copy of the Microsoft 2008 ReportDefinition.xsd to run.");
+
+            const string Rdl2008 = "http://schemas.microsoft.com/sqlserver/reporting/2008/01/reportdefinition";
+            var schemas = new System.Xml.Schema.XmlSchemaSet ();
+            schemas.Add (Rdl2008, xsdPath);
+
+            foreach (var (label, region) in new[] { ("List", SimpleList), ("Table", GroupedTable), ("Matrix", SalesMatrix) }) {
+                var doc = Load (ReportWith (Rdl2008, region));
+                Rdl2008Exporter.ConvertToTablix (doc);
+
+                var errors = new System.Collections.Generic.List<string> ();
+                var settings = new XmlReaderSettings { ValidationType = ValidationType.Schema, Schemas = schemas };
+                settings.ValidationEventHandler += (_, e) => errors.Add ($"line {e.Exception.LineNumber}: {e.Message}");
+                using (var reader = XmlReader.Create (new System.IO.StringReader (doc.OuterXml), settings)) {
+                    while (reader.Read ()) { }
+                }
+
+                Assert.That (errors, Is.Empty, $"{label}: " + string.Join (" | ", errors));
+            }
+        }
+
+        [Test]
         public async Task ExportedReport_ParsesInTheEngine ()
         {
             var doc = Load (ReportWith (Rdl2010, SimpleList));
