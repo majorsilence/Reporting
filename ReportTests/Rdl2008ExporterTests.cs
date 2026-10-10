@@ -533,17 +533,89 @@ namespace ReportTests
             Assert.That (matrix["MatrixRows"].FirstChild["MatrixCells"].FirstChild.InnerText, Does.Contain ("Sum"));
         }
 
+        /// <summary>A pivot with sibling column groups: Year columns, then Other columns.</summary>
+        private static string PivotWithSiblingColumnGroups ()
+            => PivotWithSubtotals.Replace ($"<TablixMember>{Header ("YearTotal", "Total", "0.25in")}</TablixMember>",
+                $@"<TablixMember><Group Name=""Other""><GroupExpressions><GroupExpression>=Fields!Name.Value</GroupExpression></GroupExpressions></Group>{Header ("OtherHead", "=Fields!Name.Value", "0.25in")}</TablixMember>");
+
         [Test]
-        public void Import_AdjacentGroups_AreStillRefused ()
+        public void Import_SiblingColumnGroups_BecomeColumnSets ()
         {
-            var xml = PivotWithSubtotals.Replace ($"<TablixMember>{Header ("YearTotal", "Total", "0.25in")}</TablixMember>",
-                $@"<TablixMember><Group Name=""Other""><GroupExpressions><GroupExpression>=Fields!Name.Value</GroupExpression></GroupExpressions></Group>{Header ("Other", "x", "0.25in")}</TablixMember>");
+            var doc = Load (ReportWith (Rdl2010, PivotWithSiblingColumnGroups ()));
+            var log = new ReportLog ();
+
+            Rdl2008Normalizer.Normalize (doc, log);
+
+            var matrix = First (doc, "Matrix");
+            Assert.That (matrix, Is.Not.Null, "sibling column groups are laid out side by side, not refused");
+            Assert.That (log.MaxSeverity, Is.LessThan (8));
+            Assert.That (matrix["ColumnGroupings"]["ColumnGrouping"]["DynamicColumns"]["Grouping"].GetAttribute ("Name"), Is.EqualTo ("Year"));
+            var set = matrix.ChildNodes.Cast<XmlNode> ().Single (n => n.Name == "fyi:ColumnSet");
+            Assert.That (set["ColumnGroupings"]["ColumnGrouping"]["DynamicColumns"]["Grouping"].GetAttribute ("Name"), Is.EqualTo ("Other"));
+            Assert.That (matrix["MatrixColumns"].FirstChild["Width"].InnerText, Is.EqualTo ("1in"));
+            Assert.That (set["MatrixColumns"].FirstChild["Width"].InnerText, Is.EqualTo ("1.2in"));
+            Assert.That (matrix["MatrixRows"].FirstChild["MatrixCells"].ChildNodes, Has.Count.EqualTo (1));
+            Assert.That (set["MatrixRows"].FirstChild["MatrixCells"].ChildNodes, Has.Count.EqualTo (1));
+        }
+
+        [Test]
+        public async Task SiblingColumnGroups_RenderSideBySide ()
+        {
+            var xml = ReportWith (Rdl2010, PivotWithSiblingColumnGroups ().Replace ("Sum(Fields!Name.Value)", "Count(Fields!Name.Value)"));
+            var parser = new RDLParser (xml) { SkipDatabaseSchemaValidation = true };
+            using var report = await parser.Parse ();
+            Assert.That (report.ErrorMaxSeverity, Is.LessThanOrEqualTo (4), string.Join (" | ", report.ErrorItems?.Cast<string> () ?? Enumerable.Empty<string> ()));
+
+            var data = new System.Data.DataTable ();
+            data.Columns.Add ("Name", typeof (string));
+            data.Rows.Add ("Alpha");
+            data.Rows.Add ("Beta");
+            await report.DataSets["Data"].SetData (data);
+            await report.RunGetData (null);
+            using var memory = new MemoryStreamGen ();
+            await report.RunRender (memory, OutputPresentationType.HTML);
+            var html = memory.GetText ();
+
+            // The header row lists the Year columns and then the Other columns, so each name twice.
+            Assert.That (System.Text.RegularExpressions.Regex.Matches (html, "Alpha").Count, Is.EqualTo (3), "once as the row header, once per column set");
+            Assert.That (System.Text.RegularExpressions.Regex.Matches (html, "Beta").Count, Is.EqualTo (3));
+        }
+
+        [Test]
+        public void RoundTrip_SiblingColumnGroupsSurviveExportAndImport ()
+        {
+            var doc = Load (ReportWith (Rdl2010, PivotWithSiblingColumnGroups ()));
+            Rdl2008Normalizer.Normalize (doc, null);   // as the designer opens it
+
+            Rdl2008Exporter.ConvertToTablix (doc);     // as it saves
+
+            var tablix = First (doc, "Tablix");
+            var members = tablix["TablixColumnHierarchy"]["TablixMembers"].ChildNodes;
+            Assert.That (members, Has.Count.EqualTo (2), "two sibling groups again");
+            Assert.That (members[0]["Group"].GetAttribute ("Name"), Is.EqualTo ("Year"));
+            Assert.That (members[1]["Group"].GetAttribute ("Name"), Is.EqualTo ("Other"));
+            var columns = tablix["TablixBody"]["TablixColumns"].ChildNodes;
+            Assert.That (columns, Has.Count.EqualTo (2));
+            Assert.That (columns[0]["Width"].InnerText, Is.EqualTo ("1in"));
+            Assert.That (columns[1]["Width"].InnerText, Is.EqualTo ("1.2in"));
+            Assert.That (tablix["TablixBody"]["TablixRows"].FirstChild["TablixCells"].ChildNodes, Has.Count.EqualTo (2));
+            Assert.That (doc.GetElementsByTagName ("fyi:ColumnSet"), Is.Empty, "the extension is not written into the Tablix");
+
+            Rdl2008Normalizer.Normalize (doc, null);
+            Assert.That (First (doc, "Matrix").ChildNodes.Cast<XmlNode> ().Count (n => n.Name == "fyi:ColumnSet"), Is.EqualTo (1));
+        }
+
+        [Test]
+        public void Import_SiblingRowGroups_AreStillRefused ()
+        {
+            var xml = PivotWithSubtotals.Replace ($"<TablixMember>{Header ("RegionTotal", "Grand total")}</TablixMember>",
+                $@"<TablixMember><Group Name=""OtherRows""><GroupExpressions><GroupExpression>=Fields!Name.Value</GroupExpression></GroupExpressions></Group>{Header ("OtherRowHead", "=Fields!Name.Value")}</TablixMember>");
             var doc = Load (ReportWith (Rdl2010, xml));
             var log = new ReportLog ();
 
             Rdl2008Normalizer.Normalize (doc, log);
 
-            Assert.That (First (doc, "Matrix"), Is.Null, "two sibling groups have no Matrix equivalent");
+            Assert.That (First (doc, "Matrix"), Is.Null, "sibling row groups still have no Matrix equivalent");
             Assert.That (First (doc, "Tablix"), Is.Not.Null, "and are left in place rather than rendered wrongly");
             Assert.That (log.MaxSeverity, Is.GreaterThanOrEqualTo (8));
         }
@@ -650,7 +722,16 @@ namespace ReportTests
 
             var matrixWithTotals = SalesMatrix.Replace ("</DynamicColumns>",
                 @"<Subtotal><ReportItems><Textbox Name=""TT""><Value>Total</Value></Textbox></ReportItems></Subtotal></DynamicColumns>");
-            foreach (var (label, region) in new[] { ("List", SimpleList), ("Table", GroupedTable), ("Matrix", SalesMatrix), ("Matrix with subtotal", matrixWithTotals), ("Chart", Rdl2008ChartTests.Chart2005) }) {
+            // A second, sibling set of column groups, as the engine holds it (fyi:ColumnSet).
+            var matrixWithSets = SalesMatrix.Replace ("</Matrix>", @"<fyi:ColumnSet xmlns:fyi=""http://www.fyireporting.com/schemas"">
+  <ColumnGroupings><ColumnGrouping><Height>0.25in</Height><DynamicColumns>
+    <Grouping Name=""ByRegionSet""><GroupExpressions><GroupExpression>=Fields!Name.Value</GroupExpression></GroupExpressions></Grouping>
+    <ReportItems><Textbox Name=""SetHead""><Value>=Fields!Name.Value</Value></Textbox></ReportItems>
+  </DynamicColumns></ColumnGrouping></ColumnGroupings>
+  <MatrixRows><MatrixRow><Height>0.25in</Height><MatrixCells><MatrixCell><ReportItems><Textbox Name=""SetCell""><Value>=Count(Fields!Name.Value)</Value></Textbox></ReportItems></MatrixCell></MatrixCells></MatrixRow></MatrixRows>
+  <MatrixColumns><MatrixColumn><Width>1in</Width></MatrixColumn></MatrixColumns>
+</fyi:ColumnSet></Matrix>");
+            foreach (var (label, region) in new[] { ("List", SimpleList), ("Table", GroupedTable), ("Matrix", SalesMatrix), ("Matrix with subtotal", matrixWithTotals), ("Matrix with column sets", matrixWithSets), ("Chart", Rdl2008ChartTests.Chart2005) }) {
                 var doc = Load (ReportWith (ns, region));
                 // What the designer holds besides the region: page setup, a page header and a
                 // bordered textbox, all in the 2005 spelling.

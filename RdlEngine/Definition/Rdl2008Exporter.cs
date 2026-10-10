@@ -784,10 +784,10 @@ namespace Majorsilence.Reporting.Rdl
 
             // For each leaf of an axis in document order, the detail row/column whose cell template
             // fills it: detail leaves map to themselves, subtotal leaves reuse the first.
-            XmlElement Axis (string hierarchyName, string groupingName, string dynamicName,
+            XmlElement Axis (XmlElement container, string hierarchyName, string groupingName, string dynamicName,
                 string staticsName, string staticName, string sizeName, List<int> leafSources)
             {
-                var groupings = Kids (Child (matrix, groupingName + "s"), groupingName);
+                var groupings = Kids (Child (container, groupingName + "s"), groupingName);
 
                 XmlElement Members (int index)
                 {
@@ -854,32 +854,53 @@ namespace Majorsilence.Reporting.Rdl
                 return hierarchy;
             }
 
-            var columnSources = new List<int> ();
+            // The Matrix itself is the first column set; each fyi:ColumnSet is a sibling group set,
+            // which Tablix writes as further top-level members of the column hierarchy.
+            var containers = new List<XmlElement> { matrix };
+            containers.AddRange (Kids (matrix, "ColumnSet"));
+
             var rowSources = new List<int> ();
-            var columnHierarchy = Axis ("TablixColumnHierarchy", "ColumnGrouping", "DynamicColumns", "StaticColumns", "StaticColumn", "Height", columnSources);
-            var rowHierarchy = Axis ("TablixRowHierarchy", "RowGrouping", "DynamicRows", "StaticRows", "StaticRow", "Width", rowSources);
-            var detailColumns = Kids (Child (matrix, "MatrixColumns"), "MatrixColumn");
-            var detailRows = Kids (Child (matrix, "MatrixRows"), "MatrixRow");
+            var columnSets = new List<(List<int> Sources, List<XmlElement> Columns, List<XmlElement> Rows)> ();
+            XmlElement columnHierarchy = null;
+            foreach (var container in containers) {
+                var sources = new List<int> ();
+                var hierarchy = Axis (container, "TablixColumnHierarchy", "ColumnGrouping", "DynamicColumns", "StaticColumns", "StaticColumn", "Height", sources);
+                if (columnHierarchy == null) {
+                    columnHierarchy = hierarchy;
+                } else {
+                    var target = Child (columnHierarchy, "TablixMembers");
+                    foreach (var member in Kids (Child (hierarchy, "TablixMembers"), "TablixMember"))
+                        target.AppendChild (member);
+                }
+                columnSets.Add ((sources, Kids (Child (container, "MatrixColumns"), "MatrixColumn"), Kids (Child (container, "MatrixRows"), "MatrixRow")));
+            }
+            var rowHierarchy = Axis (matrix, "TablixRowHierarchy", "RowGrouping", "DynamicRows", "StaticRows", "StaticRow", "Width", rowSources);
 
             var body = El (doc, ns, "TablixBody");
             var columns = El (doc, ns, "TablixColumns");
-            foreach (var source in columnSources) {
-                var matrixColumn = source < detailColumns.Count ? detailColumns[source] : null;
-                var column = El (doc, ns, "TablixColumn");
-                column.AppendChild (El (doc, ns, "Width", Child (matrixColumn, "Width")?.InnerText ?? "1in"));
-                columns.AppendChild (column);
+            foreach (var set in columnSets) {
+                foreach (var source in set.Sources) {
+                    var matrixColumn = source < set.Columns.Count ? set.Columns[source] : null;
+                    var column = El (doc, ns, "TablixColumn");
+                    column.AppendChild (El (doc, ns, "Width", Child (matrixColumn, "Width")?.InnerText ?? "1in"));
+                    columns.AppendChild (column);
+                }
             }
+            var detailRows = columnSets[0].Rows;
             var rows = El (doc, ns, "TablixRows");
             foreach (var rowSource in rowSources) {
                 var matrixRow = rowSource < detailRows.Count ? detailRows[rowSource] : null;
                 var row = El (doc, ns, "TablixRow");
                 row.AppendChild (El (doc, ns, "Height", Child (matrixRow, "Height")?.InnerText ?? "0.25in"));
                 var cells = El (doc, ns, "TablixCells");
-                var templateCells = Kids (Child (matrixRow, "MatrixCells"), "MatrixCell");
-                foreach (var columnSource in columnSources) {
-                    var cell = El (doc, ns, "TablixCell");
-                    cell.AppendChild (Contents (columnSource < templateCells.Count ? templateCells[columnSource] : null));
-                    cells.AppendChild (cell);
+                foreach (var set in columnSets) {
+                    var setRow = rowSource < set.Rows.Count ? set.Rows[rowSource] : null;
+                    var templateCells = Kids (Child (setRow, "MatrixCells"), "MatrixCell");
+                    foreach (var columnSource in set.Sources) {
+                        var cell = El (doc, ns, "TablixCell");
+                        cell.AppendChild (Contents (columnSource < templateCells.Count ? templateCells[columnSource] : null));
+                        cells.AppendChild (cell);
+                    }
                 }
                 row.AppendChild (cells);
                 rows.AppendChild (row);
@@ -892,7 +913,9 @@ namespace Majorsilence.Reporting.Rdl
 
             var corner = Child (matrix, "Corner");
             if (corner != null && ItemOf (corner) != null) {
-                var columnLevels = Kids (Child (matrix, "ColumnGroupings"), "ColumnGrouping").Count;
+                var columnLevels = 0;
+                foreach (var container in containers)
+                    columnLevels = Math.Max (columnLevels, Kids (Child (container, "ColumnGroupings"), "ColumnGrouping").Count);
                 var rowLevels = Kids (Child (matrix, "RowGroupings"), "RowGrouping").Count;
                 var cornerContents = Contents (corner);
                 // One item over the whole header block: span it across the row-header columns and
@@ -921,6 +944,7 @@ namespace Majorsilence.Reporting.Rdl
                     continue;
                 switch (child.LocalName) {
                     case "Corner":
+                    case "ColumnSet":
                     case "ColumnGroupings":
                     case "RowGroupings":
                     case "MatrixRows":
