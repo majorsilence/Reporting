@@ -120,5 +120,44 @@ namespace Majorsilence.Reporting.RdlDesign.Tests
             Assert.That(mc.SourceRdl, Does.Not.Contain("<List"), "RDLC schema has no List element");
             Assert.That(mc.SourceRdl, Does.Contain("<Tablix Name=\"List1\""));
         }
+
+        // A Tablix file opens as the Table/Matrix/List the designer edits, and saves as a Tablix.
+        [Test]
+        public void OpenRdlcWithTablix_EditsAsListAndSavesAsTablix()
+        {
+            const string rdlc = @"<?xml version=""1.0"" encoding=""utf-8""?>
+<Report xmlns=""http://schemas.microsoft.com/sqlserver/reporting/2008/01/reportdefinition"">
+  <Body>
+    <Height>2in</Height>
+    <ReportItems>
+      <Tablix Name=""Card"">
+        <Top>0in</Top><Left>0in</Left><Height>1in</Height><Width>2in</Width>
+        <TablixBody>
+          <TablixColumns><TablixColumn><Width>2in</Width></TablixColumn></TablixColumns>
+          <TablixRows><TablixRow><Height>1in</Height><TablixCells><TablixCell><CellContents>
+            <Textbox Name=""T1""><Paragraphs><Paragraph><TextRuns><TextRun><Value>Hello</Value><Style /></TextRun></TextRuns><Style /></Paragraph></Paragraphs></Textbox>
+          </CellContents></TablixCell></TablixCells></TablixRow></TablixRows>
+        </TablixBody>
+        <TablixColumnHierarchy><TablixMembers><TablixMember /></TablixMembers></TablixColumnHierarchy>
+        <TablixRowHierarchy><TablixMembers><TablixMember><Group Name=""Details"" /></TablixMember></TablixMembers></TablixRowHierarchy>
+      </Tablix>
+    </ReportItems>
+  </Body>
+  <Width>4in</Width>
+</Report>";
+
+            var design = new DesignCtl();
+            design.ReportSource = rdlc;
+
+            var doc = design.ReportDocument;
+            Assert.That(doc.GetElementsByTagName("List"), Has.Count.EqualTo(1), "the designer edits the List it understands");
+            Assert.That(doc.GetElementsByTagName("Tablix"), Is.Empty);
+
+            var saved = design.ReportSource;
+            Assert.That(saved, Does.Contain("<Tablix Name=\"Card\""));
+            Assert.That(saved, Does.Not.Contain("<List"));
+            Assert.That(saved, Does.Contain("<TextRun>"));
+            Assert.That(saved, Does.Contain("Hello"));
+        }
     }
 }

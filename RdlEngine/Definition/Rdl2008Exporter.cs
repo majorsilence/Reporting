@@ -25,6 +25,22 @@ namespace Majorsilence.Reporting.Rdl
             "http://schemas.microsoft.com/sqlserver/reporting/2016/01/reportdefinition",
         };
 
+        /// <summary>
+        /// Rewrites a 2008+ document into the 2005 shape the designer edits (Tablix to Table,
+        /// Matrix or List, rich text to a single Value, and so on), keeping its namespace so that
+        /// <see cref="ConvertToTablix"/> restores the original vocabulary on save. A 2005
+        /// document is left alone.
+        /// </summary>
+        /// <returns>True when the document was rewritten.</returns>
+        public static bool NormalizeForEditing (XmlDocument doc)
+        {
+            if (doc == null || !Rdl2008Normalizer.NeedsNormalizing (doc))
+                return false;
+
+            Rdl2008Normalizer.Normalize (doc, null);
+            return true;
+        }
+
         /// <summary>True when the document is 2008+ and contains a List that needs rewriting.</summary>
         public static bool NeedsConversion (XmlDocument doc)
         {
