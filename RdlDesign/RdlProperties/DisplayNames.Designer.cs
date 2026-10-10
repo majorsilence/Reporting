@@ -158,6 +158,14 @@ namespace Majorsilence.Reporting.RdlDesign.RdlProperties {
                 return ResourceManager.GetString("Appearance_WritingMode", resourceCulture);
             }
         }
+        /// <summary>
+        ///   Looks up a localized string similar to LineHeight.
+        /// </summary>
+        internal static string Appearance_LineHeight {
+            get {
+                return ResourceManager.GetString("Appearance_LineHeight", resourceCulture);
+            }
+        }
         
         /// <summary>
         ///   Looks up a localized string similar to Color.

@@ -651,6 +651,17 @@ namespace Majorsilence.Reporting.Rdl
 
 				// 06122007AJM need to add w to make slightly bigger
 				System.Drawing.SizeF ms = g.MeasureString(s + "w", drawFont, maxWidth, drawFormat);
+				float lineH = await EvalLineHeight(rpt, r);
+				if (lineH > 0)
+				{
+					// an explicit line height replaces the font's own line pitch
+					float oneLine = g.MeasureString("Xg", drawFont, int.MaxValue, drawFormat).Height;
+					if (oneLine > 0)
+					{
+						int lines = Math.Max(1, (int) Math.Round(ms.Height / oneLine));
+						ms = new System.Drawing.SizeF(ms.Width, lines * lineH * g.DpiY / 72f);
+					}
+				}
 				return new System.Drawing.Size((int) Math.Ceiling(ms.Width), 
 					(int) Math.Ceiling(ms.Height));
 			}

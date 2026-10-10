@@ -150,6 +150,9 @@
   <data name="Appearance_WritingMode" xml:space="preserve">
     <value>WritingMode</value>
   </data>
+  <data name="Appearance_LineHeight" xml:space="preserve">
+    <value>LineHeight</value>
+  </data>
   <data name="BackgroundImage_MIMEType" xml:space="preserve">
     <value>MIMEType</value>
   </data>

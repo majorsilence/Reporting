@@ -201,6 +201,20 @@ namespace Majorsilence.Reporting.RdlDesign
             }
         }
 
+        [LocalizedDisplayName("Appearance_LineHeight")]
+        [LocalizedDescription("Appearance_LineHeight")]
+        public string LineHeight
+        {
+            get
+            {
+                return GetStyleValue("LineHeight", "");
+            }
+            set
+            {
+                SetStyleValue("LineHeight", value);
+            }
+        }
+
         [TypeConverter(typeof(FormatConverter))]
 		[LocalizedDisplayName("Appearance_Format")]
 		[LocalizedDescription("Appearance_Format")]
