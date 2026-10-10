@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Report Name="GroupHeaderColumnsTest">
+  <Description>Two body columns, one group whose header repeats on new pages. Group header must also be repeated at the top of the second column (issue 173).</Description>
+  <DataSources>
+    <DataSource Name="DS1">
+      <ConnectionProperties>
+        <DataProvider>Microsoft.Data.Sqlite</DataProvider>
+        <ConnectString>Data Source=northwindEF.db</ConnectString>
+        <IntegratedSecurity>false</IntegratedSecurity>
+      </ConnectionProperties>
+    </DataSource>
+  </DataSources>
+  <DataSets>
+    <DataSet Name="Data">
+      <Query>
+        <DataSourceName>DS1</DataSourceName>
+        <CommandText>SELECT 'A' AS Grp, 'x' AS Item</CommandText>
+      </Query>
+      <Fields>
+        <Field Name="Grp"><DataField>Grp</DataField></Field>
+        <Field Name="Item"><DataField>Item</DataField></Field>
+      </Fields>
+    </DataSet>
+  </DataSets>
+  <Body>
+    <Columns>2</Columns>
+    <ColumnSpacing>0.25in</ColumnSpacing>
+    <Height>1in</Height>
+    <ReportItems>
+      <Table Name="Table1">
+        <DataSetName>Data</DataSetName>
+        <Top>0in</Top>
+        <Left>0in</Left>
+        <Width>3in</Width>
+        <TableColumns>
+          <TableColumn><Width>3in</Width></TableColumn>
+        </TableColumns>
+        <TableGroups>
+          <TableGroup>
+            <Grouping Name="G1">
+              <GroupExpressions>
+                <GroupExpression>=Fields!Grp.Value</GroupExpression>
+              </GroupExpressions>
+            </Grouping>
+            <Header>
+              <RepeatOnNewPage>true</RepeatOnNewPage>
+              <TableRows>
+                <TableRow>
+                  <Height>0.25in</Height>
+                  <TableCells>
+                    <TableCell>
+                      <ReportItems>
+                        <Textbox Name="GroupHdr"><Value>GROUPHDR</Value></Textbox>
+                      </ReportItems>
+                    </TableCell>
+                  </TableCells>
+                </TableRow>
+              </TableRows>
+            </Header>
+          </TableGroup>
+        </TableGroups>
+        <Details>
+          <TableRows>
+            <TableRow>
+              <Height>0.25in</Height>
+              <TableCells>
+                <TableCell>
+                  <ReportItems>
+                    <Textbox Name="ItemCell"><Value>=Fields!Item.Value</Value></Textbox>
+                  </ReportItems>
+                </TableCell>
+              </TableCells>
+            </TableRow>
+          </TableRows>
+        </Details>
+      </Table>
+    </ReportItems>
+  </Body>
+  <Width>3in</Width>
+  <PageWidth>7in</PageWidth>
+  <PageHeight>3in</PageHeight>
+  <TopMargin>0.25in</TopMargin>
+  <BottomMargin>0.25in</BottomMargin>
+</Report>

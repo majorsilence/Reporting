@@ -61,7 +61,7 @@ namespace Majorsilence.Reporting.Rdl
 		{
 			WorkClass wc = this.GetValue(pgs.Report);
 
-			if (wc.OutputRow == row && wc.OutputPage == pgs.CurrentPage)
+			if (wc.OutputRow == row && wc.OutputPage == pgs.CurrentPage && wc.OutputXOffset == pgs.CurrentPage.XOffset)
 				return;
 
 			Page p = pgs.CurrentPage;
@@ -90,6 +90,7 @@ namespace Majorsilence.Reporting.Rdl
             await _TableRows.RunPage(pgs, row);
 			wc.OutputRow = row;
 			wc.OutputPage = pgs.CurrentPage;
+			wc.OutputXOffset = pgs.CurrentPage.XOffset;
 			return;
 		}
 
@@ -151,6 +152,7 @@ namespace Majorsilence.Reporting.Rdl
 		class WorkClass
 		{
 			internal Row OutputRow;		// the previous outputed row
+			internal float OutputXOffset;	// body column the header was last output in
 			internal Page OutputPage;	// the previous outputed row
 			internal WorkClass()
 			{
