@@ -39,7 +39,7 @@ namespace Majorsilence.Reporting.Rdl
 
             // Unsupported report items (Map, Sparkline, ...) stay in the tree untouched so that
             // saving writes them back; replacing them with placeholders is for rendering only.
-            Rdl2008Normalizer.Normalize (doc, null, replaceUnsupported: false);
+            Rdl2008Normalizer.Normalize (doc, null, forEditing: true);
             return true;
         }
 
@@ -52,7 +52,94 @@ namespace Majorsilence.Reporting.Rdl
 
             var lists = new List<XmlElement> ();
             Collect (root, lists);
-            return lists.Count > 0 || Textboxes2005 (root).Count > 0 || Styles2005 (root).Count > 0 || NeedsSections (root);
+            return lists.Count > 0 || Textboxes2005 (root).Count > 0 || Styles2005 (root).Count > 0 || NeedsSections (root) || FixQuirks (root, apply: false) > 0;
+        }
+
+        // XML Schema booleans are lower case; 2005 files often hold "True"/"False".
+        private static readonly HashSet<string> BooleanElements = new HashSet<string> {
+            "AllowBlank", "CanGrow", "CanShrink", "ConsumeContainerWhitespace", "DeferVariableEvaluation",
+            "FixedColumnHeaders", "FixedData", "FixedRowHeaders", "Hidden", "HideIfNoRows", "IntegratedSecurity",
+            "KeepTogether", "MergeTransactions", "MultiValue", "Nullable", "OmitBorderOnPageBreak",
+            "PrintOnFirstPage", "PrintOnLastPage", "RepeatColumnHeaders", "RepeatOnNewPage", "RepeatRowHeaders",
+            "Scalar", "Transaction",
+        };
+
+        private const string DesignerNamespace = "http://schemas.microsoft.com/SQLServer/reporting/reportdesigner";
+
+        /// <summary>
+        /// Small spelling differences between 2005 and 2008+: NoRows, Action, boolean case,
+        /// DataElementStyle values, column settings that moved from Body to Page, and Field's
+        /// TypeName (a designer extension in 2008). Counts the fixes, and applies them when asked.
+        /// </summary>
+        private static int FixQuirks (XmlElement root, bool apply)
+        {
+            var ns = root.NamespaceURI;
+            var count = 0;
+            var doc = root.OwnerDocument;
+            var all = new List<XmlElement> ();
+            void Gather (XmlElement e)
+            {
+                foreach (XmlNode n in e.ChildNodes) {
+                    if (n is XmlElement c) {
+                        all.Add (c);
+                        Gather (c);
+                    }
+                }
+            }
+            Gather (root);
+
+            foreach (var e in all) {
+                if (e.NamespaceURI != ns)
+                    continue;
+                var parentName = (e.ParentNode as XmlElement)?.LocalName;
+
+                if (e.LocalName == "NoRows") {
+                    count++;
+                    if (apply) {
+                        var renamed = El (doc, ns, "NoRowsMessage", e.InnerText);
+                        e.ParentNode.ReplaceChild (renamed, e);
+                    }
+                } else if (e.LocalName == "Action" && parentName != "Actions" && parentName != "ActionInfo") {
+                    count++;
+                    if (apply) {
+                        var info = El (doc, ns, "ActionInfo");
+                        var actions = El (doc, ns, "Actions");
+                        info.AppendChild (actions);
+                        e.ParentNode.ReplaceChild (info, e);
+                        actions.AppendChild (e);
+                    }
+                } else if (BooleanElements.Contains (e.LocalName) && (e.InnerText == "True" || e.InnerText == "False")) {
+                    count++;
+                    if (apply)
+                        e.InnerText = e.InnerText.ToLowerInvariant ();
+                } else if (e.LocalName == "DataElementStyle" && (e.InnerText == "AttributeNormal" || e.InnerText == "ElementNormal")) {
+                    count++;
+                    if (apply)
+                        e.InnerText = e.InnerText == "AttributeNormal" ? "Attribute" : "Element";
+                } else if (e.LocalName == "TypeName" && parentName == "Field") {
+                    count++;
+                    if (apply) {
+                        var ext = doc.CreateElement ("rd", "TypeName", DesignerNamespace);
+                        ext.InnerText = e.InnerText;
+                        e.ParentNode.ReplaceChild (ext, e);
+                    }
+                } else if ((e.LocalName == "Columns" || e.LocalName == "ColumnSpacing") && parentName == "Body") {
+                    count++;
+                    if (apply) {
+                        e.ParentNode.RemoveChild (e);
+                        root.AppendChild (e);   // picked up into Page by the layout step
+                    }
+                } else if (e.LocalName == "Width" && parentName == "Body") {
+                    count++;
+                    if (apply) {
+                        e.ParentNode.RemoveChild (e);
+                        if (Child (root, "Width") == null && Child (Child (root, "ReportSections"), "ReportSection") == null)
+                            root.AppendChild (e);
+                    }
+                }
+            }
+
+            return count;
         }
 
         private static bool Is2008 (XmlElement root)
@@ -255,6 +342,7 @@ namespace Majorsilence.Reporting.Rdl
                 ConvertTextbox (textbox);
             foreach (var style in Styles2005 (root))
                 ConvertBorders (style);
+            FixQuirks (root, apply: true);
 
             var count = 0;
             foreach (var list in lists) {

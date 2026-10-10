@@ -57,7 +57,12 @@ namespace Majorsilence.Reporting.Rdl
         /// <summary>
         /// Rewrites the document in place. Safe to call on a 2005 document (it does nothing).
         /// </summary>
-        internal static void Normalize (XmlDocument doc, ReportLog rl, bool replaceUnsupported = true)
+        /// <param name="forEditing">
+        /// True when the designer is opening the file: unsupported report items and the version-only
+        /// elements (ReportID, DataSourceID, ...) stay in the tree so that saving writes them back.
+        /// Rendering passes false, which swaps and removes them so the parser sees only what it knows.
+        /// </param>
+        internal static void Normalize (XmlDocument doc, ReportLog rl, bool forEditing = false)
         {
             var report = FindReportElement (doc);
             if (report == null)
@@ -67,10 +72,35 @@ namespace Majorsilence.Reporting.Rdl
             UnwrapPage (report);
             NormalizeBorders (report);
             NormalizeTextboxes (report, rl);
-            if (replaceUnsupported)
+            if (!forEditing)
                 ReplaceUnsupportedItems (report, rl);
+            NormalizeActionsAndNoRows (report);
             NormalizeTablixes (report, rl);
-            RemoveVersionOnlyElements (report);
+            if (!forEditing)
+                RemoveVersionOnlyElements (report);
+        }
+
+        /// <summary>
+        /// 2008 wraps a report item's action in ActionInfo/Actions/Action and calls the empty-data
+        /// message NoRowsMessage; 2005 has Action and NoRows directly on the item.
+        /// </summary>
+        private static void NormalizeActionsAndNoRows (XmlElement root)
+        {
+            foreach (var message in FindDescendants (root, "NoRowsMessage")) {
+                var renamed = message.OwnerDocument.CreateElement ("NoRows", message.NamespaceURI);
+                renamed.InnerText = message.InnerText;
+                message.ParentNode.ReplaceChild (renamed, message);
+            }
+
+            foreach (var info in FindDescendants (root, "ActionInfo")) {
+                var first = FindChild (FindChild (info, "Actions"), "Action");
+                if (first == null) {
+                    info.ParentNode.RemoveChild (info);
+                    continue;
+                }
+                // 2005 allows one action per item; the first is the one a click follows.
+                info.ParentNode.ReplaceChild (first, info);
+            }
         }
 
         /// <summary>

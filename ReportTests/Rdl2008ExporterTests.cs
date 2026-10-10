@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Xml;
@@ -750,6 +751,139 @@ namespace ReportTests
             Assert.That (root["Body"], Is.Not.Null);
             Assert.That (root["PageHeader"], Is.Not.Null);
             Assert.That (root["PageHeight"].InnerText, Is.EqualTo ("11in"));
+        }
+
+        private const string Rdl2008 = "http://schemas.microsoft.com/sqlserver/reporting/2008/01/reportdefinition";
+
+        [Test]
+        public void Quirks_NoRowsAndBooleansAndDataElementStyle ()
+        {
+            var doc = Load (ReportWith (Rdl2008, @"<List Name=""L""><Height>1in</Height><Width>1in</Width><NoRows>Nothing here</NoRows><ReportItems /></List>"));
+            doc.DocumentElement.InnerXml += "<DataElementStyle>AttributeNormal</DataElementStyle>";
+            doc.GetElementsByTagName ("Query")[0].AppendChild (doc.CreateElement ("Hidden", Rdl2008)).InnerText = "False";
+
+            Assert.That (Rdl2008Exporter.NeedsConversion (doc), Is.True);
+            Rdl2008Exporter.ConvertToTablix (doc);
+
+            Assert.That (First (doc, "NoRows"), Is.Null);
+            Assert.That (First (doc, "Tablix")["NoRowsMessage"].InnerText, Is.EqualTo ("Nothing here"));
+            Assert.That (First (doc, "Hidden").InnerText, Is.EqualTo ("false"));
+            Assert.That (First (doc, "DataElementStyle").InnerText, Is.EqualTo ("Attribute"));
+        }
+
+        [Test]
+        public void Quirks_ActionIsWrappedInActionInfo ()
+        {
+            var doc = Load (ReportWith (Rdl2008, @"<Textbox Name=""Link""><Value>go</Value><Action><Hyperlink>http://example.com</Hyperlink></Action></Textbox>"));
+
+            Rdl2008Exporter.ConvertToTablix (doc);
+
+            var action = First (doc, "Textbox")["ActionInfo"]["Actions"]["Action"];
+            Assert.That (action["Hyperlink"].InnerText, Is.EqualTo ("http://example.com"));
+            Assert.That (Rdl2008Exporter.NeedsConversion (doc), Is.False);
+        }
+
+        [Test]
+        public void Quirks_ActionAndNoRows_RoundTrip ()
+        {
+            var doc = Load (ReportWith (Rdl2008, @"<Textbox Name=""Link""><Value>go</Value><Action><Drillthrough><ReportName>Detail</ReportName></Drillthrough></Action></Textbox>
+<Table Name=""T""><NoRows>none</NoRows><TableColumns><TableColumn><Width>1in</Width></TableColumn></TableColumns><Header><TableRows><TableRow><Height>0.25in</Height><TableCells><TableCell><ReportItems><Textbox Name=""H""><Value>h</Value></Textbox></ReportItems></TableCell></TableCells></TableRow></TableRows></Header><Details><TableRows><TableRow><Height>0.25in</Height><TableCells><TableCell><ReportItems><Textbox Name=""X""><Value>x</Value></Textbox></ReportItems></TableCell></TableCells></TableRow></TableRows></Details></Table>"));
+            Rdl2008Exporter.ConvertToTablix (doc);
+
+            Rdl2008Normalizer.Normalize (doc, null);
+
+            Assert.That (First (doc, "Textbox")["Action"]["Drillthrough"]["ReportName"].InnerText, Is.EqualTo ("Detail"));
+            Assert.That (doc.GetElementsByTagName ("ActionInfo"), Is.Empty);
+            Assert.That (First (doc, "Table")["NoRows"].InnerText, Is.EqualTo ("none"));
+        }
+
+        [Test]
+        public void Quirks_BodyColumnsMoveToPage ()
+        {
+            var doc = Load (ReportWith (Rdl2008, "<Textbox Name=\"T\"><Value>x</Value></Textbox>"));
+            var body = doc.DocumentElement["Body", Rdl2008];
+            body.AppendChild (doc.CreateElement ("Columns", Rdl2008)).InnerText = "2";
+            body.AppendChild (doc.CreateElement ("ColumnSpacing", Rdl2008)).InnerText = "0.5in";
+
+            Rdl2008Exporter.ConvertToTablix (doc);
+
+            Assert.That (body["Columns", Rdl2008], Is.Null);
+            Assert.That (doc.DocumentElement["Page", Rdl2008]["Columns", Rdl2008].InnerText, Is.EqualTo ("2"));
+            Assert.That (doc.DocumentElement["Page", Rdl2008]["ColumnSpacing", Rdl2008].InnerText, Is.EqualTo ("0.5in"));
+        }
+
+        [Test]
+        public void Quirks_FieldTypeNameBecomesTheDesignerExtension ()
+        {
+            var doc = Load (ReportWith (Rdl2008, "<Textbox Name=\"T\"><Value>x</Value></Textbox>"));
+            doc.GetElementsByTagName ("Field")[0].AppendChild (doc.CreateElement ("TypeName", Rdl2008)).InnerText = "System.String";
+
+            Rdl2008Exporter.ConvertToTablix (doc);
+
+            var field = doc.GetElementsByTagName ("Field")[0];
+            Assert.That (field["TypeName", Rdl2008], Is.Null);
+            Assert.That (field["TypeName", "http://schemas.microsoft.com/SQLServer/reporting/reportdesigner"].InnerText, Is.EqualTo ("System.String"));
+        }
+
+        /// <summary>
+        /// Every sample report in the 2005 namespace, moved to 2008 and exported, must validate against
+        /// Microsoft's schema except for the engine's own extension elements, which live in the
+        /// default namespace and have no 2008 spelling yet (see issue #411) and charts (#409).
+        /// </summary>
+        [Test]
+        public void SampleReports_ValidateAfterExportExceptKnownEngineExtensions ()
+        {
+            var xsdPath = System.Environment.GetEnvironmentVariable ("RDL_XSD_2008");
+            if (string.IsNullOrEmpty (xsdPath) || !System.IO.File.Exists (xsdPath))
+                Assert.Ignore ("Set RDL_XSD_2008 to a local copy of the Microsoft 2008 ReportDefinition.xsd to run.");
+
+            var dir = new System.IO.DirectoryInfo (TestContext.CurrentContext.TestDirectory);
+            while (dir != null && !System.IO.Directory.Exists (System.IO.Path.Combine (dir.FullName, "ReportTests", "Reports")))
+                dir = dir.Parent;
+            Assert.That (dir, Is.Not.Null, "could not find the repository root");
+
+            var schemas = new System.Xml.Schema.XmlSchemaSet ();
+            schemas.Add (Rdl2008, xsdPath);
+
+            var known = new[] {
+                "child element 'Source'",             // CustomReportItem (barcodes)
+                "child element 'Rows'",               // DataSet inline rows
+                "child element 'PageBreakCondition'", // Group
+                "child element 'MarginLeft'",         // not a real RDL element
+                "child element 'Type'",               // 2005 Chart, see #409
+                "cannot contain child element",       // FilterValue/Expression
+            };
+
+            var failures = new System.Collections.Generic.List<string> ();
+            var checkedCount = 0;
+            var files = new[] { "ReportTests/Reports", "Examples", "Templates", "WebDesigner.Tests/Reports" }
+                .Select (f => System.IO.Path.Combine (dir.FullName, f))
+                .Where (System.IO.Directory.Exists)
+                .SelectMany (f => System.IO.Directory.EnumerateFiles (f, "*.rdl", System.IO.SearchOption.AllDirectories))
+                .Where (f => !f.Contains ("/bin/") && !f.Contains ("/obj/"));
+            foreach (var file in files) {
+                var text = System.IO.File.ReadAllText (file);
+                if (!text.Contains ("reporting/2005/01/reportdefinition"))
+                    continue;
+                var doc = new XmlDocument ();
+                try { doc.LoadXml (text.Replace ("reporting/2005/01/reportdefinition", "reporting/2008/01/reportdefinition")); }
+                catch (XmlException) { continue; }
+
+                Rdl2008Exporter.ConvertToTablix (doc);
+                checkedCount++;
+
+                var settings = new XmlReaderSettings { ValidationType = ValidationType.Schema, Schemas = schemas };
+                settings.ValidationEventHandler += (_, e) => {
+                    if (!known.Any (k => e.Message.Contains (k)))
+                        failures.Add (System.IO.Path.GetFileName (file) + ": " + e.Message.Replace (Rdl2008, "NS"));
+                };
+                using (var reader = XmlReader.Create (new System.IO.StringReader (doc.OuterXml), settings)) {
+                    while (reader.Read ()) { }
+                }
+            }
+
+            Assert.That (checkedCount, Is.GreaterThan (30), "expected to find the sample reports");
+            Assert.That (failures, Is.Empty, string.Join (Environment.NewLine, failures.Take (20)));
         }
 
         [Test]

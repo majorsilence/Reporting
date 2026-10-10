@@ -179,5 +179,29 @@ namespace Majorsilence.Reporting.RdlDesign.Tests
             Assert.That(saved, Does.Contain("<Sparkline Name=\"Trend\""));
             Assert.That(saved, Does.Contain("<Marker>x</Marker>"), "its settings are written back unchanged");
         }
+
+        // Visual Studio keeps identifiers in these elements; opening and saving must not drop them.
+        [Test]
+        public void OpenRdlc_KeepsVersionOnlyElementsOnSave()
+        {
+            const string rdlc = @"<?xml version=""1.0"" encoding=""utf-8""?>
+<Report xmlns=""http://schemas.microsoft.com/sqlserver/reporting/2008/01/reportdefinition"" xmlns:rd=""http://schemas.microsoft.com/SQLServer/reporting/reportdesigner"">
+  <AutoRefresh>0</AutoRefresh>
+  <DataSources><DataSource Name=""DS1""><ConnectionProperties><DataProvider>SQL</DataProvider><ConnectString>x</ConnectString></ConnectionProperties><rd:DataSourceID>11111111-1111-1111-1111-111111111111</rd:DataSourceID></DataSource></DataSources>
+  <Body><Height>1in</Height><ReportItems /></Body>
+  <Width>4in</Width>
+  <rd:ReportUnitType>Inch</rd:ReportUnitType>
+  <rd:ReportID>22222222-2222-2222-2222-222222222222</rd:ReportID>
+</Report>";
+
+            var design = new DesignCtl();
+            design.ReportSource = rdlc;
+
+            var saved = design.ReportSource;
+            Assert.That(saved, Does.Contain("11111111-1111-1111-1111-111111111111"));
+            Assert.That(saved, Does.Contain("22222222-2222-2222-2222-222222222222"));
+            Assert.That(saved, Does.Contain("<AutoRefresh>0</AutoRefresh>"));
+            Assert.That(saved, Does.Contain("Inch"));
+        }
     }
 }
