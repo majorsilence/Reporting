@@ -102,6 +102,8 @@ namespace Majorsilence.Reporting.Rdl
 		// assemblies at runtime, which is not possible under Native AOT.
 		[UnconditionalSuppressMessage("Trimming", "IL2026",
 			Justification = "CodeModules classes are only reachable when the report declares <CodeModules>, which already requires an assembly load that is flagged where it happens; the registered-type path above is trim-safe.")]
+		[UnconditionalSuppressMessage("AOT", "IL3050",
+			Justification = "Guarded by RuntimeFeature.IsDynamicCodeSupported; the analyzer only recognises that guard when targeting net9.0 or later.")]
 		MethodInfo? ResolveMethod(Type[] argTypes, out Type? theClassType)
 		{
 			if (_Cm == null)

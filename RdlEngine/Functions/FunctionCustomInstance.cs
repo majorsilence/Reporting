@@ -108,6 +108,8 @@ namespace Majorsilence.Reporting.Rdl
 		// inst.GetType(), whose members the trimmer may have removed.
 		[UnconditionalSuppressMessage("Trimming", "IL2026",
 			Justification = "Unregistered instance types only occur for classes loaded from <CodeModules> or created by an unannotated factory; the registered-type path is trim-safe and the fallback is guarded by IsDynamicCodeSupported.")]
+		[UnconditionalSuppressMessage("AOT", "IL3050",
+			Justification = "Guarded by RuntimeFeature.IsDynamicCodeSupported; the analyzer only recognises that guard when targeting net9.0 or later.")]
 		MethodInfo? ResolveMethod(object inst, Type[] argTypes)
 		{
 			Type? registered = _Rc.ClassName == null ? null : RdlEngineConfig.GetRegisteredType(_Rc.ClassName);
