@@ -34,7 +34,116 @@ namespace Majorsilence.Reporting.Rdl
 
             var lists = new List<XmlElement> ();
             Collect (root, lists);
-            return lists.Count > 0 || Textboxes2005 (root).Count > 0;
+            return lists.Count > 0 || Textboxes2005 (root).Count > 0 || Styles2005 (root).Count > 0 || NeedsSections (root);
+        }
+
+        private static bool Is2008 (XmlElement root)
+            => root.NamespaceURI.EndsWith ("/2008/01/reportdefinition", StringComparison.Ordinal);
+
+        // 2008 moves the page setup into Page; 2010 and later also move Body and Width into
+        // ReportSections/ReportSection.
+        private static bool NeedsSections (XmlElement root)
+        {
+            foreach (XmlNode node in root.ChildNodes) {
+                if (node is XmlElement e && e.NamespaceURI == root.NamespaceURI && PageElements.Contains (e.LocalName))
+                    return true;
+            }
+
+            return !Is2008 (root) && Child (root, "Body") != null;
+        }
+
+        // 2005 groups border properties by property (BorderColor/BorderStyle/BorderWidth, each with
+        // Default/Left/Right/Top/Bottom); 2008 groups them by edge (Border/LeftBorder/..., each with
+        // Color/Style/Width). The normalizer transposes one way, this the other.
+        private static readonly string[] BorderProperties = { "Color", "Style", "Width" };
+        private static readonly string[][] BorderEdgeNames = {
+            new[] { "Default", "Border" }, new[] { "Left", "LeftBorder" }, new[] { "Right", "RightBorder" },
+            new[] { "Top", "TopBorder" }, new[] { "Bottom", "BottomBorder" },
+        };
+
+        private static List<XmlElement> Styles2005 (XmlElement root)
+        {
+            var found = new List<XmlElement> ();
+            void Walk (XmlElement element)
+            {
+                foreach (XmlNode node in element.ChildNodes) {
+                    if (node is not XmlElement child)
+                        continue;
+                    if (child.LocalName == "Style" && child.NamespaceURI == root.NamespaceURI
+                        && (Child (child, "BorderColor") != null || Child (child, "BorderStyle") != null || Child (child, "BorderWidth") != null))
+                        found.Add (child);
+                    Walk (child);
+                }
+            }
+            Walk (root);
+            return found;
+        }
+
+        private static void ConvertBorders (XmlElement style)
+        {
+            var doc = style.OwnerDocument;
+            var ns = style.NamespaceURI;
+            foreach (var property in BorderProperties) {
+                var group = Child (style, "Border" + property);
+                if (group == null)
+                    continue;
+
+                foreach (var pair in BorderEdgeNames) {
+                    var value = Child (group, pair[0]);
+                    if (value == null)
+                        continue;
+                    var edge = Child (style, pair[1]);
+                    if (edge == null) {
+                        edge = El (doc, ns, pair[1]);
+                        style.AppendChild (edge);
+                    }
+                    edge.AppendChild (El (doc, ns, property, value.InnerText));
+                }
+                style.RemoveChild (group);
+            }
+        }
+
+        // Page setup that 2008 and later keep in Page rather than directly on Report.
+        private static readonly HashSet<string> PageElements = new HashSet<string> {
+            "PageHeader", "PageFooter", "PageHeight", "PageWidth", "InteractiveHeight", "InteractiveWidth",
+            "LeftMargin", "RightMargin", "TopMargin", "BottomMargin", "Columns", "ColumnSpacing",
+        };
+
+        /// <summary>Groups the page setup into Page, and for 2010+ the body into a ReportSection.</summary>
+        private static void WrapInReportSection (XmlElement root)
+        {
+            var doc = root.OwnerDocument;
+            var ns = root.NamespaceURI;
+            var page = El (doc, ns, "Page");
+            var body = new List<XmlElement> ();
+
+            foreach (XmlNode node in new List<XmlNode> (root.ChildNodes.Cast<XmlNode> ())) {
+                if (node is not XmlElement e || e.NamespaceURI != ns)
+                    continue;
+                if (PageElements.Contains (e.LocalName)) {
+                    root.RemoveChild (e);
+                    page.AppendChild (e);
+                } else if (e.LocalName == "Body" || e.LocalName == "Width") {
+                    body.Add (e);
+                }
+            }
+
+            if (Is2008 (root)) {
+                if (page.HasChildNodes)
+                    root.AppendChild (page);
+                return;
+            }
+
+            var section = El (doc, ns, "ReportSection");
+            foreach (var e in body) {
+                root.RemoveChild (e);
+                section.AppendChild (e);
+            }
+            if (page.HasChildNodes)
+                section.AppendChild (page);
+            var sections = El (doc, ns, "ReportSections");
+            sections.AppendChild (section);
+            root.AppendChild (sections);
         }
 
         private static List<XmlElement> Textboxes2005 (XmlElement root)
@@ -126,6 +235,8 @@ namespace Majorsilence.Reporting.Rdl
             // already-converted Textbox is still correct, while the reverse would revisit them.
             foreach (var textbox in Textboxes2005 (root))
                 ConvertTextbox (textbox);
+            foreach (var style in Styles2005 (root))
+                ConvertBorders (style);
 
             var count = 0;
             foreach (var list in lists) {
@@ -135,6 +246,9 @@ namespace Majorsilence.Reporting.Rdl
                     : BuildTablix (list), list);
                 count++;
             }
+
+            if (NeedsSections (root))
+                WrapInReportSection (root);
 
             return count;
         }

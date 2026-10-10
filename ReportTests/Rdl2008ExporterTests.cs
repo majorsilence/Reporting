@@ -518,7 +518,7 @@ namespace ReportTests
         [Test]
         public void Textbox_AlreadyInTheRichTextForm_IsLeftAlone ()
         {
-            var doc = Load (ReportWith (Rdl2010, @"
+            var doc = Load (ReportWith ("http://schemas.microsoft.com/sqlserver/reporting/2008/01/reportdefinition", @"
 <Textbox Name=""T""><Paragraphs><Paragraph><TextRuns><TextRun><Value>x</Value><Style /></TextRun></TextRuns><Style /></Paragraph></Paragraphs></Textbox>"));
 
             Assert.That (Rdl2008Exporter.NeedsConversion (doc), Is.False);
@@ -529,10 +529,10 @@ namespace ReportTests
         /// redistributed here; see ReportTests/Schemas/README.md for where to get them, then set
         /// RDL_XSD_2008 / RDL_XSD_2010 / RDL_XSD_2016 to their paths to run the matching case.
         /// </summary>
-        [TestCase ("2008", false)]
-        [TestCase ("2010", true)]
-        [TestCase ("2016", true)]
-        public void ExportedRegions_ValidateAgainstTheMicrosoftSchema (string version, bool bodyInSections)
+        [TestCase ("2008")]
+        [TestCase ("2010")]
+        [TestCase ("2016")]
+        public void ExportedRegions_ValidateAgainstTheMicrosoftSchema (string version)
         {
             var xsdPath = System.Environment.GetEnvironmentVariable ("RDL_XSD_" + version);
             if (string.IsNullOrEmpty (xsdPath) || !System.IO.File.Exists (xsdPath))
@@ -544,21 +544,10 @@ namespace ReportTests
 
             foreach (var (label, region) in new[] { ("List", SimpleList), ("Table", GroupedTable), ("Matrix", SalesMatrix) }) {
                 var doc = Load (ReportWith (ns, region));
+                // What the designer holds besides the region: page setup, a page header and a
+                // bordered textbox, all in the 2005 spelling.
+                doc.DocumentElement.InnerXml += PageSetup2005;
                 Rdl2008Exporter.ConvertToTablix (doc);
-
-                if (bodyInSections) {
-                    // 2010 and later hold Body and Width inside ReportSections/ReportSection.
-                    var root = doc.DocumentElement;
-                    var section = doc.CreateElement ("ReportSection", ns);
-                    foreach (var name in new[] { "Body", "Width" }) {
-                        var element = root[name, ns];
-                        root.RemoveChild (element);
-                        section.AppendChild (element);
-                    }
-                    var sections = doc.CreateElement ("ReportSections", ns);
-                    sections.AppendChild (section);
-                    root.AppendChild (sections);
-                }
 
                 var errors = new System.Collections.Generic.List<string> ();
                 var settings = new XmlReaderSettings { ValidationType = ValidationType.Schema, Schemas = schemas };
@@ -569,6 +558,91 @@ namespace ReportTests
 
                 Assert.That (errors, Is.Empty, $"{label}: " + string.Join (" | ", errors));
             }
+        }
+
+        private const string PageSetup2005 = @"
+<PageHeader><Height>0.5in</Height><PrintOnFirstPage>true</PrintOnFirstPage><PrintOnLastPage>true</PrintOnLastPage>
+  <ReportItems><Textbox Name=""HeaderText""><Top>0in</Top><Left>0in</Left><Height>0.25in</Height><Width>2in</Width><Value>Page header</Value>
+    <Style><FontWeight>Bold</FontWeight><BorderStyle><Default>Solid</Default><Bottom>Dashed</Bottom></BorderStyle><BorderColor><Default>Black</Default></BorderColor><BorderWidth><Default>1pt</Default></BorderWidth></Style>
+  </Textbox></ReportItems>
+</PageHeader>
+<PageHeight>11in</PageHeight><PageWidth>8.5in</PageWidth><LeftMargin>1in</LeftMargin><RightMargin>1in</RightMargin><TopMargin>1in</TopMargin><BottomMargin>1in</BottomMargin>";
+
+        [Test]
+        public void Borders_AreWrittenPerEdge ()
+        {
+            var doc = Load (ReportWith (Rdl2010,
+                @"<Textbox Name=""B""><Value>x</Value><Style><BorderStyle><Default>Solid</Default><Bottom>Dashed</Bottom></BorderStyle><BorderColor><Default>Red</Default></BorderColor><BorderWidth><Default>2pt</Default></BorderWidth></Style></Textbox>"));
+
+            Assert.That (Rdl2008Exporter.NeedsConversion (doc), Is.True);
+            Rdl2008Exporter.ConvertToTablix (doc);
+
+            var style = First (doc, "Textbox")["Style"];
+            Assert.That (style["BorderStyle"], Is.Null, "2005 border groups are not in the 2008 schema");
+            Assert.That (style["Border"]["Style"].InnerText, Is.EqualTo ("Solid"));
+            Assert.That (style["Border"]["Color"].InnerText, Is.EqualTo ("Red"));
+            Assert.That (style["Border"]["Width"].InnerText, Is.EqualTo ("2pt"));
+            Assert.That (style["BottomBorder"]["Style"].InnerText, Is.EqualTo ("Dashed"));
+        }
+
+        [Test]
+        public void Borders_RoundTrip ()
+        {
+            var doc = Load (ReportWith (Rdl2010,
+                @"<Textbox Name=""B""><Value>x</Value><Style><BorderStyle><Default>Solid</Default><Bottom>Dashed</Bottom></BorderStyle><BorderWidth><Default>2pt</Default></BorderWidth></Style></Textbox>"));
+            Rdl2008Exporter.ConvertToTablix (doc);
+
+            Rdl2008Normalizer.Normalize (doc, null);
+
+            var style = First (doc, "Textbox")["Style"];
+            Assert.That (style["BorderStyle"]["Default"].InnerText, Is.EqualTo ("Solid"));
+            Assert.That (style["BorderStyle"]["Bottom"].InnerText, Is.EqualTo ("Dashed"));
+            Assert.That (style["BorderWidth"]["Default"].InnerText, Is.EqualTo ("2pt"));
+        }
+
+        [TestCase (Rdl2010, true)]
+        [TestCase ("http://schemas.microsoft.com/sqlserver/reporting/2016/01/reportdefinition", true)]
+        [TestCase ("http://schemas.microsoft.com/sqlserver/reporting/2008/01/reportdefinition", false)]
+        public void BodyAndPageSetup_AreGroupedForEachVersion (string ns, bool expectSections)
+        {
+            var doc = Load (ReportWith (ns, "<Textbox Name=\"T\"><Value>x</Value></Textbox>"));
+            doc.DocumentElement.InnerXml += PageSetup2005;
+
+            Rdl2008Exporter.ConvertToTablix (doc);
+
+            var root = doc.DocumentElement;
+            if (!expectSections) {
+                Assert.That (root["ReportSections"], Is.Null, "2008 has no sections");
+                Assert.That (root["Body"], Is.Not.Null);
+                Assert.That (root["Page"]["PageHeader"], Is.Not.Null, "but its page setup lives in Page");
+                Assert.That (root["Page"]["PageHeight"].InnerText, Is.EqualTo ("11in"));
+                Assert.That (root["PageHeight"], Is.Null);
+                return;
+            }
+            Assert.That (root["Body"], Is.Null, "Body moves into the section");
+            var section = root["ReportSections"]["ReportSection"];
+            Assert.That (section["Body"], Is.Not.Null);
+            Assert.That (section["Width"].InnerText, Is.EqualTo ("6in"));
+            Assert.That (section["Page"]["PageHeader"], Is.Not.Null);
+            Assert.That (section["Page"]["PageHeight"].InnerText, Is.EqualTo ("11in"));
+            Assert.That (root["PageHeight"], Is.Null);
+            Assert.That (Rdl2008Exporter.NeedsConversion (doc), Is.False, "converting twice must not wrap twice");
+        }
+
+        [Test]
+        public void ReportSections_RoundTripBackToTheFlatLayout ()
+        {
+            var doc = Load (ReportWith (Rdl2010, "<Textbox Name=\"T\"><Value>x</Value></Textbox>"));
+            doc.DocumentElement.InnerXml += PageSetup2005;
+            Rdl2008Exporter.ConvertToTablix (doc);
+
+            Rdl2008Normalizer.Normalize (doc, null);
+
+            var root = doc.DocumentElement;
+            Assert.That (root["ReportSections"], Is.Null);
+            Assert.That (root["Body"], Is.Not.Null);
+            Assert.That (root["PageHeader"], Is.Not.Null);
+            Assert.That (root["PageHeight"].InnerText, Is.EqualTo ("11in"));
         }
 
         [Test]
