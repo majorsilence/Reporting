@@ -1335,12 +1335,20 @@ namespace Majorsilence.Reporting.Rdl
                     if (contents == null)
                         continue;   // spanned-over placeholder
 
+                    var colSpan = SpanOf (contents, "ColSpan");
+                    var rowSpan = SpanOf (contents, "RowSpan");
+                    // A lone item covering the whole header block is simply the Corner's content;
+                    // 2005 sizes it to the corner itself.
+                    var coversCorner = cellIndex == 0 && rowIndex == 0
+                        && colSpan >= Math.Max (rowLevels.Count, 1) && rowSpan >= Math.Max (columnLevels.Count, 1);
+
                     foreach (var child in Children (contents)) {
                         if (child.LocalName == "ColSpan" || child.LocalName == "RowSpan")
                             continue;
 
                         var item = (XmlElement)child.CloneNode (true);
-                        PositionCornerItem (doc, ns, item, cellIndex, rowIndex, rowLevels, columnLevels);
+                        if (!coversCorner)
+                            PositionCornerItem (doc, ns, item, cellIndex, rowIndex, colSpan, rowSpan, rowLevels, columnLevels);
                         items.Add (item);
                     }
                 }
@@ -1368,8 +1376,11 @@ namespace Majorsilence.Reporting.Rdl
         /// Sets Top/Left/Width/Height on a corner item from the sizes of the levels before it.
         /// Sizes in mixed units are left unset; the layout degrades but nothing is lost.
         /// </summary>
+        private static int SpanOf (XmlElement contents, string name)
+            => int.TryParse (FindChild (contents, name)?.InnerText, out var span) && span > 1 ? span : 1;
+
         private static void PositionCornerItem (XmlDocument doc, string ns, XmlElement item,
-            int cellIndex, int rowIndex, List<AxisLevel> rowLevels, List<AxisLevel> columnLevels)
+            int cellIndex, int rowIndex, int colSpan, int rowSpan, List<AxisLevel> rowLevels, List<AxisLevel> columnLevels)
         {
             string LevelSize (List<AxisLevel> levels, int index)
             {
@@ -1398,11 +1409,11 @@ namespace Majorsilence.Reporting.Rdl
                 item.AppendChild (element);
             }
 
-            string Sum (Func<int, string> sizeAt, int count)
+            string Sum (Func<int, string> sizeAt, int count, int first = 0)
             {
                 double total = 0;
                 string unit = null;
-                for (var i = 0; i < count; i++) {
+                for (var i = first; i < first + count; i++) {
                     var size = sizeAt (i);
                     if (size == null)
                         return null;
@@ -1419,8 +1430,8 @@ namespace Majorsilence.Reporting.Rdl
 
             Set ("Left", cellIndex == 0 ? "0in" : Sum (i => LevelSize (rowLevels, i), cellIndex));
             Set ("Top", rowIndex == 0 ? "0in" : Sum (i => LevelSize (columnLevels, i), rowIndex));
-            Set ("Width", LevelSize (rowLevels, cellIndex));
-            Set ("Height", LevelSize (columnLevels, rowIndex));
+            Set ("Width", colSpan > 1 ? Sum (i => LevelSize (rowLevels, i), colSpan, cellIndex) : LevelSize (rowLevels, cellIndex));
+            Set ("Height", rowSpan > 1 ? Sum (i => LevelSize (columnLevels, i), rowSpan, rowIndex) : LevelSize (columnLevels, rowIndex));
         }
 
         private static (double Value, string Unit)? ParseSize (string size)

@@ -392,6 +392,77 @@ namespace ReportTests
             Assert.That (Text (matrix["Corner"]), Is.EqualTo ("Corner"));
         }
 
+        private const string TwoLevelMatrix = @"
+<Matrix Name=""Pivot2"">
+  <Corner><ReportItems><Textbox Name=""Corner""><Value>Corner</Value></Textbox></ReportItems></Corner>
+  <ColumnGroupings>
+    <ColumnGrouping><Height>0.25in</Height><DynamicColumns><Grouping Name=""Year""><GroupExpressions><GroupExpression>=Fields!Name.Value</GroupExpression></GroupExpressions></Grouping><ReportItems><Textbox Name=""Y""><Value>y</Value></Textbox></ReportItems></DynamicColumns></ColumnGrouping>
+    <ColumnGrouping><Height>0.3in</Height><DynamicColumns><Grouping Name=""Quarter""><GroupExpressions><GroupExpression>=Fields!Name.Value</GroupExpression></GroupExpressions></Grouping><ReportItems><Textbox Name=""Q""><Value>q</Value></Textbox></ReportItems></DynamicColumns></ColumnGrouping>
+  </ColumnGroupings>
+  <RowGroupings>
+    <RowGrouping><Width>1in</Width><DynamicRows><Grouping Name=""Region""><GroupExpressions><GroupExpression>=Fields!Name.Value</GroupExpression></GroupExpressions></Grouping><ReportItems><Textbox Name=""R""><Value>r</Value></Textbox></ReportItems></DynamicRows></RowGrouping>
+    <RowGrouping><Width>0.8in</Width><DynamicRows><Grouping Name=""Store""><GroupExpressions><GroupExpression>=Fields!Name.Value</GroupExpression></GroupExpressions></Grouping><ReportItems><Textbox Name=""S""><Value>s</Value></Textbox></ReportItems></DynamicRows></RowGrouping>
+  </RowGroupings>
+  <MatrixRows><MatrixRow><Height>0.25in</Height><MatrixCells><MatrixCell><ReportItems><Textbox Name=""Cell""><Value>v</Value></Textbox></ReportItems></MatrixCell></MatrixCells></MatrixRow></MatrixRows>
+  <MatrixColumns><MatrixColumn><Width>1in</Width></MatrixColumn></MatrixColumns>
+</Matrix>";
+
+        [Test]
+        public void MultiLevelMatrix_CornerSpansTheHeaderBlock ()
+        {
+            var doc = Load (ReportWith (Rdl2010, TwoLevelMatrix));
+
+            Rdl2008Exporter.ConvertToTablix (doc);
+
+            var corner = First (doc, "TablixCorner");
+            var rows = corner["TablixCornerRows"].ChildNodes;
+            Assert.That (rows, Has.Count.EqualTo (2), "one corner row per column level");
+            Assert.That (rows[0].ChildNodes, Has.Count.EqualTo (2), "one corner cell per row level");
+            var contents = rows[0].FirstChild["CellContents"];
+            Assert.That (contents["ColSpan"].InnerText, Is.EqualTo ("2"));
+            Assert.That (contents["RowSpan"].InnerText, Is.EqualTo ("2"));
+        }
+
+        [Test]
+        public void RoundTrip_MultiLevelMatrixKeepsBothLevelsAndTheCorner ()
+        {
+            var doc = Load (ReportWith (Rdl2010, TwoLevelMatrix));
+            Rdl2008Exporter.ConvertToTablix (doc);
+
+            Rdl2008Normalizer.Normalize (doc, null);
+
+            var matrix = First (doc, "Matrix");
+            Assert.That (matrix, Is.Not.Null);
+            var columns = matrix["ColumnGroupings"].ChildNodes;
+            Assert.That (columns, Has.Count.EqualTo (2));
+            Assert.That (columns[0]["DynamicColumns"]["Grouping"].GetAttribute ("Name"), Is.EqualTo ("Year"));
+            Assert.That (columns[1]["DynamicColumns"]["Grouping"].GetAttribute ("Name"), Is.EqualTo ("Quarter"));
+            Assert.That (columns[1]["Height"].InnerText, Is.EqualTo ("0.3in"));
+            var rows = matrix["RowGroupings"].ChildNodes;
+            Assert.That (rows[1]["DynamicRows"]["Grouping"].GetAttribute ("Name"), Is.EqualTo ("Store"));
+            Assert.That (rows[1]["Width"].InnerText, Is.EqualTo ("0.8in"));
+            var cornerItem = matrix["Corner"]["ReportItems"].FirstChild;
+            Assert.That (cornerItem.LocalName, Is.EqualTo ("Textbox"));
+            Assert.That (cornerItem["Width"], Is.Null, "an item covering the whole corner is left unpositioned");
+        }
+
+        [Test]
+        public void Import_CornerItemWithSpan_IsSizedAcrossTheSpannedLevels ()
+        {
+            // An item in the first corner cell spanning two row levels but one column level.
+            var doc = Load (ReportWith (Rdl2010, TwoLevelMatrix));
+            Rdl2008Exporter.ConvertToTablix (doc);
+            var corner = First (doc, "TablixCorner");
+            var contents = corner["TablixCornerRows"].FirstChild.FirstChild["CellContents"];
+            contents.RemoveChild (contents["RowSpan"]);
+
+            Rdl2008Normalizer.Normalize (doc, null);
+
+            var item = First (doc, "Matrix")["Corner"]["ReportItems"].FirstChild;
+            Assert.That (item["Width"].InnerText, Is.EqualTo ("1.8in"), "1in + 0.8in");
+            Assert.That (item["Height"].InnerText, Is.EqualTo ("0.25in"));
+        }
+
         [Test]
         public async Task ExportedMatrix_ParsesInTheEngine ()
         {
