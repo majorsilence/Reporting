@@ -37,6 +37,7 @@ jobs:
     outputs:
       version: ${{ steps.resolve.outputs.version }}
       is_release: ${{ steps.resolve.outputs.is_release }}
+      is_prerelease: ${{ steps.resolve.outputs.is_prerelease }}
     steps:
       - uses: actions/checkout@v6
 
@@ -61,6 +62,11 @@ jobs:
             echo "is_release=false" >> "$GITHUB_OUTPUT"
           fi
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          # A SemVer pre-release label ("27.0.0-alpha.1") marks the GitHub Release as a pre-release.
+          case "$VERSION" in
+            *-*) echo "is_prerelease=true" >> "$GITHUB_OUTPUT" ;;
+            *)   echo "is_prerelease=false" >> "$GITHUB_OUTPUT" ;;
+          esac
           echo "Version: $VERSION"
 
   # The designer/viewer/rdlcmd zips and every NuGet package. Every project is plain
@@ -167,4 +173,5 @@ jobs:
           name: Majorsilence Reporting ${{ needs.version.outputs.version }}
           generate_release_notes: true
           draft: true
+          prerelease: ${{ needs.version.outputs.is_prerelease == 'true' }}
           files: release/*
