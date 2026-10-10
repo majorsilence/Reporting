@@ -70,8 +70,54 @@ namespace Majorsilence.Reporting.Cri
 
             // Majorsilence.Forms.Drawing declares the SKBitmap conversion on Image; the object it
             // hands back is a Bitmap, so the ref parameter's type needs the downcast.
-            bm = (Draw2.Bitmap)(Draw2.Image)writer.Write(qrcode);
+            var rendered = writer.Write(qrcode);
+            if (!string.Equals(_align, "Center", StringComparison.OrdinalIgnoreCase))
+            {
+                rendered = AlignHorizontally(rendered, _align);
+            }
+            bm = (Draw2.Bitmap)(Draw2.Image)rendered;
         }
+
+        /// <summary>
+        /// ZXing centers the symbol (plus quiet zone) in the requested width. Trim the blank
+        /// columns either side and move the symbol to the left or right edge of the bitmap.
+        /// </summary>
+        private static SkiaSharp.SKBitmap AlignHorizontally(SkiaSharp.SKBitmap src, string align)
+        {
+            bool right = string.Equals(align, "Right", StringComparison.OrdinalIgnoreCase);
+            if (!right && !string.Equals(align, "Left", StringComparison.OrdinalIgnoreCase))
+                return src;
+
+            int first = -1, last = -1;
+            for (int x = 0; x < src.Width && first < 0; x++)
+                for (int y = 0; y < src.Height; y++)
+                    if (IsDark(src.GetPixel(x, y))) { first = x; break; }
+            if (first < 0)
+                return src;
+            for (int x = src.Width - 1; x >= first && last < 0; x--)
+                for (int y = 0; y < src.Height; y++)
+                    if (IsDark(src.GetPixel(x, y))) { last = x; break; }
+
+            int contentWidth = last - first + 1;
+            var result = new SkiaSharp.SKBitmap(src.Width, src.Height);
+            using (var canvas = new SkiaSharp.SKCanvas(result))
+            {
+                canvas.Clear(SkiaSharp.SKColors.White);
+                int dest = right ? src.Width - contentWidth : 0;
+                canvas.DrawBitmap(src,
+                    new SkiaSharp.SKRect(first, 0, first + contentWidth, src.Height),
+                    new SkiaSharp.SKRect(dest, 0, dest + contentWidth, src.Height));
+            }
+            src.Dispose();
+            return result;
+        }
+
+        private static bool IsDark(SkiaSharp.SKColor c)
+        {
+            return c.Alpha > 0 && (c.Red + c.Green + c.Blue) / 3 < 128;
+        }
+
+        private string _align = "Center";
 
         /// <summary>
         /// Design time: Draw a hard coded BarCode for design time;  Parameters can't be
@@ -87,6 +133,10 @@ namespace Majorsilence.Reporting.Cri
 
         void ICustomReportItem.SetProperties(IDictionary<string, object> props)
         {
+            _align = props.TryGetValue("Align", out object alignValue) && alignValue != null
+                ? alignValue.ToString()
+                : "Center";
+
             try
             {
                 if (props.TryGetValue("AztecCode", out object codeValueA))
@@ -123,6 +173,9 @@ namespace Majorsilence.Reporting.Cri
                     case "Code":
                         bcp.SetCode(XmlHelpers.GetNamedElementValue(n, "Value", ""));
                         break;
+                    case "Align":
+                        bcp.SetAlign(XmlHelpers.GetNamedElementValue(n, "Value", "Center"));
+                        break;
                     default:
                         break;
                 }
@@ -141,6 +194,8 @@ namespace Majorsilence.Reporting.Cri
 
 
             XmlHelpers.CreateChild(node, "Code", bcp.Code);
+            if (!string.IsNullOrEmpty(bcp.Align) && bcp.Align != "Center")
+                XmlHelpers.CreateChild(node, "Align", bcp.Align);
         }
 
 
@@ -194,6 +249,26 @@ namespace Majorsilence.Reporting.Cri
             internal void SetCode(string ns)
             {
                 _Code = ns;
+            }
+
+            string _Align = "Center";
+
+            internal void SetAlign(string align)
+            {
+                _Align = align;
+            }
+
+            [Category("Code"),
+             Description("Horizontal position of the barcode within its box: Left, Center or Right.")]
+            [TypeConverter(typeof(StringConverter))]
+            public string Align
+            {
+                get { return _Align; }
+                set
+                {
+                    _Align = value;
+                    _bc.SetPropertiesInstance(_node, this);
+                }
             }
 
             [Category("Code"),
