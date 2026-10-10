@@ -216,6 +216,54 @@ namespace ReportTests
             Assert.That (First (doc, "List"), Is.Null);
         }
 
+        private static string TablixCellXml (string text, string name)
+            => $@"<TablixCell><CellContents><Textbox Name=""{name}""><Value>{text}</Value></Textbox></CellContents></TablixCell>";
+
+        private static string TablixRowXml (string name, string text)
+            => $"<TablixRow><Height>0.25in</Height><TablixCells>{TablixCellXml (text, name)}</TablixCells></TablixRow>";
+
+        [Test]
+        public void Import_GroupedTablix_BecomesTableWithTableGroups ()
+        {
+            // Header, group header, detail, group footer, footer: the shape of a grouped table.
+            var doc = Load (ReportWith (Rdl2010, $@"
+<Tablix Name=""Grouped""><DataSetName>Data</DataSetName>
+  <TablixBody>
+    <TablixColumns><TablixColumn><Width>2in</Width></TablixColumn></TablixColumns>
+    <TablixRows>{TablixRowXml ("H", "Title")}{TablixRowXml ("GH", "=Fields!Name.Value")}{TablixRowXml ("D", "detail")}{TablixRowXml ("GF", "subtotal")}{TablixRowXml ("F", "total")}</TablixRows>
+  </TablixBody>
+  <TablixColumnHierarchy><TablixMembers><TablixMember /></TablixMembers></TablixColumnHierarchy>
+  <TablixRowHierarchy><TablixMembers>
+    <TablixMember />
+    <TablixMember>
+      <Group Name=""ByName""><GroupExpressions><GroupExpression>=Fields!Name.Value</GroupExpression></GroupExpressions></Group>
+      <SortExpressions><SortExpression><Value>=Fields!Name.Value</Value></SortExpression></SortExpressions>
+      <TablixMembers>
+        <TablixMember />
+        <TablixMember><Group Name=""Details"" /></TablixMember>
+        <TablixMember />
+      </TablixMembers>
+    </TablixMember>
+    <TablixMember />
+  </TablixMembers></TablixRowHierarchy>
+</Tablix>"));
+
+            Rdl2008Normalizer.Normalize (doc, null);
+
+            var table = First (doc, "Table");
+            Assert.That (table, Is.Not.Null);
+            string Text (XmlNode section) => string.Concat (section.SelectNodes (".//*[local-name()='Value']").Cast<XmlNode> ().Select (n => n.InnerText));
+            Assert.That (Text (table["Header"]), Is.EqualTo ("Title"));
+            Assert.That (Text (table["Details"]), Is.EqualTo ("detail"));
+            Assert.That (Text (table["Footer"]), Is.EqualTo ("total"));
+            var group = table["TableGroups"]["TableGroup"];
+            Assert.That (group["Grouping"].GetAttribute ("Name"), Is.EqualTo ("ByName"));
+            Assert.That (group["Grouping"]["GroupExpressions"].InnerText, Is.EqualTo ("=Fields!Name.Value"));
+            Assert.That (group["Sorting"]["SortBy"]["SortExpression"].InnerText, Is.EqualTo ("=Fields!Name.Value"));
+            Assert.That (Text (group["Header"]), Is.EqualTo ("=Fields!Name.Value"));
+            Assert.That (Text (group["Footer"]), Is.EqualTo ("subtotal"));
+        }
+
         [Test]
         public async Task ExportedReport_ParsesInTheEngine ()
         {
