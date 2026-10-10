@@ -49,6 +49,17 @@ if ($LASTEXITCODE -ne 0) {
     throw "Native AOT smoke test failed (exit code $LASTEXITCODE) -- see Examples/PdfAotSmokeTest/Program.cs"
 }
 
+# The same check for the report engine: render reports (built-in and registered custom functions,
+# a custom report item, groups, a subreport and every renderer) from the AOT binary.
+$rdlSmokeOutDir = "Examples/RdlAotSmokeTest/bin/Release/$pTargetFrameworkGeneric/$rid/publish"
+dotnet publish Examples/RdlAotSmokeTest -c Release -r $rid -f $pTargetFrameworkGeneric --self-contained true -p:PublishAot=true -p:GeneratePackageOnBuild=false -o $rdlSmokeOutDir
+$rdlSmokeBinary = Join-Path $CURRENTPATH $rdlSmokeOutDir "RdlAotSmokeTest"
+Write-Host "Running RDL engine Native AOT smoke test ($rid)..."
+& $rdlSmokeBinary
+if ($LASTEXITCODE -ne 0) {
+    throw "RDL engine Native AOT smoke test failed (exit code $LASTEXITCODE) -- see Examples/RdlAotSmokeTest/Program.cs"
+}
+
 $buildoutputpath_rdlcmd_aot = Join-Path $CURRENTPATH "Release-Builds" "build-output" "majorsilence-reporting-rdlcmd-aot"
 $buildoutputpath_rdlnative  = Join-Path $CURRENTPATH "Release-Builds" "build-output" "majorsilence-reporting-rdlnative"
 $buildoutputpath_pdfnative  = Join-Path $CURRENTPATH "Release-Builds" "build-output" "majorsilence-pdfnative"
