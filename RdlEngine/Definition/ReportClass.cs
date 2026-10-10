@@ -2,6 +2,7 @@
 
 using System;
 using System.Diagnostics.CodeAnalysis;
+using System.Collections.Generic;
 using System.Xml;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -15,6 +16,7 @@ namespace Majorsilence.Reporting.Rdl
 	internal class ReportClass : ReportLink
 	{
 		string _ClassName;		// The name of the class
+		List<string> _Parameters = new List<string>();	// Optional literal arguments for the constructor / SetParameters
 		Name _InstanceName;		// The name of the variable to assign the class to.
 								// This variable can be used in expressions
 								// throughout the report.
@@ -36,6 +38,15 @@ namespace Majorsilence.Reporting.Rdl
 						break;
 					case "InstanceName":
 						_InstanceName = new Name(xNodeLoop.InnerText);
+						break;
+					case "Parameters":
+						foreach (XmlNode pn in xNodeLoop.ChildNodes)
+						{
+							if (pn.NodeType != XmlNodeType.Element || pn.Name != "Parameter")
+								continue;
+							XmlNode vn = pn["Value"];
+							_Parameters.Add(vn != null ? vn.InnerText : pn.InnerText);
+						}
 						break;
 					default:
 						break;
@@ -81,8 +92,7 @@ namespace Majorsilence.Reporting.Rdl
 				Type tp = OwnerReport.CodeModules[_ClassName];
 				if (tp != null)
 				{
-					Assembly asm = tp.Assembly;
-					wc.Instance = asm.CreateInstance(_ClassName, false);
+					wc.Instance = CreateInstance(tp);
 				}
 				else
 					err = "Class not found.";
@@ -104,6 +114,52 @@ namespace Majorsilence.Reporting.Rdl
 				wc.bCreateFailed = true;
 			}
 			return wc.Instance;			
+		}
+
+		// Creates the instance, passing the configured parameters to a constructor with
+		// the same number of parameters, or else to SetParameters after default construction.
+		[UnconditionalSuppressMessage("Trimming", "IL2070",
+			Justification = "The type comes from a CodeModules assembly loaded at runtime, impossible under Native AOT.")]
+		private object CreateInstance(Type tp)
+		{
+			if (_Parameters.Count == 0)
+				return tp.Assembly.CreateInstance(_ClassName, false);
+
+			foreach (ConstructorInfo ci in tp.GetConstructors())
+			{
+				ParameterInfo[] pis = ci.GetParameters();
+				if (pis.Length != _Parameters.Count)
+					continue;
+				return ci.Invoke(ConvertArgs(pis));
+			}
+
+			object inst = tp.Assembly.CreateInstance(_ClassName, false);
+			foreach (MethodInfo mi in tp.GetMethods(BindingFlags.Public | BindingFlags.Instance))
+			{
+				if (mi.Name != "SetParameters")
+					continue;
+				ParameterInfo[] pis = mi.GetParameters();
+				if (pis.Length != _Parameters.Count)
+					continue;
+				mi.Invoke(inst, ConvertArgs(pis));
+				return inst;
+			}
+			throw new Exception(String.Format(
+				"Class {0} has no constructor or SetParameters method taking {1} parameter(s).",
+				_ClassName, _Parameters.Count));
+		}
+
+		private object[] ConvertArgs(ParameterInfo[] pis)
+		{
+			object[] args = new object[pis.Length];
+			for (int i = 0; i < pis.Length; i++)
+			{
+				Type t = Nullable.GetUnderlyingType(pis[i].ParameterType) ?? pis[i].ParameterType;
+				args[i] = t == typeof(string) || t == typeof(object)
+					? _Parameters[i]
+					: Convert.ChangeType(_Parameters[i], t, System.Globalization.CultureInfo.InvariantCulture);
+			}
+			return args;
 		}
 
 		internal string ClassName
