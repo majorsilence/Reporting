@@ -148,7 +148,7 @@
     <value>Вертикальное выравнивание</value>
   </data>
   <data name="Appearance_WritingMode" xml:space="preserve">
-    <value>Горизонтально (lr-tb) или вертикально (tb-rl).</value>
+    <value>Горизонтально (lr-tb), вертикально вниз (tb-rl), вертикально вверх (tb-lr) или горизонтально с поворотом на 180° (rl-bt, нет в стандарте RDL; при экспорте в Excel не поворачивается).</value>
   </data>
   <data name="BackgroundImage_MIMEType" xml:space="preserve">
     <value>Когда источником является база данных тип MIME определяет тип изображения.</value>

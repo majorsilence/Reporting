@@ -151,7 +151,7 @@ namespace Majorsilence.Reporting.RdlDesign.RdlProperties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Text is either written horizontally (lr-tb) or vertically (tb-rl)..
+        ///   Looks up a localized string similar to Text is written horizontally (lr-tb), vertically downward (tb-rl), vertically upward (tb-lr) or horizontally rotated 180 degrees (rl-bt, not in the RDL standard; Excel export leaves it unrotated)..
         /// </summary>
         internal static string Appearance_WritingMode {
             get {

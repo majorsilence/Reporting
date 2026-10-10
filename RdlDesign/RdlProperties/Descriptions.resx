@@ -148,7 +148,7 @@
     <value>Vertical alignment</value>
   </data>
   <data name="Appearance_WritingMode" xml:space="preserve">
-    <value>Text is either written horizontally (lr-tb) or vertically (tb-rl).</value>
+    <value>Text is written horizontally (lr-tb), vertically downward (tb-rl), vertically upward (tb-lr) or horizontally rotated 180 degrees (rl-bt, not in the RDL standard; Excel export leaves it unrotated).</value>
   </data>
   <data name="BackgroundImage_MIMEType" xml:space="preserve">
     <value>When Source is Database MIMEType describes the type of image.</value>
