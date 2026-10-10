@@ -591,7 +591,7 @@ namespace Majorsilence.Reporting.Rdl
                 {
                     if (Subreport.Left == null)
                         Subreport.Left = new RSize(this, "0 in");
-                    return Subreport.Left + Subreport.OwnerReport.LeftMargin;
+                    return Subreport.Left + Subreport.OwnerReport.LeftMargin + new RSize(this, Subreport.ContainerOffset.ToString(System.Globalization.CultureInfo.InvariantCulture) + "pt");
                 }
 
 				if (_LeftMargin == null)
