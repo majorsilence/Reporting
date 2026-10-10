@@ -273,5 +273,44 @@ namespace Majorsilence.Reporting.RdlDesign.Tests
             Assert.That(saved, Does.Contain("<Group Name=\"Region\""));
             Assert.That(saved, Does.Not.Contain("ColumnSet"));
         }
+
+        // Sibling row groups open as a Matrix with an extra row set and save as sibling groups.
+        [Test]
+        public void OpenRdlcWithSiblingRowGroups_KeepsBothOnSave()
+        {
+            const string rdlc = @"<?xml version=""1.0"" encoding=""utf-8""?>
+<Report xmlns=""http://schemas.microsoft.com/sqlserver/reporting/2008/01/reportdefinition"">
+  <Body><Height>2in</Height><ReportItems>
+    <Tablix Name=""Pivot"">
+      <TablixBody>
+        <TablixColumns><TablixColumn><Width>1in</Width></TablixColumn></TablixColumns>
+        <TablixRows>
+          <TablixRow><Height>0.25in</Height><TablixCells><TablixCell><CellContents><Textbox Name=""A""><Paragraphs><Paragraph><TextRuns><TextRun><Value>a</Value><Style /></TextRun></TextRuns><Style /></Paragraph></Paragraphs></Textbox></CellContents></TablixCell></TablixCells></TablixRow>
+          <TablixRow><Height>0.3in</Height><TablixCells><TablixCell><CellContents><Textbox Name=""B""><Paragraphs><Paragraph><TextRuns><TextRun><Value>b</Value><Style /></TextRun></TextRuns><Style /></Paragraph></Paragraphs></Textbox></CellContents></TablixCell></TablixCells></TablixRow>
+        </TablixRows>
+      </TablixBody>
+      <TablixColumnHierarchy><TablixMembers>
+        <TablixMember><Group Name=""Year""><GroupExpressions><GroupExpression>=Fields!Year.Value</GroupExpression></GroupExpressions></Group><TablixHeader><Size>0.25in</Size><CellContents><Textbox Name=""YH""><Paragraphs><Paragraph><TextRuns><TextRun><Value>=Fields!Year.Value</Value><Style /></TextRun></TextRuns><Style /></Paragraph></Paragraphs></Textbox></CellContents></TablixHeader></TablixMember>
+      </TablixMembers></TablixColumnHierarchy>
+      <TablixRowHierarchy><TablixMembers>
+        <TablixMember><Group Name=""Name""><GroupExpressions><GroupExpression>=Fields!Name.Value</GroupExpression></GroupExpressions></Group><TablixHeader><Size>1in</Size><CellContents><Textbox Name=""NH""><Paragraphs><Paragraph><TextRuns><TextRun><Value>=Fields!Name.Value</Value><Style /></TextRun></TextRuns><Style /></Paragraph></Paragraphs></Textbox></CellContents></TablixHeader></TablixMember>
+        <TablixMember><Group Name=""Region""><GroupExpressions><GroupExpression>=Fields!Region.Value</GroupExpression></GroupExpressions></Group><TablixHeader><Size>1in</Size><CellContents><Textbox Name=""RH""><Paragraphs><Paragraph><TextRuns><TextRun><Value>=Fields!Region.Value</Value><Style /></TextRun></TextRuns><Style /></Paragraph></Paragraphs></Textbox></CellContents></TablixHeader></TablixMember>
+      </TablixMembers></TablixRowHierarchy>
+    </Tablix>
+  </ReportItems></Body>
+  <Width>6in</Width>
+</Report>";
+
+            var design = new DesignCtl();
+            design.ReportSource = rdlc;
+
+            Assert.That(design.ReportDocument.GetElementsByTagName("Matrix"), Has.Count.EqualTo(1));
+            Assert.That(design.ReportDocument.GetElementsByTagName("fyi:RowSet"), Has.Count.EqualTo(1));
+
+            var saved = design.ReportSource;
+            Assert.That(saved, Does.Contain("<Group Name=\"Name\""));
+            Assert.That(saved, Does.Contain("<Group Name=\"Region\""));
+            Assert.That(saved, Does.Not.Contain("RowSet"));
+        }
     }
 }
