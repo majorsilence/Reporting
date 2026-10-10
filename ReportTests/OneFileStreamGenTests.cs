@@ -3,6 +3,7 @@ using Majorsilence.Reporting.Rdl;
 using NUnit.Framework;
 using System;
 using System.IO;
+using System.Linq;
 
 namespace ReportTests
 {
@@ -25,7 +26,8 @@ namespace ReportTests
                 sg.CloseMainStream();
 
                 Assert.That(File.Exists(path), Is.True, "the file must be created at the requested path, not at 'path.'");
-                Assert.That(File.Exists(path + "."), Is.False);
+                Assert.That(Directory.GetFiles(Path.GetDirectoryName(path), Path.GetFileName(path) + "*").Select(Path.GetFileName),
+                    Is.EqualTo(new[] { Path.GetFileName(path) }), "no file with a trailing dot or other suffix");
                 Assert.That(new FileInfo(path).Length, Is.EqualTo(1));
             }
             finally
