@@ -1061,3 +1061,20 @@ The D12 experiment of rewriting `RdlViewer`/`RdlDesign` onto the `System.Windows
 compat shim was reverted: both libraries import `Majorsilence.Forms`/`Majorsilence.Forms.Drawing`
 directly again. The four revived Examples (D11) now use `using Majorsilence.Forms;` too, and no
 project references `Majorsilence.Forms.WinFormsShims.Compat` any more (D11/D12 above are historical).
+
+## Retiring the Windows-only projects (2026-10)
+
+- **`LibRdlWpfViewer` removed.** It only wrapped the viewer in a `WindowsFormsHost`. WPF apps now use
+  the regular `RdlViewer` with `Majorsilence.Forms.Wpf`'s `ToWpfElement()`; see
+  the wiki page `27x-Hosting-Controls`, which also covers WinForms (`ToWinFormsControl()`), Avalonia, Uno,
+  GTK 4 and the terminal backend.
+- **`EncryptionProvider` is now plain `net8.0;net10.0`** and references Majorsilence.Forms. `Prompt`
+  (the passkey dialog) was a raw `System.Windows.Forms.Form` under `#if WINDOWS`; it is now a
+  Majorsilence.Forms dialog, and the two private copies in `RdlViewer.cs` and `MDIChild.cs` were
+  replaced by `Prompt.ShowDialog`.
+- The whole solution now builds on Linux without `-p:EnableWindowsTargeting=true`.
+- **Release packaging moved to Linux.** `build-release.ps1` runs on Windows, Linux and macOS
+  (forward-slash paths, `7z` outside Windows) and `release.yml` runs it on `ubuntu-latest`. Windows
+  keeps only the Windows Native AOT build (`build-release-aot-windows.ps1`) and its test run. The SBOM
+  moved to `linux.yml`. The duplicate draft-release job in `windows.yml` was removed; `release.yml`
+  creates the draft.

@@ -9,7 +9,7 @@
     <AssemblyTitle>RDL Viewer (Majorsilence.Forms)</AssemblyTitle>
     <DelaySign>false</DelaySign>
     <PackageId>Majorsilence.Reporting.RdlViewer</PackageId>
-    <Description>Cross-platform report viewer control for Majorsilence Reporting, built on Majorsilence.Forms. Embed RDL/RDLC report viewing, printing (PDF only -- see MIGRATION-NOTES.md), and export in desktop apps. Targets .NET 8 and .NET 10, any OS Majorsilence.Forms.Avalonia supports. For System.Windows.Forms hosts, embed via Majorsilence.Forms.WinForms's ToWinFormsControl().</Description>
+    <Description>Cross-platform report viewer control for Majorsilence Reporting, built on Majorsilence.Forms. Embed RDL/RDLC report viewing, printing (PDF only -- see MIGRATION-NOTES.md), and export in desktop apps. Targets .NET 8 and .NET 10, any OS Majorsilence.Forms.Avalonia supports. To host it in WPF use Majorsilence.Forms.Wpf's ToWpfElement(); for System.Windows.Forms hosts use Majorsilence.Forms.WinForms's ToWinFormsControl().</Description>
     <!-- Declared explicitly (not just relying on MSBuild's implicit Debug;Release default) so it
          matches the rest of the solution's 4-config set; an inconsistent/missing Configurations
          list across referenced projects is what caused a real "ref assembly could not be found"

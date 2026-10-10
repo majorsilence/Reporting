@@ -10,6 +10,18 @@ $pConfiguration="Release"
 $pConfigurationCompat="Release"
 $pTargetFrameworkGeneric="net10.0"
 
+# Runs on Windows, Linux and macOS: every project in the solution is plain net8.0/net10.0, so the
+# release zips and NuGet packages no longer need a Windows machine (only build-release-aot-windows.ps1
+# does). Paths use forward slashes, which Windows accepts too. 7-Zip is bundled for Windows;
+# elsewhere use the `7z` / `7za` from the CI image or the p7zip package.
+if ([System.Environment]::OSVersion.Platform -eq 'Win32NT') {
+	$sevenZip = Join-Path $pwd.Path "Release-Builds" "7za.exe"
+} elseif (Get-Command 7z -ErrorAction Ignore) {
+	$sevenZip = "7z"
+} else {
+	$sevenZip = "7za"
+}
+
 function delete_files([string]$path)
 {
 	If (Test-Path $path){
@@ -20,14 +32,14 @@ function delete_files([string]$path)
 
 function GetVersions([ref]$theVersion)
 {
-	$csprojPath = Join-Path $CURRENTPATH ".\Directory.Build.props"
+	$csprojPath = Join-Path $CURRENTPATH "./Directory.Build.props"
 	$xml = [xml](Get-Content $csprojPath)
 	# Directory.Build.props has several PropertyGroups; only one carries Version, so the rest
 	# contribute empty entries that would stringify into a leading-whitespace version.
 	$theVersion.Value = @($xml.Project.PropertyGroup.Version | Where-Object { $_ }) | Select-Object -First 1
 }
 
-Get-ChildItem .\ -include bin,obj,build-output -Recurse | foreach ($_) { remove-item $_.fullname -Force -Recurse }
+Get-ChildItem . -Include bin,obj,build-output -Recurse | foreach ($_) { remove-item $_.fullname -Force -Recurse }
 
 $Version=""
 GetVersions([ref]$Version)
@@ -49,45 +61,45 @@ dotnet publish RdlCmd -c Release -r osx-arm64 -f $pTargetFrameworkGeneric --self
 dotnet publish RdlCmd -c Release -r win-x64 -f $pTargetFrameworkGeneric --self-contained true -p:GeneratePackageOnBuild=false #-p:PublishSingleFile=true
 dotnet publish RdlCmd -c Release -r win-arm64 -f $pTargetFrameworkGeneric --self-contained true -p:GeneratePackageOnBuild=false #-p:PublishSingleFile=true
 
-$buildoutputpath_designer="$CURRENTPATH\Release-Builds\build-output\majorsilence-reporting-designer-$pTargetFrameworkGeneric-anycpu"
-$buildoutputpath_desktop="$CURRENTPATH\Release-Builds\build-output\majorsilence-reporting-desktop-$pTargetFrameworkGeneric-anycpu"
-$buildoutputpath_rdlcmd="$CURRENTPATH\Release-Builds\build-output\majorsilence-reporting-rdlcmd-$pTargetFrameworkGeneric-anycpu"
-$buildoutputpath_rdlcmd_selfcontained="$CURRENTPATH\Release-Builds\build-output\majorsilence-reporting-rdlcmd-self-contained"
-$buildoutputpath_reader="$CURRENTPATH\Release-Builds\build-output\majorsilence-reporting-reader-$pTargetFrameworkGeneric-anycpu"
-$buildoutputpath_mapfile="$CURRENTPATH\Release-Builds\build-output\majorsilence-reporting-mapfile-$pTargetFrameworkGeneric-anycpu"
+$buildoutputpath_designer="$CURRENTPATH/Release-Builds/build-output/majorsilence-reporting-designer-$pTargetFrameworkGeneric-anycpu"
+$buildoutputpath_desktop="$CURRENTPATH/Release-Builds/build-output/majorsilence-reporting-desktop-$pTargetFrameworkGeneric-anycpu"
+$buildoutputpath_rdlcmd="$CURRENTPATH/Release-Builds/build-output/majorsilence-reporting-rdlcmd-$pTargetFrameworkGeneric-anycpu"
+$buildoutputpath_rdlcmd_selfcontained="$CURRENTPATH/Release-Builds/build-output/majorsilence-reporting-rdlcmd-self-contained"
+$buildoutputpath_reader="$CURRENTPATH/Release-Builds/build-output/majorsilence-reporting-reader-$pTargetFrameworkGeneric-anycpu"
+$buildoutputpath_mapfile="$CURRENTPATH/Release-Builds/build-output/majorsilence-reporting-mapfile-$pTargetFrameworkGeneric-anycpu"
 
 Remove-Item "$buildoutputpath_designer" -Recurse -ErrorAction Ignore
-mkdir "$buildoutputpath_designer"
+New-Item -ItemType Directory -Force -Path "$buildoutputpath_designer"
 Remove-Item "$buildoutputpath_desktop" -Recurse -ErrorAction Ignore
-mkdir "$buildoutputpath_desktop"
+New-Item -ItemType Directory -Force -Path "$buildoutputpath_desktop"
 Remove-Item "$buildoutputpath_rdlcmd" -Recurse -ErrorAction Ignore
-mkdir "$buildoutputpath_rdlcmd"
+New-Item -ItemType Directory -Force -Path "$buildoutputpath_rdlcmd"
 Remove-Item "$buildoutputpath_rdlcmd_selfcontained" -Recurse -ErrorAction Ignore
-mkdir "$buildoutputpath_rdlcmd_selfcontained"
+New-Item -ItemType Directory -Force -Path "$buildoutputpath_rdlcmd_selfcontained"
 Remove-Item "$buildoutputpath_reader" -Recurse -ErrorAction Ignore
-mkdir "$buildoutputpath_reader"
+New-Item -ItemType Directory -Force -Path "$buildoutputpath_reader"
 Remove-Item "$buildoutputpath_mapfile" -Recurse -ErrorAction Ignore
-mkdir "$buildoutputpath_mapfile"
+New-Item -ItemType Directory -Force -Path "$buildoutputpath_mapfile"
 
-Copy-Item (Join-Path $CURRENTPATH "ReportDesigner" "bin" $pConfiguration $pTargetFrameworkGeneric) -Destination "$buildoutputpath_designer\" -Recurse
-Copy-Item (Join-Path $CURRENTPATH "RdlDesign" "App.ico") -Destination "$buildoutputpath_designer\" -Recurse
+Copy-Item (Join-Path $CURRENTPATH "ReportDesigner" "bin" $pConfiguration $pTargetFrameworkGeneric) -Destination "$buildoutputpath_designer/" -Recurse
+Copy-Item (Join-Path $CURRENTPATH "RdlDesign" "App.ico") -Destination "$buildoutputpath_designer/" -Recurse
 
-Copy-Item (Join-Path $CURRENTPATH "RdlDesktop" "bin" $pConfiguration $pTargetFrameworkGeneric) -Destination "$buildoutputpath_desktop\" -Recurse
-Copy-Item (Join-Path $CURRENTPATH "RdlCmd" "bin" $pConfiguration $pTargetFrameworkGeneric) -Destination "$buildoutputpath_rdlcmd\" -Recurse
+Copy-Item (Join-Path $CURRENTPATH "RdlDesktop" "bin" $pConfiguration $pTargetFrameworkGeneric) -Destination "$buildoutputpath_desktop/" -Recurse
+Copy-Item (Join-Path $CURRENTPATH "RdlCmd" "bin" $pConfiguration $pTargetFrameworkGeneric) -Destination "$buildoutputpath_rdlcmd/" -Recurse
 
 
-$rdlcmd_win="$buildoutputpath_rdlcmd_selfcontained\win-x64"
-$rdlcmd_linux="$buildoutputpath_rdlcmd_selfcontained\linux-x64"
-$rdlcmd_osx="$buildoutputpath_rdlcmd_selfcontained\osx-x64"
-$rdlcmd_win_arm64="$buildoutputpath_rdlcmd_selfcontained\win-arm64"
-$rdlcmd_linux_arm64="$buildoutputpath_rdlcmd_selfcontained\linux-arm64"
-$rdlcmd_osx_arm64="$buildoutputpath_rdlcmd_selfcontained\osx-arm64"
-mkdir "$rdlcmd_win"
-mkdir "$rdlcmd_linux"
-mkdir "$rdlcmd_osx"
-mkdir "$rdlcmd_win_arm64"
-mkdir "$rdlcmd_linux_arm64"
-mkdir "$rdlcmd_osx_arm64"
+$rdlcmd_win="$buildoutputpath_rdlcmd_selfcontained/win-x64"
+$rdlcmd_linux="$buildoutputpath_rdlcmd_selfcontained/linux-x64"
+$rdlcmd_osx="$buildoutputpath_rdlcmd_selfcontained/osx-x64"
+$rdlcmd_win_arm64="$buildoutputpath_rdlcmd_selfcontained/win-arm64"
+$rdlcmd_linux_arm64="$buildoutputpath_rdlcmd_selfcontained/linux-arm64"
+$rdlcmd_osx_arm64="$buildoutputpath_rdlcmd_selfcontained/osx-arm64"
+New-Item -ItemType Directory -Force -Path "$rdlcmd_win"
+New-Item -ItemType Directory -Force -Path "$rdlcmd_linux"
+New-Item -ItemType Directory -Force -Path "$rdlcmd_osx"
+New-Item -ItemType Directory -Force -Path "$rdlcmd_win_arm64"
+New-Item -ItemType Directory -Force -Path "$rdlcmd_linux_arm64"
+New-Item -ItemType Directory -Force -Path "$rdlcmd_osx_arm64"
 
 Copy-Item (Join-Path $CURRENTPATH "RdlCmd" "bin" $pConfiguration $pTargetFrameworkGeneric "win-x64" "publish") -Destination "$rdlcmd_win" -Recurse
 Copy-Item (Join-Path $CURRENTPATH "RdlCmd" "bin" $pConfiguration $pTargetFrameworkGeneric "win-arm64" "publish") -Destination "$rdlcmd_win_arm64" -Recurse
@@ -97,28 +109,27 @@ Copy-Item (Join-Path $CURRENTPATH "RdlCmd" "bin" $pConfigurationCompat $pTargetF
 Copy-Item (Join-Path $CURRENTPATH "RdlCmd" "bin" $pConfigurationCompat $pTargetFrameworkGeneric "osx-arm64" "publish") -Destination "$rdlcmd_osx_arm64" -Recurse
 
 
-Copy-Item (Join-Path $CURRENTPATH "RdlReader" "bin" $pConfiguration $pTargetFrameworkGeneric) -Destination "$buildoutputpath_reader\" -Recurse
-Copy-Item (Join-Path $CURRENTPATH "RdlMapFile" "bin" $pConfiguration $pTargetFrameworkGeneric) -Destination "$buildoutputpath_mapfile\" -Recurse
+Copy-Item (Join-Path $CURRENTPATH "RdlReader" "bin" $pConfiguration $pTargetFrameworkGeneric) -Destination "$buildoutputpath_reader/" -Recurse
+Copy-Item (Join-Path $CURRENTPATH "RdlMapFile" "bin" $pConfiguration $pTargetFrameworkGeneric) -Destination "$buildoutputpath_mapfile/" -Recurse
 
 # Exclude debug symbols from all release zips
 $7zaExclude = "-xr!*.pdb", "-xr!*.dbg"
 
-cd Release-Builds
-cd build-output
-..\7za.exe a -tzip $Version-majorsilence-reporting-designer-$pTargetFrameworkGeneric-anycpu.zip @7zaExclude majorsilence-reporting-designer-$pTargetFrameworkGeneric-anycpu\
-..\7za.exe a -tzip $Version-majorsilence-reporting-desktop-$pTargetFrameworkGeneric-anycpu.zip @7zaExclude majorsilence-reporting-desktop-$pTargetFrameworkGeneric-anycpu\
-..\7za.exe a -tzip $Version-majorsilence-reporting-mapfile-$pTargetFrameworkGeneric-anycpu.zip @7zaExclude majorsilence-reporting-mapfile-$pTargetFrameworkGeneric-anycpu\
+Set-Location (Join-Path $CURRENTPATH "Release-Builds" "build-output")
+& $sevenZip a -tzip $Version-majorsilence-reporting-designer-$pTargetFrameworkGeneric-anycpu.zip @7zaExclude majorsilence-reporting-designer-$pTargetFrameworkGeneric-anycpu/
+& $sevenZip a -tzip $Version-majorsilence-reporting-desktop-$pTargetFrameworkGeneric-anycpu.zip @7zaExclude majorsilence-reporting-desktop-$pTargetFrameworkGeneric-anycpu/
+& $sevenZip a -tzip $Version-majorsilence-reporting-mapfile-$pTargetFrameworkGeneric-anycpu.zip @7zaExclude majorsilence-reporting-mapfile-$pTargetFrameworkGeneric-anycpu/
 
-..\7za.exe a -tzip "$Version-majorsilence-reporting-rdlcmd-$pTargetFrameworkGeneric-anycpu.zip" `
-  -x!"majorsilence-reporting-rdlcmd-$pTargetFrameworkGeneric-anycpu\$pTargetFrameworkGeneric\win-arm64\" `
-  -x!"majorsilence-reporting-rdlcmd-$pTargetFrameworkGeneric-anycpu\$pTargetFrameworkGeneric\win-x64\" `
+& $sevenZip a -tzip "$Version-majorsilence-reporting-rdlcmd-$pTargetFrameworkGeneric-anycpu.zip" `
+  -x!"majorsilence-reporting-rdlcmd-$pTargetFrameworkGeneric-anycpu/$pTargetFrameworkGeneric/win-arm64/" `
+  -x!"majorsilence-reporting-rdlcmd-$pTargetFrameworkGeneric-anycpu/$pTargetFrameworkGeneric/win-x64/" `
   @7zaExclude `
-  "majorsilence-reporting-rdlcmd-$pTargetFrameworkGeneric-anycpu\"
+  "majorsilence-reporting-rdlcmd-$pTargetFrameworkGeneric-anycpu/"
 
 
-..\7za.exe a -tzip $Version-majorsilence-reporting-reader-$pTargetFrameworkGeneric-anycpu.zip @7zaExclude majorsilence-reporting-reader-$pTargetFrameworkGeneric-anycpu\
-..\7za.exe a -tzip $Version-majorsilence-reporting-rdlcmd-self-contained.zip @7zaExclude majorsilence-reporting-rdlcmd-self-contained\
-cd "$CURRENTPATH"
+& $sevenZip a -tzip $Version-majorsilence-reporting-reader-$pTargetFrameworkGeneric-anycpu.zip @7zaExclude majorsilence-reporting-reader-$pTargetFrameworkGeneric-anycpu/
+& $sevenZip a -tzip $Version-majorsilence-reporting-rdlcmd-self-contained.zip @7zaExclude majorsilence-reporting-rdlcmd-self-contained/
+Set-Location $CURRENTPATH
 
 
 # ************* End anycpu *********************************************
@@ -133,5 +144,5 @@ dotnet pack $solutionPath --configuration $pConfiguration --no-build --output $n
 
 
 Write-Output "Publish nuget packages with commands"
-Write-Output "dotnet nuget push $CURRENTPATH\Release-Builds\build-output\*.nupkg -k YOUR_API_KEY -s https://api.nuget.org/v3/index.json --skip-duplicate"
-Write-Output "dotnet nuget push $CURRENTPATH\Release-Builds\build-output\*.snupkg -k YOUR_API_KEY -s https://api.nuget.org/v3/index.json --skip-duplicate"
+Write-Output "dotnet nuget push $CURRENTPATH/Release-Builds/build-output/*.nupkg -k YOUR_API_KEY -s https://api.nuget.org/v3/index.json --skip-duplicate"
+Write-Output "dotnet nuget push $CURRENTPATH/Release-Builds/build-output/*.snupkg -k YOUR_API_KEY -s https://api.nuget.org/v3/index.json --skip-duplicate"

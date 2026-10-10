@@ -36,10 +36,7 @@
     <Project Path="RdlViewer/RdlViewer.csproj" />
     <Project Path="ReportDesigner/ReportDesigner.csproj" />
   </Folder>
-  <Folder Name="/Windows/">
-    <Project Path="EncryptionProvider/EncryptionProvider.csproj" />
-    <Project Path="LibRdlWpfViewer/LibRdlWpfViewer.csproj" />
-  </Folder>
+  <Project Path="EncryptionProvider/EncryptionProvider.csproj" />
   <Project Path="DataProviders/Majorsilence.Reporting.DataProviders.csproj" />
   <Project Path="Examples/MarkdownToPdf/MarkdownToPdf.csproj" />
   <Project Path="Examples/PdfAotSmokeTest/PdfAotSmokeTest.csproj" />
