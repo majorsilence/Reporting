@@ -46,3 +46,8 @@ The test reads the path from `RDL_XSD_2008` only. `*.xsd` files saved in this fo
 
 Note that the 2010 and 2016 schemas place `Body` inside `ReportSections/ReportSection`, unlike 2008, so a
 hand-built 2010 test document needs that wrapper to validate.
+
+## CI
+
+`.github/workflows/linux.yml` downloads the 2008 and 2010 XSDs and extracts the 2016 one before the test step, so
+the schema tests run on every build. The download is best effort: if it fails the tests are skipped.
