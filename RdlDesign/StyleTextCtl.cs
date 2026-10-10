@@ -389,7 +389,8 @@ namespace Majorsilence.Reporting.RdlDesign
             this.cbWritingMode.Items.AddRange(new object[] {
             resources.GetString("cbWritingMode.Items"),
             resources.GetString("cbWritingMode.Items1"),
-            resources.GetString("cbWritingMode.Items2")});
+            resources.GetString("cbWritingMode.Items2"),
+            resources.GetString("cbWritingMode.Items3")});
             resources.ApplyResources(this.cbWritingMode, "cbWritingMode");
             this.cbWritingMode.Name = "cbWritingMode";
             this.cbWritingMode.SelectedIndexChanged += this.cbWritingMode_TextChanged;

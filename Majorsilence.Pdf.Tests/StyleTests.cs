@@ -2,6 +2,7 @@
 // Licensed under the Apache License, Version 2.0.
 
 using Majorsilence.Pdf;
+using System.Linq;
 using NUnit.Framework;
 
 namespace Majorsilence.Pdf.Tests
@@ -113,6 +114,31 @@ namespace Majorsilence.Pdf.Tests
             var v = TextStyle.Default.WithVertical();
             Assert.That(v.IsVertical, Is.True);
             Assert.That(v.WithVertical(false).IsVertical, Is.False);
+        }
+
+        [Test]
+        public void WithUpsideDown_SetsFlag()
+        {
+            var v = TextStyle.Default.WithUpsideDown();
+            Assert.That(v.IsUpsideDown, Is.True);
+            Assert.That(v.WithUpsideDown(false).IsUpsideDown, Is.False);
+            Assert.That(TextStyle.Default.IsUpsideDown, Is.False);
+        }
+
+        [Test]
+        public void UpsideDownText_IsRotated180_AndEndsAtAnchor()
+        {
+            var bytes = PdfDocument.Create()
+                .AddPage(PageSizes.Letter, canvas =>
+                    canvas.DrawText("Hello", 300, 100, TextStyle.Default.WithSize(12).WithUpsideDown()))
+                .ToBytes();
+
+            using var doc = UglyToad.PdfPig.PdfDocument.Open(bytes);
+            var letters = doc.GetPage(1).Letters;
+            Assert.That(letters, Is.Not.Empty);
+            Assert.That(letters.All(l => l.TextOrientation == UglyToad.PdfPig.Content.TextOrientation.Rotate180), Is.True);
+            // the run extends back from the anchor, so every glyph sits left of x = 300
+            Assert.That(letters.All(l => l.StartBaseLine.X <= 300.5), Is.True);
         }
 
         [Test]

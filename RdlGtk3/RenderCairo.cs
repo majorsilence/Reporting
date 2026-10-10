@@ -325,6 +325,15 @@ namespace Majorsilence.Reporting.RdlGtk3
                 case WritingModeEnum.tb_lr:
                     DrawStringTBLR(pt, r);
                     break;
+                case WritingModeEnum.rl_bt:
+                    // the horizontal layout, turned half a revolution about the middle of the box
+                    g.Save();
+                    g.Translate(r.X + r.Width / 2, r.Y + r.Height / 2);
+                    g.Rotate(Math.PI);
+                    g.Translate(-(r.X + r.Width / 2), -(r.Y + r.Height / 2));
+                    DrawStringHorizontal(pt, r);
+                    g.Restore();
+                    break;
                 default:
                     throw new NotSupportedException($"Writing mode {pt.SI.WritingMode} is not supported");
             }

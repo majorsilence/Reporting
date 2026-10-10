@@ -441,7 +441,7 @@ namespace Majorsilence.Reporting.RdlDesign
     #region WritingMode
     internal class WritingModeConverter : StringConverter
     {
-        static readonly string[] WMList = new string[] { "lr-tb", "tb-rl", "tb-lr" };
+        static readonly string[] WMList = new string[] { "lr-tb", "tb-rl", "tb-lr", "rl-bt" };
 
         public override bool GetStandardValuesSupported(ITypeDescriptorContext context)
         {
