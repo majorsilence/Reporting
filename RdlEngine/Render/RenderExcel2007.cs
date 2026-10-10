@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Majorsilence.Forms.Drawing.Imaging;
 using RdlEngine.Render.ExcelConverter;
 
 namespace Majorsilence.Reporting.Rdl
@@ -171,7 +172,14 @@ namespace Majorsilence.Reporting.Rdl
         public void MatrixRowStart(Matrix m, int row, Row r) { }
         public void MatrixRowEnd(Matrix m, int row, Row r) { }
         public Task MatrixEnd(Matrix m, Row r) => Task.CompletedTask;
-        public Task Chart(Chart c, Row row, ChartBase cb) => Task.CompletedTask;
+        public async Task Chart(Chart c, Row row, ChartBase cb)
+        {
+            if (c.Visibility != null && await c.Visibility.IsHidden(report, row))
+                return;
+            using var ms = new MemoryStream();
+            cb.Save(report, ms, ImageFormat.Png);
+            excelBuilder.AddImage(c, ms.ToArray());
+        }
 
         public async Task Image(Image i, Row r, string mimeType, Stream ioin)
         {

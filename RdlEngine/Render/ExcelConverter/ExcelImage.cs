@@ -4,18 +4,18 @@ namespace RdlEngine.Render.ExcelConverter
 {
     internal class ExcelImage
     {
-        public Image Image { get; set; }
+        public ReportItem Item { get; set; }
         public byte[] Data { get; set; }
 
         public float AbsoluteTop { get; set; }
         public float AbsoluteLeft { get; set; }
 
-        public float ImageWidth => Image.Width.Points;
-        public float ImageHeight => Image.Height.Points;
+        public float ImageWidth => Item.Width.Points;
+        public float ImageHeight => Item.Height.Points;
 
-        public ExcelImage(Image image, byte[] data)
+        public ExcelImage(ReportItem item, byte[] data)
         {
-            Image = image;
+            Item = item;
             Data = data;
         }
     }

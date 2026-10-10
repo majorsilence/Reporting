@@ -1,0 +1,2276 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Report Name="">
+  <Description>
+  </Description>
+  <Author>
+  </Author>
+  <PageHeight>8.5 in</PageHeight>
+  <PageWidth>11 in</PageWidth>
+  <DataSets>
+    <DataSet Name="Data">
+      <Query>
+        <DataSourceName>DS1</DataSourceName>
+      </Query>
+      <Fields>
+        <Field Name="Region">
+          <DataField>Region</DataField>
+          <TypeName>String</TypeName>
+        </Field>
+        <Field Name="State">
+          <DataField>State</DataField>
+          <TypeName>String</TypeName>
+        </Field>
+        <Field Name="Year">
+          <DataField>Year</DataField>
+          <TypeName>String</TypeName>
+        </Field>
+        <Field Name="Qtr">
+          <DataField>Qtr</DataField>
+          <TypeName>String</TypeName>
+        </Field>
+        <Field Name="Sales">
+          <DataField>Sales</DataField>
+          <TypeName>Float</TypeName>
+        </Field>
+      </Fields>
+      <Rows>
+        <Row>
+          <Region>New England</Region>
+          <State>MA</State>
+          <Year>1993</Year>
+          <Qtr>Q1</Qtr>
+          <Sales>50</Sales>
+        </Row>
+        <Row>
+          <Region>New England</Region>
+          <State>MA</State>
+          <Year>1993</Year>
+          <Qtr>Q2</Qtr>
+          <Sales>21</Sales>
+        </Row>
+        <Row>
+          <Region>New England</Region>
+          <State>MA</State>
+          <Year>1993</Year>
+          <Qtr>Q3</Qtr>
+          <Sales>36</Sales>
+        </Row>
+        <Row>
+          <Region>New England</Region>
+          <State>MA</State>
+          <Year>1993</Year>
+          <Qtr>Q4</Qtr>
+          <Sales>42</Sales>
+        </Row>
+        <Row>
+          <Region>New England</Region>
+          <State>MA</State>
+          <Year>1994</Year>
+          <Qtr>Q1</Qtr>
+          <Sales>27</Sales>
+        </Row>
+        <Row>
+          <Region>New England</Region>
+          <State>MA</State>
+          <Year>1994</Year>
+          <Qtr>Q2</Qtr>
+          <Sales>19</Sales>
+        </Row>
+        <Row>
+          <Region>New England</Region>
+          <State>MA</State>
+          <Year>1994</Year>
+          <Qtr>Q3</Qtr>
+          <Sales>10</Sales>
+        </Row>
+        <Row>
+          <Region>New England</Region>
+          <State>MA</State>
+          <Year>1994</Year>
+          <Qtr>Q4</Qtr>
+          <Sales>34</Sales>
+        </Row>
+        <Row>
+          <Region>New England</Region>
+          <State>RI</State>
+          <Year>1993</Year>
+          <Qtr>Q1</Qtr>
+          <Sales>32</Sales>
+        </Row>
+        <Row>
+          <Region>New England</Region>
+          <State>RI</State>
+          <Year>1993</Year>
+          <Qtr>Q2</Qtr>
+          <Sales>28</Sales>
+        </Row>
+        <Row>
+          <Region>New England</Region>
+          <State>RI</State>
+          <Year>1993</Year>
+          <Qtr>Q3</Qtr>
+          <Sales>9</Sales>
+        </Row>
+        <Row>
+          <Region>New England</Region>
+          <State>RI</State>
+          <Year>1993</Year>
+          <Qtr>Q4</Qtr>
+          <Sales>21</Sales>
+        </Row>
+        <Row>
+          <Region>New England</Region>
+          <State>RI</State>
+          <Year>1994</Year>
+          <Qtr>Q1</Qtr>
+          <Sales>20</Sales>
+        </Row>
+        <Row>
+          <Region>New England</Region>
+          <State>RI</State>
+          <Year>1994</Year>
+          <Qtr>Q2</Qtr>
+          <Sales>11</Sales>
+        </Row>
+        <Row>
+          <Region>New England</Region>
+          <State>RI</State>
+          <Year>1994</Year>
+          <Qtr>Q3</Qtr>
+          <Sales>16</Sales>
+        </Row>
+        <Row>
+          <Region>New England</Region>
+          <State>RI</State>
+          <Year>1994</Year>
+          <Qtr>Q4</Qtr>
+          <Sales>47</Sales>
+        </Row>
+        <Row>
+          <Region>New England</Region>
+          <State>CT</State>
+          <Year>1993</Year>
+          <Qtr>Q1</Qtr>
+          <Sales>37</Sales>
+        </Row>
+        <Row>
+          <Region>New England</Region>
+          <State>CT</State>
+          <Year>1993</Year>
+          <Qtr>Q2</Qtr>
+          <Sales>5</Sales>
+        </Row>
+        <Row>
+          <Region>New England</Region>
+          <State>CT</State>
+          <Year>1993</Year>
+          <Qtr>Q3</Qtr>
+          <Sales>48</Sales>
+        </Row>
+        <Row>
+          <Region>New England</Region>
+          <State>CT</State>
+          <Year>1993</Year>
+          <Qtr>Q4</Qtr>
+          <Sales>5</Sales>
+        </Row>
+        <Row>
+          <Region>New England</Region>
+          <State>CT</State>
+          <Year>1994</Year>
+          <Qtr>Q1</Qtr>
+          <Sales>44</Sales>
+        </Row>
+        <Row>
+          <Region>New England</Region>
+          <State>CT</State>
+          <Year>1994</Year>
+          <Qtr>Q2</Qtr>
+          <Sales>7</Sales>
+        </Row>
+        <Row>
+          <Region>New England</Region>
+          <State>CT</State>
+          <Year>1994</Year>
+          <Qtr>Q3</Qtr>
+          <Sales>43</Sales>
+        </Row>
+        <Row>
+          <Region>New England</Region>
+          <State>CT</State>
+          <Year>1994</Year>
+          <Qtr>Q4</Qtr>
+          <Sales>29</Sales>
+        </Row>
+        <Row>
+          <Region>New England</Region>
+          <State>ME</State>
+          <Year>1993</Year>
+          <Qtr>Q1</Qtr>
+          <Sales>31</Sales>
+        </Row>
+        <Row>
+          <Region>New England</Region>
+          <State>ME</State>
+          <Year>1993</Year>
+          <Qtr>Q2</Qtr>
+          <Sales>41</Sales>
+        </Row>
+        <Row>
+          <Region>New England</Region>
+          <State>ME</State>
+          <Year>1993</Year>
+          <Qtr>Q3</Qtr>
+          <Sales>45</Sales>
+        </Row>
+        <Row>
+          <Region>New England</Region>
+          <State>ME</State>
+          <Year>1993</Year>
+          <Qtr>Q4</Qtr>
+          <Sales>24</Sales>
+        </Row>
+        <Row>
+          <Region>New England</Region>
+          <State>ME</State>
+          <Year>1994</Year>
+          <Qtr>Q1</Qtr>
+          <Sales>30</Sales>
+        </Row>
+        <Row>
+          <Region>New England</Region>
+          <State>ME</State>
+          <Year>1994</Year>
+          <Qtr>Q2</Qtr>
+          <Sales>43</Sales>
+        </Row>
+        <Row>
+          <Region>New England</Region>
+          <State>ME</State>
+          <Year>1994</Year>
+          <Qtr>Q3</Qtr>
+          <Sales>27</Sales>
+        </Row>
+        <Row>
+          <Region>New England</Region>
+          <State>ME</State>
+          <Year>1994</Year>
+          <Qtr>Q4</Qtr>
+          <Sales>18</Sales>
+        </Row>
+        <Row>
+          <Region>Central</Region>
+          <State>WI</State>
+          <Year>1993</Year>
+          <Qtr>Q1</Qtr>
+          <Sales>34</Sales>
+        </Row>
+        <Row>
+          <Region>Central</Region>
+          <State>WI</State>
+          <Year>1993</Year>
+          <Qtr>Q2</Qtr>
+          <Sales>6</Sales>
+        </Row>
+        <Row>
+          <Region>Central</Region>
+          <State>WI</State>
+          <Year>1993</Year>
+          <Qtr>Q3</Qtr>
+          <Sales>33</Sales>
+        </Row>
+        <Row>
+          <Region>Central</Region>
+          <State>WI</State>
+          <Year>1993</Year>
+          <Qtr>Q4</Qtr>
+          <Sales>20</Sales>
+        </Row>
+        <Row>
+          <Region>Central</Region>
+          <State>WI</State>
+          <Year>1994</Year>
+          <Qtr>Q1</Qtr>
+          <Sales>16</Sales>
+        </Row>
+        <Row>
+          <Region>Central</Region>
+          <State>WI</State>
+          <Year>1994</Year>
+          <Qtr>Q2</Qtr>
+          <Sales>35</Sales>
+        </Row>
+        <Row>
+          <Region>Central</Region>
+          <State>WI</State>
+          <Year>1994</Year>
+          <Qtr>Q3</Qtr>
+          <Sales>21</Sales>
+        </Row>
+        <Row>
+          <Region>Central</Region>
+          <State>WI</State>
+          <Year>1994</Year>
+          <Qtr>Q4</Qtr>
+          <Sales>35</Sales>
+        </Row>
+        <Row>
+          <Region>Central</Region>
+          <State>MI</State>
+          <Year>1993</Year>
+          <Qtr>Q1</Qtr>
+          <Sales>29</Sales>
+        </Row>
+        <Row>
+          <Region>Central</Region>
+          <State>MI</State>
+          <Year>1993</Year>
+          <Qtr>Q2</Qtr>
+          <Sales>29</Sales>
+        </Row>
+        <Row>
+          <Region>Central</Region>
+          <State>MI</State>
+          <Year>1993</Year>
+          <Qtr>Q3</Qtr>
+          <Sales>22</Sales>
+        </Row>
+        <Row>
+          <Region>Central</Region>
+          <State>MI</State>
+          <Year>1993</Year>
+          <Qtr>Q4</Qtr>
+          <Sales>34</Sales>
+        </Row>
+        <Row>
+          <Region>Central</Region>
+          <State>MI</State>
+          <Year>1994</Year>
+          <Qtr>Q1</Qtr>
+          <Sales>12</Sales>
+        </Row>
+        <Row>
+          <Region>Central</Region>
+          <State>MI</State>
+          <Year>1994</Year>
+          <Qtr>Q2</Qtr>
+          <Sales>20</Sales>
+        </Row>
+        <Row>
+          <Region>Central</Region>
+          <State>MI</State>
+          <Year>1994</Year>
+          <Qtr>Q3</Qtr>
+          <Sales>10</Sales>
+        </Row>
+        <Row>
+          <Region>Central</Region>
+          <State>MI</State>
+          <Year>1994</Year>
+          <Qtr>Q4</Qtr>
+          <Sales>15</Sales>
+        </Row>
+        <Row>
+          <Region>Central</Region>
+          <State>KS</State>
+          <Year>1993</Year>
+          <Qtr>Q1</Qtr>
+          <Sales>30</Sales>
+        </Row>
+        <Row>
+          <Region>Central</Region>
+          <State>KS</State>
+          <Year>1993</Year>
+          <Qtr>Q2</Qtr>
+          <Sales>32</Sales>
+        </Row>
+        <Row>
+          <Region>Central</Region>
+          <State>KS</State>
+          <Year>1993</Year>
+          <Qtr>Q3</Qtr>
+          <Sales>29</Sales>
+        </Row>
+        <Row>
+          <Region>Central</Region>
+          <State>KS</State>
+          <Year>1993</Year>
+          <Qtr>Q4</Qtr>
+          <Sales>13</Sales>
+        </Row>
+        <Row>
+          <Region>Central</Region>
+          <State>KS</State>
+          <Year>1994</Year>
+          <Qtr>Q1</Qtr>
+          <Sales>21</Sales>
+        </Row>
+        <Row>
+          <Region>Central</Region>
+          <State>KS</State>
+          <Year>1994</Year>
+          <Qtr>Q2</Qtr>
+          <Sales>11</Sales>
+        </Row>
+        <Row>
+          <Region>Central</Region>
+          <State>KS</State>
+          <Year>1994</Year>
+          <Qtr>Q3</Qtr>
+          <Sales>50</Sales>
+        </Row>
+        <Row>
+          <Region>Central</Region>
+          <State>KS</State>
+          <Year>1994</Year>
+          <Qtr>Q4</Qtr>
+          <Sales>39</Sales>
+        </Row>
+        <Row>
+          <Region>Central</Region>
+          <State>TX</State>
+          <Year>1993</Year>
+          <Qtr>Q1</Qtr>
+          <Sales>13</Sales>
+        </Row>
+        <Row>
+          <Region>Central</Region>
+          <State>TX</State>
+          <Year>1993</Year>
+          <Qtr>Q2</Qtr>
+          <Sales>9</Sales>
+        </Row>
+        <Row>
+          <Region>Central</Region>
+          <State>TX</State>
+          <Year>1993</Year>
+          <Qtr>Q3</Qtr>
+          <Sales>21</Sales>
+        </Row>
+        <Row>
+          <Region>Central</Region>
+          <State>TX</State>
+          <Year>1993</Year>
+          <Qtr>Q4</Qtr>
+          <Sales>24</Sales>
+        </Row>
+        <Row>
+          <Region>Central</Region>
+          <State>TX</State>
+          <Year>1994</Year>
+          <Qtr>Q1</Qtr>
+          <Sales>15</Sales>
+        </Row>
+        <Row>
+          <Region>Central</Region>
+          <State>TX</State>
+          <Year>1994</Year>
+          <Qtr>Q2</Qtr>
+          <Sales>36</Sales>
+        </Row>
+        <Row>
+          <Region>Central</Region>
+          <State>TX</State>
+          <Year>1994</Year>
+          <Qtr>Q3</Qtr>
+          <Sales>25</Sales>
+        </Row>
+        <Row>
+          <Region>Central</Region>
+          <State>TX</State>
+          <Year>1994</Year>
+          <Qtr>Q4</Qtr>
+          <Sales>11</Sales>
+        </Row>
+        <Row>
+          <Region>West</Region>
+          <State>CA</State>
+          <Year>1993</Year>
+          <Qtr>Q1</Qtr>
+          <Sales>22</Sales>
+        </Row>
+        <Row>
+          <Region>West</Region>
+          <State>CA</State>
+          <Year>1993</Year>
+          <Qtr>Q2</Qtr>
+          <Sales>13</Sales>
+        </Row>
+        <Row>
+          <Region>West</Region>
+          <State>CA</State>
+          <Year>1993</Year>
+          <Qtr>Q3</Qtr>
+          <Sales>35</Sales>
+        </Row>
+        <Row>
+          <Region>West</Region>
+          <State>CA</State>
+          <Year>1993</Year>
+          <Qtr>Q4</Qtr>
+          <Sales>18</Sales>
+        </Row>
+        <Row>
+          <Region>West</Region>
+          <State>CA</State>
+          <Year>1994</Year>
+          <Qtr>Q1</Qtr>
+          <Sales>25</Sales>
+        </Row>
+        <Row>
+          <Region>West</Region>
+          <State>CA</State>
+          <Year>1994</Year>
+          <Qtr>Q2</Qtr>
+          <Sales>28</Sales>
+        </Row>
+        <Row>
+          <Region>West</Region>
+          <State>CA</State>
+          <Year>1994</Year>
+          <Qtr>Q3</Qtr>
+          <Sales>49</Sales>
+        </Row>
+        <Row>
+          <Region>West</Region>
+          <State>CA</State>
+          <Year>1994</Year>
+          <Qtr>Q4</Qtr>
+          <Sales>7</Sales>
+        </Row>
+        <Row>
+          <Region>West</Region>
+          <State>OR</State>
+          <Year>1993</Year>
+          <Qtr>Q1</Qtr>
+          <Sales>8</Sales>
+        </Row>
+        <Row>
+          <Region>West</Region>
+          <State>OR</State>
+          <Year>1993</Year>
+          <Qtr>Q2</Qtr>
+          <Sales>24</Sales>
+        </Row>
+        <Row>
+          <Region>West</Region>
+          <State>OR</State>
+          <Year>1993</Year>
+          <Qtr>Q3</Qtr>
+          <Sales>37</Sales>
+        </Row>
+        <Row>
+          <Region>West</Region>
+          <State>OR</State>
+          <Year>1993</Year>
+          <Qtr>Q4</Qtr>
+          <Sales>32</Sales>
+        </Row>
+        <Row>
+          <Region>West</Region>
+          <State>OR</State>
+          <Year>1994</Year>
+          <Qtr>Q1</Qtr>
+          <Sales>36</Sales>
+        </Row>
+        <Row>
+          <Region>West</Region>
+          <State>OR</State>
+          <Year>1994</Year>
+          <Qtr>Q2</Qtr>
+          <Sales>10</Sales>
+        </Row>
+        <Row>
+          <Region>West</Region>
+          <State>OR</State>
+          <Year>1994</Year>
+          <Qtr>Q3</Qtr>
+          <Sales>26</Sales>
+        </Row>
+        <Row>
+          <Region>West</Region>
+          <State>OR</State>
+          <Year>1994</Year>
+          <Qtr>Q4</Qtr>
+          <Sales>18</Sales>
+        </Row>
+        <Row>
+          <Region>West</Region>
+          <State>WA</State>
+          <Year>1993</Year>
+          <Qtr>Q1</Qtr>
+          <Sales>26</Sales>
+        </Row>
+        <Row>
+          <Region>West</Region>
+          <State>WA</State>
+          <Year>1993</Year>
+          <Qtr>Q2</Qtr>
+          <Sales>15</Sales>
+        </Row>
+        <Row>
+          <Region>West</Region>
+          <State>WA</State>
+          <Year>1993</Year>
+          <Qtr>Q3</Qtr>
+          <Sales>44</Sales>
+        </Row>
+        <Row>
+          <Region>West</Region>
+          <State>WA</State>
+          <Year>1993</Year>
+          <Qtr>Q4</Qtr>
+          <Sales>22</Sales>
+        </Row>
+        <Row>
+          <Region>West</Region>
+          <State>WA</State>
+          <Year>1994</Year>
+          <Qtr>Q1</Qtr>
+          <Sales>48</Sales>
+        </Row>
+        <Row>
+          <Region>West</Region>
+          <State>WA</State>
+          <Year>1994</Year>
+          <Qtr>Q2</Qtr>
+          <Sales>30</Sales>
+        </Row>
+        <Row>
+          <Region>West</Region>
+          <State>WA</State>
+          <Year>1994</Year>
+          <Qtr>Q3</Qtr>
+          <Sales>24</Sales>
+        </Row>
+        <Row>
+          <Region>West</Region>
+          <State>WA</State>
+          <Year>1994</Year>
+          <Qtr>Q4</Qtr>
+          <Sales>25</Sales>
+        </Row>
+        <Row>
+          <Region>South</Region>
+          <State>FL</State>
+          <Year>1993</Year>
+          <Qtr>Q1</Qtr>
+          <Sales>35</Sales>
+        </Row>
+        <Row>
+          <Region>South</Region>
+          <State>FL</State>
+          <Year>1993</Year>
+          <Qtr>Q2</Qtr>
+          <Sales>16</Sales>
+        </Row>
+        <Row>
+          <Region>South</Region>
+          <State>FL</State>
+          <Year>1993</Year>
+          <Qtr>Q3</Qtr>
+          <Sales>5</Sales>
+        </Row>
+        <Row>
+          <Region>South</Region>
+          <State>FL</State>
+          <Year>1993</Year>
+          <Qtr>Q4</Qtr>
+          <Sales>35</Sales>
+        </Row>
+        <Row>
+          <Region>South</Region>
+          <State>FL</State>
+          <Year>1994</Year>
+          <Qtr>Q1</Qtr>
+          <Sales>32</Sales>
+        </Row>
+        <Row>
+          <Region>South</Region>
+          <State>FL</State>
+          <Year>1994</Year>
+          <Qtr>Q2</Qtr>
+          <Sales>5</Sales>
+        </Row>
+        <Row>
+          <Region>South</Region>
+          <State>FL</State>
+          <Year>1994</Year>
+          <Qtr>Q3</Qtr>
+          <Sales>6</Sales>
+        </Row>
+        <Row>
+          <Region>South</Region>
+          <State>FL</State>
+          <Year>1994</Year>
+          <Qtr>Q4</Qtr>
+          <Sales>28</Sales>
+        </Row>
+        <Row>
+          <Region>South</Region>
+          <State>LA</State>
+          <Year>1993</Year>
+          <Qtr>Q1</Qtr>
+          <Sales>39</Sales>
+        </Row>
+        <Row>
+          <Region>South</Region>
+          <State>LA</State>
+          <Year>1993</Year>
+          <Qtr>Q2</Qtr>
+          <Sales>42</Sales>
+        </Row>
+        <Row>
+          <Region>South</Region>
+          <State>LA</State>
+          <Year>1993</Year>
+          <Qtr>Q3</Qtr>
+          <Sales>39</Sales>
+        </Row>
+        <Row>
+          <Region>South</Region>
+          <State>LA</State>
+          <Year>1993</Year>
+          <Qtr>Q4</Qtr>
+          <Sales>28</Sales>
+        </Row>
+        <Row>
+          <Region>South</Region>
+          <State>LA</State>
+          <Year>1994</Year>
+          <Qtr>Q1</Qtr>
+          <Sales>39</Sales>
+        </Row>
+        <Row>
+          <Region>South</Region>
+          <State>LA</State>
+          <Year>1994</Year>
+          <Qtr>Q2</Qtr>
+          <Sales>40</Sales>
+        </Row>
+        <Row>
+          <Region>South</Region>
+          <State>LA</State>
+          <Year>1994</Year>
+          <Qtr>Q3</Qtr>
+          <Sales>41</Sales>
+        </Row>
+        <Row>
+          <Region>South</Region>
+          <State>LA</State>
+          <Year>1994</Year>
+          <Qtr>Q4</Qtr>
+          <Sales>9</Sales>
+        </Row>
+        <Row>
+          <Region>South</Region>
+          <State>NC</State>
+          <Year>1993</Year>
+          <Qtr>Q1</Qtr>
+          <Sales>25</Sales>
+        </Row>
+        <Row>
+          <Region>South</Region>
+          <State>NC</State>
+          <Year>1993</Year>
+          <Qtr>Q2</Qtr>
+          <Sales>37</Sales>
+        </Row>
+        <Row>
+          <Region>South</Region>
+          <State>NC</State>
+          <Year>1993</Year>
+          <Qtr>Q3</Qtr>
+          <Sales>16</Sales>
+        </Row>
+        <Row>
+          <Region>South</Region>
+          <State>NC</State>
+          <Year>1993</Year>
+          <Qtr>Q4</Qtr>
+          <Sales>40</Sales>
+        </Row>
+        <Row>
+          <Region>South</Region>
+          <State>NC</State>
+          <Year>1994</Year>
+          <Qtr>Q1</Qtr>
+          <Sales>40</Sales>
+        </Row>
+        <Row>
+          <Region>South</Region>
+          <State>NC</State>
+          <Year>1994</Year>
+          <Qtr>Q2</Qtr>
+          <Sales>45</Sales>
+        </Row>
+        <Row>
+          <Region>South</Region>
+          <State>NC</State>
+          <Year>1994</Year>
+          <Qtr>Q3</Qtr>
+          <Sales>29</Sales>
+        </Row>
+        <Row>
+          <Region>South</Region>
+          <State>NC</State>
+          <Year>1994</Year>
+          <Qtr>Q4</Qtr>
+          <Sales>27</Sales>
+        </Row>
+      </Rows>
+    </DataSet>
+  </DataSets>
+  <PageHeader>
+    <Height>0.0pt</Height>
+    <PrintOnFirstPage>True</PrintOnFirstPage>
+    <PrintOnLastPage>True</PrintOnLastPage>
+  </PageHeader>
+  <Body>
+    <Height>1100pt</Height>
+    <ReportItems>
+      <Matrix Name="Matrix1">
+        <Style>
+          <BorderStyle>
+            <Default>Solid</Default>
+          </BorderStyle>
+          <BorderColor>
+            <Default>blue</Default>
+          </BorderColor>
+          <BackgroundColor>yellow</BackgroundColor>
+          <BorderWidth />
+        </Style>
+        <Corner>
+          <ReportItems>
+            <Textbox Name="Corner">
+              <Value>Region\Year</Value>
+              <Style>
+                <BorderStyle>
+                  <Default>Solid</Default>
+                </BorderStyle>
+                <BorderWidth>
+                  <Left>1pt</Left>
+                  <Right>1pt</Right>
+                  <Top>1pt</Top>
+                  <Bottom>1pt</Bottom>
+                </BorderWidth>
+                <FontWeight>Bold</FontWeight>
+                <BorderColor />
+                <FontStyle>Normal</FontStyle>
+                <FontFamily>Arial</FontFamily>
+                <FontSize>10pt</FontSize>
+                <TextDecoration>None</TextDecoration>
+                <TextAlign>Left</TextAlign>
+                <VerticalAlign>Middle</VerticalAlign>
+                <Color>Black</Color>
+                <Direction>LTR</Direction>
+                <WritingMode>lr-tb</WritingMode>
+              </Style>
+            </Textbox>
+          </ReportItems>
+        </Corner>
+        <ColumnGroupings>
+          <ColumnGrouping>
+            <Height>12.1pt</Height>
+            <DynamicColumns Name="DynamicColumns1">
+              <Grouping Name="colGrouping1">
+                <GroupExpressions>
+                  <GroupExpression>=Fields!Year.Value</GroupExpression>
+                </GroupExpressions>
+              </Grouping>
+              <ReportItems>
+                <Textbox Name="Year">
+                  <Value>="" + Fields!Year.Value + " = "+ Sum(Fields!Sales.Value)</Value>
+                  <Style>
+                    <BorderStyle>
+                      <Default>Solid</Default>
+                    </BorderStyle>
+                    <BorderWidth>
+                      <Left>1pt</Left>
+                      <Right>1pt</Right>
+                      <Top>1pt</Top>
+                      <Bottom>1pt</Bottom>
+                      <Default>1pt</Default>
+                    </BorderWidth>
+                    <FontWeight>Bold</FontWeight>
+                    <FontStyle>Normal</FontStyle>
+                    <FontFamily>Arial</FontFamily>
+                    <FontSize>10pt</FontSize>
+                    <TextDecoration>None</TextDecoration>
+                    <TextAlign>Center</TextAlign>
+                    <VerticalAlign>Middle</VerticalAlign>
+                    <Color>Black</Color>
+                    <Direction>LTR</Direction>
+                    <WritingMode>lr-tb</WritingMode>
+                    <BorderColor />
+                  </Style>
+                </Textbox>
+              </ReportItems>
+              <Subtotal>
+                <ReportItems>
+                  <Textbox Name="Textbox1">
+                    <Value>Column Grand Total </Value>
+                    <Style>
+                      <BorderStyle>
+                        <Default>Solid</Default>
+                      </BorderStyle>
+                      <BorderWidth>
+                        <Left>1pt</Left>
+                        <Right>1pt</Right>
+                        <Top>1pt</Top>
+                        <Bottom>1pt</Bottom>
+                        <Default>1pt</Default>
+                      </BorderWidth>
+                      <FontWeight>Bold</FontWeight>
+                      <FontStyle>Normal</FontStyle>
+                      <FontFamily>Arial</FontFamily>
+                      <FontSize>10pt</FontSize>
+                      <TextDecoration>None</TextDecoration>
+                      <TextAlign>Center</TextAlign>
+                      <VerticalAlign>Middle</VerticalAlign>
+                      <Color>Black</Color>
+                      <Direction>LTR</Direction>
+                      <WritingMode>lr-tb</WritingMode>
+                      <BorderColor />
+                    </Style>
+                    <CanGrow>True</CanGrow>
+                  </Textbox>
+                </ReportItems>
+              </Subtotal>
+            </DynamicColumns>
+          </ColumnGrouping>
+        </ColumnGroupings>
+        <RowGroupings>
+          <RowGrouping>
+            <Width>82.1pt</Width>
+            <DynamicRows Name="DynamicRows1">
+              <Grouping Name="rowGrouping1">
+                <GroupExpressions>
+                  <GroupExpression>=Fields!Region.Value</GroupExpression>
+                </GroupExpressions>
+              </Grouping>
+              <ReportItems>
+                <Textbox Name="Region">
+                  <Value>=Fields!Region.Value</Value>
+                  <Style>
+                    <BorderStyle>
+                      <Default>Solid</Default>
+                    </BorderStyle>
+                    <BorderWidth>
+                      <Left>1pt</Left>
+                      <Right>1pt</Right>
+                      <Top>1pt</Top>
+                      <Bottom>1pt</Bottom>
+                    </BorderWidth>
+                    <FontWeight>Bold</FontWeight>
+                    <BorderColor />
+                    <FontStyle>Normal</FontStyle>
+                    <FontFamily>Arial</FontFamily>
+                    <FontSize>10pt</FontSize>
+                    <TextDecoration>None</TextDecoration>
+                    <TextAlign>General</TextAlign>
+                    <VerticalAlign>Middle</VerticalAlign>
+                    <Color>Black</Color>
+                    <Direction>LTR</Direction>
+                    <WritingMode>lr-tb</WritingMode>
+                  </Style>
+                </Textbox>
+              </ReportItems>
+              <Subtotal>
+                <ReportItems>
+                  <Textbox Name="Textbox2">
+                    <Value>Grand Total</Value>
+                    <Style>
+                      <BorderStyle>
+                        <Default>Solid</Default>
+                      </BorderStyle>
+                      <BorderWidth>
+                        <Left>1pt</Left>
+                        <Right>1pt</Right>
+                        <Top>1pt</Top>
+                        <Bottom>1pt</Bottom>
+                        <Default>1pt</Default>
+                      </BorderWidth>
+                      <FontWeight>Bold</FontWeight>
+                      <BorderColor />
+                      <FontStyle>Normal</FontStyle>
+                      <FontFamily>Arial</FontFamily>
+                      <FontSize>10pt</FontSize>
+                      <TextDecoration>None</TextDecoration>
+                      <TextAlign>General</TextAlign>
+                      <VerticalAlign>Middle</VerticalAlign>
+                      <Color>Black</Color>
+                      <Direction>LTR</Direction>
+                      <WritingMode>lr-tb</WritingMode>
+                    </Style>
+                  </Textbox>
+                </ReportItems>
+              </Subtotal>
+            </DynamicRows>
+          </RowGrouping>
+        </RowGroupings>
+        <MatrixRows>
+          <MatrixRow>
+            <Height>15.7pt</Height>
+            <MatrixCells>
+              <MatrixCell>
+                <ReportItems>
+                  <Textbox Name="SumSales">
+                    <Value>=sum(Fields!Sales.Value)</Value>
+                    <Style>
+                      <BorderStyle>
+                        <Default>Solid</Default>
+                      </BorderStyle>
+                      <BorderWidth>
+                        <Left>0pt</Left>
+                        <Right>1pt</Right>
+                        <Top>0pt</Top>
+                        <Bottom>1pt</Bottom>
+                      </BorderWidth>
+                      <FontWeight>bold</FontWeight>
+                      <BorderColor />
+                      <TextAlign>Center</TextAlign>
+                      <VerticalAlign>Middle</VerticalAlign>
+                    </Style>
+                  </Textbox>
+                </ReportItems>
+              </MatrixCell>
+            </MatrixCells>
+          </MatrixRow>
+        </MatrixRows>
+        <MatrixColumns>
+          <MatrixColumn>
+            <Width>1 in</Width>
+          </MatrixColumn>
+        </MatrixColumns>
+        <Left>40.7pt</Left>
+        <Top>450.0pt</Top>
+      </Matrix>
+      <Image Name="Picture2">
+        <Top>900pt</Top>
+        <Left>40pt</Left>
+        <Width>2in</Width>
+        <Height>1in</Height>
+        <Source>External</Source>
+        <Value>logo-example.png</Value>
+        <Sizing>FitProportional</Sizing>
+      </Image>
+      <Chart Name="Chart1">
+        <Height>144.00pt</Height>
+        <Width>288.00pt</Width>
+        <DataSetName>Data</DataSetName>
+        <NoRows>Query returned no rows!</NoRows>
+        <Style>
+          <BorderStyle>
+            <Default>Solid</Default>
+          </BorderStyle>
+          <BackgroundColor>White</BackgroundColor>
+          <BackgroundGradientType>LeftRight</BackgroundGradientType>
+          <BackgroundGradientEndColor>Azure</BackgroundGradientEndColor>
+          <BorderColor />
+          <BorderWidth />
+        </Style>
+        <Type>Column</Type>
+        <Subtype>Plain</Subtype>
+        <CategoryGroupings>
+          <CategoryGrouping>
+            <DynamicCategories>
+              <Grouping Name="DynamicCategoriesGroup1">
+                <GroupExpressions>
+                  <GroupExpression>=Fields!Region.Value</GroupExpression>
+                </GroupExpressions>
+              </Grouping>
+            </DynamicCategories>
+          </CategoryGrouping>
+        </CategoryGroupings>
+        <CategoryAxis>
+          <Axis>
+            <Visible>True</Visible>
+            <MajorTickMarks>Inside</MajorTickMarks>
+            <MajorGridLines>
+              <ShowGridLines>True</ShowGridLines>
+              <Style>
+                <BorderStyle>
+                  <Default>Solid</Default>
+                </BorderStyle>
+              </Style>
+            </MajorGridLines>
+            <MinorGridLines>
+              <ShowGridLines>True</ShowGridLines>
+              <Style>
+                <BorderStyle>
+                  <Default>Solid</Default>
+                </BorderStyle>
+              </Style>
+            </MinorGridLines>
+            <Title>
+              <Caption>Region</Caption>
+              <Style>
+                <BorderStyle />
+                <BorderColor />
+                <BorderWidth />
+              </Style>
+            </Title>
+            <Style>
+              <BorderStyle />
+              <BorderColor />
+              <BorderWidth />
+            </Style>
+          </Axis>
+        </CategoryAxis>
+        <SeriesGroupings>
+          <SeriesGrouping>
+            <DynamicSeries>
+              <Grouping Name="DynamicSeriesGroup1">
+                <GroupExpressions>
+                  <GroupExpression>=Fields!Year.Value</GroupExpression>
+                </GroupExpressions>
+              </Grouping>
+              <Label>=Fields!Year.Value</Label>
+            </DynamicSeries>
+          </SeriesGrouping>
+        </SeriesGroupings>
+        <ChartData>
+          <ChartSeries>
+            <DataPoints>
+              <DataPoint>
+                <DataValues>
+                  <DataValue>
+                    <Value>=Sum(Fields!Sales.Value)</Value>
+                  </DataValue>
+                </DataValues>
+              </DataPoint>
+            </DataPoints>
+          </ChartSeries>
+        </ChartData>
+        <ValueAxis>
+          <Axis>
+            <Visible>True</Visible>
+            <MajorTickMarks>Inside</MajorTickMarks>
+            <MajorGridLines>
+              <ShowGridLines>True</ShowGridLines>
+              <Style>
+                <BorderStyle>
+                  <Default>Solid</Default>
+                </BorderStyle>
+                <FontSize>8pt</FontSize>
+              </Style>
+            </MajorGridLines>
+            <MinorGridLines>
+              <ShowGridLines>True</ShowGridLines>
+              <Style>
+                <BorderStyle>
+                  <Default>Solid</Default>
+                </BorderStyle>
+              </Style>
+            </MinorGridLines>
+            <Title>
+              <Caption>Sales</Caption>
+              <Style>
+                <WritingMode>tb-rl</WritingMode>
+              </Style>
+            </Title>
+            <Style>
+              <BorderStyle />
+              <BorderColor />
+              <BorderWidth />
+            </Style>
+          </Axis>
+        </ValueAxis>
+        <Legend>
+          <Style>
+            <BorderStyle>
+              <Default>Solid</Default>
+            </BorderStyle>
+            <PaddingLeft>5pt</PaddingLeft>
+            <FontSize>8pt</FontSize>
+            <BorderColor />
+            <BorderWidth />
+          </Style>
+          <Visible>True</Visible>
+          <Position>RightCenter</Position>
+        </Legend>
+        <Title>
+          <Style>
+            <FontWeight>Bold</FontWeight>
+            <FontSize>14pt</FontSize>
+            <TextAlign>Center</TextAlign>
+            <BorderStyle />
+            <BorderColor />
+            <BorderWidth />
+          </Style>
+          <Caption>Region Year Chart</Caption>
+        </Title>
+        <Left>40.6pt</Left>
+        <Top>700pt</Top>
+      </Chart>
+      <Chart Name="Chart2">
+        <Height>111.62pt</Height>
+        <Width>288.00pt</Width>
+        <DataSetName>Data</DataSetName>
+        <NoRows>Query returned no rows!</NoRows>
+        <Style>
+          <BorderStyle>
+            <Default>Solid</Default>
+          </BorderStyle>
+          <BackgroundColor>White</BackgroundColor>
+          <BackgroundGradientType>LeftRight</BackgroundGradientType>
+          <BackgroundGradientEndColor>Azure</BackgroundGradientEndColor>
+          <BorderColor />
+          <BorderWidth />
+        </Style>
+        <Type>Area</Type>
+        <Subtype>Stacked</Subtype>
+        <CategoryGroupings>
+          <CategoryGrouping>
+            <DynamicCategories>
+              <Grouping Name="DynamicCategoriesGroup2">
+                <GroupExpressions>
+                  <GroupExpression>=Fields!Region.Value</GroupExpression>
+                </GroupExpressions>
+              </Grouping>
+            </DynamicCategories>
+          </CategoryGrouping>
+        </CategoryGroupings>
+        <CategoryAxis>
+          <Axis>
+            <Visible>True</Visible>
+            <MajorTickMarks>Inside</MajorTickMarks>
+            <MajorGridLines>
+              <ShowGridLines>True</ShowGridLines>
+              <Style>
+                <BorderStyle>
+                  <Default>Solid</Default>
+                </BorderStyle>
+              </Style>
+            </MajorGridLines>
+            <MinorGridLines>
+              <ShowGridLines>True</ShowGridLines>
+              <Style>
+                <BorderStyle>
+                  <Default>Solid</Default>
+                </BorderStyle>
+              </Style>
+            </MinorGridLines>
+            <Title>
+              <Caption>Region</Caption>
+              <Style>
+                <BorderStyle />
+                <BorderColor />
+                <BorderWidth />
+              </Style>
+            </Title>
+            <Style>
+              <BorderStyle />
+              <BorderColor />
+              <BorderWidth />
+            </Style>
+          </Axis>
+        </CategoryAxis>
+        <SeriesGroupings>
+          <SeriesGrouping>
+            <DynamicSeries>
+              <Grouping Name="DynamicSeriesGroup2">
+                <GroupExpressions>
+                  <GroupExpression>=Fields!Year.Value</GroupExpression>
+                </GroupExpressions>
+              </Grouping>
+              <Label>=Fields!Year.Value</Label>
+            </DynamicSeries>
+          </SeriesGrouping>
+        </SeriesGroupings>
+        <ChartData>
+          <ChartSeries>
+            <DataPoints>
+              <DataPoint>
+                <DataValues>
+                  <DataValue>
+                    <Value>=Sum(Fields!Sales.Value)</Value>
+                  </DataValue>
+                </DataValues>
+              </DataPoint>
+            </DataPoints>
+          </ChartSeries>
+        </ChartData>
+        <ValueAxis>
+          <Axis>
+            <Visible>True</Visible>
+            <MajorTickMarks>Inside</MajorTickMarks>
+            <MajorGridLines>
+              <ShowGridLines>True</ShowGridLines>
+              <Style>
+                <BorderStyle>
+                  <Default>Solid</Default>
+                </BorderStyle>
+                <FontSize>8pt</FontSize>
+              </Style>
+            </MajorGridLines>
+            <MinorGridLines>
+              <ShowGridLines>True</ShowGridLines>
+              <Style>
+                <BorderStyle>
+                  <Default>Solid</Default>
+                </BorderStyle>
+              </Style>
+            </MinorGridLines>
+            <Title>
+              <Caption>Sales</Caption>
+              <Style>
+                <WritingMode>tb-rl</WritingMode>
+              </Style>
+            </Title>
+            <Style>
+              <BorderStyle />
+              <BorderColor />
+              <BorderWidth />
+            </Style>
+            <MajorInterval>200</MajorInterval>
+          </Axis>
+        </ValueAxis>
+        <Legend>
+          <Style>
+            <BorderStyle>
+              <Default>Solid</Default>
+            </BorderStyle>
+            <PaddingLeft>5pt</PaddingLeft>
+            <FontSize>8pt</FontSize>
+            <BorderColor />
+            <BorderWidth />
+          </Style>
+          <Visible>True</Visible>
+          <Position>RightCenter</Position>
+        </Legend>
+        <Title>
+          <Style>
+            <FontWeight>Bold</FontWeight>
+            <FontSize>14pt</FontSize>
+            <TextAlign>Center</TextAlign>
+            <BorderStyle />
+            <BorderColor />
+            <BorderWidth />
+          </Style>
+          <Caption>Region Year Chart</Caption>
+        </Title>
+        <Left>378.00pt</Left>
+        <Top>2.70pt</Top>
+      </Chart>
+      <Chart Name="Chart3">
+        <Height>144.00pt</Height>
+        <Width>288.00pt</Width>
+        <DataSetName>Data</DataSetName>
+        <NoRows>Query returned no rows!</NoRows>
+        <Style>
+          <BorderStyle>
+            <Default>Solid</Default>
+          </BorderStyle>
+          <BackgroundColor>White</BackgroundColor>
+          <BackgroundGradientType>LeftRight</BackgroundGradientType>
+          <BackgroundGradientEndColor>Azure</BackgroundGradientEndColor>
+          <BorderColor />
+          <BorderWidth />
+        </Style>
+        <Type>Bar</Type>
+        <Subtype>Plain</Subtype>
+        <CategoryGroupings>
+          <CategoryGrouping>
+            <DynamicCategories>
+              <Grouping Name="DynamicCategoriesGroup3">
+                <GroupExpressions>
+                  <GroupExpression>=Fields!Region.Value</GroupExpression>
+                </GroupExpressions>
+              </Grouping>
+            </DynamicCategories>
+          </CategoryGrouping>
+        </CategoryGroupings>
+        <CategoryAxis>
+          <Axis>
+            <Visible>True</Visible>
+            <MajorTickMarks>Inside</MajorTickMarks>
+            <MajorGridLines>
+              <ShowGridLines>True</ShowGridLines>
+              <Style>
+                <BorderStyle>
+                  <Default>Solid</Default>
+                </BorderStyle>
+              </Style>
+            </MajorGridLines>
+            <MinorGridLines>
+              <ShowGridLines>True</ShowGridLines>
+              <Style>
+                <BorderStyle>
+                  <Default>Solid</Default>
+                </BorderStyle>
+              </Style>
+            </MinorGridLines>
+            <Title>
+              <Caption>Region</Caption>
+              <Style>
+                <BorderStyle />
+                <BorderColor />
+                <BorderWidth />
+                <WritingMode>tb-rl</WritingMode>
+              </Style>
+            </Title>
+            <Style>
+              <BorderStyle />
+              <BorderColor />
+              <BorderWidth />
+            </Style>
+          </Axis>
+        </CategoryAxis>
+        <SeriesGroupings>
+          <SeriesGrouping>
+            <DynamicSeries>
+              <Grouping Name="DynamicSeriesGroup3">
+                <GroupExpressions>
+                  <GroupExpression>=Fields!Year.Value</GroupExpression>
+                </GroupExpressions>
+              </Grouping>
+              <Label>=Fields!Year.Value</Label>
+            </DynamicSeries>
+          </SeriesGrouping>
+        </SeriesGroupings>
+        <ChartData>
+          <ChartSeries>
+            <DataPoints>
+              <DataPoint>
+                <DataValues>
+                  <DataValue>
+                    <Value>=Sum(Fields!Sales.Value)</Value>
+                  </DataValue>
+                </DataValues>
+              </DataPoint>
+            </DataPoints>
+          </ChartSeries>
+        </ChartData>
+        <ValueAxis>
+          <Axis>
+            <Visible>True</Visible>
+            <MajorTickMarks>Inside</MajorTickMarks>
+            <MajorGridLines>
+              <ShowGridLines>True</ShowGridLines>
+              <Style>
+                <BorderStyle>
+                  <Default>Solid</Default>
+                </BorderStyle>
+                <FontSize>8pt</FontSize>
+              </Style>
+            </MajorGridLines>
+            <MinorGridLines>
+              <ShowGridLines>True</ShowGridLines>
+              <Style>
+                <BorderStyle>
+                  <Default>Solid</Default>
+                </BorderStyle>
+              </Style>
+            </MinorGridLines>
+            <Title>
+              <Caption>Sales</Caption>
+              <Style>
+                <WritingMode>lr-tb</WritingMode>
+                <BorderStyle />
+                <BorderColor />
+                <BorderWidth />
+              </Style>
+            </Title>
+            <Style>
+              <BorderStyle />
+              <BorderColor />
+              <BorderWidth />
+            </Style>
+          </Axis>
+        </ValueAxis>
+        <Legend>
+          <Style>
+            <BorderStyle>
+              <Default>Solid</Default>
+            </BorderStyle>
+            <PaddingLeft>5pt</PaddingLeft>
+            <FontSize>8pt</FontSize>
+            <BorderColor />
+            <BorderWidth />
+          </Style>
+          <Visible>True</Visible>
+          <Position>RightCenter</Position>
+        </Legend>
+        <Title>
+          <Style>
+            <FontWeight>Bold</FontWeight>
+            <FontSize>14pt</FontSize>
+            <TextAlign>Center</TextAlign>
+            <BorderStyle />
+            <BorderColor />
+            <BorderWidth />
+          </Style>
+          <Caption>Region Year Chart</Caption>
+        </Title>
+        <Left>40.6pt</Left>
+        <Top>151.3pt</Top>
+      </Chart>
+      <Chart Name="Chart4">
+        <Height>118.42pt</Height>
+        <Width>288.00pt</Width>
+        <DataSetName>Data</DataSetName>
+        <NoRows>Query returned no rows!</NoRows>
+        <Style>
+          <BorderStyle>
+            <Default>Solid</Default>
+          </BorderStyle>
+          <BackgroundColor>White</BackgroundColor>
+          <BackgroundGradientType>LeftRight</BackgroundGradientType>
+          <BackgroundGradientEndColor>Azure</BackgroundGradientEndColor>
+          <BorderColor />
+          <BorderWidth />
+        </Style>
+        <Type>Line</Type>
+        <Subtype>Smooth</Subtype>
+        <CategoryGroupings>
+          <CategoryGrouping>
+            <DynamicCategories>
+              <Grouping Name="DynamicCategoriesGroup4">
+                <GroupExpressions>
+                  <GroupExpression>=Fields!Region.Value</GroupExpression>
+                </GroupExpressions>
+              </Grouping>
+            </DynamicCategories>
+          </CategoryGrouping>
+        </CategoryGroupings>
+        <CategoryAxis>
+          <Axis>
+            <Visible>True</Visible>
+            <MajorTickMarks>Inside</MajorTickMarks>
+            <MajorGridLines>
+              <ShowGridLines>True</ShowGridLines>
+              <Style>
+                <BorderStyle>
+                  <Default>Solid</Default>
+                </BorderStyle>
+              </Style>
+            </MajorGridLines>
+            <MinorGridLines>
+              <ShowGridLines>True</ShowGridLines>
+              <Style>
+                <BorderStyle>
+                  <Default>Solid</Default>
+                </BorderStyle>
+              </Style>
+            </MinorGridLines>
+            <Title>
+              <Caption>Region</Caption>
+              <Style>
+                <BorderStyle />
+                <BorderColor />
+                <BorderWidth />
+              </Style>
+            </Title>
+            <Style>
+              <BorderStyle />
+              <BorderColor />
+              <BorderWidth />
+            </Style>
+          </Axis>
+        </CategoryAxis>
+        <SeriesGroupings>
+          <SeriesGrouping>
+            <DynamicSeries>
+              <Grouping Name="DynamicSeriesGroup4">
+                <GroupExpressions>
+                  <GroupExpression>=Fields!Year.Value</GroupExpression>
+                </GroupExpressions>
+              </Grouping>
+              <Label>=Fields!Year.Value</Label>
+            </DynamicSeries>
+          </SeriesGrouping>
+        </SeriesGroupings>
+        <ChartData>
+          <ChartSeries>
+            <DataPoints>
+              <DataPoint>
+                <DataValues>
+                  <DataValue>
+                    <Value>=Sum(Fields!Sales.Value)</Value>
+                  </DataValue>
+                </DataValues>
+              </DataPoint>
+            </DataPoints>
+          </ChartSeries>
+        </ChartData>
+        <ValueAxis>
+          <Axis>
+            <Visible>True</Visible>
+            <MajorTickMarks>Inside</MajorTickMarks>
+            <MajorGridLines>
+              <ShowGridLines>True</ShowGridLines>
+              <Style>
+                <BorderStyle>
+                  <Default>Solid</Default>
+                </BorderStyle>
+                <FontSize>8pt</FontSize>
+              </Style>
+            </MajorGridLines>
+            <MinorGridLines>
+              <ShowGridLines>True</ShowGridLines>
+              <Style>
+                <BorderStyle>
+                  <Default>Solid</Default>
+                </BorderStyle>
+              </Style>
+            </MinorGridLines>
+            <Title>
+              <Caption>Sales</Caption>
+              <Style>
+                <WritingMode>tb-rl</WritingMode>
+              </Style>
+            </Title>
+            <Style>
+              <BorderStyle />
+              <BorderColor />
+              <BorderWidth />
+            </Style>
+            <MajorInterval>100</MajorInterval>
+          </Axis>
+        </ValueAxis>
+        <Legend>
+          <Style>
+            <BorderStyle>
+              <Default>Solid</Default>
+            </BorderStyle>
+            <PaddingLeft>5pt</PaddingLeft>
+            <FontSize>8pt</FontSize>
+            <BorderColor />
+            <BorderWidth />
+          </Style>
+          <Visible>True</Visible>
+          <Position>RightCenter</Position>
+        </Legend>
+        <Title>
+          <Style>
+            <FontWeight>Bold</FontWeight>
+            <FontSize>14pt</FontSize>
+            <TextAlign>Center</TextAlign>
+            <BorderStyle />
+            <BorderColor />
+            <BorderWidth />
+          </Style>
+          <Caption>Region Year Chart</Caption>
+        </Title>
+        <Left>378.00pt</Left>
+        <Top>131.50pt</Top>
+      </Chart>
+      <Chart Name="Chart5">
+        <Height>144.00pt</Height>
+        <Width>288.00pt</Width>
+        <DataSetName>Data</DataSetName>
+        <NoRows>Query returned no rows!</NoRows>
+        <Style>
+          <BorderStyle>
+            <Default>Solid</Default>
+          </BorderStyle>
+          <BackgroundColor>White</BackgroundColor>
+          <BackgroundGradientType>LeftRight</BackgroundGradientType>
+          <BackgroundGradientEndColor>Azure</BackgroundGradientEndColor>
+          <BorderColor />
+          <BorderWidth />
+        </Style>
+        <Type>Pie</Type>
+        <Subtype>Plain</Subtype>
+        <CategoryGroupings>
+          <CategoryGrouping>
+            <DynamicCategories>
+              <Grouping Name="DynamicCategoriesGroup5">
+                <GroupExpressions>
+                  <GroupExpression>=Fields!Region.Value</GroupExpression>
+                </GroupExpressions>
+              </Grouping>
+            </DynamicCategories>
+          </CategoryGrouping>
+        </CategoryGroupings>
+        <CategoryAxis>
+          <Axis>
+            <Visible>True</Visible>
+            <MajorTickMarks>Inside</MajorTickMarks>
+            <MajorGridLines>
+              <ShowGridLines>True</ShowGridLines>
+              <Style>
+                <BorderStyle>
+                  <Default>Solid</Default>
+                </BorderStyle>
+              </Style>
+            </MajorGridLines>
+            <MinorGridLines>
+              <ShowGridLines>True</ShowGridLines>
+              <Style>
+                <BorderStyle>
+                  <Default>Solid</Default>
+                </BorderStyle>
+              </Style>
+            </MinorGridLines>
+            <Title>
+              <Caption>Region</Caption>
+              <Style>
+                <BorderStyle />
+                <BorderColor />
+                <BorderWidth />
+              </Style>
+            </Title>
+            <Style>
+              <BorderStyle />
+              <BorderColor />
+              <BorderWidth />
+            </Style>
+          </Axis>
+        </CategoryAxis>
+        <SeriesGroupings>
+          <SeriesGrouping>
+            <DynamicSeries>
+              <Grouping Name="DynamicSeriesGroup5">
+                <GroupExpressions>
+                  <GroupExpression>=Fields!Year.Value</GroupExpression>
+                </GroupExpressions>
+              </Grouping>
+              <Label>=Fields!Year.Value</Label>
+            </DynamicSeries>
+          </SeriesGrouping>
+        </SeriesGroupings>
+        <ChartData>
+          <ChartSeries>
+            <DataPoints>
+              <DataPoint>
+                <DataValues>
+                  <DataValue>
+                    <Value>=Sum(Fields!Sales.Value)</Value>
+                  </DataValue>
+                </DataValues>
+              </DataPoint>
+            </DataPoints>
+          </ChartSeries>
+        </ChartData>
+        <ValueAxis>
+          <Axis>
+            <Visible>True</Visible>
+            <MajorTickMarks>Inside</MajorTickMarks>
+            <MajorGridLines>
+              <ShowGridLines>True</ShowGridLines>
+              <Style>
+                <BorderStyle>
+                  <Default>Solid</Default>
+                </BorderStyle>
+                <FontSize>8pt</FontSize>
+              </Style>
+            </MajorGridLines>
+            <MinorGridLines>
+              <ShowGridLines>True</ShowGridLines>
+              <Style>
+                <BorderStyle>
+                  <Default>Solid</Default>
+                </BorderStyle>
+              </Style>
+            </MinorGridLines>
+            <Title>
+              <Caption>Sales</Caption>
+              <Style>
+                <WritingMode>tb-rl</WritingMode>
+              </Style>
+            </Title>
+            <Style>
+              <BorderStyle />
+              <BorderColor />
+              <BorderWidth />
+            </Style>
+          </Axis>
+        </ValueAxis>
+        <Legend>
+          <Style>
+            <BorderStyle>
+              <Default>Solid</Default>
+            </BorderStyle>
+            <PaddingLeft>5pt</PaddingLeft>
+            <FontSize>8pt</FontSize>
+            <BorderColor />
+            <BorderWidth />
+          </Style>
+          <Visible>True</Visible>
+          <Position>RightCenter</Position>
+        </Legend>
+        <Title>
+          <Style>
+            <FontWeight>Bold</FontWeight>
+            <FontSize>14pt</FontSize>
+            <TextAlign>Center</TextAlign>
+            <BorderStyle />
+            <BorderColor />
+            <BorderWidth />
+          </Style>
+          <Caption>Region Year Chart</Caption>
+        </Title>
+        <Left>40.6pt</Left>
+        <Top>300.2pt</Top>
+      </Chart>
+      <Textbox Name="Textbox4">
+        <Height>62.49pt</Height>
+        <Width>21.06pt</Width>
+        <Value>Column</Value>
+        <Left>9.70pt</Left>
+        <Top>31.20pt</Top>
+        <Style>
+          <BorderStyle />
+          <BorderColor />
+          <BorderWidth />
+          <WritingMode>tb-rl</WritingMode>
+          <FontWeight>Bold</FontWeight>
+          <FontSize>14pt</FontSize>
+        </Style>
+      </Textbox>
+      <Textbox Name="Textbox5">
+        <Height>62.49pt</Height>
+        <Width>21.06pt</Width>
+        <Value>Bar</Value>
+        <Left>9.70pt</Left>
+        <Top>171.69pt</Top>
+        <Style>
+          <BorderStyle />
+          <BorderColor />
+          <BorderWidth />
+          <WritingMode>tb-rl</WritingMode>
+          <FontWeight>Bold</FontWeight>
+          <FontSize>14pt</FontSize>
+        </Style>
+      </Textbox>
+      <Textbox Name="Textbox6">
+        <Height>118.21pt</Height>
+        <Width>23.31pt</Width>
+        <Value>Area - Stacked</Value>
+        <Left>345.60pt</Left>
+        <Top>0.00pt</Top>
+        <Style>
+          <BorderStyle />
+          <BorderColor />
+          <BorderWidth />
+          <WritingMode>tb-rl</WritingMode>
+          <FontWeight>Bold</FontWeight>
+          <FontSize>14pt</FontSize>
+        </Style>
+      </Textbox>
+      <Textbox Name="Textbox7">
+        <Height>111.41pt</Height>
+        <Width>27.83pt</Width>
+        <Value>Line - Smooth</Value>
+        <Left>341.08pt</Left>
+        <Top>130.90pt</Top>
+        <Style>
+          <BorderStyle />
+          <BorderColor />
+          <BorderWidth />
+          <WritingMode>tb-rl</WritingMode>
+          <FontWeight>Bold</FontWeight>
+          <FontSize>14pt</FontSize>
+        </Style>
+      </Textbox>
+      <Textbox Name="Textbox8">
+        <Height>62.49pt</Height>
+        <Width>21.06pt</Width>
+        <Value>Pie</Value>
+        <Left>9.70pt</Left>
+        <Top>313.97pt</Top>
+        <Style>
+          <BorderStyle />
+          <BorderColor />
+          <BorderWidth />
+          <WritingMode>tb-rl</WritingMode>
+          <FontWeight>Bold</FontWeight>
+          <FontSize>14pt</FontSize>
+        </Style>
+      </Textbox>
+      <Textbox Name="Textbox9">
+        <Height>62.49pt</Height>
+        <Width>21.06pt</Width>
+        <Value>Matrix</Value>
+        <Left>9.7pt</Left>
+        <Top>462.5pt</Top>
+        <Style>
+          <BorderStyle />
+          <BorderColor />
+          <BorderWidth />
+          <WritingMode>tb-rl</WritingMode>
+          <FontWeight>Bold</FontWeight>
+          <FontSize>14pt</FontSize>
+        </Style>
+      </Textbox>
+      <Textbox Name="Textbox10">
+        <Height>100.90pt</Height>
+        <Width>24.06pt</Width>
+        <Value>Doughnut</Value>
+        <Left>344.85pt</Left>
+        <Top>261.40pt</Top>
+        <Style>
+          <BorderStyle />
+          <BorderColor />
+          <BorderWidth />
+          <WritingMode>tb-rl</WritingMode>
+          <FontWeight>Bold</FontWeight>
+          <FontSize>14pt</FontSize>
+        </Style>
+      </Textbox>
+      <Chart Name="Chart6">
+        <Height>113.17pt</Height>
+        <Width>288.00pt</Width>
+        <DataSetName>Data</DataSetName>
+        <NoRows>Query returned no rows!</NoRows>
+        <Style>
+          <BorderStyle>
+            <Default>Solid</Default>
+          </BorderStyle>
+          <BackgroundColor>White</BackgroundColor>
+          <BackgroundGradientType>LeftRight</BackgroundGradientType>
+          <BackgroundGradientEndColor>Azure</BackgroundGradientEndColor>
+          <BorderColor />
+          <BorderWidth />
+        </Style>
+        <Type>Doughnut</Type>
+        <Subtype>Plain</Subtype>
+        <CategoryGroupings>
+          <CategoryGrouping>
+            <DynamicCategories>
+              <Grouping Name="DynamicCategoriesGroup6">
+                <GroupExpressions>
+                  <GroupExpression>=Fields!Region.Value</GroupExpression>
+                </GroupExpressions>
+              </Grouping>
+            </DynamicCategories>
+          </CategoryGrouping>
+        </CategoryGroupings>
+        <CategoryAxis>
+          <Axis>
+            <Visible>True</Visible>
+            <MajorTickMarks>Inside</MajorTickMarks>
+            <MajorGridLines>
+              <ShowGridLines>True</ShowGridLines>
+              <Style>
+                <BorderStyle>
+                  <Default>Solid</Default>
+                </BorderStyle>
+              </Style>
+            </MajorGridLines>
+            <MinorGridLines>
+              <ShowGridLines>True</ShowGridLines>
+              <Style>
+                <BorderStyle>
+                  <Default>Solid</Default>
+                </BorderStyle>
+              </Style>
+            </MinorGridLines>
+            <Title>
+              <Caption>Region</Caption>
+              <Style>
+                <BorderStyle />
+                <BorderColor />
+                <BorderWidth />
+              </Style>
+            </Title>
+            <Style>
+              <BorderStyle />
+              <BorderColor />
+              <BorderWidth />
+            </Style>
+          </Axis>
+        </CategoryAxis>
+        <SeriesGroupings>
+          <SeriesGrouping>
+            <DynamicSeries>
+              <Grouping Name="DynamicSeriesGroup6">
+                <GroupExpressions>
+                  <GroupExpression>=Fields!Year.Value</GroupExpression>
+                </GroupExpressions>
+              </Grouping>
+              <Label>=Fields!Year.Value</Label>
+            </DynamicSeries>
+          </SeriesGrouping>
+        </SeriesGroupings>
+        <ChartData>
+          <ChartSeries>
+            <DataPoints>
+              <DataPoint>
+                <DataValues>
+                  <DataValue>
+                    <Value>=Sum(Fields!Sales.Value)</Value>
+                  </DataValue>
+                </DataValues>
+              </DataPoint>
+            </DataPoints>
+          </ChartSeries>
+        </ChartData>
+        <ValueAxis>
+          <Axis>
+            <Visible>True</Visible>
+            <MajorTickMarks>Inside</MajorTickMarks>
+            <MajorGridLines>
+              <ShowGridLines>True</ShowGridLines>
+              <Style>
+                <BorderStyle>
+                  <Default>Solid</Default>
+                </BorderStyle>
+                <FontSize>8pt</FontSize>
+              </Style>
+            </MajorGridLines>
+            <MinorGridLines>
+              <ShowGridLines>True</ShowGridLines>
+              <Style>
+                <BorderStyle>
+                  <Default>Solid</Default>
+                </BorderStyle>
+              </Style>
+            </MinorGridLines>
+            <Title>
+              <Caption>Sales</Caption>
+              <Style>
+                <WritingMode>tb-rl</WritingMode>
+              </Style>
+            </Title>
+            <Style>
+              <BorderStyle />
+              <BorderColor />
+              <BorderWidth />
+            </Style>
+          </Axis>
+        </ValueAxis>
+        <Legend>
+          <Style>
+            <BorderStyle>
+              <Default>Solid</Default>
+            </BorderStyle>
+            <PaddingLeft>5pt</PaddingLeft>
+            <FontSize>8pt</FontSize>
+            <BorderColor />
+            <BorderWidth />
+          </Style>
+          <Visible>True</Visible>
+          <Position>RightCenter</Position>
+        </Legend>
+        <Title>
+          <Style>
+            <FontWeight>Bold</FontWeight>
+            <FontSize>14pt</FontSize>
+            <TextAlign>Center</TextAlign>
+            <BorderStyle />
+            <BorderColor />
+            <BorderWidth />
+          </Style>
+          <Caption>Region Year Chart</Caption>
+        </Title>
+        <Left>378.00pt</Left>
+        <Top>262.00pt</Top>
+      </Chart>
+      <Textbox Name="Textbox3">
+        <Height>111.41pt</Height>
+        <Width>27.83pt</Width>
+        <Value>Bubble</Value>
+        <Left>341.1pt</Left>
+        <Top>386.0pt</Top>
+        <Style>
+          <BorderStyle />
+          <BorderColor />
+          <BorderWidth />
+          <WritingMode>tb-rl</WritingMode>
+          <FontWeight>Bold</FontWeight>
+          <FontSize>14pt</FontSize>
+        </Style>
+      </Textbox>
+      <Chart Name="Chart7">
+        <Height>157.13pt</Height>
+        <Width>281.92pt</Width>
+        <DataSetName>Data</DataSetName>
+        <NoRows>Query returned no rows!</NoRows>
+        <Legend>
+          <Visible>true</Visible>
+          <Style>
+            <BorderStyle>
+              <Default>Solid</Default>
+            </BorderStyle>
+            <BorderColor />
+            <BorderWidth />
+          </Style>
+          <Position>BottomCenter</Position>
+          <Layout>Table</Layout>
+          <InsidePlotArea>false</InsidePlotArea>
+        </Legend>
+        <Subtype>Plain</Subtype>
+        <Title />
+        <CategoryAxis>
+          <Axis>
+            <Title>
+              <Caption>Sales</Caption>
+              <Style>
+                <FontWeight>700</FontWeight>
+              </Style>
+            </Title>
+            <Style>
+              <FontFamily>Verdana</FontFamily>
+              <FontSize>8pt</FontSize>
+              <Format>C0</Format>
+              <BorderStyle />
+              <BorderColor />
+              <BorderWidth />
+            </Style>
+            <MajorGridLines>
+              <ShowGridLines>true</ShowGridLines>
+              <Style>
+                <BorderStyle>
+                  <Default>Solid</Default>
+                </BorderStyle>
+              </Style>
+            </MajorGridLines>
+            <MinorGridLines>
+              <Style>
+                <BorderStyle>
+                  <Default>Solid</Default>
+                </BorderStyle>
+              </Style>
+            </MinorGridLines>
+            <MajorTickMarks>Outside</MajorTickMarks>
+            <Visible>true</Visible>
+            <Scalar>true</Scalar>
+          </Axis>
+        </CategoryAxis>
+        <PointWidth>0</PointWidth>
+        <ThreeDProperties>
+          <Rotation>30</Rotation>
+          <Inclination>30</Inclination>
+          <Shading>Simple</Shading>
+          <WallThickness>50</WallThickness>
+        </ThreeDProperties>
+        <SeriesGroupings>
+          <SeriesGrouping>
+            <DynamicSeries>
+              <Grouping Name="DynamicSeriesGroup7">
+                <GroupExpressions>
+                  <GroupExpression>=Fields!Region.Value + " " + Fields!Year.Value</GroupExpression>
+                </GroupExpressions>
+              </Grouping>
+              <Label>=Fields!Region.Value + " " + Fields!Year.Value</Label>
+            </DynamicSeries>
+          </SeriesGrouping>
+        </SeriesGroupings>
+        <PlotArea>
+          <Style>
+            <BorderStyle>
+              <Default>Solid</Default>
+            </BorderStyle>
+            <BackgroundColor>LightGoldenrodYellow</BackgroundColor>
+            <BackgroundGradientEndColor>WhiteSmoke</BackgroundGradientEndColor>
+            <BackgroundGradientType>TopBottom</BackgroundGradientType>
+          </Style>
+        </PlotArea>
+        <ValueAxis>
+          <Axis>
+            <Title>
+              <Caption>Year</Caption>
+              <Style>
+                <FontWeight>700</FontWeight>
+                <WritingMode>tb-rl</WritingMode>
+                <BorderStyle />
+                <BorderColor />
+                <BorderWidth />
+              </Style>
+            </Title>
+            <Style>
+              <FontFamily>Verdana</FontFamily>
+              <FontSize>8pt</FontSize>
+              <BorderStyle />
+              <BorderColor />
+              <BorderWidth />
+              <BackgroundColor>Black</BackgroundColor>
+            </Style>
+            <MajorGridLines>
+              <ShowGridLines>true</ShowGridLines>
+              <Style>
+                <BorderStyle>
+                  <Default>Solid</Default>
+                </BorderStyle>
+                <BorderColor>
+                  <Default>Black</Default>
+                </BorderColor>
+                <BorderWidth>
+                  <Default>1pt</Default>
+                </BorderWidth>
+              </Style>
+            </MajorGridLines>
+            <MinorGridLines>
+              <Style>
+                <BorderStyle>
+                  <Default>Solid</Default>
+                </BorderStyle>
+                <BorderColor>
+                  <Default>Black</Default>
+                </BorderColor>
+                <BorderWidth>
+                  <Default>1pt</Default>
+                </BorderWidth>
+              </Style>
+              <ShowGridLines>false</ShowGridLines>
+            </MinorGridLines>
+            <MajorTickMarks>None</MajorTickMarks>
+            <Min>1992</Min>
+            <MajorInterval>1</MajorInterval>
+            <Margin>true</Margin>
+            <Visible>true</Visible>
+            <Scalar>true</Scalar>
+            <Max>1995</Max>
+          </Axis>
+        </ValueAxis>
+        <Type>Bubble</Type>
+        <Palette>Default</Palette>
+        <ChartData>
+          <ChartSeries>
+            <DataPoints>
+              <DataPoint>
+                <DataValues>
+                  <DataValue>
+                    <Value>=Sum(Fields!Sales.Value)</Value>
+                  </DataValue>
+                  <DataValue>
+                    <Value>=Fields!Year.Value</Value>
+                  </DataValue>
+                  <DataValue>
+                    <Value>=Sum(Fields!Sales.Value)</Value>
+                  </DataValue>
+                </DataValues>
+                <DataLabel />
+                <Marker>
+                  <Size>6pt</Size>
+                </Marker>
+              </DataPoint>
+            </DataPoints>
+          </ChartSeries>
+        </ChartData>
+        <Style>
+          <BackgroundColor>White</BackgroundColor>
+          <BorderStyle />
+          <BorderColor />
+          <BorderWidth />
+          <BackgroundGradientEndColor>Azure</BackgroundGradientEndColor>
+          <BackgroundGradientType>LeftRight</BackgroundGradientType>
+        </Style>
+        <Left>378.00pt</Left>
+        <Top>384.70pt</Top>
+      </Chart>
+    </ReportItems>
+    <Columns>1</Columns>
+  </Body>
+  <PageFooter>
+    <Height>0pt</Height>
+    <PrintOnFirstPage>True</PrintOnFirstPage>
+    <PrintOnLastPage>True</PrintOnLastPage>
+  </PageFooter>
+  <Width>7in</Width>
+  <DataElementName>Report</DataElementName>
+  <DataElementStyle>AttributeNormal</DataElementStyle>
+  <DataSources>
+    <DataSource Name="DS1">
+      <ConnectionProperties>
+        <DataProvider>SQLite</DataProvider>
+        <ConnectString>Data Source=northwindEF.db</ConnectString>
+        <IntegratedSecurity>false</IntegratedSecurity>
+      </ConnectionProperties>
+    </DataSource>
+  </DataSources>
+</Report>
