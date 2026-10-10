@@ -65,6 +65,7 @@ private System.ComponentModel.Container components = null;
             this.groupBox1 = new Majorsilence.Forms.GroupBox();
             this.radioButtonCm = new Majorsilence.Forms.RadioButton();
             this.radioButtonInches = new Majorsilence.Forms.RadioButton();
+            this.radioButtonMm = new Majorsilence.Forms.RadioButton();
             this.label12 = new Majorsilence.Forms.Label();
             this.comboXmlEndingLine = new Majorsilence.Forms.ComboBox();
             this.label11 = new Majorsilence.Forms.Label();
@@ -164,6 +165,7 @@ private System.ComponentModel.Container components = null;
             // 
             // groupBox1
             // 
+            this.groupBox1.Controls.Add(this.radioButtonMm);
             this.groupBox1.Controls.Add(this.radioButtonCm);
             this.groupBox1.Controls.Add(this.radioButtonInches);
             resources.ApplyResources(this.groupBox1, "groupBox1");
@@ -176,6 +178,13 @@ private System.ComponentModel.Container components = null;
             this.radioButtonCm.Name = "radioButtonCm";
             this.radioButtonCm.UseVisualStyleBackColor = true;
             this.radioButtonCm.CheckedChanged += this.RadioButtonCm_CheckedChanged;
+            // 
+            // radioButtonMm
+            // 
+            resources.ApplyResources(this.radioButtonMm, "radioButtonMm");
+            this.radioButtonMm.Name = "radioButtonMm";
+            this.radioButtonMm.UseVisualStyleBackColor = true;
+            this.radioButtonMm.CheckedChanged += this.RadioButtonMm_CheckedChanged;
             // 
             // radioButtonInches
             // 
@@ -520,5 +529,6 @@ private System.ComponentModel.Container components = null;
         private GroupBox groupBox1;
         private RadioButton radioButtonCm;
         private RadioButton radioButtonInches;
+        private RadioButton radioButtonMm;
     }
 }

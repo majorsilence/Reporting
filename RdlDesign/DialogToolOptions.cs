@@ -167,10 +167,12 @@ namespace Majorsilence.Reporting.RdlDesign
                             break;
                         case "units":
                             _DesktopUnits = xNodeLoop;
-                            if (xNodeLoop.InnerText.ToLower() == "inches")
-                                this.radioButtonInches.Checked = true;
-                            else
+                            if (MeasureUnits.IsMillimeters(xNodeLoop.InnerText))
+                                this.radioButtonMm.Checked = true;
+                            else if (MeasureUnits.IsCentimeters(xNodeLoop.InnerText))
                                 this.radioButtonCm.Checked = true;
+                            else
+                                this.radioButtonInches.Checked = true;
                             break;
                         default:
                             break;
@@ -248,10 +250,7 @@ namespace Majorsilence.Reporting.RdlDesign
                         return false;
                     HandleRecentFilesMax();
                     _RdlDesigner.HelpUrl = this.tbHelpUrl.Text;
-                    if (this.radioButtonInches.Checked == true)
-                        RdlDesigner.MeasureUnits = "inches";
-                    else
-                        RdlDesigner.MeasureUnits = "cm";
+                    RdlDesigner.MeasureUnits = SelectedUnits();
                     HandleShows();
                     HandleProperties();
                     if (bToolbar)
@@ -338,7 +337,7 @@ namespace Majorsilence.Reporting.RdlDesign
                 _DesktopConfig.AppendChild(_DesktopUnits);
             }
 
-            _DesktopUnits.InnerText = this.radioButtonInches.Checked == true ? "inches" : "cm";
+            _DesktopUnits.InnerText = SelectedUnits();
 
             Directory.CreateDirectory(Path.GetDirectoryName(optFileName)); //Create directory if not exist
             _DesktopDocument.Save(optFileName);
@@ -661,6 +660,18 @@ namespace Majorsilence.Reporting.RdlDesign
 
 
         private void RadioButtonInches_CheckedChanged(object sender, EventArgs e)
+        {
+            bDesktop = true;
+        }
+
+        private string SelectedUnits()
+        {
+            if (this.radioButtonMm.Checked)
+                return MeasureUnits.Millimeters;
+            return this.radioButtonCm.Checked ? MeasureUnits.Centimeters : MeasureUnits.Inches;
+        }
+
+        private void RadioButtonMm_CheckedChanged(object sender, EventArgs e)
         {
             bDesktop = true;
         }

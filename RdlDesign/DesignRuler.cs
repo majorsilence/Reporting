@@ -95,7 +95,7 @@ namespace Majorsilence.Reporting.RdlDesign
 		private void DesignRulerPaint(object sender, Majorsilence.Forms.PaintEventArgs e)
         {
 
-            _IsMetric = RdlDesign.RdlDesigner.MeasureUnits == "cm" ? true : false;
+            _IsMetric = Majorsilence.Reporting.RdlDesign.MeasureUnits.IsMetric(RdlDesign.RdlDesigner.MeasureUnits);
             _Intervals = _IsMetric ? 4 : 8;
             if (_Vertical)
                 Ruler_DrawVert(e.Graphics);

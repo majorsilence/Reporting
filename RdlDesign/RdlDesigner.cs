@@ -92,10 +92,14 @@ namespace Majorsilence.Reporting.RdlDesign
 		/// <returns></returns>
 		private bool IsMetric()
 		{
-			if (MeasureUnits == "cm")
-				return true;
-			else
-				return false;
+			return Majorsilence.Reporting.RdlDesign.MeasureUnits.IsMetric(MeasureUnits);
+		}
+
+		private string UnitLabel()
+		{
+			if (Majorsilence.Reporting.RdlDesign.MeasureUnits.IsMillimeters(MeasureUnits))
+				return Strings.RdlDesigner_Status_mm;
+			return IsMetric() ? Strings.RdlDesigner_Status_cm : Strings.RdlDesigner_Status_in;
 		}
 
 		/// <summary>
@@ -1311,13 +1315,8 @@ namespace Majorsilence.Reporting.RdlDesign
 			}
 
 			//   var rinfo = new RegionInfo(CultureInfo.CurrentCulture.Name);
-			var unit = IsMetric() ? Strings.RdlDesigner_Status_cm : Strings.RdlDesigner_Status_in;
-			var h = DesignXmlDraw.GetSize(e.Height) / DesignXmlDraw.POINTSIZED;
-
-			if (IsMetric())
-			{
-				h *= 2.54f;
-			}
+			var unit = UnitLabel();
+			var h = Majorsilence.Reporting.RdlDesign.MeasureUnits.FromInches(DesignXmlDraw.GetSize(e.Height) / DesignXmlDraw.POINTSIZED, MeasureUnits);
 
 			statusPosition.Text = string.Format("   {1}={0:0.00}{2}        ", h, Strings.RdlDesigner_Status_Height, unit);
 		}
@@ -3001,15 +3000,9 @@ namespace Majorsilence.Reporting.RdlDesign
 				var rinfo = new RegionInfo(CultureInfo.CurrentCulture.Name);
 				double m72 = DesignXmlDraw.POINTSIZED;
 
-				var x = pos.X / m72;
-				var y = pos.Y / m72;
-				var unit = IsMetric() ? Strings.RdlDesigner_Status_cm : Strings.RdlDesigner_Status_in;
-
-				if (IsMetric())
-				{
-					x *= 2.54d;
-					y *= 2.54d;
-				}
+				var x = Majorsilence.Reporting.RdlDesign.MeasureUnits.FromInches(pos.X / m72, MeasureUnits);
+				var y = Majorsilence.Reporting.RdlDesign.MeasureUnits.FromInches(pos.Y / m72, MeasureUnits);
+				var unit = UnitLabel();
 
 				if (sz.Width == float.MinValue) // item is in a table/matrix is probably cause
 				{
@@ -3018,14 +3011,8 @@ namespace Majorsilence.Reporting.RdlDesign
 				}
 				else
 				{
-					var w = sz.Width / m72;
-					var h = sz.Height / m72;
-
-					if (IsMetric())
-					{
-						w *= 2.54d;
-						h *= 2.54d;
-					}
+					var w = Majorsilence.Reporting.RdlDesign.MeasureUnits.FromInches(sz.Width / m72, MeasureUnits);
+					var h = Majorsilence.Reporting.RdlDesign.MeasureUnits.FromInches(sz.Height / m72, MeasureUnits);
 
 					spos = string.Format("   x={0:0.00}{4}, y={1:0.00}{4}, w={2:0.00}{4}, h={3:0.00}{4}        ",
 										 x, y, w, h, unit);
