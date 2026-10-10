@@ -97,5 +97,28 @@ namespace Majorsilence.Reporting.RdlDesign.Tests
                 File.Delete(openedRdlPath);
             }
         }
+
+        // #136: a List inserted into an RDLC (2008+ namespace) report must be saved as a Tablix,
+        // because <List> is not part of that schema. The in-memory document keeps the List.
+        [Test]
+        public void SaveRdlcWithList_WritesTablixNotList()
+        {
+            const string rdlc = @"<?xml version=""1.0"" encoding=""utf-8""?>
+<Report xmlns=""http://schemas.microsoft.com/sqlserver/reporting/2010/01/reportdefinition"">
+  <Body>
+    <Height>2in</Height>
+    <ReportItems>
+      <List Name=""List1""><Top>0in</Top><Left>0in</Left><Height>1in</Height><Width>2in</Width><ReportItems /></List>
+    </ReportItems>
+  </Body>
+  <Width>4in</Width>
+</Report>";
+
+            using var mc = new Majorsilence.Reporting.RdlDesign.MDIChild(800, 600);
+            mc.SourceRdl = rdlc;
+
+            Assert.That(mc.SourceRdl, Does.Not.Contain("<List"), "RDLC schema has no List element");
+            Assert.That(mc.SourceRdl, Does.Contain("<Tablix Name=\"List1\""));
+        }
     }
 }

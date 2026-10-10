@@ -354,15 +354,28 @@ namespace Majorsilence.Reporting.Rdl
                 return null;
             }
 
+            // One cell repeated per record or group is a List, not a one-column table.
+            var list = TryConvertTablixToList (tablix);
+            if (list != null)
+                return list;
+
             // A dynamic column hierarchy pivots on data, which Table cannot express; that shape
             // is 2005's Matrix.
             if (HasDynamicMembers (FindChild (tablix, "TablixColumnHierarchy")))
                 return TryConvertTablixToMatrix (tablix, rl);
 
             var rows = ChildrenNamed (FindChild (body, "TablixRows"), "TablixRow");
-            var placements = ClassifyRows (FindChild (tablix, "TablixRowHierarchy"), rows.Count, name, rl);
-            if (placements == null)
-                return null;
+            var rowHierarchy = FindChild (tablix, "TablixRowHierarchy");
+
+            // Row groups with expressions become TableGroups; any other shape falls through to
+            // the flat header/detail/footer classification.
+            var groupedPlan = PlanGroupedRows (rowHierarchy, rows.Count);
+            List<RowPlacement> placements = null;
+            if (groupedPlan == null) {
+                placements = ClassifyRows (rowHierarchy, rows.Count, name, rl);
+                if (placements == null)
+                    return null;
+            }
 
             var doc = tablix.OwnerDocument;
             var ns = tablix.NamespaceURI;
@@ -412,6 +425,11 @@ namespace Majorsilence.Reporting.Rdl
 
             table.AppendChild (BuildTableColumns (doc, ns, FindChild (body, "TablixColumns")));
 
+            if (groupedPlan != null) {
+                AppendGroupedSections (table, doc, ns, rows, groupedPlan, repeatHeaderRows, sortExpressions);
+                return table;
+            }
+
             // RepeatRowHeaders is what makes column headings reappear after a page break; a
             // long report without it reads as unlabelled columns from page two onward.
             AppendSection (table, doc, ns, "Header", rows, placements, RowPlacement.Header,
@@ -424,6 +442,316 @@ namespace Majorsilence.Reporting.Rdl
             AppendSection (table, doc, ns, "Footer", rows, placements, RowPlacement.Footer);
 
             return table;
+        }
+
+        /// <summary>
+        /// A Tablix that is one body cell, one static column and one row group is how 2008 spells a
+        /// List: free-form content repeated once per record (or per group). Returns null for any
+        /// other shape so the Table/Matrix mapping handles it.
+        /// </summary>
+        private static XmlElement TryConvertTablixToList (XmlElement tablix)
+        {
+            var body = FindChild (tablix, "TablixBody");
+            var bodyRows = ChildrenNamed (FindChild (body, "TablixRows"), "TablixRow");
+            if (ChildrenNamed (FindChild (body, "TablixColumns"), "TablixColumn").Count != 1 || bodyRows.Count != 1)
+                return null;
+
+            var cells = ChildrenNamed (FindChild (bodyRows[0], "TablixCells"), "TablixCell");
+            if (cells.Count != 1)
+                return null;
+
+            // Columns must be a single static member: a group there is a pivot.
+            var columnMembers = ChildrenNamed (FindChild (FindChild (tablix, "TablixColumnHierarchy"), "TablixMembers"), "TablixMember");
+            if (columnMembers.Count > 1 || HasDynamicMembers (FindChild (tablix, "TablixColumnHierarchy")))
+                return null;
+
+            // Rows must be exactly one member, itself the (leaf) group.
+            var rowMembers = ChildrenNamed (FindChild (FindChild (tablix, "TablixRowHierarchy"), "TablixMembers"), "TablixMember");
+            if (rowMembers.Count != 1)
+                return null;
+            var rowMember = rowMembers[0];
+            var group = FindChild (rowMember, "Group");
+            if (group == null || FindChild (rowMember, "TablixMembers") != null || FindChild (rowMember, "TablixHeader") != null)
+                return null;
+
+            var doc = tablix.OwnerDocument;
+            var ns = tablix.NamespaceURI;
+            var list = doc.CreateElement ("List", ns);
+            var name = tablix.GetAttribute ("Name");
+            if (!string.IsNullOrEmpty (name))
+                list.SetAttribute ("Name", name);
+
+            // Position, size, style, DataSetName, visibility carry over unchanged. Tablix-only
+            // vocabulary has no List counterpart.
+            XmlElement tablixSort = null;
+            foreach (var child in Children (tablix)) {
+                switch (child.LocalName) {
+                    case "TablixBody":
+                    case "TablixColumnHierarchy":
+                    case "TablixRowHierarchy":
+                    case "TablixCorner":
+                    case "RepeatColumnHeaders":
+                    case "RepeatRowHeaders":
+                    case "FixedColumnHeaders":
+                    case "FixedRowHeaders":
+                    case "PageBreak":
+                        continue;
+                    case "SortExpressions":
+                        tablixSort = child;
+                        continue;
+                    default:
+                        list.AppendChild (child.CloneNode (true));
+                        break;
+                }
+            }
+
+            // The cell's content. A lone Rectangle is the wrapper a List export adds around its
+            // items; unwrapping it keeps a List -> Tablix -> List round trip stable.
+            var items = doc.CreateElement ("ReportItems", ns);
+            var contents = FindChild (cells[0], "CellContents");
+            var contentItems = contents == null ? new List<XmlElement> () : Children (contents);
+            contentItems.RemoveAll (c => c.LocalName == "ColSpan" || c.LocalName == "RowSpan");
+            if (contentItems.Count == 1 && contentItems[0].LocalName == "Rectangle" && IsPlainWrapper (contentItems[0])) {
+                var wrapper = contentItems[0];
+                var inner = FindChild (wrapper, "ReportItems");
+                if (inner != null) {
+                    foreach (var item in Children (inner))
+                        items.AppendChild (item.CloneNode (true));
+                }
+
+                var wrapperStyle = FindChild (wrapper, "Style");
+                if (wrapperStyle != null && FindChild (list, "Style") == null)
+                    list.AppendChild (wrapperStyle.CloneNode (true));
+            } else {
+                foreach (var item in contentItems)
+                    items.AppendChild (item.CloneNode (true));
+            }
+            if (items.ChildNodes.Count > 0)
+                list.AppendChild (items);
+
+            // Size falls back to the body cell when the Tablix itself carries none.
+            if (FindChild (list, "Height") == null) {
+                var h = FindChild (bodyRows[0], "Height");
+                if (h != null)
+                    list.AppendChild (h.CloneNode (true));
+            }
+            if (FindChild (list, "Width") == null) {
+                var w = FindChild (FindChild (FindChild (body, "TablixColumns"), "TablixColumn"), "Width");
+                if (w != null)
+                    list.AppendChild (w.CloneNode (true));
+            }
+
+            // A group with no expressions is Details: List repeats per record without a Grouping.
+            if (FindChild (group, "GroupExpressions") != null)
+                list.AppendChild (BuildListGrouping (doc, ns, group));
+
+            var sort = FindChild (rowMember, "SortExpressions") ?? tablixSort;
+            if (sort != null)
+                list.AppendChild (BuildSorting (doc, ns, sort));
+
+            return list;
+        }
+
+        private static bool IsPlainWrapper (XmlElement rectangle)
+        {
+            foreach (var child in Children (rectangle)) {
+                if (child.LocalName != "ReportItems" && child.LocalName != "KeepTogether" && child.LocalName != "Style")
+                    return false;
+            }
+
+            return true;
+        }
+
+        /// <summary>BuildGrouping, with 2008's PageBreak translated to 2005's two flags.</summary>
+        private static XmlElement BuildListGrouping (XmlDocument doc, string ns, XmlElement group)
+        {
+            var grouping = doc.CreateElement ("Grouping", ns);
+            var name = group.GetAttribute ("Name");
+            if (!string.IsNullOrEmpty (name))
+                grouping.SetAttribute ("Name", name);
+
+            foreach (var child in Children (group)) {
+                if (child.LocalName != "PageBreak") {
+                    grouping.AppendChild (child.CloneNode (true));
+                    continue;
+                }
+
+                var location = FindChild (child, "BreakLocation")?.InnerText;
+                var start = location == "Start" || location == "StartAndEnd";
+                var end = location == "End" || location == "StartAndEnd";
+                if (start)
+                    grouping.AppendChild (CreateTextElement (doc, ns, "PageBreakAtStart", "true"));
+                if (end)
+                    grouping.AppendChild (CreateTextElement (doc, ns, "PageBreakAtEnd", "true"));
+            }
+
+            return grouping;
+        }
+
+        private static XmlElement CreateTextElement (XmlDocument doc, string ns, string name, string text)
+        {
+            var e = doc.CreateElement (name, ns);
+            e.InnerText = text;
+            return e;
+        }
+
+        /// <summary>
+        /// One level of a grouped row hierarchy: the static rows above and below, and either a
+        /// nested group or the detail rows.
+        /// </summary>
+        private sealed class RowLevel
+        {
+            internal List<int> Header = new List<int> ();
+            internal List<int> Footer = new List<int> ();
+            internal List<XmlElement> HeaderMembers = new List<XmlElement> ();
+            internal XmlElement GroupMember;      // the member carrying a Group with expressions
+            internal RowLevel Inner;              // that group's own level
+            internal XmlElement DetailsMember;    // a Group without expressions: one per record
+            internal List<int> Details = new List<int> ();
+        }
+
+        private static bool HasExpressionGroup (XmlElement members)
+        {
+            foreach (var member in ChildrenNamed (members, "TablixMember")) {
+                var group = FindChild (member, "Group");
+                if (group != null && FindChild (group, "GroupExpressions") != null)
+                    return true;
+                var nested = FindChild (member, "TablixMembers");
+                if (nested != null && HasExpressionGroup (nested))
+                    return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Plans a Table with TableGroups from a row hierarchy that is a single chain of groups:
+        /// static rows, then one group (itself the same shape) or the detail rows, then static
+        /// rows. Returns null for anything else -- sibling groups, groups holding no rows -- so
+        /// the caller falls back to the flat mapping rather than guessing.
+        /// </summary>
+        private static RowLevel PlanGroupedRows (XmlElement hierarchy, int rowCount)
+        {
+            var top = FindChild (hierarchy, "TablixMembers");
+            if (top == null || !HasExpressionGroup (top))
+                return null;
+
+            var next = 0;
+            var level = ParseLevel (top, ref next);
+            return level != null && next == rowCount && level.GroupMember != null ? level : null;
+        }
+
+        private static RowLevel ParseLevel (XmlElement members, ref int next)
+        {
+            var level = new RowLevel ();
+            var seenBody = false;
+
+            foreach (var member in ChildrenNamed (members, "TablixMember")) {
+                var group = FindChild (member, "Group");
+                var nested = FindChild (member, "TablixMembers");
+
+                if (group == null) {
+                    // A static member must be a single row.
+                    if (nested != null)
+                        return null;
+                    (seenBody ? level.Footer : level.Header).Add (next++);
+                    if (!seenBody)
+                        level.HeaderMembers.Add (member);
+                    continue;
+                }
+
+                if (seenBody)
+                    return null;
+                seenBody = true;
+
+                if (FindChild (group, "GroupExpressions") != null) {
+                    if (nested == null)
+                        return null;
+                    level.GroupMember = member;
+                    level.Inner = ParseLevel (nested, ref next);
+                    if (level.Inner == null)
+                        return null;
+                } else {
+                    // Details: its own static children are the rows repeated per record.
+                    level.DetailsMember = member;
+                    if (nested == null) {
+                        level.Details.Add (next++);
+                    } else {
+                        foreach (var child in ChildrenNamed (nested, "TablixMember")) {
+                            if (FindChild (child, "Group") != null || FindChild (child, "TablixMembers") != null)
+                                return null;
+                            level.Details.Add (next++);
+                        }
+                    }
+                }
+            }
+
+            return seenBody ? level : null;
+        }
+
+        private static void AppendGroupedSections (XmlElement table, XmlDocument doc, string ns,
+            List<XmlElement> rows, RowLevel top, bool repeatHeaderRows, XmlElement tablixSort)
+        {
+            XmlElement Section (string sectionName, List<int> indexes, bool repeat)
+            {
+                if (indexes.Count == 0)
+                    return null;
+
+                var tableRows = doc.CreateElement ("TableRows", ns);
+                foreach (var i in indexes)
+                    tableRows.AppendChild (BuildTableRow (doc, ns, rows[i]));
+                var section = doc.CreateElement (sectionName, ns);
+                section.AppendChild (tableRows);
+                if (repeat)
+                    section.AppendChild (CreateTextElement (doc, ns, "RepeatOnNewPage", "true"));
+                return section;
+            }
+
+            bool Repeats (RowLevel level)
+                => level.HeaderMembers.Exists (m => FindChild (m, "RepeatOnNewPage")?.InnerText == "true");
+
+            // Walk to the innermost level, which owns the detail rows.
+            var groups = new List<RowLevel> ();
+            for (var l = top; l != null; l = l.Inner)
+                groups.Add (l);
+            var innermost = groups[groups.Count - 1];
+
+            var header = Section ("Header", top.Header, repeatHeaderRows || Repeats (top));
+            if (header != null)
+                table.AppendChild (header);
+
+            var detailSort = FindChild (innermost.DetailsMember, "SortExpressions") ?? tablixSort;
+            var details = Section ("Details", innermost.Details, false);
+            if (details != null) {
+                if (detailSort != null)
+                    details.AppendChild (BuildSorting (doc, ns, detailSort));
+                table.AppendChild (details);
+            }
+
+            var footer = Section ("Footer", top.Footer, false);
+            if (footer != null)
+                table.AppendChild (footer);
+
+            var tableGroups = doc.CreateElement ("TableGroups", ns);
+            for (var l = top; l.GroupMember != null; l = l.Inner) {
+                var tableGroup = doc.CreateElement ("TableGroup", ns);
+                tableGroup.AppendChild (BuildListGrouping (doc, ns, FindChild (l.GroupMember, "Group")));
+
+                var sort = FindChild (l.GroupMember, "SortExpressions");
+                if (sort != null)
+                    tableGroup.AppendChild (BuildSorting (doc, ns, sort));
+
+                // The group's own header and footer rows sit inside it, in the inner level.
+                var gh = Section ("Header", l.Inner.Header, Repeats (l.Inner));
+                if (gh != null)
+                    tableGroup.AppendChild (gh);
+                var gf = Section ("Footer", l.Inner.Footer, false);
+                if (gf != null)
+                    tableGroup.AppendChild (gf);
+
+                tableGroups.AppendChild (tableGroup);
+            }
+            table.AppendChild (tableGroups);
         }
 
         private enum RowPlacement { Header, Detail, Footer }
