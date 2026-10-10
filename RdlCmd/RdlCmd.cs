@@ -124,6 +124,7 @@ namespace Majorsilence.Reporting.RdlCmd
 
 			rc.returnCode = returnCode;
 
+			AotDataProviders.RegisterIfAot();
 			RdlEngineConfig.RdlEngineConfigInit();
             await rc.DoRender(dir, files, types, connectionStringOverwrite);
 

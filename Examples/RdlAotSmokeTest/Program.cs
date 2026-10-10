@@ -12,7 +12,10 @@
 // Covers: built-in expression functions (Math, Convert, String and the VB functions), static and
 // instance helper classes registered with RegisterType / RegisterInstanceFactory, a custom report
 // item registered with RegisterCustomReportItem<T>, pushed data (SetData<T>, SetCollectionData),
-// grouping and aggregates, a subreport, and the PDF / HTML / XML / CSV / RTF / Excel renderers.
+// grouping and aggregates, a matrix, list and chart, a subreport, the PDF / HTML / XML / CSV / RTF /
+// Excel / TIFF renderers, every way of pushing data (DataTable, IDataReader, XmlDocument, objects,
+// dictionaries), and database drivers: a real SQLite query through RegisterDataProvider, and the
+// SQL Server, PostgreSQL and MySQL drivers constructing connections and commands.
 //
 // The reports declare a data source only because the schema needs one; no database is opened
 // (SkipDatabaseSchemaValidation) and all data is pushed in.
@@ -25,6 +28,7 @@ using RdlAotSmokeTest;
 
 // Everything the reports reference by name must be registered before RdlEngineConfigInit, and
 // before parsing: this is what keeps the trimmer from removing it.
+AotDataProviders.Register();   // database drivers are found by registration, not by loading their assemblies
 RdlEngineConfig.RegisterType("AotSmoke.Helpers", typeof(Helpers));
 RdlEngineConfig.RegisterType("AotSmoke.Greeter", typeof(Greeter));
 RdlEngineConfig.RegisterInstanceFactory("AotSmoke.Greeter", () => new Greeter());
@@ -33,6 +37,16 @@ RdlEngineConfig.RdlEngineConfigInit();
 
 var work = Path.Combine(Path.GetTempPath(), "rdl-aot-smoke-" + Guid.NewGuid().ToString("N"));
 Directory.CreateDirectory(work);
+
+static System.Data.DataTable ItemTable()
+{
+    var t = new System.Data.DataTable();
+    t.Columns.Add("Name", typeof(string));
+    t.Columns.Add("Qty", typeof(int));
+    t.Rows.Add("Chai", 3);
+    t.Rows.Add("Ikura", 5);
+    return t;
+}
 
 var failures = new List<string>();
 int passed = 0;
@@ -155,6 +169,107 @@ foreach (var format in new[]
     });
 }
 
+// Sales rows shared by the matrix, chart and list scenarios.
+var salesRows = new List<SalesRow>
+{
+    new("North", "2023", 10), new("North", "2024", 20), new("South", "2023", 5), new("South", "2024", 7),
+};
+
+await Scenario("matrix", async () =>
+{
+    var csv = await Render.Text(work, ReportBuilder.Matrix(), OutputPresentationType.HTML, r => r.DataSets["Data"].SetData(salesRows));
+    Expect.Contains(csv, "North", "South", "2023", "2024", "20", "7");
+});
+
+await Scenario("list", async () =>
+{
+    var html = await Render.Text(work, ReportBuilder.ListReport(), OutputPresentationType.HTML, r => r.DataSets["Data"].SetData(salesRows));
+    Expect.Contains(html, "North / 2023", "South / 2024");
+});
+
+await Scenario("chart in a PDF and a TIFF", async () =>
+{
+    var pdf = await Render.Bytes(work, ReportBuilder.Chart(), OutputPresentationType.PDF, r => r.DataSets["Data"].SetData(salesRows));
+    Expect.ValidPdf(pdf);
+    var tif = await Render.Bytes(work, ReportBuilder.Chart(), OutputPresentationType.TIF, r => r.DataSets["Data"].SetData(salesRows));
+    Expect.Tiff(tif);
+});
+
+await Scenario("SetData(DataTable)", async () =>
+{
+    var rdl = ReportBuilder.Table(new[] { "Name:String", "Qty:Int32" }, new[] { "=Fields!Name.Value", "=Fields!Qty.Value" });
+    var csv = await Render.Csv(work, rdl, r => r.DataSets["Data"].SetData(ItemTable()));
+    Expect.Contains(csv, "Chai", "Ikura", "3", "5");
+});
+
+await Scenario("SetData(IDataReader)", async () =>
+{
+    var rdl = ReportBuilder.Table(new[] { "Name:String", "Qty:Int32" }, new[] { "=Fields!Name.Value", "=Fields!Qty.Value" });
+    var csv = await Render.Csv(work, rdl, r => r.DataSets["Data"].SetData(ItemTable().CreateDataReader()));
+    Expect.Contains(csv, "Chai", "Ikura", "3", "5");
+});
+
+await Scenario("SetData(XmlDocument)", async () =>
+{
+    var xml = new System.Xml.XmlDocument();
+    xml.LoadXml("<Rows><Row><Name>Chai</Name><Qty>3</Qty></Row><Row><Name>Ikura</Name><Qty>5</Qty></Row></Rows>");
+    var rdl = ReportBuilder.Table(new[] { "Name:String", "Qty:Int32" }, new[] { "=Fields!Name.Value", "=Fields!Qty.Value" });
+    var csv = await Render.Csv(work, rdl, r => r.DataSets["Data"].SetData(xml));
+    Expect.Contains(csv, "Chai", "Ikura", "3", "5");
+});
+
+await Scenario("SQLite query through the registered provider", async () =>
+{
+    var dbPath = Path.Combine(work, "smoke.db");
+    using (var cn = new Microsoft.Data.Sqlite.SqliteConnection($"Data Source={dbPath}"))
+    {
+        cn.Open();
+        using var cmd = cn.CreateCommand();
+        cmd.CommandText = "CREATE TABLE Items(Name TEXT, Qty INTEGER); INSERT INTO Items VALUES ('Chai', 3), ('Ikura', 5), ('Tofu', 9);";
+        cmd.ExecuteNonQuery();
+    }
+    // A real query, with a parameter, run by the engine itself: nothing is pushed and the schema is
+    // read from the database when the report is parsed.
+    var rdl = ReportBuilder.SqlTable("Microsoft.Data.Sqlite", $"Data Source={dbPath}",
+        "SELECT Name, Qty FROM Items WHERE Qty >= @Min ORDER BY Qty", new[] { "Name", "Qty" });
+    var parser = new RDLParser(rdl) { Folder = work };
+    using var report = await parser.Parse();
+    if (report.ErrorMaxSeverity > 4)
+        throw new InvalidOperationException("parse errors: " + string.Join(" | ", report.ErrorItems.Cast<object>()));
+    report.Folder = work;
+    await report.RunGetData(new Dictionary<string, object> { ["Min"] = 4 });
+    var path = Path.Combine(work, "sqlite.csv");
+    await report.RunRender(new OneFileStreamGen(path, true), OutputPresentationType.CSV);
+    var csv = await File.ReadAllTextAsync(path);
+    Expect.Contains(csv, "Ikura", "Tofu");
+    if (csv.Contains("Chai")) throw new InvalidOperationException("the @Min parameter did not filter: " + csv);
+});
+
+await Scenario("SQL Server, PostgreSQL and MySQL drivers construct and prepare commands", () =>
+{
+    // No server is needed: the drivers must load, create a connection and a command, and bind a parameter.
+    foreach (var (provider, cs, expected) in new[]
+    {
+        ("Microsoft.Data.SqlClient", "Server=localhost;Database=x;User Id=u;Password=p;TrustServerCertificate=true", "Microsoft.Data.SqlClient.SqlConnection"),
+        ("PostgreSQL", "Host=localhost;Database=x;Username=u;Password=p", "Npgsql.NpgsqlConnection"),
+        ("MySQL.NET", "Server=localhost;Database=x;Uid=u;Pwd=p", "MySql.Data.MySqlClient.MySqlConnection"),
+    })
+    {
+        using var cn = RdlEngineConfig.GetConnection(provider, cs);
+        if (cn == null || cn.GetType().FullName != expected)
+            throw new InvalidOperationException($"{provider}: expected {expected} but got {cn?.GetType().FullName ?? "null"}");
+        using var cmd = cn.CreateCommand();
+        cmd.CommandText = "SELECT 1";
+        var p = cmd.CreateParameter();
+        p.ParameterName = "p1";
+        p.Value = 1;
+        cmd.Parameters.Add(p);
+        if (string.IsNullOrEmpty(RdlEngineConfig.GetTableSelect(provider, cn)))
+            throw new InvalidOperationException($"{provider}: no table-select query registered");
+    }
+    return Task.CompletedTask;
+});
+
 try { Directory.Delete(work, true); } catch { /* temp files; not worth failing over */ }
 
 Console.WriteLine($"{passed} passed, {failures.Count} failed");
@@ -170,6 +285,7 @@ namespace RdlAotSmokeTest
 {
     record Item(string Name, int Qty);
     record Sale(string Region, int Amount);
+    record SalesRow(string Region, string Year, int Sales);
 
     /// <summary>Static helpers called from RDL as =AotSmoke.Helpers.Triple(...).</summary>
     public static class Helpers

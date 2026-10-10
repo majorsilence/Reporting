@@ -69,6 +69,76 @@ namespace RdlAotSmokeTest
   </Table>
 </ReportItems></Body></Report>";
 
+        const string SalesFields = "Region:String,Year:String,Sales:Int32";
+
+        static string SalesDataSet() => DataSet(SalesFields.Split(','));
+
+        public static string Matrix() => Header + SalesDataSet() + @"
+<Body><Height>2in</Height><ReportItems>
+  <Matrix Name=""M1""><DataSetName>Data</DataSetName>
+    <Corner><ReportItems><Textbox Name=""Corner""><Value>Region</Value></Textbox></ReportItems></Corner>
+    <ColumnGroupings><ColumnGrouping><Height>0.25in</Height><DynamicColumns>
+      <Grouping Name=""ByYear""><GroupExpressions><GroupExpression>=Fields!Year.Value</GroupExpression></GroupExpressions></Grouping>
+      <ReportItems><Textbox Name=""YearHeader""><Value>=Fields!Year.Value</Value></Textbox></ReportItems>
+    </DynamicColumns></ColumnGrouping></ColumnGroupings>
+    <RowGroupings><RowGrouping><Width>1in</Width><DynamicRows>
+      <Grouping Name=""ByRegion""><GroupExpressions><GroupExpression>=Fields!Region.Value</GroupExpression></GroupExpressions></Grouping>
+      <ReportItems><Textbox Name=""RegionHeader""><Value>=Fields!Region.Value</Value></Textbox></ReportItems>
+    </DynamicRows></RowGrouping></RowGroupings>
+    <MatrixRows><MatrixRow><Height>0.25in</Height><MatrixCells><MatrixCell><ReportItems>
+      <Textbox Name=""SumSales""><Value>=Sum(Fields!Sales.Value)</Value></Textbox>
+    </ReportItems></MatrixCell></MatrixCells></MatrixRow></MatrixRows>
+    <MatrixColumns><MatrixColumn><Width>1in</Width></MatrixColumn></MatrixColumns>
+  </Matrix>
+</ReportItems></Body></Report>";
+
+        public static string Chart() => Header + SalesDataSet() + @"
+<Body><Height>3in</Height><ReportItems>
+  <Chart Name=""C1""><Height>3in</Height><Width>5in</Width><DataSetName>Data</DataSetName>
+    <Type>Column</Type><Subtype>Plain</Subtype>
+    <CategoryGroupings><CategoryGrouping><DynamicCategories>
+      <Grouping Name=""ByRegion""><GroupExpressions><GroupExpression>=Fields!Region.Value</GroupExpression></GroupExpressions></Grouping>
+    </DynamicCategories></CategoryGrouping></CategoryGroupings>
+    <SeriesGroupings><SeriesGrouping><DynamicSeries>
+      <Grouping Name=""ByYear""><GroupExpressions><GroupExpression>=Fields!Year.Value</GroupExpression></GroupExpressions></Grouping>
+      <Label>=Fields!Year.Value</Label>
+    </DynamicSeries></SeriesGrouping></SeriesGroupings>
+    <ChartData><ChartSeries><DataPoints><DataPoint><DataValues><DataValue><Value>=Sum(Fields!Sales.Value)</Value></DataValue></DataValues></DataPoint></DataPoints></ChartSeries></ChartData>
+    <Legend><Position>RightCenter</Position></Legend>
+    <Title><Caption>Sales by region</Caption></Title>
+  </Chart>
+</ReportItems></Body></Report>";
+
+        public static string ListReport() => Header + SalesDataSet() + @"
+<Body><Height>2in</Height><ReportItems>
+  <List Name=""L1""><DataSetName>Data</DataSetName><Width>4in</Width><Height>0.5in</Height>
+    <ReportItems>
+      <Textbox Name=""Who""><Top>0in</Top><Left>0in</Left><Width>2in</Width><Height>0.25in</Height><Value>=Fields!Region.Value &amp; "" / "" &amp; Fields!Year.Value</Value></Textbox>
+      <Textbox Name=""Amt""><Top>0in</Top><Left>2in</Left><Width>1in</Width><Height>0.25in</Height><Value>=Fields!Sales.Value</Value></Textbox>
+    </ReportItems>
+  </List>
+</ReportItems></Body></Report>";
+
+        // A table over a real query run by the engine (no pushed data). The query takes one parameter, @Min.
+        public static string SqlTable(string provider, string connectionString, string sql, string[] columns)
+        {
+            var cells = string.Concat(columns.Select((c, i) => Cell("C" + i, "=Fields!" + c + ".Value")));
+            var fields = string.Concat(columns.Select(c => $@"<Field Name=""{c}""><DataField>{c}</DataField></Field>"));
+            return Header + $@"
+<ReportParameters><ReportParameter Name=""Min""><DataType>Integer</DataType><DefaultValue><Values><Value>0</Value></Values></DefaultValue></ReportParameter></ReportParameters>
+<DataSources><DataSource Name=""DS1""><ConnectionProperties>
+  <DataProvider>{provider}</DataProvider><ConnectString>{Esc(connectionString)}</ConnectString>
+</ConnectionProperties></DataSource></DataSources>
+<DataSets><DataSet Name=""Data""><Query><DataSourceName>DS1</DataSourceName><CommandText>{Esc(sql)}</CommandText>
+  <QueryParameters><QueryParameter Name=""@Min""><Value>=Parameters!Min.Value</Value></QueryParameter></QueryParameters>
+</Query><Fields>{fields}</Fields></DataSet></DataSets>
+<Body><Height>1in</Height><ReportItems>
+  <Table Name=""T1""><DataSetName>Data</DataSetName><Width>{columns.Length * 0.7}in</Width>{Cols(columns.Length)}
+    <Details><TableRows><TableRow><Height>0.25in</Height><TableCells>{cells}</TableCells></TableRow></TableRows></Details>
+  </Table>
+</ReportItems></Body></Report>";
+        }
+
         public static string StaticReport(string text) => Header + $@"
 <Body><Height>0.5in</Height><ReportItems>
   <Textbox Name=""T""><Top>0in</Top><Left>0in</Left><Width>3in</Width><Height>0.25in</Height><Value>{Esc(text)}</Value></Textbox>
@@ -137,6 +207,14 @@ namespace RdlAotSmokeTest
             var text = Encoding.Latin1.GetString(bytes);
             if (!text.StartsWith("%PDF-", StringComparison.Ordinal) || !text.Contains("%%EOF") || bytes.Length < 500)
                 throw new InvalidOperationException($"not a structurally valid PDF ({bytes.Length} bytes)");
+        }
+
+        public static void Tiff(byte[] bytes)
+        {
+            bool little = bytes.Length > 4 && bytes[0] == 'I' && bytes[1] == 'I' && bytes[2] == 42;
+            bool big = bytes.Length > 4 && bytes[0] == 'M' && bytes[1] == 'M' && bytes[3] == 42;
+            if (!little && !big)
+                throw new InvalidOperationException($"not a TIFF ({bytes.Length} bytes)");
         }
 
         public static void ZipHeader(byte[] bytes)

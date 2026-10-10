@@ -16,6 +16,7 @@
 		<DefineConstants>DRAWINGCOMPAT</DefineConstants>
 	</PropertyGroup>
 	<ItemGroup>
+		<Compile Include="..\RdlCmd\AotDataProviders.cs" Link="AotDataProviders.cs" />
 		<PackageReference Include="Microsoft.Data.SqlClient" />
 		<PackageReference Include="Microsoft.Data.Sqlite" />
 		<PackageReference Include="MySql.Data" />
