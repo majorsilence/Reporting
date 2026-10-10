@@ -294,14 +294,35 @@ namespace Majorsilence.Reporting.Rdl
 				return null;
 
 			ReportLink rl = this.Parent;
+			var inDetails = false;
+			var inTableSection = false;
 			while (rl != null)
 			{
 				if (rl is TableGroup || rl is List || rl is MatrixCell)
 					break;
+				if (rl is Details)
+					inDetails = true;
+				else if (rl is Header || rl is Footer)
+					inTableSection = true;
 				rl = rl.Parent;
 			}
 			if (rl == null)
+			{
+				// Not inside a group, list or matrix cell: a chart in a plain table cell (how RDL 2008
+				// stores a sparkline). Its scope is that of the cell -- the current row in the detail
+				// section, the table's rows in the header or footer.
+				if (inDetails && row.R != null)
+				{
+					int at = row.R.Data.IndexOf(row);
+					if (at >= 0)
+						return new Rows(rpt, row.R, at, at, null);
+				}
+				else if (inTableSection && row.R != null)
+				{
+					return new Rows(rpt, row.R, 0, row.R.Data.Count - 1, null);
+				}
 				return null;			// should have been caught as an error
+			}
 
 			Grouping g=null;
 			if (rl is TableGroup)
