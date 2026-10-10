@@ -454,25 +454,40 @@ namespace ReportTests
         }
 
         /// <summary>
-        /// Validates exported output against Microsoft's own schema. The XSD is not redistributed
-        /// here; download ReportDefinition.xsd from
-        /// https://schemas.microsoft.com/sqlserver/reporting/2008/01/reportdefinition/ and set
-        /// RDL_XSD_2008 to its path to run this.
+        /// Validates exported output against Microsoft's own schemas. The XSDs are not
+        /// redistributed here; see ReportTests/Schemas/README.md for where to get them, then set
+        /// RDL_XSD_2008 / RDL_XSD_2010 / RDL_XSD_2016 to their paths to run the matching case.
         /// </summary>
-        [Test]
-        public void ExportedRegions_ValidateAgainstTheMicrosoft2008Schema ()
+        [TestCase ("2008", false)]
+        [TestCase ("2010", true)]
+        [TestCase ("2016", true)]
+        public void ExportedRegions_ValidateAgainstTheMicrosoftSchema (string version, bool bodyInSections)
         {
-            var xsdPath = System.Environment.GetEnvironmentVariable ("RDL_XSD_2008");
+            var xsdPath = System.Environment.GetEnvironmentVariable ("RDL_XSD_" + version);
             if (string.IsNullOrEmpty (xsdPath) || !System.IO.File.Exists (xsdPath))
-                Assert.Ignore ("Set RDL_XSD_2008 to a local copy of the Microsoft 2008 ReportDefinition.xsd to run.");
+                Assert.Ignore ($"Set RDL_XSD_{version} to a local copy of the Microsoft {version} ReportDefinition.xsd to run.");
 
-            const string Rdl2008 = "http://schemas.microsoft.com/sqlserver/reporting/2008/01/reportdefinition";
+            var ns = $"http://schemas.microsoft.com/sqlserver/reporting/{version}/01/reportdefinition";
             var schemas = new System.Xml.Schema.XmlSchemaSet ();
-            schemas.Add (Rdl2008, xsdPath);
+            schemas.Add (ns, xsdPath);
 
             foreach (var (label, region) in new[] { ("List", SimpleList), ("Table", GroupedTable), ("Matrix", SalesMatrix) }) {
-                var doc = Load (ReportWith (Rdl2008, region));
+                var doc = Load (ReportWith (ns, region));
                 Rdl2008Exporter.ConvertToTablix (doc);
+
+                if (bodyInSections) {
+                    // 2010 and later hold Body and Width inside ReportSections/ReportSection.
+                    var root = doc.DocumentElement;
+                    var section = doc.CreateElement ("ReportSection", ns);
+                    foreach (var name in new[] { "Body", "Width" }) {
+                        var element = root[name, ns];
+                        root.RemoveChild (element);
+                        section.AppendChild (element);
+                    }
+                    var sections = doc.CreateElement ("ReportSections", ns);
+                    sections.AppendChild (section);
+                    root.AppendChild (sections);
+                }
 
                 var errors = new System.Collections.Generic.List<string> ();
                 var settings = new XmlReaderSettings { ValidationType = ValidationType.Schema, Schemas = schemas };
