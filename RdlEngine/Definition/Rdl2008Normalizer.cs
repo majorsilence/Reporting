@@ -444,6 +444,12 @@ namespace Majorsilence.Reporting.Rdl
                 return null;
             }
 
+            // A row group's label column is not part of the body; Table has no such thing, so it
+            // becomes ordinary leading columns first.
+            // (A pivot keeps its row headers; they become Matrix row groupings.)
+            if (!HasDynamicMembers (FindChild (tablix, "TablixColumnHierarchy")))
+                HoistRowGroupHeaders (tablix);
+
             // One cell repeated per record or group is a List, not a one-column table.
             var list = TryConvertTablixToList (tablix);
             if (list != null)
@@ -842,6 +848,102 @@ namespace Majorsilence.Reporting.Rdl
                 tableGroups.AppendChild (tableGroup);
             }
             table.AppendChild (tableGroups);
+        }
+
+        /// <summary>
+        /// Row groups in a Tablix keep their labels in a TablixHeader that sits to the left of the
+        /// body, outside TablixColumns. A 2005 Table has only body columns, so each header level
+        /// becomes a leading column: its contents go in the first row of the member's rows, and the
+        /// other rows get a blank cell. (2005 has no row span, so the label is not merged down.)
+        /// </summary>
+        private static void HoistRowGroupHeaders (XmlElement tablix)
+        {
+            var body = FindChild (tablix, "TablixBody");
+            var rows = ChildrenNamed (FindChild (body, "TablixRows"), "TablixRow");
+            var hierarchy = FindChild (tablix, "TablixRowHierarchy");
+            var top = FindChild (hierarchy, "TablixMembers");
+            if (top == null || rows.Count == 0)
+                return;
+
+            var cells = new Dictionary<(int Row, int Column), XmlElement> ();
+            var sizes = new Dictionary<int, string> ();
+            var headerOwners = new List<XmlElement> ();
+            var leaf = 0;
+            var levels = 0;
+
+            void Walk (XmlElement members, int column)
+            {
+                foreach (var member in ChildrenNamed (members, "TablixMember")) {
+                    var header = FindChild (member, "TablixHeader");
+                    var inner = column;
+                    var firstLeaf = leaf;
+
+                    if (header != null) {
+                        headerOwners.Add (member);
+                        if (!sizes.ContainsKey (column))
+                            sizes[column] = FindChild (header, "Size")?.InnerText ?? "0in";
+                        levels = Math.Max (levels, column + 1);
+                        inner = column + 1;
+                    }
+
+                    var nested = FindChild (member, "TablixMembers");
+                    if (nested != null)
+                        Walk (nested, inner);
+                    else
+                        leaf++;
+
+                    if (header != null)
+                        cells[(firstLeaf, column)] = FindChild (header, "CellContents");
+                }
+            }
+
+            Walk (top, 0);
+            if (levels == 0 || leaf != rows.Count)
+                return;     // nothing to hoist, or a layout this pass does not model
+
+            var doc = tablix.OwnerDocument;
+            var ns = tablix.NamespaceURI;
+
+            var tablixColumns = FindChild (body, "TablixColumns");
+            for (var c = levels - 1; c >= 0; c--) {
+                var column = doc.CreateElement ("TablixColumn", ns);
+                var width = doc.CreateElement ("Width", ns);
+                width.InnerText = sizes.TryGetValue (c, out var size) ? size : "0in";
+                column.AppendChild (width);
+                tablixColumns.InsertBefore (column, tablixColumns.FirstChild);
+            }
+
+            for (var r = 0; r < rows.Count; r++) {
+                var tablixCells = FindChild (rows[r], "TablixCells");
+                for (var c = levels - 1; c >= 0; c--) {
+                    var cell = doc.CreateElement ("TablixCell", ns);
+                    var contents = cells.TryGetValue ((r, c), out var source) && source != null
+                        ? (XmlElement) source.CloneNode (true)
+                        : doc.CreateElement ("CellContents", ns);
+                    cell.AppendChild (contents);
+                    tablixCells.InsertBefore (cell, tablixCells.FirstChild);
+                }
+            }
+
+            // The column hierarchy must still describe every body column.
+            var columnHierarchy = FindChild (tablix, "TablixColumnHierarchy");
+            if (columnHierarchy == null) {
+                columnHierarchy = doc.CreateElement ("TablixColumnHierarchy", ns);
+                tablix.InsertAfter (columnHierarchy, FindChild (tablix, "TablixBody"));
+            }
+            var columnMembers = FindChild (columnHierarchy, "TablixMembers");
+            if (columnMembers == null) {
+                columnMembers = doc.CreateElement ("TablixMembers", ns);
+                columnHierarchy.AppendChild (columnMembers);
+            }
+            for (var c = 0; c < levels; c++)
+                columnMembers.InsertBefore (doc.CreateElement ("TablixMember", ns), columnMembers.FirstChild);
+
+            foreach (var owner in headerOwners) {
+                var header = FindChild (owner, "TablixHeader");
+                if (header != null)
+                    owner.RemoveChild (header);
+            }
         }
 
         private enum RowPlacement { Header, Detail, Footer }
