@@ -200,9 +200,9 @@ namespace ReportTests
             Assert.That (html, Does.Contain ("Before gauges"));
             Assert.That (Regex.Matches (html, "<img").Count, Is.EqualTo (2), "one bar per gauge");
             Assert.That (html, Does.Contain ("22.0"), "the numeric indicator shows the sum with one decimal");
-            Assert.That (html, Does.Contain ("22.0"));
-            Assert.That (html.ToLowerInvariant (), Does.Contain ("green").And.Not.Contain ("red"),
-                "a total of 22 is in the Green state, not the Red one");
+            // Match the style, not the word: the chart images are inlined as base64, which can contain "red".
+            Assert.That (html, Does.Contain ("background-color:Green"), "a total of 22 is in the Green state");
+            Assert.That (html, Does.Not.Contain ("background-color:Red"));
         }
     }
 }
