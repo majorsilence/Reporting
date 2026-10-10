@@ -334,6 +334,77 @@ namespace ReportTests
             Assert.That (group["Sorting"]["SortBy"]["SortExpression"].InnerText, Is.EqualTo ("=Fields!Name.Value"));
         }
 
+        private const string SalesMatrix = @"
+<Matrix Name=""Pivot""><DataSetName>Data</DataSetName><Height>0.5in</Height><Width>2in</Width>
+  <Corner><ReportItems><Textbox Name=""Corner""><Value>Corner</Value></Textbox></ReportItems></Corner>
+  <ColumnGroupings><ColumnGrouping><Height>0.25in</Height><DynamicColumns>
+    <Grouping Name=""ByYear""><GroupExpressions><GroupExpression>=Fields!Name.Value</GroupExpression></GroupExpressions></Grouping>
+    <Sorting><SortBy><SortExpression>=Fields!Name.Value</SortExpression></SortBy></Sorting>
+    <ReportItems><Textbox Name=""YearHead""><Value>=Fields!Name.Value</Value></Textbox></ReportItems>
+  </DynamicColumns></ColumnGrouping></ColumnGroupings>
+  <RowGroupings><RowGrouping><Width>1in</Width><DynamicRows>
+    <Grouping Name=""ByRegion""><GroupExpressions><GroupExpression>=Fields!Name.Value</GroupExpression></GroupExpressions></Grouping>
+    <ReportItems><Textbox Name=""RegionHead""><Value>=Fields!Name.Value</Value></Textbox></ReportItems>
+  </DynamicRows></RowGrouping></RowGroupings>
+  <MatrixRows><MatrixRow><Height>0.25in</Height><MatrixCells><MatrixCell><ReportItems><Textbox Name=""Cell""><Value>=Sum(Fields!Name.Value)</Value></Textbox></ReportItems></MatrixCell></MatrixCells></MatrixRow></MatrixRows>
+  <MatrixColumns><MatrixColumn><Width>1in</Width></MatrixColumn></MatrixColumns>
+</Matrix>";
+
+        [Test]
+        public void Matrix_InRdlcNamespace_IsWrittenAsTablix ()
+        {
+            var doc = Load (ReportWith (Rdl2010, SalesMatrix));
+
+            Assert.That (Rdl2008Exporter.ConvertToTablix (doc), Is.EqualTo (1));
+
+            Assert.That (doc.GetElementsByTagName ("Matrix"), Is.Empty, "<Matrix> is not in the RDLC schema");
+            var tablix = First (doc, "Tablix");
+            Assert.That (tablix.GetAttribute ("Name"), Is.EqualTo ("Pivot"));
+            var columnMember = tablix["TablixColumnHierarchy"]["TablixMembers"]["TablixMember"];
+            Assert.That (columnMember["Group"].GetAttribute ("Name"), Is.EqualTo ("ByYear"));
+            Assert.That (columnMember["TablixHeader"]["Size"].InnerText, Is.EqualTo ("0.25in"));
+            var rowMember = tablix["TablixRowHierarchy"]["TablixMembers"]["TablixMember"];
+            Assert.That (rowMember["Group"].GetAttribute ("Name"), Is.EqualTo ("ByRegion"));
+            Assert.That (rowMember["TablixHeader"]["Size"].InnerText, Is.EqualTo ("1in"));
+            Assert.That (tablix["TablixCorner"], Is.Not.Null);
+        }
+
+        [Test]
+        public void RoundTrip_MatrixSurvivesExportAndImport ()
+        {
+            var doc = Load (ReportWith (Rdl2010, SalesMatrix));
+            Rdl2008Exporter.ConvertToTablix (doc);
+
+            Rdl2008Normalizer.Normalize (doc, null);
+
+            Assert.That (doc.GetElementsByTagName ("Tablix"), Is.Empty);
+            var matrix = First (doc, "Matrix");
+            Assert.That (matrix, Is.Not.Null, "an exported pivot reads back as a Matrix");
+            string Text (XmlNode n) => string.Concat (n.SelectNodes (".//*[local-name()='Value']").Cast<XmlNode> ().Select (v => v.InnerText));
+            var column = matrix["ColumnGroupings"]["ColumnGrouping"];
+            Assert.That (column["Height"].InnerText, Is.EqualTo ("0.25in"));
+            Assert.That (column["DynamicColumns"]["Grouping"].GetAttribute ("Name"), Is.EqualTo ("ByYear"));
+            Assert.That (column["DynamicColumns"]["Sorting"]["SortBy"]["SortExpression"].InnerText, Is.EqualTo ("=Fields!Name.Value"));
+            var row = matrix["RowGroupings"]["RowGrouping"];
+            Assert.That (row["Width"].InnerText, Is.EqualTo ("1in"));
+            Assert.That (row["DynamicRows"]["Grouping"].GetAttribute ("Name"), Is.EqualTo ("ByRegion"));
+            Assert.That (Text (matrix["MatrixRows"]), Is.EqualTo ("=Sum(Fields!Name.Value)"));
+            Assert.That (Text (matrix["Corner"]), Is.EqualTo ("Corner"));
+        }
+
+        [Test]
+        public async Task ExportedMatrix_ParsesInTheEngine ()
+        {
+            var doc = Load (ReportWith (Rdl2010, SalesMatrix));
+            Rdl2008Exporter.ConvertToTablix (doc);
+
+            var parser = new RDLParser (doc.OuterXml) { SkipDatabaseSchemaValidation = true };
+            using var report = await parser.Parse ();
+
+            Assert.That (report.ErrorMaxSeverity, Is.LessThanOrEqualTo (4),
+                string.Join (" | ", report.ErrorItems ?? new System.Collections.ArrayList ()));
+        }
+
         [Test]
         public async Task ExportedReport_ParsesInTheEngine ()
         {

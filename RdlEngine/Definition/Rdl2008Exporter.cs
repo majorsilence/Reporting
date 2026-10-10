@@ -13,7 +13,7 @@ namespace Majorsilence.Reporting.Rdl
     /// written as a &lt;List&gt; element, which those schemas do not define -- Visual Studio and
     /// ReportViewer reject the file. A List is exactly a one-cell Tablix, so it is rewritten as
     /// one. A Table maps onto a Tablix whose row hierarchy carries its header, groups, details and
-    /// footer. Matrix is not handled here yet.
+    /// footer. A Matrix maps onto a Tablix with nested group members on each axis.
     /// </remarks>
     public static class Rdl2008Exporter
     {
@@ -37,8 +37,8 @@ namespace Majorsilence.Reporting.Rdl
         }
 
         /// <summary>
-        /// Rewrites every List and Table in a 2008+ document as a Tablix, in place. A 2005
-        /// document, or one with no namespace, is left alone because both are valid there.
+        /// Rewrites every List, Table and Matrix in a 2008+ document as a Tablix, in place. A 2005
+        /// document, or one with no namespace, is left alone because all three are valid there.
         /// </summary>
         /// <returns>The number of Lists converted.</returns>
         public static int ConvertToTablix (XmlDocument doc)
@@ -55,7 +55,10 @@ namespace Majorsilence.Reporting.Rdl
 
             var count = 0;
             foreach (var list in lists) {
-                list.ParentNode.ReplaceChild (list.LocalName == "Table" ? BuildTablixFromTable (list) : BuildTablix (list), list);
+                list.ParentNode.ReplaceChild (
+                    list.LocalName == "Table" ? BuildTablixFromTable (list)
+                    : list.LocalName == "Matrix" ? BuildTablixFromMatrix (list)
+                    : BuildTablix (list), list);
                 count++;
             }
 
@@ -68,7 +71,7 @@ namespace Majorsilence.Reporting.Rdl
                 if (node is not XmlElement child)
                     continue;
 
-                if ((child.LocalName == "List" || child.LocalName == "Table") && child.NamespaceURI == element.NamespaceURI)
+                if ((child.LocalName == "List" || child.LocalName == "Table" || child.LocalName == "Matrix") && child.NamespaceURI == element.NamespaceURI)
                     found.Add (child);
 
                 Collect (child, found);
@@ -388,6 +391,181 @@ namespace Majorsilence.Reporting.Rdl
                     case "Footer":
                     case "TableGroups":
                     case "FillPage":
+                        break;
+                    case "PageBreakAtStart": pageBreakAtStart = child.InnerText; break;
+                    case "PageBreakAtEnd": pageBreakAtEnd = child.InnerText; break;
+                    case "NoRows": tablix.AppendChild (El (doc, ns, "NoRowsMessage", child.InnerText)); break;
+                    default: tablix.AppendChild (child.CloneNode (true)); break;
+                }
+            }
+
+            var atStart = string.Equals (pageBreakAtStart, "true", StringComparison.OrdinalIgnoreCase);
+            var atEnd = string.Equals (pageBreakAtEnd, "true", StringComparison.OrdinalIgnoreCase);
+            if (atStart || atEnd) {
+                var pageBreak = El (doc, ns, "PageBreak");
+                pageBreak.AppendChild (El (doc, ns, "BreakLocation", atStart && atEnd ? "StartAndEnd" : atStart ? "Start" : "End"));
+                tablix.AppendChild (pageBreak);
+            }
+
+            return tablix;
+        }
+
+        private static XmlElement BuildTablixFromMatrix (XmlElement matrix)
+        {
+            var doc = matrix.OwnerDocument;
+            var ns = matrix.NamespaceURI;
+            var name = matrix.GetAttribute ("Name");
+            var prefix = name.Length > 0 ? name : "Matrix";
+
+            var tablix = El (doc, ns, "Tablix");
+            if (name.Length > 0)
+                tablix.SetAttribute ("Name", name);
+
+            XmlElement ItemOf (XmlElement container)
+            {
+                // The 2005 Matrix positions all hold a ReportItems with a single item.
+                var items = Child (container, "ReportItems");
+                if (items != null) {
+                    foreach (XmlNode n in items.ChildNodes) {
+                        if (n is XmlElement item)
+                            return item;
+                    }
+                }
+                return null;
+            }
+
+            XmlElement Contents (XmlElement container)
+            {
+                var contents = El (doc, ns, "CellContents");
+                var item = ItemOf (container);
+                if (item != null)
+                    contents.AppendChild (item.CloneNode (true));
+                return contents;
+            }
+
+            XmlElement Axis (string hierarchyName, string groupingName, string dynamicName,
+                string staticsName, string staticName, string sizeName)
+            {
+                var groupings = Kids (Child (matrix, groupingName + "s"), groupingName);
+
+                XmlElement Members (int index)
+                {
+                    var members = El (doc, ns, "TablixMembers");
+                    if (index >= groupings.Count) {
+                        // The innermost level of data: a bare static leaf under the last group.
+                        members.AppendChild (El (doc, ns, "TablixMember"));
+                        return members;
+                    }
+
+                    var grouping = groupings[index];
+                    var size = Child (grouping, sizeName)?.InnerText ?? "0in";
+
+                    XmlElement Header (XmlElement source)
+                    {
+                        var header = El (doc, ns, "TablixHeader");
+                        header.AppendChild (El (doc, ns, "Size", size));
+                        header.AppendChild (Contents (source));
+                        return header;
+                    }
+
+                    var dynamic = Child (grouping, dynamicName);
+                    if (dynamic != null) {
+                        var member = El (doc, ns, "TablixMember");
+                        member.AppendChild (BuildGroup (doc, ns, Child (dynamic, "Grouping"), prefix + "_" + hierarchyName + (index + 1)));
+                        var sorting = Child (dynamic, "Sorting");
+                        if (sorting != null)
+                            member.AppendChild (BuildSortExpressions (doc, ns, sorting));
+                        member.AppendChild (Header (dynamic));
+                        var visibility = Child (dynamic, "Visibility");
+                        if (visibility != null)
+                            member.AppendChild (visibility.CloneNode (true));
+                        member.AppendChild (Members (index + 1));
+                        members.AppendChild (member);
+                        return members;
+                    }
+
+                    foreach (var staticItem in Kids (Child (grouping, staticsName), staticName)) {
+                        var member = El (doc, ns, "TablixMember");
+                        member.AppendChild (Header (staticItem));
+                        if (index + 1 < groupings.Count)
+                            member.AppendChild (Members (index + 1));
+                        members.AppendChild (member);
+                    }
+                    return members;
+                }
+
+                var hierarchy = El (doc, ns, hierarchyName);
+                hierarchy.AppendChild (Members (0));
+                return hierarchy;
+            }
+
+            var columnHierarchy = Axis ("TablixColumnHierarchy", "ColumnGrouping", "DynamicColumns", "StaticColumns", "StaticColumn", "Height");
+            var rowHierarchy = Axis ("TablixRowHierarchy", "RowGrouping", "DynamicRows", "StaticRows", "StaticRow", "Width");
+
+            var body = El (doc, ns, "TablixBody");
+            var columns = El (doc, ns, "TablixColumns");
+            foreach (var matrixColumn in Kids (Child (matrix, "MatrixColumns"), "MatrixColumn")) {
+                var column = El (doc, ns, "TablixColumn");
+                column.AppendChild (El (doc, ns, "Width", Child (matrixColumn, "Width")?.InnerText ?? "1in"));
+                columns.AppendChild (column);
+            }
+            var rows = El (doc, ns, "TablixRows");
+            foreach (var matrixRow in Kids (Child (matrix, "MatrixRows"), "MatrixRow")) {
+                var row = El (doc, ns, "TablixRow");
+                row.AppendChild (El (doc, ns, "Height", Child (matrixRow, "Height")?.InnerText ?? "0.25in"));
+                var cells = El (doc, ns, "TablixCells");
+                foreach (var matrixCell in Kids (Child (matrixRow, "MatrixCells"), "MatrixCell")) {
+                    var cell = El (doc, ns, "TablixCell");
+                    cell.AppendChild (Contents (matrixCell));
+                    cells.AppendChild (cell);
+                }
+                row.AppendChild (cells);
+                rows.AppendChild (row);
+            }
+            body.AppendChild (columns);
+            body.AppendChild (rows);
+            tablix.AppendChild (body);
+            tablix.AppendChild (columnHierarchy);
+            tablix.AppendChild (rowHierarchy);
+
+            var corner = Child (matrix, "Corner");
+            if (corner != null && ItemOf (corner) != null) {
+                var columnLevels = Kids (Child (matrix, "ColumnGroupings"), "ColumnGrouping").Count;
+                var rowLevels = Kids (Child (matrix, "RowGroupings"), "RowGrouping").Count;
+                var cornerContents = Contents (corner);
+                // One item over the whole header block: span it across the row-header columns and
+                // the column-header rows.
+                if (rowLevels > 1)
+                    cornerContents.AppendChild (El (doc, ns, "ColSpan", rowLevels.ToString ()));
+                if (columnLevels > 1)
+                    cornerContents.AppendChild (El (doc, ns, "RowSpan", columnLevels.ToString ()));
+                var cornerCell = El (doc, ns, "TablixCornerCell");
+                cornerCell.AppendChild (cornerContents);
+                var cornerRows = El (doc, ns, "TablixCornerRows");
+                for (var r = 0; r < Math.Max (columnLevels, 1); r++) {
+                    var cornerRow = El (doc, ns, "TablixCornerRow");
+                    for (var c = 0; c < Math.Max (rowLevels, 1); c++)
+                        cornerRow.AppendChild (r == 0 && c == 0 ? cornerCell : El (doc, ns, "TablixCornerCell"));
+                    cornerRows.AppendChild (cornerRow);
+                }
+                var tablixCorner = El (doc, ns, "TablixCorner");
+                tablixCorner.AppendChild (cornerRows);
+                tablix.AppendChild (tablixCorner);
+            }
+
+            string pageBreakAtStart = null, pageBreakAtEnd = null;
+            foreach (XmlNode node in matrix.ChildNodes) {
+                if (node is not XmlElement child)
+                    continue;
+                switch (child.LocalName) {
+                    case "Corner":
+                    case "ColumnGroupings":
+                    case "RowGroupings":
+                    case "MatrixRows":
+                    case "MatrixColumns":
+                    case "GroupsBeforeRowHeaders":
+                    case "CellDataElementName":
+                    case "CellDataElementOutput":
                         break;
                     case "PageBreakAtStart": pageBreakAtStart = child.InnerText; break;
                     case "PageBreakAtEnd": pageBreakAtEnd = child.InnerText; break;
