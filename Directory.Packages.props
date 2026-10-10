@@ -31,6 +31,7 @@
     <PackageVersion Include="Microsoft.Data.SqlClient" Version="5.2.2" />
     <PackageVersion Include="Microsoft.WindowsAzure.ConfigurationManager" Version="1.8.0" />
     <PackageVersion Include="MySql.Data" Version="9.2.0" />
+    <PackageVersion Include="MySqlConnector" Version="2.6.2" />
     <PackageVersion Include="Npgsql" Version="8.0.7" />
     <PackageVersion Include="NUnit" Version="4.6.1" />
     <PackageVersion Include="NUnit3TestAdapter" Version="5.1.0" />

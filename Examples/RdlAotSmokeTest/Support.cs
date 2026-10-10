@@ -152,6 +152,21 @@ namespace RdlAotSmokeTest
   <Subreport Name=""S1""><Top>1in</Top><Left>0in</Left><Height>0.5in</Height><Width>3in</Width><ReportName>{subreportName}</ReportName></Subreport>
 </ReportItems></Body></Report>";
 
+        // One barcode of the given custom report item type; props are its <CustomProperty> name/value pairs.
+        public static string WithBarcode(string type, params (string Name, string Value)[] props)
+        {
+            var cp = string.Concat(props.Select(p => $"<CustomProperty><Name>{p.Name}</Name><Value>{Esc(p.Value)}</Value></CustomProperty>"));
+            return Header + DataSet(new[] { "N:Int32" }) + $@"
+<Body><Height>2in</Height><ReportItems>
+  <Table Name=""T1""><DataSetName>Data</DataSetName><Width>0.7in</Width>{Cols(1)}
+    <Details><TableRows><TableRow><Height>0.25in</Height><TableCells>{Cell("C0", "=Fields!N.Value")}</TableCells></TableRow></TableRows></Details>
+  </Table>
+  <CustomReportItem Name=""BC""><Type>{Esc(type)}</Type><Top>1in</Top><Left>0in</Left><Width>2.5in</Width><Height>0.9in</Height>
+    <CustomProperties>{cp}</CustomProperties><Source>Embedded</Source>
+  </CustomReportItem>
+</ReportItems></Body></Report>";
+        }
+
         public static string WithQrCode() => Header + DataSet(new[] { "N:Int32" }) + $@"
 <Body><Height>2in</Height><ReportItems>
   <Table Name=""T1""><DataSetName>Data</DataSetName><Width>0.7in</Width>{Cols(1)}
@@ -186,6 +201,22 @@ namespace RdlAotSmokeTest
             return await File.ReadAllBytesAsync(path);
         }
 
+        // Same as Bytes but renders a PDF with encryption and/or a signature applied by the engine.
+        public static async Task<byte[]> SecuredPdf(string folder, string rdl, Majorsilence.Pdf.Security.PdfSecurity? security,
+            Majorsilence.Pdf.Security.PdfSignatureOptions? signature, Func<Report, Task> pushData)
+        {
+            var parser = new RDLParser(rdl) { Folder = folder, SkipDatabaseSchemaValidation = true };
+            using var report = await parser.Parse();
+            if (report.ErrorMaxSeverity > 4)
+                throw new InvalidOperationException("parse errors: " + string.Join(" | ", report.ErrorItems.Cast<object>()));
+            report.Folder = folder;
+            await pushData(report);
+            await report.RunGetData();
+            var path = Path.Combine(folder, Guid.NewGuid().ToString("N") + ".secured.pdf");
+            await report.RunRender(new OneFileStreamGen(path, true), OutputPresentationType.PDF, security, signature);
+            return await File.ReadAllBytesAsync(path);
+        }
+
         public static async Task<string> Text(string folder, string rdl, OutputPresentationType type, Func<Report, Task> pushData) =>
             Encoding.UTF8.GetString(await Bytes(folder, rdl, type, pushData));
 
@@ -207,6 +238,12 @@ namespace RdlAotSmokeTest
             var text = Encoding.Latin1.GetString(bytes);
             if (!text.StartsWith("%PDF-", StringComparison.Ordinal) || !text.Contains("%%EOF") || bytes.Length < 500)
                 throw new InvalidOperationException($"not a structurally valid PDF ({bytes.Length} bytes)");
+        }
+
+        public static void LargerThan(byte[] bytes, int baseline, string what)
+        {
+            if (bytes.Length < baseline + 300)
+                throw new InvalidOperationException($"{what}: output ({bytes.Length} bytes) is not meaningfully larger than the report without it ({baseline} bytes); it probably did not render");
         }
 
         public static void Tiff(byte[] bytes)

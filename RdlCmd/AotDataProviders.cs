@@ -29,8 +29,14 @@ namespace Majorsilence.Reporting.Rdl
             RdlEngineConfig.RegisterDataProvider("PostgreSQL",
                 cs => new Npgsql.NpgsqlConnection(cs),
                 tableSelect: "SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME NOT LIKE 'pg_%' ORDER BY 1");
+            // MySql.Data (Oracle's connector, the config file's "MySQL.NET") cannot open a connection under
+            // Native AOT: its static initializer uses System.Configuration, which is not AOT-compatible.
+            // MySqlConnector is; reports that name either provider get it when running as an AOT binary.
+            RdlEngineConfig.RegisterDataProvider("MySqlConnector",
+                cs => new MySqlConnector.MySqlConnection(cs),
+                tableSelect: "show tables", replaceParameters: true);
             RdlEngineConfig.RegisterDataProvider("MySQL.NET",
-                cs => new MySql.Data.MySqlClient.MySqlConnection(cs),
+                cs => new MySqlConnector.MySqlConnection(cs),
                 tableSelect: "show tables", replaceParameters: true);
         }
     }
