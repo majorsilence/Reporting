@@ -1,0 +1,74 @@
+name: aot-databases
+
+# Runs the Native AOT smoke test against real PostgreSQL, MySQL and SQL Server servers (service
+# containers), so the drivers registered with RdlEngineConfig.RegisterDataProvider are exercised end to
+# end as an AOT binary, not just constructed. The same smoke test runs without servers in linux.yml.
+
+on:
+  push:
+    branches: [main, "release/**"]
+    paths:
+      - "RdlEngine/**"
+      - "DataProviders/**"
+      - "RdlCmd/AotDataProviders.cs"
+      - "Examples/RdlAotSmokeTest/**"
+      - ".github/workflows/aot-databases.yml"
+  pull_request:
+    branches: [main, "release/**"]
+    paths:
+      - "RdlEngine/**"
+      - "DataProviders/**"
+      - "RdlCmd/AotDataProviders.cs"
+      - "Examples/RdlAotSmokeTest/**"
+      - ".github/workflows/aot-databases.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  aot-databases:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_PASSWORD: smoke
+        ports: ["55432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U postgres" --health-interval 5s --health-timeout 5s --health-retries 20
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_ROOT_PASSWORD: smoke
+          MYSQL_DATABASE: smoke
+        ports: ["53306:3306"]
+        options: >-
+          --health-cmd "mysqladmin ping -uroot -psmoke --silent" --health-interval 5s --health-timeout 5s --health-retries 30
+      sqlserver:
+        image: mcr.microsoft.com/mssql/server:2022-latest
+        env:
+          ACCEPT_EULA: "Y"
+          MSSQL_SA_PASSWORD: "Smoke_Pass123!"
+        ports: ["51433:1433"]
+        options: >-
+          --health-cmd "/opt/mssql-tools18/bin/sqlcmd -C -S localhost -U sa -P 'Smoke_Pass123!' -Q 'SELECT 1' || /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P 'Smoke_Pass123!' -Q 'SELECT 1'"
+          --health-interval 10s --health-timeout 10s --health-retries 30
+    steps:
+      - uses: actions/checkout@v6
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 10.0.x
+      - name: Publish the smoke test as a Native AOT binary
+        run: dotnet publish Examples/RdlAotSmokeTest -c Release -r linux-x64 -f net10.0 --self-contained true -p:PublishAot=true -o aot-smoke
+      - name: Run it against the live servers
+        env:
+          RDL_SMOKE_POSTGRES: "Host=localhost;Port=55432;Database=postgres;Username=postgres;Password=smoke"
+          RDL_SMOKE_MYSQL: "Server=localhost;Port=53306;Database=smoke;Uid=root;Pwd=smoke"
+          RDL_SMOKE_SQLSERVER: "Server=localhost,51433;Database=master;User Id=sa;Password=Smoke_Pass123!;TrustServerCertificate=true"
+        run: |
+          ./aot-smoke/RdlAotSmokeTest | tee smoke.log
+          # A skipped database means the connection string never reached the test; that must not pass silently.
+          if grep -q "  skip  " smoke.log; then echo "::error::a live database scenario was skipped"; exit 1; fi

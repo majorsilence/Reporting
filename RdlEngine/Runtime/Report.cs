@@ -207,6 +207,10 @@ namespace Majorsilence.Reporting.Rdl
                     TotalPages = 1;
                     IPresent ip = new RenderPdf_Raw(this, sg, security, signature);
                     await _Report.Run(ip);
+                    // Same ending as the unsecured path: without this the output file stays open
+                    // and unflushed until the caller disposes the stream generator.
+                    sg.CloseMainStream();
+                    ResetRenderCache();
                     break;
                 default:
                     await RunRender(sg, type);

@@ -47,6 +47,20 @@ jobs:
         id: aot_build
         shell: pwsh
         run: ./build-release-aot-linux.ps1 -Arch x64
+      # End to end: the published rdlnative shared library, driven from a host language through the
+      # Python wrapper's own test suite (renders a SQLite report, so it also covers the AOT database
+      # provider registration in RdlNative).
+      - name: Check out the Python wrapper
+        uses: actions/checkout@v6
+        with:
+          repository: majorsilence/reporting-python
+          path: reporting-python
+      - name: Run the Python wrapper tests against the AOT rdlnative library
+        env:
+          RDLNATIVE_LIB: ${{ github.workspace }}/RdlNative/bin/Release/net10.0/linux-x64-aot/publish/rdlnative.so
+          REPORTING_REPO_ROOT: ${{ github.workspace }}
+          PYTHONPATH: ${{ github.workspace }}/reporting-python/src
+        run: python3 -m unittest discover -s reporting-python/tests -p "test_report_native.py" -v
       - name: Archive AOT artifacts
         uses: actions/upload-artifact@v6
         with:

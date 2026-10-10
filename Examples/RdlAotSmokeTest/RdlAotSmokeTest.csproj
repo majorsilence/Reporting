@@ -5,7 +5,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <IsPackable>false</IsPackable>
-    <InvariantGlobalization>true</InvariantGlobalization>
+    <!-- Not InvariantGlobalization: Microsoft.Data.SqlClient does not support it. Program.cs pins the invariant culture instead. -->
   </PropertyGroup>
   <!-- if not windows define DRAWINGCOMPAT to use Majorsilence.Forms.Drawing instead of System.Drawing -->
   <PropertyGroup Condition="'$(OS)' != 'Windows_NT'">
@@ -19,7 +19,7 @@
     <!-- The same drivers RdlCmd references; RegisterDataProvider (AotDataProviders.cs) is how AOT finds them. -->
     <PackageReference Include="Microsoft.Data.SqlClient" />
     <PackageReference Include="Microsoft.Data.Sqlite" />
-    <PackageReference Include="MySql.Data" />
+    <PackageReference Include="MySqlConnector" />
     <PackageReference Include="Npgsql" />
     <Compile Include="..\..\RdlCmd\AotDataProviders.cs" Link="AotDataProviders.cs" />
   </ItemGroup>
