@@ -943,6 +943,76 @@ namespace ReportTests
             Assert.That (report.ErrorMaxSeverity, Is.LessThanOrEqualTo (4), string.Join (" | ", messages));
         }
 
+        private static string HeaderedMember (string text, string inner, string group = "")
+            => $@"<TablixMember>{group}<TablixHeader><Size>1.2in</Size><CellContents><Textbox Name=""Hdr{text}""><Value>{text}</Value></Textbox></CellContents></TablixHeader>{inner}</TablixMember>";
+
+        [Test]
+        public void Import_RowGroupLabelColumn_BecomesALeadingTableColumn ()
+        {
+            // What Visual Studio writes for a table grouped on Name: the label column sits in the row
+            // hierarchy's TablixHeader, outside the body, and spans the group's header and detail rows.
+            var doc = Load (ReportWith (Rdl2010, $@"
+<Tablix Name=""Grouped""><DataSetName>Data</DataSetName>
+  <TablixBody>
+    <TablixColumns><TablixColumn><Width>2in</Width></TablixColumn></TablixColumns>
+    <TablixRows>{TablixRowXml ("H", "Amount")}{TablixRowXml ("D", "=Fields!Name.Value")}</TablixRows>
+  </TablixBody>
+  <TablixColumnHierarchy><TablixMembers><TablixMember /></TablixMembers></TablixColumnHierarchy>
+  <TablixRowHierarchy><TablixMembers>
+    <TablixMember />
+    {HeaderedMember ("Name", @"<TablixMembers><TablixMember><Group Name=""Details"" /></TablixMember></TablixMembers>",
+        @"<Group Name=""ByName""><GroupExpressions><GroupExpression>=Fields!Name.Value</GroupExpression></GroupExpressions></Group>")}
+  </TablixMembers></TablixRowHierarchy>
+</Tablix>"));
+
+            Rdl2008Normalizer.Normalize (doc, null);
+
+            var table = First (doc, "Table");
+            Assert.That (table, Is.Not.Null);
+            var columns = table["TableColumns"].ChildNodes;
+            Assert.That (columns, Has.Count.EqualTo (2), "the label column plus the body column");
+            Assert.That (columns[0]["Width"].InnerText, Is.EqualTo ("1.2in"));
+            string Text (XmlNode n) => string.Concat (n.SelectNodes (".//*[local-name()='Value']").Cast<XmlNode> ().Select (v => v.InnerText + "|"));
+            var header = table["Header"]["TableRows"].FirstChild["TableCells"];
+            Assert.That (header.ChildNodes, Has.Count.EqualTo (2));
+            Assert.That (Text (header.FirstChild), Is.EqualTo ("|"), "a blank label cell above the group");
+            var groupRow = table["Details"]["TableRows"].FirstChild["TableCells"];
+            Assert.That (Text (groupRow.FirstChild), Does.Contain ("Name"), "the label sits in the group's first row");
+        }
+
+        [Test]
+        public void Import_RowGroupLabelColumn_KeepsTheLabelText ()
+        {
+            var doc = Load (ReportWith (Rdl2010, $@"
+<Tablix Name=""Grouped""><DataSetName>Data</DataSetName>
+  <TablixBody>
+    <TablixColumns><TablixColumn><Width>2in</Width></TablixColumn></TablixColumns>
+    <TablixRows>{TablixRowXml ("D", "=Fields!Name.Value")}{TablixRowXml ("D2", "second")}</TablixRows>
+  </TablixBody>
+  <TablixColumnHierarchy><TablixMembers><TablixMember /></TablixMembers></TablixColumnHierarchy>
+  <TablixRowHierarchy><TablixMembers>
+    {HeaderedMember ("Label", @"<TablixMembers><TablixMember><Group Name=""Details"" /></TablixMember><TablixMember /></TablixMembers>")}
+  </TablixMembers></TablixRowHierarchy>
+</Tablix>"));
+
+            Rdl2008Normalizer.Normalize (doc, null);
+
+            var values = doc.GetElementsByTagName ("Value").Cast<XmlNode> ().Select (v => v.InnerText).ToArray ();
+            Assert.That (values, Does.Contain ("Label"), "the label text must not be dropped");
+            Assert.That (First (doc, "TableColumns").ChildNodes, Has.Count.EqualTo (2));
+        }
+
+        [Test]
+        public void Import_PivotRowHeaders_AreNotHoisted ()
+        {
+            var doc = Load (ReportWith (Rdl2010, PivotWithSubtotals));
+
+            Rdl2008Normalizer.Normalize (doc, null);
+
+            Assert.That (First (doc, "Matrix"), Is.Not.Null, "a pivot keeps its row headers as Matrix row groupings");
+            Assert.That (First (doc, "Table"), Is.Null);
+        }
+
         [Test]
         public async Task ExportedReport_ParsesInTheEngine ()
         {
