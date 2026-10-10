@@ -40,6 +40,7 @@
   <Project Path="DataProviders/Majorsilence.Reporting.DataProviders.csproj" />
   <Project Path="Examples/MarkdownToPdf/MarkdownToPdf.csproj" />
   <Project Path="Examples/PdfAotSmokeTest/PdfAotSmokeTest.csproj" />
+  <Project Path="Examples/RdlAotSmokeTest/RdlAotSmokeTest.csproj" />
   <Project Path="Majorsilence.Pdf.Markdown.Tests/Majorsilence.Pdf.Markdown.Tests.csproj" />
   <Project Path="Majorsilence.Pdf.Markdown/Majorsilence.Pdf.Markdown.csproj" />
   <Project Path="Majorsilence.Pdf.Previewer.Tests/Majorsilence.Pdf.Previewer.Tests.csproj" />
