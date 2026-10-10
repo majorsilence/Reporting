@@ -904,6 +904,10 @@ namespace Majorsilence.Reporting.Rdl
 					(scope, bSimple) = await ResolveAggrScope(args, 1);
 					result = new FunctionAggrLevel(scope);
 					break;
+				case "inscope":
+					(scope, bSimple) = await ResolveAggrScope(args, 1);
+					result = new FunctionInScope(scope);
+					break;
                 case "aggregate":
                     (scope, bSimple) = await ResolveAggrScope(args, 2);
                     FunctionAggrArray aggr = new FunctionAggrArray(_DataCache, args[0], scope);
