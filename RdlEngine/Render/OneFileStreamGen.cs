@@ -30,7 +30,11 @@ namespace Majorsilence.Reporting.Rdl
 		public OneFileStreamGen(string filename, bool bOverwrite)
 		{
 			_Overwrite = bOverwrite;
-			string ext = Path.GetExtension(filename).Substring(1);	// extension (without the '.')
+			// Extension without the '.'; empty when the file has none (tempnam() and similar callers
+			// pass an extension-less path, which used to throw ArgumentOutOfRangeException here).
+			string ext = Path.GetExtension(filename);
+			if (ext.StartsWith(".", StringComparison.Ordinal))
+				ext = ext.Substring(1);
 			_Directory = Path.GetDirectoryName(filename);
 			_FileName = Path.GetFileNameWithoutExtension(filename);
 
@@ -86,12 +90,12 @@ namespace Majorsilence.Reporting.Rdl
 			Stream io=null;
 
 			// Obtain a new file name
-			string filename = string.Format("{0}{1}{2}{3}.{4}",
-				_Directory,						// directory
-				Path.DirectorySeparatorChar,	// "\"
-				_FileName,						// filename
-				(this._nextFileNumber > 1? _nextFileNumber.ToString(): ""),		// suffix: first file doesn't need number suffix
-				extension);						// extension
+			string name = _FileName +
+				(this._nextFileNumber > 1? _nextFileNumber.ToString(): "") +		// suffix: first file doesn't need number suffix
+				(string.IsNullOrEmpty(extension)? "": "." + extension);				// no dot when there is no extension
+			// A bare file name ("out.pdf") has no directory: stay relative to the current directory
+			// instead of rooting it at "/".
+			string filename = string.IsNullOrEmpty(_Directory)? name: Path.Combine(_Directory, name);
 			_nextFileNumber++;			// increment to next file
 
 			FileInfo fi = new FileInfo(filename);
