@@ -5,6 +5,7 @@ using System.Collections;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using Majorsilence.Reporting.RdlEngine.Resources;
 using Majorsilence.Reporting.Rdl;
 using System.Threading.Tasks;
@@ -66,8 +67,6 @@ namespace Majorsilence.Reporting.Rdl
 		}
 
 		// Evaluate is for interpretation  (and is relatively slow)
-		[RequiresDynamicCode("Invokes Code element VB methods at runtime; not AOT-compatible")]
-		[RequiresUnreferencedCode("Type members may be removed by the trimmer")]
 		public async Task<object> Evaluate(Report rpt, Row row)
 		{
 			if (rpt == null || rpt.CodeInstance == null)
@@ -102,14 +101,31 @@ namespace Majorsilence.Reporting.Rdl
 				throw new Exception(string.Format(Strings.FunctionCode_Error_MethodNotFound, _Func));
 			}
 
-			// Non-AOT path: reflection over VBCodeProvider-compiled assembly
+			// Non-AOT path: reflection over the VBCodeProvider-compiled assembly. Such an instance
+			// only exists when the VB source was compiled at runtime, which Native AOT cannot do
+			// (Code.cs refuses to compile there), so this is unreachable under AOT.
+			if (!RuntimeFeature.IsDynamicCodeSupported)
+				throw new PlatformNotSupportedException(
+					"The report's <Code> element was compiled at runtime, which Native AOT does not support. " +
+					"Register a code provider with RdlEngineConfig.RegisterCodeProvider instead.");
+			return InvokeCompiledCode(inst, argTypes, argResults);
+		}
+
+		[UnconditionalSuppressMessage("Trimming", "IL2026",
+			Justification = "Only reached with an instance compiled at runtime from the report's <Code> element, which is itself a non-trimmable, non-AOT path (Code.GetAssembly).")]
+		[UnconditionalSuppressMessage("Trimming", "IL2075",
+			Justification = "Same instance as above: a type created by the runtime VB compiler.")]
+		[UnconditionalSuppressMessage("Trimming", "IL2072",
+			Justification = "Same instance as above: a type created by the runtime VB compiler.")]
+		object InvokeCompiledCode(object inst, Type[] argTypes, object[] argResults)
+		{
 			Type theClassType = inst.GetType();
-            MethodInfo mInfo = XmlUtil.GetMethod(theClassType, _Func, argTypes);
-            if (mInfo == null)
-            {
-                throw new Exception(string.Format(Strings.FunctionCode_Error_MethodNotFound, _Func));
-            }
-            return mInfo.Invoke(inst, argResults);
+			MethodInfo mInfo = XmlUtil.GetMethod(theClassType, _Func, argTypes);
+			if (mInfo == null)
+			{
+				throw new Exception(string.Format(Strings.FunctionCode_Error_MethodNotFound, _Func));
+			}
+			return mInfo.Invoke(inst, argResults);
 		}
 
 		public async Task<double> EvaluateDouble(Report rpt, Row row)

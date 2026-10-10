@@ -1,5 +1,6 @@
 ﻿
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -1305,6 +1306,13 @@ namespace Majorsilence.Reporting.Rdl
 			return expr;
 		}
 
+		// cType is one of: a built-in class (typeof), a type registered with RegisterType (annotated
+		// there), or a type from a <CodeModules> assembly / the report's <Code> element. The last two
+		// exist only because an assembly was loaded or compiled at runtime, which is flagged and
+		// refused under Native AOT where it happens; parse-time lookup of their methods cannot be
+		// annotated any further.
+		[UnconditionalSuppressMessage("Trimming", "IL2072",
+			Justification = "See comment above: unannotated types only come from runtime-loaded assemblies.")]
 		private IExpr ResolveMethodCall(string fullname, IExpr[] args)
 		{
 			string cls, method;

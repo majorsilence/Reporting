@@ -793,6 +793,8 @@ namespace Majorsilence.Reporting.Rdl
         // A multi-value parameter becomes a strongly typed array so providers can bind it as a list.
         // The common element types are handled without reflection; any other type needs
         // ArrayList.ToArray(Type), which is unavailable under Native AOT (fall back to object[]).
+        [UnconditionalSuppressMessage("AOT", "IL3050",
+        	Justification = "Guarded by RuntimeFeature.IsDynamicCodeSupported; the analyzer only recognises that guard when targeting net9.0 or later.")]
         private static Array ToTypedArray(ArrayList ar)
         {
             Type t = ar[0].GetType();
