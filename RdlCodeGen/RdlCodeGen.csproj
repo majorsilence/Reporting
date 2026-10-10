@@ -8,8 +8,27 @@
     <AssemblyName>RdlCodeGen</AssemblyName>
     <!-- Build-time tool: runs on the build machine, never shipped inside the AOT app. -->
     <RollForward>Major</RollForward>
-    <IsPackable>false</IsPackable>
+    <IsPackable>true</IsPackable>
+    <PackageId>Majorsilence.Reporting.AotCode</PackageId>
+    <Description>Opt-in build-time compilation of report &lt;Code&gt; (VB) blocks for Native AOT. Add to a Visual Basic project, list the reports in RdlReports, and call RdlPrecompiledCode.Register() at startup. Full VB is not supported by the AOT runtime; see the Native AOT and Trimming wiki page.</Description>
+    <PackageTags>rdl;reporting;nativeaot;aot;msbuild;vb</PackageTags>
+    <!-- A build tool, not a library: the package carries the tool in tools/ and MSBuild targets in build/. -->
+    <DevelopmentDependency>true</DevelopmentDependency>
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+    <IncludeSymbols>false</IncludeSymbols>
+    <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
+    <NoWarn>$(NoWarn);NU5100;NU5128</NoWarn>
   </PropertyGroup>
+  <ItemGroup>
+    <None Include="build\Majorsilence.Reporting.AotCode.targets" Pack="true" PackagePath="build\" />
+  </ItemGroup>
+  <!-- Ship the published tool (with Roslyn) under tools/net10.0, where the targets file looks for it. -->
+  <Target Name="_PackTool" BeforeTargets="_GetPackageFiles">
+    <ItemGroup>
+      <_ToolFile Include="$(MSBuildProjectDirectory)/$(OutDir)**/*" Exclude="$(MSBuildProjectDirectory)/$(OutDir)**/*.pdb" />
+      <None Include="@(_ToolFile)" Pack="true" PackagePath="tools/net10.0/%(RecursiveDir)" />
+    </ItemGroup>
+  </Target>
   <ItemGroup>
     <InternalsVisibleTo Include="RdlCodeGen.Tests" />
   </ItemGroup>
