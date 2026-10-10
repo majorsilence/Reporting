@@ -120,5 +120,118 @@ namespace Majorsilence.Reporting.RdlDesign.Tests
             Assert.That(mc.SourceRdl, Does.Not.Contain("<List"), "RDLC schema has no List element");
             Assert.That(mc.SourceRdl, Does.Contain("<Tablix Name=\"List1\""));
         }
+
+        // A Tablix file opens as the Table/Matrix/List the designer edits, and saves as a Tablix.
+        [Test]
+        public void OpenRdlcWithTablix_EditsAsListAndSavesAsTablix()
+        {
+            const string rdlc = @"<?xml version=""1.0"" encoding=""utf-8""?>
+<Report xmlns=""http://schemas.microsoft.com/sqlserver/reporting/2008/01/reportdefinition"">
+  <Body>
+    <Height>2in</Height>
+    <ReportItems>
+      <Tablix Name=""Card"">
+        <Top>0in</Top><Left>0in</Left><Height>1in</Height><Width>2in</Width>
+        <TablixBody>
+          <TablixColumns><TablixColumn><Width>2in</Width></TablixColumn></TablixColumns>
+          <TablixRows><TablixRow><Height>1in</Height><TablixCells><TablixCell><CellContents>
+            <Textbox Name=""T1""><Paragraphs><Paragraph><TextRuns><TextRun><Value>Hello</Value><Style /></TextRun></TextRuns><Style /></Paragraph></Paragraphs></Textbox>
+          </CellContents></TablixCell></TablixCells></TablixRow></TablixRows>
+        </TablixBody>
+        <TablixColumnHierarchy><TablixMembers><TablixMember /></TablixMembers></TablixColumnHierarchy>
+        <TablixRowHierarchy><TablixMembers><TablixMember><Group Name=""Details"" /></TablixMember></TablixMembers></TablixRowHierarchy>
+      </Tablix>
+    </ReportItems>
+  </Body>
+  <Width>4in</Width>
+</Report>";
+
+            var design = new DesignCtl();
+            design.ReportSource = rdlc;
+
+            var doc = design.ReportDocument;
+            Assert.That(doc.GetElementsByTagName("List"), Has.Count.EqualTo(1), "the designer edits the List it understands");
+            Assert.That(doc.GetElementsByTagName("Tablix"), Is.Empty);
+
+            var saved = design.ReportSource;
+            Assert.That(saved, Does.Contain("<Tablix Name=\"Card\""));
+            Assert.That(saved, Does.Not.Contain("<List"));
+            Assert.That(saved, Does.Contain("<TextRun>"));
+            Assert.That(saved, Does.Contain("Hello"));
+        }
+
+        // Items the engine cannot render (GaugePanel, Map) must still survive an open and save.
+        [Test]
+        public void OpenRdlcWithGaugePanel_KeepsItOnSave()
+        {
+            const string rdlc = @"<?xml version=""1.0"" encoding=""utf-8""?>
+<Report xmlns=""http://schemas.microsoft.com/sqlserver/reporting/2008/01/reportdefinition"">
+  <Body><Height>2in</Height><ReportItems>
+    <GaugePanel Name=""Trend""><Top>0in</Top><Left>0in</Left><Height>0.5in</Height><Width>2in</Width><Marker>x</Marker></GaugePanel>
+  </ReportItems></Body>
+  <Width>4in</Width>
+</Report>";
+
+            var design = new DesignCtl();
+            design.ReportSource = rdlc;
+
+            var saved = design.ReportSource;
+            Assert.That(saved, Does.Contain("<GaugePanel Name=\"Trend\""));
+            Assert.That(saved, Does.Contain("<Marker>x</Marker>"), "its settings are written back unchanged");
+        }
+
+        // Visual Studio keeps identifiers in these elements; opening and saving must not drop them.
+        [Test]
+        public void OpenRdlc_KeepsVersionOnlyElementsOnSave()
+        {
+            const string rdlc = @"<?xml version=""1.0"" encoding=""utf-8""?>
+<Report xmlns=""http://schemas.microsoft.com/sqlserver/reporting/2008/01/reportdefinition"" xmlns:rd=""http://schemas.microsoft.com/SQLServer/reporting/reportdesigner"">
+  <AutoRefresh>0</AutoRefresh>
+  <DataSources><DataSource Name=""DS1""><ConnectionProperties><DataProvider>SQL</DataProvider><ConnectString>x</ConnectString></ConnectionProperties><rd:DataSourceID>11111111-1111-1111-1111-111111111111</rd:DataSourceID></DataSource></DataSources>
+  <Body><Height>1in</Height><ReportItems /></Body>
+  <Width>4in</Width>
+  <rd:ReportUnitType>Inch</rd:ReportUnitType>
+  <rd:ReportID>22222222-2222-2222-2222-222222222222</rd:ReportID>
+</Report>";
+
+            var design = new DesignCtl();
+            design.ReportSource = rdlc;
+
+            var saved = design.ReportSource;
+            Assert.That(saved, Does.Contain("11111111-1111-1111-1111-111111111111"));
+            Assert.That(saved, Does.Contain("22222222-2222-2222-2222-222222222222"));
+            Assert.That(saved, Does.Contain("<AutoRefresh>0</AutoRefresh>"));
+            Assert.That(saved, Does.Contain("Inch"));
+        }
+
+        // A 2008+ chart opens as the chart model the designer edits and saves back in the 2008+ model.
+        [Test]
+        public void OpenRdlcWithChart_EditsAs2005ChartAndSavesAs2008()
+        {
+            const string rdlc = @"<?xml version=""1.0"" encoding=""utf-8""?>
+<Report xmlns=""http://schemas.microsoft.com/sqlserver/reporting/2008/01/reportdefinition"">
+  <Body><Height>3in</Height><ReportItems>
+    <Chart Name=""C1"">
+      <ChartCategoryHierarchy><ChartMembers><ChartMember><Group Name=""G""><GroupExpressions><GroupExpression>=Fields!Name.Value</GroupExpression></GroupExpressions></Group><Label>=Fields!Name.Value</Label></ChartMember></ChartMembers></ChartCategoryHierarchy>
+      <ChartData><ChartSeriesCollection><ChartSeries Name=""S""><ChartDataPoints><ChartDataPoint><ChartDataPointValues><Y>=Sum(Fields!Amount.Value)</Y></ChartDataPointValues></ChartDataPoint></ChartDataPoints><Type>Line</Type><Subtype>Plain</Subtype></ChartSeries></ChartSeriesCollection></ChartData>
+      <ChartTitles><ChartTitle Name=""Default""><Caption>Trend</Caption></ChartTitle></ChartTitles>
+      <Top>0in</Top><Left>0in</Left><Height>3in</Height><Width>5in</Width>
+    </Chart>
+  </ReportItems></Body>
+  <Width>6in</Width>
+</Report>";
+
+            var design = new DesignCtl();
+            design.ReportSource = rdlc;
+
+            var chart = (System.Xml.XmlElement)design.ReportDocument.GetElementsByTagName("Chart")[0];
+            Assert.That(chart["Type", chart.NamespaceURI].InnerText, Is.EqualTo("Line"));
+            Assert.That(chart["Title", chart.NamespaceURI]["Caption", chart.NamespaceURI].InnerText, Is.EqualTo("Trend"));
+
+            var saved = design.ReportSource;
+            Assert.That(saved, Does.Contain("<ChartSeriesCollection>"));
+            Assert.That(saved, Does.Contain("<ChartTitle Name=\"Default\">"));
+            Assert.That(saved, Does.Not.Contain("<CategoryGroupings>"));
+        }
     }
 }
