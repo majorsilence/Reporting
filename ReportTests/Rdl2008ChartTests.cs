@@ -1,5 +1,6 @@
 using System.Data;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Xml;
 using Majorsilence.Reporting.Rdl;
@@ -283,11 +284,10 @@ namespace ReportTests
 
         /// <summary>
         /// Report Builder stores a sparkline as a Chart with its axes hidden, sitting in a Tablix cell.
-        /// It is converted like any other chart and lands in the table cell. (Whether the engine
-        /// draws a chart nested in a table cell is a separate matter: it currently renders blank.)
+        /// It is converted like any other chart, lands in the table cell, and renders there.
         /// </summary>
         [Test]
-        public async Task SparklineInATablixCell_ConvertsToAChartInTheTableCell ()
+        public async Task SparklineInATablixCell_RendersInTheTableCell ()
         {
             var sparkline = Chart2008
                 .Replace ("<Type>Column</Type>", "<Type>Line</Type>")
@@ -316,6 +316,39 @@ namespace ReportTests
             Assert.That (chart, Is.Not.Null, "the sparkline chart sits in a table cell");
             Assert.That (chart["Type", Rdl2008].InnerText, Is.EqualTo ("Line"));
             Assert.That (chart["CategoryAxis", Rdl2008]["Axis", Rdl2008]["Visible", Rdl2008].InnerText, Is.EqualTo ("false"), "its axes stay hidden");
+
+            await report.DataSets["Data"].SetData (Data ());
+            await report.RunGetData (null);
+            using var memory = new MemoryStreamGen ();
+            await report.RunRender (memory, OutputPresentationType.HTML);
+            Assert.That (Regex.Matches (memory.GetText (), "<img").Count, Is.EqualTo (3), "one sparkline per detail row");
+        }
+
+        [Test]
+        public async Task ChartInATableHeaderCell_SeesTheWholeTable ()
+        {
+            var chart = Chart2008
+                .Replace ("<DataSetName>Data</DataSetName>", "")
+                .Replace ("<Top>0in</Top><Left>0in</Left><Height>3in</Height><Width>5in</Width>", "<Height>0.4in</Height><Width>1.5in</Width>");
+            var tablix = $@"<Tablix Name=""Grid""><DataSetName>Data</DataSetName>
+  <TablixBody>
+    <TablixColumns><TablixColumn><Width>1.5in</Width></TablixColumn></TablixColumns>
+    <TablixRows>
+      <TablixRow><Height>0.4in</Height><TablixCells><TablixCell><CellContents>{chart}</CellContents></TablixCell></TablixCells></TablixRow>
+      <TablixRow><Height>0.25in</Height><TablixCells><TablixCell><CellContents><Textbox Name=""D""><Value>=Fields!Name.Value</Value></Textbox></CellContents></TablixCell></TablixCells></TablixRow>
+    </TablixRows>
+  </TablixBody>
+  <TablixColumnHierarchy><TablixMembers><TablixMember /></TablixMembers></TablixColumnHierarchy>
+  <TablixRowHierarchy><TablixMembers><TablixMember /><TablixMember><Group Name=""Details"" /></TablixMember></TablixMembers></TablixRowHierarchy>
+</Tablix>";
+            var parser = new RDLParser (ReportWith (Rdl2008, tablix)) { SkipDatabaseSchemaValidation = true };
+            using var report = await parser.Parse ();
+            await report.DataSets["Data"].SetData (Data ());
+            await report.RunGetData (null);
+            using var memory = new MemoryStreamGen ();
+            await report.RunRender (memory, OutputPresentationType.HTML);
+
+            Assert.That (Regex.Matches (memory.GetText (), "<img").Count, Is.EqualTo (1), "one chart in the header, drawn over all rows");
         }
     }
 }

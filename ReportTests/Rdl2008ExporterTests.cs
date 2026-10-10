@@ -846,9 +846,6 @@ namespace ReportTests
             schemas.Add (Rdl2008, xsdPath);
 
             var known = new[] {
-                "child element 'Source'",             // CustomReportItem (barcodes)
-                "child element 'Rows'",               // DataSet inline rows
-                "child element 'PageBreakCondition'", // Group
                 "child element 'MarginLeft'",         // not a real RDL element
                 "cannot contain child element",       // FilterValue/Expression
             };
@@ -908,6 +905,42 @@ namespace ReportTests
             var columns = First (doc, "TableColumns").ChildNodes;
             Assert.That (columns[0]["Visibility"], Is.Null);
             Assert.That (columns[1]["Visibility"]["Hidden"].InnerText, Is.EqualTo ("true"));
+        }
+
+        [Test]
+        public void EngineExtensions_MoveToTheFyiNamespace ()
+        {
+            var doc = Load (ReportWith (Rdl2008, @"<Table Name=""T""><TableColumns><TableColumn><Width>1in</Width></TableColumn></TableColumns>
+  <TableGroups><TableGroup><Grouping Name=""G""><GroupExpressions><GroupExpression>=Fields!Name.Value</GroupExpression></GroupExpressions><PageBreakCondition>=true</PageBreakCondition></Grouping>
+    <Header><TableRows><TableRow><Height>0.25in</Height><TableCells><TableCell><ReportItems><Textbox Name=""H""><Value>h</Value></Textbox></ReportItems></TableCell></TableCells></TableRow></TableRows></Header></TableGroup></TableGroups>
+  <Details><TableRows><TableRow><Height>0.25in</Height><TableCells><TableCell><ReportItems><Textbox Name=""D""><Value>d</Value></Textbox></ReportItems></TableCell></TableCells></TableRow></TableRows></Details></Table>"));
+
+            Rdl2008Exporter.ConvertToTablix (doc);
+
+            Assert.That (doc.GetElementsByTagName ("PageBreakCondition"), Is.Empty);
+            var moved = doc.GetElementsByTagName ("fyi:PageBreakCondition");
+            Assert.That (moved, Has.Count.EqualTo (1));
+            Assert.That (moved[0].NamespaceURI, Is.EqualTo ("http://www.fyireporting.com/schemas"));
+            Assert.That (moved[0].InnerText, Is.EqualTo ("=true"));
+            Assert.That (moved[0].ParentNode.LocalName, Is.EqualTo ("Group"));
+        }
+
+        [Test]
+        public async Task ExportedEngineExtensions_AreStillUnderstoodByTheEngine ()
+        {
+            var doc = Load (ReportWith (Rdl2008, @"<Table Name=""T""><DataSetName>Data</DataSetName><TableColumns><TableColumn><Width>1in</Width></TableColumn></TableColumns>
+  <TableGroups><TableGroup><Grouping Name=""G""><GroupExpressions><GroupExpression>=Fields!Name.Value</GroupExpression></GroupExpressions><PageBreakCondition>=true</PageBreakCondition></Grouping>
+    <Header><TableRows><TableRow><Height>0.25in</Height><TableCells><TableCell><ReportItems><Textbox Name=""H""><Value>h</Value></Textbox></ReportItems></TableCell></TableCells></TableRow></TableRows></Header></TableGroup></TableGroups>
+  <Details><TableRows><TableRow><Height>0.25in</Height><TableCells><TableCell><ReportItems><Textbox Name=""D""><Value>d</Value></Textbox></ReportItems></TableCell></TableCells></TableRow></TableRows></Details></Table>"));
+            Rdl2008Exporter.ConvertToTablix (doc);
+
+            var parser = new RDLParser (doc.OuterXml) { SkipDatabaseSchemaValidation = true };
+            using var report = await parser.Parse ();
+
+            var messages = report.ErrorItems == null ? new string[0] : report.ErrorItems.Cast<string> ().ToArray ();
+            Assert.That (messages.Where (m => m.Contains ("PageBreakCondition", StringComparison.OrdinalIgnoreCase)), Is.Empty,
+                "the prefixed element must not be reported as unknown");
+            Assert.That (report.ErrorMaxSeverity, Is.LessThanOrEqualTo (4), string.Join (" | ", messages));
         }
 
         [Test]
