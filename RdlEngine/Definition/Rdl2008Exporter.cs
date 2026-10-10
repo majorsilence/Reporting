@@ -647,8 +647,10 @@ namespace Majorsilence.Reporting.Rdl
                 return contents;
             }
 
+            // For each leaf of an axis in document order, the detail row/column whose cell template
+            // fills it: detail leaves map to themselves, subtotal leaves reuse the first.
             XmlElement Axis (string hierarchyName, string groupingName, string dynamicName,
-                string staticsName, string staticName, string sizeName)
+                string staticsName, string staticName, string sizeName, List<int> leafSources)
             {
                 var groupings = Kids (Child (matrix, groupingName + "s"), groupingName);
 
@@ -658,6 +660,7 @@ namespace Majorsilence.Reporting.Rdl
                     if (index >= groupings.Count) {
                         // The innermost level of data: a bare static leaf under the last group.
                         members.AppendChild (El (doc, ns, "TablixMember"));
+                        leafSources.Add (0);
                         return members;
                     }
 
@@ -685,14 +688,27 @@ namespace Majorsilence.Reporting.Rdl
                             member.AppendChild (visibility.CloneNode (true));
                         member.AppendChild (Members (index + 1));
                         members.AppendChild (member);
+
+                        // A Subtotal is a headed static leaf after the group, with its own body cells.
+                        var subtotal = Child (dynamic, "Subtotal");
+                        if (subtotal != null) {
+                            var total = El (doc, ns, "TablixMember");
+                            total.AppendChild (Header (subtotal));
+                            members.AppendChild (total);
+                            leafSources.Add (0);
+                        }
                         return members;
                     }
 
+                    var detailIndex = 0;
                     foreach (var staticItem in Kids (Child (grouping, staticsName), staticName)) {
                         var member = El (doc, ns, "TablixMember");
                         member.AppendChild (Header (staticItem));
                         if (index + 1 < groupings.Count)
                             member.AppendChild (Members (index + 1));
+                        else
+                            leafSources.Add (detailIndex);
+                        detailIndex++;
                         members.AppendChild (member);
                     }
                     return members;
@@ -703,24 +719,31 @@ namespace Majorsilence.Reporting.Rdl
                 return hierarchy;
             }
 
-            var columnHierarchy = Axis ("TablixColumnHierarchy", "ColumnGrouping", "DynamicColumns", "StaticColumns", "StaticColumn", "Height");
-            var rowHierarchy = Axis ("TablixRowHierarchy", "RowGrouping", "DynamicRows", "StaticRows", "StaticRow", "Width");
+            var columnSources = new List<int> ();
+            var rowSources = new List<int> ();
+            var columnHierarchy = Axis ("TablixColumnHierarchy", "ColumnGrouping", "DynamicColumns", "StaticColumns", "StaticColumn", "Height", columnSources);
+            var rowHierarchy = Axis ("TablixRowHierarchy", "RowGrouping", "DynamicRows", "StaticRows", "StaticRow", "Width", rowSources);
+            var detailColumns = Kids (Child (matrix, "MatrixColumns"), "MatrixColumn");
+            var detailRows = Kids (Child (matrix, "MatrixRows"), "MatrixRow");
 
             var body = El (doc, ns, "TablixBody");
             var columns = El (doc, ns, "TablixColumns");
-            foreach (var matrixColumn in Kids (Child (matrix, "MatrixColumns"), "MatrixColumn")) {
+            foreach (var source in columnSources) {
+                var matrixColumn = source < detailColumns.Count ? detailColumns[source] : null;
                 var column = El (doc, ns, "TablixColumn");
                 column.AppendChild (El (doc, ns, "Width", Child (matrixColumn, "Width")?.InnerText ?? "1in"));
                 columns.AppendChild (column);
             }
             var rows = El (doc, ns, "TablixRows");
-            foreach (var matrixRow in Kids (Child (matrix, "MatrixRows"), "MatrixRow")) {
+            foreach (var rowSource in rowSources) {
+                var matrixRow = rowSource < detailRows.Count ? detailRows[rowSource] : null;
                 var row = El (doc, ns, "TablixRow");
                 row.AppendChild (El (doc, ns, "Height", Child (matrixRow, "Height")?.InnerText ?? "0.25in"));
                 var cells = El (doc, ns, "TablixCells");
-                foreach (var matrixCell in Kids (Child (matrixRow, "MatrixCells"), "MatrixCell")) {
+                var templateCells = Kids (Child (matrixRow, "MatrixCells"), "MatrixCell");
+                foreach (var columnSource in columnSources) {
                     var cell = El (doc, ns, "TablixCell");
-                    cell.AppendChild (Contents (matrixCell));
+                    cell.AppendChild (Contents (columnSource < templateCells.Count ? templateCells[columnSource] : null));
                     cells.AppendChild (cell);
                 }
                 row.AppendChild (cells);

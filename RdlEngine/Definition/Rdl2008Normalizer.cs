@@ -987,6 +987,7 @@ namespace Majorsilence.Reporting.Rdl
         {
             internal XmlElement Dynamic;
             internal List<XmlElement> Statics;
+            internal XmlElement Subtotal;   // a headed static leaf beside the group: its total
         }
 
         /// <summary>
@@ -1014,17 +1015,25 @@ namespace Majorsilence.Reporting.Rdl
             var bodyColumns = ChildrenNamed (FindChild (body, "TablixColumns"), "TablixColumn");
             var bodyRows = ChildrenNamed (FindChild (body, "TablixRows"), "TablixRow");
 
-            if (bodyColumns.Count != LeafCount (columnLevels) || bodyRows.Count != LeafCount (rowLevels)) {
+            // Subtotals add body rows and columns beyond the detail ones; the Matrix repeats its one
+            // cell template, so only the detail range is kept.
+            var columnRange = LeafRange (FindChild (tablix, "TablixColumnHierarchy"));
+            var rowRange = LeafRange (FindChild (tablix, "TablixRowHierarchy"));
+
+            if (bodyColumns.Count != columnRange.Total || bodyRows.Count != rowRange.Total
+                || columnRange.Count != LeafCount (columnLevels) || rowRange.Count != LeafCount (rowLevels)) {
                 rl?.LogError (8, $"Tablix '{name}' has a {bodyRows.Count}x{bodyColumns.Count} body but its " +
-                    $"hierarchies describe {LeafCount (rowLevels)}x{LeafCount (columnLevels)} leaf cell(s); " +
+                    $"hierarchies describe {rowRange.Total}x{columnRange.Total} leaf cell(s); " +
                     "this pivot layout is not supported yet and the region was ignored.");
                 return null;
             }
+            bodyColumns = bodyColumns.GetRange (columnRange.Start, columnRange.Count);
+            bodyRows = bodyRows.GetRange (rowRange.Start, rowRange.Count);
 
             // Matrix cells cannot span, and a placeholder for a spanned-over position would shift
             // every later cell in its row.
             foreach (var bodyRow in bodyRows) {
-                foreach (var cell in ChildrenNamed (FindChild (bodyRow, "TablixCells"), "TablixCell")) {
+                foreach (var cell in ChildrenNamed (FindChild (bodyRow, "TablixCells"), "TablixCell").GetRange (columnRange.Start, columnRange.Count)) {
                     if (FindChild (cell, "CellContents") == null) {
                         rl?.LogError (8, $"Tablix '{name}' has merged (spanned) cells in its pivot body; " +
                             "this layout is not supported yet and the region was ignored.");
@@ -1032,6 +1041,7 @@ namespace Majorsilence.Reporting.Rdl
                     }
                 }
             }
+
 
             var doc = tablix.OwnerDocument;
             var ns = tablix.NamespaceURI;
@@ -1075,7 +1085,8 @@ namespace Majorsilence.Reporting.Rdl
                     matrixRow.AppendChild (height.CloneNode (true));
 
                 var matrixCells = doc.CreateElement ("MatrixCells", ns);
-                foreach (var cell in ChildrenNamed (FindChild (bodyRow, "TablixCells"), "TablixCell")) {
+                var rowCells = ChildrenNamed (FindChild (bodyRow, "TablixCells"), "TablixCell");
+                foreach (var cell in rowCells.GetRange (columnRange.Start, columnRange.Count)) {
                     var matrixCell = doc.CreateElement ("MatrixCell", ns);
                     matrixCell.AppendChild (BuildSingleItem (doc, ns, FindChild (cell, "CellContents")));
                     matrixCells.AppendChild (matrixCell);
@@ -1126,12 +1137,23 @@ namespace Majorsilence.Reporting.Rdl
                     return levels;
                 }
 
+                // One group plus one headed static leaf is a subtotal, which 2005 expresses as the
+                // group's Subtotal element.
+                var groups = members.FindAll (m => FindChild (m, "Group") != null);
+                var statics = members.FindAll (m => FindChild (m, "Group") == null);
+                if (members.Count == 2 && groups.Count == 1 && statics[0].SelectSingleNode ("*[local-name()='TablixMembers']") == null
+                    && FindChild (statics[0], "TablixHeader") != null) {
+                    levels.Add (new AxisLevel { Dynamic = groups[0], Subtotal = statics[0] });
+                    var groupNested = FindChild (groups[0], "TablixMembers");
+                    members = groupNested == null ? new List<XmlElement> () : ChildrenNamed (groupNested, "TablixMember");
+                    continue;
+                }
+
                 if (members.Count != 1) {
-                    // A static member alongside a grouped one is a subtotal; grouped siblings are
-                    // adjacent pivots. Either way there is no uniform-level Matrix equivalent, and
-                    // converting without them would silently drop rows or columns.
+                    // Grouped siblings are adjacent pivots, which have no uniform-level Matrix
+                    // equivalent; converting without them would silently drop rows or columns.
                     rl?.LogError (8, $"Tablix '{tablixName}' mixes grouped and static members on its {axis} " +
-                        "hierarchy (adjacent groups or subtotals); this pivot layout is not supported yet " +
+                        "hierarchy (adjacent groups or stacked headers); this pivot layout is not supported yet " +
                         "and the region was ignored.");
                     return null;
                 }
@@ -1164,6 +1186,40 @@ namespace Majorsilence.Reporting.Rdl
             var last = levels[levels.Count - 1];
             if (last.Statics != null && last.Statics.Count == 1 && FindChild (last.Statics[0], "TablixHeader") == null)
                 levels.RemoveAt (levels.Count - 1);
+        }
+
+        /// <summary>
+        /// Leaves of a hierarchy in document order, and the contiguous run of them that holds detail
+        /// cells -- the path through the groups, as opposed to subtotal leaves beside it.
+        /// </summary>
+        private static (int Total, int Start, int Count) LeafRange (XmlElement hierarchy)
+        {
+            var top = FindChild (hierarchy, "TablixMembers");
+            return top == null ? (1, 0, 1) : RangeOf (ChildrenNamed (top, "TablixMember"));
+
+            (int Total, int Start, int Count) RangeOf (List<XmlElement> members)
+            {
+                var hasGroup = members.Exists (m => FindChild (m, "Group") != null);
+                var total = 0;
+                var start = 0;
+                var count = 0;
+
+                foreach (var member in members) {
+                    var nested = FindChild (member, "TablixMembers");
+                    var (t, s, c) = nested == null ? (1, 0, 1) : RangeOf (ChildrenNamed (nested, "TablixMember"));
+
+                    if (!hasGroup) {
+                        // The innermost run of static members: every one is a detail leaf.
+                        count += c;
+                    } else if (FindChild (member, "Group") != null) {
+                        start = total + s;
+                        count = c;
+                    }
+                    total += t;
+                }
+
+                return (total, hasGroup ? start : 0, count);
+            }
         }
 
         private static int LeafCount (List<AxisLevel> levels)
@@ -1204,6 +1260,11 @@ namespace Majorsilence.Reporting.Rdl
                         dynamic.AppendChild (visibility.CloneNode (true));
 
                     dynamic.AppendChild (BuildSingleItem (doc, ns, HeaderContents (level.Dynamic)));
+                    if (level.Subtotal != null) {
+                        var subtotal = doc.CreateElement ("Subtotal", ns);
+                        subtotal.AppendChild (BuildSingleItem (doc, ns, HeaderContents (level.Subtotal)));
+                        dynamic.AppendChild (subtotal);
+                    }
                     grouping.AppendChild (dynamic);
                 } else {
                     var size = "0in";

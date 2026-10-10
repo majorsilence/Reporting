@@ -463,6 +463,111 @@ namespace ReportTests
             Assert.That (item["Height"].InnerText, Is.EqualTo ("0.25in"));
         }
 
+        private static string PivotCell (string name, string text)
+            => $@"<TablixCell><CellContents><Textbox Name=""{name}""><Value>{text}</Value></Textbox></CellContents></TablixCell>";
+
+        private static string Header (string name, string text, string size = "1in")
+            => $@"<TablixHeader><Size>{size}</Size><CellContents><Textbox Name=""{name}""><Value>{text}</Value></Textbox></CellContents></TablixHeader>";
+
+        /// <summary>
+        /// A pivot with a Total column after the Year group and a Grand total row after the Region
+        /// group: body is 2 rows x 2 columns, of which only the first of each is detail.
+        /// </summary>
+        private static readonly string PivotWithSubtotals = $@"
+<Tablix Name=""Sales""><DataSetName>Data</DataSetName>
+  <TablixBody>
+    <TablixColumns><TablixColumn><Width>1in</Width></TablixColumn><TablixColumn><Width>1.2in</Width></TablixColumn></TablixColumns>
+    <TablixRows>
+      <TablixRow><Height>0.25in</Height><TablixCells>{PivotCell ("Amount", "=Sum(Fields!Name.Value)")}{PivotCell ("RowTotal", "=Sum(Fields!Name.Value)")}</TablixCells></TablixRow>
+      <TablixRow><Height>0.25in</Height><TablixCells>{PivotCell ("ColTotal", "=Sum(Fields!Name.Value)")}{PivotCell ("GrandTotal", "=Sum(Fields!Name.Value)")}</TablixCells></TablixRow>
+    </TablixRows>
+  </TablixBody>
+  <TablixColumnHierarchy><TablixMembers>
+    <TablixMember><Group Name=""Year""><GroupExpressions><GroupExpression>=Fields!Name.Value</GroupExpression></GroupExpressions></Group>{Header ("YearHead", "=Fields!Name.Value", "0.25in")}</TablixMember>
+    <TablixMember>{Header ("YearTotal", "Total", "0.25in")}</TablixMember>
+  </TablixMembers></TablixColumnHierarchy>
+  <TablixRowHierarchy><TablixMembers>
+    <TablixMember><Group Name=""Region""><GroupExpressions><GroupExpression>=Fields!Name.Value</GroupExpression></GroupExpressions></Group>{Header ("RegionHead", "=Fields!Name.Value")}</TablixMember>
+    <TablixMember>{Header ("RegionTotal", "Grand total")}</TablixMember>
+  </TablixMembers></TablixRowHierarchy>
+</Tablix>";
+
+        [Test]
+        public void Import_PivotWithSubtotals_BecomesMatrixWithSubtotalElements ()
+        {
+            var doc = Load (ReportWith (Rdl2010, PivotWithSubtotals));
+
+            Rdl2008Normalizer.Normalize (doc, null);
+
+            var matrix = First (doc, "Matrix");
+            Assert.That (matrix, Is.Not.Null, "a pivot with totals is still a pivot");
+            string Text (XmlNode n) => string.Concat (n.SelectNodes (".//*[local-name()='Value']").Cast<XmlNode> ().Select (v => v.InnerText));
+            var columns = matrix["ColumnGroupings"]["ColumnGrouping"]["DynamicColumns"];
+            Assert.That (Text (columns["Subtotal"]), Is.EqualTo ("Total"));
+            var rows = matrix["RowGroupings"]["RowGrouping"]["DynamicRows"];
+            Assert.That (Text (rows["Subtotal"]), Is.EqualTo ("Grand total"));
+            Assert.That (matrix["MatrixRows"].ChildNodes, Has.Count.EqualTo (1), "only the detail row is kept");
+            Assert.That (matrix["MatrixRows"].FirstChild["MatrixCells"].ChildNodes, Has.Count.EqualTo (1), "only the detail column is kept");
+            Assert.That (matrix["MatrixColumns"].ChildNodes, Has.Count.EqualTo (1));
+            Assert.That (matrix["MatrixColumns"].FirstChild["Width"].InnerText, Is.EqualTo ("1in"), "the detail column's width, not the total's");
+            Assert.That (Text (matrix["MatrixRows"]), Is.EqualTo ("=Sum(Fields!Name.Value)"));
+        }
+
+        [Test]
+        public void Import_SubtotalBeforeTheGroup_KeepsTheDetailColumn ()
+        {
+            // Total listed first: the detail column is then the second body column.
+            var xml = PivotWithSubtotals
+                .Replace ("<TablixColumn><Width>1in</Width></TablixColumn><TablixColumn><Width>1.2in</Width></TablixColumn>",
+                          "<TablixColumn><Width>1.2in</Width></TablixColumn><TablixColumn><Width>1in</Width></TablixColumn>");
+            var doc = Load (ReportWith (Rdl2010, xml));
+            var members = doc.GetElementsByTagName ("TablixColumnHierarchy")[0]["TablixMembers"];
+            members.InsertBefore (members.LastChild, members.FirstChild);   // static total first, then the group
+
+            Rdl2008Normalizer.Normalize (doc, null);
+
+            var matrix = First (doc, "Matrix");
+            Assert.That (matrix, Is.Not.Null);
+            Assert.That (matrix["MatrixColumns"].FirstChild["Width"].InnerText, Is.EqualTo ("1in"));
+            Assert.That (matrix["MatrixRows"].FirstChild["MatrixCells"].FirstChild.InnerText, Does.Contain ("Sum"));
+        }
+
+        [Test]
+        public void Import_AdjacentGroups_AreStillRefused ()
+        {
+            var xml = PivotWithSubtotals.Replace ($"<TablixMember>{Header ("YearTotal", "Total", "0.25in")}</TablixMember>",
+                $@"<TablixMember><Group Name=""Other""><GroupExpressions><GroupExpression>=Fields!Name.Value</GroupExpression></GroupExpressions></Group>{Header ("Other", "x", "0.25in")}</TablixMember>");
+            var doc = Load (ReportWith (Rdl2010, xml));
+            var log = new ReportLog ();
+
+            Rdl2008Normalizer.Normalize (doc, log);
+
+            Assert.That (First (doc, "Matrix"), Is.Null, "two sibling groups have no Matrix equivalent");
+            Assert.That (First (doc, "Tablix"), Is.Not.Null, "and are left in place rather than rendered wrongly");
+            Assert.That (log.MaxSeverity, Is.GreaterThanOrEqualTo (8));
+        }
+
+        [Test]
+        public void RoundTrip_PivotSubtotalsSurviveExportAndImport ()
+        {
+            var doc = Load (ReportWith (Rdl2010, PivotWithSubtotals));
+            Rdl2008Normalizer.Normalize (doc, null);   // as the designer opens it
+
+            Rdl2008Exporter.ConvertToTablix (doc);     // as the designer saves it
+
+            var tablix = First (doc, "Tablix");
+            Assert.That (tablix["TablixBody"]["TablixColumns"].ChildNodes, Has.Count.EqualTo (2), "detail plus total column");
+            Assert.That (tablix["TablixBody"]["TablixRows"].ChildNodes, Has.Count.EqualTo (2), "detail plus total row");
+            var texts = string.Concat (tablix["TablixColumnHierarchy"].SelectNodes (".//*[local-name()='Value']").Cast<XmlNode> ().Select (v => v.InnerText + "|"));
+            Assert.That (texts, Does.Contain ("Total"));
+
+            Rdl2008Normalizer.Normalize (doc, null);
+
+            var matrix = First (doc, "Matrix");
+            Assert.That (matrix["ColumnGroupings"]["ColumnGrouping"]["DynamicColumns"]["Subtotal"], Is.Not.Null);
+            Assert.That (matrix["RowGroupings"]["RowGrouping"]["DynamicRows"]["Subtotal"], Is.Not.Null);
+        }
+
         [Test]
         public async Task ExportedMatrix_ParsesInTheEngine ()
         {
@@ -542,7 +647,9 @@ namespace ReportTests
             var schemas = new System.Xml.Schema.XmlSchemaSet ();
             schemas.Add (ns, xsdPath);
 
-            foreach (var (label, region) in new[] { ("List", SimpleList), ("Table", GroupedTable), ("Matrix", SalesMatrix) }) {
+            var matrixWithTotals = SalesMatrix.Replace ("</DynamicColumns>",
+                @"<Subtotal><ReportItems><Textbox Name=""TT""><Value>Total</Value></Textbox></ReportItems></Subtotal></DynamicColumns>");
+            foreach (var (label, region) in new[] { ("List", SimpleList), ("Table", GroupedTable), ("Matrix", SalesMatrix), ("Matrix with subtotal", matrixWithTotals) }) {
                 var doc = Load (ReportWith (ns, region));
                 // What the designer holds besides the region: page setup, a page header and a
                 // bordered textbox, all in the 2005 spelling.
