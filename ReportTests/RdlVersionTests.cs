@@ -71,9 +71,6 @@ namespace ReportTests
 </Report>";
 
         [TestCase ("Map")]
-        [TestCase ("Sparkline")]
-        [TestCase ("DataBar")]
-        [TestCase ("Indicator")]
         [TestCase ("GaugePanel")]
         public async Task UnsupportedItem_ParsesAndKeepsItsPlace (string kind)
         {
@@ -99,14 +96,14 @@ namespace ReportTests
         {
             RdlEngineConfig.RdlEngineConfigInit ();
             var rdl = ReportWithItem (string.Concat (Enumerable.Range (1, 3).Select (i =>
-                $@"<Sparkline Name=""S{i}""><Top>{i * 0.3}in</Top><Left>0in</Left><Height>0.25in</Height><Width>1in</Width></Sparkline>")));
+                $@"<GaugePanel Name=""G{i}""><Top>{i * 0.3}in</Top><Left>0in</Left><Height>0.25in</Height><Width>1in</Width></GaugePanel>")));
 
             var parser = new RDLParser (rdl) { SkipDatabaseSchemaValidation = true };
             using var report = await parser.Parse ();
 
-            var sparklineWarnings = report.ErrorItems.Cast<string> ().Count (e => e.Contains ("Sparkline"));
+            var sparklineWarnings = report.ErrorItems.Cast<string> ().Count (e => e.Contains ("GaugePanel"));
             Assert.That (sparklineWarnings, Is.EqualTo (1));
-            Assert.That (report.ErrorItems.Cast<string> ().First (e => e.Contains ("Sparkline")), Does.Contain ("3"));
+            Assert.That (report.ErrorItems.Cast<string> ().First (e => e.Contains ("GaugePanel")), Does.Contain ("3"));
         }
     }
 }

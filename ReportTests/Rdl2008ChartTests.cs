@@ -280,5 +280,42 @@ namespace ReportTests
 
             Assert.That (Messages (report).Count (e => e.Contains ("secondary axes")), Is.EqualTo (1));
         }
+
+        /// <summary>
+        /// Report Builder stores a sparkline as a Chart with its axes hidden, sitting in a Tablix cell.
+        /// It is converted like any other chart and lands in the table cell. (Whether the engine
+        /// draws a chart nested in a table cell is a separate matter: it currently renders blank.)
+        /// </summary>
+        [Test]
+        public async Task SparklineInATablixCell_ConvertsToAChartInTheTableCell ()
+        {
+            var sparkline = Chart2008
+                .Replace ("<Type>Column</Type>", "<Type>Line</Type>")
+                .Replace ("<Visible>True</Visible>", "<Visible>False</Visible>")
+                .Replace ("<DataSetName>Data</DataSetName>", "")   // a sparkline takes the table's scope
+                .Replace ("<Top>0in</Top><Left>0in</Left><Height>3in</Height><Width>5in</Width>", "<Height>0.4in</Height><Width>1.5in</Width>");
+            var tablix = $@"<Tablix Name=""Grid""><DataSetName>Data</DataSetName>
+  <TablixBody>
+    <TablixColumns><TablixColumn><Width>1.5in</Width></TablixColumn></TablixColumns>
+    <TablixRows>
+      <TablixRow><Height>0.25in</Height><TablixCells><TablixCell><CellContents><Textbox Name=""H""><Value>Trend</Value></Textbox></CellContents></TablixCell></TablixCells></TablixRow>
+      <TablixRow><Height>0.4in</Height><TablixCells><TablixCell><CellContents>{sparkline}</CellContents></TablixCell></TablixCells></TablixRow>
+    </TablixRows>
+  </TablixBody>
+  <TablixColumnHierarchy><TablixMembers><TablixMember /></TablixMembers></TablixColumnHierarchy>
+  <TablixRowHierarchy><TablixMembers><TablixMember /><TablixMember><Group Name=""Details"" /></TablixMember></TablixMembers></TablixRowHierarchy>
+</Tablix>";
+            var parser = new RDLParser (ReportWith (Rdl2008, tablix)) { SkipDatabaseSchemaValidation = true };
+            using var report = await parser.Parse ();
+
+            Assert.That (report.ErrorMaxSeverity, Is.LessThanOrEqualTo (4), string.Join (" | ", Messages (report)));
+            Assert.That (Messages (report), Is.Empty.Or.All.Not.Contain ("not supported"));
+            var doc = Load (ReportWith (Rdl2008, tablix));
+            Rdl2008Normalizer.Normalize (doc, null);
+            var chart = doc.GetElementsByTagName ("TableCell").Cast<XmlElement> ().SelectMany (x => x.GetElementsByTagName ("Chart").Cast<XmlElement> ()).FirstOrDefault ();
+            Assert.That (chart, Is.Not.Null, "the sparkline chart sits in a table cell");
+            Assert.That (chart["Type", Rdl2008].InnerText, Is.EqualTo ("Line"));
+            Assert.That (chart["CategoryAxis", Rdl2008]["Axis", Rdl2008]["Visible", Rdl2008].InnerText, Is.EqualTo ("false"), "its axes stay hidden");
+        }
     }
 }

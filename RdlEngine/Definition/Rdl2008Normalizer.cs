@@ -362,7 +362,9 @@ namespace Majorsilence.Reporting.Rdl
 
         // Report items added after RDL 2005 that have no counterpart in the engine. Left in place
         // they surface as "unknown element" and, inside a Tablix cell, break the converted table.
-        private static readonly string[] UnsupportedItems = { "Map", "Sparkline", "DataBar", "Indicator", "GaugePanel" };
+        // Gauges and indicators are both GaugePanel; sparklines and data bars are ordinary Charts
+        // and render through the chart conversion.
+        private static readonly string[] UnsupportedItems = { "Map", "GaugePanel" };
 
         /// <summary>
         /// Swaps each unsupported item for an empty Rectangle with the same position and size, so
