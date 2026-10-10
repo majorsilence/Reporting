@@ -39,6 +39,8 @@ namespace ReportTests
             int imgs = System.Text.RegularExpressions.Regex.Matches(html, "<img ").Count;
             // 3 charts + 1 external image in the report
             Assert.That(imgs, Is.GreaterThanOrEqualTo(4), html);
+            // in-memory output has no sibling files, so charts must be inlined
+            Assert.That(html, Does.Contain("src=\"data:image/png;base64,"));
         }
 
         [Test]
