@@ -37,7 +37,9 @@ namespace Majorsilence.Reporting.Rdl
             if (doc == null || !Rdl2008Normalizer.NeedsNormalizing (doc))
                 return false;
 
-            Rdl2008Normalizer.Normalize (doc, null);
+            // Unsupported report items (Map, Sparkline, ...) stay in the tree untouched so that
+            // saving writes them back; replacing them with placeholders is for rendering only.
+            Rdl2008Normalizer.Normalize (doc, null, replaceUnsupported: false);
             return true;
         }
 

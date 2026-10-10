@@ -159,5 +159,25 @@ namespace Majorsilence.Reporting.RdlDesign.Tests
             Assert.That(saved, Does.Contain("<TextRun>"));
             Assert.That(saved, Does.Contain("Hello"));
         }
+
+        // Items the engine cannot render (Sparkline, ...) must still survive an open and save.
+        [Test]
+        public void OpenRdlcWithSparkline_KeepsItOnSave()
+        {
+            const string rdlc = @"<?xml version=""1.0"" encoding=""utf-8""?>
+<Report xmlns=""http://schemas.microsoft.com/sqlserver/reporting/2008/01/reportdefinition"">
+  <Body><Height>2in</Height><ReportItems>
+    <Sparkline Name=""Trend""><Top>0in</Top><Left>0in</Left><Height>0.5in</Height><Width>2in</Width><Marker>x</Marker></Sparkline>
+  </ReportItems></Body>
+  <Width>4in</Width>
+</Report>";
+
+            var design = new DesignCtl();
+            design.ReportSource = rdlc;
+
+            var saved = design.ReportSource;
+            Assert.That(saved, Does.Contain("<Sparkline Name=\"Trend\""));
+            Assert.That(saved, Does.Contain("<Marker>x</Marker>"), "its settings are written back unchanged");
+        }
     }
 }

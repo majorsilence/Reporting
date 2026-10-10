@@ -57,7 +57,7 @@ namespace Majorsilence.Reporting.Rdl
         /// <summary>
         /// Rewrites the document in place. Safe to call on a 2005 document (it does nothing).
         /// </summary>
-        internal static void Normalize (XmlDocument doc, ReportLog rl)
+        internal static void Normalize (XmlDocument doc, ReportLog rl, bool replaceUnsupported = true)
         {
             var report = FindReportElement (doc);
             if (report == null)
@@ -67,6 +67,8 @@ namespace Majorsilence.Reporting.Rdl
             UnwrapPage (report);
             NormalizeBorders (report);
             NormalizeTextboxes (report, rl);
+            if (replaceUnsupported)
+                ReplaceUnsupportedItems (report, rl);
             NormalizeTablixes (report, rl);
             RemoveVersionOnlyElements (report);
         }
@@ -311,6 +313,52 @@ namespace Majorsilence.Reporting.Rdl
                     target.RemoveChild (existing);
 
                 target.AppendChild (property.CloneNode (true));
+            }
+        }
+
+        #endregion
+
+        #region Unsupported items
+
+        // Report items added after RDL 2005 that have no counterpart in the engine. Left in place
+        // they surface as "unknown element" and, inside a Tablix cell, break the converted table.
+        private static readonly string[] UnsupportedItems = { "Map", "Sparkline", "DataBar", "Indicator", "GaugePanel" };
+
+        /// <summary>
+        /// Swaps each unsupported item for an empty Rectangle with the same position and size, so
+        /// the layout around it holds, and reports them in one warning per kind.
+        /// </summary>
+        private static void ReplaceUnsupportedItems (XmlElement root, ReportLog rl)
+        {
+            foreach (var kind in UnsupportedItems) {
+                var found = FindDescendants (root, kind);
+                var replaced = 0;
+
+                foreach (var item in found) {
+                    // Only report items: a Map or Indicator name can also be an unrelated child
+                    // element (an Indicator's own properties, a Textbox's nested value).
+                    var parent = item.ParentNode as XmlElement;
+                    if (parent == null || (parent.LocalName != "ReportItems" && parent.LocalName != "CellContents"))
+                        continue;
+
+                    var doc = item.OwnerDocument;
+                    var rectangle = doc.CreateElement ("Rectangle", item.NamespaceURI);
+                    var name = item.GetAttribute ("Name");
+                    rectangle.SetAttribute ("Name", string.IsNullOrEmpty (name) ? "RdlUnsupported" + (++_generatedNameCounter) : name);
+                    foreach (var keep in new[] { "Top", "Left", "Height", "Width", "ZIndex", "Visibility" }) {
+                        var source = FindChild (item, keep);
+                        if (source != null)
+                            rectangle.AppendChild (source.CloneNode (true));
+                    }
+
+                    parent.ReplaceChild (rectangle, item);
+                    replaced++;
+                }
+
+                if (replaced > 0) {
+                    rl?.LogError (4, $"The report contains {replaced} {kind} item(s), which are not supported " +
+                        "yet; each is replaced by an empty placeholder of the same size.");
+                }
             }
         }
 
