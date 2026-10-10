@@ -3804,18 +3804,55 @@ namespace Majorsilence.Reporting.RdlDesign
             return (r >= 0 && r <= 1) && (s >= 0 && s <= 1);
         }
 
-        private void SelectInList(XmlNode xNode, RectangleF r)
+		/// <summary>
+		/// A rubber band that lies completely within a container (Rectangle, List) selects the
+		/// items inside it; otherwise the container is selected as a single top-level item.
+		/// </summary>
+		private void SelectInContainer(XmlNode xNode, RectangleF r)
 		{
 			RectangleF rif = GetReportItemRect(xNode, r);
 			if (!rif.IntersectsWith(_HitRect))
 				return;
 
 			XmlNode ri = GetNamedChildNode(xNode, "ReportItems");
-			if (ri == null)
-				return;
+			if (ri != null && rif.Contains(_HitRect))
+			{
+				int before = this._SelectedReportItems.Count;
+				SelectInReportItems(ri, rif);
+				if (before != this._SelectedReportItems.Count)
+					return;
+			}
+			this.AddSelection(xNode);
+		}
 
-			SelectInReportItems(ri, rif);
-			if (this.SelectedCount == 0)			// if nothing inside selected select List itself
+		private void SelectInRectangle(XmlNode xNode, RectangleF r)
+		{
+			SelectInContainer(xNode, r);
+		}
+
+		private void SelectInList(XmlNode xNode, RectangleF r)
+		{
+			SelectInContainer(xNode, r);
+		}
+
+		/// <summary>
+		/// Selecting a table selects the table itself; its cells cannot be rubber banded.
+		/// </summary>
+		private void SelectInTable(XmlNode xNode, RectangleF r)
+		{
+			RectangleF tr = GetReportItemRect(xNode, r);		// get the table rectangle
+
+			// For Table width is really defined by the table columns
+			float[] colWidths = GetTableColumnWidths(GetNamedChildNode(xNode, "TableColumns"));
+			float w = 0;
+			foreach (float cw in colWidths)
+				w += cw;
+			tr.Width = w;
+
+			// For Table height is really defined the sum of the RowHeights
+			tr.Height = GetTableRowsHeight(GetTableRows(xNode));
+
+			if (tr.IntersectsWith(_HitRect))
 				this.AddSelection(xNode);
 		}
 
@@ -3825,100 +3862,32 @@ namespace Majorsilence.Reporting.RdlDesign
 			MatrixView matrix = new MatrixView(this, xNode);
 			mr.Height = matrix.Height;
 			mr.Width = matrix.Width;
-			if (!mr.IntersectsWith(_HitRect))
-				return;
-			 
-			float ypos = mr.Top;
-			for (int row=0; row < matrix.Rows; row++)
-			{
-				float xpos = mr.Left;
-				for (int col=0; col <matrix.Columns; col++)
-				{
-					MatrixItem mi = matrix[row, col];
-					if (mi.ReportItem != null)
-					{
-						RectangleF cr = new RectangleF(xpos, ypos, mi.Width, mi.Height);
-						SelectInReportItems(mi.ReportItem, cr);
-					}
-					float width = matrix[1,col].Width;
-					xpos += width;
-				}
-				ypos += matrix[row, 1].Height;
-			}
-
-			return;
-		}
-
-		private void SelectInRectangle(XmlNode xNode, RectangleF r)
-		{
-			RectangleF rif = GetReportItemRect(xNode, r);
-			if (!rif.IntersectsWith(_HitRect))
-				return;
-
-			XmlNode ri = GetNamedChildNode(xNode, "ReportItems");
-			if (ri == null)
-				return;
-
-			SelectInReportItems(ri, rif);
-			if (this.SelectedCount == 0)			// if nothing inside selected select Rectangle itself
+			if (mr.IntersectsWith(_HitRect))
 				this.AddSelection(xNode);
 		}
 
-		private void SelectInTable(XmlNode xNode, RectangleF r)
+		internal static bool IsMovableReportItem(XmlNode node)
 		{
-			RectangleF tr = GetReportItemRect(xNode, r);		// get the table rectangle
-
-			// For Table width is really defined by the table columns
-			float[] colWidths;
-			colWidths = GetTableColumnWidths(GetNamedChildNode(xNode, "TableColumns"));
-			// calc the total width
-			float w=0;
-			foreach (float cw in colWidths)
-				w += cw;
-			tr.Width = w;
-
-			// For Table height is really defined the sum of the RowHeights
-			List<XmlNode> trs = GetTableRows(xNode);
-			tr.Height = GetTableRowsHeight(trs);
-
-			if (!tr.IntersectsWith(_HitRect))
-				return;
-
-			// Loop thru the TableRows and the columns in each of them to get at the
-			//  individual cell
-			float yPos = tr.Y;
-			foreach (XmlNode trow in trs)
+			if (node == null)
+				return false;
+			switch (node.Name)
 			{
-				XmlNode tcells=GetNamedChildNode(trow, "TableCells");
-
-				float h = GetSize(GetNamedChildNode(trow, "Height").InnerText);
-
-				float xPos = tr.X;
-				int col=0;
-				foreach (XmlNode tcell in tcells)
-				{
-					if (tcell.Name != "TableCell")
-						continue;
-					// Calculate width based on cell span
-					float width = 0;
-					int colSpan = Convert.ToInt32(GetElementValue(tcell, "ColSpan", "1"));
-					for (int i = 0; i < colSpan && col+i<colWidths.Length; i++)
-					{
-						width += colWidths[col+i];
-					}
-
-					RectangleF cellR = new RectangleF(xPos, yPos, width, h);
-					if (cellR.IntersectsWith(_HitRect))
-						this.SelectInReportItems(GetNamedChildNode(tcell, "ReportItems"), cellR);
-
-					xPos += width;
-					col+=colSpan;
-				}
-				yPos += h;
+				case "Textbox":
+				case "Image":
+				case "Rectangle":
+				case "List":
+				case "Table":
+				case "fyi:Grid":
+				case "Matrix":
+				case "Chart":
+				case "Subreport":
+				case "Line":
+				case "CustomReportItem":
+					return true;
 			}
-			return;
+			return false;
 		}
-		
+
 		internal bool TableColumnResize(XmlNode tcNode, int xInc)
 		{
 			if (tcNode == null || xInc == 0)

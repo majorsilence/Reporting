@@ -1703,7 +1703,13 @@ namespace Majorsilence.Reporting.RdlDesign
 				SelectionChanged(this, new EventArgs());
 			}
 
-			DrawPanelSetCursor(_MouseDownNode, hl.HitSpot);
+			// The item was unselected when hit so it reported Inside; it is selected now,
+			// so dragging in the same gesture must move it rather than try to resize it.
+			if (_MouseDownLoc == HitLocationEnum.Inside && DesignXmlDraw.IsMovableReportItem(_MouseDownNode)
+				&& _DrawPanel.IsNodeSelected(_MouseDownNode))
+				_MouseDownLoc = HitLocationEnum.Move;
+
+			DrawPanelSetCursor(_MouseDownNode, _MouseDownLoc);
 		}
 
         internal void SetSelection(XmlNode node)
