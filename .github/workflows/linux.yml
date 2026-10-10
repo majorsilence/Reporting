@@ -61,6 +61,15 @@ jobs:
           REPORTING_REPO_ROOT: ${{ github.workspace }}
           PYTHONPATH: ${{ github.workspace }}/reporting-python/src
         run: python3 -m unittest discover -s reporting-python/tests -p "test_report_native.py" -v
+      # Report <Code> blocks are compiled at build time (RdlCodeGen) and then run natively.
+      - name: Publish and run the build-time <Code> example under Native AOT
+        shell: bash
+        run: |
+          dotnet publish Examples/AotPrecompiledCode/App/App.csproj -c Release -r linux-x64 -o "$RUNNER_TEMP/aotcode"
+          cd "$RUNNER_TEMP/aotcode"
+          ./AotPrecompiledCode
+          test -s score-card.pdf
+
       - name: Archive AOT artifacts
         uses: actions/upload-artifact@v6
         with:

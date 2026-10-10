@@ -29,6 +29,7 @@ namespace Majorsilence.Reporting.Rdl
 		string _Classname;		// Class name of generated class
 		Assembly _Assembly;		// the compiled assembly
 		bool _HasRegisteredProvider;	// true when an RdlCodeFunctions factory is registered (AOT path)
+		Func<Report, RdlCodeFunctions> _Factory;	// the factory to use; precompiled block, else the global provider
 
 		[UnconditionalSuppressMessage("Trimming", "IL2026",
 			Justification = "GetAssembly compiles VB source and loads the result from disk; it is only called when dynamic code is supported (never under Native AOT).")]
@@ -37,9 +38,15 @@ namespace Majorsilence.Reporting.Rdl
 		internal Code(ReportDefn r, ReportLink p, XmlNode xNode) : base(r, p)
 		{
 			_Source = xNode.InnerText;
-			if (RdlEngineConfig.CodeProviderFactory != null)
+			if (RdlEngineConfig.TryGetPrecompiledCode(_Source, out var precompiled))
 			{
 				_HasRegisteredProvider = true;
+				_Factory = precompiled;
+			}
+			else if (RdlEngineConfig.CodeProviderFactory != null)
+			{
+				_HasRegisteredProvider = true;
+				_Factory = RdlEngineConfig.CodeProviderFactory;
 			}
 			else
 			{
@@ -56,7 +63,8 @@ namespace Majorsilence.Reporting.Rdl
 					// per their own policy, and every other report keeps rendering.
 					OwnerReport.rl.LogError(8,
 						"The report's <Code> element requires VB.NET compilation, which is not " +
-						"supported on this platform; register a CodeProviderFactory or remove the Code element.");
+						"supported on this platform (code hash " + RdlCodeHash.Compute(_Source) + "); precompile it with " +
+						"the RdlCodeGen build task, register a CodeProviderFactory, or remove the Code element.");
 				}
 			}
 		}
@@ -231,7 +239,7 @@ namespace Majorsilence.Reporting.Rdl
 			// AOT path: use the registered RdlCodeFunctions factory instead of VBCodeProvider
 			if (_HasRegisteredProvider)
 			{
-				var rcf = RdlEngineConfig.CodeProviderFactory!(rpt);
+				var rcf = _Factory(rpt);
 				rcf.Report = new CodeReport(rpt);
 				wc.Instance = rcf;
 				return rcf;

@@ -239,7 +239,7 @@ public static class CompatibilityChecker
         if (doc.Descendants().Any(e => e.Name.LocalName == "Code" && e.Parent?.Name.LocalName == "Report"))
         {
             findings.Add(new Finding("DOC011", FindingSeverity.Info,
-                $"The report's <Code> element is compiled as VB.NET at runtime. {how} Register a code provider with RdlEngineConfig.RegisterCodeProvider, or move the logic into a class registered with RegisterType."));
+                $"The report's <Code> element is compiled as VB.NET at runtime. {how} Compile it at build time with the opt-in RdlCodeGen build task (RdlPrecompileCode), register a code provider with RdlEngineConfig.RegisterCodeProvider, or move the logic into a class registered with RegisterType."));
         }
 
         if (doc.Descendants().Any(e => e.Name.LocalName == "CodeModule"))

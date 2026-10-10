@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>Majorsilence.Reporting.RdlCodeGen</RootNamespace>
+    <AssemblyName>RdlCodeGen</AssemblyName>
+    <!-- Build-time tool: runs on the build machine, never shipped inside the AOT app. -->
+    <RollForward>Major</RollForward>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="RdlCodeGen.Tests" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\RdlEngine\Runtime\RdlCodeHash.cs" Link="RdlCodeHash.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.VisualBasic" />
+  </ItemGroup>
+</Project>
