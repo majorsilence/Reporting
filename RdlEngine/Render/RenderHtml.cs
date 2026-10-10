@@ -98,6 +98,10 @@ namespace Majorsilence.Reporting.Rdl
 			return;
 		}
 
+		// Output to a single in-memory stream has no place to put sibling image files
+		// (relative links would dangle), so charts and images are inlined as data URIs.
+		bool InlineImages => !_Asp && _sg is MemoryStreamGen;
+
 		string FixupRelativeName(string relativeName)
 		{
 			if (_sg is OneFileStreamGen)
@@ -1230,18 +1234,29 @@ function findObject(id) {
 		{
 			string relativeName;
 
-			Stream io = _sg.GetIOStream(out relativeName, "png");
-			try
+			if (InlineImages)
 			{
-				cb.Save(this.r, io, ImageFormat.Png);
+				using (var ms = new MemoryStream())
+				{
+					cb.Save(this.r, ms, ImageFormat.Png);
+					relativeName = "data:image/png;base64," + Convert.ToBase64String(ms.ToArray());
+				}
 			}
-			finally
+			else
 			{
-				io.Flush();
-				io.Close();
+				Stream io = _sg.GetIOStream(out relativeName, "png");
+				try
+				{
+					cb.Save(this.r, io, ImageFormat.Png);
+				}
+				finally
+				{
+					io.Flush();
+					io.Close();
+				}
+
+				relativeName = FixupRelativeName(relativeName);
 			}
-			
-			relativeName = FixupRelativeName(relativeName);
 
 			// Create syntax in a string buffer
 			StringWriter sw = new StringWriter();
@@ -1306,6 +1321,10 @@ function findObject(id) {
                     relativeName = "data:" + mimeType + ";base64," + await WriteImageToBase64String(ioin);
                 }
               
+            }
+            else if (InlineImages)
+            {
+                relativeName = "data:" + mimeType + ";base64," + await WriteImageToBase64String(ioin);
             }
             else
             {

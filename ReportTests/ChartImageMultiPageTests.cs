@@ -39,6 +39,37 @@ namespace ReportTests
             int imgs = System.Text.RegularExpressions.Regex.Matches(html, "<img ").Count;
             // 3 charts + 1 external image in the report
             Assert.That(imgs, Is.GreaterThanOrEqualTo(4), html);
+            // in-memory output has no sibling files, so charts must be inlined
+            Assert.That(html, Does.Contain("src=\"data:image/png;base64,"));
+        }
+
+        [Test]
+        public async Task Html_InMemory_AllImagesAreInlined()
+        {
+            var rap = await LoadAsync();
+            using var ms = new MemoryStreamGen();
+            await rap.RunRender(ms, OutputPresentationType.HTML);
+            string html = ms.GetText();
+            var srcs = System.Text.RegularExpressions.Regex.Matches(html, "<img [^>]*src=\"([^\"]*)\"")
+                .Select(m => m.Groups[1].Value).ToList();
+            Assert.That(srcs, Is.Not.Empty);
+            Assert.That(srcs, Has.All.StartsWith("data:"), string.Join("\n", srcs.Select(x => x.Length > 80 ? x.Substring(0, 80) : x)));
+            // chart data is real PNG content, not an empty payload
+            Assert.That(srcs.Where(x => x.StartsWith("data:image/png;base64,")).All(x => x.Length > "data:image/png;base64,".Length + 100));
+        }
+
+        [Test]
+        public async Task Html_ToFile_KeepsLinkedImageFiles()
+        {
+            var rap = await LoadAsync();
+            string dir = Path.Combine(GeneralUtils.OutputTestsFolder().LocalPath, "ChartImageMultiPageHtml");
+            Directory.CreateDirectory(dir);
+            string path = Path.Combine(dir, "ChartImageMultiPage.html");
+            var sg = new OneFileStreamGen(path, true);
+            await rap.RunRender(sg, OutputPresentationType.HTML);
+            string html = File.ReadAllText(path);
+            Assert.That(html, Does.Not.Contain("src=\"data:image/png;base64,"));
+            Assert.That(html, Does.Contain("<img "));
         }
 
         [Test]
