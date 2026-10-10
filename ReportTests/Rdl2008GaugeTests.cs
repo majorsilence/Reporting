@@ -119,8 +119,10 @@ namespace ReportTests
         [Test]
         public void PercentageIndicator_ScalesTheValueToTheRange ()
         {
-            var xml = Panel.Replace ("<GaugeInputValue><Value>=Sum(Fields!Amount.Value)</Value></GaugeInputValue>\n    <IndicatorStates>",
-                "<GaugeInputValue><Value>=Sum(Fields!Amount.Value)</Value></GaugeInputValue><TransformationType>Percentage</TransformationType><MinimumValue><Value>0</Value></MinimumValue><MaximumValue><Value>200</Value></MaximumValue>\n    <IndicatorStates>");
+            // Match across the line break whatever its form: the source file is checked out with CRLF on Windows.
+            var xml = Regex.Replace (Panel, @"</GaugeInputValue>\s*<IndicatorStates>",
+                "</GaugeInputValue><TransformationType>Percentage</TransformationType><MinimumValue><Value>0</Value></MinimumValue><MaximumValue><Value>200</Value></MaximumValue><IndicatorStates>");
+            Assert.That (xml, Does.Contain ("Percentage"), "the fixture must actually be changed");
             var doc = Load (ReportWith (xml));
             Rdl2008Normalizer.Normalize (doc, null);
 
