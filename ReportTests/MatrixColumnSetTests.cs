@@ -1,3 +1,4 @@
+using System;
 using System.Data;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -85,6 +86,17 @@ namespace ReportTests
                 .Where (r => r.Length > 0)
                 .ToArray ();
 
+        /// <summary>The text of every cell of every table row, blanks included, so positions can be checked.</summary>
+        private static string[][] Cells (string html)
+            => Regex.Matches (html, "<tr[^>]*>(.*?)</tr>", RegexOptions.Singleline)
+                .Cast<Match> ()
+                .Select (m => Regex.Matches (m.Groups[1].Value, "<t[dh][^>]*>(.*?)</t[dh]>", RegexOptions.Singleline)
+                    .Cast<Match> ()
+                    .Select (c => Regex.Replace (Regex.Replace (c.Groups[1].Value, "<[^>]+>", " "), @"\s+", " ").Trim ())
+                    .ToArray ())
+                .Where (r => r.Length > 0)
+                .ToArray ();
+
         [Test]
         public async Task SecondColumnSet_SitsBesideTheFirst ()
         {
@@ -131,6 +143,87 @@ namespace ReportTests
 
             Assert.That (html, Does.Contain ("Y2020"));
             Assert.That (html, Does.Not.Contain ("North"));
+        }
+
+        // --- row sets (fyi:RowSet): sibling row groups stack below the first -----------------------------------
+
+        private static string RowGrouping (string group, string field, string headerName, string width = "1in")
+            => $@"<RowGrouping><Width>{width}</Width><DynamicRows><Grouping Name=""{group}""><GroupExpressions><GroupExpression>=Fields!{field}.Value</GroupExpression></GroupExpressions></Grouping>{Head (headerName, "=Fields!" + field + ".Value")}</DynamicRows></RowGrouping>";
+
+        private static string RowReport (string firstRowGroupings, string setRowGroupings, string extraSet = "") => $@"<?xml version=""1.0"" encoding=""UTF-8""?>
+<Report xmlns=""http://schemas.microsoft.com/sqlserver/reporting/2005/01/reportdefinition"" xmlns:fyi=""http://www.fyireporting.com/schemas"">
+  <DataSources><DataSource Name=""DS1""><ConnectionProperties><DataProvider>SQLite</DataProvider><ConnectString>Data Source=none.db</ConnectString></ConnectionProperties></DataSource></DataSources>
+  <DataSets><DataSet Name=""Data"">
+    <Query><DataSourceName>DS1</DataSourceName><CommandText>/* Local Query */</CommandText></Query>
+    <Fields><Field Name=""Name""><DataField>Name</DataField></Field><Field Name=""Year""><DataField>Year</DataField></Field><Field Name=""Quarter""><DataField>Quarter</DataField></Field><Field Name=""Region""><DataField>Region</DataField></Field><Field Name=""Amount""><DataField>Amount</DataField></Field></Fields>
+  </DataSet></DataSets>
+  <Body><Height>3in</Height><ReportItems>
+    <Matrix Name=""Pivot""><DataSetName>Data</DataSetName><Top>0in</Top><Left>0in</Left>
+      <Corner>{Head ("Corner", "Corner")}</Corner>
+      <ColumnGroupings>{ColumnGrouping ("Years", "Year", "YearHead")}</ColumnGroupings>
+      <RowGroupings>{firstRowGroupings}</RowGroupings>
+      {MatrixRows ("ByName")}
+      <fyi:RowSet>
+        <RowGroupings>{setRowGroupings}</RowGroupings>
+        {MatrixRows ("ByRegion")}
+      </fyi:RowSet>
+      {extraSet}
+    </Matrix>
+  </ReportItems></Body>
+  <Width>8in</Width>
+</Report>";
+
+        [Test]
+        public async Task SecondRowSet_StacksBelowTheFirst ()
+        {
+            var html = await Render (RowReport (RowGrouping ("Names", "Name", "NameHead"), RowGrouping ("Regions", "Region", "RegionHead")));
+            var rows = Rows (html);
+
+            // one header row (the corner and the years), then the Name rows, then the Region rows
+            Assert.That (rows[0], Does.StartWith ("Corner").And.Contain ("Y2020").And.Contain ("Y2021"), string.Join (" || ", rows));
+            Assert.That (rows.Count (r => r.Contains ("Y2020")), Is.EqualTo (1), "the column headers appear once");
+            var order = new[] { "Gadget", "Widget", "North", "South" }.Select (label => Array.FindIndex (rows, r => r.StartsWith (label))).ToArray ();
+            Assert.That (order.All (i => i > 0), Is.True, string.Join (" || ", rows));
+            Assert.That (order, Is.Ordered, "Name rows first, then Region rows: " + string.Join (" || ", rows));
+
+            // Widget: Y2020 = 10, Y2021 = 20. North: Y2020 = 10, Y2021 = 0. South: Y2020 = 30, Y2021 = 20.
+            Assert.That (rows.First (r => r.StartsWith ("Widget")), Does.Contain ("10").And.Contain ("20"));
+            Assert.That (Regex.Matches (rows.First (r => r.StartsWith ("South")), @"\d+").Select (m => int.Parse (m.Value)).ToArray (),
+                Is.EqualTo (new[] { 30, 20 }));
+        }
+
+        [Test]
+        public async Task RowSetsWithDifferentDepth_AlignAtTheData ()
+        {
+            // The first set has two row levels (Name, Quarter); the second only one (Region).
+            var first = RowGrouping ("Names", "Name", "NameHead") + RowGrouping ("Quarters", "Quarter", "QuarterHead", "0.6in");
+            var html = await Render (RowReport (first, RowGrouping ("Regions", "Region", "RegionHead")));
+            var rows = Rows (html);
+
+            var widget = rows.First (r => r.StartsWith ("Widget"));
+            Assert.That (widget, Does.Match (@"^Widget Q\d"), "two levels in the first set: " + widget);
+            var cells = Cells (html);
+            var northCells = cells.First (r => r.Contains ("North"));
+            // Two row-header columns in the first set, one in the second: the region label sits in the
+            // right-hand one, next to the data, with a blank cell to its left.
+            Assert.That (northCells, Is.EqualTo (new[] { "", "North", "10", "0" }), string.Join (" | ", northCells));
+            var widgetCells = cells.First (r => r.Contains ("Widget"));
+            Assert.That (widgetCells.Take (2), Is.EqualTo (new[] { "Widget", "Q1" }));
+            Assert.That (northCells.Length, Is.EqualTo (widgetCells.Length), "every row has the same number of columns");
+        }
+
+        [Test]
+        public async Task ARowSetAndAColumnSetTogether_AreRejected ()
+        {
+            RdlEngineConfig.RdlEngineConfigInit ();
+            var rdl = RowReport (RowGrouping ("Names", "Name", "NameHead"), RowGrouping ("Regions", "Region", "RegionHead"),
+                "<fyi:ColumnSet><ColumnGroupings>" + ColumnGrouping ("Other", "Region", "OtherHead") + "</ColumnGroupings>" + MatrixRows ("Other") + "</fyi:ColumnSet>");
+
+            var parser = new RDLParser (rdl) { SkipDatabaseSchemaValidation = true };
+            using var report = await parser.Parse ();
+
+            Assert.That (report.ErrorMaxSeverity, Is.GreaterThanOrEqualTo (8));
+            Assert.That (report.ErrorItems.Cast<string> ().Any (e => e.Contains ("both ColumnSet and RowSet")), Is.True);
         }
     }
 }

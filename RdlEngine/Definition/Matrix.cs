@@ -43,6 +43,16 @@ namespace Majorsilence.Reporting.Rdl
         // Written fyi:ColumnSet in the report definition. See RunBuild.
         List<ColumnSet> _ExtraColumnSets = new List<ColumnSet>();
 
+        // The same for rows: further sets of row groupings that stack below the first, each with its
+        // own cells and sharing the column groupings. Written fyi:RowSet.
+        List<RowSet> _ExtraRowSets = new List<RowSet>();
+
+        sealed class RowSet
+        {
+            internal RowGroupings RowGroupings;
+            internal MatrixRows MatrixRows;
+        }
+
         sealed class ColumnSet
         {
             internal ColumnGroupings ColumnGroupings;
@@ -86,6 +96,9 @@ namespace Majorsilence.Reporting.Rdl
                         break;
                     case "matrixcolumns":
                         _MatrixColumns = new MatrixColumns(r, this, xNodeLoop);
+                        break;
+                    case "fyi:rowset":
+                        _ExtraRowSets.Add(ParseRowSet(r, xNodeLoop));
                         break;
                     case "fyi:columnset":
                         _ExtraColumnSets.Add(ParseColumnSet(r, xNodeLoop));
@@ -151,6 +164,24 @@ namespace Majorsilence.Reporting.Rdl
                     return;
                 }
             }
+            if (_ExtraRowSets.Count > 0 && _ExtraColumnSets.Count > 0)
+            {
+                OwnerReport.rl.LogError(8, "A Matrix cannot have both ColumnSet and RowSet elements. Matrix " + (this.Name == null ? "unknown." : this.Name.Nm));
+                return;
+            }
+            foreach (RowSet set in _ExtraRowSets)
+            {
+                if (set.RowGroupings == null || set.MatrixRows == null)
+                {
+                    OwnerReport.rl.LogError(8, "A RowSet needs RowGroupings and MatrixRows. Matrix " + (this.Name == null ? "unknown." : this.Name.Nm));
+                    return;
+                }
+                if (set.MatrixRows.Items.Count != Math.Max(1, set.RowGroupings.StaticCount) || set.MatrixRows.CellCount != sc)
+                {
+                    OwnerReport.rl.LogError(8, "The count of MatrixRows and MatrixCells in a RowSet must match its StaticRows and the StaticColumns. Matrix " + (this.Name == null ? "unknown." : this.Name.Nm));
+                    return;
+                }
+            }
             // matrix rows must also equal the static count (or 1 if no static rows)
             int mr = this.CountMatrixRows;
             int sr = Math.Max(1, _RowGroupings.StaticCount);
@@ -181,6 +212,11 @@ namespace Majorsilence.Reporting.Rdl
             }
             if (_MatrixColumns != null)
                 await _MatrixColumns.FinalPass();
+            foreach (RowSet set in _ExtraRowSets)
+            {
+                await set.RowGroupings.FinalPass();
+                await set.MatrixRows.FinalPass();
+            }
             foreach (ColumnSet set in _ExtraColumnSets)
             {
                 await set.ColumnGroupings.FinalPass();
@@ -449,6 +485,8 @@ namespace Majorsilence.Reporting.Rdl
         //   used by their respective rendering interfaces
         internal async Task<(MatrixCellEntry[,], int numRows, int numCols)> RunBuild(Report rpt)
         {
+            if (_ExtraRowSets.Count > 0)
+                return await RunBuildRowSets(rpt);
             if (_ExtraColumnSets.Count == 0)
                 return await RunBuildSet(rpt);
 
@@ -533,6 +571,120 @@ namespace Majorsilence.Reporting.Rdl
                     header = Math.Max(header, set.ColumnGroupings.Items.Count);
                 return header;
             }
+        }
+
+        // The row-axis counterpart of the column sets: run the build once per row set, then stack the
+        // grids. The column headers are shared and kept once (from the first set); each later set
+        // contributes only its data rows. Row-header columns are aligned at the data, so a set with
+        // fewer row levels has blank cells to its left.
+        async Task<(MatrixCellEntry[,], int, int)> RunBuildRowSets(Report rpt)
+        {
+            var grids = new List<(MatrixCellEntry[,] Grid, int Rows, int Cols, int RowHeaders)>();
+            RowGroupings savedGroupings = _RowGroupings;
+            MatrixRows savedRows = _MatrixRows;
+            try
+            {
+                var (g, r, c) = await RunBuildSet(rpt);
+                grids.Add((g, r, c, _RowGroupings.Items.Count));
+                foreach (RowSet set in _ExtraRowSets)
+                {
+                    _RowGroupings = set.RowGroupings;
+                    _MatrixRows = set.MatrixRows;
+                    (g, r, c) = await RunBuildSet(rpt);
+                    grids.Add((g, r, c, _RowGroupings.Items.Count));
+                }
+            }
+            finally
+            {
+                _RowGroupings = savedGroupings;
+                _MatrixRows = savedRows;
+            }
+
+            return MergeRowSets(grids, _ColumnGroupings.Items.Count);
+        }
+
+        static (MatrixCellEntry[,], int, int) MergeRowSets(
+            List<(MatrixCellEntry[,] Grid, int Rows, int Cols, int RowHeaders)> grids, int headerRows)
+        {
+            int rowHeaders = 0;
+            int dataColumns = int.MaxValue;
+            int rows = headerRows;
+            foreach (var g in grids)
+            {
+                rowHeaders = Math.Max(rowHeaders, g.RowHeaders);
+                dataColumns = Math.Min(dataColumns, g.Cols - g.RowHeaders);   // the columns are shared
+                rows += Math.Max(g.Rows - headerRows, 0);
+            }
+            int cols = rowHeaders + Math.Max(dataColumns, 0);
+
+            MatrixCellEntry[,] merged = new MatrixCellEntry[rows, cols];
+            int top = headerRows;       // where the next set's data rows start
+            for (int i = 0; i < grids.Count; i++)
+            {
+                var g = grids[i];
+                int shift = rowHeaders - g.RowHeaders;
+                int firstRow = i == 0 ? 0 : headerRows;
+                for (int iRow = firstRow; iRow < g.Rows; iRow++)
+                {
+                    for (int iCol = 0; iCol < g.RowHeaders + Math.Max(dataColumns, 0); iCol++)
+                    {
+                        MatrixCellEntry mce = g.Grid[iRow, iCol];
+                        if (mce == null)
+                            continue;
+                        bool corner = i == 0 && iRow == 0 && iCol == 0;
+                        int targetRow = i == 0 ? iRow : top + (iRow - headerRows);
+                        merged[targetRow, corner ? 0 : iCol + shift] = mce;
+                        if (corner)
+                            mce.ColSpan += shift;
+                    }
+                }
+                top += Math.Max(g.Rows - headerRows, 0);
+            }
+
+            // a corner that now spans extra columns is as wide as they are
+            MatrixCellEntry cornerEntry = merged[0, 0];
+            if (cornerEntry != null && cornerEntry.ColSpan > 1)
+            {
+                float width = 0;
+                for (int iCol = 0; iCol < cornerEntry.ColSpan && iCol < cols; iCol++)
+                {
+                    for (int iRow = 0; iRow < rows; iRow++)
+                    {
+                        MatrixCellEntry mce = merged[iRow, iCol];
+                        if (mce != null && mce != cornerEntry && mce.ColSpan == 1)
+                        {
+                            width += mce.Width;
+                            break;
+                        }
+                    }
+                }
+                if (width > 0)
+                    cornerEntry.Width = width;
+            }
+            return (merged, rows, cols);
+        }
+
+        RowSet ParseRowSet(ReportDefn r, XmlNode xNode)
+        {
+            var set = new RowSet();
+            foreach (XmlNode child in xNode.ChildNodes)
+            {
+                if (child.NodeType != XmlNodeType.Element)
+                    continue;
+                switch (child.Name.ToLowerInvariant())
+                {
+                    case "rowgroupings":
+                        set.RowGroupings = new RowGroupings(r, this, child);
+                        break;
+                    case "matrixrows":
+                        set.MatrixRows = new MatrixRows(r, this, child);
+                        break;
+                    default:
+                        OwnerReport.rl.LogError(4, "Unknown RowSet element '" + child.Name + "' ignored.");
+                        break;
+                }
+            }
+            return set;
         }
 
         ColumnSet ParseColumnSet(ReportDefn r, XmlNode xNode)

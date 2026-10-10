@@ -1293,39 +1293,63 @@ namespace Majorsilence.Reporting.Rdl
                 leavesBefore += range.Total;
             }
 
-            var rowLevels = ReadAxisLevels (FindChild (tablix, "TablixRowHierarchy"), "row", name, rl);
-            if (rowLevels == null)
+            // Sibling row groups likewise become row sets stacked one below the other. The engine
+            // cannot cross sibling row groups with sibling column groups, so that is refused.
+            var topRows = ChildrenNamed (FindChild (FindChild (tablix, "TablixRowHierarchy"), "TablixMembers"), "TablixMember");
+            var siblingRowGroups = topRows.Count > 1 && topRows.TrueForAll (m => FindChild (m, "Group") != null);
+            if (siblingRowGroups && sets.Count > 1) {
+                rl?.LogError (8, $"Tablix '{name}' has sibling groups on both its row and column hierarchies; " +
+                    "this pivot layout is not supported yet and the region was ignored.");
                 return null;
-            TrimBareLeafLevel (rowLevels);
+            }
+            var rowMemberSets = new List<List<XmlElement>> ();
+            if (siblingRowGroups)
+                topRows.ForEach (m => rowMemberSets.Add (new List<XmlElement> { m }));
+            else
+                rowMemberSets.Add (topRows);
+
+            var rowSets = new List<(List<AxisLevel> Levels, (int Total, int Start, int Count) Range)> ();
+            var rowLeavesBefore = 0;
+            foreach (var members in rowMemberSets) {
+                var levels = ReadAxisLevelsOf (members, "row", name, rl);
+                if (levels == null)
+                    return null;
+                TrimBareLeafLevel (levels);
+                var range = LeafRangeOf (members);
+                rowSets.Add ((levels, (range.Total, rowLeavesBefore + range.Start, range.Count)));
+                rowLeavesBefore += range.Total;
+            }
 
             var allBodyColumns = ChildrenNamed (FindChild (body, "TablixColumns"), "TablixColumn");
             var allBodyRows = ChildrenNamed (FindChild (body, "TablixRows"), "TablixRow");
 
             // Subtotals add body rows and columns beyond the detail ones; the Matrix repeats its one
             // cell template, so only the detail range is kept.
-            var rowRange = LeafRange (FindChild (tablix, "TablixRowHierarchy"));
-
             var columnsMatch = allBodyColumns.Count == leavesBefore;
             foreach (var set in sets)
                 columnsMatch &= set.Range.Count == LeafCount (set.Levels);
-            if (!columnsMatch || allBodyRows.Count != rowRange.Total || rowRange.Count != LeafCount (rowLevels)) {
+            var rowsMatch = allBodyRows.Count == rowLeavesBefore;
+            foreach (var set in rowSets)
+                rowsMatch &= set.Range.Count == LeafCount (set.Levels);
+            if (!columnsMatch || !rowsMatch) {
                 rl?.LogError (8, $"Tablix '{name}' has a {allBodyRows.Count}x{allBodyColumns.Count} body but its " +
-                    $"hierarchies describe {rowRange.Total}x{leavesBefore} leaf cell(s); " +
+                    $"hierarchies describe {rowLeavesBefore}x{leavesBefore} leaf cell(s); " +
                     "this pivot layout is not supported yet and the region was ignored.");
                 return null;
             }
-            var bodyRows = allBodyRows.GetRange (rowRange.Start, rowRange.Count);
 
             // Matrix cells cannot span, and a placeholder for a spanned-over position would shift
             // every later cell in its row.
-            foreach (var bodyRow in bodyRows) {
-                var rowCells = ChildrenNamed (FindChild (bodyRow, "TablixCells"), "TablixCell");
-                foreach (var set in sets) {
-                    foreach (var cell in rowCells.GetRange (set.Range.Start, set.Range.Count)) {
-                        if (FindChild (cell, "CellContents") == null) {
-                            rl?.LogError (8, $"Tablix '{name}' has merged (spanned) cells in its pivot body; " +
-                                "this layout is not supported yet and the region was ignored.");
-                            return null;
+            foreach (var rowSet in rowSets) {
+                foreach (var bodyRow in allBodyRows.GetRange (rowSet.Range.Start, rowSet.Range.Count)) {
+                    var rowCells = ChildrenNamed (FindChild (bodyRow, "TablixCells"), "TablixCell");
+                    foreach (var set in sets) {
+                        foreach (var cell in rowCells.GetRange (set.Range.Start, set.Range.Count)) {
+                            if (FindChild (cell, "CellContents") == null) {
+                                rl?.LogError (8, $"Tablix '{name}' has merged (spanned) cells in its pivot body; " +
+                                    "this layout is not supported yet and the region was ignored.");
+                                return null;
+                            }
                         }
                     }
                 }
@@ -1363,22 +1387,37 @@ namespace Majorsilence.Reporting.Rdl
                 if (set.Levels.Count > deepest.Count)
                     deepest = set.Levels;
             }
-            var corner = BuildCorner (doc, ns, FindChild (tablix, "TablixCorner"), rowLevels, deepest, rl, name);
+            var deepestRows = rowSets[0].Levels;
+            foreach (var set in rowSets) {
+                if (set.Levels.Count > deepestRows.Count)
+                    deepestRows = set.Levels;
+            }
+            var corner = BuildCorner (doc, ns, FindChild (tablix, "TablixCorner"), deepestRows, deepest, rl, name);
             if (corner != null)
                 matrix.AppendChild (corner);
 
+            List<XmlElement> RowsOf ((int Total, int Start, int Count) range) => allBodyRows.GetRange (range.Start, range.Count);
+
             matrix.AppendChild (BuildGroupings (doc, ns, sets[0].Levels, isColumnAxis: true));
-            matrix.AppendChild (BuildGroupings (doc, ns, rowLevels, isColumnAxis: false));
-            matrix.AppendChild (BuildMatrixRows (doc, ns, bodyRows, sets[0].Range));
+            matrix.AppendChild (BuildGroupings (doc, ns, rowSets[0].Levels, isColumnAxis: false));
+            matrix.AppendChild (BuildMatrixRows (doc, ns, RowsOf (rowSets[0].Range), sets[0].Range));
             matrix.AppendChild (BuildMatrixColumns (doc, ns, allBodyColumns, sets[0].Range));
 
-            // Later sets travel as fyi:ColumnSet; the engine builds each and lays them beside the first.
+            // Later column sets travel as fyi:ColumnSet; the engine builds each and lays them beside the first.
             for (var i = 1; i < sets.Count; i++) {
                 var columnSet = doc.CreateElement ("fyi", "ColumnSet", EngineNamespace);
                 columnSet.AppendChild (BuildGroupings (doc, ns, sets[i].Levels, isColumnAxis: true));
-                columnSet.AppendChild (BuildMatrixRows (doc, ns, bodyRows, sets[i].Range));
+                columnSet.AppendChild (BuildMatrixRows (doc, ns, RowsOf (rowSets[0].Range), sets[i].Range));
                 columnSet.AppendChild (BuildMatrixColumns (doc, ns, allBodyColumns, sets[i].Range));
                 matrix.AppendChild (columnSet);
+            }
+
+            // Later row sets travel as fyi:RowSet and are stacked below the first.
+            for (var i = 1; i < rowSets.Count; i++) {
+                var rowSet = doc.CreateElement ("fyi", "RowSet", EngineNamespace);
+                rowSet.AppendChild (BuildGroupings (doc, ns, rowSets[i].Levels, isColumnAxis: false));
+                rowSet.AppendChild (BuildMatrixRows (doc, ns, RowsOf (rowSets[i].Range), sets[0].Range));
+                matrix.AppendChild (rowSet);
             }
 
             return matrix;
