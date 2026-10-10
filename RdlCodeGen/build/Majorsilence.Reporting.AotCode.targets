@@ -1,0 +1,51 @@
+<Project>
+  <!--
+    Opt-in build-time compilation of report <Code> blocks, for Native AOT.
+
+    Native AOT cannot compile VB at runtime, so the <Code> element of a report is unsupported there.
+    With this targets file imported into a *Visual Basic* class library project, set:
+
+      <RdlPrecompileCode>true</RdlPrecompileCode>
+      <ItemGroup><RdlReports Include="Reports/**/*.rdl" /></ItemGroup>
+
+    and every <Code> block in those reports is compiled with the project (by the VB compiler, at build
+    time) and exposed through RdlPrecompiledCode.Register(), which the host calls once at startup.
+  -->
+  <PropertyGroup>
+    <RdlPrecompileCode Condition="'$(RdlPrecompileCode)' == ''">false</RdlPrecompileCode>
+    <RdlCodeGenDll Condition="'$(RdlCodeGenDll)' == ''">$(MSBuildThisFileDirectory)../tools/net10.0/RdlCodeGen.dll</RdlCodeGenDll>
+    <_RdlDotnet Condition="'$(DOTNET_HOST_PATH)' != ''">$(DOTNET_HOST_PATH)</_RdlDotnet>
+    <_RdlDotnet Condition="'$(_RdlDotnet)' == ''">dotnet</_RdlDotnet>
+  </PropertyGroup>
+
+  <!-- IntermediateOutputPath is only known after the SDK targets load, so resolve paths when the target runs. -->
+  <Target Name="_RdlPrepare" Condition="'$(RdlPrecompileCode)' == 'true'">
+    <PropertyGroup>
+      <RdlGeneratedCodeFile>$(MSBuildProjectDirectory)/$(IntermediateOutputPath)RdlPrecompiledCode.g.vb</RdlGeneratedCodeFile>
+      <_RdlListFile>$(MSBuildProjectDirectory)/$(IntermediateOutputPath)RdlReports.list</_RdlListFile>
+    </PropertyGroup>
+  </Target>
+
+  <Target Name="_RdlPrecompileCheck" DependsOnTargets="_RdlPrepare" Condition="'$(RdlPrecompileCode)' == 'true'">
+    <Error Code="RDLCODE101" Condition="'$(Language)' != 'VB'"
+           Text="RdlPrecompileCode needs a Visual Basic project: the generated code is VB and the VB compiler builds it. Put the report code in a small .vbproj and reference it from your C# app." />
+    <Warning Code="RDLCODE100" Condition="'$(RdlPrecompileAcknowledgeLimits)' != 'true'"
+             Text="RdlPrecompileCode is on. Report &lt;Code&gt; blocks are compiled at BUILD time; full VB is NOT supported by the AOT runtime. Only reports listed in RdlReports are covered (a report loaded later with different code will fail), and late binding / reflection in the code will fail under AOT. Set RdlPrecompileAcknowledgeLimits=true to silence this warning." />
+  </Target>
+
+  <Target Name="_RdlGenerateCode" DependsOnTargets="_RdlPrepare;_RdlPrecompileCheck" Condition="'$(RdlPrecompileCode)' == 'true'"
+          Inputs="@(RdlReports);$(RdlCodeGenDll);$(MSBuildProjectFullPath)" Outputs="$(RdlGeneratedCodeFile)">
+    <ItemGroup>
+      <_RdlReportPath Include="@(RdlReports->'%(FullPath)')" />
+    </ItemGroup>
+    <WriteLinesToFile File="$(_RdlListFile)" Lines="@(_RdlReportPath)" Overwrite="true" />
+    <Exec Command="&quot;$(_RdlDotnet)&quot; &quot;$(RdlCodeGenDll)&quot; --output &quot;$(RdlGeneratedCodeFile)&quot; @&quot;$(_RdlListFile)&quot;" />
+  </Target>
+
+  <Target Name="RdlPrecompileCode" BeforeTargets="CoreCompile" DependsOnTargets="_RdlGenerateCode" Condition="'$(RdlPrecompileCode)' == 'true'">
+    <ItemGroup>
+      <Compile Include="$(RdlGeneratedCodeFile)" Condition="Exists('$(RdlGeneratedCodeFile)')" />
+      <FileWrites Include="$(RdlGeneratedCodeFile);$(_RdlListFile)" />
+    </ItemGroup>
+  </Target>
+</Project>

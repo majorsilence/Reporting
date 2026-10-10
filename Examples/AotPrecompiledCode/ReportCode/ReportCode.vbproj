@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Visual Basic library holding the report <Code> blocks compiled at build time by RdlCodeGen. -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>ReportCode</RootNamespace>
+    <OptionStrict>Off</OptionStrict>
+    <!-- The repo-wide DRAWINGCOMPAT define (Directory.Build.props) is not valid VB syntax; this project does not need it. -->
+    <DefineConstants>TRACE</DefineConstants>
+    <RdlPrecompileCode>true</RdlPrecompileCode>
+    <!-- Inside this repo the tool is built from source; consumers get it from the NuGet package. -->
+    <RdlCodeGenDll>$(MSBuildThisFileDirectory)../../../RdlCodeGen/bin/$(Configuration)/net10.0/RdlCodeGen.dll</RdlCodeGenDll>
+  </PropertyGroup>
+  <ItemGroup>
+    <RdlReports Include="../ScoreCard.rdl" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../../RdlEngine/Majorsilence.Reporting.RdlEngine.csproj" />
+    <ProjectReference Include="../../../RdlCodeGen/RdlCodeGen.csproj" ReferenceOutputAssembly="false" />
+  </ItemGroup>
+  <Import Project="../../../RdlCodeGen/build/Majorsilence.Reporting.AotCode.targets" />
+</Project>

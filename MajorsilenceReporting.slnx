@@ -58,6 +58,8 @@
   <Project Path="RdlCri/Majorsilence.Reporting.RdlCri.csproj" />
   <Project Path="RdlDesign.Tests/RdlDesign.Tests.csproj" />
   <Project Path="RdlDesktop/RdlDesktop.csproj" />
+  <Project Path="RdlCodeGen.Tests/RdlCodeGen.Tests.csproj" />
+  <Project Path="RdlCodeGen/RdlCodeGen.csproj" />
   <Project Path="RdlDoctor.Tests/RdlDoctor.Tests.csproj" />
   <Project Path="RdlDoctor/RdlDoctor.csproj" />
   <Project Path="RdlEngine/Majorsilence.Reporting.RdlEngine.csproj" />

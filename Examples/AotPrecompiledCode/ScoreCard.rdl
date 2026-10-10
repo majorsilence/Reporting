@@ -1,0 +1,266 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Report xmlns="http://schemas.microsoft.com/sqlserver/reporting/2005/01/reportdefinition"
+        xmlns:rd="http://schemas.microsoft.com/SQLServer/reporting/reportdesigner">
+  <PageHeight>11in</PageHeight>
+  <PageWidth>8.5in</PageWidth>
+  <TopMargin>.5in</TopMargin>
+  <LeftMargin>.5in</LeftMargin>
+  <RightMargin>.5in</RightMargin>
+  <BottomMargin>.5in</BottomMargin>
+  <Width>7.5in</Width>
+
+  <!-- On non-AOT runtimes this VB is compiled and called directly via reflection.
+       When RdlEngineConfig.RegisterCodeProvider is called (AOT path) this source is
+       bypassed and the registered C# delegates are used instead. -->
+  <Code>
+Function Grade(score As Object) As String
+    Dim n As Double = Convert.ToDouble(score)
+    If n >= 90 Then Return "A"
+    If n >= 80 Then Return "B"
+    If n >= 70 Then Return "C"
+    If n >= 60 Then Return "D"
+    Return "F"
+End Function
+Function Commentary(score As Object) As String
+    Dim n As Double = Convert.ToDouble(score)
+    If n >= 90 Then Return "Excellent"
+    If n >= 70 Then Return "Good"
+    If n >= 50 Then Return "Needs Improvement"
+    Return "Failing"
+End Function
+Function IsPassing(score As Object) As Boolean
+    Return Convert.ToDouble(score) >= 60
+End Function
+  </Code>
+
+  <DataSources>
+    <DataSource Name="DS1">
+      <ConnectionProperties>
+        <DataProvider>Microsoft.Data.Sqlite</DataProvider>
+        <!-- sqlitetestdb2.db is used only for parse-time schema validation.
+             At runtime, SetData() injects data and the query never executes. -->
+        <ConnectString>Data Source=sqlitetestdb2.db</ConnectString>
+      </ConnectionProperties>
+    </DataSource>
+  </DataSources>
+
+  <DataSets>
+    <DataSet Name="Data">
+      <Query>
+        <DataSourceName>DS1</DataSourceName>
+        <!-- LIMIT 0 means schema-only — no rows returned at parse time. -->
+        <CommandText>SELECT ProductName AS Name, UnitPrice AS Score FROM Products LIMIT 0</CommandText>
+      </Query>
+      <Fields>
+        <Field Name="Name">
+          <DataField>Name</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="Score">
+          <DataField>Score</DataField>
+          <rd:TypeName>System.Double</rd:TypeName>
+        </Field>
+      </Fields>
+    </DataSet>
+  </DataSets>
+
+  <PageHeader>
+    <Height>.5in</Height>
+    <PrintOnFirstPage>true</PrintOnFirstPage>
+    <PrintOnLastPage>true</PrintOnLastPage>
+    <ReportItems>
+      <Textbox Name="Title">
+        <Top>.1in</Top>
+        <Left>0in</Left>
+        <Width>7.5in</Width>
+        <Height>.3in</Height>
+        <Value>Student Score Card</Value>
+        <Style>
+          <FontSize>16pt</FontSize>
+          <FontWeight>Bold</FontWeight>
+        </Style>
+      </Textbox>
+    </ReportItems>
+  </PageHeader>
+
+  <Body>
+    <Height>4in</Height>
+    <ReportItems>
+      <Table Name="ScoreTable">
+        <DataSetName>Data</DataSetName>
+        <NoRows>No data provided.</NoRows>
+        <Top>0in</Top>
+        <Left>0in</Left>
+        <TableColumns>
+          <TableColumn><Width>2.5in</Width></TableColumn>
+          <TableColumn><Width>1.0in</Width></TableColumn>
+          <TableColumn><Width>0.75in</Width></TableColumn>
+          <TableColumn><Width>1.5in</Width></TableColumn>
+          <TableColumn><Width>1.75in</Width></TableColumn>
+        </TableColumns>
+        <Header>
+          <TableRows>
+            <TableRow>
+              <Height>16pt</Height>
+              <TableCells>
+                <TableCell>
+                  <ReportItems>
+                    <Textbox Name="H_Name">
+                      <Value>Student</Value>
+                      <Style>
+                        <FontWeight>Bold</FontWeight>
+                        <BackgroundColor>#1F497D</BackgroundColor>
+                        <Color>White</Color>
+                        <PaddingLeft>4pt</PaddingLeft>
+                      </Style>
+                    </Textbox>
+                  </ReportItems>
+                </TableCell>
+                <TableCell>
+                  <ReportItems>
+                    <Textbox Name="H_Score">
+                      <Value>Score</Value>
+                      <Style>
+                        <FontWeight>Bold</FontWeight>
+                        <BackgroundColor>#1F497D</BackgroundColor>
+                        <Color>White</Color>
+                        <TextAlign>Center</TextAlign>
+                      </Style>
+                    </Textbox>
+                  </ReportItems>
+                </TableCell>
+                <TableCell>
+                  <ReportItems>
+                    <Textbox Name="H_Grade">
+                      <Value>Grade</Value>
+                      <Style>
+                        <FontWeight>Bold</FontWeight>
+                        <BackgroundColor>#1F497D</BackgroundColor>
+                        <Color>White</Color>
+                        <TextAlign>Center</TextAlign>
+                      </Style>
+                    </Textbox>
+                  </ReportItems>
+                </TableCell>
+                <TableCell>
+                  <ReportItems>
+                    <Textbox Name="H_Status">
+                      <Value>Status</Value>
+                      <Style>
+                        <FontWeight>Bold</FontWeight>
+                        <BackgroundColor>#1F497D</BackgroundColor>
+                        <Color>White</Color>
+                        <PaddingLeft>4pt</PaddingLeft>
+                      </Style>
+                    </Textbox>
+                  </ReportItems>
+                </TableCell>
+                <TableCell>
+                  <ReportItems>
+                    <Textbox Name="H_Commentary">
+                      <Value>Commentary</Value>
+                      <Style>
+                        <FontWeight>Bold</FontWeight>
+                        <BackgroundColor>#1F497D</BackgroundColor>
+                        <Color>White</Color>
+                        <PaddingLeft>4pt</PaddingLeft>
+                      </Style>
+                    </Textbox>
+                  </ReportItems>
+                </TableCell>
+              </TableCells>
+            </TableRow>
+          </TableRows>
+          <RepeatOnNewPage>true</RepeatOnNewPage>
+        </Header>
+        <Details>
+          <TableRows>
+            <TableRow>
+              <Height>14pt</Height>
+              <TableCells>
+                <TableCell>
+                  <ReportItems>
+                    <Textbox Name="Name">
+                      <Value>=Fields!Name.Value</Value>
+                      <Style>
+                        <BackgroundColor>=IIf(RowNumber(Nothing) Mod 2 = 0, "#DCE6F1", "White")</BackgroundColor>
+                        <PaddingLeft>4pt</PaddingLeft>
+                      </Style>
+                    </Textbox>
+                  </ReportItems>
+                </TableCell>
+                <TableCell>
+                  <ReportItems>
+                    <Textbox Name="Score">
+                      <Value>=Fields!Score.Value</Value>
+                      <Style>
+                        <BackgroundColor>=IIf(RowNumber(Nothing) Mod 2 = 0, "#DCE6F1", "White")</BackgroundColor>
+                        <Format>#0.0</Format>
+                        <TextAlign>Center</TextAlign>
+                      </Style>
+                    </Textbox>
+                  </ReportItems>
+                </TableCell>
+                <TableCell>
+                  <ReportItems>
+                    <!-- Code.Grade calls the registered C# delegate (or compiled VB on non-AOT) -->
+                    <Textbox Name="Grade">
+                      <Value>=Code.Grade(Fields!Score.Value)</Value>
+                      <Style>
+                        <BackgroundColor>=IIf(RowNumber(Nothing) Mod 2 = 0, "#DCE6F1", "White")</BackgroundColor>
+                        <FontWeight>Bold</FontWeight>
+                        <TextAlign>Center</TextAlign>
+                      </Style>
+                    </Textbox>
+                  </ReportItems>
+                </TableCell>
+                <TableCell>
+                  <ReportItems>
+                    <!-- Code.IsPassing drives the pass/fail background colour -->
+                    <Textbox Name="Status">
+                      <Value>=IIf(Code.IsPassing(Fields!Score.Value), "Pass", "Fail")</Value>
+                      <Style>
+                        <BackgroundColor>=IIf(Code.IsPassing(Fields!Score.Value), "#C6EFCE", "#FFC7CE")</BackgroundColor>
+                        <Color>=IIf(Code.IsPassing(Fields!Score.Value), "#276221", "#9C0006")</Color>
+                        <FontWeight>Bold</FontWeight>
+                        <PaddingLeft>4pt</PaddingLeft>
+                      </Style>
+                    </Textbox>
+                  </ReportItems>
+                </TableCell>
+                <TableCell>
+                  <ReportItems>
+                    <!-- Code.Commentary returns a descriptive label -->
+                    <Textbox Name="Commentary">
+                      <Value>=Code.Commentary(Fields!Score.Value)</Value>
+                      <Style>
+                        <BackgroundColor>=IIf(RowNumber(Nothing) Mod 2 = 0, "#DCE6F1", "White")</BackgroundColor>
+                        <PaddingLeft>4pt</PaddingLeft>
+                      </Style>
+                    </Textbox>
+                  </ReportItems>
+                </TableCell>
+              </TableCells>
+            </TableRow>
+          </TableRows>
+        </Details>
+      </Table>
+    </ReportItems>
+  </Body>
+
+  <PageFooter>
+    <Height>18pt</Height>
+    <PrintOnFirstPage>true</PrintOnFirstPage>
+    <PrintOnLastPage>true</PrintOnLastPage>
+    <ReportItems>
+      <Textbox Name="PageNum">
+        <Top>2pt</Top>
+        <Left>0in</Left>
+        <Width>3in</Width>
+        <Height>14pt</Height>
+        <Value>=Globals!PageNumber &amp; " of " &amp; Globals!TotalPages</Value>
+        <Style><FontSize>9pt</FontSize></Style>
+      </Textbox>
+    </ReportItems>
+  </PageFooter>
+</Report>

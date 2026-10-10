@@ -112,6 +112,14 @@ jobs:
           RDLNATIVE_LIB: ${{ github.workspace }}/RdlNative/bin/Release/net10.0/linux-x64-aot/publish/rdlnative.so
           REPORTING_REPO_ROOT: ${{ github.workspace }}
         run: cargo test --test integration
+      # Report <Code> blocks are compiled at build time (RdlCodeGen) and then run natively.
+      - name: Publish and run the build-time <Code> example under Native AOT
+        shell: bash
+        run: |
+          dotnet publish Examples/AotPrecompiledCode/App/App.csproj -c Release -r linux-x64 -o "$RUNNER_TEMP/aotcode"
+          cd "$RUNNER_TEMP/aotcode"
+          ./AotPrecompiledCode
+          test -s score-card.pdf
       - name: Archive AOT artifacts
         uses: actions/upload-artifact@v6
         with:
