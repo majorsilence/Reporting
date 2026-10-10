@@ -1,6 +1,7 @@
 
 
 using System;
+using System.Collections.Generic;
 using System.Xml;
 using System.Collections;
 using System.Globalization;
@@ -37,6 +38,18 @@ namespace Majorsilence.Reporting.Rdl
         string _CellDataElementName;    // The name to use for the cell element. Default: �Cell�
         MatrixCellDataElementOutputEnum _CellDataElementOutput; // Indicates whether the cell contents
                                                                 //should appear in a data rendering.  Default is Output.
+        // Further sets of column groupings that sit beside the first, each with its own columns and
+        // cells and sharing the row groupings (RDL 2008+ allows sibling column groups; 2005 has one).
+        // Written fyi:ColumnSet in the report definition. See RunBuild.
+        List<ColumnSet> _ExtraColumnSets = new List<ColumnSet>();
+
+        sealed class ColumnSet
+        {
+            internal ColumnGroupings ColumnGroupings;
+            internal MatrixRows MatrixRows;
+            internal MatrixColumns MatrixColumns;
+        }
+
         static string nullterminal = '\ufffe'.ToString();
         static string terminal = '\uffff'.ToString();
 
@@ -73,6 +86,9 @@ namespace Majorsilence.Reporting.Rdl
                         break;
                     case "matrixcolumns":
                         _MatrixColumns = new MatrixColumns(r, this, xNodeLoop);
+                        break;
+                    case "fyi:columnset":
+                        _ExtraColumnSets.Add(ParseColumnSet(r, xNodeLoop));
                         break;
                     case "layoutdirection":
                         _LayoutDirection = MatrixLayoutDirection.GetStyle(xNodeLoop.InnerText, OwnerReport.rl);
@@ -121,6 +137,20 @@ namespace Majorsilence.Reporting.Rdl
             {
                 OwnerReport.rl.LogError(8, "The count of MatrixColumns must be 1 or equal to the number of StaticColumns if there are any.  Matrix " + (this.Name == null ? "unknown." : this.Name.Nm));
             }
+            foreach (ColumnSet set in _ExtraColumnSets)
+            {
+                if (set.ColumnGroupings == null || set.MatrixRows == null || set.MatrixColumns == null)
+                {
+                    OwnerReport.rl.LogError(8, "A ColumnSet needs ColumnGroupings, MatrixRows and MatrixColumns. Matrix " + (this.Name == null ? "unknown." : this.Name.Nm));
+                    return;
+                }
+                int setStatic = Math.Max(1, set.ColumnGroupings.StaticCount);
+                if (set.MatrixRows.CellCount != setStatic || set.MatrixColumns.Items.Count != setStatic)
+                {
+                    OwnerReport.rl.LogError(8, "The count of MatrixCells and MatrixColumns in a ColumnSet must be 1 or equal to its number of StaticColumns. Matrix " + (this.Name == null ? "unknown." : this.Name.Nm));
+                    return;
+                }
+            }
             // matrix rows must also equal the static count (or 1 if no static rows)
             int mr = this.CountMatrixRows;
             int sr = Math.Max(1, _RowGroupings.StaticCount);
@@ -151,6 +181,12 @@ namespace Majorsilence.Reporting.Rdl
             }
             if (_MatrixColumns != null)
                 await _MatrixColumns.FinalPass();
+            foreach (ColumnSet set in _ExtraColumnSets)
+            {
+                await set.ColumnGroupings.FinalPass();
+                await set.MatrixRows.FinalPass();
+                await set.MatrixColumns.FinalPass();
+            }
 
             if (this.Height == null)
             {   // Calculate a height based on the sum of the TableRows
@@ -177,7 +213,7 @@ namespace Majorsilence.Reporting.Rdl
 
             // Now run thru the rows and columns of the matrix passing the information
             //   on to the rendering engine
-            int headerRows = _ColumnGroupings.Items.Count;	// number of column headers we have
+            int headerRows = HeaderRowCount;	// number of column headers we have
             if (!await ip.MatrixStart(this, matrix, row, headerRows, maxRows, maxColumns))
                 return;
             for (int iRow = 0; iRow < maxRows; iRow++)
@@ -228,7 +264,7 @@ namespace Majorsilence.Reporting.Rdl
 
             int maxColumns;
             int maxRows;
-            int headerRows = _ColumnGroupings.Items.Count;  // number of column headers we have
+            int headerRows = HeaderRowCount;  // number of column headers we have
             MatrixCellEntry[,] matrix;
 
             (matrix, maxRows, maxColumns) = await RunBuild(r);
@@ -412,6 +448,120 @@ namespace Majorsilence.Reporting.Rdl
         // RunBuild is used by both Matrix.Run and Chart.Run to obtain the necessary data
         //   used by their respective rendering interfaces
         internal async Task<(MatrixCellEntry[,], int numRows, int numCols)> RunBuild(Report rpt)
+        {
+            if (_ExtraColumnSets.Count == 0)
+                return await RunBuildSet(rpt);
+
+            // Run the build once per column set, swapping in that set's groupings and cells, then
+            // lay the grids side by side. The row groupings are shared, so each later grid repeats
+            // the row-header columns, which are dropped; header rows are aligned at the bottom, next
+            // to the data, so a set with fewer column levels has blank cells above it.
+            var grids = new List<(MatrixCellEntry[,] Grid, int Rows, int Cols, int Header)>();
+            ColumnGroupings savedGroupings = _ColumnGroupings;
+            MatrixRows savedRows = _MatrixRows;
+            MatrixColumns savedColumns = _MatrixColumns;
+            try
+            {
+                var (g, r, c) = await RunBuildSet(rpt);
+                grids.Add((g, r, c, _ColumnGroupings.Items.Count));
+                foreach (ColumnSet set in _ExtraColumnSets)
+                {
+                    _ColumnGroupings = set.ColumnGroupings;
+                    _MatrixRows = set.MatrixRows;
+                    _MatrixColumns = set.MatrixColumns;
+                    (g, r, c) = await RunBuildSet(rpt);
+                    grids.Add((g, r, c, _ColumnGroupings.Items.Count));
+                }
+            }
+            finally
+            {
+                _ColumnGroupings = savedGroupings;
+                _MatrixRows = savedRows;
+                _MatrixColumns = savedColumns;
+            }
+
+            return MergeColumnSets(grids, _RowGroupings.Items.Count);
+        }
+
+        static (MatrixCellEntry[,], int, int) MergeColumnSets(
+            List<(MatrixCellEntry[,] Grid, int Rows, int Cols, int Header)> grids, int rowHeaderColumns)
+        {
+            int header = 0;
+            int dataRows = int.MaxValue;
+            foreach (var g in grids)
+            {
+                header = Math.Max(header, g.Header);
+                dataRows = Math.Min(dataRows, g.Rows - g.Header);   // all sets share the row groupings
+            }
+            int rows = header + Math.Max(dataRows, 0);
+
+            int cols = grids[0].Cols;
+            for (int i = 1; i < grids.Count; i++)
+                cols += Math.Max(grids[i].Cols - rowHeaderColumns, 0);
+
+            MatrixCellEntry[,] merged = new MatrixCellEntry[rows, cols];
+            int left = 0;
+            for (int i = 0; i < grids.Count; i++)
+            {
+                var g = grids[i];
+                int firstColumn = i == 0 ? 0 : rowHeaderColumns;
+                int shift = header - g.Header;
+                for (int iRow = 0; iRow < g.Header + Math.Max(dataRows, 0); iRow++)
+                {
+                    for (int iCol = firstColumn; iCol < g.Cols; iCol++)
+                    {
+                        MatrixCellEntry mce = g.Grid[iRow, iCol];
+                        if (mce == null)
+                            continue;
+                        // the corner stays at the top left whatever the first set's header depth
+                        int target = (i == 0 && iRow == 0 && iCol == 0) ? 0 : iRow + shift;
+                        merged[target, left + iCol - firstColumn] = mce;
+                    }
+                }
+                left += g.Cols - firstColumn;
+            }
+            return (merged, rows, cols);
+        }
+
+        /// <summary>The most column-header rows in any column set; repeated at the top of each page.</summary>
+        int HeaderRowCount
+        {
+            get
+            {
+                int header = _ColumnGroupings.Items.Count;
+                foreach (ColumnSet set in _ExtraColumnSets)
+                    header = Math.Max(header, set.ColumnGroupings.Items.Count);
+                return header;
+            }
+        }
+
+        ColumnSet ParseColumnSet(ReportDefn r, XmlNode xNode)
+        {
+            var set = new ColumnSet();
+            foreach (XmlNode child in xNode.ChildNodes)
+            {
+                if (child.NodeType != XmlNodeType.Element)
+                    continue;
+                switch (child.Name.ToLowerInvariant())
+                {
+                    case "columngroupings":
+                        set.ColumnGroupings = new ColumnGroupings(r, this, child);
+                        break;
+                    case "matrixrows":
+                        set.MatrixRows = new MatrixRows(r, this, child);
+                        break;
+                    case "matrixcolumns":
+                        set.MatrixColumns = new MatrixColumns(r, this, child);
+                        break;
+                    default:
+                        OwnerReport.rl.LogError(4, "Unknown ColumnSet element '" + child.Name + "' ignored.");
+                        break;
+                }
+            }
+            return set;
+        }
+
+        async Task<(MatrixCellEntry[,], int numRows, int numCols)> RunBuildSet(Report rpt)
         {
             int numRows;
             int numCols;
