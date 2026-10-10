@@ -910,6 +910,79 @@ namespace ReportTests
             Assert.That (columns[1]["Visibility"]["Hidden"].InnerText, Is.EqualTo ("true"));
         }
 
+        /// <summary>A pivot with a "Sales" heading member above the Year group on the column axis.</summary>
+        private static readonly string PivotWithHeading = $@"
+<Tablix Name=""Headed""><DataSetName>Data</DataSetName>
+  <TablixBody>
+    <TablixColumns><TablixColumn><Width>1in</Width></TablixColumn></TablixColumns>
+    <TablixRows><TablixRow><Height>0.25in</Height><TablixCells>{PivotCell ("Amount", "=Sum(Fields!Name.Value)")}</TablixCells></TablixRow></TablixRows>
+  </TablixBody>
+  <TablixColumnHierarchy><TablixMembers>
+    <TablixMember>{Header ("Heading", "Sales", "0.3in")}<TablixMembers>
+      <TablixMember><Group Name=""Year""><GroupExpressions><GroupExpression>=Fields!Name.Value</GroupExpression></GroupExpressions></Group>{Header ("YearHead", "=Fields!Name.Value", "0.25in")}</TablixMember>
+    </TablixMembers></TablixMember>
+  </TablixMembers></TablixColumnHierarchy>
+  <TablixRowHierarchy><TablixMembers>
+    <TablixMember><Group Name=""Region""><GroupExpressions><GroupExpression>=Fields!Name.Value</GroupExpression></GroupExpressions></Group>{Header ("RegionHead", "=Fields!Name.Value")}</TablixMember>
+  </TablixMembers></TablixRowHierarchy>
+</Tablix>";
+
+        [Test]
+        public void Import_HeadingOverAPivotGroup_BecomesAStaticLevel ()
+        {
+            var doc = Load (ReportWith (Rdl2010, PivotWithHeading));
+            var log = new ReportLog ();
+
+            Rdl2008Normalizer.Normalize (doc, log);
+
+            var matrix = First (doc, "Matrix");
+            Assert.That (matrix, Is.Not.Null, "a heading above a group is a static level, not a refusal");
+            var groupings = matrix["ColumnGroupings"].ChildNodes;
+            Assert.That (groupings, Has.Count.EqualTo (2));
+            Assert.That (groupings[0]["Height"].InnerText, Is.EqualTo ("0.3in"));
+            Assert.That (groupings[0]["StaticColumns"]["StaticColumn"].InnerText, Does.Contain ("Sales"));
+            Assert.That (groupings[1]["DynamicColumns"]["Grouping"].GetAttribute ("Name"), Is.EqualTo ("Year"));
+            Assert.That (matrix["MatrixColumns"].ChildNodes, Has.Count.EqualTo (1));
+            Assert.That (log.MaxSeverity, Is.LessThan (8));
+        }
+
+        [Test]
+        public void RoundTrip_HeadingOverAPivotGroupSurvives ()
+        {
+            var doc = Load (ReportWith (Rdl2010, PivotWithHeading));
+            Rdl2008Normalizer.Normalize (doc, null);   // as the designer opens it
+
+            Rdl2008Exporter.ConvertToTablix (doc);     // as it saves
+
+            var members = First (doc, "TablixColumnHierarchy")["TablixMembers"].ChildNodes;
+            Assert.That (members, Has.Count.EqualTo (1));
+            Assert.That (members[0]["TablixHeader"].InnerText, Does.Contain ("Sales"), "the heading is a static member with a header");
+            Assert.That (members[0]["TablixMembers"]["TablixMember"]["Group"].GetAttribute ("Name"), Is.EqualTo ("Year"));
+        }
+
+        [Test]
+        public async Task HeadingOverAPivotGroup_RendersWithItsHeading ()
+        {
+            var xml = ReportWith (Rdl2010, PivotWithHeading.Replace ("Sum(Fields!Name.Value)", "Count(Fields!Name.Value)"));
+            var parser = new RDLParser (xml) { SkipDatabaseSchemaValidation = true };
+            using var report = await parser.Parse ();
+            Assert.That (report.ErrorMaxSeverity, Is.LessThanOrEqualTo (4), string.Join (" | ", report.ErrorItems?.Cast<string> () ?? Enumerable.Empty<string> ()));
+
+            var data = new System.Data.DataTable ();
+            data.Columns.Add ("Name", typeof (string));
+            data.Rows.Add ("Alpha");
+            data.Rows.Add ("Beta");
+            await report.DataSets["Data"].SetData (data);
+            await report.RunGetData (null);
+            using var memory = new MemoryStreamGen ();
+            await report.RunRender (memory, OutputPresentationType.HTML);
+            var html = memory.GetText ();
+
+            Assert.That (html, Does.Contain ("Sales"), "the heading above the group");
+            Assert.That (html, Does.Contain ("Alpha"));
+            Assert.That (html, Does.Contain ("Beta"));
+        }
+
         [Test]
         public async Task ExportedReport_ParsesInTheEngine ()
         {
