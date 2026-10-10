@@ -25,6 +25,24 @@ namespace Majorsilence.Reporting.Rdl
             "http://schemas.microsoft.com/sqlserver/reporting/2016/01/reportdefinition",
         };
 
+        /// <summary>
+        /// Rewrites a 2008+ document into the 2005 shape the designer edits (Tablix to Table,
+        /// Matrix or List, rich text to a single Value, and so on), keeping its namespace so that
+        /// <see cref="ConvertToTablix"/> restores the original vocabulary on save. A 2005
+        /// document is left alone.
+        /// </summary>
+        /// <returns>True when the document was rewritten.</returns>
+        public static bool NormalizeForEditing (XmlDocument doc)
+        {
+            if (doc == null || !Rdl2008Normalizer.NeedsNormalizing (doc))
+                return false;
+
+            // Unsupported report items (Map, Sparkline, ...) stay in the tree untouched so that
+            // saving writes them back; replacing them with placeholders is for rendering only.
+            Rdl2008Normalizer.Normalize (doc, null, forEditing: true);
+            return true;
+        }
+
         /// <summary>True when the document is 2008+ and contains a List that needs rewriting.</summary>
         public static bool NeedsConversion (XmlDocument doc)
         {
@@ -34,7 +52,221 @@ namespace Majorsilence.Reporting.Rdl
 
             var lists = new List<XmlElement> ();
             Collect (root, lists);
-            return lists.Count > 0 || Textboxes2005 (root).Count > 0;
+            return lists.Count > 0 || Textboxes2005 (root).Count > 0 || Styles2005 (root).Count > 0 || NeedsSections (root) || FixQuirks (root, apply: false) > 0 || Charts2005 (root).Count > 0;
+        }
+
+        // XML Schema booleans are lower case; 2005 files often hold "True"/"False".
+        private static readonly HashSet<string> BooleanElements = new HashSet<string> {
+            "AllowBlank", "CanGrow", "CanShrink", "ConsumeContainerWhitespace", "DeferVariableEvaluation",
+            "FixedColumnHeaders", "FixedData", "FixedRowHeaders", "Hidden", "HideIfNoRows", "IntegratedSecurity",
+            "KeepTogether", "MergeTransactions", "MultiValue", "Nullable", "OmitBorderOnPageBreak",
+            "PrintOnFirstPage", "PrintOnLastPage", "RepeatColumnHeaders", "RepeatOnNewPage", "RepeatRowHeaders",
+            "Scalar", "Transaction",
+        };
+
+        private const string DesignerNamespace = "http://schemas.microsoft.com/SQLServer/reporting/reportdesigner";
+
+        /// <summary>
+        /// Small spelling differences between 2005 and 2008+: NoRows, Action, boolean case,
+        /// DataElementStyle values, column settings that moved from Body to Page, and Field's
+        /// TypeName (a designer extension in 2008). Counts the fixes, and applies them when asked.
+        /// </summary>
+        private static int FixQuirks (XmlElement root, bool apply)
+        {
+            var ns = root.NamespaceURI;
+            var count = 0;
+            var doc = root.OwnerDocument;
+            var all = new List<XmlElement> ();
+            void Gather (XmlElement e)
+            {
+                foreach (XmlNode n in e.ChildNodes) {
+                    if (n is XmlElement c) {
+                        all.Add (c);
+                        Gather (c);
+                    }
+                }
+            }
+            Gather (root);
+
+            foreach (var e in all) {
+                if (e.NamespaceURI != ns)
+                    continue;
+                var parentName = (e.ParentNode as XmlElement)?.LocalName;
+
+                if (e.LocalName == "NoRows") {
+                    count++;
+                    if (apply) {
+                        var renamed = El (doc, ns, "NoRowsMessage", e.InnerText);
+                        e.ParentNode.ReplaceChild (renamed, e);
+                    }
+                } else if (e.LocalName == "Action" && parentName != "Actions" && parentName != "ActionInfo") {
+                    count++;
+                    if (apply) {
+                        var info = El (doc, ns, "ActionInfo");
+                        var actions = El (doc, ns, "Actions");
+                        info.AppendChild (actions);
+                        e.ParentNode.ReplaceChild (info, e);
+                        actions.AppendChild (e);
+                    }
+                } else if (BooleanElements.Contains (e.LocalName) && (e.InnerText == "True" || e.InnerText == "False")) {
+                    count++;
+                    if (apply)
+                        e.InnerText = e.InnerText.ToLowerInvariant ();
+                } else if (e.LocalName == "DataElementStyle" && (e.InnerText == "AttributeNormal" || e.InnerText == "ElementNormal")) {
+                    count++;
+                    if (apply)
+                        e.InnerText = e.InnerText == "AttributeNormal" ? "Attribute" : "Element";
+                } else if (e.LocalName == "TypeName" && parentName == "Field") {
+                    count++;
+                    if (apply) {
+                        var ext = doc.CreateElement ("rd", "TypeName", DesignerNamespace);
+                        ext.InnerText = e.InnerText;
+                        e.ParentNode.ReplaceChild (ext, e);
+                    }
+                } else if ((e.LocalName == "Columns" || e.LocalName == "ColumnSpacing") && parentName == "Body") {
+                    count++;
+                    if (apply) {
+                        e.ParentNode.RemoveChild (e);
+                        root.AppendChild (e);   // picked up into Page by the layout step
+                    }
+                } else if (e.LocalName == "Width" && parentName == "Body") {
+                    count++;
+                    if (apply) {
+                        e.ParentNode.RemoveChild (e);
+                        if (Child (root, "Width") == null && Child (Child (root, "ReportSections"), "ReportSection") == null)
+                            root.AppendChild (e);
+                    }
+                }
+            }
+
+            return count;
+        }
+
+        private static List<XmlElement> Charts2005 (XmlElement root)
+        {
+            var found = new List<XmlElement> ();
+            void Walk (XmlElement element)
+            {
+                foreach (XmlNode node in element.ChildNodes) {
+                    if (node is not XmlElement child)
+                        continue;
+                    if (child.LocalName == "Chart" && child.NamespaceURI == root.NamespaceURI && Rdl2008ChartConverter.Is2005Chart (child)
+                        && !Rdl2008ChartConverter.Is2008Chart (child))
+                        found.Add (child);
+                    Walk (child);
+                }
+            }
+            Walk (root);
+            return found;
+        }
+
+        private static bool Is2008 (XmlElement root)
+            => root.NamespaceURI.EndsWith ("/2008/01/reportdefinition", StringComparison.Ordinal);
+
+        // 2008 moves the page setup into Page; 2010 and later also move Body and Width into
+        // ReportSections/ReportSection.
+        private static bool NeedsSections (XmlElement root)
+        {
+            foreach (XmlNode node in root.ChildNodes) {
+                if (node is XmlElement e && e.NamespaceURI == root.NamespaceURI && PageElements.Contains (e.LocalName))
+                    return true;
+            }
+
+            return !Is2008 (root) && Child (root, "Body") != null;
+        }
+
+        // 2005 groups border properties by property (BorderColor/BorderStyle/BorderWidth, each with
+        // Default/Left/Right/Top/Bottom); 2008 groups them by edge (Border/LeftBorder/..., each with
+        // Color/Style/Width). The normalizer transposes one way, this the other.
+        private static readonly string[] BorderProperties = { "Color", "Style", "Width" };
+        private static readonly string[][] BorderEdgeNames = {
+            new[] { "Default", "Border" }, new[] { "Left", "LeftBorder" }, new[] { "Right", "RightBorder" },
+            new[] { "Top", "TopBorder" }, new[] { "Bottom", "BottomBorder" },
+        };
+
+        private static List<XmlElement> Styles2005 (XmlElement root)
+        {
+            var found = new List<XmlElement> ();
+            void Walk (XmlElement element)
+            {
+                foreach (XmlNode node in element.ChildNodes) {
+                    if (node is not XmlElement child)
+                        continue;
+                    if (child.LocalName == "Style" && child.NamespaceURI == root.NamespaceURI
+                        && (Child (child, "BorderColor") != null || Child (child, "BorderStyle") != null || Child (child, "BorderWidth") != null))
+                        found.Add (child);
+                    Walk (child);
+                }
+            }
+            Walk (root);
+            return found;
+        }
+
+        private static void ConvertBorders (XmlElement style)
+        {
+            var doc = style.OwnerDocument;
+            var ns = style.NamespaceURI;
+            foreach (var property in BorderProperties) {
+                var group = Child (style, "Border" + property);
+                if (group == null)
+                    continue;
+
+                foreach (var pair in BorderEdgeNames) {
+                    var value = Child (group, pair[0]);
+                    if (value == null)
+                        continue;
+                    var edge = Child (style, pair[1]);
+                    if (edge == null) {
+                        edge = El (doc, ns, pair[1]);
+                        style.AppendChild (edge);
+                    }
+                    edge.AppendChild (El (doc, ns, property, value.InnerText));
+                }
+                style.RemoveChild (group);
+            }
+        }
+
+        // Page setup that 2008 and later keep in Page rather than directly on Report.
+        private static readonly HashSet<string> PageElements = new HashSet<string> {
+            "PageHeader", "PageFooter", "PageHeight", "PageWidth", "InteractiveHeight", "InteractiveWidth",
+            "LeftMargin", "RightMargin", "TopMargin", "BottomMargin", "Columns", "ColumnSpacing",
+        };
+
+        /// <summary>Groups the page setup into Page, and for 2010+ the body into a ReportSection.</summary>
+        private static void WrapInReportSection (XmlElement root)
+        {
+            var doc = root.OwnerDocument;
+            var ns = root.NamespaceURI;
+            var page = El (doc, ns, "Page");
+            var body = new List<XmlElement> ();
+
+            foreach (XmlNode node in new List<XmlNode> (root.ChildNodes.Cast<XmlNode> ())) {
+                if (node is not XmlElement e || e.NamespaceURI != ns)
+                    continue;
+                if (PageElements.Contains (e.LocalName)) {
+                    root.RemoveChild (e);
+                    page.AppendChild (e);
+                } else if (e.LocalName == "Body" || e.LocalName == "Width") {
+                    body.Add (e);
+                }
+            }
+
+            if (Is2008 (root)) {
+                if (page.HasChildNodes)
+                    root.AppendChild (page);
+                return;
+            }
+
+            var section = El (doc, ns, "ReportSection");
+            foreach (var e in body) {
+                root.RemoveChild (e);
+                section.AppendChild (e);
+            }
+            if (page.HasChildNodes)
+                section.AppendChild (page);
+            var sections = El (doc, ns, "ReportSections");
+            sections.AppendChild (section);
+            root.AppendChild (sections);
         }
 
         private static List<XmlElement> Textboxes2005 (XmlElement root)
@@ -126,6 +358,14 @@ namespace Majorsilence.Reporting.Rdl
             // already-converted Textbox is still correct, while the reverse would revisit them.
             foreach (var textbox in Textboxes2005 (root))
                 ConvertTextbox (textbox);
+            foreach (var style in Styles2005 (root))
+                ConvertBorders (style);
+            FixQuirks (root, apply: true);
+            foreach (var chart in Charts2005 (root)) {
+                var converted = Rdl2008ChartConverter.FromEngine (chart);
+                if (converted != null)
+                    chart.ParentNode.ReplaceChild (converted, chart);
+            }
 
             var count = 0;
             foreach (var list in lists) {
@@ -135,6 +375,9 @@ namespace Majorsilence.Reporting.Rdl
                     : BuildTablix (list), list);
                 count++;
             }
+
+            if (NeedsSections (root))
+                WrapInReportSection (root);
 
             return count;
         }
@@ -301,8 +544,8 @@ namespace Majorsilence.Reporting.Rdl
             if (name.Length > 0)
                 tablix.SetAttribute ("Name", name);
 
-            var columnWidths = Kids (Child (table, "TableColumns"), "TableColumn")
-                .ConvertAll (c => Child (c, "Width")?.InnerText ?? "1in");
+            var tableColumns = Kids (Child (table, "TableColumns"), "TableColumn");
+            var columnWidths = tableColumns.ConvertAll (c => Child (c, "Width")?.InnerText ?? "1in");
             var bodyRows = El (doc, ns, "TablixRows");
 
             XmlElement BuildRow (XmlElement tableRow)
@@ -435,11 +678,15 @@ namespace Majorsilence.Reporting.Rdl
 
             var columns = El (doc, ns, "TablixColumns");
             var columnMembers = El (doc, ns, "TablixMembers");
-            foreach (var width in columnWidths) {
+            for (var c = 0; c < columnWidths.Count; c++) {
                 var column = El (doc, ns, "TablixColumn");
-                column.AppendChild (El (doc, ns, "Width", width));
+                column.AppendChild (El (doc, ns, "Width", columnWidths[c]));
                 columns.AppendChild (column);
-                columnMembers.AppendChild (El (doc, ns, "TablixMember"));
+                var columnMember = El (doc, ns, "TablixMember");
+                var columnVisibility = Child (tableColumns[c], "Visibility");
+                if (columnVisibility != null)
+                    columnMember.AppendChild (columnVisibility.CloneNode (true));
+                columnMembers.AppendChild (columnMember);
             }
 
             var body = El (doc, ns, "TablixBody");
@@ -517,8 +764,10 @@ namespace Majorsilence.Reporting.Rdl
                 return contents;
             }
 
+            // For each leaf of an axis in document order, the detail row/column whose cell template
+            // fills it: detail leaves map to themselves, subtotal leaves reuse the first.
             XmlElement Axis (string hierarchyName, string groupingName, string dynamicName,
-                string staticsName, string staticName, string sizeName)
+                string staticsName, string staticName, string sizeName, List<int> leafSources)
             {
                 var groupings = Kids (Child (matrix, groupingName + "s"), groupingName);
 
@@ -528,6 +777,7 @@ namespace Majorsilence.Reporting.Rdl
                     if (index >= groupings.Count) {
                         // The innermost level of data: a bare static leaf under the last group.
                         members.AppendChild (El (doc, ns, "TablixMember"));
+                        leafSources.Add (0);
                         return members;
                     }
 
@@ -555,14 +805,27 @@ namespace Majorsilence.Reporting.Rdl
                             member.AppendChild (visibility.CloneNode (true));
                         member.AppendChild (Members (index + 1));
                         members.AppendChild (member);
+
+                        // A Subtotal is a headed static leaf after the group, with its own body cells.
+                        var subtotal = Child (dynamic, "Subtotal");
+                        if (subtotal != null) {
+                            var total = El (doc, ns, "TablixMember");
+                            total.AppendChild (Header (subtotal));
+                            members.AppendChild (total);
+                            leafSources.Add (0);
+                        }
                         return members;
                     }
 
+                    var detailIndex = 0;
                     foreach (var staticItem in Kids (Child (grouping, staticsName), staticName)) {
                         var member = El (doc, ns, "TablixMember");
                         member.AppendChild (Header (staticItem));
                         if (index + 1 < groupings.Count)
                             member.AppendChild (Members (index + 1));
+                        else
+                            leafSources.Add (detailIndex);
+                        detailIndex++;
                         members.AppendChild (member);
                     }
                     return members;
@@ -573,24 +836,31 @@ namespace Majorsilence.Reporting.Rdl
                 return hierarchy;
             }
 
-            var columnHierarchy = Axis ("TablixColumnHierarchy", "ColumnGrouping", "DynamicColumns", "StaticColumns", "StaticColumn", "Height");
-            var rowHierarchy = Axis ("TablixRowHierarchy", "RowGrouping", "DynamicRows", "StaticRows", "StaticRow", "Width");
+            var columnSources = new List<int> ();
+            var rowSources = new List<int> ();
+            var columnHierarchy = Axis ("TablixColumnHierarchy", "ColumnGrouping", "DynamicColumns", "StaticColumns", "StaticColumn", "Height", columnSources);
+            var rowHierarchy = Axis ("TablixRowHierarchy", "RowGrouping", "DynamicRows", "StaticRows", "StaticRow", "Width", rowSources);
+            var detailColumns = Kids (Child (matrix, "MatrixColumns"), "MatrixColumn");
+            var detailRows = Kids (Child (matrix, "MatrixRows"), "MatrixRow");
 
             var body = El (doc, ns, "TablixBody");
             var columns = El (doc, ns, "TablixColumns");
-            foreach (var matrixColumn in Kids (Child (matrix, "MatrixColumns"), "MatrixColumn")) {
+            foreach (var source in columnSources) {
+                var matrixColumn = source < detailColumns.Count ? detailColumns[source] : null;
                 var column = El (doc, ns, "TablixColumn");
                 column.AppendChild (El (doc, ns, "Width", Child (matrixColumn, "Width")?.InnerText ?? "1in"));
                 columns.AppendChild (column);
             }
             var rows = El (doc, ns, "TablixRows");
-            foreach (var matrixRow in Kids (Child (matrix, "MatrixRows"), "MatrixRow")) {
+            foreach (var rowSource in rowSources) {
+                var matrixRow = rowSource < detailRows.Count ? detailRows[rowSource] : null;
                 var row = El (doc, ns, "TablixRow");
                 row.AppendChild (El (doc, ns, "Height", Child (matrixRow, "Height")?.InnerText ?? "0.25in"));
                 var cells = El (doc, ns, "TablixCells");
-                foreach (var matrixCell in Kids (Child (matrixRow, "MatrixCells"), "MatrixCell")) {
+                var templateCells = Kids (Child (matrixRow, "MatrixCells"), "MatrixCell");
+                foreach (var columnSource in columnSources) {
                     var cell = El (doc, ns, "TablixCell");
-                    cell.AppendChild (Contents (matrixCell));
+                    cell.AppendChild (Contents (columnSource < templateCells.Count ? templateCells[columnSource] : null));
                     cells.AppendChild (cell);
                 }
                 row.AppendChild (cells);

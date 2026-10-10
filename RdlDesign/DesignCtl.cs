@@ -250,6 +250,9 @@ namespace Majorsilence.Reporting.RdlDesign
 				
 				xDoc.PreserveWhitespace = false;
 				xDoc.LoadXml(value);	// this will throw an exception if invalid XML
+				// The designer edits the RDL 2005 shape; a 2008+ (RDLC) file is rewritten to it here
+				// and written back as Tablix by the ReportSource getter.
+				Rdl2008Exporter.NormalizeForEditing(xDoc);
 				ReportDocument = xDoc;
 			}
 		}
