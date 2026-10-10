@@ -354,6 +354,11 @@ namespace Majorsilence.Reporting.Rdl
                 return null;
             }
 
+            // One cell repeated per record or group is a List, not a one-column table.
+            var list = TryConvertTablixToList (tablix);
+            if (list != null)
+                return list;
+
             // A dynamic column hierarchy pivots on data, which Table cannot express; that shape
             // is 2005's Matrix.
             if (HasDynamicMembers (FindChild (tablix, "TablixColumnHierarchy")))
@@ -424,6 +429,157 @@ namespace Majorsilence.Reporting.Rdl
             AppendSection (table, doc, ns, "Footer", rows, placements, RowPlacement.Footer);
 
             return table;
+        }
+
+        /// <summary>
+        /// A Tablix that is one body cell, one static column and one row group is how 2008 spells a
+        /// List: free-form content repeated once per record (or per group). Returns null for any
+        /// other shape so the Table/Matrix mapping handles it.
+        /// </summary>
+        private static XmlElement TryConvertTablixToList (XmlElement tablix)
+        {
+            var body = FindChild (tablix, "TablixBody");
+            var bodyRows = ChildrenNamed (FindChild (body, "TablixRows"), "TablixRow");
+            if (ChildrenNamed (FindChild (body, "TablixColumns"), "TablixColumn").Count != 1 || bodyRows.Count != 1)
+                return null;
+
+            var cells = ChildrenNamed (FindChild (bodyRows[0], "TablixCells"), "TablixCell");
+            if (cells.Count != 1)
+                return null;
+
+            // Columns must be a single static member: a group there is a pivot.
+            var columnMembers = ChildrenNamed (FindChild (FindChild (tablix, "TablixColumnHierarchy"), "TablixMembers"), "TablixMember");
+            if (columnMembers.Count > 1 || HasDynamicMembers (FindChild (tablix, "TablixColumnHierarchy")))
+                return null;
+
+            // Rows must be exactly one member, itself the (leaf) group.
+            var rowMembers = ChildrenNamed (FindChild (FindChild (tablix, "TablixRowHierarchy"), "TablixMembers"), "TablixMember");
+            if (rowMembers.Count != 1)
+                return null;
+            var rowMember = rowMembers[0];
+            var group = FindChild (rowMember, "Group");
+            if (group == null || FindChild (rowMember, "TablixMembers") != null || FindChild (rowMember, "TablixHeader") != null)
+                return null;
+
+            var doc = tablix.OwnerDocument;
+            var ns = tablix.NamespaceURI;
+            var list = doc.CreateElement ("List", ns);
+            var name = tablix.GetAttribute ("Name");
+            if (!string.IsNullOrEmpty (name))
+                list.SetAttribute ("Name", name);
+
+            // Position, size, style, DataSetName, visibility carry over unchanged. Tablix-only
+            // vocabulary has no List counterpart.
+            XmlElement tablixSort = null;
+            foreach (var child in Children (tablix)) {
+                switch (child.LocalName) {
+                    case "TablixBody":
+                    case "TablixColumnHierarchy":
+                    case "TablixRowHierarchy":
+                    case "TablixCorner":
+                    case "RepeatColumnHeaders":
+                    case "RepeatRowHeaders":
+                    case "FixedColumnHeaders":
+                    case "FixedRowHeaders":
+                    case "PageBreak":
+                        continue;
+                    case "SortExpressions":
+                        tablixSort = child;
+                        continue;
+                    default:
+                        list.AppendChild (child.CloneNode (true));
+                        break;
+                }
+            }
+
+            // The cell's content. A lone Rectangle is the wrapper a List export adds around its
+            // items; unwrapping it keeps a List -> Tablix -> List round trip stable.
+            var items = doc.CreateElement ("ReportItems", ns);
+            var contents = FindChild (cells[0], "CellContents");
+            var contentItems = contents == null ? new List<XmlElement> () : Children (contents);
+            contentItems.RemoveAll (c => c.LocalName == "ColSpan" || c.LocalName == "RowSpan");
+            if (contentItems.Count == 1 && contentItems[0].LocalName == "Rectangle" && IsPlainWrapper (contentItems[0])) {
+                var wrapper = contentItems[0];
+                var inner = FindChild (wrapper, "ReportItems");
+                if (inner != null) {
+                    foreach (var item in Children (inner))
+                        items.AppendChild (item.CloneNode (true));
+                }
+
+                var wrapperStyle = FindChild (wrapper, "Style");
+                if (wrapperStyle != null && FindChild (list, "Style") == null)
+                    list.AppendChild (wrapperStyle.CloneNode (true));
+            } else {
+                foreach (var item in contentItems)
+                    items.AppendChild (item.CloneNode (true));
+            }
+            if (items.ChildNodes.Count > 0)
+                list.AppendChild (items);
+
+            // Size falls back to the body cell when the Tablix itself carries none.
+            if (FindChild (list, "Height") == null) {
+                var h = FindChild (bodyRows[0], "Height");
+                if (h != null)
+                    list.AppendChild (h.CloneNode (true));
+            }
+            if (FindChild (list, "Width") == null) {
+                var w = FindChild (FindChild (FindChild (body, "TablixColumns"), "TablixColumn"), "Width");
+                if (w != null)
+                    list.AppendChild (w.CloneNode (true));
+            }
+
+            // A group with no expressions is Details: List repeats per record without a Grouping.
+            if (FindChild (group, "GroupExpressions") != null)
+                list.AppendChild (BuildListGrouping (doc, ns, group));
+
+            var sort = FindChild (rowMember, "SortExpressions") ?? tablixSort;
+            if (sort != null)
+                list.AppendChild (BuildSorting (doc, ns, sort));
+
+            return list;
+        }
+
+        private static bool IsPlainWrapper (XmlElement rectangle)
+        {
+            foreach (var child in Children (rectangle)) {
+                if (child.LocalName != "ReportItems" && child.LocalName != "KeepTogether" && child.LocalName != "Style")
+                    return false;
+            }
+
+            return true;
+        }
+
+        /// <summary>BuildGrouping, with 2008's PageBreak translated to 2005's two flags.</summary>
+        private static XmlElement BuildListGrouping (XmlDocument doc, string ns, XmlElement group)
+        {
+            var grouping = doc.CreateElement ("Grouping", ns);
+            var name = group.GetAttribute ("Name");
+            if (!string.IsNullOrEmpty (name))
+                grouping.SetAttribute ("Name", name);
+
+            foreach (var child in Children (group)) {
+                if (child.LocalName != "PageBreak") {
+                    grouping.AppendChild (child.CloneNode (true));
+                    continue;
+                }
+
+                var location = FindChild (child, "BreakLocation")?.InnerText;
+                var start = location == "Start" || location == "StartAndEnd";
+                var end = location == "End" || location == "StartAndEnd";
+                if (start)
+                    grouping.AppendChild (CreateTextElement (doc, ns, "PageBreakAtStart", "true"));
+                if (end)
+                    grouping.AppendChild (CreateTextElement (doc, ns, "PageBreakAtEnd", "true"));
+            }
+
+            return grouping;
+        }
+
+        private static XmlElement CreateTextElement (XmlDocument doc, string ns, string name, string text)
+        {
+            var e = doc.CreateElement (name, ns);
+            e.InnerText = text;
+            return e;
         }
 
         private enum RowPlacement { Header, Detail, Footer }
