@@ -191,7 +191,8 @@ namespace Majorsilence.Pdf
 
                         var font = _ser.GetOrAddTtfFont(segSrc.CacheKey, segTtf);
                         sb.Append("/").Append(font.PdfName).Append(" ").AppendNum(style.FontSize).Append(" Tf\n");
-                        sb.Append($"{PdfSerializer.EncodeGlyphIds(segText, segTtf, font.UsedGlyphs)} Tj\n");
+                        PdfSerializer.AppendGlyphIds(sb, segText, segTtf, font.UsedGlyphs);
+                        sb.Append(" Tj\n");
                         float segW = segTtf.GetWidthPoint(segText, style.FontSize);
                         cursorX   += segW;
                         totalWidth += segW;

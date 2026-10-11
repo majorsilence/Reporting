@@ -935,6 +935,29 @@ namespace Majorsilence.Pdf.Internal
         internal static string PdfString(string s) =>
             s.Replace("\\", "\\\\").Replace("(", "\\(").Replace(")", "\\)");
 
+        /// <summary>
+        /// Appends the text as a PDF hex string of glyph ids ("&lt;00410042&gt;") straight into
+        /// <paramref name="sb"/>, without a string per glyph.
+        /// </summary>
+        internal static void AppendGlyphIds(StringBuilder sb, string text, TrueTypeFont ttf,
+            HashSet<ushort>? usedGlyphs = null)
+        {
+            const string Hex = "0123456789ABCDEF";
+            sb.Append('<');
+            for (int i = 0; i < text.Length; i++)
+            {
+                int codePoint;
+                if (char.IsHighSurrogate(text[i]) && i + 1 < text.Length && char.IsLowSurrogate(text[i + 1]))
+                { codePoint = char.ConvertToUtf32(text[i], text[i + 1]); i++; }
+                else codePoint = text[i];
+                ushort gid = ttf.GetGlyphId(codePoint);
+                usedGlyphs?.Add(gid);
+                sb.Append(Hex[(gid >> 12) & 0xF]).Append(Hex[(gid >> 8) & 0xF])
+                  .Append(Hex[(gid >> 4) & 0xF]).Append(Hex[gid & 0xF]);
+            }
+            sb.Append('>');
+        }
+
         internal static string EncodeGlyphIds(string text, TrueTypeFont ttf,
             HashSet<ushort>? usedGlyphs = null)
         {

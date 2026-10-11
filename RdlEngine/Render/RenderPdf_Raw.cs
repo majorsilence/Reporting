@@ -382,6 +382,15 @@ namespace Majorsilence.Reporting.Rdl
         // fraction too wide lost its last word once the box clipped the second line.
         internal static string[] RejoinSoftWraps(string[] lines)
         {
+            // Nothing to rejoin unless a line ends in a space (the common case is one short line).
+            bool anySoftWrap = false;
+            foreach (string line in lines)
+            {
+                if (!string.IsNullOrEmpty(line) && line[line.Length - 1] == ' ') { anySoftWrap = true; break; }
+            }
+            if (!anySoftWrap)
+                return lines;
+
             var joined = new List<string>(lines.Length);
             var current = new System.Text.StringBuilder();
             foreach (string line in lines)
@@ -401,20 +410,25 @@ namespace Majorsilence.Reporting.Rdl
         // line against the actual PDF font metrics and split further if needed.
         private string[] RewrapLines(string[] lines, TextStyle style, float maxWidth)
         {
-            var result = new List<string>(lines.Length);
-            foreach (string line in lines)
+            List<string> result = null;     // made only when a line has to be split
+            for (int i = 0; i < lines.Length; i++)
             {
-                if (string.IsNullOrEmpty(line))
+                string line = lines[i];
+                if (string.IsNullOrEmpty(line) || _currentPage.MeasureTextWidth(line, style) <= maxWidth)
                 {
-                    result.Add(line);
+                    result?.Add(line);
                     continue;
                 }
-                if (_currentPage.MeasureTextWidth(line, style) <= maxWidth)
-                    result.Add(line);
-                else
-                    WrapLine(line, style, maxWidth, result);
+
+                if (result == null)
+                {
+                    result = new List<string>(lines.Length + 1);
+                    for (int j = 0; j < i; j++)
+                        result.Add(lines[j]);
+                }
+                WrapLine(line, style, maxWidth, result);
             }
-            return result.ToArray();
+            return result == null ? lines : result.ToArray();
         }
 
         private void WrapLine(string text, TextStyle style, float maxWidth, List<string> output)
