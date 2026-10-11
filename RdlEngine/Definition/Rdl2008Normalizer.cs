@@ -1355,6 +1355,14 @@ namespace Majorsilence.Reporting.Rdl
                 }
             }
 
+            // The Matrix repeats the detail cell for its totals, so a total's own formatting is carried
+            // by InScope() expressions on that one cell.
+            if (sets.Count == 1) {
+                PreserveSubtotalFormatting (tablix.OwnerDocument, tablix.NamespaceURI, allBodyRows, allBodyColumns,
+                    ChildrenNamed (FindChild (FindChild (tablix, "TablixRowHierarchy"), "TablixMembers"), "TablixMember"),
+                    topColumns, rowLevels, sets[0].Levels);
+            }
+
             var doc = tablix.OwnerDocument;
             var ns = tablix.NamespaceURI;
             var matrix = doc.CreateElement ("Matrix", ns);
@@ -1560,6 +1568,161 @@ namespace Majorsilence.Reporting.Rdl
         {
             var top = FindChild (hierarchy, "TablixMembers");
             return top == null ? (1, 0, 1) : LeafRangeOf (ChildrenNamed (top, "TablixMember"));
+        }
+
+        /// <summary>
+        /// What each body leaf of a hierarchy is, in order: 0 for a detail leaf, or L for the subtotal of
+        /// the group at level L (1 = outermost) -- a static leaf sitting beside a group.
+        /// </summary>
+        private static List<int> LeafKinds (List<XmlElement> members, int depth)
+        {
+            var kinds = new List<int> ();
+            var hasGroup = members.Exists (m => FindChild (m, "Group") != null);
+            foreach (var member in members) {
+                var isGroup = FindChild (member, "Group") != null;
+                var nested = FindChild (member, "TablixMembers");
+                if (nested != null)
+                    kinds.AddRange (LeafKinds (ChildrenNamed (nested, "TablixMember"), isGroup ? depth + 1 : depth));
+                else
+                    kinds.Add (hasGroup && !isGroup ? depth + 1 : 0);
+            }
+            return kinds;
+        }
+
+        // Values assumed for a style property a cell does not set, so that a total which sets it and a
+        // detail cell which does not can still be told apart. A property not listed is left alone.
+        private static readonly Dictionary<string, string> StyleDefaults = new Dictionary<string, string> (StringComparer.Ordinal)
+        {
+            ["FontWeight"] = "Normal", ["FontStyle"] = "Normal", ["TextDecoration"] = "None",
+            ["BackgroundColor"] = "Transparent", ["Color"] = "Black", ["FontSize"] = "10pt", ["TextAlign"] = "General",
+        };
+
+        private static void PreserveSubtotalFormatting (XmlDocument doc, string ns, List<XmlElement> bodyRows,
+            List<XmlElement> bodyColumns, List<XmlElement> rowMembers, List<XmlElement> columnMembers,
+            List<AxisLevel> rowLevels, List<AxisLevel> columnLevels)
+        {
+            var rowKinds = LeafKinds (rowMembers, 0);
+            var columnKinds = LeafKinds (columnMembers, 0);
+            if (rowKinds.Count != bodyRows.Count || columnKinds.Count != bodyColumns.Count)
+                return;
+            if (rowKinds.FindAll (k => k == 0).Count != 1 || columnKinds.FindAll (k => k == 0).Count != 1)
+                return;     // several detail cells: the totals cannot be told from them by InScope alone
+
+            string[] GroupNames (List<AxisLevel> levels)
+            {
+                var names = new List<string> ();
+                foreach (var level in levels) {
+                    if (level.Dynamic != null)
+                        names.Add (FindChild (level.Dynamic, "Group").GetAttribute ("Name"));
+                }
+                return names.ToArray ();
+            }
+            var rowGroups = GroupNames (rowLevels);
+            var columnGroups = GroupNames (columnLevels);
+            if (rowKinds.Exists (k => k > rowGroups.Length) || columnKinds.Exists (k => k > columnGroups.Length))
+                return;
+            if (Array.Exists (rowGroups, string.IsNullOrEmpty) || Array.Exists (columnGroups, string.IsNullOrEmpty))
+                return;     // InScope names a group, so each needs a name
+
+            XmlElement BoxAt (int row, int column)
+            {
+                var cell = ChildrenNamed (FindChild (bodyRows[row], "TablixCells"), "TablixCell")[column];
+                var contents = FindChild (cell, "CellContents");
+                return contents == null ? null : ChildrenNamed (contents, "Textbox").Find (_ => true);
+            }
+
+            Dictionary<string, string> StyleOf (XmlElement box)
+            {
+                var map = new Dictionary<string, string> (StringComparer.Ordinal);
+                foreach (var property in Children (FindChild (box, "Style"))) {
+                    if (property.ChildNodes.Count == 1 && property.FirstChild is XmlText)
+                        map[property.LocalName] = property.InnerText;
+                }
+                return map;
+            }
+
+            // The condition that is true exactly for cells of this kind on one axis.
+            string Condition (int kind, string[] groups)
+            {
+                if (groups.Length == 0)
+                    return "True";
+                if (kind == 0)
+                    return $"InScope(\"{groups[groups.Length - 1]}\")";
+                var parts = new List<string> ();
+                if (kind > 1)
+                    parts.Add ($"InScope(\"{groups[kind - 2]}\")");
+                parts.Add ($"Not InScope(\"{groups[kind - 1]}\")");
+                return string.Join (" And ", parts);
+            }
+
+            string Value (string text)
+                => text.StartsWith ("=", StringComparison.Ordinal) ? "(" + text.Substring (1) + ")" : "\"" + text.Replace ("\"", "\"\"") + "\"";
+
+            var detailBox = BoxAt (rowKinds.IndexOf (0), columnKinds.IndexOf (0));
+            if (detailBox == null)
+                return;
+            var detail = StyleOf (detailBox);
+
+            var variants = new List<(string Condition, Dictionary<string, string> Style)> ();
+            for (var r = 0; r < bodyRows.Count; r++) {
+                for (var c = 0; c < bodyColumns.Count; c++) {
+                    if (rowKinds[r] == 0 && columnKinds[c] == 0)
+                        continue;
+                    var box = BoxAt (r, c);
+                    if (box == null)
+                        continue;
+                    variants.Add (($"({Condition (rowKinds[r], rowGroups)}) And ({Condition (columnKinds[c], columnGroups)})", StyleOf (box)));
+                }
+            }
+            if (variants.Count == 0)
+                return;
+
+            var properties = new List<string> (detail.Keys);
+            foreach (var variant in variants) {
+                foreach (var key in variant.Style.Keys) {
+                    if (!properties.Contains (key))
+                        properties.Add (key);
+                }
+            }
+
+            foreach (var property in properties) {
+                string ValueIn (Dictionary<string, string> style)
+                    => style.TryGetValue (property, out var v) ? v : (StyleDefaults.TryGetValue (property, out var d) ? d : null);
+
+                var detailValue = ValueIn (detail);
+                var chosen = new List<(string Condition, string Value)> ();
+                var differs = false;
+                var unknown = false;
+                foreach (var variant in variants) {
+                    var value = ValueIn (variant.Style);
+                    if (value == null || detailValue == null) {
+                        unknown = detailValue == null || value == null;
+                        if (unknown)
+                            break;
+                    }
+                    if (value != detailValue)
+                        differs = true;
+                    chosen.Add ((variant.Condition, value));
+                }
+                if (unknown || !differs)
+                    continue;
+
+                var expression = Value (detailValue);
+                for (var i = chosen.Count - 1; i >= 0; i--)
+                    expression = $"Iif({chosen[i].Condition}, {Value (chosen[i].Value)}, {expression})";
+
+                var style = FindChild (detailBox, "Style");
+                if (style == null) {
+                    style = doc.CreateElement ("Style", ns);
+                    detailBox.AppendChild (style);
+                }
+                var element = FindChild (style, property);
+                if (element == null) {
+                    element = doc.CreateElement (property, ns);
+                    style.AppendChild (element);
+                }
+                element.InnerText = "=" + expression;
+            }
         }
 
         private static (int Total, int Start, int Count) LeafRangeOf (List<XmlElement> topMembers)

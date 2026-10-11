@@ -1242,6 +1242,75 @@ namespace ReportTests
             Assert.That (First (doc, "Table"), Is.Null);
         }
 
+        /// <summary>The subtotal pivot with its three total cells set in bold, the detail cell left plain.</summary>
+        private static string PivotWithBoldTotals ()
+        {
+            var xml = PivotWithSubtotals;
+            foreach (var name in new[] { "RowTotal", "ColTotal", "GrandTotal" }) {
+                xml = xml.Replace ($@"<Textbox Name=""{name}""><Value>=Sum(Fields!Name.Value)</Value></Textbox>",
+                    $@"<Textbox Name=""{name}""><Value>=Sum(Fields!Name.Value)</Value><Style><FontWeight>Bold</FontWeight></Style></Textbox>");
+            }
+            Assert.That (xml, Does.Contain ("<FontWeight>Bold</FontWeight>"), "the fixture must carry the formatting");
+            return xml;
+        }
+
+        [Test]
+        public void Import_BoldTotals_BecomeInScopeExpressionsOnTheDetailCell ()
+        {
+            var doc = Load (ReportWith (Rdl2010, PivotWithBoldTotals ()));
+
+            Rdl2008Normalizer.Normalize (doc, null);
+
+            var cell = First (doc, "Matrix")["MatrixRows"].FirstChild["MatrixCells"].FirstChild["ReportItems"].FirstChild;
+            Assert.That (cell.LocalName, Is.EqualTo ("Textbox"));
+            var weight = cell["Style"]["FontWeight"].InnerText;
+            Assert.That (weight, Does.StartWith ("=Iif("));
+            Assert.That (weight, Does.Contain ("\"Bold\"").And.Contain ("\"Normal\""));
+            // each total is told apart by which groups it is inside
+            Assert.That (weight, Does.Contain ("InScope(\"Year\")").And.Contain ("InScope(\"Region\")"));
+            Assert.That (weight, Does.Contain ("Not InScope(\"Year\")").And.Contain ("Not InScope(\"Region\")"));
+        }
+
+        [Test]
+        public void Import_UnformattedTotals_LeaveTheDetailCellAlone ()
+        {
+            var doc = Load (ReportWith (Rdl2010, PivotWithSubtotals));
+
+            Rdl2008Normalizer.Normalize (doc, null);
+
+            var cell = First (doc, "Matrix")["MatrixRows"].FirstChild["MatrixCells"].FirstChild["ReportItems"].FirstChild;
+            Assert.That (cell["Style"], Is.Null, "nothing differs, so no style expressions are invented");
+        }
+
+        [Test]
+        public async Task BoldTotals_RenderBoldOnTheTotalsOnly ()
+        {
+            var xml = ReportWith (Rdl2010, PivotWithBoldTotals ().Replace ("Sum(Fields!Name.Value)", "Count(Fields!Name.Value)"));
+            var parser = new RDLParser (xml) { SkipDatabaseSchemaValidation = true };
+            using var report = await parser.Parse ();
+            Assert.That (report.ErrorMaxSeverity, Is.LessThanOrEqualTo (4), string.Join (" | ", report.ErrorItems?.Cast<string> () ?? Enumerable.Empty<string> ()));
+
+            var data = new System.Data.DataTable ();
+            data.Columns.Add ("Name", typeof (string));
+            data.Rows.Add ("Alpha");
+            data.Rows.Add ("Beta");
+            await report.DataSets["Data"].SetData (data);
+            await report.RunGetData (null);
+            using var memory = new MemoryStreamGen ();
+            await report.RunRender (memory, OutputPresentationType.HTML);
+            var html = memory.GetText ();
+
+            // A 2x2 block of detail cells, then a total column (2 cells), a total row (2) and the grand total.
+            var cells = System.Text.RegularExpressions.Regex.Matches (html, "<td id='(css\\d+)'[^>]*>(\\d+)\\s*<")
+                .Cast<System.Text.RegularExpressions.Match> ().Select (m => (Class: m.Groups[1].Value, Text: m.Groups[2].Value)).ToList ();
+            var groups = cells.GroupBy (c => c.Class).OrderBy (g => g.Count ()).ToList ();
+            Assert.That (groups.Count, Is.EqualTo (2));
+            Assert.That (groups.Select (g => g.Count ()).ToArray (), Is.EqualTo (new[] { 4, 5 }), "4 detail cells, 5 total cells");
+            string Rule (string cssClass) => System.Text.RegularExpressions.Regex.Match (html, "td#" + cssClass + @" \{[^}]*\}").Value;
+            Assert.That (Rule (groups[1].Key), Does.Match ("(?i)font-weight:\\s*bold"), "the totals are bold");
+            Assert.That (Rule (groups[0].Key), Does.Not.Match ("(?i)font-weight:\\s*bold"), "the detail cells are not");
+        }
+
         [Test]
         public async Task ExportedReport_ParsesInTheEngine ()
         {
