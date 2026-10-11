@@ -72,19 +72,33 @@ namespace Majorsilence.Reporting.Rdl
             get { return _row; }
         }
 
-        internal void Save(Report rpt, System.IO.Stream stream, Imaging.ImageFormat im)
+        internal async Task SaveAsync(Report rpt, System.IO.Stream stream, Imaging.ImageFormat im)
         {
-            if (_bm == null)
-                Draw(rpt);
+            await EnsureDrawn(rpt).ConfigureAwait(false);
             _bm.Save(stream, im);
         }
 
-        internal Draw2.Image Image(Report rpt) // GJL 14082008 Using Vector Graphics
+        internal async Task<Draw2.Image> ImageAsync(Report rpt) // GJL 14082008 Using Vector Graphics
         {
-            if (_bm == null)
-                Draw(rpt);
+            await EnsureDrawn(rpt).ConfigureAwait(false);
             return _bm;
+        }
 
+        // Draw used to be called without being awaited, so an exception inside it (a sparkline whose plot area
+        // has no height, for one) was lost and the half-drawn bitmap was still saved. That output is kept, but
+        // the failure is now logged as a warning instead of vanishing.
+        private async Task EnsureDrawn(Report rpt)
+        {
+            if (_bm != null)
+                return;
+            try
+            {
+                await Draw(rpt).ConfigureAwait(false);
+            }
+            catch (Exception e) when (_bm != null)
+            {
+                rpt.rl.LogError(4, "Chart drawing stopped early: " + e.Message);
+            }
         }
 
         protected Draw2.Bitmap CreateSizedBitmap()

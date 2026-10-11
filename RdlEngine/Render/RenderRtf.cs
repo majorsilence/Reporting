@@ -653,16 +653,14 @@ namespace Majorsilence.Reporting.Rdl
             return Task.CompletedTask;
 		}
 
-		public Task Chart(Chart c, Row row, ChartBase cb)
+		public async Task Chart(Chart c, Row row, ChartBase cb)
 		{
-           Draw2.Image im = cb.Image(r);
+           Draw2.Image im = await cb.ImageAsync(r).ConfigureAwait(false);
             
             PutImage(im, im.Width, im.Height);
             
             if (InTable(c))
                 tw.Write(@"\cell");
-
-            return Task.CompletedTask;
         }
         public Task Image(Image i, Row r, string mimeType, Stream ioin)
         {

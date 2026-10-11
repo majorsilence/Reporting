@@ -178,7 +178,7 @@ namespace Majorsilence.Reporting.Rdl
             if (c.Visibility != null && await c.Visibility.IsHidden(report, row).ConfigureAwait(false))
                 return;
             using var ms = new MemoryStream();
-            cb.Save(report, ms, ImageFormat.Png);
+            await cb.SaveAsync(report, ms, ImageFormat.Png).ConfigureAwait(false);
             excelBuilder.AddImage(c, ms.ToArray());
         }
 

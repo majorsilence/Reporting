@@ -1248,7 +1248,7 @@ function findObject(id) {
 			{
 				using (var ms = new MemoryStream())
 				{
-					cb.Save(this.r, ms, ImageFormat.Png);
+					await cb.SaveAsync(this.r, ms, ImageFormat.Png).ConfigureAwait(false);
 					relativeName = "data:image/png;base64," + Convert.ToBase64String(ms.ToArray());
 				}
 			}
@@ -1257,7 +1257,7 @@ function findObject(id) {
 				Stream io = _sg.GetIOStream(out relativeName, "png");
 				try
 				{
-					cb.Save(this.r, io, ImageFormat.Png);
+					await cb.SaveAsync(this.r, io, ImageFormat.Png).ConfigureAwait(false);
 				}
 				finally
 				{
