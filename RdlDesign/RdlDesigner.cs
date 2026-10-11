@@ -1556,6 +1556,30 @@ namespace Majorsilence.Reporting.RdlDesign
 			}
 		}
 
+		private void reportCodeToolStripMenuItem_Click(object sender, System.EventArgs e)
+		{
+			ShowReportCtlDialog(SingleCtlTypeEnum.ReportCodeCtl);
+		}
+
+		private void modulesClassesToolStripMenuItem_Click(object sender, System.EventArgs e)
+		{
+			ShowReportCtlDialog(SingleCtlTypeEnum.ReportModulesClassesCtl);
+		}
+
+		private void ShowReportCtlDialog(SingleCtlTypeEnum type)
+		{
+			MDIChild mc = this.ActiveMdiChild as MDIChild;
+			if (mc == null || mc.Editor == null || mc.DrawCtl == null)
+				return;
+
+			using (SingleCtlDialog scd = new SingleCtlDialog(mc.Editor.DesignCtl, mc.DrawCtl, null, type, null))
+			{
+				scd.StartPosition = FormStartPosition.CenterParent;
+				if (scd.ShowDialog() == DialogResult.OK)
+					mc.Modified = true;
+			}
+		}
+
 		private void menuFileNewDataSourceRef_Click(object sender, System.EventArgs e)
 		{
 			using (DialogDataSourceRef dlgDS = new DialogDataSourceRef())

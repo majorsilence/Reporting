@@ -82,6 +82,8 @@ namespace Majorsilence.Reporting.RdlDesign
 			this.dataSourcesToolStripMenuItem1 = new Majorsilence.Forms.ToolStripMenuItem();
 			this.toolStripSeparator8 = new Majorsilence.Forms.ToolStripSeparator();
 			this.embeddedImagesToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
+			this.reportCodeToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
+			this.modulesClassesToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
 			this.toolStripSeparator9 = new Majorsilence.Forms.ToolStripSeparator();
 			this.createSharedDataSourceToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
 			this.formatToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
@@ -641,6 +643,8 @@ namespace Majorsilence.Reporting.RdlDesign
             this.dataSourcesToolStripMenuItem1,
             this.toolStripSeparator8,
             this.embeddedImagesToolStripMenuItem,
+            this.reportCodeToolStripMenuItem,
+            this.modulesClassesToolStripMenuItem,
             this.toolStripSeparator9,
             this.createSharedDataSourceToolStripMenuItem});
 			this.dataToolStripMenuItem.Name = "dataToolStripMenuItem";
@@ -668,6 +672,18 @@ namespace Majorsilence.Reporting.RdlDesign
 			this.embeddedImagesToolStripMenuItem.Name = "embeddedImagesToolStripMenuItem";
 			resources.ApplyResources(this.embeddedImagesToolStripMenuItem, "embeddedImagesToolStripMenuItem");
 			this.embeddedImagesToolStripMenuItem.Click += this.embeddedImagesToolStripMenuItem_Click;
+			// 
+			// reportCodeToolStripMenuItem
+			// 
+			this.reportCodeToolStripMenuItem.Name = "reportCodeToolStripMenuItem";
+			resources.ApplyResources(this.reportCodeToolStripMenuItem, "reportCodeToolStripMenuItem");
+			this.reportCodeToolStripMenuItem.Click += this.reportCodeToolStripMenuItem_Click;
+			// 
+			// modulesClassesToolStripMenuItem
+			// 
+			this.modulesClassesToolStripMenuItem.Name = "modulesClassesToolStripMenuItem";
+			resources.ApplyResources(this.modulesClassesToolStripMenuItem, "modulesClassesToolStripMenuItem");
+			this.modulesClassesToolStripMenuItem.Click += this.modulesClassesToolStripMenuItem_Click;
 			// 
 			// toolStripSeparator9
 			// 
@@ -6735,6 +6751,8 @@ namespace Majorsilence.Reporting.RdlDesign
         private ToolStripMenuItem propertiesWindowsToolStripMenuItem;
         private ToolStripMenuItem dataSetsToolStripMenuItem;
         private ToolStripMenuItem embeddedImagesToolStripMenuItem;
+        private ToolStripMenuItem reportCodeToolStripMenuItem;
+        private ToolStripMenuItem modulesClassesToolStripMenuItem;
         private ToolStripMenuItem createSharedDataSourceToolStripMenuItem;
         private ToolStripMenuItem dataSourcesToolStripMenuItem1;
         private ToolStripSeparator toolStripSeparator8;
