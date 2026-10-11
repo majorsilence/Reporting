@@ -1,74 +1,87 @@
-﻿// See https://aka.ms/new-console-template for more information
-
-using BenchmarkDotNet.Configs;
-using BenchmarkDotNet.Jobs;
 using BenchmarkDotNet.Running;
 using Majorsilence.Reporting.Benchmarks;
 using System.Diagnostics;
 
-//var summary = BenchmarkRunner.Run(typeof(Program).Assembly, 
-//    new DebugBuildConfig()
-//        .WithOptions(ConfigOptions.DisableOptimizationsValidator));
-
-var summary = BenchmarkRunner.Run(typeof(Program).Assembly);
-
-
-//var config = DefaultConfig.Instance
-//    .AddJob(Job.Default.WithCustomBuildConfiguration("Release-DrawingCompat"))
-//    .WithOptions(ConfigOptions.DisableOptimizationsValidator);
-
-//var summary = BenchmarkSwitcher
-//    .FromAssembly(typeof(Program).Assembly)
-//    .Run(args, config);
-
-
-// Run a simple multithreaded test
-
-var jsonBp = new JsonDataProviderBenchmark();
-Console.WriteLine("|Threads|Duration|Source|Calls/Sec|Total Calls|Errors|");
-Console.WriteLine("|-------|--------|------|---------:|----------:|-----:|");
-ConcurrentCallCount(jsonBp, threadCount: 1, durationInSeconds: 30);
-ConcurrentCallCount(jsonBp, threadCount: 20, durationInSeconds: 30);
-ConcurrentCallCount(jsonBp, threadCount: 20, durationInSeconds: 30);
-ConcurrentCallCount(jsonBp, threadCount: 30, durationInSeconds: 30);
-ConcurrentCallCount(jsonBp, threadCount: 40, durationInSeconds: 30);
-ConcurrentCallCount(jsonBp, threadCount: 50, durationInSeconds: 30);
-
-
-void ConcurrentCallCount(JsonDataProviderBenchmark inst, int threadCount, int durationInSeconds)
+// Benchmarks:  dotnet run -c Release -f net10.0 -- --filter '*Json*'
+// CI allocation gate (compares bytes/op with docs/performance/allocation-baseline.json):  -- gate [--update]
+// Loop one workload for profilers + allocation-by-type sample:  -- profile WorldFacts pdf 20 alloc
+// Render every .rdl under a folder, list failures:  -- sweep ../Examples [text]
+// Print one workload's text output:  -- show GroupSortTest csv
+// Render every workload once and print size + hash:  -- smoke
+// Thread scaling (not a BDN benchmark):  dotnet run -c Release -f net10.0 -- scale [seconds] [threads...]
+if (args.Length > 0 && args[0] == "scale")
 {
-    Stopwatch stopwatch = new Stopwatch();
+    int seconds = args.Length > 1 ? int.Parse(args[1]) : 30;
+    int[] threadCounts = args.Length > 2 ? args.Skip(2).Select(int.Parse).ToArray() : [1, 4, 8, 16];
 
-// Start the stopwatch
-    stopwatch.Start();
+    var bench = new JsonDataProviderBenchmark();
+    Console.WriteLine("|Threads|Duration|Source|Calls/Sec|Total Calls|Errors|");
+    Console.WriteLine("|-------|--------|------|---------:|----------:|-----:|");
+    foreach (int threads in threadCounts)
+    {
+        ConcurrentCallCount(bench, threads, seconds);
+    }
 
-    int functionCallCount = 0;
+    return 0;
+}
+
+if (args.Length > 0 && args[0] == "gate")
+{
+    return await AllocationGate.Run(args);
+}
+
+if (args.Length > 0 && args[0] == "profile")
+{
+    await Profile.Run(args);
+    return 0;
+}
+
+if (args.Length > 0 && args[0] == "sweep")
+{
+    await Smoke.Sweep(args[1], args.Length > 2 ? args[2] : null);
+    return 0;
+}
+
+if (args.Length > 0 && args[0] == "show")
+{
+    await Smoke.Show(args[1], Enum.Parse<Majorsilence.Reporting.Rdl.OutputPresentationType>(args[2], ignoreCase: true));
+    return 0;
+}
+
+if (args.Length > 0 && args[0] == "smoke")
+{
+    await Smoke.Run();
+    return 0;
+}
+
+BenchmarkSwitcher.FromAssembly(typeof(Program).Assembly).Run(args);
+return 0;
+
+static void ConcurrentCallCount(JsonDataProviderBenchmark inst, int threadCount, int durationInSeconds)
+{
+    int calls = 0;
     int errors = 0;
+    var stopwatch = Stopwatch.StartNew();
 
-// Create an array to hold the threads
-    Thread[] threads = new Thread[threadCount];
-
-// Create and start the threads
+    var threads = new Thread[threadCount];
     for (int i = 0; i < threadCount; i++)
     {
-        threads[i] = new Thread(async () =>
+        threads[i] = new Thread(() =>
         {
             while (stopwatch.Elapsed.TotalSeconds < durationInSeconds)
             {
                 try
                 {
-                    await inst.NestedJson();
-
-                    Interlocked.Increment(ref functionCallCount);
+                    inst.NestedJson().GetAwaiter().GetResult();
+                    Interlocked.Increment(ref calls);
                 }
                 catch (Exception ex)
                 {
                     Interlocked.Increment(ref errors);
-                    Console.WriteLine(ex);
+                    Console.Error.WriteLine(ex);
                 }
             }
         });
-
         threads[i].Start();
     }
 
@@ -78,8 +91,6 @@ void ConcurrentCallCount(JsonDataProviderBenchmark inst, int threadCount, int du
     }
 
     stopwatch.Stop();
-    double callRate = functionCallCount / stopwatch.Elapsed.TotalSeconds;
-
-    Console.WriteLine(
-        $"|{threadCount}|{durationInSeconds}|{inst.GetType().Name}|{callRate:N0}|{functionCallCount:N0}|{errors:N0}|");
+    double callRate = calls / stopwatch.Elapsed.TotalSeconds;
+    Console.WriteLine($"|{threadCount}|{durationInSeconds}|{inst.GetType().Name}|{callRate:N0}|{calls:N0}|{errors:N0}|");
 }

@@ -87,15 +87,15 @@ namespace Majorsilence.Pdf
 
             bool rotated = style.IsVertical || style.IsVerticalDown || style.IsUpsideDown;
             if (style.IsVertical)
-                sb.Append($"{F(0)} {F(1)} {F(-1)} {F(0)} {F(x)} {F(pdfY)} cm\n");
+                sb.AppendNum(0).Append(" ").AppendNum(1).Append(" ").AppendNum(-1).Append(" ").AppendNum(0).Append(" ").AppendNum(x).Append(" ").AppendNum(pdfY).Append(" cm\n");
             else if (style.IsVerticalDown)
-                sb.Append($"{F(0)} {F(-1)} {F(1)} {F(0)} {F(x)} {F(pdfY)} cm\n");
+                sb.AppendNum(0).Append(" ").AppendNum(-1).Append(" ").AppendNum(1).Append(" ").AppendNum(0).Append(" ").AppendNum(x).Append(" ").AppendNum(pdfY).Append(" cm\n");
             else if (style.IsUpsideDown)
-                sb.Append($"{F(-1)} {F(0)} {F(0)} {F(-1)} {F(x)} {F(pdfY)} cm\n");
+                sb.AppendNum(-1).Append(" ").AppendNum(0).Append(" ").AppendNum(0).Append(" ").AppendNum(-1).Append(" ").AppendNum(x).Append(" ").AppendNum(pdfY).Append(" cm\n");
             else
                 sb.Append("1 0 0 1 0 0 cm\n");
 
-            sb.Append($"{F(r)} {F(g)} {F(b)} rg\n");
+            sb.AppendNum(r).Append(" ").AppendNum(g).Append(" ").AppendNum(b).Append(" rg\n");
 
             float totalWidth;
 
@@ -162,7 +162,7 @@ namespace Majorsilence.Pdf
                                 float imgPdfBottom = pdfY + (by2 * ptPerPx) - imgH;
 
                                 sb.Append("q\n");
-                                sb.Append($"{F(imgW)} 0 0 {F(imgH)} {F(imgX)} {F(imgPdfBottom)} cm\n");
+                                sb.AppendNum(imgW).Append(" 0 0 ").AppendNum(imgH).Append(" ").AppendNum(imgX).Append(" ").AppendNum(imgPdfBottom).Append(" cm\n");
                                 sb.Append($"/{img.PdfName} Do\n");
                                 sb.Append("Q\n");
                             }
@@ -183,15 +183,16 @@ namespace Majorsilence.Pdf
                                 // the horizontal branch uses. Td 0 FontSize used to shift the whole run
                                 // FontSize points off-axis, landing it FontSize points short of the box
                                 // it was measured and sized for.
-                                sb.Append($"{F(0)} {F(0)} Td\n");
+                                sb.AppendNum(0).Append(" ").AppendNum(0).Append(" Td\n");
                             else
-                                sb.Append($"{F(cursorX)} {F(pdfY)} Td\n");
+                                sb.AppendNum(cursorX).Append(" ").AppendNum(pdfY).Append(" Td\n");
                             inBt = true;
                         }
 
                         var font = _ser.GetOrAddTtfFont(segSrc.CacheKey, segTtf);
-                        sb.Append($"/{font.PdfName} {F(style.FontSize)} Tf\n");
-                        sb.Append($"{PdfSerializer.EncodeGlyphIds(segText, segTtf, font.UsedGlyphs)} Tj\n");
+                        sb.Append("/").Append(font.PdfName).Append(" ").AppendNum(style.FontSize).Append(" Tf\n");
+                        PdfSerializer.AppendGlyphIds(sb, segText, segTtf, font.UsedGlyphs);
+                        sb.Append(" Tj\n");
                         float segW = segTtf.GetWidthPoint(segText, style.FontSize);
                         cursorX   += segW;
                         totalWidth += segW;
@@ -214,13 +215,13 @@ namespace Majorsilence.Pdf
                         $"Embed a TrueType font via TextStyle.WithFontFile() or add the family to a FontRegistry.");
 
                 sb.Append("BT\n");
-                sb.Append($"/{font.PdfName} {F(style.FontSize)} Tf\n");
+                sb.Append("/").Append(font.PdfName).Append(" ").AppendNum(style.FontSize).Append(" Tf\n");
                 if (rotated)
                     // See the matching comment in the TTF path above: Td 0 0 anchors at (x, pdfY)
                     // through the vertical CTM, matching the horizontal branch's baseline-start.
-                    sb.Append($"{F(0)} {F(0)} Td\n");
+                    sb.AppendNum(0).Append(" ").AppendNum(0).Append(" Td\n");
                 else
-                    sb.Append($"{F(x)} {F(pdfY)} Td\n");
+                    sb.AppendNum(x).Append(" ").AppendNum(pdfY).Append(" Td\n");
                 sb.Append($"({PdfSerializer.PdfString(encoded)}) Tj\n");
                 sb.Append("ET\n");
 
@@ -238,9 +239,9 @@ namespace Majorsilence.Pdf
                     case TextDecoration.Overline: lineY = pdfY + style.FontSize * 0.9f; break;
                     default: lineY = pdfY; break;
                 }
-                sb.Append($"{F(r)} {F(g)} {F(b)} RG\n");
+                sb.AppendNum(r).Append(" ").AppendNum(g).Append(" ").AppendNum(b).Append(" RG\n");
                 sb.Append("0.5 w\n");
-                sb.Append($"{F(x)} {F(lineY)} m {F(x + totalWidth)} {F(lineY)} l S\n");
+                sb.AppendNum(x).Append(" ").AppendNum(lineY).Append(" m ").AppendNum(x + totalWidth).Append(" ").AppendNum(lineY).Append(" l S\n");
             }
 
             sb.Append("Q\n");
@@ -472,7 +473,7 @@ namespace Majorsilence.Pdf
             bool wrap = NeedsWrap(style);
             if (wrap) Content.Append("q\n");
             AppendStrokeState(style);
-            Content.Append($"{F(x1)} {F(PdfY(y1))} m {F(x2)} {F(PdfY(y2))} l S\n");
+            Content.AppendNum(x1).Append(" ").AppendNum(PdfY(y1)).Append(" m ").AppendNum(x2).Append(" ").AppendNum(PdfY(y2)).Append(" l S\n");
             ResetDash();
             if (wrap) Content.Append("Q\n");
             return this;
@@ -488,7 +489,7 @@ namespace Majorsilence.Pdf
             if (wrap) Content.Append("q\n");
             AppendShapeState(style);
             float pdfY = PdfY(y + height); // bottom edge in PDF coords
-            Content.Append($"{F(x)} {F(pdfY)} {F(width)} {F(height)} re\n");
+            Content.AppendNum(x).Append(" ").AppendNum(pdfY).Append(" ").AppendNum(width).Append(" ").AppendNum(height).Append(" re\n");
             AppendPaintOp(style);
             ResetDash();
             if (wrap) Content.Append("Q\n");
@@ -513,11 +514,11 @@ namespace Majorsilence.Pdf
             // Approximate circle with 4 cubic Bézier segments (κ ≈ 0.5523)
             const float k = 0.5523f;
             var sb = Content;
-            sb.Append($"{F(cx)}        {F(cy + ry)}  m\n");
-            sb.Append($"{F(cx + k * rx)} {F(cy + ry)}  {F(cx + rx)} {F(cy + k * ry)} {F(cx + rx)} {F(cy)} c\n");
-            sb.Append($"{F(cx + rx)}   {F(cy - k * ry)} {F(cx + k * rx)} {F(cy - ry)} {F(cx)} {F(cy - ry)} c\n");
-            sb.Append($"{F(cx - k * rx)} {F(cy - ry)}  {F(cx - rx)} {F(cy - k * ry)} {F(cx - rx)} {F(cy)} c\n");
-            sb.Append($"{F(cx - rx)}   {F(cy + k * ry)} {F(cx - k * rx)} {F(cy + ry)} {F(cx)} {F(cy + ry)} c\n");
+            sb.AppendNum(cx).Append("        ").AppendNum(cy + ry).Append("  m\n");
+            sb.AppendNum(cx + k * rx).Append(" ").AppendNum(cy + ry).Append("  ").AppendNum(cx + rx).Append(" ").AppendNum(cy + k * ry).Append(" ").AppendNum(cx + rx).Append(" ").AppendNum(cy).Append(" c\n");
+            sb.AppendNum(cx + rx).Append("   ").AppendNum(cy - k * ry).Append(" ").AppendNum(cx + k * rx).Append(" ").AppendNum(cy - ry).Append(" ").AppendNum(cx).Append(" ").AppendNum(cy - ry).Append(" c\n");
+            sb.AppendNum(cx - k * rx).Append(" ").AppendNum(cy - ry).Append("  ").AppendNum(cx - rx).Append(" ").AppendNum(cy - k * ry).Append(" ").AppendNum(cx - rx).Append(" ").AppendNum(cy).Append(" c\n");
+            sb.AppendNum(cx - rx).Append("   ").AppendNum(cy + k * ry).Append(" ").AppendNum(cx - k * rx).Append(" ").AppendNum(cy + ry).Append(" ").AppendNum(cx).Append(" ").AppendNum(cy + ry).Append(" c\n");
             AppendPaintOp(style);
             ResetDash();
             if (wrap) Content.Append("Q\n");
@@ -535,9 +536,9 @@ namespace Majorsilence.Pdf
             if (wrap) Content.Append("q\n");
             AppendShapeState(style);
             var sb = Content;
-            sb.Append($"{F(points[0].x)} {F(PdfY(points[0].y))} m\n");
+            sb.AppendNum(points[0].x).Append(" ").AppendNum(PdfY(points[0].y)).Append(" m\n");
             for (int i = 1; i < points.Count; i++)
-                sb.Append($"{F(points[i].x)} {F(PdfY(points[i].y))} l\n");
+                sb.AppendNum(points[i].x).Append(" ").AppendNum(PdfY(points[i].y)).Append(" l\n");
             sb.Append("h\n");
             AppendPaintOp(style);
             ResetDash();
@@ -558,10 +559,10 @@ namespace Majorsilence.Pdf
             if (wrap) Content.Append("q\n");
             AppendStrokeState(style);
             var sb = Content;
-            sb.Append($"{F(points[0].x)} {F(PdfY(points[0].y))} m\n");
+            sb.AppendNum(points[0].x).Append(" ").AppendNum(PdfY(points[0].y)).Append(" m\n");
             if (points.Count == 2)
             {
-                sb.Append($"{F(points[1].x)} {F(PdfY(points[1].y))} l\n");
+                sb.AppendNum(points[1].x).Append(" ").AppendNum(PdfY(points[1].y)).Append(" l\n");
             }
             else
             {
@@ -578,7 +579,7 @@ namespace Majorsilence.Pdf
                     float cp2x = p2.x - (p3.x - p1.x) / 6f;
                     float cp2y = p2.y - (p3.y - p1.y) / 6f;
 
-                    sb.Append($"{F(cp1x)} {F(PdfY(cp1y))} {F(cp2x)} {F(PdfY(cp2y))} {F(p2.x)} {F(PdfY(p2.y))} c\n");
+                    sb.AppendNum(cp1x).Append(" ").AppendNum(PdfY(cp1y)).Append(" ").AppendNum(cp2x).Append(" ").AppendNum(PdfY(cp2y)).Append(" ").AppendNum(p2.x).Append(" ").AppendNum(PdfY(p2.y)).Append(" c\n");
                 }
             }
             sb.Append("S\n");
@@ -600,7 +601,7 @@ namespace Majorsilence.Pdf
             float pdfY = PdfY(y + height);
             var sb = Content;
             sb.Append("q\n");
-            sb.Append($"{F(width)} 0 0 {F(height)} {F(x)} {F(pdfY)} cm\n");
+            sb.AppendNum(width).Append(" 0 0 ").AppendNum(height).Append(" ").AppendNum(x).Append(" ").AppendNum(pdfY).Append(" cm\n");
             sb.Append($"/{img.PdfName} Do\n");
             sb.Append("Q\n");
             return this;
@@ -936,7 +937,6 @@ namespace Majorsilence.Pdf
 
         // ── internal helpers ─────────────────────────────────────────────────
 
-        private static string F(float v) => PdfSerializer.Fmt(v);
 
         private void AppendStrokeState(StrokeStyle style)
         {
@@ -946,8 +946,8 @@ namespace Majorsilence.Pdf
                 string gsName = _ser.GetOrAddExtGState(1f, style.Opacity);
                 sb.Append($"/{gsName} gs\n");
             }
-            sb.Append($"{F(style.Color.Rf)} {F(style.Color.Gf)} {F(style.Color.Bf)} RG\n");
-            sb.Append($"{F(style.Width)} w\n");
+            sb.AppendNum(style.Color.Rf).Append(" ").AppendNum(style.Color.Gf).Append(" ").AppendNum(style.Color.Bf).Append(" RG\n");
+            sb.AppendNum(style.Width).Append(" w\n");
             AppendDash(style.LineStyle);
         }
 
@@ -966,13 +966,13 @@ namespace Majorsilence.Pdf
             if (style.HasFill)
             {
                 var c = style.FillColor!.Value;
-                sb.Append($"{F(c.Rf)} {F(c.Gf)} {F(c.Bf)} rg\n");
+                sb.AppendNum(c.Rf).Append(" ").AppendNum(c.Gf).Append(" ").AppendNum(c.Bf).Append(" rg\n");
             }
             if (style.HasStroke)
             {
                 var c = style.StrokeColor!.Value;
-                sb.Append($"{F(c.Rf)} {F(c.Gf)} {F(c.Bf)} RG\n");
-                sb.Append($"{F(style.StrokeWidth)} w\n");
+                sb.AppendNum(c.Rf).Append(" ").AppendNum(c.Gf).Append(" ").AppendNum(c.Bf).Append(" RG\n");
+                sb.AppendNum(style.StrokeWidth).Append(" w\n");
                 AppendDash(style.LineStyle);
             }
         }

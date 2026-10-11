@@ -60,14 +60,35 @@ namespace Majorsilence.Reporting.Rdl
         }
         internal List<MatrixEntry> GetSortedData(Report rpt)
         {
+            // The entries are sorted by PrepareSortedDataAsync, which Matrix.RunBuildSet awaits right after
+            // building them (the only place MatrixEntry trees are made). Sorting needs the sort expressions
+            // evaluated, which is async, so it cannot be done lazily from here.
+            if (_SortedData == null && _HashData != null && _HashData.Count > 0)
+                throw new InvalidOperationException("Matrix entries were read before they were sorted (PrepareSortedDataAsync).");
+
+            return _SortedData;
+        }
+
+        /// <summary>
+        /// Sorts this entry's children, and theirs, awaiting the sort expressions. The matrix reads the
+        /// sorted lists from many synchronous methods through <see cref="GetSortedData"/>, so they are
+        /// sorted here once, after the entries are built, rather than lazily with a blocking comparer.
+        /// </summary>
+        internal async Task PrepareSortedDataAsync(Report rpt)
+        {
             if (_SortedData == null && _HashData != null && _HashData.Count > 0)
             {
-                _SortedData = new List<MatrixEntry>(_HashData.Values);
-                _SortedData.Sort(new MatrixEntryComparer(rpt, GetSortBy()));
+                var list = new List<MatrixEntry>(_HashData.Values);
+                await MatrixEntrySort.SortAsync(rpt, list, GetSortBy());
+                _SortedData = list;
                 _HashData = null;       // we only keep one
             }
 
-            return _SortedData;
+            if (_SortedData != null)
+            {
+                foreach (MatrixEntry child in _SortedData)
+                    await child.PrepareSortedDataAsync(rpt);
+            }
         }
 
         internal MatrixEntry Parent
@@ -163,52 +184,84 @@ namespace Majorsilence.Reporting.Rdl
 
     }
 
-    class MatrixEntryComparer : System.Collections.Generic.IComparer<MatrixEntry>
+    static class MatrixEntrySort
     {
-        Report _rpt;
-        Sorting _Sorting;
-
-        public MatrixEntryComparer(Report rpt, Sorting s)
+        /// <summary>
+        /// Sorts the entries by the matrix's sort expressions (or by their hash text when there are none),
+        /// each entry's expressions evaluated once, awaited. A comparer is synchronous, so sorting with one
+        /// meant two Task.Run(...).GetResult() hops per comparison.
+        /// </summary>
+        internal static async Task SortAsync(Report rpt, List<MatrixEntry> list, Sorting sorting)
         {
-            _rpt = rpt;
-            _Sorting = s;
-        }
-
-        #region IComparer Members
-
-        public int Compare(MatrixEntry m1, MatrixEntry m2)
-        {
-            if (_Sorting == null)
-                return m1.HashItem.CompareTo(m2.HashItem);
-
-            object o1 = null, o2 = null;
-            TypeCode tc = TypeCode.Object;
-            int rc;
-            try
+            if (sorting == null || list.Count < 2)
             {
-                foreach (SortBy sb in _Sorting.Items)
+                list.Sort((a, b) => a.HashItem.CompareTo(b.HashItem));
+                return;
+            }
+
+            var sortItems = sorting.Items;
+            var exprs = new IExpr[sortItems.Count];
+            var types = new TypeCode[sortItems.Count];
+            for (int k = 0; k < exprs.Length; k++)
+            {
+                exprs[k] = ((SortBy) sortItems[k]).SortExpression.Expr;
+                types[k] = exprs[k].GetTypeCode();
+            }
+
+            var items = new Keyed[list.Count];
+            for (int i = 0; i < items.Length; i++)
+            {
+                MatrixEntry me = list[i];
+                var keys = new object[exprs.Length];
+                bool failed = false;
+                int k = 0;
+                try
                 {
-                    IExpr e = sb.SortExpression.Expr;
-                    // HACK: async
-                    o1 = Task.Run(async () => await e.Evaluate(_rpt, m1.R)).GetAwaiter().GetResult();
-                    o2 = Task.Run(async () => await e.Evaluate(_rpt, m2.R)).GetAwaiter().GetResult();
-                    tc = e.GetTypeCode();
-                    rc = Filter.ApplyCompare(tc, o1, o2);
-                    if (rc != 0)
-                        return sb.Direction == SortDirectionEnum.Ascending ? rc : -rc;
+                    for (; k < exprs.Length; k++)
+                        keys[k] = await exprs[k].Evaluate(rpt, me.R);
                 }
+                catch (Exception e)		// this really shouldn't happen
+                {
+                    failed = true;
+                    rpt.rl.LogError(8,
+                        string.Format("Matrix Sort rows exception\r\nSort key: {0} of entry {1}\r\n{2}\r\n{3}",
+                        k, me.HashItem, e.Message, e.StackTrace));
+                }
+                items[i] = new Keyed { Entry = me, Keys = keys, Failed = failed };
             }
-            catch (Exception e)		// this really shouldn't happen
-            {
-                _rpt.rl.LogError(8,
-                    string.Format("Matrix Sort rows exception\r\nArguments: {0} {1}\r\nTypecode: {2}\r\n{3}\r\n{4}",
-                    o1, o2, tc.ToString(), e.Message, e.StackTrace));
-                return m1.HashItem.CompareTo(m2.HashItem);
-            }
-            return 0;		    // treat as the same
 
+            Array.Sort(items, (a, b) =>
+            {
+                if (a.Failed || b.Failed)
+                    return a.Entry.HashItem.CompareTo(b.Entry.HashItem);
+                try
+                {
+                    for (int k = 0; k < exprs.Length; k++)
+                    {
+                        int rc = Filter.ApplyCompare(types[k], a.Keys[k], b.Keys[k]);
+                        if (rc != 0)
+                            return ((SortBy) sortItems[k]).Direction == SortDirectionEnum.Ascending ? rc : -rc;
+                    }
+                }
+                catch (Exception e)		// this really shouldn't happen
+                {
+                    rpt.rl.LogError(8,
+                        string.Format("Matrix Sort rows exception\r\nEntries: {0} {1}\r\n{2}\r\n{3}",
+                        a.Entry.HashItem, b.Entry.HashItem, e.Message, e.StackTrace));
+                    return a.Entry.HashItem.CompareTo(b.Entry.HashItem);
+                }
+                return 0;		    // treat as the same
+            });
+
+            for (int i = 0; i < items.Length; i++)
+                list[i] = items[i].Entry;
         }
 
-        #endregion
+        private struct Keyed
+        {
+            internal MatrixEntry Entry;
+            internal object[] Keys;
+            internal bool Failed;
+        }
     }
 }

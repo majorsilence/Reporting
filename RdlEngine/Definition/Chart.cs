@@ -397,6 +397,7 @@ namespace Majorsilence.Reporting.Rdl
 					break;
 			}
 
+			await cb.InitAsync();
 			return cb;
 		}
 

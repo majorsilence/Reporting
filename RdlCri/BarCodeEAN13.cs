@@ -175,17 +175,17 @@ namespace Majorsilence.Reporting.Cri
             // Draw the left guard text (i.e. 2nd digit of the NumberSystem)
             string wc = upcode.Substring(0, 1);
             g.DrawString(wc, f, Draw2.Brushes.Black,
-                new System.Drawing.PointF(ModuleEdgePx(LeftQuietZoneModules) - g.MeasureString(wc, f).Width, textY));
+                new System.Drawing.PointF(ModuleEdgePx(LeftQuietZoneModules) - g.MeasureStringLocked(wc, f).Width, textY));
 
             // Draw the manufacturing digits
             wc = upcode.Substring(1, 6);
             g.DrawString(wc, f, Draw2.Brushes.Black,
-                new System.Drawing.PointF(ModuleEdgePx(ModulesToManufacturingEnd) - g.MeasureString(wc, f).Width, textY));
+                new System.Drawing.PointF(ModuleEdgePx(ModulesToManufacturingEnd) - g.MeasureStringLocked(wc, f).Width, textY));
 
             // Draw the product code + the checksum digit
             wc = upcode.Substring(7, 5) + CheckSum(upcode).ToString();
             g.DrawString(wc, f, Draw2.Brushes.Black,
-                new System.Drawing.PointF(ModuleEdgePx(ModulesToProductEnd) - g.MeasureString(wc, f).Width, textY));
+                new System.Drawing.PointF(ModuleEdgePx(ModulesToProductEnd) - g.MeasureStringLocked(wc, f).Width, textY));
         }
 
         /// <summary>

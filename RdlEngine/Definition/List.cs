@@ -169,7 +169,7 @@ namespace Majorsilence.Reporting.Rdl
 				Rows saveData = wc.Data;
 				wc.Data = new Rows(rpt, null, _Grouping, _Sorting);
 				wc.Data.Data = saveData.Data;
-				wc.Data.Sort();
+				await wc.Data.SortAsync();
                 await PrepGroups(rpt, wc);
 			}
 			// If we haven't formed any groups then form one with all rows

@@ -21,14 +21,20 @@ namespace Majorsilence.Reporting.Rdl
     ///</summary> 
     public class RdlEngineConfig
     {
-        static internal IDictionary SqlEntries = null;
+        // SqlEntries is what everything checks to know the config has been read, so it is published
+        // last (see RdlEngineConfigInit) and is volatile so a thread that sees it also sees the rest.
+        static internal volatile IDictionary SqlEntries = null;
         // list of entries
-        static internal Dictionary<string, CustomReportItemEntry> CustomReportItemEntries = null;
+        static internal volatile Dictionary<string, CustomReportItemEntry> CustomReportItemEntries = null;
         static DateTime _InitFileCreationTime = DateTime.MinValue;
 
         // Compression entries
-        static CompressionConfig _Compression = null;
-        static string _DirectoryLoadedFrom = null;
+        static volatile CompressionConfig _Compression = null;
+        static volatile string _DirectoryLoadedFrom = null;
+
+        // Reading the config file is serialised: concurrent first requests would otherwise each
+        // parse it and overwrite the statics above while others read them.
+        static readonly object _initLock = new object();
 
         // AOT registration state
         static Func<Report, RdlCodeFunctions>? _codeProviderFactory = null;
@@ -95,6 +101,14 @@ namespace Majorsilence.Reporting.Rdl
 
         // initialize configuration
         static public void RdlEngineConfigInit(params string[] dirs)
+        {
+            lock (_initLock)
+            {
+                RdlEngineConfigInitLocked(dirs);
+            }
+        }
+
+        static void RdlEngineConfigInitLocked(string[] dirs)
         {
             bool bLoaded = false;
             XmlDocument xDoc = new XmlDocument();
@@ -407,9 +421,9 @@ namespace Majorsilence.Reporting.Rdl
                 }
             }
 
-            SqlEntries = dsDir;
             CustomReportItemEntries = crieDir;
             _InitFileCreationTime = fileTime;           // save initialization time 
+            SqlEntries = dsDir;                         // last: this is the "initialised" flag
 
             return;
         }

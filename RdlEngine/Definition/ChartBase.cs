@@ -42,13 +42,24 @@ namespace Majorsilence.Reporting.Rdl
             _SeriesBrush = null;
             _SeriesMarker = null;
 
-            // HACK: async
-            Task.Run(async () => { 
-                _showToolTips =  await showTooltips.EvaluateBoolean(r, row);
-                _showToolTipsX = await showTooltipsX.EvaluateBoolean(r, row);
-                _tooltipYFormat = await _ToolTipYFormat.EvaluateString(r, row);
-                _tooltipXFormat = await _ToolTipXFormat.EvaluateString(r, row);
-            }).GetAwaiter().GetResult();
+            // evaluated by InitAsync: a constructor cannot await
+            _initReport = r;
+            _showTooltipsExpr = showTooltips;
+            _showTooltipsXExpr = showTooltipsX;
+            _tooltipYFormatExpr = _ToolTipYFormat;
+            _tooltipXFormatExpr = _ToolTipXFormat;
+        }
+
+        private Report _initReport;
+        private Expression _showTooltipsExpr, _showTooltipsXExpr, _tooltipYFormatExpr, _tooltipXFormatExpr;
+
+        /// <summary>Evaluates the tooltip settings; call once after construction, before Draw.</summary>
+        internal async Task InitAsync()
+        {
+            _showToolTips = await _showTooltipsExpr.EvaluateBoolean(_initReport, _row);
+            _showToolTipsX = await _showTooltipsXExpr.EvaluateBoolean(_initReport, _row);
+            _tooltipYFormat = await _tooltipYFormatExpr.EvaluateString(_initReport, _row);
+            _tooltipXFormat = await _tooltipXFormatExpr.EvaluateString(_initReport, _row);
         }
 
         internal virtual Task Draw(Report rpt)
@@ -584,7 +595,7 @@ namespace Majorsilence.Reporting.Rdl
                 string c = await GetSeriesValue(rpt, iCol);
                 if (c != "")  //14052008WRP cater for empty strings in legend names
                 {
-                    System.Drawing.SizeF ms = g.MeasureString(c, f, maxSize, sf);
+                    System.Drawing.SizeF ms = g.MeasureStringLocked(c, f, maxSize, sf);
                     sizes[iCol - 1] = new System.Drawing.Size((int)Math.Ceiling(ms.Width),
                                              (int)Math.Ceiling(ms.Height));
                     if (sizes[iCol - 1].Width > maxWidth)

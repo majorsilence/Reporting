@@ -1087,7 +1087,7 @@ namespace Majorsilence.Reporting.Rdl
 			return builder.ToString();
 		}
 
-		static Hashtable htmlEntitiesTable = null;
+		static volatile Hashtable htmlEntitiesTable = null;
 
 		char HtmlLookup(string entity)
 		{
@@ -1097,7 +1097,9 @@ namespace Majorsilence.Reporting.Rdl
 				{
 					if (htmlEntitiesTable == null)
 					{
-						htmlEntitiesTable = new Hashtable();
+						// Filled in a local and published afterwards: another thread seeing the field
+						// non-null skips the lock, so it must never see a half-filled table.
+						var table = new Hashtable();
 						string[] htmlEntities = new string[] 
 						{ 
 							"\"-quot", "&-amp", "<-lt", ">-gt", "\x00a0-nbsp", "\x00a1-iexcl", "\x00a2-cent", "\x00a3-pound", "\x00a4-curren", "\x00a5-yen", "\x00a6-brvbar", "\x00a7-sect", "\x00a8-uml", "\x00a9-copy", "\x00aa-ordf", "\x00ab-laquo", 
@@ -1121,8 +1123,9 @@ namespace Majorsilence.Reporting.Rdl
 						for (int i = 0; i < htmlEntities.Length; i++)
 						{
 							string current = htmlEntities[i];
-							htmlEntitiesTable[current.Substring(2)] = current[0];
+							table[current.Substring(2)] = current[0];
 						}
+						htmlEntitiesTable = table;
 					}
 				}
 			}

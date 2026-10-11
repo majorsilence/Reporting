@@ -295,8 +295,7 @@ namespace Majorsilence.Pdf.Internal
 
                 pageContentIdx[pi] = objects.Count;
                 int contentObjNum  = objects.Count + 1;
-                byte[] raw         = Latin1.GetBytes(page.Content.ToString());
-                byte[] compressed  = Compress(raw);
+                byte[] compressed  = Compress(page.Content);
                 byte[] streamData  = _encryptor != null
                     ? _encryptor.EncryptStream(contentObjNum, 0, compressed)
                     : compressed;
@@ -936,6 +935,29 @@ namespace Majorsilence.Pdf.Internal
         internal static string PdfString(string s) =>
             s.Replace("\\", "\\\\").Replace("(", "\\(").Replace(")", "\\)");
 
+        /// <summary>
+        /// Appends the text as a PDF hex string of glyph ids ("&lt;00410042&gt;") straight into
+        /// <paramref name="sb"/>, without a string per glyph.
+        /// </summary>
+        internal static void AppendGlyphIds(StringBuilder sb, string text, TrueTypeFont ttf,
+            HashSet<ushort>? usedGlyphs = null)
+        {
+            const string Hex = "0123456789ABCDEF";
+            sb.Append('<');
+            for (int i = 0; i < text.Length; i++)
+            {
+                int codePoint;
+                if (char.IsHighSurrogate(text[i]) && i + 1 < text.Length && char.IsLowSurrogate(text[i + 1]))
+                { codePoint = char.ConvertToUtf32(text[i], text[i + 1]); i++; }
+                else codePoint = text[i];
+                ushort gid = ttf.GetGlyphId(codePoint);
+                usedGlyphs?.Add(gid);
+                sb.Append(Hex[(gid >> 12) & 0xF]).Append(Hex[(gid >> 8) & 0xF])
+                  .Append(Hex[(gid >> 4) & 0xF]).Append(Hex[gid & 0xF]);
+            }
+            sb.Append('>');
+        }
+
         internal static string EncodeGlyphIds(string text, TrueTypeFont ttf,
             HashSet<ushort>? usedGlyphs = null)
         {
@@ -961,12 +983,48 @@ namespace Majorsilence.Pdf.Internal
             return sb.ToString();
         }
 
+        /// <summary>
+        /// Compresses a content stream straight from the builder's chunks as Latin-1, so the whole
+        /// page is never copied into a string and a byte array first (both are large-object-heap
+        /// allocations for a busy page). The bytes are the same as compressing the finished string.
+        /// </summary>
+        private static byte[] Compress(StringBuilder content)
+        {
+#if NET6_0_OR_GREATER
+            byte[] buf = System.Buffers.ArrayPool<byte>.Shared.Rent(16 * 1024);
+            try
+            {
+                using (var ms = new MemoryStream())
+                {
+                    using (var zs = new ZLibStream(ms, CompressionLevel.Optimal, leaveOpen: true))
+                    {
+                        foreach (ReadOnlyMemory<char> chunk in content.GetChunks())
+                        {
+                            for (int offset = 0; offset < chunk.Length; offset += buf.Length)
+                            {
+                                int n = Latin1.GetBytes(chunk.Span.Slice(offset, Math.Min(buf.Length, chunk.Length - offset)), buf);
+                                zs.Write(buf, 0, n);
+                            }
+                        }
+                    }
+                    return ms.ToArray();
+                }
+            }
+            finally
+            {
+                System.Buffers.ArrayPool<byte>.Shared.Return(buf);
+            }
+#else
+            return Compress(Latin1.GetBytes(content.ToString()));
+#endif
+        }
+
         private static byte[] Compress(byte[] data)
         {
 #if NET6_0_OR_GREATER
             using (var ms = new MemoryStream())
             {
-                using (var zs = new ZLibStream(ms, CompressionLevel.SmallestSize, leaveOpen: true))
+                using (var zs = new ZLibStream(ms, CompressionLevel.Optimal, leaveOpen: true))
                     zs.Write(data, 0, data.Length);
                 return ms.ToArray();
             }

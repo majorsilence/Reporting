@@ -28,7 +28,7 @@ namespace Majorsilence.Reporting.Data
             _tconn = conn ?? throw new ArgumentNullException(nameof(conn), "Connection cannot be null.");
             _requestedColumns = cmd.Columns;
         
-            string json = Task.Run(async () => await ReadAllJsonAsync()).GetAwaiter().GetResult();
+            string json = ReadAllJson();
 
             var extractor = new JsonTableExtractor();
             var allReaders = extractor.Extract(json);
@@ -117,7 +117,9 @@ namespace Majorsilence.Reporting.Data
         public long GetInt64(int i) => (long)GetValue(i);
         public string GetString(int i) => GetValue(i)?.ToString();
 
-        async Task<StreamReader> GetStream()
+        // The constructor of an IDataReader cannot be async, so the stream is opened synchronously
+        // (HttpClient.Send is a real synchronous call): no thread-pool hop or blocked pool thread.
+        StreamReader GetStream()
         {
             string fname = _tcmd.Url;
             Stream strm = null;
@@ -139,9 +141,9 @@ namespace Majorsilence.Reporting.Data
                         new System.Net.Http.Headers.AuthenticationHeaderValue(authScheme, authParameters);
                 }
 
-                HttpResponseMessage response = await _tconn.Client.SendAsync(request);
+                HttpResponseMessage response = _tconn.Client.Send(request);
                 response.EnsureSuccessStatusCode();
-                strm = await response.Content.ReadAsStreamAsync();
+                strm = response.Content.ReadAsStream();
             }
             else if (fname.StartsWith("file:"))
             {
@@ -155,10 +157,10 @@ namespace Majorsilence.Reporting.Data
             return new StreamReader(strm);
         }
 
-        private async Task<string> ReadAllJsonAsync()
+        private string ReadAllJson()
         {
-            using var sr = await GetStream();
-            return await sr.ReadToEndAsync();
+            using var sr = GetStream();
+            return sr.ReadToEnd();
         }
     }
 }

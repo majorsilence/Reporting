@@ -98,7 +98,7 @@ namespace Majorsilence.Reporting.Rdl
                 return null;
 
             var rectangle = El (doc, ns, "Rectangle");
-            rectangle.SetAttribute ("Name", string.IsNullOrEmpty (name) ? "RdlGaugePanel" + (++_counter) : name);
+            rectangle.SetAttribute ("Name", string.IsNullOrEmpty (name) ? "RdlGaugePanel" + System.Threading.Interlocked.Increment(ref _counter) : name);
             foreach (var keep in new[] { "Top", "Left", "Height", "Width", "ZIndex", "Visibility" }) {
                 var source = Child (panel, keep);
                 if (source != null)

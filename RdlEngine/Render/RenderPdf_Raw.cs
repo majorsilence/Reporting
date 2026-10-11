@@ -15,6 +15,7 @@
  */
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -101,12 +102,24 @@ namespace Majorsilence.Reporting.Rdl
             float width, System.Drawing.Color c, BorderStyleEnum ls)
         {
             if (width <= 0) return;
-            _currentPage.DrawLine(x, y, x2, y2,
-                StrokeStyle.Default
+            var line = ConvertLineStyle(ls);
+            var key = (width, (c.R << 16) | (c.G << 8) | c.B, line);
+            if (!_strokeStyles.TryGetValue(key, out var stroke))
+            {
+                stroke = StrokeStyle.Default
                     .WithWidth(width)
                     .WithColor(PdfColor.FromRgb(c.R, c.G, c.B))
-                    .WithLineStyle(ConvertLineStyle(ls)));
+                    .WithLineStyle(line);
+                _strokeStyles[key] = stroke;
+            }
+            _currentPage.DrawLine(x, y, x2, y2, stroke);
         }
+
+        // Stroke and fill styles are immutable and a report repeats a handful of them (cell borders,
+        // backgrounds), so each distinct one is made once per render.
+        private readonly Dictionary<(float Width, int Rgb, LineStyle Line), StrokeStyle> _strokeStyles =
+            new Dictionary<(float, int, LineStyle), StrokeStyle>();
+        private readonly Dictionary<int, ShapeStyle> _fillStyles = new Dictionary<int, ShapeStyle>();
 
         // ── images ────────────────────────────────────────────────────────────
 
@@ -369,6 +382,15 @@ namespace Majorsilence.Reporting.Rdl
         // fraction too wide lost its last word once the box clipped the second line.
         internal static string[] RejoinSoftWraps(string[] lines)
         {
+            // Nothing to rejoin unless a line ends in a space (the common case is one short line).
+            bool anySoftWrap = false;
+            foreach (string line in lines)
+            {
+                if (!string.IsNullOrEmpty(line) && line[line.Length - 1] == ' ') { anySoftWrap = true; break; }
+            }
+            if (!anySoftWrap)
+                return lines;
+
             var joined = new List<string>(lines.Length);
             var current = new System.Text.StringBuilder();
             foreach (string line in lines)
@@ -388,20 +410,25 @@ namespace Majorsilence.Reporting.Rdl
         // line against the actual PDF font metrics and split further if needed.
         private string[] RewrapLines(string[] lines, TextStyle style, float maxWidth)
         {
-            var result = new List<string>(lines.Length);
-            foreach (string line in lines)
+            List<string> result = null;     // made only when a line has to be split
+            for (int i = 0; i < lines.Length; i++)
             {
-                if (string.IsNullOrEmpty(line))
+                string line = lines[i];
+                if (string.IsNullOrEmpty(line) || _currentPage.MeasureTextWidth(line, style) <= maxWidth)
                 {
-                    result.Add(line);
+                    result?.Add(line);
                     continue;
                 }
-                if (_currentPage.MeasureTextWidth(line, style) <= maxWidth)
-                    result.Add(line);
-                else
-                    WrapLine(line, style, maxWidth, result);
+
+                if (result == null)
+                {
+                    result = new List<string>(lines.Length + 1);
+                    for (int j = 0; j < i; j++)
+                        result.Add(lines[j]);
+                }
+                WrapLine(line, style, maxWidth, result);
             }
-            return result.ToArray();
+            return result == null ? lines : result.ToArray();
         }
 
         private void WrapLine(string text, TextStyle style, float maxWidth, List<string> output)
@@ -437,10 +464,26 @@ namespace Majorsilence.Reporting.Rdl
 
         // ── font registry construction ────────────────────────────────────────
 
+        // Scanning the font folders is the same work for every report, so it is done once per
+        // distinct set of inputs and the result shared. A FontRegistry is only read after it is
+        // built (Resolve / Contains / GetFallbackSources), so sharing it between threads is safe.
+        // Like InstalledFontScanner's per-folder cache, fonts installed after the first report
+        // are not seen until the process restarts.
+        private static readonly ConcurrentDictionary<string, Lazy<FontRegistry>> _sharedRegistries =
+            new ConcurrentDictionary<string, Lazy<FontRegistry>>(StringComparer.Ordinal);
+
         private FontRegistry BuildFontRegistry()
         {
             // FontFolder sets _liberationFonts / _dejavuFonts as a side-effect
             string sysFolder = FontFolder;
+            string home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+            string key = string.Join("|", sysFolder, _liberationFonts, _dejavuFonts, home, IsOSX, _osPlatform);
+            return _sharedRegistries.GetOrAdd(key,
+                _ => new Lazy<FontRegistry>(() => BuildFontRegistryUncached(sysFolder))).Value;
+        }
+
+        private FontRegistry BuildFontRegistryUncached(string sysFolder)
+        {
             var reg = new FontRegistry();
 
             // ── bundled fonts (always available via Majorsilence.Forms.Drawing.Common) ──
@@ -693,10 +736,26 @@ namespace Majorsilence.Reporting.Rdl
             }
         }
 
+        // TextStyle is immutable, and the style ResolveFont builds depends only on these values, so one
+        // is made per distinct combination per render rather than per text item (each With* call clones).
+        private readonly Dictionary<(string Family, float Size, int Rgb, bool Bold, bool Italic), TextStyle> _textStyles =
+            new Dictionary<(string, float, int, bool, bool), TextStyle>();
+
         private TextStyle ResolveFont(StyleInfo si)
         {
             bool bold   = si.IsFontBold();
             bool italic = si.FontStyle == FontStyleEnum.Italic;
+            var key = (si.FontFamily ?? "", si.FontSize, (si.Color.R << 16) | (si.Color.G << 8) | si.Color.B, bold, italic);
+            if (!_textStyles.TryGetValue(key, out var style))
+            {
+                style = BuildTextStyle(si, bold, italic);
+                _textStyles[key] = style;
+            }
+            return style;
+        }
+
+        private TextStyle BuildTextStyle(StyleInfo si, bool bold, bool italic)
+        {
             string face = NormalizeFace(si.FontFamily);
 
             var baseStyle = TextStyle.Default
@@ -726,8 +785,13 @@ namespace Majorsilence.Reporting.Rdl
 
         private void iAddFillRect(float x, float y, float width, float height, System.Drawing.Color c)
         {
-            _currentPage.DrawRectangle(x, y, width, height,
-                ShapeStyle.Filled(PdfColor.FromRgb(c.R, c.G, c.B)));
+            int rgb = (c.R << 16) | (c.G << 8) | c.B;
+            if (!_fillStyles.TryGetValue(rgb, out var fill))
+            {
+                fill = ShapeStyle.Filled(PdfColor.FromRgb(c.R, c.G, c.B));
+                _fillStyles[rgb] = fill;
+            }
+            _currentPage.DrawRectangle(x, y, width, height, fill);
         }
 
         private ShapeStyle BuildShapeStyle(StyleInfo si)

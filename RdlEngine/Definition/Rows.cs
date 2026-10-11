@@ -11,7 +11,7 @@ namespace Majorsilence.Reporting.Rdl
 	///<summary>
 	/// A collection of rows.
 	///</summary>
-    internal class Rows : System.Collections.Generic.IComparer<Row>, IDisposable
+    internal class Rows : IDisposable
 	{
 		List<Row> _Data;	// array of Row object;
         List<RowsSortExpression> _SortBy;	// array of expressions used to sort the data
@@ -141,10 +141,78 @@ namespace Majorsilence.Reporting.Rdl
 			get {return this._Rpt;}
 		}
 
-		internal void Sort()
+		/// <summary>
+		/// Sorts the rows by their sort expressions, evaluating each row's keys once, awaited, in order.
+		/// (A comparer has to be synchronous, so sorting with one meant running every evaluation through
+		/// Task.Run(...).GetResult(): a thread-pool hop per evaluation, O(n log n) of them, each blocking a
+		/// pool thread - slow, and a way to starve the pool when several reports render at once.)
+		/// </summary>
+		internal async Task SortAsync()
 		{
-			// sort the data array by the data.
-			_Data.Sort(this);
+			if (_SortBy == null || _Data.Count < 2)
+				return;     // nothing to sort by (or nothing to sort)
+
+			int keyCount = _SortBy.Count;
+			var types = new TypeCode[keyCount];
+			for (int k = 0; k < keyCount; k++)
+				types[k] = _SortBy[k].expr.GetTypeCode();
+
+			var entries = new SortEntry[_Data.Count];
+			for (int i = 0; i < entries.Length; i++)
+			{
+				Row row = _Data[i];
+				var keys = new object[keyCount];
+				bool failed = false;
+				int k = 0;
+				try
+				{
+					for (; k < keyCount; k++)
+						keys[k] = await _SortBy[k].expr.Evaluate(_Rpt, row);
+				}
+				catch (Exception e)		// this really shouldn't happen
+				{
+					failed = true;
+					_Rpt.rl.LogError(8,
+						string.Format("Sort rows exception\r\nSort key: {0} of row {1}\r\n{2}\r\n{3}",
+						k, row.RowNumber, e.Message, e.StackTrace));
+				}
+				entries[i] = new SortEntry { Row = row, Keys = keys, Failed = failed };
+			}
+
+			Array.Sort(entries, (a, b) =>
+			{
+				if (a.Row == b.Row)
+					return 0;
+				if (!a.Failed && !b.Failed)
+				{
+					try
+					{
+						for (int k = 0; k < keyCount; k++)
+						{
+							int rc = Filter.ApplyCompare(types[k], a.Keys[k], b.Keys[k]);
+							if (rc != 0)
+								return _SortBy[k].bAscending ? rc : -rc;
+						}
+					}
+					catch (Exception e)		// this really shouldn't happen
+					{
+						_Rpt.rl.LogError(8,
+							string.Format("Sort rows exception\r\nRows: {0} {1}\r\n{2}\r\n{3}",
+							a.Row.RowNumber, b.Row.RowNumber, e.Message, e.StackTrace));
+					}
+				}
+				return a.Row.RowNumber - b.Row.RowNumber;	// in case of tie use original row number
+			});
+
+			for (int i = 0; i < entries.Length; i++)
+				_Data[i] = entries[i].Row;
+		}
+
+		private struct SortEntry
+		{
+			internal Row Row;
+			internal object[] Keys;
+			internal bool Failed;
 		}
 
 		internal List<Row> Data
@@ -173,39 +241,6 @@ namespace Majorsilence.Reporting.Rdl
 			set { _CurrentGroups = value; }
 		}
 
-		#region IComparer Members
-
-		public int Compare(Row r1, Row r2)
-		{
-			if (r1 == r2)				// why does the sort routine do this??
-				return 0;
-
-			object o1=null,o2=null;
-			TypeCode tc = TypeCode.Object;
-			int rc;
-			try 
-			{
-				foreach (RowsSortExpression se in _SortBy)
-				{
-					// HACK: async
-					o1 = Task.Run(async () => await se.expr.Evaluate(this._Rpt, r1)).GetAwaiter().GetResult();
-					o2 = Task.Run(async () => await se.expr.Evaluate(this._Rpt, r2)).GetAwaiter().GetResult();
-					tc = se.expr.GetTypeCode();
-					rc = Filter.ApplyCompare(tc, o1, o2);
-					if (rc != 0)
-						return se.bAscending? rc: -rc;
-				}
-			}
-			catch (Exception e)		// this really shouldn't happen
-			{
-				_Rpt.rl.LogError(8, 
-                    string.Format("Sort rows exception\r\nArguments: {0} {1}\r\nTypecode: {2}\r\n{3}\r\n{4}", 
-                    o1, o2, tc.ToString(), e.Message, e.StackTrace));
-			}
-			return r1.RowNumber - r2.RowNumber;		// in case of tie use original row number
-		}
-
-		#endregion
 
 		public void Dispose()
 		{
