@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk.WebAssembly">
+  <!--
+    The Majorsilence.Forms (WinForms-style) report viewer running in the browser. Majorsilence.Forms draws
+    through its Avalonia backend, which here runs on Avalonia.Browser. Needs the wasm-tools workload.
+
+      dotnet publish -c Release
+      serve bin/Release/net10.0/publish/wwwroot with any static web server (npx http-server <dir>)
+
+    No database sockets, synchronous HTTP or local files in the browser: the report reads a JSON file
+    from the in-memory file system. See Program.cs.
+  -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <OutputType>Exe</OutputType>
+    <Nullable>disable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <IsPackable>false</IsPackable>
+    <InvariantGlobalization>true</InvariantGlobalization>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Avalonia" />
+    <PackageReference Include="Avalonia.Browser" />
+    <PackageReference Include="Avalonia.Themes.Fluent" />
+    <PackageReference Include="Avalonia.Fonts.Inter" />
+    <PackageReference Include="Majorsilence.Forms" />
+    <PackageReference Include="Majorsilence.Forms.Avalonia" />
+    <ProjectReference Include="..\..\..\RdlViewer\RdlViewer.csproj" />
+  </ItemGroup>
+</Project>

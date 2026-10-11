@@ -17,6 +17,10 @@
 		<EnableTrimAnalyzer>true</EnableTrimAnalyzer>
 	</PropertyGroup>
 	<ItemGroup>
+		<!-- Run the platform-compatibility analyzer against browser-wasm, so APIs that throw there are flagged. -->
+		<SupportedPlatform Include="browser" />
+	</ItemGroup>
+	<ItemGroup>
 		<Reference Update="System">
 			<Name>System</Name>
 		</Reference>

@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk.WebAssembly">
+  <!--
+    Publishes Majorsilence.Pdf + Majorsilence.Pdf.Security as a browser-wasm app and runs the same
+    checks as PdfAotSmokeTest. Needs the wasm-tools workload (dotnet workload install wasm-tools) and Node.
+
+      dotnet publish -c Release -p:WasmTestFont=/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf
+      node run-node.mjs
+  -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <OutputType>Exe</OutputType>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <IsPackable>false</IsPackable>
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <DefineConstants>$(DefineConstants);WASM_SMOKE</DefineConstants>
+  </PropertyGroup>
+  <ItemGroup Condition="'$(WasmTestFont)' != ''">
+    <EmbeddedResource Include="$(WasmTestFont)" LogicalName="TestFont.ttf" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\PdfAotSmokeTest\Program.cs" Link="Program.cs" />
+    <ProjectReference Include="..\..\Majorsilence.Pdf\Majorsilence.Pdf.csproj" />
+    <ProjectReference Include="..\..\Majorsilence.Pdf.Security\Majorsilence.Pdf.Security.csproj" />
+  </ItemGroup>
+</Project>

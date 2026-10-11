@@ -122,7 +122,7 @@ namespace Majorsilence.Reporting.Data
                 fname.StartsWith("https:"))
             {
                 using var request = new HttpRequestMessage(HttpMethod.Get, fname);
-                HttpResponseMessage response = _httpClient.Send(request);
+                HttpResponseMessage response = _httpClient.SendSync(request);
                 response.EnsureSuccessStatusCode();
                 strm = response.Content.ReadAsStream();
             }

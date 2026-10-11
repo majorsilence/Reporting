@@ -14,7 +14,12 @@
   <PropertyGroup Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net6.0'))">
     <IsAotCompatible>true</IsAotCompatible>
   </PropertyGroup>
+  <ItemGroup Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net6.0'))">
+    <!-- Run the platform-compatibility analyzer against browser-wasm, so APIs that throw there are flagged. -->
+    <SupportedPlatform Include="browser" />
+  </ItemGroup>
   <ItemGroup>
+    <InternalsVisibleTo Include="Majorsilence.Pdf.Tests" />
     <ProjectReference Include="..\Majorsilence.Pdf\Majorsilence.Pdf.csproj" />
     <PackageReference Include="System.Security.Cryptography.Pkcs" />
   </ItemGroup>

@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk.WebAssembly">
+  <!--
+    The Avalonia report viewer running in the browser (WebAssembly). Needs the wasm-tools workload
+    (dotnet workload install wasm-tools).
+
+      dotnet publish -c Release
+      then serve bin/Release/net10.0/publish/wwwroot with any static web server, e.g.
+      npx http-server bin/Release/net10.0/publish/wwwroot
+
+    The browser has no database sockets, no synchronous HTTP and no local files: a report gets its
+    data from SetData/SetCollectionData, a file in the in-memory file system, or data the page has
+    already fetched. See App.axaml.cs.
+  -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <OutputType>Exe</OutputType>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <IsPackable>false</IsPackable>
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Avalonia" />
+    <PackageReference Include="Avalonia.Browser" />
+    <PackageReference Include="Avalonia.Themes.Fluent" />
+    <PackageReference Include="Avalonia.Fonts.Inter" />
+    <ProjectReference Include="..\Majorsilence.Reporting.UI.RdlAvalonia\Majorsilence.Reporting.UI.RdlAvalonia.csproj" />
+  </ItemGroup>
+</Project>

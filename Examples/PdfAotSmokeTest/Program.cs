@@ -81,24 +81,33 @@ byte[] encryptedBytes = PdfDocument.Create()
 Check("AES password protection produces a PDF", IsValidPdf(encryptedBytes));
 
 // ── PKCS#7 digital signature ─────────────────────────────────────────────
-using var rsa = RSA.Create(2048);
-var certReq = new CertificateRequest(
-    "CN=AOT Smoke Test Signer", rsa, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
-certReq.CertificateExtensions.Add(new X509BasicConstraintsExtension(false, false, 0, false));
-certReq.CertificateExtensions.Add(new X509KeyUsageExtension(X509KeyUsageFlags.DigitalSignature, false));
-var notBefore = DateTimeOffset.UtcNow.AddMinutes(-5);
-var selfSigned = certReq.CreateSelfSigned(notBefore, notBefore.AddYears(1));
-var pfxBytes = selfSigned.Export(X509ContentType.Pfx);
-using var cert = X509CertificateLoader.LoadPkcs12(pfxBytes, (string?)null,
-    X509KeyStorageFlags.Exportable | X509KeyStorageFlags.PersistKeySet);
+// browser-wasm has no RSA or X.509, so signing is skipped there (see PdfWasmSmokeTest).
+if (!OperatingSystem.IsBrowser())
+{
+    using var rsa = RSA.Create(2048);
+    var certReq = new CertificateRequest(
+        "CN=AOT Smoke Test Signer", rsa, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
+    certReq.CertificateExtensions.Add(new X509BasicConstraintsExtension(false, false, 0, false));
+    certReq.CertificateExtensions.Add(new X509KeyUsageExtension(X509KeyUsageFlags.DigitalSignature, false));
+    var notBefore = DateTimeOffset.UtcNow.AddMinutes(-5);
+    var selfSigned = certReq.CreateSelfSigned(notBefore, notBefore.AddYears(1));
+    var pfxBytes = selfSigned.Export(X509ContentType.Pfx);
+    using var cert = X509CertificateLoader.LoadPkcs12(pfxBytes, (string?)null,
+        X509KeyStorageFlags.Exportable | X509KeyStorageFlags.PersistKeySet);
 
-var sigOpts = new PdfSignatureOptions(cert).WithReason("AOT smoke test").WithSignerName("CI");
-byte[] signedBytes = PdfDocument.Create()
-    .WithSignature(sigOpts)
-    .WithTitle("Signed")
-    .AddPage(PageSizes.A4, canvas => canvas.DrawText("Digitally signed", 72, 72))
-    .ToBytes();
-Check("PKCS#7 signature produces a PDF", IsValidPdf(signedBytes));
+    var sigOpts = new PdfSignatureOptions(cert).WithReason("AOT smoke test").WithSignerName("CI");
+    byte[] signedBytes = PdfDocument.Create()
+        .WithSignature(sigOpts)
+        .WithTitle("Signed")
+        .AddPage(PageSizes.A4, canvas => canvas.DrawText("Digitally signed", 72, 72))
+        .ToBytes();
+    Check("PKCS#7 signature produces a PDF", IsValidPdf(signedBytes));
+}
+
+#if WASM_SMOKE
+// ── fonts supplied as bytes (browser-wasm has no system fonts) ─────────────
+WasmChecks.Run(Check, IsValidPdf);
+#endif
 
 // ── merge ────────────────────────────────────────────────────────────────
 byte[] mergedBytes = new PdfMerger()

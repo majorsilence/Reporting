@@ -142,6 +142,19 @@ namespace Majorsilence.Pdf.Security.Internal
 
         // ── password preparation ──────────────────────────────────────────────
 
+        // The browser runtime (invariant globalization) cannot do compatibility normalization of
+        // non-ASCII text; ASCII passwords are already normalized, so only those are accepted as-is.
+        private static string Nfkc(string pw)
+        {
+#pragma warning disable CA1416 // guarded below: the browser runtime can throw for non-ASCII input
+            try { return pw.Normalize(NormalizationForm.FormKC); }
+            catch (Exception e) when (e is PlatformNotSupportedException || e is ArgumentException)
+            {
+                return pw;
+            }
+#pragma warning restore CA1416
+        }
+
         private static byte[] PreparePassword(string pw)
         {
             if (string.IsNullOrEmpty(pw)) return new byte[0];
@@ -149,7 +162,7 @@ namespace Majorsilence.Pdf.Security.Internal
             // PDF 2.0 §7.6.4.3.3: passwords are UTF-8, max 127 bytes.
             // Apply NFKC normalization — the common-case subset of SASLprep (RFC 4013)
             // that maps ligatures, fullwidth, and composed forms to canonical equivalents.
-            string normalized = pw.Normalize(NormalizationForm.FormKC);
+            string normalized = Nfkc(pw);
             byte[] bytes      = Encoding.UTF8.GetBytes(normalized);
             if (bytes.Length <= 127) return bytes;
 
@@ -197,43 +210,25 @@ namespace Majorsilence.Pdf.Security.Internal
         // Used in Algorithm 2.A only; K1 is always block-aligned.
         private static byte[] AesCbc128NoPad(byte[] key, byte[] iv, byte[] data)
         {
-            using var aes = Aes.Create();
-            aes.Key = key; aes.IV = iv; aes.Mode = CipherMode.CBC; aes.Padding = PaddingMode.None;
-            using var enc = aes.CreateEncryptor();
-            return enc.TransformFinalBlock(data, 0, data.Length);
+            return PlatformCrypto.AesCbcEncrypt(key, iv, data, pkcs7: false);
         }
 
         // Used for /UE and /OE; FEK is always 32 bytes (2 blocks) — no padding needed.
         private static byte[] AesCbc256NoPad(byte[] key, byte[] iv, byte[] data)
         {
-            using var aes = Aes.Create();
-            aes.Key = key; aes.IV = iv; aes.Mode = CipherMode.CBC; aes.Padding = PaddingMode.None;
-            using var enc = aes.CreateEncryptor();
-            return enc.TransformFinalBlock(data, 0, data.Length);
+            return PlatformCrypto.AesCbcEncrypt(key, iv, data, pkcs7: false);
         }
 
         // Stream/string encryption: random 16-byte IV prepended to PKCS7-padded ciphertext.
         private static byte[] AesCbc256WithIv(byte[] key, byte[] plaintext)
         {
-            using var aes = Aes.Create();
-            aes.Key = key; aes.Mode = CipherMode.CBC; aes.Padding = PaddingMode.PKCS7;
-            aes.GenerateIV();
-            byte[] iv = aes.IV;
-            using var enc = aes.CreateEncryptor();
-            byte[] ct = enc.TransformFinalBlock(plaintext, 0, plaintext.Length);
-            var result = new byte[16 + ct.Length];
-            Buffer.BlockCopy(iv, 0, result, 0,  16);
-            Buffer.BlockCopy(ct, 0, result, 16, ct.Length);
-            return result;
+            return PlatformCrypto.AesCbcEncryptWithRandomIv(key, plaintext);
         }
 
         // Used for /Perms; input is always exactly one 16-byte block.
         private static byte[] AesEcb256(byte[] key, byte[] data)
         {
-            using var aes = Aes.Create();
-            aes.Key = key; aes.Mode = CipherMode.ECB; aes.Padding = PaddingMode.None;
-            using var enc = aes.CreateEncryptor();
-            return enc.TransformFinalBlock(data, 0, data.Length);
+            return PlatformCrypto.AesEcbEncrypt(key, data);
         }
 
         // ── crypto primitives ─────────────────────────────────────────────────

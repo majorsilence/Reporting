@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0 OR BSD-3-Clause
 // Copyright (C) 2026 Peter Gill <peter@majorsilence.com>
 
+using System;
 using System.IO;
 using Majorsilence.Pdf;
 using Majorsilence.Pdf.Internal;          // IStreamEncryptor, ISignatureHandler (friend)
@@ -34,9 +35,16 @@ namespace Majorsilence.Pdf.Security
         /// <summary>
         /// Embed an invisible PKCS#7 detached digital signature.
         /// Pass <c>null</c> to remove a previously configured signature.
+        /// Not available in the browser (browser-wasm): the runtime has no RSA or X.509 support.
         /// </summary>
+#if NET6_0_OR_GREATER
+        [System.Runtime.Versioning.UnsupportedOSPlatform("browser")]
+#endif
         public static PdfDocument WithSignature(this PdfDocument doc, PdfSignatureOptions? opts)
         {
+            if (opts != null && PlatformCrypto.IsBrowser)
+                throw new PlatformNotSupportedException(
+                    "PDF digital signatures are not supported in the browser (browser-wasm has no RSA or X.509 support).");
             doc.SetSignatureHandler(opts != null ? new SignatureHandlerAdapter(opts) : null);
             return doc;
         }
@@ -72,6 +80,9 @@ namespace Majorsilence.Pdf.Security
                               : _enc4!.BuildEncryptDict();
         }
 
+#if NET6_0_OR_GREATER
+        [System.Runtime.Versioning.UnsupportedOSPlatform("browser")]
+#endif
         private sealed class SignatureHandlerAdapter : ISignatureHandler
         {
             private readonly PdfSignatureOptions _opts;
