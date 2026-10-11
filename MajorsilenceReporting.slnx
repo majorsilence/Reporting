@@ -9,6 +9,12 @@
   <Folder Name="/Examples/">
     <Project Path="Examples/MajorsilencePdfExample/MajorsilencePdfExample.csproj" />
     <Project Path="Examples/PdfLayoutExample/PdfLayoutExample.csproj" />
+    <Project Path="Examples/Hosting/WinForms/HostingWinForms.csproj" />
+    <Project Path="Examples/Hosting/Wpf/HostingWpf.csproj" />
+    <Project Path="Examples/Hosting/Avalonia/HostingAvalonia.csproj" />
+    <Project Path="Examples/Hosting/Uno/HostingUno.csproj" />
+    <Project Path="Examples/Hosting/Gtk4/HostingGtk4.csproj" />
+    <Project Path="Examples/Hosting/Terminal/HostingTerminal.csproj" />
     <Project Path="Majorsilence.Reporting.WebExample/Majorsilence.Reporting.WebExample.csproj" />
   </Folder>
   <Folder Name="/Package Aliases/">

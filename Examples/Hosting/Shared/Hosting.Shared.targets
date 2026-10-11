@@ -1,0 +1,13 @@
+<Project>
+  <!-- Pulled into every hosting example: the shared viewer content, the sample report and its database. -->
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)ReportContent.cs" Link="ReportContent.cs" />
+    <ProjectReference Include="$(MSBuildThisFileDirectory)..\..\..\RdlViewer\RdlViewer.csproj" />
+    <ProjectReference Include="$(MSBuildThisFileDirectory)..\..\..\RdlCri\Majorsilence.Reporting.RdlCri.csproj" />
+    <PackageReference Include="Microsoft.Data.Sqlite" />
+    <PackageReference Include="Majorsilence.Forms" />
+    <None Include="$(MSBuildThisFileDirectory)..\..\ExportSqliteToPdf\Products.rdl" Link="Products.rdl" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="$(MSBuildThisFileDirectory)..\..\SqliteExamples\sqlitetestdb2.db" Link="sqlitetestdb2.db" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="$(MSBuildThisFileDirectory)..\..\..\RdlEngine\RdlEngineConfig.xml" Link="RdlEngineConfig.xml" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+</Project>
