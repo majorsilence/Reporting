@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>HostingUno</RootNamespace>
+    <NoWarn>$(NoWarn);CA1416;Uno0001;NU1903;NU1605</NoWarn>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Majorsilence.Forms.Uno" />
+    <!-- Uno.WinUI.Runtime.Skia.X11 needs the 0.21 D-Bus API; Avalonia.FreeDesktop (pulled in by
+         Majorsilence.Forms) would otherwise raise it to 0.94 and the X11 host crashes at startup. -->
+    <PackageReference Include="Tmds.DBus.Protocol" VersionOverride="0.21.3" />
+    <PackageReference Include="Uno.WinUI" />
+    <PackageReference Include="Uno.WinUI.Runtime.Skia.X11" />
+    <PackageReference Include="Uno.WinUI.Runtime.Skia.Win32" />
+    <PackageReference Include="Uno.WinUI.Runtime.Skia.MacOS" />
+  </ItemGroup>
+  <Import Project="..\Shared\Hosting.Shared.targets" />
+</Project>
