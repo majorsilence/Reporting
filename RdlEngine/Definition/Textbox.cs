@@ -286,7 +286,7 @@ namespace Majorsilence.Reporting.Rdl
 
                 Page p = pgs.CurrentPage;
                 RecordPageReference(r, p, row);			// save information for late page header/footer references
-                if (this.IsInBody && pt.CanGrow && pth == null && t.Length > 0 &&
+                if (this.CanSplitAcrossPages && pt.CanGrow && t.Length > 0 &&
                     p.YOffset + pt.Y + pt.H > pgs.BottomOfPage)
                 {   // Issue #159: grown taller than the space any page can offer;
                     // split the text across pages instead of clipping the overflow
@@ -326,7 +326,8 @@ namespace Majorsilence.Reporting.Rdl
 				widthPx -= (await Style.EvalPaddingLeftPx(rpt, row) + await Style.EvalPaddingRightPx(rpt, row));
 				padV = await Style.EvalPaddingTop(rpt, row) + await Style.EvalPaddingBottom(rpt, row);
 			}
-			float lineH = await MeasureTextHeightPoints(rpt, g, "Xg", row, widthPx);
+			bool html = pt is PageTextHtml;
+			float lineH = await MeasureTextHeightPoints(rpt, g, "Xg", row, widthPx, html);
 
 			PageText chunk = pt;
 			string remaining = pt.Text;
@@ -335,12 +336,12 @@ namespace Majorsilence.Reporting.Rdl
 			{
 				Page p = pgs.CurrentPage;
 				float availText = pgs.BottomOfPage - (p.YOffset + chunk.Y) - padV;
-				float textH = await MeasureTextHeightPoints(rpt, g, remaining, row, widthPx);
+				float textH = await MeasureTextHeightPoints(rpt, g, remaining, row, widthPx, html);
 				bool freshPage = chunk.Y == 0 && p.YOffset <= OwnerReport.TopOfPage;
 
 				if (textH <= availText)
 				{	// the rest fits on this page; done
-					chunk.Text = remaining;
+					SetChunkText(chunk, remaining);
 					chunk.H = textH + padV;
 					p.AddObject(chunk);
 					return chunk;
@@ -355,18 +356,18 @@ namespace Majorsilence.Reporting.Rdl
 					continue;
 				}
 
-				(string head, string tail) = await SplitTextToFit(rpt, g, remaining, row, widthPx, availText);
+				(string head, string tail) = await SplitTextToFit(rpt, g, remaining, row, widthPx, availText, html);
 				if (tail.Length == 0)
 				{	// couldn't split (single unbreakable run); emit as-is
-					chunk.Text = head;
-					chunk.H = await MeasureTextHeightPoints(rpt, g, head, row, widthPx) + padV;
+					SetChunkText(chunk, head);
+					chunk.H = await MeasureTextHeightPoints(rpt, g, head, row, widthPx, html) + padV;
 					p.AddObject(chunk);
 					return chunk;
 				}
 
 				PageText next = (PageText)chunk.Clone();	// clone BEFORE AddObject adjusts coordinates
-				chunk.Text = head;
-				chunk.H = await MeasureTextHeightPoints(rpt, g, head, row, widthPx) + padV;
+				SetChunkText(chunk, head);
+				chunk.H = await MeasureTextHeightPoints(rpt, g, head, row, widthPx, html) + padV;
 				p.AddObject(chunk);
 
 				pgs.NextOrNew();
@@ -377,21 +378,18 @@ namespace Majorsilence.Reporting.Rdl
 				remaining = tail;
 			}
 			// guard tripped: emit whatever is left rather than looping forever
-			chunk.Text = remaining;
+			SetChunkText(chunk, remaining);
 			pgs.CurrentPage.AddObject(chunk);
 			return chunk;
 		}
 
 		// Largest whitespace-bounded prefix of text whose wrapped height fits availPts.
 		// Returns the whole text as head (empty tail) when no split point exists.
-		private async Task<(string head, string tail)> SplitTextToFit(Report rpt, Graphics g, string text, Row row, int widthPx, float availPts)
+		// Html text is split only outside of tags; tags still open at the split are closed
+		// at the end of the head and opened again at the start of the tail.
+		private async Task<(string head, string tail)> SplitTextToFit(Report rpt, Graphics g, string text, Row row, int widthPx, float availPts, bool html)
 		{
-			List<int> breaks = new List<int>();
-			for (int i = 1; i < text.Length - 1; i++)
-			{
-				if (char.IsWhiteSpace(text[i]) && !char.IsWhiteSpace(text[i - 1]))
-					breaks.Add(i);
-			}
+			List<(int pos, string closers, string openers)> breaks = html ? HtmlSplitPoints(text) : PlainSplitPoints(text);
 			if (breaks.Count == 0)
 				return (text, "");
 
@@ -399,7 +397,7 @@ namespace Majorsilence.Reporting.Rdl
 			while (lo <= hi)
 			{
 				int mid = (lo + hi) / 2;
-				float h = await MeasureTextHeightPoints(rpt, g, text.Substring(0, breaks[mid]), row, widthPx);
+				float h = await MeasureTextHeightPoints(rpt, g, text.Substring(0, breaks[mid].pos) + breaks[mid].closers, row, widthPx, html);
 				if (h <= availPts)
 				{
 					best = mid;
@@ -408,8 +406,106 @@ namespace Majorsilence.Reporting.Rdl
 				else
 					hi = mid - 1;
 			}
-			int split = breaks[best < 0 ? 0 : best];	// force minimal progress when nothing fits
-			return (text.Substring(0, split), text.Substring(split).TrimStart());
+			var split = breaks[best < 0 ? 0 : best];	// force minimal progress when nothing fits
+			return (text.Substring(0, split.pos) + split.closers, split.openers + text.Substring(split.pos).TrimStart());
+		}
+
+		private static List<(int pos, string closers, string openers)> PlainSplitPoints(string text)
+		{
+			var breaks = new List<(int, string, string)>();
+			for (int i = 1; i < text.Length - 1; i++)
+			{
+				if (char.IsWhiteSpace(text[i]) && !char.IsWhiteSpace(text[i - 1]))
+					breaks.Add((i, "", ""));
+			}
+			return breaks;
+		}
+
+		private static readonly HashSet<string> HtmlBlockTags = new HashSet<string> { "p", "div", "li", "tr", "h1", "h2", "h3", "h4", "h5", "h6" };
+
+		private static readonly HashSet<string> HtmlVoidTags = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+			{ "br", "hr", "img", "input", "meta", "link", "col", "wbr" };
+
+		// Places in html text where it may be split: whitespace between words, never inside a tag.
+		// For each one the tags that are open there are returned as the closing tags to add to the
+		// first part and the opening tags to start the second part with.
+		private static List<(int pos, string closers, string openers)> HtmlSplitPoints(string text)
+		{
+			var breaks = new List<(int, string, string)>();
+			var open = new List<(string name, string tag)>();
+
+			void AddBreak(int pos)
+			{
+				var closers = new StringBuilder();
+				var openers = new StringBuilder();
+				for (int k = open.Count - 1; k >= 0; k--)
+					closers.Append("</").Append(open[k].name).Append('>');
+				foreach (var o in open)
+					openers.Append(o.tag);
+				breaks.Add((pos, closers.ToString(), openers.ToString()));
+			}
+
+			int i = 0;
+			while (i < text.Length)
+			{
+				if (text[i] == '<')
+				{
+					int end = text.IndexOf('>', i);
+					if (end < 0)
+						break;
+					string tag = text.Substring(i, end - i + 1);
+					i = end + 1;
+					if (tag.StartsWith("<!"))
+						continue;
+
+					bool closing = tag.Length > 1 && tag[1] == '/';
+					int n = closing ? 2 : 1;
+					int e = n;
+					while (e < tag.Length && (char.IsLetterOrDigit(tag[e]) || tag[e] == ':'))
+						e++;
+					string name = tag.Substring(n, e - n).ToLowerInvariant();
+					if (name.Length == 0)
+						continue;
+
+					if (closing)
+					{
+						int k = open.FindLastIndex(o => o.name == name);
+						if (k >= 0)
+							open.RemoveRange(k, open.Count - k);
+					}
+					else if (!HtmlVoidTags.Contains(name) && !tag.EndsWith("/>"))
+						open.Add((name, tag));
+
+					// the end of a paragraph, list item or line is the best place to split
+					if (i < text.Length && (name == "br" || closing && HtmlBlockTags.Contains(name)))
+						AddBreak(i);
+					continue;
+				}
+
+				if (i > 0 && char.IsWhiteSpace(text[i]) && !char.IsWhiteSpace(text[i - 1]) && i < text.Length - 1)
+					AddBreak(i);
+				i++;
+			}
+			return breaks;
+		}
+
+		private static void SetChunkText(PageText chunk, string text)
+		{
+			chunk.Text = text;
+			if (chunk is PageTextHtml pth)
+				pth.Reset();		// the layout built for the previous text no longer applies
+		}
+
+		private async Task<float> MeasureTextHeightPoints(Report rpt, Graphics g, string text, Row row, int widthPx, bool html)
+		{
+			if (html)
+			{
+				var pth = new PageTextHtml(text);
+				await SetPagePositionAndStyle(rpt, pth, row);
+				await pth.Build(g);
+				return pth.TotalHeight;
+			}
+			return await MeasureTextHeightPoints(rpt, g, text, row, widthPx);
 		}
 
 		private async Task<float> MeasureTextHeightPoints(Report rpt, Graphics g, string text, Row row, int widthPx)
@@ -524,6 +620,13 @@ namespace Majorsilence.Reporting.Rdl
 		{
 			get { return  _Value; }
 			set {  _Value = value; }
+		}
+
+		// A tall textbox is only carried over to following pages when it sits directly in the body
+		// or is a row of a list, which carries on below the text.
+		private bool CanSplitAcrossPages
+		{
+			get { return this.IsInBody || this.Parent.Parent is List; }
 		}
 
 		internal bool CanGrow

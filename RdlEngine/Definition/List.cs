@@ -377,6 +377,7 @@ namespace Majorsilence.Reporting.Rdl
                         else
                         {   // got forced to new page; just add the padding on
                             p = pgs.CurrentPage;        // set to new page
+                            p.YOffset = Math.Max(p.YOffset, BottomOfItems(p));  // carry on below what the row put there
                             if (this.Style != null)
                             {
                                 p.YOffset += await this.Style.EvalPaddingBottom(rpt, row);
@@ -412,6 +413,7 @@ namespace Majorsilence.Reporting.Rdl
                     else
                     {   // got forced to new page; just add the padding on
                         p = pgs.CurrentPage;        // set to new page
+                        p.YOffset = Math.Max(p.YOffset, BottomOfItems(p));  // carry on below what the row put there
                         if (this.Style != null)
                         {
                             p.YOffset += await this.Style.EvalPaddingBottom(rpt, row);
@@ -455,6 +457,16 @@ namespace Majorsilence.Reporting.Rdl
 		{
 			get { return  _Grouping; }
 			set {  _Grouping = value; }
+		}
+
+		// Bottom of everything on a page. A row that was carried onto a new page (such as a textbox
+		// split across pages) leaves the next row to start under it instead of on top of it.
+		private static float BottomOfItems(Page p)
+		{
+			float bottom = 0;
+			for (int i = 0; i < p.Count; i++)
+				bottom = Math.Max(bottom, p[i].Y + p[i].H);
+			return bottom;
 		}
 
 		// The height one list instance actually took on the page. HeightOfList only knows about CanGrow

@@ -70,5 +70,6 @@
   <Project Path="RdlReader.Tests/RdlReader.Tests.csproj" />
   <Project Path="Templates.Tests/Templates.Tests.csproj" />
   <Project Path="WebDesigner.Tests/WebDesigner.Tests.csproj" />
+  <Project Path="RdlAsp.Mvc.Tests/RdlAsp.Mvc.Tests.csproj" />
   <Project Path="WebDesigner/WebDesigner.csproj" />
 </Solution>

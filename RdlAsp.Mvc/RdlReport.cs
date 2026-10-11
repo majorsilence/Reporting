@@ -1,46 +1,33 @@
 using System;
-using System.IO;
 using System.Collections;
-using System.Collections.Specialized;
-using System.Text;
-using Majorsilence.Reporting.Rdl;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Caching.Memory;
-using System.Reflection;
 using System.Collections.Generic;
+using System.IO;
+using System.Net;
+using System.Text.RegularExpressions;
+using System.Text;
 using System.Threading.Tasks;
+using Majorsilence.Reporting.Rdl;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace Majorsilence.Reporting.RdlAsp
 {
     /// <summary>
-    /// Summary description for Class1.
+    /// RdlReport generates a report from a RDL file and sends it as html, pdf, xml, csv, xlsx or rtf.
     /// </summary>
     public class RdlReport : Controller
     {
-        /// <summary>
-        /// RdlReport generates an HTML report from a RDL file.
-        /// </summary>
-        /// 
         private const string STATISTICS = "statistics";
 
-        private string _ReportFile = null;
-        private ArrayList _Errors = null;
-        private int _MaxSeverity = 0;
-        private string _CSS = null;
-        private string _JavaScript = null;
-        private string _Html = null;
-        private string _Xml = null;
-        private string _Csv = null;
-        private byte[] _Object = null;
-        private string _ParameterHtml = null;
-        private OutputPresentationType _RenderType = OutputPresentationType.HTML;
-        private string contentType = "text/html";
-        private string _PassPhrase = null;
-        private bool _NoShow;
         private readonly IWebHostEnvironment _webHostEnvironment;
         private readonly IMemoryCache _cache;
         private readonly Settings _settings;
+
+        // The result of the request being served.
+        private List<string> _errors;
+        private int _maxSeverity;
+        private string _passPhrase;
 
         public RdlReport(IWebHostEnvironment webHostEnvironment, IMemoryCache cache,
             Settings settings)
@@ -50,431 +37,184 @@ namespace Majorsilence.Reporting.RdlAsp
             _settings = settings;
         }
 
+        /// <summary>
+        /// Pass phrase used to read data source references that are encrypted.
+        /// </summary>
+        public string PassPhrase
+        {
+            set { _passPhrase = value; }
+        }
+
         [HttpGet]
         [Route("msr/RdlReport/ShowFile/{reportFile}/{type?}")]
         public async Task<IActionResult> Render(string reportFile, string type = "html")
         {
-            this.RenderType = type;
-            await SetReportFile(reportFile);
+            if (string.IsNullOrWhiteSpace(reportFile))
+                return Failure(400, "ReportFile not specified.");
 
-            var htmlContent = new StringBuilder();
-            if (_ReportFile == null)
-            {
-                this.AddError(8, "ReportFile not specified.");
-                return Content("", contentType);
-            }
-            else if (_ReportFile == STATISTICS)
-            {
-                DoStatistics(ref htmlContent);
-                return Content(htmlContent.ToString());
-            }
-            else if (_Html != null)
-                htmlContent.AppendLine(_Html);
-            else if (_Object != null)
-            {
-                return File(_Object, contentType);
-            }
-            else // we never generated anything!
-            {
-                if (_Errors != null)
-                {
-                    htmlContent.AppendLine("<table>");
-                    htmlContent.AppendLine("<tr>");
-                    htmlContent.AppendLine("<td>");
-                    htmlContent.AppendLine("Errors");
-                    htmlContent.AppendLine("</td>");
-                    htmlContent.AppendLine("</tr>");
+            if (reportFile == STATISTICS)
+                return Content(DoStatistics(), "text/html");
 
-                    foreach (string e in _Errors)
-                    {
-                        htmlContent.AppendLine("<tr>");
-                        htmlContent.AppendLine("<td>");
-                        htmlContent.AppendLine(e);
-                        htmlContent.AppendLine("</td>");
-                        htmlContent.AppendLine("</tr>");
-                    }
+            var format = GetFormat(type);
+            if (format == null)
+                return Failure(400, $"Unknown report type '{type}'.");
 
-                    htmlContent.AppendLine("</table>");
-                }
-            }
+            string file = FindReportFile(reportFile.EndsWith(".rdl", StringComparison.OrdinalIgnoreCase) ? reportFile : reportFile + ".rdl");
+            if (file == null)
+                return Failure(404, null);
 
-            return Content(htmlContent.ToString(), contentType);
-        }
-
-        /// <summary>
-        /// When true report won't be shown but parameters (if any) will be
-        /// </summary>
-        public bool NoShow
-        {
-            get { return _NoShow; }
-            set { _NoShow = value; }
-        }
-
-        public string RenderType
-        {
-            get
-            {
-                switch (_RenderType)
-                {
-                    case OutputPresentationType.ASPHTML:
-                    case OutputPresentationType.HTML:
-                        return "html";
-                    case OutputPresentationType.PDF:
-                        return "pdf";
-                    case OutputPresentationType.XML:
-                        return "xml";
-                    case OutputPresentationType.CSV:
-                        return "csv";
-                    case OutputPresentationType.ExcelTableOnly:
-                    case OutputPresentationType.Excel2007:
-                        return "xlsx";
-                    case OutputPresentationType.RTF:
-                        return "rtf";
-                    default:
-                        return "html";
-                }
-            }
-            set
-            {
-                _RenderType = this.GetRenderType(value);
-            }
-        }
-
-        public string ReportFile
-        {
-            get { return _ReportFile; }
-        }
-
-        private async Task SetReportFile(string value)
-        {
-            if (!value.EndsWith(".rdl"))
-            {
-                value += ".rdl"; // assume it's a rdl file
-            }
-
-            _ReportFile = FindReportFile(value);
-            // Clear out old report information (if any)
-            this._Errors = null;
-            this._MaxSeverity = 0;
-            _CSS = null;
-            _JavaScript = null;
-            _Html = null;
-            _ParameterHtml = null;
-
-            if (_ReportFile == STATISTICS)
-            {
-                var sb = new StringBuilder();
-
-                DoStatistics(ref sb);
-                _Html = sb.ToString();
-
-                return;
-            }
-
-            // Build the new report
-            string contentRootPath = _webHostEnvironment.ContentRootPath;
-            string pfile = Path.Combine(contentRootPath, _ReportFile);
-            
-            await DoRender(pfile);
-        }
-
-
-        public string PassPhrase
-        {
-            set
-            {
-                _PassPhrase = value;
-            }
-        }
-
-        private string GetPassword()
-        {
-            return _PassPhrase;
-        }
-
-
-        public string Html
-        {
-            get
-            {
-                return _Html;
-            }
-        }
-
-        public string Xml
-        {
-            get
-            {
-                return _Xml;
-            }
-        }
-
-        public string CSV
-        {
-            get
-            {
-                return _Csv;
-            }
-        }
-
-        public byte[] Object
-        {
-            get
-            {
-                return _Object;
-            }
-        }
-
-        public ArrayList Errors
-        {
-            get { return _Errors; }
-        }
-
-        public int MaxErrorSeverity
-        {
-            get
-            {
-                return _MaxSeverity;
-            }
-        }
-
-        public string CSS
-        {
-            get
-            {
-                return _CSS;
-            }
-        }
-
-        public string JavaScript
-        {
-            get
-            {
-                return _JavaScript;
-            }
-        }
-
-        public string ParameterHtml
-        {
-            get
-            {
-                return _ParameterHtml;
-            }
-        }
-
-
-        // Render the report files with the requested types
-        private async Task DoRender(string file)
-        {
-            string source;
+            var parameters = ReportHelper.GetParameters(Request.Query);
             Report report = null;
-
-            var nvc = this.HttpContext.Request.Query; // parameters
-            ListDictionary ld = new ListDictionary();
+            RenderedReport rendered = null;
             try
             {
-                foreach (var kvp in nvc)
+                report = await LoadReport(file);
+                if (report != null)
                 {
-                    ld.Add(kvp.Key, kvp.Value);
-                }
-                
-                report = ReportHelper.GetCachedReport(file, _cache);
-
-                if (report == null) // couldn't obtain report definition from cache
-                {
-                    // Obtain the source
-                    source = ReportHelper.GetSource(file);
-                    if (source == null)
-                        return; // GetSource reported the error
-
-                    // Compile the report
-                    report = await this.GetReport(source, file);
-                    if (report == null)
-                        return;
-
-                    ReportHelper.SaveCachedReport(report, file, _cache);
-                }
-
-                // Set the user context information: ID, language
-                ReportHelper.SetUserContext(report, this.HttpContext, new Rdl.NeedPassword(GetPassword));
-
-                // Obtain the data if report is being generated
-                if (!_NoShow)
-                {
-                    await report.RunGetData(ld);
-                    await Generate(report);
+                    ReportHelper.SetUserContext(report, this.HttpContext, new NeedPassword(GetPassword));
+                    await report.RunGetData(parameters);
+                    rendered = await Generate(report, format);
                 }
             }
             catch (Exception exe)
             {
-                AddError(8, "Error: {0}", exe.Message);
+                AddError(8, "Error: " + exe.Message);
             }
 
-            if (_ParameterHtml == null)
-                _ParameterHtml =
-                    ReportHelper.GetParameterHtml(report, ld, this.HttpContext, _ReportFile,
-                        _NoShow); // build the parameter html
-        }
-
-        private void AddError(int severity, string err, params object[] args)
-        {
-            if (_MaxSeverity < severity)
-                _MaxSeverity = severity;
-
-            string error = string.Format(err, args);
-            if (_Errors == null)
-                _Errors = new ArrayList();
-            _Errors.Add(error);
-        }
-
-        private void AddError(int severity, IList errors)
-        {
-            if (_MaxSeverity < severity)
-                _MaxSeverity = severity;
-            if (_Errors == null)
-            {
-                // if we don't have any we can just start with this list
-                _Errors = new ArrayList(errors);
-                return;
-            }
-
-            // Need to copy all items in the errors array
-            foreach (string err in errors)
-                _Errors.Add(err);
-        }
-
-        private void DoStatistics(ref StringBuilder htmlContent)
-        {
-            RdlSession rs = _cache.Get(RdlSession.SessionStat) as RdlSession;
-            ReportHelper s = ReportHelper.Get(_cache);
-            IMemoryCache c = _cache;
-
-            int sessions = 0;
-            if (rs != null)
-                sessions = rs.Count;
-
-
-            var cacheEntries = GetCacheEntries(c);
-            htmlContent.AppendLine($"<p>{sessions} sessions");
-            htmlContent.AppendLine($"<p>{cacheEntries.Count} items are in the cache");
-            htmlContent.AppendLine($"<p>{s.CacheHits} cache hits");
-            htmlContent.AppendLine($"<p>{s.CacheMisses} cache misses");
-            
-        }
-
-        private List<string> GetCacheEntries(IMemoryCache cache)
-        {
-            var field = cache.GetType()
-                .GetProperty("EntriesCollection", BindingFlags.NonPublic | BindingFlags.Instance);
-            var collection = field.GetValue(cache) as ICollection;
-            var items = new List<string>();
-            if (collection != null)
-                foreach (var item in collection)
-                {
-                    var methodInfo = item.GetType().GetProperty("Key");
-                    var val = methodInfo.GetValue(item);
-                    items.Add(val.ToString());
-                }
-
-            return items;
-        }
-
-        private async Task Generate(Report report)
-        {
-            MemoryStreamGen sg = null;
-            try
-            {
-                sg = new MemoryStreamGen("ShowFile?type=", null, this.RenderType);
-
-                await report.RunRender(sg, _RenderType, Guid.NewGuid().ToString());
-                _CSS = "";
-                _JavaScript = "";
-                switch (_RenderType)
-                {
-                    case OutputPresentationType.ASPHTML:
-                    case OutputPresentationType.HTML:
-                        _CSS = report.CSS; //.Replace("position: relative;", "position: absolute;");
-                        _JavaScript = report.JavaScript;
-                        _Html = sg.GetText();
-                        break;
-                    case OutputPresentationType.XML:
-                        _Xml = sg.GetText();
-                        break;
-                    case OutputPresentationType.CSV:
-                        _Csv = sg.GetText();
-                        break;
-                    case OutputPresentationType.PDF:
-                        {
-                            MemoryStream ms = sg.MemoryList[0] as MemoryStream;
-                            _Object = ms.ToArray();
-                            break;
-                        }
-                }
-
-                // Now save off the other streams in the session context for later use
-                IList strms = sg.MemoryList;
-                IList names = sg.MemoryNames;
-                for (int i = 1; i < sg.MemoryList.Count; i++) // we skip the first one
-                {
-                    string n = names[i] as string;
-                    MemoryStream ms = strms[i] as MemoryStream;
-                    HttpContext.Session.Set(n, ms.ToArray());
-                }
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.Message);
-            }
-            finally
-            {
-                if (sg != null)
-                {
-                    sg.CloseMainStream();
-                }
-            }
-
-            if (report.ErrorMaxSeverity > 0)
+            if (report != null && report.ErrorMaxSeverity > 0)
             {
                 AddError(report.ErrorMaxSeverity, report.ErrorItems);
                 report.ErrorReset();
             }
 
-            return;
+            if (rendered == null)
+                return Failure(500, null);
+
+            if (format.Type != OutputPresentationType.HTML)
+                return rendered.Bytes != null
+                    ? File(rendered.Bytes, format.ContentType)
+                    : Content(rendered.Text, format.ContentType);
+
+            string name = Path.GetFileNameWithoutExtension(file);
+            return Content(HtmlPage(report, rendered, parameters, name), format.ContentType);
         }
 
-        private OutputPresentationType GetRenderType(string type)
+        private string GetPassword()
         {
-            switch (type.ToLower())
+            return _passPhrase;
+        }
+
+        // The report is a whole html document (its styles and images are in it). The parameters
+        // and any errors are put at the top of its body.
+        private string HtmlPage(Report report, RenderedReport rendered, IDictionary parameters, string name)
+        {
+            var top = new StringBuilder();
+            top.AppendLine(ReportHelper.GetParameterHtml(report, parameters, HttpContext, name, true));
+            AppendErrors(top);
+
+            string html = rendered.Text;
+            var body = Regex.Match(html, "<body[^>]*>", RegexOptions.IgnoreCase);
+            return body.Success
+                ? html.Insert(body.Index + body.Length, top.ToString())
+                : top + html;
+        }
+
+        private void AppendErrors(StringBuilder sb)
+        {
+            if (_errors == null)
+                return;
+            sb.AppendLine("<table><tr><td>Errors</td></tr>");
+            foreach (string e in _errors)
+                sb.AppendLine($"<tr><td>{WebUtility.HtmlEncode(e)}</td></tr>");
+            sb.AppendLine("</table>");
+        }
+
+        private IActionResult Failure(int statusCode, string message)
+        {
+            if (message != null)
+                AddError(8, message);
+            var sb = new StringBuilder("<!DOCTYPE html><html><body>");
+            AppendErrors(sb);
+            sb.Append("</body></html>");
+            return new ContentResult { Content = sb.ToString(), ContentType = "text/html", StatusCode = statusCode };
+        }
+
+        private string DoStatistics()
+        {
+            ReportHelper s = ReportHelper.Get(_cache);
+            int cacheEntries = (_cache as MemoryCache)?.Count ?? 0;
+
+            var html = new StringBuilder();
+            html.AppendLine($"<p>{cacheEntries} items are in the cache");
+            html.AppendLine($"<p>{s.CacheHits} cache hits");
+            html.AppendLine($"<p>{s.CacheMisses} cache misses");
+            return html.ToString();
+        }
+
+        private async Task<RenderedReport> Generate(Report report, Format format)
+        {
+            var sg = new MemoryStreamGen(null, null, format.Extension);
+            try
+            {
+                await report.RunRender(sg, format.Type, Guid.NewGuid().ToString());
+
+                var rendered = new RenderedReport();
+                if (format.IsText)
+                    rendered.Text = sg.GetText();
+                else
+                    rendered.Bytes = ((MemoryStream)sg.MemoryList[0]).ToArray();
+                return rendered;
+            }
+            finally
+            {
+                sg.CloseMainStream();
+            }
+        }
+
+        private void AddError(int severity, string err)
+        {
+            if (_maxSeverity < severity)
+                _maxSeverity = severity;
+            (_errors ??= new List<string>()).Add(err);
+        }
+
+        private void AddError(int severity, IList errors)
+        {
+            if (_maxSeverity < severity)
+                _maxSeverity = severity;
+            _errors ??= new List<string>();
+            foreach (string err in errors)
+                _errors.Add(err);
+        }
+
+        private static Format GetFormat(string type)
+        {
+            switch ((type ?? "html").ToLowerInvariant())
             {
                 case "htm":
                 case "html":
-                    contentType = "text/html";
-                    return OutputPresentationType.HTML;
+                    return new Format(OutputPresentationType.HTML, "html", "text/html", true);
                 case "pdf":
-                    contentType = "application/pdf";
-                    return OutputPresentationType.PDF;
+                    return new Format(OutputPresentationType.PDF, "pdf", "application/pdf", false);
                 case "xml":
-                    contentType = "text/xml";
-                    return OutputPresentationType.XML;
+                    return new Format(OutputPresentationType.XML, "xml", "text/xml", true);
                 case "csv":
-                    contentType = "text/csv";
-                    return OutputPresentationType.CSV;
+                    return new Format(OutputPresentationType.CSV, "csv", "text/csv", true);
                 case "xlsx":
-                    contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
-                    return OutputPresentationType.ExcelTableOnly;
+                    return new Format(OutputPresentationType.ExcelTableOnly, "xlsx",
+                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", false);
                 case "rtf":
-                    contentType = "application/rtf";
-                    return OutputPresentationType.RTF;
+                    return new Format(OutputPresentationType.RTF, "rtf", "application/rtf", true);
                 default:
-                    contentType = "text/html";
-                    return OutputPresentationType.HTML;
+                    return null;
             }
         }
 
         private string FindReportFile(string file)
         {
             // The file name comes from the request: it must stay inside the reports folder.
-            string foundFile = ReportPathResolver.ResolveWithin(_settings.ReportsFolder, file);
+            string foundFile = ReportPathResolver.ResolveWithin(
+                _settings.ResolveReportsFolder(_webHostEnvironment.ContentRootPath), file);
 
             if (foundFile == null || !System.IO.File.Exists(foundFile))
             {
@@ -496,60 +236,73 @@ namespace Majorsilence.Reporting.RdlAsp
 
             if (foundFile == null)
             {
-                AddError(8, "Report file '{0}' does not exist.", file);
+                AddError(8, $"Report file '{file}' does not exist.");
                 return null;
             }
 
             return foundFile;
         }
 
-        private async Task<Report> GetReport(string prog, string file)
+        private async Task<Report> LoadReport(string file)
         {
-            // Now parse the file
-            RDLParser rdlp;
-            Report r;
+            Report report = ReportHelper.GetCachedReport(file, _cache);
+            if (report != null)
+                return report;
+
             try
             {
-                // Make sure RdlEngine is configured before we ever parse a program
-                //   The config file must exist in the Bin directory.
-                string[] searchDir =
-                [
-                    this.ReportFile.StartsWith("~") ? "~/Bin" : "/Bin" + Path.DirectorySeparatorChar,
-                    System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)
-                ];
-                RdlEngineConfig.RdlEngineConfigInit(searchDir);
+                // Make sure RdlEngine is configured before we ever parse a report
+                RdlEngineConfig.RdlEngineConfigInit();
 
-                rdlp = new RDLParser(prog);
+                var rdlp = new RDLParser(ReportHelper.GetSource(file));
                 string folder = Path.GetDirectoryName(file);
-                if (folder == "")
-                    folder = Environment.CurrentDirectory;
                 rdlp.Folder = folder;
                 rdlp.DataSourceReferencePassword = new NeedPassword(this.GetPassword);
 
-                r = await rdlp.Parse();
-                if (r.ErrorMaxSeverity > 0)
+                report = await rdlp.Parse();
+                if (report.ErrorMaxSeverity > 0)
                 {
-                    AddError(r.ErrorMaxSeverity, r.ErrorItems);
-                    if (r.ErrorMaxSeverity >= 8)
-                        r = null;
-                    r.ErrorReset();
+                    AddError(report.ErrorMaxSeverity, report.ErrorItems);
+                    bool failed = report.ErrorMaxSeverity >= 8;
+                    report.ErrorReset();
+                    if (failed)
+                        return null;
                 }
 
-                // If we've loaded the report; we should tell it where it got loaded from
-                if (r != null)
-                {
-                    r.Folder = folder;
-                    r.Name = Path.GetFileNameWithoutExtension(file);
-                    r.GetDataSourceReferencePassword = new Rdl.NeedPassword(GetPassword);
-                }
+                // we should tell the report where it got loaded from
+                report.Folder = folder;
+                report.Name = Path.GetFileNameWithoutExtension(file);
+                report.GetDataSourceReferencePassword = new NeedPassword(GetPassword);
+                ReportHelper.SaveCachedReport(report, file, _cache);
+                return report;
             }
             catch (Exception e)
             {
-                r = null;
-                AddError(8, "Exception parsing report {0}.  {1}", file, e.Message);
+                AddError(8, $"Exception parsing report {Path.GetFileName(file)}.  {e.Message}");
+                return null;
+            }
+        }
+
+        private sealed class Format
+        {
+            public Format(OutputPresentationType type, string extension, string contentType, bool isText)
+            {
+                Type = type;
+                Extension = extension;
+                ContentType = contentType;
+                IsText = isText;
             }
 
-            return r;
+            public OutputPresentationType Type { get; }
+            public string Extension { get; }
+            public string ContentType { get; }
+            public bool IsText { get; }
+        }
+
+        private sealed class RenderedReport
+        {
+            public string Text;
+            public byte[] Bytes;
         }
     }
 }

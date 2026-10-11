@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Report Name="Parameters">
+  <Description>Shows its parameters, and an embedded image.</Description>
+  <ReportParameters>
+    <ReportParameter Name="Min">
+      <DataType>Integer</DataType>
+      <DefaultValue><Values><Value>1</Value></Values></DefaultValue>
+      <Prompt>Minimum</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="Who">
+      <DataType>String</DataType>
+      <DefaultValue><Values><Value>nobody</Value></Values></DefaultValue>
+      <Prompt>Who</Prompt>
+    </ReportParameter>
+  </ReportParameters>
+  <EmbeddedImages>
+    <EmbeddedImage Name="pix">
+      <MIMEType>image/png</MIMEType>
+      <ImageData>iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==</ImageData>
+    </EmbeddedImage>
+  </EmbeddedImages>
+  <Body>
+    <Height>1in</Height>
+    <ReportItems>
+      <Textbox Name="Shown">
+        <Top>0in</Top><Left>0in</Left><Height>0.3in</Height><Width>5in</Width>
+        <Value>="MIN=" &amp; Parameters!Min.Value &amp; " WHO=" &amp; Parameters!Who.Value</Value>
+      </Textbox>
+      <Image Name="Pixel">
+        <Top>0.4in</Top><Left>0in</Left><Height>0.3in</Height><Width>0.3in</Width>
+        <Source>Embedded</Source>
+        <Value>pix</Value>
+        <Sizing>Fit</Sizing>
+      </Image>
+    </ReportItems>
+  </Body>
+  <Width>6in</Width>
+  <PageWidth>8.5in</PageWidth>
+  <PageHeight>11in</PageHeight>
+</Report>

@@ -32,7 +32,7 @@
   </ItemGroup>
   <PropertyGroup />
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.SystemWebAdapters" />
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
   <ItemGroup>
     <None Remove="ShowReport.cshtml" />
