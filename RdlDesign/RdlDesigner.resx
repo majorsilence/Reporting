@@ -552,6 +552,18 @@
   <data name="embeddedImagesToolStripMenuItem.Text" xml:space="preserve">
     <value>&amp;Embedded Images...</value>
   </data>
+  <data name="reportCodeToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
+    <value>222, 22</value>
+  </data>
+  <data name="reportCodeToolStripMenuItem.Text" xml:space="preserve">
+    <value>&amp;Code...</value>
+  </data>
+  <data name="modulesClassesToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
+    <value>222, 22</value>
+  </data>
+  <data name="modulesClassesToolStripMenuItem.Text" xml:space="preserve">
+    <value>&amp;Modules and Classes...</value>
+  </data>
   <data name="toolStripSeparator9.Size" type="System.Drawing.Size, System.Drawing">
     <value>219, 6</value>
   </data>
