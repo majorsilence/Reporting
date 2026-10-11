@@ -779,6 +779,38 @@ namespace Majorsilence.Reporting.RdlDesign
 			this.Invalidate();
 		}
 
+		// Issue #297: after an undo, select the report items the undo changed.
+		// Leaves the selection alone when no report item was affected.
+		internal void SelectAffectedByUndo(IEnumerable<XmlNode> affected)
+		{
+			_SelectedReportItems.RemoveAll(n => !IsAttached(n));	// e.g. item removed by undoing an insert
+			var items = new List<XmlNode>();
+			foreach (XmlNode n in affected)
+			{
+				XmlNode cur = n is XmlAttribute a ? a.OwnerElement : n;
+				while (cur != null && !IsMovableReportItem(cur))
+					cur = cur.ParentNode;
+				if (cur == null || items.Contains(cur))
+					continue;
+				// ignore items no longer in the document (e.g. undone insert)
+				if (!IsAttached(cur))
+					continue;
+				items.Add(cur);
+			}
+			if (items.Count == 0)
+				return;
+			_SelectedReportItems.Clear();
+			_SelectedReportItems.AddRange(items);
+			this.Invalidate();
+		}
+
+		private static bool IsAttached(XmlNode n)
+		{
+			while (n.ParentNode != null)
+				n = n.ParentNode;
+			return n.NodeType == XmlNodeType.Document;
+		}
+
 		internal List<XmlNode> SelectedList
 		{
 			get {return _SelectedReportItems;}

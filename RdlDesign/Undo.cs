@@ -128,6 +128,12 @@ namespace Majorsilence.Reporting.RdlDesign
 
 		internal void undo()
 		{
+			undo(null);
+		}
+
+		// Undoes the last action; nodes touched by the undo are added to affected (when supplied).
+		internal void undo(List<XmlNode> affected)
+		{
 			UndoItem undoItem = null;
 
 			if (_actions.Count == 0)
@@ -137,6 +143,8 @@ namespace Majorsilence.Reporting.RdlDesign
 
 			_Undoing = true;
 			undoItem.Undo();
+			if (affected != null)
+				undoItem.CollectAffected(affected);
 		}
 
 		internal void StartUndoGroup(String description)
@@ -171,12 +179,15 @@ namespace Majorsilence.Reporting.RdlDesign
     internal interface UndoItem
     {
         void Undo();
+        // adds the nodes changed by Undo (call after Undo)
+        void CollectAffected(List<XmlNode> nodes);
         String GetDescription();
     }
 
     internal class NodeInsertedUndo : UndoItem
     {
         XmlNode iNode;
+        XmlNode _parentAtUndo;
 
         public NodeInsertedUndo(XmlNodeChangedEventArgs e, object previous)
         {
@@ -186,11 +197,18 @@ namespace Majorsilence.Reporting.RdlDesign
         public void Undo()
         {
             XmlNode parent = iNode.ParentNode;
+            _parentAtUndo = parent;
 			if (parent == null)		// happens with attributes but doesn't affect the undo??
 			{
 				return;
 			}
             parent.RemoveChild(iNode);
+        }
+
+        public void CollectAffected(List<XmlNode> nodes)
+        {
+            if (_parentAtUndo != null)
+                nodes.Add(_parentAtUndo);
         }
 
         public String GetDescription()
@@ -222,6 +240,11 @@ namespace Majorsilence.Reporting.RdlDesign
             parentNode.InsertBefore(removedNode, nextSibling);
         }
 
+        public void CollectAffected(List<XmlNode> nodes)
+        {
+            nodes.Add(removedNode);
+        }
+
         public String GetDescription()
         {
 			return Strings.NodeRemovedUndo_GetDescription_remove;		// could be more specific using NodeType
@@ -251,6 +274,11 @@ namespace Majorsilence.Reporting.RdlDesign
         public void Undo()
         {
 			node.Value = oldValue;
+        }
+
+        public void CollectAffected(List<XmlNode> nodes)
+        {
+            nodes.Add(node);
         }
 
         public String GetDescription()
@@ -299,6 +327,12 @@ namespace Majorsilence.Reporting.RdlDesign
                 _undo.Undoing = true;
                 ui.Undo();
             }
+        }
+
+        public void CollectAffected(List<XmlNode> nodes)
+        {
+            foreach (UndoItem ui in undoItems)
+                ui.CollectAffected(nodes);
         }
 
         public String GetDescription()

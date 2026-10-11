@@ -268,7 +268,8 @@ namespace Majorsilence.Reporting.RdlDesign
         }
 		public void Undo()
 		{
-			_Undo.undo();
+			var affected = new List<XmlNode>();
+			_Undo.undo(affected);
 			_DrawPanel.ReportNames = null;	// may not be required; but if reportitem deleted/inserted it must be
             // determine if any of the selected nodes has been affected
             bool clearSelect = false;
@@ -284,6 +285,7 @@ namespace Majorsilence.Reporting.RdlDesign
             if (clearSelect)
                 _DrawPanel.SelectedList.Clear();
 
+			_DrawPanel.SelectAffectedByUndo(affected);
 			_DrawPanel.Invalidate();   
 		}
 
