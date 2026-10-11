@@ -25,6 +25,37 @@ namespace Majorsilence.Reporting.RdlDesign
             : base(d, dc, ris)
         {
         }
+
+        [Category("Table Rows")]
+        [DisplayName("Header Repeat On New Page")]
+        [Description("Repeat the table header rows at the top of each page. Requires header rows; add them from the table's popup menu.")]
+        public bool HeaderRepeatOnNewPage
+        {
+            get { return GetRepeat("Header"); }
+            set { SetRepeat("Header", value); }
+        }
+
+        [Category("Table Rows")]
+        [DisplayName("Footer Repeat On New Page")]
+        [Description("Repeat the table footer rows at the bottom of each page. Requires footer rows; add them from the table's popup menu.")]
+        public bool FooterRepeatOnNewPage
+        {
+            get { return GetRepeat("Footer"); }
+            set { SetRepeat("Footer", value); }
+        }
+
+        private bool GetRepeat(string section)
+        {
+            return GetValue(section, "RepeatOnNewPage", "false").ToLower().Trim() == "true";
+        }
+
+        private void SetRepeat(string section, bool value)
+        {
+            // Header/Footer rows are structural; only toggle the flag when they exist.
+            if (Draw.GetNamedChildNode(Nodes[0], section) == null)
+                return;
+            SetValue(section, "RepeatOnNewPage", value ? "true" : "false");
+        }
     }
     internal class PropertyTableConverter : ExpandableObjectConverter
     {
