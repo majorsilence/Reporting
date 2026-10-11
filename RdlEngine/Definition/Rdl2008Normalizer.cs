@@ -1357,10 +1357,10 @@ namespace Majorsilence.Reporting.Rdl
 
             // The Matrix repeats the detail cell for its totals, so a total's own formatting is carried
             // by InScope() expressions on that one cell.
-            if (sets.Count == 1) {
+            if (sets.Count == 1 && rowSets.Count == 1) {
                 PreserveSubtotalFormatting (tablix.OwnerDocument, tablix.NamespaceURI, allBodyRows, allBodyColumns,
                     ChildrenNamed (FindChild (FindChild (tablix, "TablixRowHierarchy"), "TablixMembers"), "TablixMember"),
-                    topColumns, rowLevels, sets[0].Levels);
+                    topColumns, rowSets[0].Levels, sets[0].Levels);
             }
 
             var doc = tablix.OwnerDocument;

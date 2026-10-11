@@ -186,5 +186,32 @@ namespace ReportTests
             };
             Assert.That (rows, Is.EqualTo (expected), string.Join (" ", rows));
         }
+
+        [Test]
+        public async Task InScope_SeesTheGroupsOfEveryRowSet ()
+        {
+            // Sibling row groups (Names rows, then Regions rows) are separate row sets: a cell is inside
+            // the group of its own set and not inside the other set's.
+            var rdl = Report ("=IIf(InScope(&quot;Names&quot;), &quot;n&quot;, &quot;-&quot;) &amp; IIf(InScope(&quot;Regions&quot;), &quot;r&quot;, &quot;-&quot;)")
+                .Replace ("</Matrix>", @"<fyi:RowSet xmlns:fyi=""http://www.fyireporting.com/schemas"">
+        <RowGroupings><RowGrouping><Width>1in</Width><DynamicRows>
+          <Grouping Name=""Regions""><GroupExpressions><GroupExpression>=Fields!Year.Value</GroupExpression></GroupExpressions></Grouping>
+          <ReportItems><Textbox Name=""RegionHead""><Value>=Fields!Year.Value</Value></Textbox></ReportItems>
+        </DynamicRows></RowGrouping></RowGroupings>
+        <MatrixRows><MatrixRow><Height>0.25in</Height><MatrixCells><MatrixCell><ReportItems><Textbox Name=""RegionCell""><Value>=IIf(InScope(&quot;Names&quot;), &quot;n&quot;, &quot;-&quot;) &amp; IIf(InScope(&quot;Regions&quot;), &quot;r&quot;, &quot;-&quot;)</Value></Textbox></ReportItems></MatrixCell></MatrixCells></MatrixRow></MatrixRows>
+      </fyi:RowSet></Matrix>")
+                .Replace ("<Report xmlns=\"" + Rdl2005 + "\">", "<Report xmlns=\"" + Rdl2005 + "\" xmlns:fyi=\"http://www.fyireporting.com/schemas\">");
+            // the subtotals of the first set would add rows of their own; keep this about the two sets
+            rdl = Regex.Replace (rdl, "<Subtotal>.*?</Subtotal>", "", RegexOptions.Singleline);
+
+            var html = await Render (rdl);
+            var rows = Cells (html);
+
+            // Name rows: inside Names, not Regions. Region rows: inside Regions, not Names.
+            Assert.That (rows.Where (r => r[0] == "Widget" || r[0] == "Gadget").SelectMany (r => r.Skip (1)).Distinct ().ToArray (), Is.EqualTo (new[] { "n-" }),
+                string.Join (" || ", rows.Select (r => string.Join (" ", r))));
+            Assert.That (rows.Where (r => r[0] == "Y2020" || r[0] == "Y2021").SelectMany (r => r.Skip (1)).Distinct ().ToArray (), Is.EqualTo (new[] { "-r" }),
+                string.Join (" || ", rows.Select (r => string.Join (" ", r))));
+        }
     }
 }

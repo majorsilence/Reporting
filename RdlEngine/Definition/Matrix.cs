@@ -1473,6 +1473,11 @@ namespace Majorsilence.Reporting.Rdl
             }
             foreach (RowGrouping rg in this.RowGroupings.Items)
                 rg.DynamicRows?.Grouping?.SetInScope(rpt, true);
+            foreach (RowSet set in _ExtraRowSets)
+            {
+                foreach (RowGrouping rg in set.RowGroupings.Items)
+                    rg.DynamicRows?.Grouping?.SetInScope(rpt, true);
+            }
         }
 
         private void SetGroupingValues(Report rpt, MatrixCellEntry mce)
@@ -1514,6 +1519,15 @@ namespace Majorsilence.Reporting.Rdl
                 {
                     if (rg.DynamicRows != null)
                         SetGrouping(rpt, rg.DynamicRows.Grouping, rme, data, inScope: false);
+                }
+                // groups of the other row sets are not on this cell's chain either
+                foreach (RowSet set in _ExtraRowSets)
+                {
+                    foreach (RowGrouping rg in set.RowGroupings.Items)
+                    {
+                        if (rg.DynamicRows != null)
+                            SetGrouping(rpt, rg.DynamicRows.Grouping, rme, data, inScope: false);
+                    }
                 }
             }
         }
