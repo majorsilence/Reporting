@@ -1330,7 +1330,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			SetStatusNameAndPosition();
 		}
 
-		private void SelectionChanged(object sender, System.EventArgs e)
+		private async void SelectionChanged(object sender, System.EventArgs e)
 		{
 			MDIChild mc = this.ActiveMdiChild as MDIChild;
 			if (mc == null)
@@ -1347,9 +1347,12 @@ namespace Majorsilence.Reporting.RdlDesign
 			SetStatusNameAndPosition();
 			this.EnableEditTextBox();   // handling enabling/disabling of textbox
 
-			StyleInfo si = mc.SelectedStyle;
+			StyleInfo si = await mc.GetSelectedStyleAsync();
 			if (si == null)
+			{
+				bSuppressChange = false;   // the early exit used to leave it set
 				return;
+			}
 
 			if (centerAlignToolStripButton2 != null)
 				centerAlignToolStripButton2.Checked = si.TextAlign == TextAlignEnum.Center ? true : false;

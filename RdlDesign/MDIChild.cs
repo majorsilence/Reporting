@@ -144,9 +144,17 @@ namespace Majorsilence.Reporting.RdlDesign
             rdlDesigner.SetFocus();
         }
 
+        [Obsolete("Blocks the calling thread. Use GetSelectedStyleAsync().")]
         public StyleInfo SelectedStyle
         {
+#pragma warning disable CS0618
             get { return rdlDesigner.SelectedStyle; }
+#pragma warning restore CS0618
+        }
+
+        public Task<StyleInfo> GetSelectedStyleAsync()
+        {
+            return rdlDesigner.GetSelectedStyleAsync();
         }
 
         public string SelectionName

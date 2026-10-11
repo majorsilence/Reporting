@@ -304,6 +304,45 @@ namespace Majorsilence.Pdf.Tests
         }
 
         [Test]
+        public void WithSignature_TimestampRequest_IsPostedToTheAuthority()
+        {
+            // Signing is synchronous, so the timestamp request is a synchronous HTTP call. A local listener stands
+            // in for the authority: it must receive a POST of an RFC 3161 query, and its error must surface.
+            using var cert = CreateTestCert();
+            var probe = new System.Net.Sockets.TcpListener(System.Net.IPAddress.Loopback, 0);
+            probe.Start();
+            int port = ((System.Net.IPEndPoint)probe.LocalEndpoint).Port;
+            probe.Stop();
+            string url = $"http://localhost:{port}/tsa";
+
+            using var listener = new System.Net.HttpListener();
+            listener.Prefixes.Add(url + "/");
+            listener.Start();
+            string method = null, contentType = null;
+            int bodyLength = 0;
+            var server = System.Threading.Tasks.Task.Run(async () =>
+            {
+                var ctx = await listener.GetContextAsync();
+                method = ctx.Request.HttpMethod;
+                contentType = ctx.Request.ContentType;
+                using var body = new System.IO.MemoryStream();
+                await ctx.Request.InputStream.CopyToAsync(body);
+                bodyLength = (int)body.Length;
+                ctx.Response.StatusCode = 500;
+                ctx.Response.Close();
+            });
+
+            var sig = new PdfSignatureOptions(cert).WithTimestampAuthority(url + "/");
+            var ex = Assert.Catch(() => MakePdf(doc => doc.WithSignature(sig)));
+
+            Assert.That(server.Wait(5000), Is.True, "the authority was never contacted");
+            Assert.That(method, Is.EqualTo("POST"));
+            Assert.That(contentType, Is.EqualTo("application/timestamp-query"));
+            Assert.That(bodyLength, Is.GreaterThan(0));
+            Assert.That(ex.ToString(), Does.Contain("500"));
+        }
+
+        [Test]
         public void WithSignature_ByteRangeIsFilledIn()
         {
             using var cert = CreateTestCert();

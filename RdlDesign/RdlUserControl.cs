@@ -405,7 +405,7 @@ namespace Majorsilence.Reporting.RdlDesign
             SetStatusNameAndPosition();
         }
 
-        private void SelectionChanged(object sender, System.EventArgs e)
+        private async void SelectionChanged(object sender, System.EventArgs e)
         {
             // handle edit tab first
             if (rdlEditPreview1.DesignTab == DesignTabs.Edit)
@@ -419,9 +419,12 @@ namespace Majorsilence.Reporting.RdlDesign
             SetStatusNameAndPosition();
             this.EnableEditTextBox();	// handling enabling/disabling of textbox
 
-            StyleInfo si = rdlEditPreview1.SelectedStyle;
+            StyleInfo si = await rdlEditPreview1.GetSelectedStyleAsync();
             if (si == null)
+               {
+                bSuppressChange = false;   // the early exit used to leave it set
                 return;
+               }
 
             if (centerAlignToolStripButton2 != null)
                 centerAlignToolStripButton2.Checked = si.TextAlign == TextAlignEnum.Center ? true : false;

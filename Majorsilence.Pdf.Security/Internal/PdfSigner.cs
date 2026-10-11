@@ -176,9 +176,21 @@ namespace Majorsilence.Pdf.Security.Internal
             var body          = new ByteArrayContent(req);
             body.Headers.ContentType = new MediaTypeHeaderValue("application/timestamp-query");
 
+            // Signing is synchronous (PdfDocument.Save), so the request is too. HttpClient.Send is a real
+            // synchronous call; only netstandard2.0 lacks it and has to block on the async one.
+#if NET5_0_OR_GREATER
+            using var request = new HttpRequestMessage(HttpMethod.Post, tsaUrl) { Content = body };
+            using var resp = http.Send(request);
+            resp.EnsureSuccessStatusCode();
+            using var responseStream = resp.Content.ReadAsStream();
+            using var buffer = new System.IO.MemoryStream();
+            responseStream.CopyTo(buffer);
+            byte[] raw = buffer.ToArray();
+#else
             var resp = http.PostAsync(tsaUrl, body).GetAwaiter().GetResult();
             resp.EnsureSuccessStatusCode();
             byte[] raw = resp.Content.ReadAsByteArrayAsync().GetAwaiter().GetResult();
+#endif
             return ExtractTimestampToken(raw);
         }
 
