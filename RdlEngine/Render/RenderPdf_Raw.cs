@@ -15,6 +15,7 @@
  */
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -437,10 +438,26 @@ namespace Majorsilence.Reporting.Rdl
 
         // ── font registry construction ────────────────────────────────────────
 
+        // Scanning the font folders is the same work for every report, so it is done once per
+        // distinct set of inputs and the result shared. A FontRegistry is only read after it is
+        // built (Resolve / Contains / GetFallbackSources), so sharing it between threads is safe.
+        // Like InstalledFontScanner's per-folder cache, fonts installed after the first report
+        // are not seen until the process restarts.
+        private static readonly ConcurrentDictionary<string, Lazy<FontRegistry>> _sharedRegistries =
+            new ConcurrentDictionary<string, Lazy<FontRegistry>>(StringComparer.Ordinal);
+
         private FontRegistry BuildFontRegistry()
         {
             // FontFolder sets _liberationFonts / _dejavuFonts as a side-effect
             string sysFolder = FontFolder;
+            string home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+            string key = string.Join("|", sysFolder, _liberationFonts, _dejavuFonts, home, IsOSX, _osPlatform);
+            return _sharedRegistries.GetOrAdd(key,
+                _ => new Lazy<FontRegistry>(() => BuildFontRegistryUncached(sysFolder))).Value;
+        }
+
+        private FontRegistry BuildFontRegistryUncached(string sysFolder)
+        {
             var reg = new FontRegistry();
 
             // ── bundled fonts (always available via Majorsilence.Forms.Drawing.Common) ──
