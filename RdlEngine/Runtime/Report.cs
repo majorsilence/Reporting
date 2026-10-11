@@ -22,6 +22,7 @@ namespace Majorsilence.Reporting.Rdl
 	{
         // private definitions
 		ReportDefn _Report;
+		readonly bool _ownsDefinition = true;
 		DataSources _DataSources;
 		DataSets _DataSets;
 		int _RuntimeName=0;		// used for the generation of unique runtime names
@@ -102,8 +103,16 @@ namespace Majorsilence.Reporting.Rdl
 		/// Construct a runtime Report object using the compiled report definition.
 		/// </summary>
 		/// <param name="r"></param>
-		public Report(ReportDefn r)
+		public Report(ReportDefn r) : this(r, true)
 		{
+		}
+
+		// ownsDefinition is false for a report made by CompiledReport.CreateReport: the definition is shared with
+		// other reports (possibly running on other threads) and must neither be disposed nor have its settings
+		// changed by this one.
+		internal Report(ReportDefn r, bool ownsDefinition)
+		{
+			_ownsDefinition = ownsDefinition;
 			_Report = r;
 			_Cache = new RCache();
 			rl = new ReportLog(r.rl);
@@ -493,7 +502,21 @@ namespace Majorsilence.Reporting.Rdl
 		public NeedPassword GetDataSourceReferencePassword
 		{
 			get {return _Report.GetDataSourceReferencePassword;}
-			set {_Report.GetDataSourceReferencePassword = value;}
+			set
+			{
+				// A change would affect every report using the shared definition.
+				if (!_ownsDefinition)
+					throw new InvalidOperationException("This report shares its definition with a CompiledReport. Set the data source reference password in CompiledReportOptions instead.");
+				_Report.GetDataSourceReferencePassword = value;
+			}
+		}
+
+		// Subreport.Run passes the running password on to the subreport's definition. A shared definition already
+		// has the password it was compiled with.
+		internal void PassPasswordToSubreport(NeedPassword np)
+		{
+			if (_ownsDefinition)
+				_Report.GetDataSourceReferencePassword = np;
 		}
 
 		public ReportDefn ReportDefinition
@@ -700,7 +723,8 @@ namespace Majorsilence.Reporting.Rdl
 			_DataSets = null;
 			if (_Report != null)
 			{
-				_Report.Dispose();
+				if (_ownsDefinition)
+					_Report.Dispose();
 				_Report = null;
 			}
 			_Cache = null;

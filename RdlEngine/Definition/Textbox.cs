@@ -394,15 +394,21 @@ namespace Majorsilence.Reporting.Rdl
 		// at the end of the head and opened again at the start of the tail.
 		private async Task<(string head, string tail)> SplitTextToFit(Report rpt, Graphics g, string text, Row row, int widthPx, float availPts, bool html)
 		{
-			List<(int pos, string closers, string openers)> breaks = html ? HtmlSplitPoints(text) : PlainSplitPoints(text);
-			if (breaks.Count == 0)
+			// Plain text keeps only the positions (a long text has one per word); html needs the tags open at each.
+			List<(int pos, string closers, string openers)> htmlBreaks = html ? HtmlSplitPoints(text) : null;
+			int[] plainBreaks = html ? null : PlainSplitPoints(text);
+			int count = html ? htmlBreaks.Count : plainBreaks.Length;
+			if (count == 0)
 				return (text, "");
 
-			int lo = 0, hi = breaks.Count - 1, best = -1;
+			(int pos, string closers, string openers) BreakAt(int k) => html ? htmlBreaks[k] : (plainBreaks[k], "", "");
+
+			int lo = 0, hi = count - 1, best = -1;
 			while (lo <= hi)
 			{
 				int mid = (lo + hi) / 2;
-				float h = await MeasureTextHeightPoints(rpt, g, text.Substring(0, breaks[mid].pos) + breaks[mid].closers, row, widthPx, html).ConfigureAwait(false);
+				var probe = BreakAt(mid);
+				float h = await MeasureTextHeightPoints(rpt, g, text.Substring(0, probe.pos) + probe.closers, row, widthPx, html).ConfigureAwait(false);
 				if (h <= availPts)
 				{
 					best = mid;
@@ -411,17 +417,27 @@ namespace Majorsilence.Reporting.Rdl
 				else
 					hi = mid - 1;
 			}
-			var split = breaks[best < 0 ? 0 : best];	// force minimal progress when nothing fits
+			var split = BreakAt(best < 0 ? 0 : best);	// force minimal progress when nothing fits
 			return (text.Substring(0, split.pos) + split.closers, split.openers + text.Substring(split.pos).TrimStart());
 		}
 
-		private static List<(int pos, string closers, string openers)> PlainSplitPoints(string text)
+		private static int[] PlainSplitPoints(string text)
 		{
-			var breaks = new List<(int, string, string)>();
+			int count = 0;
 			for (int i = 1; i < text.Length - 1; i++)
 			{
 				if (char.IsWhiteSpace(text[i]) && !char.IsWhiteSpace(text[i - 1]))
-					breaks.Add((i, "", ""));
+					count++;
+			}
+			if (count == 0)
+				return Array.Empty<int>();
+
+			var breaks = new int[count];
+			int n = 0;
+			for (int i = 1; i < text.Length - 1; i++)
+			{
+				if (char.IsWhiteSpace(text[i]) && !char.IsWhiteSpace(text[i - 1]))
+					breaks[n++] = i;
 			}
 			return breaks;
 		}

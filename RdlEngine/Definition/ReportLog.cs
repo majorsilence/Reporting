@@ -38,17 +38,24 @@ namespace Majorsilence.Reporting.Rdl
 			LogError(rl.MaxSeverity, rl.ErrorItems);
 		}
 
+		// A log can be shared: run-time messages with no Report to hold them go to the definition's log, and a
+		// definition may be used by several reports at once (CompiledReport).
+		readonly object _lock = new object();
+
 		internal void LogError(int severity, string item)
 		{
-			if (_ErrorItems == null)			// create log if first time
-                _ErrorItems = new List<string>();
-
-			if (severity > _MaxSeverity)
-				_MaxSeverity = severity;
-
 			var msg = Strings.ReportLog_Error_Severity + ": " + Convert.ToString(severity) + " - " + item;
 
-			_ErrorItems.Add(msg);
+			lock (_lock)
+			{
+				if (_ErrorItems == null)			// create log if first time
+					_ErrorItems = new List<string>();
+
+				if (severity > _MaxSeverity)
+					_MaxSeverity = severity;
+
+				_ErrorItems.Add(msg);
+			}
 
 			if (severity >= 12)		
 				throw new Exception(msg);		// terminate the processing
@@ -56,13 +63,16 @@ namespace Majorsilence.Reporting.Rdl
 
 		internal void LogError(int severity, List<string> list)
 		{
-			if (_ErrorItems == null)			// create log if first time
-                _ErrorItems = new List<string>();
+			lock (_lock)
+			{
+				if (_ErrorItems == null)			// create log if first time
+					_ErrorItems = new List<string>();
 
-			if (severity > _MaxSeverity)
-				_MaxSeverity = severity;
+				if (severity > _MaxSeverity)
+					_MaxSeverity = severity;
 
-			_ErrorItems.AddRange(list);
+				_ErrorItems.AddRange(list);
+			}
 		}
 
 		internal void Reset()

@@ -434,32 +434,30 @@ namespace Majorsilence.Reporting.Rdl
         private void WrapLine(string text, TextStyle style, float maxWidth, List<string> output)
         {
             string[] words = text.Split(' ');
-            var current = new System.Text.StringBuilder();
+            string current = null;      // the line being built; the candidate (line + " " + word) is the only string made per word
 
             foreach (string word in words)
             {
-                if (current.Length == 0)
+                if (string.IsNullOrEmpty(current))
                 {
-                    current.Append(word);
+                    current = word;
                 }
                 else
                 {
                     string candidate = current + " " + word;
                     if (_currentPage.MeasureTextWidth(candidate, style) <= maxWidth)
                     {
-                        current.Clear();
-                        current.Append(candidate);
+                        current = candidate;
                     }
                     else
                     {
-                        output.Add(current.ToString());
-                        current.Clear();
-                        current.Append(word);
+                        output.Add(current);
+                        current = word;
                     }
                 }
             }
-            if (current.Length > 0)
-                output.Add(current.ToString());
+            if (!string.IsNullOrEmpty(current))
+                output.Add(current);
         }
 
         // ── font registry construction ────────────────────────────────────────

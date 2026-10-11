@@ -305,7 +305,7 @@ namespace Majorsilence.Reporting.Rdl
         private async Task<Page> RunPage_Bitmap(Pages pgs, Row row, Report rpt, ChartBase cb)
         {
             Page p;
-            Draw2.Image im = cb.Image(rpt);   // Grab the image
+            Draw2.Image im = await cb.ImageAsync(rpt).ConfigureAwait(false);   // Grab the image
             int height = im.Height;                         // save height and width
             int width = im.Width;
 

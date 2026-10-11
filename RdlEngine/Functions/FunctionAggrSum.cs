@@ -48,7 +48,7 @@ namespace Majorsilence.Reporting.Rdl
 				case TypeCode.Decimal:
 					return (object)await EvaluateDecimal(rpt, row).ConfigureAwait(false);
 				case TypeCode.Object:
-					return EvaluateObject(rpt, row);
+					return await EvaluateObject(rpt, row).ConfigureAwait(false);
 				case TypeCode.Double:
 				default:
 					return (object)await EvaluateDouble(rpt, row).ConfigureAwait(false);

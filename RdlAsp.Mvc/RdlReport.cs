@@ -91,8 +91,8 @@ namespace Majorsilence.Reporting.RdlAsp
                 return Failure(500, null);
 
             if (format.Type != OutputPresentationType.HTML)
-                return rendered.Bytes != null
-                    ? File(rendered.Bytes, format.ContentType)
+                return rendered.Stream != null
+                    ? File(rendered.Stream, format.ContentType)     // the result disposes it once written
                     : Content(rendered.Text, format.ContentType);
 
             string name = Path.GetFileNameWithoutExtension(file);
@@ -162,7 +162,11 @@ namespace Majorsilence.Reporting.RdlAsp
                 if (format.IsText)
                     rendered.Text = sg.GetText();
                 else
-                    rendered.Bytes = ((MemoryStream)sg.MemoryList[0]).ToArray();
+                {
+                    // The output is sent from the stream the engine wrote it to, not from a copy of it.
+                    rendered.Stream = (MemoryStream)sg.MemoryList[0];
+                    rendered.Stream.Position = 0;
+                }
                 return rendered;
             }
             finally
@@ -245,35 +249,39 @@ namespace Majorsilence.Reporting.RdlAsp
 
         private async Task<Report> LoadReport(string file)
         {
-            Report report = ReportHelper.GetCachedReport(file, _cache);
-            if (report != null)
-                return report;
+            string folder = Path.GetDirectoryName(file);
+            CompiledReport compiled = ReportHelper.GetCachedReport(file, _cache);
+            if (compiled != null)
+                return NewReport(compiled, file, folder);
 
             try
             {
                 // Make sure RdlEngine is configured before we ever parse a report
                 RdlEngineConfig.RdlEngineConfigInit();
 
-                var rdlp = new RDLParser(ReportHelper.GetSource(file));
-                string folder = Path.GetDirectoryName(file);
-                rdlp.Folder = folder;
-                rdlp.DataSourceReferencePassword = new NeedPassword(this.GetPassword);
+                // Parsed once and shared by every request for this file; the pass phrase is fixed at compile time.
+                string passPhrase = _passPhrase;
+                compiled = await CompiledReport.CompileAsync(ReportHelper.GetSource(file), new CompiledReportOptions
+                {
+                    Folder = folder,
+                    DataSourceReferencePassword = () => passPhrase,
+                });
 
-                report = await rdlp.Parse();
+                Report report = NewReport(compiled, file, folder);
                 if (report.ErrorMaxSeverity > 0)
                 {
                     AddError(report.ErrorMaxSeverity, report.ErrorItems);
                     bool failed = report.ErrorMaxSeverity >= 8;
                     report.ErrorReset();
                     if (failed)
+                    {
+                        report.Dispose();
+                        compiled.Dispose();
                         return null;
+                    }
                 }
 
-                // we should tell the report where it got loaded from
-                report.Folder = folder;
-                report.Name = Path.GetFileNameWithoutExtension(file);
-                report.GetDataSourceReferencePassword = new NeedPassword(GetPassword);
-                ReportHelper.SaveCachedReport(report, file, _cache);
+                ReportHelper.SaveCachedReport(compiled, file, _cache);
                 return report;
             }
             catch (Exception e)
@@ -281,6 +289,15 @@ namespace Majorsilence.Reporting.RdlAsp
                 AddError(8, $"Exception parsing report {Path.GetFileName(file)}.  {e.Message}");
                 return null;
             }
+        }
+
+        private static Report NewReport(CompiledReport compiled, string file, string folder)
+        {
+            Report report = compiled.CreateReport();
+            // we should tell the report where it got loaded from
+            report.Folder = folder;
+            report.Name = Path.GetFileNameWithoutExtension(file);
+            return report;
         }
 
         private sealed class Format
@@ -302,7 +319,7 @@ namespace Majorsilence.Reporting.RdlAsp
         private sealed class RenderedReport
         {
             public string Text;
-            public byte[] Bytes;
+            public MemoryStream Stream;
         }
     }
 }

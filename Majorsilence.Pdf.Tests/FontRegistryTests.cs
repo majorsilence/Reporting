@@ -371,6 +371,36 @@ namespace Majorsilence.Pdf.Tests
         }
 
         [Test]
+        public void EmbeddedFont_IsSharedBetweenDocumentsThatUseTheSameGlyphs_AndKeepsTheTextExtractable()
+        {
+            Assume.That(BundledFontsExist, "Bundled fonts directory not found");
+            var registry = new FontRegistry().AddDirectory(BundledFontsDir);
+            var style = TextStyle.Default.WithFamily("LiberationSans").WithSize(12);
+
+            byte[] Make(string text)
+            {
+                var doc = PdfDocument.Create().WithFontRegistry(registry);
+                return doc.AddPage(PageSizes.A4, c => c.DrawText(text, 50, 50, style)).ToBytes();
+            }
+
+            long hitsBefore = Majorsilence.Pdf.Internal.FontPartsCache.Hits;
+            byte[] first = Make("Invoice 1042");
+            byte[] second = Make("Order 77");        // different text, same ASCII glyph subset
+            Assert.That(Majorsilence.Pdf.Internal.FontPartsCache.Hits, Is.GreaterThan(hitsBefore));
+
+            foreach (var (bytes, text) in new[] { (first, "Invoice 1042"), (second, "Order 77") })
+            {
+                using var parsed = PdfPig.Open(bytes);
+                Assert.That(parsed.GetPage(1).Text, Does.Contain(text));
+            }
+
+            // A glyph outside ASCII still gets its own subset and still extracts
+            byte[] accented = Make("Caf\u00e9");
+            using (var parsed = PdfPig.Open(accented))
+                Assert.That(parsed.GetPage(1).Text, Does.Contain("Caf\u00e9"));
+        }
+
+        [Test]
         public void AddInstalledFonts_AMissingDirectoryAddsNothing()
         {
             var reg = new FontRegistry().AddInstalledFonts(
