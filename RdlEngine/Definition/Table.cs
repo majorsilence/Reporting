@@ -431,24 +431,23 @@ namespace Majorsilence.Reporting.Rdl
 
 			wc.Data.CurrentGroups = currentGroups;
 
-			SortGroups(rpt, wc.Groups, wc);
+			await SortGroups(rpt, wc.Groups, wc);
 		}
 
-		private void SortGroups(Report rpt, List<GroupEntry> groupEntries, TableWorkClass wc)
+		private async Task SortGroups(Report rpt, List<GroupEntry> groupEntries, TableWorkClass wc)
 		{
 			GroupEntry fge = (GroupEntry) (groupEntries[0]);
 			if (fge.Sort != null)
 			{
-				GroupEntryCompare gec = new GroupEntryCompare(rpt, wc);
 				RunGroupsSetGroups(rpt, wc, groupEntries);
-				groupEntries.Sort(gec);
+				await GroupEntryCompare.SortAsync(rpt, wc, groupEntries);
 			}
 
 			// drill down into nested groups
 			foreach (GroupEntry ge in groupEntries)
 			{
 				if (ge.NestedGroup.Count > 0)
-					SortGroups(rpt, ge.NestedGroup, wc);
+					await SortGroups(rpt, ge.NestedGroup, wc);
 			}
 		}
 
@@ -634,7 +633,7 @@ namespace Majorsilence.Reporting.Rdl
 				r.GroupEntry.EndRow = iRow;
 
 				// pull out all the rows that match this value
-				int iMainRow=odata.BinarySearch(r, rc);
+				int iMainRow = await rc.BinarySearchAsync(odata, r);
 				if (iMainRow < 0)
 				{
 					for (int i=0; i <= r.Level+1 && i < ges.Count; i++)
@@ -1188,11 +1187,34 @@ namespace Majorsilence.Reporting.Rdl
 
 		#region IComparer Members
 
+		// Same search as List<Row>.BinarySearch(item, this) - the element is compared to the item, ties
+		// return the middle index - with the two expressions awaited instead of run through
+		// Task.Run(...).GetResult() (a thread-pool hop and a blocked pool thread per probe).
+		internal async Task<int> BinarySearchAsync(List<Row> list, Row item)
+		{
+			int lo = 0;
+			int hi = list.Count - 1;
+			while (lo <= hi)
+			{
+				int i = lo + ((hi - lo) >> 1);
+				object xv = await parentExpr.Evaluate(rpt, list[i]);
+				object yv = await groupExpr.Evaluate(rpt, item);
+				int order = -Filter.ApplyCompare(_Type, yv, xv);
+				if (order == 0)
+					return i;
+				if (order < 0)
+					lo = i + 1;
+				else
+					hi = i - 1;
+			}
+			return ~lo;
+		}
+
 		public int Compare(Row x, Row y)
 		{
-			// HACK: async
-            object xv = Task.Run(async () => await parentExpr.Evaluate(rpt, x)).GetAwaiter().GetResult();
-            object yv = Task.Run(async () => await groupExpr.Evaluate(rpt, y)).GetAwaiter().GetResult();
+			// Synchronous callers only; the report engine itself uses BinarySearchAsync.
+			object xv = Task.Run(async () => await parentExpr.Evaluate(rpt, x)).GetAwaiter().GetResult();
+			object yv = Task.Run(async () => await groupExpr.Evaluate(rpt, y)).GetAwaiter().GetResult();
 
 			return -Filter.ApplyCompare(_Type, yv, xv);
 		}
@@ -1208,6 +1230,54 @@ namespace Majorsilence.Reporting.Rdl
 		{
 			rpt = r;
 			wc = w;
+		}
+
+		// Sorts like List<GroupEntry>.Sort(this) but evaluates each entry's sort expressions once, awaited,
+		// instead of two Task.Run(...).GetResult() hops per comparison. An entry's key depends only on
+		// the entry: the expression is evaluated with that entry as its group's current group, on its first row.
+		internal static async Task SortAsync(Report rpt, TableWorkClass wc, List<GroupEntry> groupEntries)
+		{
+			var items = new KeyedGroup[groupEntries.Count];
+			for (int i = 0; i < items.Length; i++)
+			{
+				GroupEntry ge = groupEntries[i];
+				var sortItems = ge.Sort.Items;
+				var keys = new object[sortItems.Count];
+				for (int k = 0; k < keys.Length; k++)
+				{
+					SortBy sb = (SortBy) sortItems[k];
+					wc.Data.CurrentGroups[ge.Group.GetIndex(rpt)] = ge;
+					keys[k] = await sb.SortExpression.Evaluate(rpt, wc.Data.Data[ge.StartRow]);
+				}
+				items[i] = new KeyedGroup { Entry = ge, Keys = keys };
+			}
+
+			Array.Sort(items, (a, b) =>
+			{
+				int rc = 0;
+				var sortItems = a.Entry.Sort.Items;
+				for (int k = 0; k < sortItems.Count; k++)
+				{
+					SortBy sb = (SortBy) sortItems[k];
+					rc = Filter.ApplyCompare(sb.SortExpression.Type, a.Keys[k], b.Keys[k]);
+					if (rc != 0)
+					{
+						if (sb.Direction == SortDirectionEnum.Descending)
+							rc = -rc;
+						break;
+					}
+				}
+				return rc;
+			});
+
+			for (int i = 0; i < items.Length; i++)
+				groupEntries[i] = items[i].Entry;
+		}
+
+		private struct KeyedGroup
+		{
+			internal GroupEntry Entry;
+			internal object[] Keys;
 		}
 
 		#region IComparer<GroupEntry> Members

@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Report xmlns="http://schemas.microsoft.com/sqlserver/reporting/2005/01/reportdefinition" xmlns:rd="http://schemas.microsoft.com/SQLServer/reporting/reportdesigner">
+  <Description>Recursive hierarchy via Grouping/Parent: regression workload for the recursive group search.</Description>
+  <Width>6in</Width>
+  <PageWidth>8.5in</PageWidth>
+  <PageHeight>11in</PageHeight>
+  <TopMargin>.5in</TopMargin><BottomMargin>.5in</BottomMargin><LeftMargin>.5in</LeftMargin><RightMargin>.5in</RightMargin>
+  <DataSources>
+    <DataSource Name="DS1"><ConnectionProperties><DataProvider>xxx</DataProvider><ConnectString>none</ConnectString></ConnectionProperties></DataSource>
+  </DataSources>
+  <DataSets>
+    <DataSet Name="Data">
+      <Query><DataSourceName>DS1</DataSourceName><CommandText></CommandText></Query>
+      <Fields>
+        <Field Name="EmployeeID"><DataField>EmployeeID</DataField><rd:TypeName>System.Int32</rd:TypeName></Field>
+        <Field Name="ReportsTo"><DataField>ReportsTo</DataField><rd:TypeName>System.Int32</rd:TypeName></Field>
+        <Field Name="Name"><DataField>Name</DataField><rd:TypeName>System.String</rd:TypeName></Field>
+      </Fields>
+      <fyi:Rows xmlns:fyi="http://www.fyireporting.com/schemas">
+        <Row><EmployeeID>1</EmployeeID><ReportsTo></ReportsTo><Name>CEO</Name></Row>
+        <Row><EmployeeID>2</EmployeeID><ReportsTo>1</ReportsTo><Name>VP Eng</Name></Row>
+        <Row><EmployeeID>3</EmployeeID><ReportsTo>1</ReportsTo><Name>VP Sales</Name></Row>
+        <Row><EmployeeID>4</EmployeeID><ReportsTo>2</ReportsTo><Name>Dev Lead</Name></Row>
+        <Row><EmployeeID>5</EmployeeID><ReportsTo>2</ReportsTo><Name>QA Lead</Name></Row>
+        <Row><EmployeeID>6</EmployeeID><ReportsTo>3</ReportsTo><Name>Account Mgr</Name></Row>
+        <Row><EmployeeID>7</EmployeeID><ReportsTo>4</ReportsTo><Name>Dev One</Name></Row>
+        <Row><EmployeeID>8</EmployeeID><ReportsTo>4</ReportsTo><Name>Dev Two</Name></Row>
+        <Row><EmployeeID>9</EmployeeID><ReportsTo>6</ReportsTo><Name>Rep One</Name></Row>
+      </fyi:Rows>
+    </DataSet>
+  </DataSets>
+  <Body>
+    <Height>1in</Height>
+    <ReportItems>
+      <Table Name="Table1">
+        <DataSetName>Data</DataSetName>
+        <Top>0in</Top><Left>0in</Left><Width>6in</Width><Height>0.4in</Height>
+        <TableColumns><TableColumn><Width>3in</Width></TableColumn><TableColumn><Width>3in</Width></TableColumn></TableColumns>
+        <Details>
+          <Grouping Name="Hierarchy">
+            <GroupExpressions><GroupExpression>=Fields!EmployeeID.Value</GroupExpression></GroupExpressions>
+            <Parent>=Fields!ReportsTo.Value</Parent>
+          </Grouping>
+          <TableRows><TableRow><Height>0.2in</Height><TableCells>
+            <TableCell><ReportItems><Textbox Name="dName"><Value>=Fields!Name.Value</Value></Textbox></ReportItems></TableCell><TableCell><ReportItems><Textbox Name="dLevel"><Value>=Level()</Value></Textbox></ReportItems></TableCell>
+          </TableCells></TableRow></TableRows>
+        </Details>
+      </Table>
+    </ReportItems>
+  </Body>
+</Report>

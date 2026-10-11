@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Report xmlns="http://schemas.microsoft.com/sqlserver/reporting/2005/01/reportdefinition" xmlns:rd="http://schemas.microsoft.com/SQLServer/reporting/reportdesigner">
+  <Description>Table groups sorted descending by Sum(Amount): benchmark/regression workload for group-entry sorting.</Description>
+  <Width>6in</Width>
+  <PageWidth>8.5in</PageWidth>
+  <PageHeight>11in</PageHeight>
+  <TopMargin>.5in</TopMargin><BottomMargin>.5in</BottomMargin><LeftMargin>.5in</LeftMargin><RightMargin>.5in</RightMargin>
+  <DataSources>
+    <DataSource Name="DS1"><ConnectionProperties><DataProvider>xxx</DataProvider><ConnectString>none</ConnectString></ConnectionProperties></DataSource>
+  </DataSources>
+  <DataSets>
+    <DataSet Name="Data">
+      <Query><DataSourceName>DS1</DataSourceName><CommandText></CommandText></Query>
+      <Fields>
+        <Field Name="Region"><DataField>Region</DataField><rd:TypeName>System.String</rd:TypeName></Field>
+        <Field Name="Amount"><DataField>Amount</DataField><rd:TypeName>System.Int32</rd:TypeName></Field>
+        <Field Name="Id"><DataField>Id</DataField><rd:TypeName>System.Int32</rd:TypeName></Field>
+      </Fields>
+      <fyi:Rows xmlns:fyi="http://www.fyireporting.com/schemas">
+        <Row><Region>North</Region><Amount>10</Amount><Id>1</Id></Row>
+        <Row><Region>South</Region><Amount>50</Amount><Id>2</Id></Row>
+        <Row><Region>East</Region><Amount>30</Amount><Id>3</Id></Row>
+        <Row><Region>West</Region><Amount>20</Amount><Id>4</Id></Row>
+        <Row><Region>North</Region><Amount>5</Amount><Id>5</Id></Row>
+        <Row><Region>South</Region><Amount>1</Amount><Id>6</Id></Row>
+        <Row><Region>East</Region><Amount>40</Amount><Id>7</Id></Row>
+        <Row><Region>West</Region><Amount>25</Amount><Id>8</Id></Row>
+        <Row><Region>Central</Region><Amount>99</Amount><Id>9</Id></Row>
+        <Row><Region>Central</Region><Amount>1</Amount><Id>10</Id></Row>
+      </fyi:Rows>
+    </DataSet>
+  </DataSets>
+  <Body>
+    <Height>1in</Height>
+    <ReportItems>
+      <Table Name="Table1">
+        <DataSetName>Data</DataSetName>
+        <Top>0in</Top><Left>0in</Left><Width>6in</Width><Height>0.6in</Height>
+        <TableColumns><TableColumn><Width>3in</Width></TableColumn><TableColumn><Width>3in</Width></TableColumn></TableColumns>
+        <TableGroups>
+          <TableGroup>
+            <Grouping Name="ByRegion"><GroupExpressions><GroupExpression>=Fields!Region.Value</GroupExpression></GroupExpressions></Grouping>
+            <Sorting><SortBy><SortExpression>=Sum(Fields!Amount.Value)</SortExpression><Direction>Descending</Direction></SortBy></Sorting>
+            <Header><TableRows><TableRow><Height>0.2in</Height><TableCells>
+              <TableCell><ReportItems><Textbox Name="gRegion"><Value>=Fields!Region.Value</Value></Textbox></ReportItems></TableCell><TableCell><ReportItems><Textbox Name="gSum"><Value>=Sum(Fields!Amount.Value)</Value></Textbox></ReportItems></TableCell>
+            </TableCells></TableRow></TableRows></Header>
+          </TableGroup>
+        </TableGroups>
+        <Details><TableRows><TableRow><Height>0.2in</Height><TableCells>
+          <TableCell><ReportItems><Textbox Name="dId"><Value>=Fields!Id.Value</Value></Textbox></ReportItems></TableCell><TableCell><ReportItems><Textbox Name="dAmt"><Value>=Fields!Amount.Value</Value></Textbox></ReportItems></TableCell>
+        </TableCells></TableRow></TableRows></Details>
+      </Table>
+    </ReportItems>
+  </Body>
+</Report>

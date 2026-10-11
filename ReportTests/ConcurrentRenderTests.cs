@@ -34,6 +34,8 @@ namespace ReportTests
             "MatrixExample.rdl",    // sqlite
             "ListPagingTest.rdl",   // html text split across pages
             "CanGrowSplitTest.rdl",
+            "GroupSortTest.rdl",    // groups sorted by an aggregate
+            "RecursiveGroupTest.rdl",
         };
 
         private static readonly OutputPresentationType[] Formats =

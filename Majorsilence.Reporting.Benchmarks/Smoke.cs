@@ -9,7 +9,7 @@ public static class Smoke
     public static async Task Run()
     {
         WorkloadSupport.Init();
-        string[] names = [Workloads.Small, Workloads.Tabular, Workloads.Matrix, Workloads.Paging, Workloads.CanGrow, Workloads.Charts, Workloads.Images];
+        string[] names = [Workloads.Small, Workloads.Tabular, Workloads.Matrix, Workloads.Paging, Workloads.CanGrow, Workloads.Charts, Workloads.Images, "GroupSortTest", "RecursiveGroupTest"];
         OutputPresentationType[] formats = [OutputPresentationType.PDF, OutputPresentationType.HTML, OutputPresentationType.CSV, OutputPresentationType.XML, OutputPresentationType.RTF, OutputPresentationType.Excel2007];
         Console.WriteLine("|Workload|Format|Bytes|SHA256 (first 12)|Status|");
         Console.WriteLine("|--------|------|----:|-----------------|------|");
@@ -38,6 +38,17 @@ public static class Smoke
                 }
             }
         }
+    }
+
+    /// <summary>Renders one workload and prints the text output (CSV / XML / HTML): <c>-- show GroupSortTest csv</c>.</summary>
+    public static async Task Show(string name, OutputPresentationType format)
+    {
+        WorkloadSupport.Init();
+        var report = await WorkloadSupport.Load(name);
+        await report.RunGetData();
+        using var ms = new MemoryStreamGen();
+        await report.RunRender(ms, format);
+        Console.WriteLine(ms.GetText());
     }
 
     // PDF and OOXML embed creation times / random ids; mask them so equal output hashes equally.
