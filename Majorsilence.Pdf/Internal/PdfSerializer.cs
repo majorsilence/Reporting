@@ -510,11 +510,16 @@ namespace Majorsilence.Pdf.Internal
             }
 
             // ── ToUnicode CMap ────────────────────────────────────────────────
-            byte[] cmapComp = parts.ToUnicodeCompressed;
-            byte[] cmapData = _encryptor != null
-                ? _encryptor.EncryptStream(toUnicodeObjNum, 0, cmapComp) : cmapComp;
-            string cmapHdr  = $"<< /Filter /FlateDecode /Length {cmapData.Length} >>\nstream\n";
-            objects.Add(Concat(Latin1.GetBytes(cmapHdr), cmapData, Latin1.GetBytes("\nendstream")));
+            if (_encryptor == null)
+            {
+                objects.Add(parts.ToUnicodeObject);     // shared; an object's bytes are only ever read
+            }
+            else
+            {
+                byte[] cmapData = _encryptor.EncryptStream(toUnicodeObjNum, 0, parts.ToUnicodeCompressed);
+                string cmapHdr  = $"<< /Filter /FlateDecode /Length {cmapData.Length} >>\nstream\n";
+                objects.Add(Concat(Latin1.GetBytes(cmapHdr), cmapData, Latin1.GetBytes("\nendstream")));
+            }
 
             string wArray = parts.Widths;
 
@@ -531,10 +536,16 @@ namespace Majorsilence.Pdf.Internal
                 $"/CapHeight {asc} /StemV 80 /FontFile2 {fontFileObjNum} 0 R >>"));
 
             // ── FontFile2 stream ───────────────────────────────────────────────
-            byte[] fontStream = _encryptor != null
-                ? _encryptor.EncryptStream(fontFileObjNum, 0, parts.FontCompressed) : parts.FontCompressed;
-            string ffHdr = $"<< /Filter /FlateDecode /Length {fontStream.Length} /Length1 {parts.FontLength} >>\nstream\n";
-            objects.Add(Concat(Latin1.GetBytes(ffHdr), fontStream, Latin1.GetBytes("\nendstream")));
+            if (_encryptor == null)
+            {
+                objects.Add(parts.FontFileObject);
+            }
+            else
+            {
+                byte[] fontStream = _encryptor.EncryptStream(fontFileObjNum, 0, parts.FontCompressed);
+                string ffHdr = $"<< /Filter /FlateDecode /Length {fontStream.Length} /Length1 {parts.FontLength} >>\nstream\n";
+                objects.Add(Concat(Latin1.GetBytes(ffHdr), fontStream, Latin1.GetBytes("\nendstream")));
+            }
 
             // ── CIDFont ───────────────────────────────────────────────────────
             objects.Add(Latin1.GetBytes(
@@ -584,7 +595,12 @@ namespace Majorsilence.Pdf.Internal
             wArray.Append(" ]");
 
             byte[] fontData = subset && used != null && used.Count > 0 ? ttf.Subset(used) : ttf.Data;
-            return new FontParts(cmapComp, wArray.ToString(), Compress(fontData), fontData.Length);
+            byte[] fontComp = Compress(fontData);
+            byte[] cmapObject = Concat(Latin1.GetBytes($"<< /Filter /FlateDecode /Length {cmapComp.Length} >>\nstream\n"),
+                cmapComp, Latin1.GetBytes("\nendstream"));
+            byte[] fontObject = Concat(Latin1.GetBytes($"<< /Filter /FlateDecode /Length {fontComp.Length} /Length1 {fontData.Length} >>\nstream\n"),
+                fontComp, Latin1.GetBytes("\nendstream"));
+            return new FontParts(cmapComp, wArray.ToString(), fontComp, fontData.Length, cmapObject, fontObject);
         }
 
         private byte[] BuildImageObj(ImageResource img, int objNum)

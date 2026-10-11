@@ -19,19 +19,26 @@ namespace Majorsilence.Pdf.Internal
     /// </summary>
     internal sealed class FontParts
     {
-        internal FontParts(byte[] toUnicodeCompressed, string widths, byte[] fontCompressed, int fontLength)
+        internal FontParts(byte[] toUnicodeCompressed, string widths, byte[] fontCompressed, int fontLength,
+            byte[] toUnicodeObject, byte[] fontFileObject)
         {
             ToUnicodeCompressed = toUnicodeCompressed;
             Widths = widths;
             FontCompressed = fontCompressed;
             FontLength = fontLength;
+            ToUnicodeObject = toUnicodeObject;
+            FontFileObject = fontFileObject;
         }
+
+        /// <summary>The complete stream objects as written without encryption; shared, never changed.</summary>
+        internal byte[] ToUnicodeObject { get; }
+        internal byte[] FontFileObject { get; }
 
         internal byte[] ToUnicodeCompressed { get; }
         internal string Widths { get; }
         internal byte[] FontCompressed { get; }
         internal int FontLength { get; }
-        internal long Size => ToUnicodeCompressed.Length + FontCompressed.Length + Widths.Length * 2L;
+        internal long Size => ToUnicodeCompressed.Length + FontCompressed.Length + ToUnicodeObject.Length + FontFileObject.Length + Widths.Length * 2L;
     }
 
     internal static class FontPartsCache
