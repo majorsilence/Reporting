@@ -440,7 +440,7 @@ namespace Majorsilence.Reporting.Rdl
 			if (fge.Sort != null)
 			{
 				RunGroupsSetGroups(rpt, wc, groupEntries);
-				await GroupEntryCompare.SortAsync(rpt, wc, groupEntries);
+				await GroupEntrySort.SortAsync(rpt, wc, groupEntries);
 			}
 
 			// drill down into nested groups
@@ -1170,7 +1170,7 @@ namespace Majorsilence.Reporting.Rdl
 		}
 	}
 
-	class RecursiveCompare: IComparer<Row>
+	class RecursiveCompare
 	{
         Report rpt;
 		TypeCode _Type;
@@ -1184,8 +1184,6 @@ namespace Majorsilence.Reporting.Rdl
 			parentExpr = pExpr;
             groupExpr = gExpr;
 		}
-
-		#region IComparer Members
 
 		// Same search as List<Row>.BinarySearch(item, this) - the element is compared to the item, ties
 		// return the middle index - with the two expressions awaited instead of run through
@@ -1209,30 +1207,12 @@ namespace Majorsilence.Reporting.Rdl
 			}
 			return ~lo;
 		}
-
-		public int Compare(Row x, Row y)
-		{
-			// Synchronous callers only; the report engine itself uses BinarySearchAsync.
-			object xv = Task.Run(async () => await parentExpr.Evaluate(rpt, x)).GetAwaiter().GetResult();
-			object yv = Task.Run(async () => await groupExpr.Evaluate(rpt, y)).GetAwaiter().GetResult();
-
-			return -Filter.ApplyCompare(_Type, yv, xv);
-		}
-
-		#endregion
 	}
-	class GroupEntryCompare: IComparer<GroupEntry>
+	// Sorts the group entries of a table by their Sorting expressions. A comparer would have to be
+	// synchronous, and sorting with one meant running each expression through Task.Run(...).GetResult().
+	static class GroupEntrySort
 	{
-		Report rpt;
-		TableWorkClass wc;
-
-		internal GroupEntryCompare(Report r, TableWorkClass w )
-		{
-			rpt = r;
-			wc = w;
-		}
-
-		// Sorts like List<GroupEntry>.Sort(this) but evaluates each entry's sort expressions once, awaited,
+		// Evaluates each entry's sort expressions once, awaited,
 		// instead of two Task.Run(...).GetResult() hops per comparison. An entry's key depends only on
 		// the entry: the expression is evaluated with that entry as its group's current group, on its first row.
 		internal static async Task SortAsync(Report rpt, TableWorkClass wc, List<GroupEntry> groupEntries)
@@ -1279,40 +1259,6 @@ namespace Majorsilence.Reporting.Rdl
 			internal GroupEntry Entry;
 			internal object[] Keys;
 		}
-
-		#region IComparer<GroupEntry> Members
-
-        public int Compare(GroupEntry x1, GroupEntry y1)
-		{
-			Debug.Assert(x1 != null && y1 != null && x1.Sort != null, "Illegal arguments to GroupEntryCompare", 
-				"Compare requires object to be of type GroupEntry and that sort be defined.");
-
-			int rc = 0;
-			foreach (SortBy sb in x1.Sort.Items)
-			{
-				TypeCode tc = sb.SortExpression.Type;
-				
-				int index = x1.Group.GetIndex(rpt);
-				wc.Data.CurrentGroups[index] = x1;
-				// HACK: async
-				object o1 = Task.Run(async () => await sb.SortExpression.Evaluate(rpt, wc.Data.Data[x1.StartRow])).GetAwaiter().GetResult();
-				index = y1.Group.GetIndex(rpt);	
-				wc.Data.CurrentGroups[index] = y1;
-				// HACK: async
-				object o2 = Task.Run(async () => await sb.SortExpression.Evaluate(rpt, wc.Data.Data[y1.StartRow])).GetAwaiter().GetResult();
-
-				rc = Filter.ApplyCompare(tc, o1, o2);
-				if (rc != 0)
-				{
-					if (sb.Direction == SortDirectionEnum.Descending)
-						rc = -rc;
-					break;
-				}
-			}
-			return rc;
-		}
-
-		#endregion
 	}
 
 }

@@ -60,13 +60,11 @@ namespace Majorsilence.Reporting.Rdl
         }
         internal List<MatrixEntry> GetSortedData(Report rpt)
         {
+            // The entries are sorted by PrepareSortedDataAsync, which Matrix.RunBuildSet awaits right after
+            // building them (the only place MatrixEntry trees are made). Sorting needs the sort expressions
+            // evaluated, which is async, so it cannot be done lazily from here.
             if (_SortedData == null && _HashData != null && _HashData.Count > 0)
-            {
-                // Normally already done by PrepareSortedDataAsync; this is the synchronous fallback.
-                _SortedData = new List<MatrixEntry>(_HashData.Values);
-                _SortedData.Sort(new MatrixEntryComparer(rpt, GetSortBy()));
-                _HashData = null;       // we only keep one
-            }
+                throw new InvalidOperationException("Matrix entries were read before they were sorted (PrepareSortedDataAsync).");
 
             return _SortedData;
         }
@@ -81,7 +79,7 @@ namespace Majorsilence.Reporting.Rdl
             if (_SortedData == null && _HashData != null && _HashData.Count > 0)
             {
                 var list = new List<MatrixEntry>(_HashData.Values);
-                await MatrixEntryComparer.SortAsync(rpt, list, GetSortBy());
+                await MatrixEntrySort.SortAsync(rpt, list, GetSortBy());
                 _SortedData = list;
                 _HashData = null;       // we only keep one
             }
@@ -186,26 +184,18 @@ namespace Majorsilence.Reporting.Rdl
 
     }
 
-    class MatrixEntryComparer : System.Collections.Generic.IComparer<MatrixEntry>
+    static class MatrixEntrySort
     {
-        Report _rpt;
-        Sorting _Sorting;
-
-        public MatrixEntryComparer(Report rpt, Sorting s)
-        {
-            _rpt = rpt;
-            _Sorting = s;
-        }
-
         /// <summary>
-        /// Sorts like <c>list.Sort(new MatrixEntryComparer(rpt, sorting))</c>, with each entry's sort
-        /// expressions evaluated once, awaited, instead of two Task.Run(...).GetResult() hops per comparison.
+        /// Sorts the entries by the matrix's sort expressions (or by their hash text when there are none),
+        /// each entry's expressions evaluated once, awaited. A comparer is synchronous, so sorting with one
+        /// meant two Task.Run(...).GetResult() hops per comparison.
         /// </summary>
         internal static async Task SortAsync(Report rpt, List<MatrixEntry> list, Sorting sorting)
         {
             if (sorting == null || list.Count < 2)
             {
-                list.Sort(new MatrixEntryComparer(rpt, sorting));
+                list.Sort((a, b) => a.HashItem.CompareTo(b.HashItem));
                 return;
             }
 
@@ -273,42 +263,5 @@ namespace Majorsilence.Reporting.Rdl
             internal object[] Keys;
             internal bool Failed;
         }
-
-        #region IComparer Members
-
-        public int Compare(MatrixEntry m1, MatrixEntry m2)
-        {
-            if (_Sorting == null)
-                return m1.HashItem.CompareTo(m2.HashItem);
-
-            object o1 = null, o2 = null;
-            TypeCode tc = TypeCode.Object;
-            int rc;
-            try
-            {
-                foreach (SortBy sb in _Sorting.Items)
-                {
-                    IExpr e = sb.SortExpression.Expr;
-                    // HACK: async
-                    o1 = Task.Run(async () => await e.Evaluate(_rpt, m1.R)).GetAwaiter().GetResult();
-                    o2 = Task.Run(async () => await e.Evaluate(_rpt, m2.R)).GetAwaiter().GetResult();
-                    tc = e.GetTypeCode();
-                    rc = Filter.ApplyCompare(tc, o1, o2);
-                    if (rc != 0)
-                        return sb.Direction == SortDirectionEnum.Ascending ? rc : -rc;
-                }
-            }
-            catch (Exception e)		// this really shouldn't happen
-            {
-                _rpt.rl.LogError(8,
-                    string.Format("Matrix Sort rows exception\r\nArguments: {0} {1}\r\nTypecode: {2}\r\n{3}\r\n{4}",
-                    o1, o2, tc.ToString(), e.Message, e.StackTrace));
-                return m1.HashItem.CompareTo(m2.HashItem);
-            }
-            return 0;		    // treat as the same
-
-        }
-
-        #endregion
     }
 }

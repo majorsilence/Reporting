@@ -5,6 +5,7 @@ using System.Diagnostics;
 // Benchmarks:  dotnet run -c Release -f net10.0 -- --filter '*Json*'
 // CI allocation gate (compares bytes/op with docs/performance/allocation-baseline.json):  -- gate [--update]
 // Loop one workload for profilers + allocation-by-type sample:  -- profile WorldFacts pdf 20 alloc
+// Render every .rdl under a folder, list failures:  -- sweep ../Examples [text]
 // Print one workload's text output:  -- show GroupSortTest csv
 // Render every workload once and print size + hash:  -- smoke
 // Thread scaling (not a BDN benchmark):  dotnet run -c Release -f net10.0 -- scale [seconds] [threads...]
@@ -32,6 +33,12 @@ if (args.Length > 0 && args[0] == "gate")
 if (args.Length > 0 && args[0] == "profile")
 {
     await Profile.Run(args);
+    return 0;
+}
+
+if (args.Length > 0 && args[0] == "sweep")
+{
+    await Smoke.Sweep(args[1], args.Length > 2 ? args[2] : null);
     return 0;
 }
 

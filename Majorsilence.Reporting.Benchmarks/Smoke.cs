@@ -40,6 +40,37 @@ public static class Smoke
         }
     }
 
+    /// <summary>
+    /// Renders every .rdl under a folder to PDF and reports the ones that throw (data sources the machine lacks
+    /// fail with a connection error; those are listed too). <c>-- sweep ../Examples [text]</c> only lists
+    /// failures whose message contains the text.
+    /// </summary>
+    public static async Task Sweep(string folder, string? contains)
+    {
+        WorkloadSupport.Init();
+        int ok = 0, failed = 0;
+        foreach (string file in Directory.EnumerateFiles(folder, "*.rdl", SearchOption.AllDirectories).OrderBy(f => f))
+        {
+            try
+            {
+                Directory.SetCurrentDirectory(Path.GetDirectoryName(file)!);
+                var report = await WorkloadSupport.Parse(File.ReadAllText(file));
+                report.Folder = Path.GetDirectoryName(file)!;
+                await report.RunGetData();
+                await WorkloadSupport.Render(report, OutputPresentationType.PDF);
+                ok++;
+            }
+            catch (Exception ex)
+            {
+                failed++;
+                if (contains == null || ex.ToString().Contains(contains))
+                    Console.WriteLine($"{Path.GetRelativePath(folder, file)}: {ex.GetType().Name}: {ex.Message.ReplaceLineEndings(" ")[..Math.Min(140, ex.Message.Length)]}");
+            }
+        }
+
+        Console.WriteLine($"{ok} rendered, {failed} threw");
+    }
+
     /// <summary>Renders one workload and prints the text output (CSV / XML / HTML): <c>-- show GroupSortTest csv</c>.</summary>
     public static async Task Show(string name, OutputPresentationType format)
     {
