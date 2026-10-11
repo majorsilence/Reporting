@@ -541,9 +541,14 @@ namespace Majorsilence.Reporting.Rdl
                     pi.W = this.WidthOrOwnerWidth(rpt);
             }
 			if (Style != null)
-				pi.SI = await Style.GetStyleInfo(rpt, row).ConfigureAwait(false);
+				pi.SI = await Style.GetStyleInfoShared(rpt, row).ConfigureAwait(false);   // shared when constant: copy before changing it
 			else
-				pi.SI = new StyleInfo();	// this will just default everything
+			{
+				// An item with no Style gets the defaults for everything: one instance per item and report, shared
+				// by its rows (nothing changes it in place; see Textbox.RunPage and Chart.RunPage_Bitmap).
+				WorkClass defaultWc = GetWC(rpt);
+				pi.SI = defaultWc.DefaultStyle ??= new StyleInfo();
+			}
 
             pi.ZIndex = this.ZIndex;        // retain the zindex of the object
 
@@ -940,6 +945,7 @@ namespace Majorsilence.Reporting.Rdl
 			internal float BottomPosition;	// used when calculating position of objects below this one.
 											// this must be initialized by the inheriting class.
 			internal Page CurrentPage;		// the page this reportitem was last put on; 
+			internal StyleInfo DefaultStyle;	// the style of every row when the item has no Style
 			internal WorkClass()
 			{
 				MC=null;

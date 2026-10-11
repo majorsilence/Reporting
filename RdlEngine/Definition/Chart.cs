@@ -332,7 +332,11 @@ namespace Majorsilence.Reporting.Rdl
             RunPageRegionBegin(pgs);
 
             await SetPagePositionAndStyle(rpt, pi, row).ConfigureAwait(false);
-            pi.SI.BackgroundImage = null;   // chart already has the background image
+            if (pi.SI.BackgroundImage != null)
+            {
+                pi.SI = (StyleInfo) pi.SI.Clone();      // the style may be shared with other items
+                pi.SI.BackgroundImage = null;           // chart already has the background image
+            }
 
             if (pgs.CurrentPage.YOffset + pi.Y + pi.H >= pgs.BottomOfPage && !pgs.CurrentPage.IsEmpty())
             {   // force page break if it doesn't fit on the page

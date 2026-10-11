@@ -328,7 +328,7 @@ namespace Majorsilence.Reporting.Rdl
             if (style == null)
                 return;
 
-            StyleInfo si = await style.GetStyleInfo(r, row).ConfigureAwait(false);
+            StyleInfo si = await style.GetStyleInfoShared(r, row).ConfigureAwait(false);   // read only
 
 //            tw.Write(@"\plain");        // reset current attributes
 
@@ -477,7 +477,7 @@ namespace Majorsilence.Reporting.Rdl
                     ReportItem ri = tr.TableCells.Items[ci].ReportItems[0];
                     if (ri.Style != null)
                     {
-                        StyleInfo si = await ri.Style.GetStyleInfo(r, row).ConfigureAwait(false);
+                        StyleInfo si = await ri.Style.GetStyleInfoShared(r, row).ConfigureAwait(false);   // read only
                         border = string.Format(@"\clbrdrt\{0}\clbrdrl\{1}\clbrdrb\{2}\clbrdrr\{3}",
                             GetBorderStyle(si.BStyleTop),
                             GetBorderStyle(si.BStyleLeft),
@@ -587,7 +587,7 @@ namespace Majorsilence.Reporting.Rdl
                 string border;
                 if (ri != null && ri.Style != null)
                 {
-                    StyleInfo si = await ri.Style.GetStyleInfo(this.r, r).ConfigureAwait(false);
+                    StyleInfo si = await ri.Style.GetStyleInfoShared(this.r, r).ConfigureAwait(false);   // read only
                     border = string.Format(@"\clbrdrt\{0}\clbrdrl\{1}\clbrdrb\{2}\clbrdrr\{3}",
                         GetBorderStyle(si.BStyleTop),
                         GetBorderStyle(si.BStyleLeft),

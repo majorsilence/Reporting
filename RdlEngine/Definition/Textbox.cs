@@ -268,7 +268,10 @@ namespace Majorsilence.Reporting.Rdl
             if (pt.SI.TextAlign == TextAlignEnum.General)
             {
                 if (DataType.IsNumeric(this.Value.GetTypeCode() ))
+                {
+                    pt.SI = (StyleInfo) pt.SI.Clone();      // the style may be shared with other items
                     pt.SI.TextAlign = TextAlignEnum.Right;
+                }
             }
 
             // Hidden objects don't affect the current page?

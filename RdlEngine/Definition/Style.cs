@@ -972,6 +972,21 @@ namespace Majorsilence.Reporting.Rdl
 			return sb.ToString();
 		}
 
+		/// <summary>
+		/// The evaluated style for callers that only read it. When every part of the style is constant this is
+		/// one instance shared by every item that uses the style, so it must not be modified (clone it first,
+		/// as <see cref="GetStyleInfo"/> callers get); otherwise it is a fresh instance, as GetStyleInfo returns.
+		/// </summary>
+		internal async Task<StyleInfo> GetStyleInfoShared(Report rpt, Row r)
+		{
+			WorkClass wc = GetWC(rpt);
+			if (wc != null && wc.StyleInfo != null)
+				return wc.StyleInfo;
+
+			StyleInfo si = await GetStyleInfo(rpt, r).ConfigureAwait(false);   // fills wc.StyleInfo when the style is constant
+			return wc?.StyleInfo ?? si;
+		}
+
 		// Generate an evaluated version of all the style parameters; used for page processing
 		internal async Task<StyleInfo> GetStyleInfo(Report rpt, Row r)
 		{

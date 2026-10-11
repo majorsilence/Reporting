@@ -203,7 +203,7 @@ namespace RdlEngine.Render.ExcelConverter
 		{
 			StyleInfo si = new StyleInfo();
 			if(reportItem.Style != null) {
-				var itemStyleInfo = await reportItem.Style.GetStyleInfo(Report, row).ConfigureAwait(false);
+				var itemStyleInfo = await reportItem.Style.GetStyleInfoShared(Report, row).ConfigureAwait(false);   // read only
 				if(itemStyleInfo != null) {
 					si = itemStyleInfo;
 				}
