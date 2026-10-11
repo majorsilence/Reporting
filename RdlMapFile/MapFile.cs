@@ -58,11 +58,26 @@ namespace Majorsilence.Reporting.RdlMapFile
             bToolStrip.Image = selectionToolStripMenuItem.Image;
         }
 
-        // The Closing event is synchronous and cancelable, so the "save changes?" and Save As dialogs cannot be
-        // awaited here; this is the one place that still blocks (OkToCloseBlocking).
+        private bool _closeConfirmed;
+
+        // The Closing event is synchronous and cancelable, but the "save changes?" and Save As dialogs are
+        // awaited: a modified map cancels this close, asks, and closes again once the user has answered.
         void MapFile_Closing(object sender, CancelEventArgs e)
         {
-            e.Cancel = !OkToCloseBlocking();
+            if (_closeConfirmed || !map.Modified)
+                return;
+
+            e.Cancel = true;
+            _ = ConfirmAndCloseAsync();
+        }
+
+        private async System.Threading.Tasks.Task ConfirmAndCloseAsync()
+        {
+            if (await OkToCloseAsync())
+            {
+                _closeConfirmed = true;
+                Close();
+            }
         }
 
         void map_SelectionChange(DesignXmlDraw dxd)
@@ -157,6 +172,7 @@ namespace Majorsilence.Reporting.RdlMapFile
         {
             if (!await OkToCloseAsync())
                 return;
+            _closeConfirmed = true;
             Application.Exit();
 
         }
@@ -180,25 +196,6 @@ namespace Majorsilence.Reporting.RdlMapFile
                 return true;
 
             return await SaveAsync();
-        }
-
-        // For the synchronous Closing event only: waits for a Save As dialog if the map has no file name yet.
-        private bool OkToCloseBlocking()
-        {
-            if (!map.Modified)
-                return true;
-
-            DialogResult mb = AskToSave();
-            if (mb == DialogResult.Cancel)
-                return false;
-
-            if (mb == DialogResult.No)
-                return true;
-
-            if (map.File == null &&
-                !System.Threading.Tasks.Task.Run(async () => await SaveAsAsync()).GetAwaiter().GetResult())
-                return false;
-            return WriteMapFile();
         }
 
         private async System.Threading.Tasks.Task<bool> SaveAsync()

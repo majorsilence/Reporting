@@ -793,10 +793,18 @@ namespace Majorsilence.Reporting.RdlDesign
 				mc.Close();
 		}
 
+		// The user has answered "save changes?" for every report: none needs to ask again as it closes.
+		private void ConfirmAllClosing()
+		{
+			foreach (MDIChild mc in this.MdiChildren)
+				mc.CloseConfirmed = true;
+		}
+
 		private async void menuFileExit_Click(object sender, EventArgs e)
 		{
 			if (!await OkToSaveAsync())
 				return;
+			ConfirmAllClosing();
 			SaveStartupState();
 			menuToolsCloseProcess(false);
 			CleanupTempFiles();
@@ -2337,8 +2345,32 @@ namespace Majorsilence.Reporting.RdlDesign
 			await CreateMDIChildAsync(file, null, true);
 		}
 
-		private void RdlDesigner_Closing(object sender, Majorsilence.Forms.FormClosingEventArgs e)
+		private bool _exitConfirmed;
+
+		// Closing the main window with modified reports open: ask about all of them once, up front, then
+		// close again with each report marked as answered. (Left to each report, a cancelled close would
+		// have to be repeated once per modified report.)
+		private async void RdlDesigner_Closing(object sender, Majorsilence.Forms.FormClosingEventArgs e)
 		{
+			if (!_exitConfirmed)
+			{
+				bool anyModified = false;
+				foreach (MDIChild mc in this.MdiChildren)
+					anyModified |= mc.Modified;
+
+				if (anyModified)
+				{
+					e.Cancel = true;
+					if (await OkToSaveAsync())
+					{
+						ConfirmAllClosing();
+						_exitConfirmed = true;
+						Close();
+					}
+					return;
+				}
+			}
+
 			SaveStartupState();
 			menuToolsCloseProcess(false);
 			CleanupTempFiles();

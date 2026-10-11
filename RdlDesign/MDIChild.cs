@@ -549,17 +549,21 @@ namespace Majorsilence.Reporting.RdlDesign
             await rdlDesigner.SaveAs(filename, type);
         }
 
-        // FormClosing is a synchronous, cancelable event, so the possible "Save changes?" / Save As dialogs
-        // cannot be awaited here without cancelling the close and closing again afterwards, which for an
-        // MDI parent closing with several modified children would take one extra close per document.
-        // This is the one place that still uses the blocking OkToClose().
+        /// <summary>
+        /// Set once the user has answered the "save changes?" question for this report (including by the
+        /// main window, which asks about every modified report at once), so closing does not ask again.
+        /// </summary>
+        internal bool CloseConfirmed { get; set; }
+
+        // FormClosing is a synchronous, cancelable event, but the "Save changes?" and Save As dialogs are
+        // awaited. So an unconfirmed, modified report cancels this close, asks, and closes itself again
+        // once the user has answered (CloseConfirmed stops the second close asking again).
         private void MDIChild_Closing(object sender, Majorsilence.Forms.FormClosingEventArgs e)
         {
-#pragma warning disable CS0618
-            if (!OkToClose())
-#pragma warning restore CS0618
+            if (!CloseConfirmed && Modified)
             {
                 e.Cancel = true;
+                _ = ConfirmAndCloseAsync();
                 return;
             }
 
@@ -596,6 +600,15 @@ namespace Majorsilence.Reporting.RdlDesign
                     Strings.MDIChild_ShowH_fyiReportingDesigner,
                     MessageBoxButtons.YesNoCancel,
                     MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button3);
+        }
+
+        private async Task ConfirmAndCloseAsync()
+        {
+            if (await OkToCloseAsync())
+            {
+                CloseConfirmed = true;
+                Close();
+            }
         }
 
         [Obsolete("Blocks the calling thread if a Save As dialog is needed. Use OkToCloseAsync().")]

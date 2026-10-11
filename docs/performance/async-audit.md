@@ -30,11 +30,22 @@ All awaits in `RdlEngine`, `DataProviders` and `RdlCreator` (~2,200) now use `Co
 | Where | Why it stays |
 |---|---|
 | `UserReportParameter` `DefaultValue` / `DisplayValues` / `DataValues` / `Value` / `Values`, `Report.ClientLanguage`, `DesignCtl` / `RdlEditPreview` / `MDIChild` `SelectedStyle`, `MDIChild.FileSave` / `OkToClose` | Public compatibility members, all `[Obsolete]` with an async replacement; nothing in this repository calls them any more (the tests that pin their behaviour use a pragma) |
-| `MDIChild_Closing` (report designer) and `MapFile_Closing` (map designer) | `FormClosing` is a synchronous, cancelable event. Awaiting the "save changes?" / Save As dialogs there means cancelling the close and closing again afterwards, which for an MDI parent closing with several modified documents costs one extra close per document. Left on the obsolete blocking path until that UX is decided |
+| *(none)* | The report designer and map designer closing handlers are async now (cancel, ask, close again; see below) |
 | `RdlNative` C entry points (`rdl_report_render_file`, `..._buffer`) | The C ABI is synchronous by definition: the Python / PHP / Ruby / Rust caller is waiting for the return value, on a thread with no `SynchronizationContext` |
 | `RdlReader.Main` silent print | Process entry point, no UI loop or context yet, and the thread must stay the STA thread that runs the application |
 | `PdfSigner` on netstandard2.0 | `HttpClient.Send` needs .NET 5+; net6.0 and later use it |
 | Benchmark harness (`Program.cs`, `ConcurrencyBenchmarks`) | Deliberate: the concurrency benchmark measures render CPU scaling on blocked threads |
+
+## Behaviour changes to be aware of
+Things that are observably different, in the order they matter to an application:
+1. **Engine continuations no longer resume on the caller's context** (`ConfigureAwait(false)`). Code the engine runs after an await may be on a thread-pool thread: expressions, the report's embedded Code, custom report items, and the engine's one event, `SubreportDataRetrieval`. The WinForms-style and Avalonia viewers marshal that event back to the UI thread; an application that subscribes to `Report.SubreportDataRetrieval` directly now receives it on whatever thread is running the report, and must marshal to its UI itself if it touches controls.
+2. **Sort expressions are evaluated once per row, not once per comparison.** Table, list, group, matrix and Top N/Bottom N sorts evaluate each key once, then sort. The order produced is the same for any deterministic expression. An expression with side effects or a changing value (`Rnd()`, `Now()`, a custom function with state) used to be re-evaluated on every comparison, which could not give a consistent order anyway.
+3. **`MhtWebFile.ToString()` no longer downloads.** An undownloaded file reads as an empty string. Nothing in the engine reaches this (it awaits `Download()` first); the class is internal.
+4. **Obsolete members still block** (`UserReportParameter` value members, `Report.ClientLanguage`, the designer's `SelectedStyle`, `MDIChild.FileSave()` / `OkToClose()`). They behave as before; new code should use the async methods.
+5. **Report designer: closing.** `FormClosing` stays synchronous, so a modified report that is closed cancels that close, asks, and closes itself again once answered. The main window, when closed with modified reports open, asks about all of them once and then closes everything (previously each report asked as it closed). A report answered "No" (discard) is no longer asked a second time on exit. The map designer works the same way for its one document.
+6. **`Report.ClientLanguage` is resolved at the start of `RunGetData` / `RunRender`** for the report's embedded Code (`User.Language`); a change to the report's Language expression's inputs between those calls and a later code read is not seen until the next run.
+7. **ASP.NET Core:** `ReportHelper.GetParameterHtml` and the page builder are async; the HTML produced is the same.
+8. **PDF** (earlier round, already merged): zlib level 6 instead of 9, so the compressed bytes differ while inflating to the same content.
 
 ## Findings along the way (existing behaviour, not changed)
 - Matrix rows sorted on an aggregate such as `Sum(...)` keep first-met order: the sort expression is evaluated against the entry's first row. Plain sort expressions work. Pinned in `AsyncSortTests`.
