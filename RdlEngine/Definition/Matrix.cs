@@ -193,35 +193,35 @@ namespace Majorsilence.Reporting.Rdl
 
         async override internal Task FinalPass()
         {
-            await base.FinalPass();
+            await base.FinalPass().ConfigureAwait(false);
 
             float totalHeight = 0;
             if (_Corner != null)
-                await _Corner.FinalPass();
+                await _Corner.FinalPass().ConfigureAwait(false);
             if (_ColumnGroupings != null)
             {
-                await _ColumnGroupings.FinalPass();
+                await _ColumnGroupings.FinalPass().ConfigureAwait(false);
                 totalHeight += _ColumnGroupings.DefnHeight();
             }
             if (_RowGroupings != null)
-                await _RowGroupings.FinalPass();
+                await _RowGroupings.FinalPass().ConfigureAwait(false);
             if (_MatrixRows != null)
             {
-                await _MatrixRows.FinalPass();
+                await _MatrixRows.FinalPass().ConfigureAwait(false);
                 totalHeight += _MatrixRows.DefnHeight();
             }
             if (_MatrixColumns != null)
-                await _MatrixColumns.FinalPass();
+                await _MatrixColumns.FinalPass().ConfigureAwait(false);
             foreach (RowSet set in _ExtraRowSets)
             {
-                await set.RowGroupings.FinalPass();
-                await set.MatrixRows.FinalPass();
+                await set.RowGroupings.FinalPass().ConfigureAwait(false);
+                await set.MatrixRows.FinalPass().ConfigureAwait(false);
             }
             foreach (ColumnSet set in _ExtraColumnSets)
             {
-                await set.ColumnGroupings.FinalPass();
-                await set.MatrixRows.FinalPass();
-                await set.MatrixColumns.FinalPass();
+                await set.ColumnGroupings.FinalPass().ConfigureAwait(false);
+                await set.MatrixRows.FinalPass().ConfigureAwait(false);
+                await set.MatrixColumns.FinalPass().ConfigureAwait(false);
             }
 
             if (this.Height == null)
@@ -236,21 +236,21 @@ namespace Majorsilence.Reporting.Rdl
         {
             Report rpt = ip.Report();
             WorkClass wc = GetValue(rpt);
-            wc.FullData = wc.Data = await GetFilteredData(rpt, row);
+            wc.FullData = wc.Data = await GetFilteredData(rpt, row).ConfigureAwait(false);
 
-            if (!await AnyRows(ip, wc.Data))      // if no rows return
+            if (!await AnyRows(ip, wc.Data).ConfigureAwait(false))      // if no rows return
                 return;                 //   nothing left to do
 
             int maxColumns;
             int maxRows;
             MatrixCellEntry[,] matrix;
 
-            (matrix, maxRows, maxColumns) = await RunBuild(rpt);
+            (matrix, maxRows, maxColumns) = await RunBuild(rpt).ConfigureAwait(false);
 
             // Now run thru the rows and columns of the matrix passing the information
             //   on to the rendering engine
             int headerRows = HeaderRowCount;	// number of column headers we have
-            if (!await ip.MatrixStart(this, matrix, row, headerRows, maxRows, maxColumns))
+            if (!await ip.MatrixStart(this, matrix, row, headerRows, maxRows, maxColumns).ConfigureAwait(false))
                 return;
             for (int iRow = 0; iRow < maxRows; iRow++)
             {
@@ -260,8 +260,8 @@ namespace Majorsilence.Reporting.Rdl
                     MatrixCellEntry mce = matrix[iRow, iColumn];
                     if (mce == null)
                     {
-                        await ip.MatrixCellStart(this, null, iRow, iColumn, row, float.MinValue, float.MinValue, 1);
-                        await ip.MatrixCellEnd(this, null, iRow, iColumn, row);
+                        await ip.MatrixCellStart(this, null, iRow, iColumn, row, float.MinValue, float.MinValue, 1).ConfigureAwait(false);
+                        await ip.MatrixCellEnd(this, null, iRow, iColumn, row).ConfigureAwait(false);
                     }
                     else
                     {
@@ -271,15 +271,15 @@ namespace Majorsilence.Reporting.Rdl
                         mce.DisplayItem.SetMC(rpt, mce);    // set for use by the display item
                         SetGroupingValues(rpt, mce);
 
-                        await ip.MatrixCellStart(this, mce.DisplayItem, iRow, iColumn, lrow, mce.Height, mce.Width, mce.ColSpan);
+                        await ip.MatrixCellStart(this, mce.DisplayItem, iRow, iColumn, lrow, mce.Height, mce.Width, mce.ColSpan).ConfigureAwait(false);
 
-                        await mce.DisplayItem.Run(ip, lrow);
-                        await ip.MatrixCellEnd(this, mce.DisplayItem, iRow, iColumn, lrow);
+                        await mce.DisplayItem.Run(ip, lrow).ConfigureAwait(false);
+                        await ip.MatrixCellEnd(this, mce.DisplayItem, iRow, iColumn, lrow).ConfigureAwait(false);
                     }
                 }
                 ip.MatrixRowEnd(this, iRow, row);
             }
-            await ip.MatrixEnd(this, row);
+            await ip.MatrixEnd(this, row).ConfigureAwait(false);
             ResetInScope(rpt);
             RemoveValue(rpt);
         }
@@ -287,16 +287,16 @@ namespace Majorsilence.Reporting.Rdl
         async override internal Task RunPage(Pages pgs, Row row)
         {
             Report r = pgs.Report;
-            if (await IsHidden(r, row))
+            if (await IsHidden(r, row).ConfigureAwait(false))
                 return;
 
             WorkClass wc = GetValue(r);
 
-            wc.FullData = wc.Data = await GetFilteredData(r, row);
+            wc.FullData = wc.Data = await GetFilteredData(r, row).ConfigureAwait(false);
 
             SetPagePositionBegin(pgs);
 
-            if (!await AnyRowsPage(pgs, wc.Data))     // if no rows return
+            if (!await AnyRowsPage(pgs, wc.Data).ConfigureAwait(false))     // if no rows return
                 return;                     //   nothing left to do
 
             int maxColumns;
@@ -304,7 +304,7 @@ namespace Majorsilence.Reporting.Rdl
             int headerRows = HeaderRowCount;  // number of column headers we have
             MatrixCellEntry[,] matrix;
 
-            (matrix, maxRows, maxColumns) = await RunBuild(r);
+            (matrix, maxRows, maxColumns) = await RunBuild(r).ConfigureAwait(false);
 
             // Now run thru the rows and columns of the matrix creating the pages
             RunPageRegionBegin(pgs);
@@ -313,7 +313,7 @@ namespace Majorsilence.Reporting.Rdl
 
             for (int iRow = 0; iRow < maxRows; iRow++)
             {
-                float h = await HeightOfRow(pgs, matrix, iRow);
+                float h = await HeightOfRow(pgs, matrix, iRow).ConfigureAwait(false);
                 if (h <= 0)     // there were no cells in row
                     continue;   //     skip the row
 
@@ -323,11 +323,11 @@ namespace Majorsilence.Reporting.Rdl
                     // run thru the headers again
                     for (int aRow = 0; aRow < headerRows; aRow++)
                     {
-                        await RunPageColumns(pgs, wc, matrix, aRow, maxColumns);
-                        p.YOffset += await HeightOfRow(pgs, matrix, aRow);
+                        await RunPageColumns(pgs, wc, matrix, aRow, maxColumns).ConfigureAwait(false);
+                        p.YOffset += await HeightOfRow(pgs, matrix, aRow).ConfigureAwait(false);
                     }
                 }
-                await RunPageColumns(pgs, wc, matrix, iRow, maxColumns);
+                await RunPageColumns(pgs, wc, matrix, iRow, maxColumns).ConfigureAwait(false);
                 p.YOffset += h;
             }
 
@@ -378,7 +378,7 @@ namespace Majorsilence.Reporting.Rdl
                         mce.DisplayItem.SetMC(rpt, mce);    // set for use by the display item
                         SetGroupingValues(rpt, mce);
 
-                        float tbh = await tb.RunTextCalcHeight(rpt, pgs.G, lrow);
+                        float tbh = await tb.RunTextCalcHeight(rpt, pgs.G, lrow).ConfigureAwait(false);
                         if (height < tbh)
                         {
                             if (bCorner && iCol == 0)
@@ -477,7 +477,7 @@ namespace Majorsilence.Reporting.Rdl
                 SetGroupingValues(rpt, mce);
                 mce.DisplayItem.SetMC(rpt, mce);    // set for use by the display item
                 mce.XPosition = xpos;
-                await mce.DisplayItem.RunPage(pgs, lrow);
+                await mce.DisplayItem.RunPage(pgs, lrow).ConfigureAwait(false);
                 xpos += mce.Width;
                 iColumn += (mce.ColSpan - 1);           // skip columns already accounted for
             }
@@ -488,9 +488,9 @@ namespace Majorsilence.Reporting.Rdl
         internal async Task<(MatrixCellEntry[,], int numRows, int numCols)> RunBuild(Report rpt)
         {
             if (_ExtraRowSets.Count > 0)
-                return await RunBuildRowSets(rpt);
+                return await RunBuildRowSets(rpt).ConfigureAwait(false);
             if (_ExtraColumnSets.Count == 0)
-                return await RunBuildSet(rpt);
+                return await RunBuildSet(rpt).ConfigureAwait(false);
 
             // Run the build once per column set, swapping in that set's groupings and cells, then
             // lay the grids side by side. The row groupings are shared, so each later grid repeats
@@ -502,14 +502,14 @@ namespace Majorsilence.Reporting.Rdl
             MatrixColumns savedColumns = _MatrixColumns;
             try
             {
-                var (g, r, c) = await RunBuildSet(rpt);
+                var (g, r, c) = await RunBuildSet(rpt).ConfigureAwait(false);
                 grids.Add((g, r, c, _ColumnGroupings.Items.Count));
                 foreach (ColumnSet set in _ExtraColumnSets)
                 {
                     _ColumnGroupings = set.ColumnGroupings;
                     _MatrixRows = set.MatrixRows;
                     _MatrixColumns = set.MatrixColumns;
-                    (g, r, c) = await RunBuildSet(rpt);
+                    (g, r, c) = await RunBuildSet(rpt).ConfigureAwait(false);
                     grids.Add((g, r, c, _ColumnGroupings.Items.Count));
                 }
             }
@@ -586,13 +586,13 @@ namespace Majorsilence.Reporting.Rdl
             MatrixRows savedRows = _MatrixRows;
             try
             {
-                var (g, r, c) = await RunBuildSet(rpt);
+                var (g, r, c) = await RunBuildSet(rpt).ConfigureAwait(false);
                 grids.Add((g, r, c, _RowGroupings.Items.Count));
                 foreach (RowSet set in _ExtraRowSets)
                 {
                     _RowGroupings = set.RowGroupings;
                     _MatrixRows = set.MatrixRows;
-                    (g, r, c) = await RunBuildSet(rpt);
+                    (g, r, c) = await RunBuildSet(rpt).ConfigureAwait(false);
                     grids.Add((g, r, c, _RowGroupings.Items.Count));
                 }
             }
@@ -746,17 +746,17 @@ namespace Majorsilence.Reporting.Rdl
             foreach (Row r in _Data.Data)
             {
                 // Handle the column values
-                maxColumns = await HandleColumnGrouping(rpt, wc, _Data, r, mcg, 0, iRow, maxColumns);
+                maxColumns = await HandleColumnGrouping(rpt, wc, _Data, r, mcg, 0, iRow, maxColumns).ConfigureAwait(false);
 
                 // Handle the row values
-                maxRows = await HandleRowGrouping(rpt, wc, _Data, r, mrg, 0, iRow, maxRows);
+                maxRows = await HandleRowGrouping(rpt, wc, _Data, r, mrg, 0, iRow, maxRows).ConfigureAwait(false);
 
                 iRow++;
             }
 
             // Sort the entries now, awaiting the sort expressions; the code below reads them synchronously
-            await mcg.PrepareSortedDataAsync(rpt);
-            await mrg.PrepareSortedDataAsync(rpt);
+            await mcg.PrepareSortedDataAsync(rpt).ConfigureAwait(false);
+            await mrg.PrepareSortedDataAsync(rpt).ConfigureAwait(false);
 
             // Determine how many subtotal columns are needed
             maxColumns += RunCountSubtotalColumns(rpt, wc, mcg, 0);
@@ -891,7 +891,7 @@ namespace Majorsilence.Reporting.Rdl
                         // Logic in FirstRow and Last row determine whether value gets set
                         ame.FirstRow = iRow;
                         ame.LastRow = iRow;
-                        maxRows = await HandleRowGrouping(rpt, wc, rows, r, ame, rgi + 1, iRow, maxRows);
+                        maxRows = await HandleRowGrouping(rpt, wc, rows, r, ame, rgi + 1, iRow, maxRows).ConfigureAwait(false);
                     }
                     break;  // handled ones below it recursively
                 }
@@ -902,7 +902,7 @@ namespace Majorsilence.Reporting.Rdl
                     StringBuilder sb = new StringBuilder();
                     foreach (GroupExpression ge in grp.GroupExpressions.Items)
                     {
-                        string temp = await ge.Expression.EvaluateString(rpt, r);
+                        string temp = await ge.Expression.EvaluateString(rpt, r).ConfigureAwait(false);
                         if (temp == null || temp == "")
                             sb.Append(nullterminal);
                         else
@@ -962,7 +962,7 @@ namespace Majorsilence.Reporting.Rdl
                         // Logic in FirstRow and Last row determine whether value gets set
                         ame.FirstRow = iRow;
                         ame.LastRow = iRow;
-                        maxColumns = await HandleColumnGrouping(rpt, wc, rows, r, ame, cgi + 1, iRow, maxColumns);
+                        maxColumns = await HandleColumnGrouping(rpt, wc, rows, r, ame, cgi + 1, iRow, maxColumns).ConfigureAwait(false);
                     }
                     break;  // handled ones below it recursively
                 }
@@ -973,7 +973,7 @@ namespace Majorsilence.Reporting.Rdl
                     StringBuilder sb = new StringBuilder();
                     foreach (GroupExpression ge in grp.GroupExpressions.Items)
                     {
-                        string temp = await ge.Expression.EvaluateString(rpt, r);
+                        string temp = await ge.Expression.EvaluateString(rpt, r).ConfigureAwait(false);
                         if (temp == null || temp == "")
                             sb.Append(nullterminal);
                         else

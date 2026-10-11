@@ -77,13 +77,13 @@ namespace Majorsilence.Reporting.Rdl
 		async override internal Task FinalPass()
 		{
 			if (_Value != null)
-                await _Value.FinalPass();
+                await _Value.FinalPass().ConfigureAwait(false);
 			if (_MIMEType != null)
-                await _MIMEType.FinalPass();
+                await _MIMEType.FinalPass().ConfigureAwait(false);
 			if (_BackgroundRepeat != null)
-                await _BackgroundRepeat.FinalPass();
+                await _BackgroundRepeat.FinalPass().ConfigureAwait(false);
 
-			_ConstantImage = await this.IsConstant();
+			_ConstantImage = await IsConstant().ConfigureAwait(false);
 			return;
 		}
 
@@ -94,12 +94,12 @@ namespace Majorsilence.Reporting.Rdl
 
 			// TODO: need to handle other types of sources
 			if (_Value != null && _Source==StyleBackgroundImageSourceEnum.External)
-				sb.AppendFormat(NumberFormatInfo.InvariantInfo, "background-image:url(\"{0}\");", await _Value.EvaluateString(rpt, row));
+				sb.AppendFormat(NumberFormatInfo.InvariantInfo, "background-image:url(\"{0}\");", await _Value.EvaluateString(rpt, row).ConfigureAwait(false));
 			else if (bDefaults)
 				return "background-image:none;";	
             			
 			if (_BackgroundRepeat != null)
-				sb.AppendFormat(NumberFormatInfo.InvariantInfo, "background-repeat:{0};", await _BackgroundRepeat.EvaluateString(rpt, row));
+				sb.AppendFormat(NumberFormatInfo.InvariantInfo, "background-repeat:{0};", await _BackgroundRepeat.EvaluateString(rpt, row).ConfigureAwait(false));
 			else if (bDefaults)
 				sb.AppendFormat(NumberFormatInfo.InvariantInfo, "background-repeat:repeat;");
 
@@ -114,12 +114,12 @@ namespace Majorsilence.Reporting.Rdl
 			bool rc = true;
 
 			if (_Value != null)
-				rc = await _Value.IsConstant();
+				rc = await _Value.IsConstant().ConfigureAwait(false);
 			if (!rc)
 				return false;
 
 			if (_BackgroundRepeat != null)
-				rc = await _BackgroundRepeat.IsConstant();
+				rc = await _BackgroundRepeat.IsConstant().ConfigureAwait(false);
 
 			return rc;
 		}
@@ -142,11 +142,11 @@ namespace Majorsilence.Reporting.Rdl
 
 			try 
 			{
-				(strm, mtype) = await GetImageStream(rpt, row);
+				(strm, mtype) = await GetImageStream(rpt, row).ConfigureAwait(false);
                 if (strm == null)
                 {
                     rpt.rl.LogError(4, string.Format("Unable to load image {0}.", 
-                        this._Value==null?"": await this._Value.EvaluateString(rpt, row)));
+                        this._Value==null?"": await _Value.EvaluateString(rpt, row).ConfigureAwait(false)));
                     return null;
                 }
                 im = Draw2.Image.FromStream(strm);
@@ -181,7 +181,7 @@ namespace Majorsilence.Reporting.Rdl
 				pi.SI = new StyleInfo();	// this will just default everything
 				if (_BackgroundRepeat != null)
 				{
-					string r = (await _BackgroundRepeat.EvaluateString(rpt, row)).ToLower();
+					string r = (await _BackgroundRepeat.EvaluateString(rpt, row).ConfigureAwait(false)).ToLower();
 					switch (r)
 					{
 						case "repeat":
@@ -230,19 +230,19 @@ namespace Majorsilence.Reporting.Rdl
                     case StyleBackgroundImageSourceEnum.Database:
                         if (_MIMEType == null)
                             return (null, mtype);
-                        mtype = await _MIMEType.EvaluateString(rpt, row);
-                        object o = await _Value.Evaluate(rpt, row);
+                        mtype = await _MIMEType.EvaluateString(rpt, row).ConfigureAwait(false);
+                        object o = await _Value.Evaluate(rpt, row).ConfigureAwait(false);
                         strm = new MemoryStream((byte[])o);
                         break;
                     case StyleBackgroundImageSourceEnum.Embedded:
-                        string name = await _Value.EvaluateString(rpt, row);
+                        string name = await _Value.EvaluateString(rpt, row).ConfigureAwait(false);
                         EmbeddedImage ei = (EmbeddedImage)OwnerReport.LUEmbeddedImages[name];
                         mtype = ei.MIMEType;
                         byte[] ba = Convert.FromBase64String(ei.ImageData);
                         strm = new MemoryStream(ba);
                         break;
                     case StyleBackgroundImageSourceEnum.External:
-                        string fname = await _Value.EvaluateString(rpt, row);
+                        string fname = await _Value.EvaluateString(rpt, row).ConfigureAwait(false);
                         mtype = Image.GetMimeType(fname);
                         if (fname.StartsWith("http:") ||
                             fname.StartsWith("file:") ||
@@ -251,10 +251,10 @@ namespace Majorsilence.Reporting.Rdl
                             using (HttpClient client = new HttpClient())
                             {
                                 client.AddMajorsilenceReportingUserAgent();
-                                HttpResponseMessage response = await client.GetAsync(fname);
+                                HttpResponseMessage response = await client.GetAsync(fname).ConfigureAwait(false);
                                 if (response.IsSuccessStatusCode)
                                 {
-                                    strm = await response.Content.ReadAsStreamAsync();
+                                    strm = await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
                                 }
                             }
                         }

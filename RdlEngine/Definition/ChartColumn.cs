@@ -40,19 +40,19 @@ namespace Majorsilence.Reporting.Rdl
                 g.CompositingQuality = Draw2.Drawing2D.CompositingQuality.HighQuality;
 
                 // Adjust the top margin to depend on the title height
-                System.Drawing.Size titleSize = await DrawTitleMeasure(rpt, g, ChartDefn.Title);
+                System.Drawing.Size titleSize = await DrawTitleMeasure(rpt, g, ChartDefn.Title).ConfigureAwait(false);
                 Layout.TopMargin = titleSize.Height;
 
                 double max = 0, min = 0; // Get the max and min values
-                (max, min) = await GetValueMaxMin(rpt, max, min, 0, 1);
+                (max, min) = await GetValueMaxMin(rpt, max, min, 0, 1).ConfigureAwait(false);
 
-                await DrawChartStyle(rpt, g);
+                await DrawChartStyle(rpt, g).ConfigureAwait(false);
 
                 // Draw title; routine determines if necessary
-                await DrawTitle(rpt, g, ChartDefn.Title, new System.Drawing.Rectangle(0, 0, _bm.Width, Layout.TopMargin));
+                await DrawTitle(rpt, g, ChartDefn.Title, new System.Drawing.Rectangle(0, 0, _bm.Width, Layout.TopMargin)).ConfigureAwait(false);
 
                 // Adjust the left margin to depend on the Value Axis
-                System.Drawing.Size vaSize = await ValueAxisSize(rpt, g, min, max);
+                System.Drawing.Size vaSize = await ValueAxisSize(rpt, g, min, max).ConfigureAwait(false);
                 Layout.LeftMargin = vaSize.Width;
 
                 // Adjust the right margin to depend on the Value Axis
@@ -62,29 +62,29 @@ namespace Majorsilence.Reporting.Rdl
                 if (Show2ndY)
                 {
                     double rmax = 0, rmin = 0;
-                    (rmax, rmin) = await GetMaxMinDataValue(rpt, 0, 2);
-                    vaSize2 = await ValueAxisSize(rpt, g, rmin, rmax);
+                    (rmax, rmin) = await GetMaxMinDataValue(rpt, 0, 2).ConfigureAwait(false);
+                    vaSize2 = await ValueAxisSize(rpt, g, rmin, rmax).ConfigureAwait(false);
                     Layout.RightMargin = vaSize2.Width;
                 }
 
                 // Draw legend
-                System.Drawing.Rectangle lRect = await DrawLegend(rpt, g, false, true);
+                System.Drawing.Rectangle lRect = await DrawLegend(rpt, g, false, true).ConfigureAwait(false);
 
                 // Adjust the bottom margin to depend on the Category Axis
-                System.Drawing.Size caSize = await CategoryAxisSize(rpt, g);
+                System.Drawing.Size caSize = await CategoryAxisSize(rpt, g).ConfigureAwait(false);
                 Layout.BottomMargin = caSize.Height;
 
                 AdjustMargins(lRect, rpt, g);       // Adjust margins based on legend.
 
                 // Draw Plot area
-                await DrawPlotAreaStyle(rpt, g, lRect);
+                await DrawPlotAreaStyle(rpt, g, lRect).ConfigureAwait(false);
 
                 int intervalCount = 0; //GJL - Used to get the interval count out of DrawValueAxis so that we don't recalculate it again.
                 double incr = 0.0;  //GJL - As above
                                     // Draw Value Axis //GJL now as by ref params to return the values to the above variables
                 if (vaSize.Width > 0)   // If we made room for the axis - we need to draw it
                     (incr, intervalCount) = await DrawValueAxis(rpt, g, min, max,
-                        new System.Drawing.Rectangle(Layout.LeftMargin - vaSize.Width, Layout.TopMargin, vaSize.Width, _bm.Height - Layout.TopMargin - Layout.BottomMargin), Layout.LeftMargin, Layout.Width - Layout.RightMargin);
+                        new System.Drawing.Rectangle(Layout.LeftMargin - vaSize.Width, Layout.TopMargin, vaSize.Width, _bm.Height - Layout.TopMargin - Layout.BottomMargin), Layout.LeftMargin, Layout.Width - Layout.RightMargin).ConfigureAwait(false);
 
 
                 //********************************************************************************************************************************************
@@ -93,21 +93,21 @@ namespace Majorsilence.Reporting.Rdl
                 double ScaleFactor = 1.0;
                 //Secong value axis            
                 if (Show2ndY)
-                    ScaleFactor = await Draw2ndValueAxis(rpt, g, min, max, new System.Drawing.Rectangle(Layout.LeftMargin + Layout.PlotArea.Width, Layout.TopMargin, vaSize2.Width, _bm.Height - Layout.TopMargin - Layout.BottomMargin), Layout.LeftMargin, Layout.Width - Layout.RightMargin, incr, intervalCount, ScaleFactor);
+                    ScaleFactor = await Draw2ndValueAxis(rpt, g, min, max, new System.Drawing.Rectangle(Layout.LeftMargin + Layout.PlotArea.Width, Layout.TopMargin, vaSize2.Width, _bm.Height - Layout.TopMargin - Layout.BottomMargin), Layout.LeftMargin, Layout.Width - Layout.RightMargin, incr, intervalCount, ScaleFactor).ConfigureAwait(false);
 
                 // Draw Category Axis
                 if (caSize.Height > 0)
                     // 090508ajm passing chart bounds in
                     await DrawCategoryAxis(rpt, g,
-                        new System.Drawing.Rectangle(Layout.LeftMargin, _bm.Height - Layout.BottomMargin, Layout.PlotArea.Width, caSize.Height), Layout.TopMargin, caSize.Width);
-                if ((ChartSubTypeEnum)Enum.Parse(typeof(ChartSubTypeEnum), await _ChartDefn.Subtype.EvaluateString(rpt, _row)) == ChartSubTypeEnum.Stacked)
-                    await DrawPlotAreaStacked(rpt, g, max, min);
-                else if ((ChartSubTypeEnum)Enum.Parse(typeof(ChartSubTypeEnum), await _ChartDefn.Subtype.EvaluateString(rpt, _row)) == ChartSubTypeEnum.PercentStacked)
-                    await DrawPlotAreaPercentStacked(rpt, g);
+                        new System.Drawing.Rectangle(Layout.LeftMargin, _bm.Height - Layout.BottomMargin, Layout.PlotArea.Width, caSize.Height), Layout.TopMargin, caSize.Width).ConfigureAwait(false);
+                if ((ChartSubTypeEnum)Enum.Parse(typeof(ChartSubTypeEnum), await _ChartDefn.Subtype.EvaluateString(rpt, _row).ConfigureAwait(false)) == ChartSubTypeEnum.Stacked)
+                    await DrawPlotAreaStacked(rpt, g, max, min).ConfigureAwait(false);
+                else if ((ChartSubTypeEnum)Enum.Parse(typeof(ChartSubTypeEnum), await _ChartDefn.Subtype.EvaluateString(rpt, _row).ConfigureAwait(false)) == ChartSubTypeEnum.PercentStacked)
+                    await DrawPlotAreaPercentStacked(rpt, g).ConfigureAwait(false);
                 else
-                    await DrawPlotAreaPlain(rpt, g, max, min, ScaleFactor);
+                    await DrawPlotAreaPlain(rpt, g, max, min, ScaleFactor).ConfigureAwait(false);
 
-                await DrawLegend(rpt, g, false, false);
+                await DrawLegend(rpt, g, false, false).ConfigureAwait(false);
 
             }
         }
@@ -132,7 +132,7 @@ namespace Majorsilence.Reporting.Rdl
                 double sum = 0;
                 for (int iCol = 1; iCol <= SeriesCount; iCol++)
                 {
-                    double t = await GetDataValue(rpt, iRow, iCol);
+                    double t = await GetDataValue(rpt, iRow, iCol).ConfigureAwait(false);
                     if (t.CompareTo(double.NaN) == 0)
                         t = 0;
                     sum += t;
@@ -141,7 +141,7 @@ namespace Majorsilence.Reporting.Rdl
                 System.Drawing.Point saveP = System.Drawing.Point.Empty;
                 for (int iCol = 1; iCol <= SeriesCount; iCol++)
                 {
-                    double t = await GetDataValue(rpt, iRow, iCol);
+                    double t = await GetDataValue(rpt, iRow, iCol).ConfigureAwait(false);
                     if (t.CompareTo(double.NaN) == 0)
                         t = 0;
                     v += t;
@@ -154,7 +154,7 @@ namespace Majorsilence.Reporting.Rdl
                         rect = new System.Drawing.Rectangle(p, new System.Drawing.Size(widthBar, h));
                     else
                         rect = new System.Drawing.Rectangle(p, new System.Drawing.Size(widthBar, saveP.Y - p.Y));
-                    await DrawColumnBar(rpt, g, await GetSeriesBrush(rpt, iRow, iCol), rect, iRow, iCol);
+                    await DrawColumnBar(rpt, g, await GetSeriesBrush(rpt, iRow, iCol).ConfigureAwait(false), rect, iRow, iCol).ConfigureAwait(false);
 
                     //Add a metafilecomment to use as a tooltip GJL 26092008
                     //if (_showToolTips)
@@ -227,7 +227,7 @@ namespace Majorsilence.Reporting.Rdl
                         {
                             if (z == 0)
                             {
-                                double v = await this.GetDataValue(rpt, iRow, iCol);
+                                double v = await GetDataValue(rpt, iRow, iCol).ConfigureAwait(false);
                                 double tooltipVal = v;
                                 if (GetYAxis(rpt, iCol, iRow).ToUpper() != "LEFT")
                                 {
@@ -239,8 +239,8 @@ namespace Majorsilence.Reporting.Rdl
                                     v = min;
                                 int h = (int)(((Math.Min(v, max) - min) / (max - min)) * maxBarHeight);
 
-                                await DrawColumnBar(rpt, g, await GetSeriesBrush(rpt, iRow, iCol),
-                                    new System.Drawing.Rectangle(barLoc, Layout.PlotArea.Top + (maxBarHeight - h), widthBar, h), iRow, iCol);
+                                await DrawColumnBar(rpt, g, await GetSeriesBrush(rpt, iRow, iCol).ConfigureAwait(false),
+                                    new System.Drawing.Rectangle(barLoc, Layout.PlotArea.Top + (maxBarHeight - h), widthBar, h), iRow, iCol).ConfigureAwait(false);
 
                                 //Add a metafilecomment to use as a tooltip GJL 26092008
                                 if (_showToolTips)
@@ -258,7 +258,7 @@ namespace Majorsilence.Reporting.Rdl
                         {
                             if (z == 1)
                             {
-                                double v = await this.GetDataValue(rpt, iRow, iCol);
+                                double v = await GetDataValue(rpt, iRow, iCol).ConfigureAwait(false);
                                 double tooltipVal = v;
                                 if (GetYAxis(rpt, iCol, iRow).ToUpper() != "LEFT")
                                 {
@@ -285,8 +285,8 @@ namespace Majorsilence.Reporting.Rdl
                                     if (LastPoints[iCol - 1] == null)
                                         LastPoints[iCol - 1] = p;
                                     bool DrawMarker = getNoMarkerVal(rpt, iCol, 1) == false;
-                                    await DrawDataPoint(rpt, g, new System.Drawing.Point(p.X, p.Y - 14), iRow, iCol);  // todo: 14 is arbitrary
-                                    if (DrawMarker) { DrawLegendLineMarker(g, await GetSeriesBrush(rpt, iRow, iCol), new Draw2.Pen(await GetSeriesBrush(rpt, iRow, iCol)), SeriesMarker[iCol - 1], p.X - 5, p.Y - 5, 10); }
+                                    await DrawDataPoint(rpt, g, new System.Drawing.Point(p.X, p.Y - 14), iRow, iCol).ConfigureAwait(false);  // todo: 14 is arbitrary
+                                    if (DrawMarker) { DrawLegendLineMarker(g, await GetSeriesBrush(rpt, iRow, iCol).ConfigureAwait(false), new Draw2.Pen(await GetSeriesBrush(rpt, iRow, iCol).ConfigureAwait(false)), SeriesMarker[iCol - 1], p.X - 5, p.Y - 5, 10); }
 
 
                                     if (LastPoints.ContainsKey(iCol))
@@ -318,7 +318,7 @@ namespace Majorsilence.Reporting.Rdl
                                                     break;
                                             }
 
-                                            await DrawLineBetweenPoints(g, rpt, await GetSeriesBrush(rpt, iRow, iCol), Points, intLineSize);
+                                            await DrawLineBetweenPoints(g, rpt, await GetSeriesBrush(rpt, iRow, iCol).ConfigureAwait(false), Points, intLineSize).ConfigureAwait(false);
                                         }
                                     }
 
@@ -396,7 +396,7 @@ namespace Majorsilence.Reporting.Rdl
          * 05122007 AJM */
         async Task DrawLineBetweenPoints(Draw2.Graphics g, Report rpt, Draw2.Brush brush, System.Drawing.Point[] points)
         {
-            await DrawLineBetweenPoints(g, rpt, brush, points, 2);
+            await DrawLineBetweenPoints(g, rpt, brush, points, 2).ConfigureAwait(false);
         }
 
 
@@ -418,7 +418,7 @@ namespace Majorsilence.Reporting.Rdl
                     p = new Draw2.Pen(brush, intLineSize);
                 }
 
-                if ((ChartSubTypeEnum)Enum.Parse(typeof(ChartSubTypeEnum), await _ChartDefn.Subtype.EvaluateString(rpt, _row)) == ChartSubTypeEnum.Smooth && points.Length > 2)
+                if ((ChartSubTypeEnum)Enum.Parse(typeof(ChartSubTypeEnum), await _ChartDefn.Subtype.EvaluateString(rpt, _row).ConfigureAwait(false)) == ChartSubTypeEnum.Smooth && points.Length > 2)
                     g.DrawCurve(p, points, 0.5F);
                 else
                     g.DrawLines(p, points);
@@ -449,7 +449,7 @@ namespace Majorsilence.Reporting.Rdl
                 System.Drawing.Point saveP = System.Drawing.Point.Empty;
                 for (int iCol = 1; iCol <= SeriesCount; iCol++)
                 {
-                    double t = await GetDataValue(rpt, iRow, iCol);
+                    double t = await GetDataValue(rpt, iRow, iCol).ConfigureAwait(false);
                     if (t.CompareTo(double.NaN) == 0)
                         t = 0;
                     v += t;
@@ -462,7 +462,7 @@ namespace Majorsilence.Reporting.Rdl
                         rect = new System.Drawing.Rectangle(p, new System.Drawing.Size(widthBar, h));
                     else
                         rect = new System.Drawing.Rectangle(p, new System.Drawing.Size(widthBar, saveP.Y - p.Y));
-                    await DrawColumnBar(rpt, g, await GetSeriesBrush(rpt, iRow, iCol), rect, iRow, iCol);
+                    await DrawColumnBar(rpt, g, await GetSeriesBrush(rpt, iRow, iCol).ConfigureAwait(false), rect, iRow, iCol).ConfigureAwait(false);
 
                     //Add a metafilecomment to use as a tooltip GJL 26092008
                     if (_showToolTips)
@@ -492,7 +492,7 @@ namespace Majorsilence.Reporting.Rdl
             Style s = a.Style;
 
             // Measure the title
-            size = await DrawTitleMeasure(rpt, g, a.Title);
+            size = await DrawTitleMeasure(rpt, g, a.Title).ConfigureAwait(false);
 
             if (!a.Visible)     // don't need to calculate the height
                 return size;
@@ -503,12 +503,12 @@ namespace Majorsilence.Reporting.Rdl
             int maxWidth = 0;
             for (int iRow = 1; iRow <= CategoryCount; iRow++)
             {
-                (object v, tc) = await this.GetCategoryValue(rpt, iRow);
+                (object v, tc) = await GetCategoryValue(rpt, iRow).ConfigureAwait(false);
                 System.Drawing.Size tSize;
                 if (s == null)
-                    tSize = await Style.MeasureStringDefaults(rpt, g, v, tc, null, int.MaxValue);
+                    tSize = await Style.MeasureStringDefaults(rpt, g, v, tc, null, int.MaxValue).ConfigureAwait(false);
                 else
-                    tSize = await s.MeasureString(rpt, g, v, tc, null, int.MaxValue);
+                    tSize = await s.MeasureString(rpt, g, v, tc, null, int.MaxValue).ConfigureAwait(false);
 
                 if (tSize.Height > maxHeight)
                     maxHeight = tSize.Height;
@@ -556,8 +556,8 @@ namespace Majorsilence.Reporting.Rdl
             if (a == null)
                 return;
             Style s = a.Style;
-            System.Drawing.Size tSize = await DrawTitleMeasure(rpt, g, a.Title);
-            await DrawTitle(rpt, g, a.Title, new System.Drawing.Rectangle(rect.Left, rect.Bottom - tSize.Height, rect.Width, tSize.Height));
+            System.Drawing.Size tSize = await DrawTitleMeasure(rpt, g, a.Title).ConfigureAwait(false);
+            await DrawTitle(rpt, g, a.Title, new System.Drawing.Rectangle(rect.Left, rect.Bottom - tSize.Height, rect.Width, tSize.Height)).ConfigureAwait(false);
 
             // Account for tick marks
             int tickSize = 0;
@@ -577,7 +577,7 @@ namespace Majorsilence.Reporting.Rdl
             if (a.MajorInterval != null)
             {
                 // 09052008WRP  get major interval value  
-                MajorGrid = (int)await a.MajorInterval.EvaluateDouble(rpt, this._row);
+                MajorGrid = (int)await a.MajorInterval.EvaluateDouble(rpt, _row).ConfigureAwait(false);
             }
             // 12052008WRP
             // setup month scale gridline plot - must check dealing with date data type
@@ -587,7 +587,7 @@ namespace Majorsilence.Reporting.Rdl
             bool date = false; //used for confirming dealing with date data
             int PreviousLocation = rect.Left; //used to keep track of previous gridline location on x axis - set to x position of category axis at start
             TypeCode tc;
-            (object first, tc) = await this.GetCategoryValue(rpt, 1);
+            (object first, tc) = await GetCategoryValue(rpt, 1).ConfigureAwait(false);
             if (first != null)
             {
                 switch (tc)
@@ -607,7 +607,7 @@ namespace Majorsilence.Reporting.Rdl
             }
             for (int iRow = 1; iRow <= CategoryCount; iRow++)
             {
-                (object v, tc) = await this.GetCategoryValue(rpt, iRow);
+                (object v, tc) = await GetCategoryValue(rpt, iRow).ConfigureAwait(false);
                 //make sure we are dealing with datetime type
                 if (date)
                 {
@@ -627,11 +627,11 @@ namespace Majorsilence.Reporting.Rdl
                     {	// Area chart - value is centered under the tick mark
                         if (s != null)
                         {
-                            size = await s.MeasureString(rpt, g, v, TypeCode.Double, null, int.MaxValue);
+                            size = await s.MeasureString(rpt, g, v, TypeCode.Double, null, int.MaxValue).ConfigureAwait(false);
                         }
                         else
                         {
-                            size = await Style.MeasureStringDefaults(rpt, g, v, TypeCode.Double, null, int.MaxValue);
+                            size = await Style.MeasureStringDefaults(rpt, g, v, TypeCode.Double, null, int.MaxValue).ConfigureAwait(false);
                         }
                     }
 
@@ -652,7 +652,7 @@ namespace Majorsilence.Reporting.Rdl
                     if (s == null)
                         Style.DrawStringDefaults(g, v, drawRect);
                     else
-                        await s.DrawString(rpt, g, v, tc, null, drawRect);
+                        await s.DrawString(rpt, g, v, tc, null, drawRect).ConfigureAwait(false);
                 }
 
                 //09052008WRP Draw major gridlines and place category labels for months scale 
@@ -662,12 +662,12 @@ namespace Majorsilence.Reporting.Rdl
                     if (CurrentDate.Month != OldDate.Month)
                     {
                         TempDate = CurrentDate;
-                        await DrawCategoryAxisGrid(rpt, g, a.MajorGridLines, new System.Drawing.Point(drawLoc, rect.Top), new System.Drawing.Point(drawLoc, plotTop)); //Don't overdraw the Y axis on the first gridline
+                        await DrawCategoryAxisGrid(rpt, g, a.MajorGridLines, new System.Drawing.Point(drawLoc, rect.Top), new System.Drawing.Point(drawLoc, plotTop)).ConfigureAwait(false); //Don't overdraw the Y axis on the first gridline
                         CurrentDate = CurrentDate.AddMonths(OldDate.Month - CurrentDate.Month); // get previous category month value
                         string MonthString = CurrentDate.ToString("MMMM");
-                        System.Drawing.Size lSize = await DrawCategoryTitleMeasure(rpt, g, MonthString, s);
+                        System.Drawing.Size lSize = await DrawCategoryTitleMeasure(rpt, g, MonthString, s).ConfigureAwait(false);
                         int catlabelLoc = (int)((drawLoc - PreviousLocation) / 2) + PreviousLocation - (lSize.Width / 2);
-                        await DrawCategoryLabel(rpt, g, MonthString, a.Style, new System.Drawing.Rectangle(catlabelLoc, rect.Top - (lSize.Height - 25), lSize.Width, lSize.Height));
+                        await DrawCategoryLabel(rpt, g, MonthString, a.Style, new System.Drawing.Rectangle(catlabelLoc, rect.Top - (lSize.Height - 25), lSize.Width, lSize.Height)).ConfigureAwait(false);
                         PreviousLocation = drawLoc;
                         OldDate = TempDate;
 
@@ -676,7 +676,7 @@ namespace Majorsilence.Reporting.Rdl
                 if ((MajorGrid != 0) && ((iRow - 1) % MajorGrid == 0) && !(a.Month))
                 //if (((iRow - 1) % ((int)a.MajorInterval.EvaluateDouble(rpt, this.ChartRow.RowNumber)) == 0) && !(a.Month)) 
                 {
-                    await DrawCategoryAxisGrid(rpt, g, a.MajorGridLines, new System.Drawing.Point(drawLoc, rect.Top), new System.Drawing.Point(drawLoc, plotTop));
+                    await DrawCategoryAxisGrid(rpt, g, a.MajorGridLines, new System.Drawing.Point(drawLoc, rect.Top), new System.Drawing.Point(drawLoc, plotTop)).ConfigureAwait(false);
                 }
                 // Draw the Major Tick Marks (if necessary)
                 DrawCategoryAxisTick(g, true, a.MajorTickMarks, new System.Drawing.Point(drawLoc, rect.Top));
@@ -686,9 +686,9 @@ namespace Majorsilence.Reporting.Rdl
             if (a.Month && date && a.Visible)// 16052008WRP draw last category label for months scale
             {
                 string MonthString = OldDate.ToString("MMMM");
-                System.Drawing.Size lSize = await DrawCategoryTitleMeasure(rpt, g, MonthString, s);
+                System.Drawing.Size lSize = await DrawCategoryTitleMeasure(rpt, g, MonthString, s).ConfigureAwait(false);
                 int catlabelLoc = (int)((rect.Right - PreviousLocation) / 2) + PreviousLocation - (lSize.Width / 2);
-                await DrawCategoryLabel(rpt, g, MonthString, a.Style, new System.Drawing.Rectangle(catlabelLoc, rect.Top - (lSize.Height - 25), lSize.Width, lSize.Height));
+                await DrawCategoryLabel(rpt, g, MonthString, a.Style, new System.Drawing.Rectangle(catlabelLoc, rect.Top - (lSize.Height - 25), lSize.Width, lSize.Height)).ConfigureAwait(false);
             }
 
 
@@ -727,7 +727,7 @@ namespace Majorsilence.Reporting.Rdl
                 return;
 
             if (gl.Style != null)
-                await gl.Style.DrawStyleLine(rpt, g, null, s, e);
+                await gl.Style.DrawStyleLine(rpt, g, null, s, e).ConfigureAwait(false);
             else
                 g.DrawLine(Draw2.Pens.Black, s, e);
 
@@ -743,16 +743,16 @@ namespace Majorsilence.Reporting.Rdl
             g.FillRectangle(brush, rect);
             g.DrawRectangle(Draw2.Pens.Black, rect);
 
-            if ((ChartSubTypeEnum)Enum.Parse(typeof(ChartSubTypeEnum), await _ChartDefn.Subtype.EvaluateString(rpt, _row)) == ChartSubTypeEnum.Stacked ||
-                (ChartSubTypeEnum)Enum.Parse(typeof(ChartSubTypeEnum), await _ChartDefn.Subtype.EvaluateString(rpt, _row)) == ChartSubTypeEnum.PercentStacked)
+            if ((ChartSubTypeEnum)Enum.Parse(typeof(ChartSubTypeEnum), await _ChartDefn.Subtype.EvaluateString(rpt, _row).ConfigureAwait(false)) == ChartSubTypeEnum.Stacked ||
+                (ChartSubTypeEnum)Enum.Parse(typeof(ChartSubTypeEnum), await _ChartDefn.Subtype.EvaluateString(rpt, _row).ConfigureAwait(false)) == ChartSubTypeEnum.PercentStacked)
             {
-                await DrawDataPoint(rpt, g, rect, iRow, iCol);
+                await DrawDataPoint(rpt, g, rect, iRow, iCol).ConfigureAwait(false);
             }
             else
             {
                 System.Drawing.Point p;
                 p = new System.Drawing.Point(rect.Left, rect.Top - 14); // todo: 14 is arbitrary
-                await DrawDataPoint(rpt, g, p, iRow, iCol);
+                await DrawDataPoint(rpt, g, p, iRow, iCol).ConfigureAwait(false);
             }
 
             return;
@@ -772,10 +772,10 @@ namespace Majorsilence.Reporting.Rdl
 
             //int intervalCount;
             //double incr;
-            (incr, intervalCount) = await SetIncrementAndInterval(rpt, a, min, max);      // Calculate the interval count
+            (incr, intervalCount) = await SetIncrementAndInterval(rpt, a, min, max).ConfigureAwait(false);      // Calculate the interval count
 
-            System.Drawing.Size tSize = await DrawTitleMeasure(rpt, g, a.Title);
-            await DrawTitle(rpt, g, a.Title, new System.Drawing.Rectangle(rect.Left, rect.Top, tSize.Width, rect.Height));
+            System.Drawing.Size tSize = await DrawTitleMeasure(rpt, g, a.Title).ConfigureAwait(false);
+            await DrawTitle(rpt, g, a.Title, new System.Drawing.Rectangle(rect.Left, rect.Top, tSize.Width, rect.Height)).ConfigureAwait(false);
 
             double v = min;
             for (int i = 0; i < intervalCount + 1; i++)
@@ -793,29 +793,29 @@ namespace Majorsilence.Reporting.Rdl
                 }
                 else if (s != null)
                 {
-                    System.Drawing.Size size = await s.MeasureString(rpt, g, v, TypeCode.Double, null, int.MaxValue);
+                    System.Drawing.Size size = await s.MeasureString(rpt, g, v, TypeCode.Double, null, int.MaxValue).ConfigureAwait(false);
                     System.Drawing.Rectangle vRect =
                         new System.Drawing.Rectangle(rect.Left + tSize.Width, rect.Top + rect.Height - h - (size.Height / 2), rect.Width - tSize.Width, size.Height);
-                    await s.DrawString(rpt, g, v, TypeCode.Double, null, vRect);
+                    await s.DrawString(rpt, g, v, TypeCode.Double, null, vRect).ConfigureAwait(false);
                 }
                 else
                 {
-                    System.Drawing.Size size = await Style.MeasureStringDefaults(rpt, g, v, TypeCode.Double, null, int.MaxValue);
+                    System.Drawing.Size size = await Style.MeasureStringDefaults(rpt, g, v, TypeCode.Double, null, int.MaxValue).ConfigureAwait(false);
                     System.Drawing.Rectangle vRect =
                         new System.Drawing.Rectangle(rect.Left + tSize.Width, rect.Top + rect.Height - h - (size.Height / 2), rect.Width - tSize.Width, size.Height);
                     Style.DrawStringDefaults(g, v, vRect);
                 }
 
-                await DrawValueAxisGrid(rpt, g, a.MajorGridLines, new System.Drawing.Point(plotLeft, rect.Top + rect.Height - h), new System.Drawing.Point(plotRight, rect.Top + rect.Height - h));
-                await DrawValueAxisTick(rpt, g, true, a.MajorTickMarks, a.MajorGridLines, new System.Drawing.Point(plotLeft, rect.Top + rect.Height - h));
+                await DrawValueAxisGrid(rpt, g, a.MajorGridLines, new System.Drawing.Point(plotLeft, rect.Top + rect.Height - h), new System.Drawing.Point(plotRight, rect.Top + rect.Height - h)).ConfigureAwait(false);
+                await DrawValueAxisTick(rpt, g, true, a.MajorTickMarks, a.MajorGridLines, new System.Drawing.Point(plotLeft, rect.Top + rect.Height - h)).ConfigureAwait(false);
 
                 v += incr;
             }
 
             // Draw the end points of the major grid lines
-            await DrawValueAxisGrid(rpt, g, a.MajorGridLines, new System.Drawing.Point(plotLeft, rect.Top), new System.Drawing.Point(plotLeft, rect.Bottom));
-            await DrawValueAxisTick(rpt, g, true, a.MajorTickMarks, a.MajorGridLines, new System.Drawing.Point(plotLeft, rect.Top));
-            await DrawValueAxisGrid(rpt, g, a.MajorGridLines, new System.Drawing.Point(plotRight, rect.Top), new System.Drawing.Point(plotRight, rect.Bottom));
+            await DrawValueAxisGrid(rpt, g, a.MajorGridLines, new System.Drawing.Point(plotLeft, rect.Top), new System.Drawing.Point(plotLeft, rect.Bottom)).ConfigureAwait(false);
+            await DrawValueAxisTick(rpt, g, true, a.MajorTickMarks, a.MajorGridLines, new System.Drawing.Point(plotLeft, rect.Top)).ConfigureAwait(false);
+            await DrawValueAxisGrid(rpt, g, a.MajorGridLines, new System.Drawing.Point(plotRight, rect.Top), new System.Drawing.Point(plotRight, rect.Bottom)).ConfigureAwait(false);
 
             //12052008WRP this line not required adds tick at bottom end of right y axis.
             //DrawValueAxisTick(rpt, g, true, a.MajorTickMarks, a.MajorGridLines, new Point(plotRight, rect.Bottom));
@@ -854,7 +854,7 @@ namespace Majorsilence.Reporting.Rdl
             double thisMin = 0;
             double thisMax = 0;
 
-            (thisMax, thisMin) = await GetMaxMinDataValue(rpt, 0, 2);
+            (thisMax, thisMin) = await GetMaxMinDataValue(rpt, 0, 2).ConfigureAwait(false);
             thisMin = 0; //Stop rescaling the min on autoscale
 
 
@@ -977,11 +977,11 @@ namespace Majorsilence.Reporting.Rdl
             //}
 
 
-            System.Drawing.Size tSize = await DrawTitleMeasure(rpt, g, a.Title2);
+            System.Drawing.Size tSize = await DrawTitleMeasure(rpt, g, a.Title2).ConfigureAwait(false);
 
             // rect.Width = (int)g.VisibleClipBounds.Width - rect.Left + 20;
 
-            await DrawTitle(rpt, g, a.Title2, new System.Drawing.Rectangle((int)rect.Right - tSize.Width, rect.Top, tSize.Width, rect.Height));
+            await DrawTitle(rpt, g, a.Title2, new System.Drawing.Rectangle((int)rect.Right - tSize.Width, rect.Top, tSize.Width, rect.Height)).ConfigureAwait(false);
 
             double v = min;
             for (int i = 0; i < _gridIncrs + 1; i++)
@@ -998,14 +998,14 @@ namespace Majorsilence.Reporting.Rdl
                 }
                 else if (s != null)
                 {
-                    System.Drawing.Size size = await s.MeasureString(rpt, g, v, TypeCode.Double, null, int.MaxValue);
+                    System.Drawing.Size size = await s.MeasureString(rpt, g, v, TypeCode.Double, null, int.MaxValue).ConfigureAwait(false);
                     System.Drawing.Rectangle vRect =
                         new System.Drawing.Rectangle(rect.Left - (int)(tSize.Width * .5), rect.Top + rect.Height - h - (size.Height / 2), rect.Width - tSize.Width, size.Height);
-                    await s.DrawString(rpt, g, v, TypeCode.Double, null, vRect);
+                    await s.DrawString(rpt, g, v, TypeCode.Double, null, vRect).ConfigureAwait(false);
                 }
                 else
                 {
-                    System.Drawing.Size size = await Style.MeasureStringDefaults(rpt, g, v, TypeCode.Double, null, int.MaxValue);
+                    System.Drawing.Size size = await Style.MeasureStringDefaults(rpt, g, v, TypeCode.Double, null, int.MaxValue).ConfigureAwait(false);
                     System.Drawing.Rectangle vRect =
                         new System.Drawing.Rectangle(rect.Left - (int)(tSize.Width * .5), rect.Top + rect.Height - h - (size.Height / 2), rect.Width - (tSize.Width * 2), size.Height);
                     Style.DrawStringDefaults(g, v, vRect);
@@ -1013,7 +1013,7 @@ namespace Majorsilence.Reporting.Rdl
 
                 v += incr;
 
-                await DrawValueAxisTick(rpt, g, true, a.MajorTickMarks, a.MajorGridLines, new System.Drawing.Point(plotRight - (AxisTickMarkMajorLen / 2), rect.Top + rect.Height - h));
+                await DrawValueAxisTick(rpt, g, true, a.MajorTickMarks, a.MajorGridLines, new System.Drawing.Point(plotRight - (AxisTickMarkMajorLen / 2), rect.Top + rect.Height - h)).ConfigureAwait(false);
 
             }
 
@@ -1027,7 +1027,7 @@ namespace Majorsilence.Reporting.Rdl
                 return;
 
             if (gl.Style != null)
-                await gl.Style.DrawStyleLine(rpt, g, null, s, e);
+                await gl.Style.DrawStyleLine(rpt, g, null, s, e).ConfigureAwait(false);
             else
                 g.DrawLine(Draw2.Pens.Black, s, e);
 
@@ -1060,7 +1060,7 @@ namespace Majorsilence.Reporting.Rdl
             Style style = gl.Style;
 
             if (style != null)
-                await style.DrawStyleLine(rpt, g, null, s, e);
+                await style.DrawStyleLine(rpt, g, null, s, e).ConfigureAwait(false);
             else
                 g.DrawLine(Draw2.Pens.Black, s, e);
 
@@ -1091,20 +1091,20 @@ namespace Majorsilence.Reporting.Rdl
             }
             else if (a.Style != null)
             {
-                minSize = await a.Style.MeasureString(rpt, g, min, TypeCode.Double, null, int.MaxValue);
-                maxSize = await a.Style.MeasureString(rpt, g, max, TypeCode.Double, null, int.MaxValue);
+                minSize = await a.Style.MeasureString(rpt, g, min, TypeCode.Double, null, int.MaxValue).ConfigureAwait(false);
+                maxSize = await a.Style.MeasureString(rpt, g, max, TypeCode.Double, null, int.MaxValue).ConfigureAwait(false);
             }
             else
             {
-                minSize = await Style.MeasureStringDefaults(rpt, g, min, TypeCode.Double, null, int.MaxValue);
-                maxSize = await Style.MeasureStringDefaults(rpt, g, max, TypeCode.Double, null, int.MaxValue);
+                minSize = await Style.MeasureStringDefaults(rpt, g, min, TypeCode.Double, null, int.MaxValue).ConfigureAwait(false);
+                maxSize = await Style.MeasureStringDefaults(rpt, g, max, TypeCode.Double, null, int.MaxValue).ConfigureAwait(false);
             }
             // Choose the largest
             size.Width = Math.Max(minSize.Width, maxSize.Width);
             size.Height = Math.Max(minSize.Height, maxSize.Height);
 
             // Now we need to add in the width of the title (if any)
-            System.Drawing.Size titleSize = await DrawTitleMeasure(rpt, g, a.Title);
+            System.Drawing.Size titleSize = await DrawTitleMeasure(rpt, g, a.Title).ConfigureAwait(false);
             size.Width += titleSize.Width;
 
             return size;

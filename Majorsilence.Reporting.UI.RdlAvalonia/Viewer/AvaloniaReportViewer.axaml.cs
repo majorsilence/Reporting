@@ -120,7 +120,7 @@ namespace Majorsilence.Reporting.UI.RdlAvalonia.Viewer
             _sourceFile = null;
             _sourceRdl = null;
             _externalReport = report;
-            report.SubreportDataRetrieval += (_, args) => SubreportDataRetrieval?.Invoke(this, args);
+            report.SubreportDataRetrieval += OnReportSubreportDataRetrieval;
             await RebuildAsync();
         }
 
@@ -581,7 +581,7 @@ namespace Majorsilence.Reporting.UI.RdlAvalonia.Viewer
             };
 
             var report = await parser.Parse();
-            report.SubreportDataRetrieval += (_, args) => SubreportDataRetrieval?.Invoke(this, args);
+            report.SubreportDataRetrieval += OnReportSubreportDataRetrieval;
             return report;
         }
 
@@ -831,6 +831,17 @@ namespace Majorsilence.Reporting.UI.RdlAvalonia.Viewer
         }
 
         // ── Parameter UI ─────────────────────────────────────────────
+
+        // The engine does not resume on the UI thread after an await (ConfigureAwait(false)), but
+        // applications handle this event expecting the UI thread. The UI thread is awaiting, not
+        // blocked, so handing the call to it here cannot deadlock.
+        private void OnReportSubreportDataRetrieval(object? sender, SubreportDataRetrievalEventArgs args)
+        {
+            if (Avalonia.Threading.Dispatcher.UIThread.CheckAccess())
+                SubreportDataRetrieval?.Invoke(this, args);
+            else
+                Avalonia.Threading.Dispatcher.UIThread.Invoke(() => SubreportDataRetrieval?.Invoke(this, args));
+        }
 
         private async Task BuildParameterUiAsync()
         {

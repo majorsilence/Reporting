@@ -50,7 +50,7 @@ namespace Majorsilence.Reporting.Rdl
 		{
 			foreach (DataSetDefn ds in _Items.Values)
 			{
-				await ds.FinalPass();
+				await ds.FinalPass().ConfigureAwait(false);
 			}
 			return;
 		}
@@ -60,7 +60,7 @@ namespace Majorsilence.Reporting.Rdl
             bool haveRows = false;
 			foreach (DataSetDefn ds in _Items.Values)
 			{
-				haveRows |= await ds.GetData(rpt);
+				haveRows |= await ds.GetData(rpt).ConfigureAwait(false);
 			}
 
 			return haveRows;

@@ -79,7 +79,7 @@ namespace Majorsilence.Reporting.Rdl
             if (_SortedData == null && _HashData != null && _HashData.Count > 0)
             {
                 var list = new List<MatrixEntry>(_HashData.Values);
-                await MatrixEntrySort.SortAsync(rpt, list, GetSortBy());
+                await MatrixEntrySort.SortAsync(rpt, list, GetSortBy()).ConfigureAwait(false);
                 _SortedData = list;
                 _HashData = null;       // we only keep one
             }
@@ -87,7 +87,7 @@ namespace Majorsilence.Reporting.Rdl
             if (_SortedData != null)
             {
                 foreach (MatrixEntry child in _SortedData)
-                    await child.PrepareSortedDataAsync(rpt);
+                    await child.PrepareSortedDataAsync(rpt).ConfigureAwait(false);
             }
         }
 
@@ -218,7 +218,7 @@ namespace Majorsilence.Reporting.Rdl
                 try
                 {
                     for (; k < exprs.Length; k++)
-                        keys[k] = await exprs[k].Evaluate(rpt, me.R);
+                        keys[k] = await exprs[k].Evaluate(rpt, me.R).ConfigureAwait(false);
                 }
                 catch (Exception e)		// this really shouldn't happen
                 {

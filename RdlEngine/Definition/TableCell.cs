@@ -88,7 +88,7 @@ namespace Majorsilence.Reporting.Rdl
 		
 		async override internal Task FinalPass()
 		{
-            await _ReportItems.FinalPass();
+            await _ReportItems.FinalPass().ConfigureAwait(false);
 			return;
 		}
 
@@ -98,12 +98,12 @@ namespace Majorsilence.Reporting.Rdl
 			//   of the table processing;  also this doesn't account for the affect of colspan correctly
 			//   where if any of the spanned columns are visible the value would show??
 			TableColumn tc = _OwnerTable.TableColumns[_ColIndex];
-			if (tc.Visibility != null && await tc.Visibility.IsHidden(ip.Report(), row))	// column visible?
+			if (tc.Visibility != null && await tc.Visibility.IsHidden(ip.Report(), row).ConfigureAwait(false))	// column visible?
 				return;													//  no nothing to do
 
-			await ip.TableCellStart(this, row);
+			await ip.TableCellStart(this, row).ConfigureAwait(false);
 
-            await _ReportItems.Items[0].Run(ip, row);
+            await _ReportItems.Items[0].Run(ip, row).ConfigureAwait(false);
 
 			ip.TableCellEnd(this, row);
 			return;
@@ -115,10 +115,10 @@ namespace Majorsilence.Reporting.Rdl
 			//   of the table processing;  also this doesn't account for the affect of colspan correctly
 			//   where if any of the spanned columns are visible the value would show??
 			TableColumn tc = _OwnerTable.TableColumns[_ColIndex];
-			if (tc.Visibility != null && await tc.Visibility.IsHidden(pgs.Report, row))	// column visible?
+			if (tc.Visibility != null && await tc.Visibility.IsHidden(pgs.Report, row).ConfigureAwait(false))	// column visible?
 				return;                                                 //  no nothing to do
 
-            await _ReportItems.Items[0].RunPage(pgs, row);
+            await _ReportItems.Items[0].RunPage(pgs, row).ConfigureAwait(false);
 			return;
 		}
 

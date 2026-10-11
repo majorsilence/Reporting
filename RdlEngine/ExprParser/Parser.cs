@@ -76,7 +76,7 @@ namespace Majorsilence.Reporting.Rdl
 				return new Constant(expr);		//   this is a constant value
 
 			idLookup = lu;	
-			IExpr e = await this.ParseExpr(new StringReader(expr));
+			IExpr e = await ParseExpr(new StringReader(expr)).ConfigureAwait(false);
 			
 			if (e == null)					// Didn't get an expression?
 				e = new Constant(expr);		//  then provide a constant
@@ -115,7 +115,7 @@ namespace Majorsilence.Reporting.Rdl
 			{
 				tokens.Extract();		// skip over the equal
 				curToken = tokens.Extract();	// set up the first token
-				result = await MatchExprAndOr();	// start with lowest precedence and work up
+				result = await MatchExprAndOr().ConfigureAwait(false);	// start with lowest precedence and work up
 			}
 
 			if (curToken.Type != TokenTypes.EOF)
@@ -130,13 +130,13 @@ namespace Majorsilence.Reporting.Rdl
 			TokenTypes t;			// remember the type
 
 			IExpr lhs;
-			lhs = await MatchExprNot();
+			lhs = await MatchExprNot().ConfigureAwait(false);
 			IExpr result = lhs;			// in case we get no matches
 			while ((t = curToken.Type) == TokenTypes.AND || t == TokenTypes.OR)
 			{
 				curToken = tokens.Extract();
 				IExpr rhs;
-				rhs = await MatchExprNot();
+				rhs = await MatchExprNot().ConfigureAwait(false);
 				bool bBool = (rhs.GetTypeCode() == TypeCode.Boolean &&
 					lhs.GetTypeCode() == TypeCode.Boolean);
 				if (!bBool)
@@ -165,7 +165,7 @@ namespace Majorsilence.Reporting.Rdl
 			{
 				curToken = tokens.Extract();
 			}
-			IExpr result = await MatchExprRelop();
+			IExpr result = await MatchExprRelop().ConfigureAwait(false);
 			if (t == TokenTypes.NOT)
 			{
 				if (result.GetTypeCode() != TypeCode.Boolean)
@@ -181,7 +181,7 @@ namespace Majorsilence.Reporting.Rdl
 			TokenTypes t;           // remember the type
 			IExpr result = null;
 			IExpr lhs;
-			lhs = await MatchExprAddSub();
+			lhs = await MatchExprAddSub().ConfigureAwait(false);
 			result = lhs;			// in case we get no matches
 			while (true)
 			{
@@ -205,7 +205,7 @@ namespace Majorsilence.Reporting.Rdl
 				}
 				curToken = tokens.Extract();
 				IExpr rhs;
-				rhs = await MatchExprAddSub();
+				rhs = await MatchExprAddSub().ConfigureAwait(false);
 
 				switch(t)
 				{
@@ -242,13 +242,13 @@ namespace Majorsilence.Reporting.Rdl
 			TokenTypes t;           // remember the type
 			IExpr result=null;
 			IExpr lhs;
-			lhs = await MatchExprIntDiv();
+			lhs = await MatchExprIntDiv().ConfigureAwait(false);
 			result = lhs;			// in case we get no matches
 			while ((t = curToken.Type) == TokenTypes.PLUS || t == TokenTypes.PLUSSTRING || t == TokenTypes.MINUS)
 			{
 				curToken = tokens.Extract();
 				IExpr rhs;
-				rhs = await MatchExprIntDiv();
+				rhs = await MatchExprIntDiv().ConfigureAwait(false);
 				TypeCode lt = lhs.GetTypeCode();
 				TypeCode rt = rhs.GetTypeCode();
 				bool bDecimal = (rt == TypeCode.Decimal &&
@@ -295,11 +295,11 @@ namespace Majorsilence.Reporting.Rdl
 		// 7 \ 2 * 2 is 7 \ 4.
 		private async Task<IExpr> MatchExprIntDiv()
 		{
-			IExpr lhs = await MatchExprMultDiv();
+			IExpr lhs = await MatchExprMultDiv().ConfigureAwait(false);
 			while (curToken.Type == TokenTypes.BACKSLASH)
 			{
 				curToken = tokens.Extract();
-				IExpr rhs = await MatchExprMultDiv();
+				IExpr rhs = await MatchExprMultDiv().ConfigureAwait(false);
 				lhs = new FunctionIntDiv(lhs, rhs);
 			}
 			return lhs;
@@ -311,7 +311,7 @@ namespace Majorsilence.Reporting.Rdl
 			IExpr result = null;
 			TokenTypes t;			// remember the type
 			IExpr lhs;
-			lhs = await MatchExprExp();
+			lhs = await MatchExprExp().ConfigureAwait(false);
 			result = lhs;			// in case we get no matches
 			while ((t = curToken.Type) == TokenTypes.FORWARDSLASH ||
 				t == TokenTypes.STAR ||
@@ -319,7 +319,7 @@ namespace Majorsilence.Reporting.Rdl
 			{
 				curToken = tokens.Extract();
 				IExpr rhs;
-				rhs = await MatchExprExp();
+				rhs = await MatchExprExp().ConfigureAwait(false);
 				bool bDecimal = (rhs.GetTypeCode() == TypeCode.Decimal &&
 					lhs.GetTypeCode() == TypeCode.Decimal);
 				switch (t)
@@ -351,12 +351,12 @@ namespace Majorsilence.Reporting.Rdl
 		{
             IExpr result = null;
             IExpr lhs;
-			lhs = await MatchExprUnary();
+			lhs = await MatchExprUnary().ConfigureAwait(false);
 			if (curToken.Type == TokenTypes.EXP)
 			{
 				curToken = tokens.Extract();
 				IExpr rhs;
-				rhs = await MatchExprUnary();
+				rhs = await MatchExprUnary().ConfigureAwait(false);
 				result = new FunctionExp(lhs, rhs);	
 			}
 			else
@@ -374,7 +374,7 @@ namespace Majorsilence.Reporting.Rdl
 			{
 				curToken = tokens.Extract();
 			}
-            result = await MatchExprParen();
+            result = await MatchExprParen().ConfigureAwait(false);
 			if (t == TokenTypes.MINUS)
 			{
 				if (result.GetTypeCode() == TypeCode.Decimal)
@@ -396,13 +396,13 @@ namespace Majorsilence.Reporting.Rdl
             if (curToken.Type == TokenTypes.LPAREN)
 			{	// trying to match ( Expr )
 				curToken = tokens.Extract();
-				result = await MatchExprAndOr();
+				result = await MatchExprAndOr().ConfigureAwait(false);
 				if (curToken.Type != TokenTypes.RPAREN)
 					throw new ParserException(Strings.Parser_ErrorP_BracketExpected + GetLocationInfoWithValue(curToken));
 				curToken = tokens.Extract();
 			}
 			else
-				result = await MatchBaseType();
+				result = await MatchBaseType().ConfigureAwait(false);
 
 			// A ".ToString" suffix can follow any complete expression, not only the member
 			// references NormalizeMemberRef already handles.
@@ -412,7 +412,7 @@ namespace Majorsilence.Reporting.Rdl
 		// BaseType: FuncIdent | NUMBER | QUOTE   - note certain types are restricted in expressions
 		private async Task<IExpr> MatchBaseType()
 		{
-			var r = await MatchFuncIDent();
+			var r = await MatchFuncIDent().ConfigureAwait(false);
 
             if (r.match)
 				return r.result;
@@ -725,7 +725,7 @@ namespace Majorsilence.Reporting.Rdl
 				else
 					throw new ParserException(Strings.Parser_ErrorP_Invalid_function_arguments + GetLocationInfoWithValue(curToken));
 				
-				e = await MatchExprAndOr();
+				e = await MatchExprAndOr().ConfigureAwait(false);
 				if (e == null)
 					throw new ParserException(Strings.Parser_ErrorP_ExpectingComma + GetLocationInfoWithValue(curToken));
 
@@ -861,89 +861,89 @@ namespace Majorsilence.Reporting.Rdl
 					result = new FunctionUserCollection(idLookup.User, args[0]);
 					break;
 				case "sum":
-					(scope, bSimple) = await ResolveAggrScope(args, 2);
+					(scope, bSimple) = await ResolveAggrScope(args, 2).ConfigureAwait(false);
 					FunctionAggrSum aggrFS = new FunctionAggrSum(_DataCache, args[0], scope);
 					aggrFS.LevelCheck = bSimple;
 					result = aggrFS;
 					break;
 				case "avg":
-					(scope, bSimple) = await ResolveAggrScope(args, 2);
+					(scope, bSimple) = await ResolveAggrScope(args, 2).ConfigureAwait(false);
 					FunctionAggrAvg aggrFA = new FunctionAggrAvg(_DataCache, args[0], scope);
 					aggrFA.LevelCheck = bSimple;
 					result = aggrFA;
 					break;
 				case "min":
-					(scope, bSimple) = await ResolveAggrScope(args, 2);
+					(scope, bSimple) = await ResolveAggrScope(args, 2).ConfigureAwait(false);
 					FunctionAggrMin aggrFMin = new FunctionAggrMin(_DataCache, args[0], scope);
 					aggrFMin.LevelCheck = bSimple;
 					result = aggrFMin;
 					break;
 				case "max":
-					(scope, bSimple) = await ResolveAggrScope(args, 2);
+					(scope, bSimple) = await ResolveAggrScope(args, 2).ConfigureAwait(false);
 					FunctionAggrMax aggrFMax = new FunctionAggrMax(_DataCache, args[0], scope);
 					aggrFMax.LevelCheck = bSimple;
 					result = aggrFMax;
 					break;
 				case "first":
-					(scope, bSimple) = await ResolveAggrScope(args, 2);
+					(scope, bSimple) = await ResolveAggrScope(args, 2).ConfigureAwait(false);
 					result = new FunctionAggrFirst(_DataCache, args[0], scope);
 					break;
 				case "last":
-					(scope, bSimple) = await ResolveAggrScope(args, 2);
+					(scope, bSimple) = await ResolveAggrScope(args, 2).ConfigureAwait(false);
 					result = new FunctionAggrLast(_DataCache, args[0], scope);
 					break;
 				case "next":
-					(scope, bSimple) = await ResolveAggrScope(args, 2);
+					(scope, bSimple) = await ResolveAggrScope(args, 2).ConfigureAwait(false);
 					result = new FunctionAggrNext(_DataCache, args[0], scope);
 					break;
 				case "previous":
-				    (scope, bSimple) = await ResolveAggrScope(args, 2);
+				    (scope, bSimple) = await ResolveAggrScope(args, 2).ConfigureAwait(false);
 					result = new FunctionAggrPrevious(_DataCache, args[0], scope);
 					break;
 				case "level":
-					(scope, bSimple) = await ResolveAggrScope(args, 1);
+					(scope, bSimple) = await ResolveAggrScope(args, 1).ConfigureAwait(false);
 					result = new FunctionAggrLevel(scope);
 					break;
 				case "inscope":
-					(scope, bSimple) = await ResolveAggrScope(args, 1);
+					(scope, bSimple) = await ResolveAggrScope(args, 1).ConfigureAwait(false);
 					result = new FunctionInScope(scope, idLookup);
 					break;
                 case "aggregate":
-                    (scope, bSimple) = await ResolveAggrScope(args, 2);
+                    (scope, bSimple) = await ResolveAggrScope(args, 2).ConfigureAwait(false);
                     FunctionAggrArray aggr = new FunctionAggrArray(_DataCache, args[0], scope);
                     aggr.LevelCheck = bSimple;
                     result = aggr;
                     break;
                 case "count":
-					(scope, bSimple) = await ResolveAggrScope(args, 2);
+					(scope, bSimple) = await ResolveAggrScope(args, 2).ConfigureAwait(false);
 					FunctionAggrCount aggrFC = new FunctionAggrCount(_DataCache, args[0], scope);
 					aggrFC.LevelCheck = bSimple;
 					result = aggrFC;
 					break;
 				case "countrows":
-					(scope, bSimple) = await ResolveAggrScope(args, 1);
+					(scope, bSimple) = await ResolveAggrScope(args, 1).ConfigureAwait(false);
 					FunctionAggrCountRows aggrFCR = new FunctionAggrCountRows(scope);
 					aggrFCR.LevelCheck = bSimple;
 					result = aggrFCR;
 					break;
                 case "countdistinct":
-					(scope, bSimple) = await ResolveAggrScope(args, 2);
+					(scope, bSimple) = await ResolveAggrScope(args, 2).ConfigureAwait(false);
 					FunctionAggrCountDistinct aggrFCD = new FunctionAggrCountDistinct(_DataCache, args[0], scope);
 					aggrFCD.LevelCheck = bSimple;
 					result = aggrFCD;
 					break;
 				case "rownumber":
-					(scope, bSimple) = await ResolveAggrScope(args, 1);
+					(scope, bSimple) = await ResolveAggrScope(args, 1).ConfigureAwait(false);
 					IExpr texpr = new ConstantDouble("0");
 					result = new FunctionAggrRvCount(_DataCache, texpr, scope);
 					break;
 				case "runningvalue":
 					if (args.Length < 2 || args.Length > 3)
 						throw new ParserException(Strings.Parser_ErrorP_RunningValue_takes_2_or_3_arguments + GetLocationInfo(curToken));
-					string aggrFunc = await args[1].EvaluateString(null, null);
+					string aggrFunc = await args[1].EvaluateString(null, null).ConfigureAwait(false);
 					if (aggrFunc == null)
 						throw new ParserException(Strings.Parser_ErrorP_RunningValueArgumentInvalid + GetLocationInfo(curToken));
-					(scope, bSimple) = await ResolveAggrScope(args, 3);
+					(scope, bSimple) = await ResolveAggrScope(args, 3).ConfigureAwait(false);
 					switch(aggrFunc.ToLower())
 					{
 						case "sum":
@@ -978,25 +978,25 @@ namespace Majorsilence.Reporting.Rdl
 					}
 					break;
 				case "stdev":
-					(scope, bSimple) = await ResolveAggrScope(args, 2);
+					(scope, bSimple) = await ResolveAggrScope(args, 2).ConfigureAwait(false);
 					FunctionAggrStdev aggrSDev = new FunctionAggrStdev(_DataCache, args[0], scope);
 					aggrSDev.LevelCheck = bSimple;
 					result = aggrSDev;
 					break;
 				case "stdevp":
-					(scope, bSimple) = await ResolveAggrScope(args, 2);
+					(scope, bSimple) = await ResolveAggrScope(args, 2).ConfigureAwait(false);
 					FunctionAggrStdevp aggrSDevP = new FunctionAggrStdevp(_DataCache, args[0], scope);
 					aggrSDevP.LevelCheck = bSimple;
 					result = aggrSDevP;
 					break;
 				case "var":
-					(scope, bSimple) = await ResolveAggrScope(args, 2);
+					(scope, bSimple) = await ResolveAggrScope(args, 2).ConfigureAwait(false);
 					FunctionAggrVar aggrVar = new FunctionAggrVar(_DataCache, args[0], scope);
 					aggrVar.LevelCheck = bSimple;
 					result = aggrVar;
 					break;
 				case "varp":
-					(scope, bSimple) = await ResolveAggrScope(args, 2);
+					(scope, bSimple) = await ResolveAggrScope(args, 2).ConfigureAwait(false);
 					FunctionAggrVarp aggrVarP = new FunctionAggrVarp(_DataCache, args[0], scope);
 					aggrVarP.LevelCheck = bSimple;
 					result = aggrVarP;
@@ -1054,7 +1054,7 @@ namespace Majorsilence.Reporting.Rdl
 
 			if (args.Length >= indexOfScope)
 			{
-				string n = await args[indexOfScope-1].EvaluateString(null, null);
+				string n = await args[indexOfScope-1].EvaluateString(null, null).ConfigureAwait(false);
 
 				scope = idLookup.LookupScope(n);
 

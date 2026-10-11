@@ -57,7 +57,7 @@ namespace Majorsilence.Reporting.Rdl
 		public virtual async Task<IExpr> ConstantOptimization()
 		{	
 			if (f.Value != null)
-				return await f.Value.ConstantOptimization();
+				return await f.Value.ConstantOptimization().ConfigureAwait(false);
 
 			return this;	// not a constant
 		}
@@ -69,7 +69,7 @@ namespace Majorsilence.Reporting.Rdl
 				return null;
 			object o;
 			if (f.Value != null)
-				o = await f.Value.Evaluate(rpt, row);
+				o = await f.Value.Evaluate(rpt, row).ConfigureAwait(false);
 			else
 				o = row.Data[f.ColumnNumber];
 
@@ -109,14 +109,14 @@ namespace Majorsilence.Reporting.Rdl
 		{
 			if (row == null)
 				return Double.NaN;
-			return Convert.ToDouble(await Evaluate(rpt, row), NumberFormatInfo.InvariantInfo);
+			return Convert.ToDouble(await Evaluate(rpt, row).ConfigureAwait(false), NumberFormatInfo.InvariantInfo);
 		}
 		
 		public virtual async Task<decimal> EvaluateDecimal(Report rpt, Row row)
 		{
 			if (row == null)
 				return decimal.MinValue;
-			var value = await Evaluate(rpt, row);
+			var value = await Evaluate(rpt, row).ConfigureAwait(false);
 			if (value is double && double.IsNaN((double)value))
 				return decimal.MinValue;
 			return Convert.ToDecimal(value, NumberFormatInfo.InvariantInfo);
@@ -126,28 +126,28 @@ namespace Majorsilence.Reporting.Rdl
         {
             if (row == null)
                 return int.MinValue;
-            return Convert.ToInt32(await Evaluate(rpt, row), NumberFormatInfo.InvariantInfo);
+            return Convert.ToInt32(await Evaluate(rpt, row).ConfigureAwait(false), NumberFormatInfo.InvariantInfo);
         }
 
 		public virtual async Task<string> EvaluateString(Report rpt, Row row)
 		{
 			if (row == null)
 				return null;
-			return Convert.ToString(await Evaluate(rpt, row));
+			return Convert.ToString(await Evaluate(rpt, row).ConfigureAwait(false));
 		}
 
 		public virtual async Task<DateTime> EvaluateDateTime(Report rpt, Row row)
 		{
 			if (row == null)
 				return DateTime.MinValue;
-			return Convert.ToDateTime(await Evaluate(rpt, row));
+			return Convert.ToDateTime(await Evaluate(rpt, row).ConfigureAwait(false));
 		}
 
 		public virtual async Task<bool> EvaluateBoolean(Report rpt, Row row)
 		{
 			if (row == null)
 				return false;
-			return Convert.ToBoolean(await Evaluate(rpt, row));
+			return Convert.ToBoolean(await Evaluate(rpt, row).ConfigureAwait(false));
 		}
 	}
 }

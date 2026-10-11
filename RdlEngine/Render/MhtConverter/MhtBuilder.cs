@@ -349,7 +349,7 @@ namespace Majorsilence.Reporting.Rdl
 				Url = url;
             
 			_HtmlFile.WasAppended = false;
-			await _HtmlFile.Download();
+			await _HtmlFile.Download().ConfigureAwait(false);
 			if (!_HtmlFile.WasDownloaded)
 				throw new Exception(string.Format(Strings.MhtBuilder_Error_UnableDownload, Url, _HtmlFile.DownloadException.Message), _HtmlFile.DownloadException);
 		}
@@ -413,7 +413,7 @@ namespace Majorsilence.Reporting.Rdl
 		/// <returns>string representation of MHT file</returns>
 		public async Task<string> GetPageArchive()
 		{
-			return await GetPageArchive(string.Empty);
+			return await GetPageArchive(string.Empty).ConfigureAwait(false);
 		}
 
 		/// <summary>
@@ -424,10 +424,10 @@ namespace Majorsilence.Reporting.Rdl
 		/// <returns>string representation of MHT file</returns>
 		public async Task<string> GetPageArchive(string url)
 		{
-            await DownloadHtmlFile(url);
+            await DownloadHtmlFile(url).ConfigureAwait(false);
 
             // download all references
-            await _HtmlFile.DownloadExternalFiles(_AllowRecursion);
+            await _HtmlFile.DownloadExternalFiles(_AllowRecursion).ConfigureAwait(false);
 			
 			// build the Mht 
 			AppendMhtHeader(_HtmlFile);
@@ -445,7 +445,7 @@ namespace Majorsilence.Reporting.Rdl
 		/// <returns>the complete path of the Mht archive file that was generated</returns>
 		public async Task<string> SavePageArchive(string outputFilePath)
 		{
-			return await SavePageArchive(outputFilePath, string.Empty);
+			return await SavePageArchive(outputFilePath, string.Empty).ConfigureAwait(false);
 		}
 
 		/// <summary>
@@ -459,13 +459,13 @@ namespace Majorsilence.Reporting.Rdl
 		public async Task<string> SavePageArchive(string outputFilePath, string url)
 		{
 			ValidateFilename(outputFilePath, ".mht");
-            await DownloadHtmlFile(url);
+            await DownloadHtmlFile(url).ConfigureAwait(false);
         
 			_HtmlFile.DownloadPath = outputFilePath;
 			_HtmlFile.UseHtmlTitleAsFilename = true;
 
             // download all references
-            await _HtmlFile.DownloadExternalFiles(_AllowRecursion);
+            await _HtmlFile.DownloadExternalFiles(_AllowRecursion).ConfigureAwait(false);
             
 			// build the Mht 
 			AppendMhtHeader(_HtmlFile);

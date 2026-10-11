@@ -95,7 +95,7 @@ namespace Majorsilence.Reporting.Rdl
 		// Handle parsing of function in final pass
 		async override internal Task FinalPass()
 		{
-            await base.FinalPass();
+            await base.FinalPass().ConfigureAwait(false);
 
             if (this is Table)
             {   // Grids don't have any data responsibilities
@@ -139,11 +139,11 @@ namespace Majorsilence.Reporting.Rdl
 			}
 
 			if (_NoRows != null)
-                await _NoRows.FinalPass();
+                await _NoRows.FinalPass().ConfigureAwait(false);
 			if (_Filters != null)
-                await _Filters.FinalPass();
+                await _Filters.FinalPass().ConfigureAwait(false);
             if (_PageBreakCondition != null)
-                await _PageBreakCondition.FinalPass();
+                await _PageBreakCondition.FinalPass().ConfigureAwait(false);
 
             return;
 		}
@@ -165,7 +165,7 @@ namespace Majorsilence.Reporting.Rdl
 
 		async override internal Task Run(IPresent ip, Row row)
 		{
-            await base.Run(ip, row);
+            await base.Run(ip, row).ConfigureAwait(false);
 		}
 
 		internal void RunPageRegionBegin(Pages pgs)
@@ -193,10 +193,10 @@ namespace Majorsilence.Reporting.Rdl
 			{
 				string msg;
 				if (this.NoRows != null)
-					msg = await this.NoRows.EvaluateString(ip.Report(), null);
+					msg = await NoRows.EvaluateString(ip.Report(), null).ConfigureAwait(false);
 				else
 					msg = null;
-                await ip.DataRegionNoRows(this, msg);
+                await ip.DataRegionNoRows(this, msg).ConfigureAwait(false);
 				return false;
 			}
 
@@ -211,7 +211,7 @@ namespace Majorsilence.Reporting.Rdl
 
 			string msg;
 			if (this.NoRows != null)
-				msg = await this.NoRows.EvaluateString(pgs.Report, null);
+				msg = await NoRows.EvaluateString(pgs.Report, null).ConfigureAwait(false);
 			else
 				msg = null;
 
@@ -222,7 +222,7 @@ namespace Majorsilence.Reporting.Rdl
 			RunPageRegionBegin(pgs);				// still perform page break if needed
 
 			PageText pt = new PageText(msg);
-            await SetPagePositionAndStyle(pgs.Report, pt, null);
+            await SetPagePositionAndStyle(pgs.Report, pt, null).ConfigureAwait(false);
 
 			if (pt.SI.BackgroundImage != null)
 				pt.SI.BackgroundImage.H = pt.H;		//   and in the background image
@@ -267,12 +267,12 @@ namespace Majorsilence.Reporting.Rdl
 				List<Row> ar = new List<Row>();
 				foreach (Row r in data.Data)
 				{
-					if (await _Filters.Apply(rpt, r))
+					if (await _Filters.Apply(rpt, r).ConfigureAwait(false))
 						ar.Add(r);
 				}
                 ar.TrimExcess();
 				data.Data = ar;
-                await _Filters.ApplyFinalFilters(rpt, data, true);
+                await _Filters.ApplyFinalFilters(rpt, data, true).ConfigureAwait(false);
 
 				// Adjust the rowcount
 				int rCount = 0;

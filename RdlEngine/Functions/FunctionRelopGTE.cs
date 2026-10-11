@@ -31,11 +31,11 @@ namespace Majorsilence.Reporting.Rdl
 
 		public async Task<IExpr> ConstantOptimization()
 		{
-			_lhs = await _lhs.ConstantOptimization();
-			_rhs = await _rhs.ConstantOptimization();
-			if (await _lhs.IsConstant() && await _rhs.IsConstant())
+			_lhs = await _lhs.ConstantOptimization().ConfigureAwait(false);
+			_rhs = await _rhs.ConstantOptimization().ConfigureAwait(false);
+			if (await _lhs.IsConstant().ConfigureAwait(false) && await _rhs.IsConstant().ConfigureAwait(false))
 			{
-				bool b = await EvaluateBoolean(null, null);
+				bool b = await EvaluateBoolean(null, null).ConfigureAwait(false);
 				return new ConstantBoolean(b);
 			}
 
@@ -45,13 +45,13 @@ namespace Majorsilence.Reporting.Rdl
 		// Evaluate is for interpretation  (and is relatively slow)
 		public async Task<object> Evaluate(Report rpt, Row row)
 		{
-			return await EvaluateBoolean(rpt, row);
+			return await EvaluateBoolean(rpt, row).ConfigureAwait(false);
 		}
 
 		public async Task<bool> EvaluateBoolean(Report rpt, Row row)
 		{
-			object left = await _lhs.Evaluate(rpt, row);
-			object right = await _rhs.Evaluate(rpt, row);
+			object left = await _lhs.Evaluate(rpt, row).ConfigureAwait(false);
+			object right = await _rhs.Evaluate(rpt, row).ConfigureAwait(false);
 			if (Filter.ApplyCompare(_lhs.GetTypeCode(), left, right) >= 0)
 				return true;
 			else
@@ -75,7 +75,7 @@ namespace Majorsilence.Reporting.Rdl
 
 		public async Task<string> EvaluateString(Report rpt, Row row)
 		{
-			bool result = await EvaluateBoolean(rpt, row);
+			bool result = await EvaluateBoolean(rpt, row).ConfigureAwait(false);
 			return result.ToString();
 		}
 

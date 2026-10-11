@@ -49,7 +49,7 @@ namespace Majorsilence.Reporting.Rdl
 		{
 			foreach (TableCell tc in _Items)
 			{
-                await tc.FinalPass();
+                await tc.FinalPass().ConfigureAwait(false);
 			}
 			return;
 		}
@@ -58,7 +58,7 @@ namespace Majorsilence.Reporting.Rdl
 		{
 			foreach (TableCell tc in _Items)
 			{
-                await tc.Run(ip, row);
+                await tc.Run(ip, row).ConfigureAwait(false);
 			}
 			return ;
 		}
@@ -74,7 +74,7 @@ namespace Majorsilence.Reporting.Rdl
 
 			foreach (TableCell tc in _Items)
 			{
-                await tc.RunPage(pgs, row);
+                await tc.RunPage(pgs, row).ConfigureAwait(false);
 				if (maxpg != pgs.CurrentPage)
 				{	// a page break
 					if (maxpg.PageNumber < pgs.CurrentPage.PageNumber)

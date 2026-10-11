@@ -35,24 +35,24 @@ namespace Majorsilence.Reporting.Rdl
 
 		public async Task<IExpr> ConstantOptimization()
 		{
-			_lhs = await _lhs.ConstantOptimization();
-			_rhs = await _rhs.ConstantOptimization();
-			bool bLeftConst = await _lhs.IsConstant();
-			bool bRightConst = await _rhs.IsConstant();
+			_lhs = await _lhs.ConstantOptimization().ConfigureAwait(false);
+			_rhs = await _rhs.ConstantOptimization().ConfigureAwait(false);
+			bool bLeftConst = await _lhs.IsConstant().ConfigureAwait(false);
+			bool bRightConst = await _rhs.IsConstant().ConfigureAwait(false);
 			if (bLeftConst && bRightConst)
 			{
-				decimal d = await EvaluateDecimal(null, null);
+				decimal d = await EvaluateDecimal(null, null).ConfigureAwait(false);
 				return new ConstantDecimal(d);
 			}
 			else if (bRightConst)
 			{
-				decimal d = await _rhs.EvaluateDecimal(null, null);
+				decimal d = await _rhs.EvaluateDecimal(null, null).ConfigureAwait(false);
 				if (d == 0m)
 					return _lhs;
 			}
 			else if (bLeftConst)
 			{
-				decimal d = await _lhs.EvaluateDecimal(null, null);
+				decimal d = await _lhs.EvaluateDecimal(null, null).ConfigureAwait(false);
 				if (d == 0m)
 					return _rhs;
 			}
@@ -63,46 +63,46 @@ namespace Majorsilence.Reporting.Rdl
 		// Evaluate is for interpretation  (and is relatively slow)
 		public async Task<object> Evaluate(Report rpt, Row row)
 		{
-			return await EvaluateDecimal(rpt, row);
+			return await EvaluateDecimal(rpt, row).ConfigureAwait(false);
 		}
 		
 		public async Task<double> EvaluateDouble(Report rpt, Row row)
 		{
-			decimal result = await EvaluateDecimal(rpt, row);
+			decimal result = await EvaluateDecimal(rpt, row).ConfigureAwait(false);
 
 			return Convert.ToDouble(result);
 		}
 
         public async Task<int> EvaluateInt32(Report rpt, Row row)
         {
-            decimal result = await EvaluateDecimal(rpt, row);
+            decimal result = await EvaluateDecimal(rpt, row).ConfigureAwait(false);
 
             return Convert.ToInt32(result);
         }
 
 		public async Task<decimal> EvaluateDecimal(Report rpt, Row row)
 		{
-			decimal lhs = await _lhs.EvaluateDecimal(rpt, row);
-			decimal rhs = await _rhs.EvaluateDecimal(rpt, row);
+			decimal lhs = await _lhs.EvaluateDecimal(rpt, row).ConfigureAwait(false);
+			decimal rhs = await _rhs.EvaluateDecimal(rpt, row).ConfigureAwait(false);
 
 			return (decimal) (lhs+rhs);
 		}
 
 		public async Task<string> EvaluateString(Report rpt, Row row)
 		{
-			decimal result = await EvaluateDecimal(rpt, row);
+			decimal result = await EvaluateDecimal(rpt, row).ConfigureAwait(false);
 			return result.ToString();
 		}
 
 		public async Task<DateTime> EvaluateDateTime(Report rpt, Row row)
 		{
-			decimal result = await EvaluateDecimal(rpt, row);
+			decimal result = await EvaluateDecimal(rpt, row).ConfigureAwait(false);
 			return Convert.ToDateTime(result);
 		}
 
 		public async Task<bool> EvaluateBoolean(Report rpt, Row row)
 		{
-			decimal result = await EvaluateDecimal(rpt, row);
+			decimal result = await EvaluateDecimal(rpt, row).ConfigureAwait(false);
 			return Convert.ToBoolean(result);
 		}
 	}

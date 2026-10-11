@@ -40,7 +40,7 @@ namespace Majorsilence.Reporting.Rdl
 		// Evaluate is for interpretation  
 		public async Task<object> Evaluate(Report rpt, Row row)
 		{
-			return await EvaluateString(rpt, row);
+			return await EvaluateString(rpt, row).ConfigureAwait(false);
 		}
 		
 		public Task<double> EvaluateDouble(Report rpt, Row row)

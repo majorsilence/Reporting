@@ -435,7 +435,7 @@ namespace Majorsilence.Reporting.Rdl
 		public async Task Download()
 		{
 			Debug.Write("Downloading " + this._Url + "  ..");
-			await DownloadBytes();
+			await DownloadBytes().ConfigureAwait(false);
 			
 			if (_DownloadException == null)
 				Debug.WriteLine("OK");
@@ -459,7 +459,7 @@ namespace Majorsilence.Reporting.Rdl
 		/// </summary>
 		public async Task DownloadExternalFiles()
 		{
-			await this.DownloadExternalFiles(this.ExternalFilesFolder, false);
+			await DownloadExternalFiles(ExternalFilesFolder, false).ConfigureAwait(false);
 		}
 
 		/// <summary>
@@ -468,7 +468,7 @@ namespace Majorsilence.Reporting.Rdl
 		/// </summary>
 		public async Task DownloadExternalFiles(bool recursive)
 		{
-			await this.DownloadExternalFiles(this.ExternalFilesFolder, recursive);
+			await DownloadExternalFiles(ExternalFilesFolder, recursive).ConfigureAwait(false);
 		}
 
 		/// <summary>
@@ -511,7 +511,7 @@ namespace Majorsilence.Reporting.Rdl
 			if (!_WasDownloaded)
 			{
 				// HACK: async
-				Task.Run(async () => await Download()).GetAwaiter().GetResult();
+				Task.Run(async () => await Download().ConfigureAwait(false)).GetAwaiter().GetResult();
 			}
 			
 			if (!_WasDownloaded || _DownloadedBytes.Length <= 0)
@@ -662,7 +662,7 @@ namespace Majorsilence.Reporting.Rdl
 			// always download to memory first
 			try
 			{
-				_DownloadedBytes = await _Builder.WebClient.DownloadBytes(_Url);
+				_DownloadedBytes = await _Builder.WebClient.DownloadBytes(_Url).ConfigureAwait(false);
 				_WasDownloaded = true;
 			}
 			catch (WebException ex)
@@ -705,7 +705,7 @@ namespace Majorsilence.Reporting.Rdl
 				isNew = true;
 			}
 
-			await wf.Download();
+			await wf.Download().ConfigureAwait(false);
 			
 			if (isNew)
 			{
@@ -715,7 +715,7 @@ namespace Majorsilence.Reporting.Rdl
 				// if this is an HTML file, it has dependencies of its own;
 				// download them into a subfolder
 				if ((wf.IsHtml || wf.IsCss) && recursive)
-					await wf.DownloadExternalFiles(recursive);
+					await wf.DownloadExternalFiles(recursive).ConfigureAwait(false);
 			}
 		}
 
@@ -732,7 +732,7 @@ namespace Majorsilence.Reporting.Rdl
 			Debug.WriteLine("Downloading all external files collected from URL:");
 			Debug.WriteLine("    " + this.Url);
 			foreach (string key in fileCollection.Keys)
-				await DownloadExternalFile(fileCollection[key], targetFolder, recursive);
+				await DownloadExternalFile(fileCollection[key], targetFolder, recursive).ConfigureAwait(false);
 		}
 
 		/// <summary>

@@ -47,13 +47,13 @@ namespace Majorsilence.Reporting.Rdl
 		
 		async override internal Task FinalPass()
 		{
-            await _TableRows.FinalPass();
+            await _TableRows.FinalPass().ConfigureAwait(false);
 			return;
 		}
 
 		internal async Task Run(IPresent ip, Row row)
 		{
-            await _TableRows.Run(ip, row);
+            await _TableRows.Run(ip, row).ConfigureAwait(false);
 			return;
 		}
 
@@ -61,12 +61,12 @@ namespace Majorsilence.Reporting.Rdl
 		{
 
 			Page p = pgs.CurrentPage;
-			if (p.YOffset + await HeightOfRows(pgs, row) > pgs.BottomOfPage)
+			if (p.YOffset + await HeightOfRows(pgs, row).ConfigureAwait(false) > pgs.BottomOfPage)
 			{
 				p = OwnerTable.RunPageNew(pgs, p);
-                await OwnerTable.RunPageHeader(pgs, row, false, null);
+                await OwnerTable.RunPageHeader(pgs, row, false, null).ConfigureAwait(false);
 			}
-            await _TableRows.RunPage(pgs, row);
+            await _TableRows.RunPage(pgs, row).ConfigureAwait(false);
 
 			return;
 		}
@@ -79,7 +79,7 @@ namespace Majorsilence.Reporting.Rdl
 
 		internal async Task<float> HeightOfRows(Pages pgs, Row r)
 		{
-			return await _TableRows.HeightOfRows(pgs, r);
+			return await _TableRows.HeightOfRows(pgs, r).ConfigureAwait(false);
 		}
 
 		internal bool RepeatOnNewPage

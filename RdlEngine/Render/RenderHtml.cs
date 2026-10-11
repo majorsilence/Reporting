@@ -343,7 +343,7 @@ function findObject(id) {
 			string result = t;
 			if (a.Hyperlink != null)
 			{	// Handle a hyperlink
-				string url = await a.HyperLinkValue(this.r, r);
+				string url = await a.HyperLinkValue(this.r, r).ConfigureAwait(false);
 				if (tooltip == null)
 					result = String.Format("<a target=\"_top\" href=\"{0}\">{1}</a>", url, t);
 				else
@@ -361,7 +361,7 @@ function findObject(id) {
 					bool bFirst = !_Asp;		// ASP already have an argument
 					foreach (DrillthroughParameter dtp in a.Drill.DrillthroughParameters.Items)
 					{
-						if (!await dtp.OmitValue(this.r, r))
+						if (!await dtp.OmitValue(this.r, r).ConfigureAwait(false))
 						{
 							if (bFirst)
 							{	// First parameter - prefixed by '?'
@@ -388,7 +388,7 @@ function findObject(id) {
 			}
 			else if (a.BookmarkLink != null)
 			{	// Handle a bookmark
-				string bm = await a.BookmarkLinkValue(this.r, r);
+				string bm = await a.BookmarkLinkValue(this.r, r).ConfigureAwait(false);
 				if (tooltip == null)
 					result = String.Format("<a href=\"#{0}\">{1}</a>", bm, t);
 				else
@@ -453,12 +453,12 @@ function findObject(id) {
 
 		private async Task<string> CssAdd(Style s, ReportLink rl, Row row)
 		{
-			return await CssAdd(s, rl, row, false, float.MinValue, float.MinValue);
+			return await CssAdd(s, rl, row, false, float.MinValue, float.MinValue).ConfigureAwait(false);
 		}
 		
 		private async Task<string> CssAdd(Style s, ReportLink rl, Row row, bool bForceRelative)
 		{
-			return await CssAdd(s, rl, row, bForceRelative, float.MinValue, float.MinValue);
+			return await CssAdd(s, rl, row, bForceRelative, float.MinValue, float.MinValue).ConfigureAwait(false);
 		}
 		private async Task<string> CssAdd(Style s, ReportLink rl, Row row, bool bForceRelative, float h, float w)
 		{
@@ -467,9 +467,9 @@ function findObject(id) {
 			if (_Asp && prefix == "table#")
 				bForceRelative = true;
 
-			string position = await CssPosition(rl, row, bForceRelative, h, w);
+			string position = await CssPosition(rl, row, bForceRelative, h, w).ConfigureAwait(false);
 			if (s != null)
-				css = prefix + "{" + position + await s.GetCSS(this.r, row, true) + "}";
+				css = prefix + "{" + position + await s.GetCSS(r, row, true).ConfigureAwait(false) + "}";
 			else if (rl is Table || rl is Matrix)
 				css = prefix + "{" + position + "border-collapse:collapse;}";
 			else
@@ -537,7 +537,7 @@ function findObject(id) {
 			if (ri is List)
 			{
 				List l = ri as List;
-				sb.AppendFormat(NumberFormatInfo.InvariantInfo, "height: {0}pt; ", await l.HeightOfList(this.r, GetGraphics,row));
+				sb.AppendFormat(NumberFormatInfo.InvariantInfo, "height: {0}pt; ", await l.HeightOfList(r, GetGraphics,row).ConfigureAwait(false));
 			}
 			else if (ri is Matrix || ri is Table || ri is Image || ri is Chart)
 			{}
@@ -640,7 +640,7 @@ function findObject(id) {
 		{
 			string bodyCssId;
 			if (r.ReportDefinition.Body != null)
-				bodyCssId = await CssAdd(r.ReportDefinition.Body.Style, r.ReportDefinition.Body, null);		// add the style for the body
+				bodyCssId = await CssAdd(r.ReportDefinition.Body.Style, r.ReportDefinition.Body, null).ConfigureAwait(false);		// add the style for the body
 			else
 				bodyCssId = null;
 
@@ -746,7 +746,7 @@ function findObject(id) {
 
 		public async Task Textbox(Textbox tb, string t, Row row)
 		{
-            if (await tb.IsHtml(this.r, row))		// we leave the text as is (except to handle unicode) when request is to treat as html
+            if (await tb.IsHtml(r, row).ConfigureAwait(false))		// we leave the text as is (except to handle unicode) when request is to treat as html
             {                               //   this can screw up the generated HTML if not properly formed HTML
                 t = XmlUtil.HtmlAnsi(t);
             }
@@ -757,10 +757,10 @@ function findObject(id) {
 				t = t.Replace("\r\n", "<br/>").Replace("\r", "<br/>").Replace("\n", "<br/>");
 
 				// handle any specified bookmark
-				t = Bookmark(await tb.BookmarkValue(this.r, row), t);
+				t = Bookmark(await tb.BookmarkValue(r, row).ConfigureAwait(false), t);
 
 				// handle any specified actions
-				t = await Action(tb.Action, row, t, await tb.ToolTipValue(this.r, row));
+				t = await Action(tb.Action, row, t, await tb.ToolTipValue(r, row).ConfigureAwait(false)).ConfigureAwait(false);
 			}
 			// determine if we're in a tablecell
 			Type tp = tb.Parent.Parent.GetType();
@@ -789,7 +789,7 @@ function findObject(id) {
 			}
 			else
 			{	// Formatting must be specified
-				string cssName = await CssAdd(tb.Style, tb, row);	// get the style name for this item
+				string cssName = await CssAdd(tb.Style, tb, row).ConfigureAwait(false);	// get the style name for this item
 
 				tw.Write("<div class='{0}'>{1}</div>", cssName, t);
 			}
@@ -814,7 +814,7 @@ function findObject(id) {
 			}
 			else
 			{
-				string cssName = await CssAdd(d.Style, d, null);	// get the style name for this item
+				string cssName = await CssAdd(d.Style, d, null).ConfigureAwait(false);	// get the style name for this item
 				tw.Write("<div class='{0}'>{1}</div>", cssName, noRowsMsg);
 			}
 			return;
@@ -824,7 +824,7 @@ function findObject(id) {
 		public async Task<bool> ListStart(List l, Row r)
 		{
 			// identifiy reportitem it if necessary
-			string bookmark = await l.BookmarkValue(this.r, r);
+			string bookmark = await l.BookmarkValue(this.r, r).ConfigureAwait(false);
 			if (bookmark != null)	// 
 				tw.WriteLine("<div id=\"{0}\">", bookmark);		// can't use the table id since we're using for css style
 			return true;
@@ -832,14 +832,14 @@ function findObject(id) {
 
 		public async Task ListEnd(List l, Row r)
 		{
-			string bookmark = await l.BookmarkValue(this.r, r);
+			string bookmark = await l.BookmarkValue(this.r, r).ConfigureAwait(false);
 			if (bookmark != null)
 				tw.WriteLine("</div>"); 
 		}
 
 		public async Task ListEntryBegin(List l, Row r)
 		{
-			string cssName = await CssAdd(l.Style, l, r, true);	// get the style name for this item; force to be relative
+			string cssName = await CssAdd(l.Style, l, r, true).ConfigureAwait(false);	// get the style name for this item; force to be relative
 			tw.WriteLine();
 			tw.WriteLine("<div class={0}>", cssName);
 		}
@@ -853,7 +853,7 @@ function findObject(id) {
 		// Tables					// Report item table
 		public async Task<bool> TableStart(Table t, Row row)
 		{
-			string cssName = await CssAdd(t.Style, t, row);	// get the style name for this item
+			string cssName = await CssAdd(t.Style, t, row).ConfigureAwait(false);	// get the style name for this item
 
 			// Determine if report custom defn want this table to be sortable
 			if (IsTableSortable(t))
@@ -861,12 +861,12 @@ function findObject(id) {
 				this.bScriptTableSort = true;
 			}
 
-			string bookmark = await t.BookmarkValue(this.r, row);
+			string bookmark = await t.BookmarkValue(r, row).ConfigureAwait(false);
 			if (bookmark != null)
 				tw.WriteLine("<div id=\"{0}\">", bookmark);		// can't use the table id since we're using for css style
 
 			// Calculate the width of all the columns
-			int width = await t.WidthInPixels(this.r, row);
+			int width = await t.WidthInPixels(r, row).ConfigureAwait(false);
 			if (width <= 0)
 				tw.WriteLine("<table id='{0}'>", cssName);
 			else
@@ -903,7 +903,7 @@ function findObject(id) {
 
 		public async Task TableEnd(Table t, Row row)
 		{
-			string bookmark = await t.BookmarkValue(this.r, row);
+			string bookmark = await t.BookmarkValue(r, row).ConfigureAwait(false);
 			if (bookmark != null)
 				tw.WriteLine("</div>"); 
 			tw.WriteLine("</table>");
@@ -966,7 +966,7 @@ function findObject(id) {
 			if (v != null &&
 				v.Hidden != null)
 			{
-				bool bHide = await v.Hidden.EvaluateBoolean(this.r, row);
+				bool bHide = await v.Hidden.EvaluateBoolean(r, row).ConfigureAwait(false);
 				if (bHide)
 					rowStyle.Append("display:none;");
 			}
@@ -994,7 +994,7 @@ function findObject(id) {
 
 			ReportItem r = t.ReportItems.Items[0];
 
-			string cssName = await CssAdd(r.Style, r, row);	// get the style name for this item
+			string cssName = await CssAdd(r.Style, r, row).ConfigureAwait(false);	// get the style name for this item
 
 			tw.Write("<{0} id='{1}'", cellType, cssName);
 
@@ -1144,12 +1144,12 @@ function findObject(id) {
 
         public async Task<bool> MatrixStart(Matrix m, MatrixCellEntry[,] matrix, Row r, int headerRows, int maxRows, int maxCols)				// called first
 		{
-			string bookmark = await m.BookmarkValue(this.r, r);
+			string bookmark = await m.BookmarkValue(this.r, r).ConfigureAwait(false);
 			if (bookmark != null)
 				tw.WriteLine("<div id=\"{0}\">", bookmark);		// can't use the table id since we're using for css style
 
 			// output some of the table styles
-			string cssName = await CssAdd(m.Style, m, r);	// get the style name for this item
+			string cssName = await CssAdd(m.Style, m, r).ConfigureAwait(false);	// get the style name for this item
 
 			tw.WriteLine("<table id='{0}'>", cssName);
 			return true;
@@ -1168,9 +1168,9 @@ function findObject(id) {
 				return;
 			}
 
-			string cssName = await CssAdd(ri.Style, ri, r, false, h, w);	// get the style name for this item
+			string cssName = await CssAdd(ri.Style, ri, r, false, h, w).ConfigureAwait(false);	// get the style name for this item
 
-			await tw.WriteAsync($"<td id='{cssName}'");
+			await tw.WriteAsync($"<td id='{cssName}'").ConfigureAwait(false);
 			if (colSpan != 1)
 			{
 				tw.Write(" colspan={0}", colSpan);
@@ -1224,7 +1224,7 @@ function findObject(id) {
 		{
 			tw.Write("</table>");
 
-			string bookmark = await m.BookmarkValue(this.r, r);
+			string bookmark = await m.BookmarkValue(this.r, r).ConfigureAwait(false);
 			if (bookmark != null)
 				tw.WriteLine("</div>");		
 			return;
@@ -1261,14 +1261,14 @@ function findObject(id) {
 			// Create syntax in a string buffer
 			StringWriter sw = new StringWriter();
 
-			string bookmark = await c.BookmarkValue(this.r, r);
+			string bookmark = await c.BookmarkValue(this.r, r).ConfigureAwait(false);
 			if (bookmark != null)
 				sw.WriteLine("<div id=\"{0}\">", bookmark);		// can't use the table id since we're using for css style
 
-			string cssName = await CssAdd(c.Style, c, null);	// get the style name for this item
+			string cssName = await CssAdd(c.Style, c, null).ConfigureAwait(false);	// get the style name for this item
 
 			sw.Write("<img src=\"{0}\" class='{1}'", relativeName, cssName);
-			string tooltip = await c.ToolTipValue(this.r, r);
+			string tooltip = await c.ToolTipValue(this.r, r).ConfigureAwait(false);
 			if (tooltip != null)
 				sw.Write(" alt=\"{0}\"", tooltip);
 			if (c.Height != null)
@@ -1279,7 +1279,7 @@ function findObject(id) {
 			if (bookmark != null)
 				sw.Write("</div>");
 
-			tw.Write(await Action(c.Action, r, sw.ToString(), tooltip));
+			tw.Write(await Action(c.Action, r, sw.ToString(), tooltip).ConfigureAwait(false));
 			
 			return;
 		}
@@ -1318,32 +1318,32 @@ function findObject(id) {
                 }
                 else
                 {
-                    relativeName = "data:" + mimeType + ";base64," + await WriteImageToBase64String(ioin);
+                    relativeName = "data:" + mimeType + ";base64," + await WriteImageToBase64String(ioin).ConfigureAwait(false);
                 }
               
             }
             else if (InlineImages)
             {
-                relativeName = "data:" + mimeType + ";base64," + await WriteImageToBase64String(ioin);
+                relativeName = "data:" + mimeType + ";base64," + await WriteImageToBase64String(ioin).ConfigureAwait(false);
             }
             else
             {
-                relativeName = await WriteImageToFile(ioin, suffix);
+                relativeName = await WriteImageToFile(ioin, suffix).ConfigureAwait(false);
                 relativeName = FixupRelativeName(relativeName);
             }
 
             // Create syntax in a string buffer
             StringWriter sw = new StringWriter();
 
-            string bookmark = await i.BookmarkValue(this.r, r);
+            string bookmark = await i.BookmarkValue(this.r, r).ConfigureAwait(false);
             if (bookmark != null)
                 sw.WriteLine("<div id=\"{0}\">", bookmark);     // we're using for css style
 
-            string cssName = await CssAdd(i.Style, i, null);    // get the style name for this item
+            string cssName = await CssAdd(i.Style, i, null).ConfigureAwait(false);    // get the style name for this item
 
             sw.Write("<img src=\"{0}\" class='{1}'", relativeName, cssName);
 
-            string tooltip = await i.ToolTipValue(this.r, r);
+            string tooltip = await i.ToolTipValue(this.r, r).ConfigureAwait(false);
             if (tooltip != null)
                 sw.Write(" alt=\"{0}\"", tooltip);
             int h = i.Height == null ? -1 : i.Height.PixelsY;
@@ -1369,7 +1369,7 @@ function findObject(id) {
             if (bookmark != null)
                 sw.Write("</div>");
 
-            tw.Write(await Action(i.Action, r, sw.ToString(), tooltip));
+            tw.Write(await Action(i.Action, r, sw.ToString(), tooltip).ConfigureAwait(false));
         }
 
         private async Task<string> WriteImageToBase64String(Stream ioin)
@@ -1377,7 +1377,7 @@ function findObject(id) {
             using (MemoryStream ms = new MemoryStream())
             {
                 ioin.Position = 0;
-                await ioin.CopyToAsync(ms);
+                await ioin.CopyToAsync(ms).ConfigureAwait(false);
                 byte[] imageBytes = ms.ToArray();
                 return Convert.ToBase64String(imageBytes);
             }
@@ -1409,7 +1409,7 @@ function findObject(id) {
             }
             finally
             {
-                await io.FlushAsync();
+                await io.FlushAsync().ConfigureAwait(false);
                 io.Close();
             }
 
@@ -1444,7 +1444,7 @@ function findObject(id) {
 				height = l.Height == null? "0px": l.Height.CSS;
 				// width comes from the BorderWidth
 				if (s != null && s.BorderWidth != null && s.BorderWidth.Default != null)
-					width = await s.BorderWidth.Default.EvaluateString(this.r, r);
+					width = await s.BorderWidth.Default.EvaluateString(this.r, r).ConfigureAwait(false);
 				else
 					width = "1px";
 			}
@@ -1453,13 +1453,13 @@ function findObject(id) {
 				width = l.Width == null? "0px": l.Width.CSS;
 				// height comes from the BorderWidth
 				if (s != null && s.BorderWidth != null && s.BorderWidth.Default != null)
-					height = await s.BorderWidth.Default.EvaluateString(this.r, r);
+					height = await s.BorderWidth.Default.EvaluateString(this.r, r).ConfigureAwait(false);
 				else
 					height = "1px";
 			}
 
 			if (s != null && s.BorderColor != null && s.BorderColor.Default != null)
-				color = await s.BorderColor.Default.EvaluateString(this.r, r);
+				color = await s.BorderColor.Default.EvaluateString(this.r, r).ConfigureAwait(false);
 			else
 				color = "black";
 			
@@ -1469,9 +1469,9 @@ function findObject(id) {
 
 		public async Task<bool> RectangleStart(Rdl.Rectangle rect, Row r)
 		{
-			string cssName = await CssAdd(rect.Style, rect, r);	// get the style name for this item
+			string cssName = await CssAdd(rect.Style, rect, r).ConfigureAwait(false);	// get the style name for this item
 
-			string bookmark = await rect.BookmarkValue(this.r, r);
+			string bookmark = await rect.BookmarkValue(this.r, r).ConfigureAwait(false);
 			if (bookmark != null)
 				tw.WriteLine("<div id=\"{0}\">", bookmark);		// can't use the table id since we're using for css style
 
@@ -1488,7 +1488,7 @@ function findObject(id) {
 		public async Task RectangleEnd(Rdl.Rectangle rect, Row r)
 		{
 			tw.WriteLine("</tr></table>");
-			string bookmark = await rect.BookmarkValue(this.r, r);
+			string bookmark = await rect.BookmarkValue(this.r, r).ConfigureAwait(false);
 			if (bookmark != null)
 				tw.WriteLine("</div>"); 
 			return;
@@ -1497,11 +1497,11 @@ function findObject(id) {
 		// Subreport:  
 		public async Task Subreport(Subreport s, Row r)
 		{
-			string cssName = await CssAdd(s.Style, s, r);	// get the style name for this item
+			string cssName = await CssAdd(s.Style, s, r).ConfigureAwait(false);	// get the style name for this item
 
 			tw.WriteLine("<div class='{0}'>", cssName);
 
-            await s.ReportDefn.Run(this);
+            await s.ReportDefn.Run(this).ConfigureAwait(false);
 			
 			tw.WriteLine("</div>");
             return;

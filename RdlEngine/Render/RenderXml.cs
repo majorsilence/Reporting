@@ -54,7 +54,7 @@ namespace Majorsilence.Reporting.Rdl
 		{
 			ContainerIO cio = (ContainerIO) stkContainers.Pop();	// this pop should empty the stack
 			cio.WriteAttribute(">");
-			await tw.WriteLineAsync(cio.attribute_sb.ToString());
+			await tw.WriteLineAsync(cio.attribute_sb.ToString()).ConfigureAwait(false);
 			tw.WriteLine(cio.subelement_sb);
 			tw.WriteLine("</" + r.ReportDefinition.DataElementName + ">");
 
@@ -382,7 +382,7 @@ namespace Majorsilence.Reporting.Rdl
 
             PushContainer(s.DataElementName);
 
-            await s.ReportDefn.Run(this);
+            await s.ReportDefn.Run(this).ConfigureAwait(false);
 
 			PopContainer(s.DataElementName);
             return;

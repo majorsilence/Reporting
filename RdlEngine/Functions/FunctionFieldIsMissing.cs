@@ -43,22 +43,22 @@ namespace Majorsilence.Reporting.Rdl
 		// 
 		public override async Task<object> Evaluate(Report rpt, Row row)
 		{
-			return await EvaluateBoolean(rpt, row);
+			return await EvaluateBoolean(rpt, row).ConfigureAwait(false);
 		}
 		
 		public override async Task<double> EvaluateDouble(Report rpt, Row row)
 		{
-			return await EvaluateBoolean(rpt, row)? 1: 0;
+			return await EvaluateBoolean(rpt, row).ConfigureAwait(false) ? 1: 0;
 		}
 		
 		public override async Task<decimal> EvaluateDecimal(Report rpt, Row row)
 		{
-			return await EvaluateBoolean(rpt, row)? 1m: 0m;
+			return await EvaluateBoolean(rpt, row).ConfigureAwait(false) ? 1m: 0m;
 		}
 
 		public override async Task<string> EvaluateString(Report rpt, Row row)
 		{
-			return await EvaluateBoolean(rpt, row)? "True": "False";
+			return await EvaluateBoolean(rpt, row).ConfigureAwait(false) ? "True": "False";
 		}
 
 		public override Task<DateTime> EvaluateDateTime(Report rpt, Row row)
@@ -68,7 +68,7 @@ namespace Majorsilence.Reporting.Rdl
 
 		public override async Task<bool> EvaluateBoolean(Report rpt, Row row)
 		{
-			object o = await base.Evaluate(rpt, row);
+			object o = await base.Evaluate(rpt, row).ConfigureAwait(false);
 			if(o is double)
 				return double.IsNaN((double)o) ? true : false;
 			else

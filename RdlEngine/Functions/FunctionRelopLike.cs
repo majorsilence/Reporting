@@ -27,11 +27,11 @@ namespace Majorsilence.Reporting.Rdl
 
 		public async Task<IExpr> ConstantOptimization()
 		{
-			_lhs = await _lhs.ConstantOptimization();
-			_rhs = await _rhs.ConstantOptimization();
-			if (await _lhs.IsConstant() && await _rhs.IsConstant())
+			_lhs = await _lhs.ConstantOptimization().ConfigureAwait(false);
+			_rhs = await _rhs.ConstantOptimization().ConfigureAwait(false);
+			if (await _lhs.IsConstant().ConfigureAwait(false) && await _rhs.IsConstant().ConfigureAwait(false))
 			{
-				bool b = await EvaluateBoolean(null, null);
+				bool b = await EvaluateBoolean(null, null).ConfigureAwait(false);
 				return new ConstantBoolean(b);
 			}
 
@@ -40,13 +40,13 @@ namespace Majorsilence.Reporting.Rdl
 
 		public async Task<object> Evaluate(Report rpt, Row row)
 		{
-			return await EvaluateBoolean(rpt, row);
+			return await EvaluateBoolean(rpt, row).ConfigureAwait(false);
 		}
 
 		public async Task<bool> EvaluateBoolean(Report rpt, Row row)
 		{
-			string text = await _lhs.EvaluateString(rpt, row);
-			string pattern = await _rhs.EvaluateString(rpt, row);
+			string text = await _lhs.EvaluateString(rpt, row).ConfigureAwait(false);
+			string pattern = await _rhs.EvaluateString(rpt, row).ConfigureAwait(false);
 			return VBFunctions.Like(text, pattern);
 		}
 
@@ -67,7 +67,7 @@ namespace Majorsilence.Reporting.Rdl
 
 		public async Task<string> EvaluateString(Report rpt, Row row)
 		{
-			bool result = await EvaluateBoolean(rpt, row);
+			bool result = await EvaluateBoolean(rpt, row).ConfigureAwait(false);
 			return result.ToString();
 		}
 

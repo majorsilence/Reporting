@@ -55,7 +55,7 @@ namespace Majorsilence.Reporting.Rdl
 		{
 			foreach (ReportClass rc in _Items)
 			{
-                await rc.FinalPass();
+                await rc.FinalPass().ConfigureAwait(false);
 			}
 			return;
 		}

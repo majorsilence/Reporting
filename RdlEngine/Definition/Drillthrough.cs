@@ -45,7 +45,7 @@ namespace Majorsilence.Reporting.Rdl
 		async override internal Task FinalPass()
 		{
 			if (_DrillthroughParameters != null)
-                await _DrillthroughParameters.FinalPass();
+                await _DrillthroughParameters.FinalPass().ConfigureAwait(false);
 			return;
 		}
 

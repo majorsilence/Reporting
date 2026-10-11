@@ -38,7 +38,7 @@ namespace Majorsilence.Reporting.Rdl
 		// Evaluate is for interpretation  (and is relatively slow)
 		public async Task<object> Evaluate(Report rpt, Row row)
 		{
-			double d = await EvaluateDouble(rpt, row);
+			double d = await EvaluateDouble(rpt, row).ConfigureAwait(false);
 			if (d.CompareTo(double.NaN) == 0)
 				return null;
 			return (object) d;
@@ -61,7 +61,7 @@ namespace Majorsilence.Reporting.Rdl
 			double temp;
 			foreach (Row r in re)
 			{
-				temp = await _Expr.EvaluateDouble(rpt, r);
+				temp = await _Expr.EvaluateDouble(rpt, r).ConfigureAwait(false);
 				if (temp.CompareTo(double.NaN) != 0)
 				{
 					sum += temp;
@@ -83,7 +83,7 @@ namespace Majorsilence.Reporting.Rdl
 		
 		public async Task<decimal> EvaluateDecimal(Report rpt, Row row)
 		{
-			double d = await EvaluateDouble(rpt, row);
+			double d = await EvaluateDouble(rpt, row).ConfigureAwait(false);
 			if (d.CompareTo(double.NaN) == 0)
 				return decimal.MinValue;
 
@@ -92,7 +92,7 @@ namespace Majorsilence.Reporting.Rdl
 
         public async Task<int> EvaluateInt32(Report rpt, Row row)
         {
-            double d = await EvaluateDouble(rpt, row);
+            double d = await EvaluateDouble(rpt, row).ConfigureAwait(false);
             if (d.CompareTo(double.NaN) == 0)
                 return int.MinValue;
 
@@ -101,7 +101,7 @@ namespace Majorsilence.Reporting.Rdl
 
 		public async Task<string> EvaluateString(Report rpt, Row row)
 		{
-			double result = await EvaluateDouble(rpt, row);
+			double result = await EvaluateDouble(rpt, row).ConfigureAwait(false);
 			if (result.CompareTo(double.NaN) == 0)
 				return null;
 			return Convert.ToString(result);
@@ -109,7 +109,7 @@ namespace Majorsilence.Reporting.Rdl
 
 		public async Task<DateTime> EvaluateDateTime(Report rpt, Row row)
 		{
-			object result = await Evaluate(rpt, row);
+			object result = await Evaluate(rpt, row).ConfigureAwait(false);
 			return Convert.ToDateTime(result);
 		}
 		private ODouble GetValue(Report rpt)

@@ -160,24 +160,24 @@ namespace Majorsilence.Reporting.Rdl
 		async override internal Task FinalPass()
 		{
 			if (_MajorInterval != null)
-                await _MajorInterval.FinalPass();
+                await _MajorInterval.FinalPass().ConfigureAwait(false);
 			if (_MinorInterval != null)
-                await _MinorInterval.FinalPass();
+                await _MinorInterval.FinalPass().ConfigureAwait(false);
 			if (_Max != null)
-                await _Max.FinalPass();
+                await _Max.FinalPass().ConfigureAwait(false);
 			if (_Min != null)
-                await _Min.FinalPass();
+                await _Min.FinalPass().ConfigureAwait(false);
 			if (_Style != null)
-                await _Style.FinalPass();
+                await _Style.FinalPass().ConfigureAwait(false);
 			if (_Title != null)
-                await _Title.FinalPass();
+                await _Title.FinalPass().ConfigureAwait(false);
 			// 20022008 AJM GJL - Second Y axis
             if (_Title2 != null)
-                await _Title2.FinalPass();
+                await _Title2.FinalPass().ConfigureAwait(false);
 			if (_MajorGridLines != null)
-                await _MajorGridLines.FinalPass();
+                await _MajorGridLines.FinalPass().ConfigureAwait(false);
 			if (_MinorGridLines != null)
-                await _MinorGridLines.FinalPass();
+                await _MinorGridLines.FinalPass().ConfigureAwait(false);
 			return;
 		}
 
@@ -287,14 +287,14 @@ namespace Majorsilence.Reporting.Rdl
 		{
 			if (_Max == null)
 				return (double)int.MinValue;
-			return await _Max.EvaluateDouble(r, row);
+			return await _Max.EvaluateDouble(r, row).ConfigureAwait(false);
 		}
 
 		internal async Task<double> MinEval(Report r, Row row)
 		{
 			if (_Min == null)
                 return (double)int.MinValue;
-			return await _Min.EvaluateDouble(r, row);
+			return await _Min.EvaluateDouble(r, row).ConfigureAwait(false);
 		}
         //WP 12 may 2008 -- set up month gridlines for report
         internal bool Month

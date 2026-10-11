@@ -47,42 +47,42 @@ namespace Majorsilence.Reporting.Rdl
 		// Evaluate the value for the expression
 		public async Task<object> Evaluate(Report rpt, Row row)
 		{
-			return await t.Evaluate(rpt, row);
+			return await t.Evaluate(rpt, row).ConfigureAwait(false);
 		}
 		
 		public async Task<double> EvaluateDouble(Report rpt, Row row)
 		{
-			object result = await Evaluate(rpt, row);
+			object result = await Evaluate(rpt, row).ConfigureAwait(false);
 			return Convert.ToDouble(result);
 		}
 		
 		public async Task<decimal> EvaluateDecimal(Report rpt, Row row)
 		{
-			object result = await Evaluate(rpt, row);
+			object result = await Evaluate(rpt, row).ConfigureAwait(false);
 			return Convert.ToDecimal(result);
 		}
 
         public async Task<int> EvaluateInt32(Report rpt, Row row)
         {
-            object result = await Evaluate(rpt, row);
+            object result = await Evaluate(rpt, row).ConfigureAwait(false);
             return Convert.ToInt32(result);
         }
 
 		public async Task<string> EvaluateString(Report rpt, Row row)
 		{
-			object result = await Evaluate(rpt, row);
+			object result = await Evaluate(rpt, row).ConfigureAwait(false);
 			return result.ToString();
 		}
 
 		public async Task<DateTime> EvaluateDateTime(Report rpt, Row row)
 		{
-			object result = await Evaluate(rpt, row);
+			object result = await Evaluate(rpt, row).ConfigureAwait(false);
 			return Convert.ToDateTime(result);
 		}
 
 		public async Task<bool> EvaluateBoolean(Report rpt, Row row)
 		{
-			object result = await Evaluate(rpt, row);
+			object result = await Evaluate(rpt, row).ConfigureAwait(false);
 			return Convert.ToBoolean(result);
 		}
 	}

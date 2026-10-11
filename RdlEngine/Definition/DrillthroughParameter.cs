@@ -63,9 +63,9 @@ namespace Majorsilence.Reporting.Rdl
 		async override internal Task FinalPass()
 		{
 			if (_Value != null)
-                await _Value.FinalPass();
+                await _Value.FinalPass().ConfigureAwait(false);
 			if (_Omit != null)
-                await _Omit.FinalPass();
+                await _Omit.FinalPass().ConfigureAwait(false);
 			return;
 		}
 
@@ -86,7 +86,7 @@ namespace Majorsilence.Reporting.Rdl
 			if (_Value == null)
 				return "";
 
-			return await _Value.EvaluateString(rpt, r);
+			return await _Value.EvaluateString(rpt, r).ConfigureAwait(false);
 		}
 
 		internal Expression Omit
@@ -100,7 +100,7 @@ namespace Majorsilence.Reporting.Rdl
 			if (_Omit == null)
 				return false;
 
-			return await _Omit.EvaluateBoolean(rpt, r);
+			return await _Omit.EvaluateBoolean(rpt, r).ConfigureAwait(false);
 		}
 	}
 }

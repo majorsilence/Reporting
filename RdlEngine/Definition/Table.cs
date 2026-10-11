@@ -152,29 +152,29 @@ namespace Majorsilence.Reporting.Rdl
 
 		async override internal Task FinalPass()
 		{
-            await base.FinalPass();
+            await base.FinalPass().ConfigureAwait(false);
 			float totalHeight=0;
 
 			if (_TableColumns != null)
-                await _TableColumns.FinalPass();
+                await _TableColumns.FinalPass().ConfigureAwait(false);
 			if (_Header != null)
 			{
-                await _Header.FinalPass();
+                await _Header.FinalPass().ConfigureAwait(false);
 				totalHeight += _Header.TableRows.DefnHeight();
 			}
 			if (_TableGroups != null)
 			{
-                await _TableGroups.FinalPass();
+                await _TableGroups.FinalPass().ConfigureAwait(false);
 				totalHeight += _TableGroups.DefnHeight();
 			}
 			if (_Details != null)
 			{
-                await _Details.FinalPass();
+                await _Details.FinalPass().ConfigureAwait(false);
 				totalHeight += _Details.TableRows.DefnHeight();
 			}
 			if (_Footer != null)
 			{
-                await _Footer.FinalPass();
+                await _Footer.FinalPass().ConfigureAwait(false);
 				totalHeight += _Footer.TableRows.DefnHeight();
 			}
 
@@ -194,14 +194,14 @@ namespace Majorsilence.Reporting.Rdl
             if (_IsGrid)
                 wc.Data = Rows.CreateOneRow(r);
             else
-			    wc.Data = await GetFilteredData(r, row);
+			    wc.Data = await GetFilteredData(r, row).ConfigureAwait(false);
 
-			if (!await AnyRows(ip, wc.Data))		// if no rows return
+			if (!await AnyRows(ip, wc.Data).ConfigureAwait(false))		// if no rows return
 				return;                 //   nothing left to do
 
-            await RunPrep(r, row, wc);
+            await RunPrep(r, row, wc).ConfigureAwait(false);
 
-			if (!await ip.TableStart(this, row))
+			if (!await ip.TableStart(this, row).ConfigureAwait(false))
 				return;						// render doesn't want to continue
 
 			if (_TableColumns != null)
@@ -212,16 +212,16 @@ namespace Majorsilence.Reporting.Rdl
 			{
 				ip.TableHeaderStart(_Header, row);
 				Row frow = wc.Data.Data.Count > 0?  wc.Data.Data[0]: null;
-                await _Header.Run(ip, frow);
+                await _Header.Run(ip, frow).ConfigureAwait(false);
 				ip.TableHeaderEnd(_Header, row);
 			}
 						   
 			// Body
 			ip.TableBodyStart(this, row);
 			if (wc.RecursiveGroup != null)
-                await RunRecursiveGroups(ip, wc);
+                await RunRecursiveGroups(ip, wc).ConfigureAwait(false);
 			else
-                await RunGroups(ip, wc.Groups, wc);
+                await RunGroups(ip, wc.Groups, wc).ConfigureAwait(false);
 			ip.TableBodyEnd(this, row);
 
 			// Footer
@@ -229,11 +229,11 @@ namespace Majorsilence.Reporting.Rdl
 			{
 				ip.TableFooterStart(_Footer, row);
 				Row lrow = wc.Data.Data.Count > 0?  wc.Data.Data[wc.Data.Data.Count-1]: null;
-                await _Footer.Run(ip, lrow);
+                await _Footer.Run(ip, lrow).ConfigureAwait(false);
 				ip.TableFooterEnd(_Footer, row);
 			}
 
-            await ip.TableEnd(this, row);
+            await ip.TableEnd(this, row).ConfigureAwait(false);
 			RemoveValue(r);
 
 			return;
@@ -242,21 +242,21 @@ namespace Majorsilence.Reporting.Rdl
 		async override internal Task RunPage(Pages pgs, Row row)
 		{	
 			Report r = pgs.Report;
-			if (await IsHidden(r, row))
+			if (await IsHidden(r, row).ConfigureAwait(false))
 				return;
 
 			TableWorkClass wc = GetValue(r);
             if (_IsGrid)
                 wc.Data = Rows.CreateOneRow(r);
             else
-                wc.Data = await GetFilteredData(r, row);
+                wc.Data = await GetFilteredData(r, row).ConfigureAwait(false);
 
 			SetPagePositionBegin(pgs);
 
-			if (!await AnyRowsPage(pgs, wc.Data))		// if no rows return
+			if (!await AnyRowsPage(pgs, wc.Data).ConfigureAwait(false))		// if no rows return
 				return;                     //   nothing left to do
 
-            await RunPrep(r, row, wc);
+            await RunPrep(r, row, wc).ConfigureAwait(false);
 
 			RunPageRegionBegin(pgs);
 
@@ -264,20 +264,20 @@ namespace Majorsilence.Reporting.Rdl
 			p.YOffset += this.RelativeY(r);
 
             // Calculate the xpositions of the columns
-            await TableColumns.CalculateXPositions(r, GetOffsetCalc(r) + LeftCalc(r), row);
+            await TableColumns.CalculateXPositions(r, GetOffsetCalc(r) + LeftCalc(r), row).ConfigureAwait(false);
 
-            await RunPageHeader(pgs, wc.Data.Data[0], true, null);
+            await RunPageHeader(pgs, wc.Data.Data[0], true, null).ConfigureAwait(false);
 
             if (wc.RecursiveGroup != null)
             {
-                await RunRecursiveGroupsPage(pgs, wc);
+                await RunRecursiveGroupsPage(pgs, wc).ConfigureAwait(false);
             }
             else
             {
                 float groupHeight = 0;
                 if (wc.Data.Data.Count > 0 && _Footer != null)
-                    groupHeight = await _Footer.HeightOfRows(pgs, wc.Data.Data[0]);
-                await RunGroupsPage(pgs, wc, wc.Groups, wc.Data.Data.Count - 1, groupHeight);
+                    groupHeight = await _Footer.HeightOfRows(pgs, wc.Data.Data[0]).ConfigureAwait(false);
+                await RunGroupsPage(pgs, wc, wc.Groups, wc.Data.Data.Count - 1, groupHeight).ConfigureAwait(false);
             }
 
 		    // Footer
@@ -285,7 +285,7 @@ namespace Majorsilence.Reporting.Rdl
             {
                 // Row == null means the inital/last page
                 Row lRow = wc.Data.Data.Count > 0 ? wc.Data.Data[wc.Data.Data.Count - 1] : null;
-                await RunPageFooter(pgs, lRow, true);
+                await RunPageFooter(pgs, lRow, true).ConfigureAwait(false);
             }
 
             // dst, use the code above
@@ -316,12 +316,12 @@ namespace Majorsilence.Reporting.Rdl
             if (_Footer != null && (_Footer.RepeatOnNewPage || bLast))
             {
                 Page p = pgs.CurrentPage;
-                if (p.YOffset + await _Footer.HeightOfRows(pgs, row) > pgs.BottomOfPage)
+                if (p.YOffset + await _Footer.HeightOfRows(pgs, row).ConfigureAwait(false) > pgs.BottomOfPage)
                 {
                     p = RunPageNew(pgs, p);
-                    await RunPageHeader(pgs, row, false, null);
+                    await RunPageHeader(pgs, row, false, null).ConfigureAwait(false);
                 }
-                await _Footer.RunPage(pgs, row);                
+                await _Footer.RunPage(pgs, row).ConfigureAwait(false);                
             }
         }
 
@@ -331,7 +331,7 @@ namespace Majorsilence.Reporting.Rdl
             float FooterHeight = 0;
 
             if (Footer != null && Footer.RepeatOnNewPage)
-                FooterHeight += await Footer.HeightOfRows(pgs, row);
+                FooterHeight += await Footer.HeightOfRows(pgs, row).ConfigureAwait(false);
 
             // Need add calculation for group footer which show on every page
             return FooterHeight;
@@ -344,7 +344,7 @@ namespace Majorsilence.Reporting.Rdl
 
 			if (_Header != null && (_Header.RepeatOnNewPage || bFirst))
 			{
-                await _Header.RunPage(pgs, frow);
+                await _Header.RunPage(pgs, frow).ConfigureAwait(false);
 				if (isEmpty)
 					pgs.CurrentPage.SetEmpty();		// Consider this empty of data
 			}
@@ -367,7 +367,7 @@ namespace Majorsilence.Reporting.Rdl
 				{
 					if (tg.Header.RepeatOnNewPage)
 					{
-                        await tg.Header.RunPage(pgs, frow);
+                        await tg.Header.RunPage(pgs, frow).ConfigureAwait(false);
 					}
 				}
 			}
@@ -402,8 +402,8 @@ namespace Majorsilence.Reporting.Rdl
 
 				wc.Data = new Rows(rpt, _TableGroups, gr, srt);
 				wc.Data.Data = saveData;
-				await wc.Data.SortAsync();
-                await PrepGroups(rpt, wc);
+				await wc.Data.SortAsync().ConfigureAwait(false);
+                await PrepGroups(rpt, wc).ConfigureAwait(false);
 			}
 
 			// If we haven't formed any groups then form one with all rows
@@ -431,7 +431,7 @@ namespace Majorsilence.Reporting.Rdl
 
 			wc.Data.CurrentGroups = currentGroups;
 
-			await SortGroups(rpt, wc.Groups, wc);
+			await SortGroups(rpt, wc.Groups, wc).ConfigureAwait(false);
 		}
 
 		private async Task SortGroups(Report rpt, List<GroupEntry> groupEntries, TableWorkClass wc)
@@ -440,14 +440,14 @@ namespace Majorsilence.Reporting.Rdl
 			if (fge.Sort != null)
 			{
 				RunGroupsSetGroups(rpt, wc, groupEntries);
-				await GroupEntrySort.SortAsync(rpt, wc, groupEntries);
+				await GroupEntrySort.SortAsync(rpt, wc, groupEntries).ConfigureAwait(false);
 			}
 
 			// drill down into nested groups
 			foreach (GroupEntry ge in groupEntries)
 			{
 				if (ge.NestedGroup.Count > 0)
-					await SortGroups(rpt, ge.NestedGroup, wc);
+					await SortGroups(rpt, ge.NestedGroup, wc).ConfigureAwait(false);
 			}
 		}
 
@@ -508,7 +508,7 @@ namespace Majorsilence.Reporting.Rdl
 				if (gea.Count != 1)		// Limitiation of implementation
 					throw new Exception(Strings.Table_Error_RecursiveGroupsMustOnlyGroupDefinition);
 
-                await PrepRecursiveGroup(rpt, wc);	// only one group and it's recursive: optimization 
+                await PrepRecursiveGroup(rpt, wc).ConfigureAwait(false);	// only one group and it's recursive: optimization 
 				return;
 			}
 
@@ -538,7 +538,7 @@ namespace Majorsilence.Reporting.Rdl
 				foreach (GroupExpression ge in gea)
 				{
 					if (((Grouping)(ge.Parent.Parent)).ParentGroup == null)	
-						grpValues[i++] = await ge.Expression.Evaluate(rpt, row);
+						grpValues[i++] = await ge.Expression.Evaluate(rpt, row).ConfigureAwait(false);
 					else
 						grpValues[i++] = null;	// Want all the parentGroup to evaluate equal
 				}
@@ -633,7 +633,7 @@ namespace Majorsilence.Reporting.Rdl
 				r.GroupEntry.EndRow = iRow;
 
 				// pull out all the rows that match this value
-				int iMainRow = await rc.BinarySearchAsync(odata, r);
+				int iMainRow = await rc.BinarySearchAsync(odata, r).ConfigureAwait(false);
 				if (iMainRow < 0)
 				{
 					for (int i=0; i <= r.Level+1 && i < ges.Count; i++)
@@ -648,12 +648,12 @@ namespace Majorsilence.Reporting.Rdl
 
 				// look backward for starting row; 
 				//   in case of duplicates, BinarySearch can land on any of the rows
-                object cmpvalue = await groupExpr.Evaluate(rpt, r);
+                object cmpvalue = await groupExpr.Evaluate(rpt, r).ConfigureAwait(false);
 
 				int sRow = iMainRow-1;
 				while (sRow >= 0)
 				{
-					object v = await parentExpr.Evaluate(rpt, odata[sRow]);
+					object v = await parentExpr.Evaluate(rpt, odata[sRow]).ConfigureAwait(false);
 					if (Filter.ApplyCompare(tc, cmpvalue, v) != 0)
 						break;
 					sRow--;
@@ -663,7 +663,7 @@ namespace Majorsilence.Reporting.Rdl
 				int eRow = iMainRow+1;
 				while (eRow < odata.Count)
 				{
-					object v = await parentExpr.Evaluate(rpt, odata[eRow]);
+					object v = await parentExpr.Evaluate(rpt, odata[eRow]).ConfigureAwait(false);
 					if (Filter.ApplyCompare(tc, cmpvalue, v) != 0)
 						break;
 					eRow++;
@@ -739,23 +739,23 @@ namespace Majorsilence.Reporting.Rdl
 							wc.GroupNestCount = RunGroupsCount(ge.NestedGroup, 0);
 						else
 							wc.GroupNestCount = (ge.EndRow - ge.StartRow + 1) * DetailsCount;
-                        await tg.Header.Run(ip, wc.Data.Data[ge.StartRow]);
+                        await tg.Header.Run(ip, wc.Data.Data[ge.StartRow]).ConfigureAwait(false);
 						wc.GroupNestCount = 0;
 					}
 				}
 				// Handle the nested groups if any
 				if (ge.NestedGroup.Count > 0)
-                    await RunGroups(ip, ge.NestedGroup, wc);
+                    await RunGroups(ip, ge.NestedGroup, wc).ConfigureAwait(false);
 				// If no nested groups then handle the detail rows for the group
 				else if (_Details != null)
 				{
 					if (ge.Group != null &&
 						ge.Group.Parent as TableGroup == null)
 					{   // Group defined on table; means that Detail rows only put out once per group
-                        await _Details.Run(ip, wc.Data, ge.StartRow, ge.StartRow);
+                        await _Details.Run(ip, wc.Data, ge.StartRow, ge.StartRow).ConfigureAwait(false);
 					}
 					else
-                        await _Details.Run(ip, wc.Data, ge.StartRow, ge.EndRow);
+                        await _Details.Run(ip, wc.Data, ge.StartRow, ge.EndRow).ConfigureAwait(false);
 				}
 
 				// Do the group footer
@@ -765,7 +765,7 @@ namespace Majorsilence.Reporting.Rdl
 					{
 						TableGroup tg = ge.Group.Parent as TableGroup;	// detail groups will result in null
 						if (tg != null && tg.Footer != null)
-                            await tg.Footer.Run(ip, wc.Data.Data[ge.EndRow]);
+                            await tg.Footer.Run(ip, wc.Data.Data[ge.EndRow]).ConfigureAwait(false);
 					}
 					ip.GroupingInstanceEnd(ge.Group);
 				}
@@ -799,10 +799,10 @@ namespace Majorsilence.Reporting.Rdl
 					TableGroup tg = ge.Group.Parent as TableGroup;
                      //   if (ge.Group.PageBreakAtStart && !pgs.CurrentPage.IsEmpty())
 					 // Add check PageBreakCondition not only PageBreakAtStart
-                    if (ge.Group.PageBreakAtStart && await ge.Group.PageBreakCondition(rpt, wc.Data.Data[ge.StartRow], ge.Group.PageBreakAtStart) && !pgs.CurrentPage.IsEmpty())
+                    if (ge.Group.PageBreakAtStart && await ge.Group.PageBreakCondition(rpt, wc.Data.Data[ge.StartRow], ge.Group.PageBreakAtStart).ConfigureAwait(false) && !pgs.CurrentPage.IsEmpty())
                     {
 						RunPageNew(pgs, pgs.CurrentPage);
-                        await RunPageHeader(pgs, wc.Data.Data[ge.StartRow], false, tg);
+                        await RunPageHeader(pgs, wc.Data.Data[ge.StartRow], false, tg).ConfigureAwait(false);
 					}
 
 					if (tg != null && tg.Header != null)
@@ -813,11 +813,11 @@ namespace Majorsilence.Reporting.Rdl
 						else
 							wc.GroupNestCount = (ge.EndRow - ge.StartRow + 1) * DetailsCount;
 
-                        await tg.Header.RunPage(pgs, wc.Data.Data[ge.StartRow]);
+                        await tg.Header.RunPage(pgs, wc.Data.Data[ge.StartRow]).ConfigureAwait(false);
 						wc.GroupNestCount = 0;
 					}
 				}
-				float footerHeight = await RunGroupsFooterHeight(pgs, wc, ge);
+				float footerHeight = await RunGroupsFooterHeight(pgs, wc, ge).ConfigureAwait(false);
 
 
                 if (ge.EndRow == endRow && (  Footer != null ? !Footer.RepeatOnNewPage: true))
@@ -827,18 +827,18 @@ namespace Majorsilence.Reporting.Rdl
       
 				// Handle the nested groups if any
 				if (ge.NestedGroup.Count > 0)
-                    await RunGroupsPage(pgs, wc, ge.NestedGroup, ge.EndRow, footerHeight);
+                    await RunGroupsPage(pgs, wc, ge.NestedGroup, ge.EndRow, footerHeight).ConfigureAwait(false);
 				// If no nested groups then handle the detail rows for the group
 				else if (_Details != null)
 				{
 					if (ge.Group != null &&
 						ge.Group.Parent as TableGroup == null)
 					{   // Group defined on table; means that Detail rows only put out once per group
-                        await _Details.RunPage(pgs, wc.Data, ge.StartRow, ge.StartRow, footerHeight);
+                        await _Details.RunPage(pgs, wc.Data, ge.StartRow, ge.StartRow, footerHeight).ConfigureAwait(false);
 					}
 					else
 					{
-                        await _Details.RunPage(pgs, wc.Data, ge.StartRow, ge.EndRow, footerHeight);
+                        await _Details.RunPage(pgs, wc.Data, ge.StartRow, ge.EndRow, footerHeight).ConfigureAwait(false);
 					}
 				}
 				else	// When no details we need to figure out whether any more fits on a page
@@ -847,7 +847,7 @@ namespace Majorsilence.Reporting.Rdl
 					if (p.YOffset + footerHeight > pgs.BottomOfPage) //	Do we need new page to fit footer?
 					{
 						p = RunPageNew(pgs, p);
-                        await RunPageHeader(pgs, wc.Data.Data[ge.EndRow], false, null);
+                        await RunPageHeader(pgs, wc.Data.Data[ge.EndRow], false, null).ConfigureAwait(false);
 					}
 				}
 
@@ -856,12 +856,12 @@ namespace Majorsilence.Reporting.Rdl
 				{
 					TableGroup tg = ge.Group.Parent as TableGroup;	// detail groups will result in null
 					if (tg != null && tg.Footer != null)
-                        await tg.Footer.RunPage(pgs, wc.Data.Data[ge.EndRow]);
+                        await tg.Footer.RunPage(pgs, wc.Data.Data[ge.EndRow]).ConfigureAwait(false);
 
 					if (ge.Group.PageBreakAtEnd && !pgs.CurrentPage.IsEmpty())
 					{
 						RunPageNew(pgs, pgs.CurrentPage);
-                        await RunPageHeader(pgs, wc.Data.Data[ge.StartRow], false, tg);
+                        await RunPageHeader(pgs, wc.Data.Data[ge.StartRow], false, tg).ConfigureAwait(false);
 					}
 				}
 
@@ -878,7 +878,7 @@ namespace Majorsilence.Reporting.Rdl
 			if (tg == null || tg.Footer == null)
 				return 0;
 
-			return await tg.Footer.HeightOfRows(pgs, wc.Data.Data[ge.EndRow]);
+			return await tg.Footer.HeightOfRows(pgs, wc.Data.Data[ge.EndRow]).ConfigureAwait(false);
 		}
 
         private int RunGroupsCount(List<GroupEntry> groupEntries, int count)
@@ -935,12 +935,12 @@ namespace Majorsilence.Reporting.Rdl
 				{
 					bHeader = false;
 					if (header != null)
-                        await header.Run(ip, r);
+                        await header.Run(ip, r).ConfigureAwait(false);
 				}
 
 				if (_Details != null)
 				{
-                    await _Details.Run(ip, wc.Data, iRow, iRow);
+                    await _Details.Run(ip, wc.Data, iRow, iRow).ConfigureAwait(false);
 				}
 
 				// determine need for group headers and/or footers
@@ -950,14 +950,14 @@ namespace Majorsilence.Reporting.Rdl
 					if (r.Level > r2.Level)
 					{
 						if (footer != null)
-                            await footer.Run(ip, r);
+                            await footer.Run(ip, r).ConfigureAwait(false);
 					}
 					else if (r.Level < r2.Level)
 						bHeader = true;
 				}
 			}
 			if (footer != null)
-                await footer.Run(ip, rows[rows.Count-1] as Row);
+                await footer.Run(ip, rows[rows.Count-1] as Row).ConfigureAwait(false);
 		}
 
 		private async Task RunRecursiveGroupsPage(Pages pgs, TableWorkClass wc)
@@ -987,16 +987,16 @@ namespace Majorsilence.Reporting.Rdl
 					if (header != null)
 					{
 						Page p = pgs.CurrentPage;			// this can change after running a row
-						float height = p.YOffset + await header.HeightOfRows(pgs, r);
+						float height = p.YOffset + await header.HeightOfRows(pgs, r).ConfigureAwait(false);
 						if (height > pgs.BottomOfPage)
 						{
 							p = RunPageNew(pgs, p);
-                            await RunPageHeader(pgs, r, false, null);
+                            await RunPageHeader(pgs, r, false, null).ConfigureAwait(false);
 							if (!header.RepeatOnNewPage)
-                                await header.RunPage(pgs, r);
+                                await header.RunPage(pgs, r).ConfigureAwait(false);
 						}
 						else
-                            await header.RunPage(pgs, r);
+                            await header.RunPage(pgs, r).ConfigureAwait(false);
 					}
 				}
 
@@ -1012,7 +1012,7 @@ namespace Majorsilence.Reporting.Rdl
 						if (footer != null)
 						{
 							bFooter = true;
-							footerHeight = await footer.HeightOfRows(pgs, r);
+							footerHeight = await footer.HeightOfRows(pgs, r).ConfigureAwait(false);
 						}
 					}
 					else if (r.Level < r2.Level)
@@ -1021,15 +1021,15 @@ namespace Majorsilence.Reporting.Rdl
 
 				if (_Details != null)
 				{
-                    await _Details.RunPage(pgs, wc.Data, iRow, iRow, footerHeight);
+                    await _Details.RunPage(pgs, wc.Data, iRow, iRow, footerHeight).ConfigureAwait(false);
 				}
 
 				// and output the footer if needed
 				if (bFooter)
-                    await footer.RunPage(pgs, r);
+                    await footer.RunPage(pgs, r).ConfigureAwait(false);
 			}
 			if (footer != null)
-                await footer.RunPage(pgs, rows[rows.Count-1] as Row);
+                await footer.RunPage(pgs, rows[rows.Count-1] as Row).ConfigureAwait(false);
 		}
 
 		internal TableColumns TableColumns
@@ -1114,7 +1114,7 @@ namespace Majorsilence.Reporting.Rdl
 			int width=0;
 			foreach (TableColumn tc in this.TableColumns.Items)
 			{
-                if (tc.Visibility == null || !await tc.Visibility.Hidden.EvaluateBoolean(rpt, row))
+                if (tc.Visibility == null || !await tc.Visibility.Hidden.EvaluateBoolean(rpt, row).ConfigureAwait(false))
 					width += tc.Width.PixelsX;
 			}
 			return width;
@@ -1195,8 +1195,8 @@ namespace Majorsilence.Reporting.Rdl
 			while (lo <= hi)
 			{
 				int i = lo + ((hi - lo) >> 1);
-				object xv = await parentExpr.Evaluate(rpt, list[i]);
-				object yv = await groupExpr.Evaluate(rpt, item);
+				object xv = await parentExpr.Evaluate(rpt, list[i]).ConfigureAwait(false);
+				object yv = await groupExpr.Evaluate(rpt, item).ConfigureAwait(false);
 				int order = -Filter.ApplyCompare(_Type, yv, xv);
 				if (order == 0)
 					return i;
@@ -1227,7 +1227,7 @@ namespace Majorsilence.Reporting.Rdl
 				{
 					SortBy sb = (SortBy) sortItems[k];
 					wc.Data.CurrentGroups[ge.Group.GetIndex(rpt)] = ge;
-					keys[k] = await sb.SortExpression.Evaluate(rpt, wc.Data.Data[ge.StartRow]);
+					keys[k] = await sb.SortExpression.Evaluate(rpt, wc.Data.Data[ge.StartRow]).ConfigureAwait(false);
 				}
 				items[i] = new KeyedGroup { Entry = ge, Keys = keys };
 			}

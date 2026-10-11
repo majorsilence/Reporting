@@ -55,9 +55,9 @@ namespace Majorsilence.Reporting.Rdl
 		async override internal Task FinalPass()
 		{
 			if (_DataSetReference != null)
-                await _DataSetReference.FinalPass();
+                await _DataSetReference.FinalPass().ConfigureAwait(false);
 			if (_ParameterValues != null)
-                await _ParameterValues.FinalPass();
+                await _ParameterValues.FinalPass().ConfigureAwait(false);
 			return;
 		}
 
@@ -82,9 +82,9 @@ namespace Majorsilence.Reporting.Rdl
 				return dsplValues;
 
 			if (_DataSetReference != null)
-				(dsplValues, dataValues) = await _DataSetReference.SupplyValues(rpt);
+				(dsplValues, dataValues) = await _DataSetReference.SupplyValues(rpt).ConfigureAwait(false);
 			else
-				(dsplValues, dataValues) = await _ParameterValues.SupplyValues(rpt);
+				(dsplValues, dataValues) = await _ParameterValues.SupplyValues(rpt).ConfigureAwait(false);
 
             if (dataValues == null)
                 dataValues = new object[0];
@@ -115,9 +115,9 @@ namespace Majorsilence.Reporting.Rdl
 				return dataValues;
 
 			if (_DataSetReference != null)
-				(dsplValues, dataValues)= await _DataSetReference.SupplyValues(rpt);
+				(dsplValues, dataValues)= await _DataSetReference.SupplyValues(rpt).ConfigureAwait(false);
 			else
-				(dsplValues, dataValues) = await _ParameterValues.SupplyValues(rpt);
+				(dsplValues, dataValues) = await _ParameterValues.SupplyValues(rpt).ConfigureAwait(false);
 
             if (dataValues == null)
                 dataValues = new object[0];

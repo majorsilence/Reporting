@@ -28,7 +28,7 @@ namespace Majorsilence.Reporting.Rdl
 
 		public async Task<object> Evaluate(Report rpt, Row row)
 		{
-			return await EvaluateString(rpt, row);
+			return await EvaluateString(rpt, row).ConfigureAwait(false);
 		}
 
 		public Task<string> EvaluateString(Report rpt, Row row)

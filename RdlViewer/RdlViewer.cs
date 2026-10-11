@@ -1333,6 +1333,17 @@ namespace Majorsilence.Reporting.RdlViewer
 
         void r_SubreportDataRetrieval(object sender, SubreportDataRetrievalEventArgs e)
         {
+            // The engine does not resume on the UI thread after an await (ConfigureAwait(false)), but
+            // applications handle this event expecting the UI thread. The UI thread is awaiting, not
+            // blocked, so handing the call to it here cannot deadlock.
+            if (InvokeRequired)
+                Invoke(new Action(() => RaiseSubreportDataRetrieval(e)));
+            else
+                RaiseSubreportDataRetrieval(e);
+        }
+
+        void RaiseSubreportDataRetrieval(SubreportDataRetrievalEventArgs e)
+        {
             if (this.SubreportDataRetrieval != null)
                 SubreportDataRetrieval(this, e);
         }

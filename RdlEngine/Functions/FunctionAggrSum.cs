@@ -46,12 +46,12 @@ namespace Majorsilence.Reporting.Rdl
 			switch (_tc)
 			{
 				case TypeCode.Decimal:
-					return (object)await EvaluateDecimal(rpt, row);
+					return (object)await EvaluateDecimal(rpt, row).ConfigureAwait(false);
 				case TypeCode.Object:
 					return EvaluateObject(rpt, row);
 				case TypeCode.Double:
 				default:
-					return (object)await EvaluateDouble(rpt, row);
+					return (object)await EvaluateDouble(rpt, row).ConfigureAwait(false);
 			}
 		}
 
@@ -71,7 +71,7 @@ namespace Majorsilence.Reporting.Rdl
 
 			foreach (Row r in re)
 			{
-				temp = await _Expr.Evaluate(rpt, r);
+				temp = await _Expr.Evaluate(rpt, r).ConfigureAwait(false);
 				if (temp != null)
 				{
 					if (sum != null)
@@ -102,7 +102,7 @@ namespace Majorsilence.Reporting.Rdl
 			double temp;
 			foreach (Row r in re)
 			{
-				temp = await _Expr.EvaluateDouble(rpt, r);
+				temp = await _Expr.EvaluateDouble(rpt, r).ConfigureAwait(false);
 				if (temp.CompareTo(double.NaN) != 0)
 					sum += temp;
 			}
@@ -114,7 +114,7 @@ namespace Majorsilence.Reporting.Rdl
 
         public async Task<int> EvaluateInt32(Report rpt, Row row)
         {
-            double result = await EvaluateDouble(rpt, row);
+            double result = await EvaluateDouble(rpt, row).ConfigureAwait(false);
             return Convert.ToInt32(result);
         }
 
@@ -133,7 +133,7 @@ namespace Majorsilence.Reporting.Rdl
 			decimal temp;
 			foreach (Row r in re)
 			{
-				temp = await _Expr.EvaluateDecimal(rpt, r);
+				temp = await _Expr.EvaluateDecimal(rpt, r).ConfigureAwait(false);
 				if (temp != decimal.MinValue)		// indicate null value
 					sum += temp;
 			}
@@ -145,13 +145,13 @@ namespace Majorsilence.Reporting.Rdl
 
 		public async Task<string> EvaluateString(Report rpt, Row row)
 		{
-			object result = await Evaluate(rpt, row);
+			object result = await Evaluate(rpt, row).ConfigureAwait(false);
 			return Convert.ToString(result);
 		}
 
 		public async Task<DateTime> EvaluateDateTime(Report rpt, Row row)
 		{
-			object result = await Evaluate(rpt, row);
+			object result = await Evaluate(rpt, row).ConfigureAwait(false);
 			return Convert.ToDateTime(result);
 		}
 

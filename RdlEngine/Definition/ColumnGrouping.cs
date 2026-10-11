@@ -53,9 +53,9 @@ namespace Majorsilence.Reporting.Rdl
 		async override internal Task FinalPass()
 		{
 			if (_DynamicColumns != null)
-                await _DynamicColumns.FinalPass();
+                await _DynamicColumns.FinalPass().ConfigureAwait(false);
 			if (_StaticColumns != null)
-                await _StaticColumns.FinalPass();
+                await _StaticColumns.FinalPass().ConfigureAwait(false);
 			return ;
 		}
 

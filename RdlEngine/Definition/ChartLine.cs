@@ -34,62 +34,62 @@ namespace Majorsilence.Reporting.Rdl
                 g.CompositingQuality = Draw2.Drawing2D.CompositingQuality.HighQuality;
 
                 // Adjust the top margin to depend on the title height
-                System.Drawing.Size titleSize = await DrawTitleMeasure(rpt, g, ChartDefn.Title);
+                System.Drawing.Size titleSize = await DrawTitleMeasure(rpt, g, ChartDefn.Title).ConfigureAwait(false);
                 Layout.TopMargin = titleSize.Height;
 
                 // 20022008 AJM GJL - Added new required info 
                 double max = 0, min = 0; // Get the max and min values
-                (max, min) = await GetValueMaxMin(rpt, max, min, 0, 1);
+                (max, min) = await GetValueMaxMin(rpt, max, min, 0, 1).ConfigureAwait(false);
 
-                await DrawChartStyle(rpt, g);
+                await DrawChartStyle(rpt, g).ConfigureAwait(false);
 
                 // Draw title; routine determines if necessary
-                await DrawTitle(rpt, g, ChartDefn.Title, new System.Drawing.Rectangle(0, 0, Layout.Width, Layout.TopMargin));
+                await DrawTitle(rpt, g, ChartDefn.Title, new System.Drawing.Rectangle(0, 0, Layout.Width, Layout.TopMargin)).ConfigureAwait(false);
 
                 // Adjust the left margin to depend on the Value Axis
-                System.Drawing.Size vaSize = await ValueAxisSize(rpt, g, min, max);
+                System.Drawing.Size vaSize = await ValueAxisSize(rpt, g, min, max).ConfigureAwait(false);
                 Layout.LeftMargin = vaSize.Width;
 
                 // Draw legend
-                System.Drawing.Rectangle lRect = await DrawLegend(rpt, g, ChartDefn.Type == ChartTypeEnum.Area ? false : true, true);
+                System.Drawing.Rectangle lRect = await DrawLegend(rpt, g, ChartDefn.Type == ChartTypeEnum.Area ? false : true, true).ConfigureAwait(false);
 
                 // Adjust the bottom margin to depend on the Category Axis
-                System.Drawing.Size caSize = await CategoryAxisSize(rpt, g);
+                System.Drawing.Size caSize = await CategoryAxisSize(rpt, g).ConfigureAwait(false);
                 Layout.BottomMargin = caSize.Height;
 
                 AdjustMargins(lRect, rpt, g);       // Adjust margins based on legend.
 
                 // Draw Plot area
-                await DrawPlotAreaStyle(rpt, g, lRect);
+                await DrawPlotAreaStyle(rpt, g, lRect).ConfigureAwait(false);
                 int intervalCount = 0;
                 double incr = 0;
                 // Draw Value Axis
                 if (vaSize.Width > 0)   // If we made room for the axis - we need to draw it
                     (incr, intervalCount) = await DrawValueAxis(rpt, g, min, max,
-                        new System.Drawing.Rectangle(Layout.LeftMargin - vaSize.Width, Layout.TopMargin, vaSize.Width, Layout.PlotArea.Height), Layout.LeftMargin, _bm.Width - Layout.RightMargin);
+                        new System.Drawing.Rectangle(Layout.LeftMargin - vaSize.Width, Layout.TopMargin, vaSize.Width, Layout.PlotArea.Height), Layout.LeftMargin, _bm.Width - Layout.RightMargin).ConfigureAwait(false);
 
                 // Draw Category Axis
                 if (caSize.Height > 0)
                     //09052008ajm passing chart bounds int
                     await DrawCategoryAxis(rpt, g,
                         new System.Drawing.Rectangle(Layout.LeftMargin, _bm.Height - Layout.BottomMargin, Layout.PlotArea.Width, caSize.Height), Layout.TopMargin,
-                        caSize.Width);
+                        caSize.Width).ConfigureAwait(false);
 
                 // Draw Plot area data 
                 if (ChartDefn.Type == ChartTypeEnum.Area)
                 {
-                    if ((ChartSubTypeEnum)Enum.Parse(typeof(ChartSubTypeEnum), await _ChartDefn.Subtype.EvaluateString(rpt, _row)) == ChartSubTypeEnum.Stacked)
-                        await DrawPlotAreaAreaStacked(rpt, g, min, max);
-                    else if ((ChartSubTypeEnum)Enum.Parse(typeof(ChartSubTypeEnum), await _ChartDefn.Subtype.EvaluateString(rpt, _row)) == ChartSubTypeEnum.PercentStacked)
-                        await DrawPlotAreaAreaPercentStacked(rpt, g);
+                    if ((ChartSubTypeEnum)Enum.Parse(typeof(ChartSubTypeEnum), await _ChartDefn.Subtype.EvaluateString(rpt, _row).ConfigureAwait(false)) == ChartSubTypeEnum.Stacked)
+                        await DrawPlotAreaAreaStacked(rpt, g, min, max).ConfigureAwait(false);
+                    else if ((ChartSubTypeEnum)Enum.Parse(typeof(ChartSubTypeEnum), await _ChartDefn.Subtype.EvaluateString(rpt, _row).ConfigureAwait(false)) == ChartSubTypeEnum.PercentStacked)
+                        await DrawPlotAreaAreaPercentStacked(rpt, g).ConfigureAwait(false);
                     else
-                        await DrawPlotAreaArea(rpt, g, min, max);
+                        await DrawPlotAreaArea(rpt, g, min, max).ConfigureAwait(false);
                 }
                 else
                 {
-                    await DrawPlotAreaLine(rpt, g, min, max);
+                    await DrawPlotAreaLine(rpt, g, min, max).ConfigureAwait(false);
                 }
-                await DrawLegend(rpt, g, ChartDefn.Type == ChartTypeEnum.Area ? false : true, false);
+                await DrawLegend(rpt, g, ChartDefn.Type == ChartTypeEnum.Area ? false : true, false).ConfigureAwait(false);
             }
         }
 
@@ -103,13 +103,13 @@ namespace Majorsilence.Reporting.Rdl
             {
                 for (int iRow = 1; iRow <= CategoryCount; iRow++)
                 {
-                    double v = await this.GetDataValue(rpt, iRow, iCol);
+                    double v = await GetDataValue(rpt, iRow, iCol).ConfigureAwait(false);
 
                     int x = (int)(Layout.PlotArea.Left + ((iRow - 1) * widthCat));
                     int y = (int)(((Math.Min(v, max) - min) / (max - min)) * maxPointHeight);
                     System.Drawing.Point p = new System.Drawing.Point(x, Layout.PlotArea.Top + (maxPointHeight - y));
                     saveP[iRow - 1] = p;
-                    await DrawLinePoint(rpt, g, await GetSeriesBrush(rpt, iRow, iCol), ChartMarkerEnum.None, p, iRow, iCol);
+                    await DrawLinePoint(rpt, g, await GetSeriesBrush(rpt, iRow, iCol).ConfigureAwait(false), ChartMarkerEnum.None, p, iRow, iCol).ConfigureAwait(false);
 
                     //Add a metafilecomment to use as a tooltip GJL 26092008
                     if (_showToolTips)
@@ -118,7 +118,7 @@ namespace Majorsilence.Reporting.Rdl
                         g.AddMetafileComment(new System.Text.ASCIIEncoding().GetBytes(val));
                     }
                 }
-                DrawAreaBetweenPoints(g, await GetSeriesBrush(rpt, 1, iCol), saveP, null);
+                DrawAreaBetweenPoints(g, await GetSeriesBrush(rpt, 1, iCol).ConfigureAwait(false), saveP, null);
             }
             return;
         }
@@ -138,12 +138,12 @@ namespace Majorsilence.Reporting.Rdl
                 double sum = 0;
                 for (int iCol = 1; iCol <= SeriesCount; iCol++)
                 {
-                    sum += await GetDataValue(rpt, iRow, iCol);
+                    sum += await GetDataValue(rpt, iRow, iCol).ConfigureAwait(false);
                 }
                 double v = 0;
                 for (int iCol = 1; iCol <= SeriesCount; iCol++)
                 {
-                    v += await GetDataValue(rpt, iRow, iCol);
+                    v += await GetDataValue(rpt, iRow, iCol).ConfigureAwait(false);
 
                     int y = (int)((Math.Min(v / sum, max) / max) * maxPointHeight);
                     System.Drawing.Point p = new System.Drawing.Point(x, Layout.PlotArea.Top + (maxPointHeight - y));
@@ -158,13 +158,13 @@ namespace Majorsilence.Reporting.Rdl
             {
                 for (int iRow = 1; iRow <= CategoryCount; iRow++)
                 {
-                    double v = await this.GetDataValue(rpt, iRow, iCol);
+                    double v = await GetDataValue(rpt, iRow, iCol).ConfigureAwait(false);
 
                     int x = (int)(Layout.PlotArea.Left + ((iRow - 1) * widthCat));
                     int y = (int)((Math.Min(v, max) / max) * maxPointHeight);
                     System.Drawing.Point p = new System.Drawing.Point(x, Layout.PlotArea.Top + (maxPointHeight - y));
                     saveP[iRow - 1] = saveAllP[iRow - 1, iCol - 1];
-                    await DrawLinePoint(rpt, g, await GetSeriesBrush(rpt, iRow, iCol), ChartMarkerEnum.None, p, iRow, iCol);
+                    await DrawLinePoint(rpt, g, await GetSeriesBrush(rpt, iRow, iCol).ConfigureAwait(false), ChartMarkerEnum.None, p, iRow, iCol).ConfigureAwait(false);
 
                     //Add a metafilecomment to use as a tooltip GJL 26092008
                     if (_showToolTips)
@@ -173,7 +173,7 @@ namespace Majorsilence.Reporting.Rdl
                         g.AddMetafileComment(new System.Text.ASCIIEncoding().GetBytes(val));
                     }
                 }
-                DrawAreaBetweenPoints(g, await GetSeriesBrush(rpt, 1, iCol), saveP, iCol == 1 ? null : priorSaveP);
+                DrawAreaBetweenPoints(g, await GetSeriesBrush(rpt, 1, iCol).ConfigureAwait(false), saveP, iCol == 1 ? null : priorSaveP);
                 // Save prior point values
                 for (int i = 0; i < CategoryCount; i++)
                     priorSaveP[i] = saveP[i];
@@ -195,7 +195,7 @@ namespace Majorsilence.Reporting.Rdl
                 double v = 0;
                 for (int iCol = 1; iCol <= SeriesCount; iCol++)
                 {
-                    v += await GetDataValue(rpt, iRow, iCol);
+                    v += await GetDataValue(rpt, iRow, iCol).ConfigureAwait(false);
                     int y = (int)(((Math.Min(v, max) - min) / (max - min)) * maxPointHeight);
                     System.Drawing.Point p = new System.Drawing.Point(x, Layout.PlotArea.Top + (maxPointHeight - y));
                     saveAllP[iRow - 1, iCol - 1] = p;
@@ -209,13 +209,13 @@ namespace Majorsilence.Reporting.Rdl
             {
                 for (int iRow = 1; iRow <= CategoryCount; iRow++)
                 {
-                    double v = await this.GetDataValue(rpt, iRow, iCol);
+                    double v = await GetDataValue(rpt, iRow, iCol).ConfigureAwait(false);
 
                     int x = (int)(Layout.PlotArea.Left + ((iRow - 1) * widthCat));
                     int y = (int)(((Math.Min(v, max) - min) / (max - min)) * maxPointHeight);
                     System.Drawing.Point p = new System.Drawing.Point(x, Layout.PlotArea.Top + (maxPointHeight - y));
                     saveP[iRow - 1] = saveAllP[iRow - 1, iCol - 1];
-                    await DrawLinePoint(rpt, g, await GetSeriesBrush(rpt, iRow, iCol), ChartMarkerEnum.None, p, iRow, iCol);
+                    await DrawLinePoint(rpt, g, await GetSeriesBrush(rpt, iRow, iCol).ConfigureAwait(false), ChartMarkerEnum.None, p, iRow, iCol).ConfigureAwait(false);
                     //Add a metafilecomment to use as a tooltip GJL 26092008
                     if (_showToolTips)
                     {
@@ -225,7 +225,7 @@ namespace Majorsilence.Reporting.Rdl
 
 
                 }
-                DrawAreaBetweenPoints(g, await GetSeriesBrush(rpt, 1, iCol), saveP, iCol == 1 ? null : priorSaveP);
+                DrawAreaBetweenPoints(g, await GetSeriesBrush(rpt, 1, iCol).ConfigureAwait(false), saveP, iCol == 1 ? null : priorSaveP);
                 // Save prior point values
                 for (int i = 0; i < CategoryCount; i++)
                     priorSaveP[i] = saveP[i];
@@ -243,7 +243,7 @@ namespace Majorsilence.Reporting.Rdl
             {
                 for (int iRow = 1; iRow <= CategoryCount; iRow++)
                 {
-                    double v = await this.GetDataValue(rpt, iRow, iCol);
+                    double v = await GetDataValue(rpt, iRow, iCol).ConfigureAwait(false);
 
                     int x = (int)(Layout.PlotArea.Left + ((iRow - 1) * widthCat) + (widthCat / 2));
                     int y = (int)(((Math.Min(v, max) - min) / (max - min)) * maxPointHeight);
@@ -251,7 +251,7 @@ namespace Majorsilence.Reporting.Rdl
                     saveP[iRow - 1] = p;
                     bool DrawPoint = getNoMarkerVal(rpt, iCol, 1) == false;
                     //dont draw the point if I say not to!
-                    if (DrawPoint) { await DrawLinePoint(rpt, g, await GetSeriesBrush(rpt, iRow, iCol), SeriesMarker[iCol - 1], p, iRow, iCol); }
+                    if (DrawPoint) { await DrawLinePoint(rpt, g, await GetSeriesBrush(rpt, iRow, iCol).ConfigureAwait(false), SeriesMarker[iCol - 1], p, iRow, iCol).ConfigureAwait(false); }
 
                     //Add a metafilecomment to use as a tooltip GJL 26092008
                     if (_showToolTips)
@@ -281,7 +281,7 @@ namespace Majorsilence.Reporting.Rdl
                         intLineSize = 5;
                         break;
                 }
-                await DrawLineBetweenPoints(g, rpt, await GetSeriesBrush(rpt, 1, iCol), saveP, intLineSize);
+                await DrawLineBetweenPoints(g, rpt, await GetSeriesBrush(rpt, 1, iCol).ConfigureAwait(false), saveP, intLineSize).ConfigureAwait(false);
             }
             return;
         }
@@ -333,7 +333,7 @@ namespace Majorsilence.Reporting.Rdl
 
         async Task DrawLineBetweenPoints(Draw2.Graphics g, Report rpt, Draw2.Brush brush, System.Drawing.Point[] points)
         {
-            await DrawLineBetweenPoints(g, rpt, brush, points, 2);
+            await DrawLineBetweenPoints(g, rpt, brush, points, 2).ConfigureAwait(false);
         }
 
         async Task DrawLineBetweenPoints(Draw2.Graphics g, Report rpt, Draw2.Brush brush, System.Drawing.Point[] points, int intLineSize)
@@ -350,7 +350,7 @@ namespace Majorsilence.Reporting.Rdl
                 p = new Draw2.Pen(brush, intLineSize);    // todo - use line from style ????
 
 
-                if ((ChartSubTypeEnum)Enum.Parse(typeof(ChartSubTypeEnum), await _ChartDefn.Subtype.EvaluateString(rpt, _row)) == ChartSubTypeEnum.Smooth && points.Length > 2)
+                if ((ChartSubTypeEnum)Enum.Parse(typeof(ChartSubTypeEnum), await _ChartDefn.Subtype.EvaluateString(rpt, _row).ConfigureAwait(false)) == ChartSubTypeEnum.Smooth && points.Length > 2)
                     g.DrawCurve(p, points, 0.5F);
                 else
                     g.DrawLines(p, points);
@@ -371,7 +371,7 @@ namespace Majorsilence.Reporting.Rdl
                 pen = new Draw2.Pen(brush);
                 // 20022008 AJM GJL - Added bigger points
                 DrawLegendMarker(g, brush, pen, marker, p.X - 5, p.Y - 5, 10);
-                await DrawDataPoint(rpt, g, new System.Drawing.Point(p.X - 5, p.Y + 5), iRow, iCol);
+                await DrawDataPoint(rpt, g, new System.Drawing.Point(p.X - 5, p.Y + 5), iRow, iCol).ConfigureAwait(false);
             }
             finally
             {

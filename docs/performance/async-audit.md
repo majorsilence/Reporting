@@ -15,11 +15,15 @@ Blocking on async work (`Task.Run(...).GetAwaiter().GetResult()`, `.Result`, `.W
 
 Measured effect: WorldFacts 50 -> 44 ms and 9.5 -> 8.0 MB per render; thread-pool work items per WorldFacts render fell from ~3,700 to ~15 (0 for the tiny and matrix reports); `-- profile` prints the count.
 
+## Public API: `UserReportParameter`
+`DefaultValue`, `DisplayValues`, `DataValues`, `Value` and `Values` blocked the calling thread. They are marked `[Obsolete]` (they still work) and the replacements are `GetDefaultValueAsync()`, `GetDisplayValuesAsync()`, `GetDataValuesAsync()`, `GetValueAsync()`, `GetValuesAsync()`, `SetValueAsync()` and `SetValuesAsync()`. Every caller in this repository (Subreport, ASP.NET Core, MCP, the WinForms-style, Avalonia and Gtk3 viewers, RdlDesktop) uses the async methods; `UserReportParameterAsyncTests` covers them.
+
+## `ConfigureAwait(false)`
+All awaits in `RdlEngine`, `DataProviders` and `RdlCreator` (~2,200) now use `ConfigureAwait(false)`, applied with the CA2007 code fix, and CA2007 is a warning for those projects in `.editorconfig` so new code is held to it. UI, ASP.NET Core and command-line projects are deliberately not covered: a UI project needs to resume on its UI thread, and ASP.NET Core has no synchronization context. `SynchronizationContextTests` renders reports under a counting context and requires zero posts back to it (WorldFacts posted 6 times before the pass). The one event the engine raises, `SubreportDataRetrieval`, used to arrive on the UI thread by accident of the captured context; the WinForms-style and Avalonia viewers now marshal it back to the UI thread explicitly.
+
 ## Remaining (not done)
 | Where | What it needs | Public API? |
-|---|---|---|
-| `ReportParameter.cs` (5 sites: `DefaultValue`, `DisplayValues`, `DataValues`, `RuntimeValue`, `RuntimeValues` on the report-parameter wrapper) | async methods (`GetDefaultValueAsync()` ...) next to the properties; properties kept as a documented blocking compatibility path. ~50 call sites in the viewer, designer and ASP projects to move over | **Yes** (additive). Decision needed |
-| `Report.ClientLanguage` getter (`Report.cs:733`) | evaluate the language expression once, awaited, when the run starts (it has no row), then the getter returns the stored value | Internal; 28 references |
+|---|---|---|| `Report.ClientLanguage` getter (`Report.cs:733`) | evaluate the language expression once, awaited, when the run starts (it has no row), then the getter returns the stored value | Internal; 28 references |
 | `ReportItem.DataElementOutput` getter (`ReportItem.cs:895`) | resolve once in `FinalPass` (awaited) and store | Internal |
 | `MhtWebFile` download (`MhtWebFile.cs:514`) | MHT/web-archive export only; make the download path async or use `HttpClient.Send` | Internal |
 | UI only: `RdlDesign/MDIChild.cs:182` (`FileSaveAs`), `RdlDesign/DesignCtl.cs:1015` (`GetStyleInfo`) | event-handler/command plumbing; belongs with a designer pass, not the engine | Internal |

@@ -46,7 +46,7 @@ namespace Majorsilence.Reporting.Rdl
 		{
 			foreach (SeriesGrouping sg in _Items)
 			{
-                await sg.FinalPass();
+                await sg.FinalPass().ConfigureAwait(false);
 			}
 			return;
 		}

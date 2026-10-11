@@ -108,8 +108,8 @@ namespace Majorsilence.Reporting.Rdl
 				//   should mark a dataset as only having one retrieval???
 				bool lConnect = _ds.Query.DataSourceDefn.IsConnected(rpt);
 				if (!lConnect)
-					await _ds.Query.DataSourceDefn.ConnectDataSource(rpt);  // connect; since not already connected
-                await _ds.GetData(rpt);									// get the data
+					await _ds.Query.DataSourceDefn.ConnectDataSource(rpt).ConfigureAwait(false);  // connect; since not already connected
+                await _ds.GetData(rpt).ConfigureAwait(false);									// get the data
 				if (!lConnect)										// if we connected; then
 					_ds.Query.DataSourceDefn.CleanUp(rpt);				//   we cleanup
 				rows = _ds.Query.GetMyData(rpt);

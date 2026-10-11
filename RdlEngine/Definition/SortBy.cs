@@ -51,7 +51,7 @@ namespace Majorsilence.Reporting.Rdl
 		async override internal Task FinalPass()
 		{
 			if (_SortExpression != null)
-                await _SortExpression.FinalPass();
+                await _SortExpression.FinalPass().ConfigureAwait(false);
 			return;
 		}
 

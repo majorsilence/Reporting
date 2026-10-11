@@ -48,7 +48,7 @@ namespace Majorsilence.Reporting.Rdl
 		{
 			foreach (Filter f in _Items)
 			{
-                await f.FinalPass();
+                await f.FinalPass().ConfigureAwait(false);
 			}
 			return;
 		}
@@ -59,7 +59,7 @@ namespace Majorsilence.Reporting.Rdl
 			{
 				if (!f.FilterOperatorSingleRow)		// have to handle Top/Bottom in ApplyFinalFilters
 					return true;
-				if (!await f.Apply(rpt, datarow))
+				if (!await f.Apply(rpt, datarow).ConfigureAwait(false))
 					return false;
 			}
 			return true;
@@ -92,7 +92,7 @@ namespace Majorsilence.Reporting.Rdl
 			for (; iFilter < _Items.Count && data.Data.Count > 0; iFilter++)
 			{
 				Filter f = (Filter) _Items[iFilter];
-                await f.Apply(rpt, data);
+                await f.Apply(rpt, data).ConfigureAwait(false);
 			}
 			
 			// trim the space

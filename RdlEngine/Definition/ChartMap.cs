@@ -38,35 +38,35 @@ namespace Majorsilence.Reporting.Rdl
                 g.CompositingQuality = Draw2.Drawing2D.CompositingQuality.HighQuality;
 
 				// Adjust the top margin to depend on the title height
-				System.Drawing.Size titleSize = await DrawTitleMeasure(rpt, g, ChartDefn.Title);
+				System.Drawing.Size titleSize = await DrawTitleMeasure(rpt, g, ChartDefn.Title).ConfigureAwait(false);
 				Layout.TopMargin = titleSize.Height;
 
 				double max=0,min=0; // Get the max and min values
                                     //		GetValueMaxMin(rpt, ref max, ref min,0, 1);
 
-                await DrawChartStyle(rpt, g);
+                await DrawChartStyle(rpt, g).ConfigureAwait(false);
 
                 // Draw title; routine determines if necessary
-                await DrawTitle(rpt, g, ChartDefn.Title, new System.Drawing.Rectangle(0, 0, _bm.Width, Layout.TopMargin));
+                await DrawTitle(rpt, g, ChartDefn.Title, new System.Drawing.Rectangle(0, 0, _bm.Width, Layout.TopMargin)).ConfigureAwait(false);
 
 				Layout.LeftMargin = 0;
                 Layout.RightMargin = 0;
 
 				// Draw legend
-				System.Drawing.Rectangle lRect = await DrawLegend(rpt, g, false, true);
+				System.Drawing.Rectangle lRect = await DrawLegend(rpt, g, false, true).ConfigureAwait(false);
 
 				Layout.BottomMargin = 0;
 
 				AdjustMargins(lRect,rpt, g);        // Adjust margins based on legend.
 
                 // Draw Plot area
-                await DrawPlotAreaStyle(rpt, g, lRect);
+                await DrawPlotAreaStyle(rpt, g, lRect).ConfigureAwait(false);
 
-                string subtype = await _ChartDefn.Subtype.EvaluateString(rpt, _row);
+                string subtype = await _ChartDefn.Subtype.EvaluateString(rpt, _row).ConfigureAwait(false);
 
-                await DrawMap(rpt, g, subtype, max, min);
+                await DrawMap(rpt, g, subtype, max, min).ConfigureAwait(false);
 
-                await DrawLegend(rpt, g, false, false);
+                await DrawLegend(rpt, g, false, false).ConfigureAwait(false);
 
 			}
 		}
@@ -89,9 +89,9 @@ namespace Majorsilence.Reporting.Rdl
             {
                 for (int iCol = 1; iCol <= SeriesCount; iCol++)
                 {
-                    string sv = await GetSeriesValue(rpt, iCol);
+                    string sv = await GetSeriesValue(rpt, iCol).ConfigureAwait(false);
 
-                    string c = await this.GetDataValueString(rpt, iRow, iCol);
+                    string c = await GetDataValueString(rpt, iRow, iCol).ConfigureAwait(false);
                     List<MapPolygon> pl = mp.GetPolygon(sv);
                     if (pl == null)
                         continue;

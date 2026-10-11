@@ -43,13 +43,13 @@ namespace Majorsilence.Reporting.Rdl
 		// Evaluate is for interpretation  (and is relatively slow)
 		public async override Task<object> Evaluate(Report rpt, Row row)
 		{
-			string v = await base.EvaluateString(rpt, row);
+			string v = await base.EvaluateString(rpt, row).ConfigureAwait(false);
 
 			if (p.ValidValues == null)
 				return v;
 
-			string[] displayValues = await p.ValidValues.DisplayValues(rpt);
-			object[] dataValues = await p.ValidValues.DataValues(rpt);
+			string[] displayValues = await p.ValidValues.DisplayValues(rpt).ConfigureAwait(false);
+			object[] dataValues = await p.ValidValues.DataValues(rpt).ConfigureAwait(false);
 
 			for (int i=0; i < dataValues.Length; i++)
 			{
@@ -62,33 +62,33 @@ namespace Majorsilence.Reporting.Rdl
 		
 		public async override Task<double> EvaluateDouble(Report rpt, Row row)
 		{	
-			string r = await EvaluateString(rpt, row);
+			string r = await EvaluateString(rpt, row).ConfigureAwait(false);
 
 			return r == null? double.MinValue: Convert.ToDouble(r);
 		}
 		
 		public override async Task<decimal> EvaluateDecimal(Report rpt, Row row)
 		{
-			string r = await EvaluateString(rpt, row);
+			string r = await EvaluateString(rpt, row).ConfigureAwait(false);
 
 			return r == null? decimal.MinValue: Convert.ToDecimal(r);
 		}
 
 		public async override Task<string> EvaluateString(Report rpt, Row row)
 		{
-			return (string)await Evaluate(rpt, row);
+			return (string)await Evaluate(rpt, row).ConfigureAwait(false);
 		}
 
 		public async override Task<DateTime> EvaluateDateTime(Report rpt, Row row)
 		{
-			string r = await EvaluateString(rpt, row);
+			string r = await EvaluateString(rpt, row).ConfigureAwait(false);
 
 			return r == null? DateTime.MinValue: Convert.ToDateTime(r);
 		}
 
 		public async override Task<bool> EvaluateBoolean(Report rpt, Row row)
 		{
-			string r = await EvaluateString(rpt, row);
+			string r = await EvaluateString(rpt, row).ConfigureAwait(false);
 
 			return r.ToLower() == "true"? true: false;
 		}

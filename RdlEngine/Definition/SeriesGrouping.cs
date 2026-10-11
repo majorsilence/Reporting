@@ -51,11 +51,11 @@ namespace Majorsilence.Reporting.Rdl
 		async override internal Task FinalPass()
 		{
 			if (_DynamicSeries != null)
-                await _DynamicSeries.FinalPass();
+                await _DynamicSeries.FinalPass().ConfigureAwait(false);
 			if (_StaticSeries != null)
-                await _StaticSeries.FinalPass();
+                await _StaticSeries.FinalPass().ConfigureAwait(false);
 			if (_Style != null)
-                await _Style.FinalPass();
+                await _Style.FinalPass().ConfigureAwait(false);
 
 			return;
 		}

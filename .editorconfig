@@ -251,3 +251,7 @@ dotnet_naming_style.begins_with_i.capitalization = pascal_case
 
 # CA4014: async code not awaited.  See https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/compiler-messages/cs4014
 dotnet_diagnostic.CA4014.severity = error
+# Library projects must not capture the caller's SynchronizationContext: a desktop host resumes every plain await on its
+# UI thread. See docs/performance/async-audit.md. (UI, ASP.NET Core and command line projects are not listed.)
+[{RdlEngine,DataProviders,RdlCreator}/**.cs]
+dotnet_diagnostic.CA2007.severity = warning

@@ -60,7 +60,7 @@ namespace Majorsilence.Reporting.Rdl
 		{
 			foreach (DataSourceDefn ds in _Items.Values)
 			{
-                await ds.FinalPass();
+                await ds.FinalPass().ConfigureAwait(false);
 			}
 			return;
 		}
@@ -85,7 +85,7 @@ namespace Majorsilence.Reporting.Rdl
 
 			foreach (DataSourceDefn ds in _Items.Values)
 			{
-				await ds.ConnectDataSourceAsync(rpt);
+				await ds.ConnectDataSourceAsync(rpt).ConfigureAwait(false);
 			}
 			return true;
 		}

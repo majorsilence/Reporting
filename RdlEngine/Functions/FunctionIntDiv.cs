@@ -32,8 +32,8 @@ namespace Majorsilence.Reporting.Rdl
 
 		public async Task<IExpr> ConstantOptimization()
 		{
-			_lhs = await _lhs.ConstantOptimization();
-			_rhs = await _rhs.ConstantOptimization();
+			_lhs = await _lhs.ConstantOptimization().ConfigureAwait(false);
+			_rhs = await _rhs.ConstantOptimization().ConfigureAwait(false);
 
 			// Nothing to fold into (there is no Long constant) and no shortcuts: x \ 1 is not
 			// x, since x is rounded, and 0 \ x still fails when x rounds to 0.
@@ -43,13 +43,13 @@ namespace Majorsilence.Reporting.Rdl
 		// Evaluate is for interpretation (and is relatively slow)
 		public async Task<object> Evaluate(Report rpt, Row row)
 		{
-			return await EvaluateInt64(rpt, row);
+			return await EvaluateInt64(rpt, row).ConfigureAwait(false);
 		}
 
 		private async Task<long> EvaluateInt64(Report rpt, Row row)
 		{
-			long lhs = ToLong(await _lhs.EvaluateDouble(rpt, row));
-			long rhs = ToLong(await _rhs.EvaluateDouble(rpt, row));
+			long lhs = ToLong(await _lhs.EvaluateDouble(rpt, row).ConfigureAwait(false));
+			long rhs = ToLong(await _rhs.EvaluateDouble(rpt, row).ConfigureAwait(false));
 
 			return lhs / rhs;		// DivideByZeroException when rhs rounds to 0, as in VB
 		}
@@ -62,34 +62,34 @@ namespace Majorsilence.Reporting.Rdl
 
 		public async Task<double> EvaluateDouble(Report rpt, Row row)
 		{
-			return await EvaluateInt64(rpt, row);
+			return await EvaluateInt64(rpt, row).ConfigureAwait(false);
 		}
 
 		public async Task<decimal> EvaluateDecimal(Report rpt, Row row)
 		{
-			return await EvaluateInt64(rpt, row);
+			return await EvaluateInt64(rpt, row).ConfigureAwait(false);
 		}
 
 		public async Task<int> EvaluateInt32(Report rpt, Row row)
 		{
-			return checked((int)await EvaluateInt64(rpt, row));
+			return checked((int)await EvaluateInt64(rpt, row).ConfigureAwait(false));
 		}
 
 		public async Task<string> EvaluateString(Report rpt, Row row)
 		{
-			long result = await EvaluateInt64(rpt, row);
+			long result = await EvaluateInt64(rpt, row).ConfigureAwait(false);
 			return result.ToString();
 		}
 
 		public async Task<DateTime> EvaluateDateTime(Report rpt, Row row)
 		{
-			long result = await EvaluateInt64(rpt, row);
+			long result = await EvaluateInt64(rpt, row).ConfigureAwait(false);
 			return Convert.ToDateTime(result);
 		}
 
 		public async Task<bool> EvaluateBoolean(Report rpt, Row row)
 		{
-			long result = await EvaluateInt64(rpt, row);
+			long result = await EvaluateInt64(rpt, row).ConfigureAwait(false);
 			return Convert.ToBoolean(result);
 		}
 	}

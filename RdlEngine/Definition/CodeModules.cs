@@ -88,7 +88,7 @@ namespace Majorsilence.Reporting.Rdl
 		{
 			foreach (CodeModule cm in _Items)
 			{
-                await cm.FinalPass();
+                await cm.FinalPass().ConfigureAwait(false);
 			}
 			return;
 		}

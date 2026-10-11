@@ -167,7 +167,7 @@ namespace Majorsilence.Reporting.Rdl
 				try
 				{
 					for (; k < keyCount; k++)
-						keys[k] = await _SortBy[k].expr.Evaluate(_Rpt, row);
+						keys[k] = await _SortBy[k].expr.Evaluate(_Rpt, row).ConfigureAwait(false);
 				}
 				catch (Exception e)		// this really shouldn't happen
 				{

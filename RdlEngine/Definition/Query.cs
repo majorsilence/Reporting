@@ -88,9 +88,9 @@ namespace Majorsilence.Reporting.Rdl
         internal override async Task FinalPass()
         {
             if (_CommandText != null)
-                await _CommandText.FinalPass();
+                await _CommandText.FinalPass().ConfigureAwait(false);
             if (_QueryParameters != null)
-                await _QueryParameters.FinalPass();
+                await _QueryParameters.FinalPass().ConfigureAwait(false);
 
             // verify the data source
             DataSourceDefn ds = null;
@@ -111,7 +111,7 @@ namespace Majorsilence.Reporting.Rdl
                 return;
 
             // Treat this as a SQL statement
-            String sql = await _CommandText.EvaluateString(null, null);
+            String sql = await _CommandText.EvaluateString(null, null).ConfigureAwait(false);
 
             try
             {
@@ -119,11 +119,11 @@ namespace Majorsilence.Reporting.Rdl
                 // Must match the data pass below: both passes have to bind identically,
                 // or a report can compile and then fail at run time.
                 bool bindByName = TrySetBindByName(cmSQL);
-                cmSQL.CommandText = await AddParametersAsLiterals(null, cnSQL, sql, false);
+                cmSQL.CommandText = await AddParametersAsLiterals(null, cnSQL, sql, false).ConfigureAwait(false);
                 if (this._QueryCommandType == QueryCommandTypeEnum.StoredProcedure)
                     cmSQL.CommandType = CommandType.StoredProcedure;
 
-                await AddParameters(null, cnSQL, cmSQL, false, bindByName);
+                await AddParameters(null, cnSQL, cmSQL, false, bindByName).ConfigureAwait(false);
                 // Schema pass: only column metadata is needed, the query must not be executed at compile time.
                 using var dr = await CreateDataReader(cmSQL, CommandBehavior.SchemaOnly).ConfigureAwait(false);
 
@@ -194,25 +194,25 @@ namespace Majorsilence.Reporting.Rdl
             }
 
             Rows _Data = new Rows(rpt, null, null, null);       // no sorting and grouping at base data
-            String sql = await _CommandText.EvaluateString(rpt, null);
+            String sql = await _CommandText.EvaluateString(rpt, null).ConfigureAwait(false);
 
             try
             {
                 using var cmSQL = cnSQL.CreateCommand();
                 bool bindByName = TrySetBindByName(cmSQL);
-                cmSQL.CommandText = await AddParametersAsLiterals(rpt, cnSQL, sql, true);
+                cmSQL.CommandText = await AddParametersAsLiterals(rpt, cnSQL, sql, true).ConfigureAwait(false);
                 if (this._QueryCommandType == QueryCommandTypeEnum.StoredProcedure)
                     cmSQL.CommandType = CommandType.StoredProcedure;
                 if (this._Timeout > 0)
                     cmSQL.CommandTimeout = this._Timeout;
 
-                await AddParameters(rpt, cnSQL, cmSQL, true, bindByName);
+                await AddParameters(rpt, cnSQL, cmSQL, true, bindByName).ConfigureAwait(false);
                 // Data pass: rows are required, so the reader must not be opened with SchemaOnly.
                 // SingleResult (not Default) is what this call site used before CreateDataReader
                 // was extracted: only one result set is ever read, and the bundled file-based
                 // providers (JSON, XML, text, web service, ...) accept SingleResult or SchemaOnly
                 // and reject anything else.
-                using var dr = await CreateDataReader(cmSQL, CommandBehavior.SingleResult);
+                using var dr = await CreateDataReader(cmSQL, CommandBehavior.SingleResult).ConfigureAwait(false);
 
                 List<Row> ar = new List<Row>();
                 _Data.Data = ar;
@@ -250,7 +250,7 @@ namespace Majorsilence.Reporting.Rdl
                     }
 
                     // Apply the filters
-                    if (f == null || await f.Apply(rpt, or))
+                    if (f == null || await f.Apply(rpt, or).ConfigureAwait(false))
                     {
                         or.RowNumber = rowCount;    // 
                         rowCount++;
@@ -261,7 +261,7 @@ namespace Majorsilence.Reporting.Rdl
                 }
                 ar.TrimExcess();        // free up any extraneous space; can be sizeable for large # rows
                 if (f != null)
-                    await f.ApplyFinalFilters(rpt, _Data, false);
+                    await f.ApplyFinalFilters(rpt, _Data, false).ConfigureAwait(false);
                 //#if DEBUG
                 //				rpt.rl.LogError(4, "Rows Read:" + ar.Count.ToString() + " SQL:" + sql );
                 //#endif
@@ -360,7 +360,7 @@ namespace Majorsilence.Reporting.Rdl
                     }
                 }
                 // Apply the filters 
-                if (f == null || await f.Apply(rpt, or))
+                if (f == null || await f.Apply(rpt, or).ConfigureAwait(false))
                 {
                     or.RowNumber = rowCount;    // 
                     rowCount++;
@@ -371,7 +371,7 @@ namespace Majorsilence.Reporting.Rdl
             ar.TrimExcess();		// free up any extraneous space; can be sizeable for large # rows
             if (f != null)
             {
-                await f.ApplyFinalFilters(rpt, _Data, false);
+                await f.ApplyFinalFilters(rpt, _Data, false).ConfigureAwait(false);
             }
 
             SetMyData(rpt, _Data);
@@ -459,7 +459,7 @@ namespace Majorsilence.Reporting.Rdl
                 }
 
                 // Apply the filters 
-                if (f == null || await f.Apply(rpt, or))
+                if (f == null || await f.Apply(rpt, or).ConfigureAwait(false))
                 {
                     or.RowNumber = rowCount;    // 
                     rowCount++;
@@ -470,7 +470,7 @@ namespace Majorsilence.Reporting.Rdl
             }
             ar.TrimExcess();        // free up any extraneous space; can be sizeable for large # rows
             if (f != null)
-                await f.ApplyFinalFilters(rpt, rows, false);
+                await f.ApplyFinalFilters(rpt, rows, false).ConfigureAwait(false);
 
             SetMyUserData(rpt, rows);
         }
@@ -495,7 +495,7 @@ namespace Majorsilence.Reporting.Rdl
                 Row or = new Row(rows, dr.FieldCount);
                 dr.GetValues(or.Data);
                 // Apply the filters 
-                if (f == null || await f.Apply(rpt, or))
+                if (f == null || await f.Apply(rpt, or).ConfigureAwait(false))
                 {
                     or.RowNumber = rowCount;    // 
                     rowCount++;
@@ -506,7 +506,7 @@ namespace Majorsilence.Reporting.Rdl
             }
             ar.TrimExcess();        // free up any extraneous space; can be sizeable for large # rows
             if (f != null)
-                await f.ApplyFinalFilters(rpt, rows, false);
+                await f.ApplyFinalFilters(rpt, rows, false).ConfigureAwait(false);
 
             SetMyUserData(rpt, rows);
         }
@@ -555,7 +555,7 @@ namespace Majorsilence.Reporting.Rdl
                     or.Data[fld.ColumnNumber] = dr[fld.DataField];
                 }
                 // Apply the filters 
-                if (f == null || await f.Apply(rpt, or))
+                if (f == null || await f.Apply(rpt, or).ConfigureAwait(false))
                 {
                     or.RowNumber = rowCount;    // 
                     rowCount++;
@@ -566,7 +566,7 @@ namespace Majorsilence.Reporting.Rdl
             }
             ar.TrimExcess();        // free up any extraneous space; can be sizeable for large # rows
             if (f != null)
-                await f.ApplyFinalFilters(rpt, rows, false);
+                await f.ApplyFinalFilters(rpt, rows, false).ConfigureAwait(false);
 
             SetMyUserData(rpt, rows);
         }
@@ -623,7 +623,7 @@ namespace Majorsilence.Reporting.Rdl
                     }
                 }
                 // Apply the filters 
-                if (f == null || await f.Apply(rpt, or))
+                if (f == null || await f.Apply(rpt, or).ConfigureAwait(false))
                 {
                     or.RowNumber = rowCount;    // 
                     rowCount++;
@@ -633,7 +633,7 @@ namespace Majorsilence.Reporting.Rdl
 
             ar.TrimExcess();        // free up any extraneous space; can be sizeable for large # rows
             if (f != null)
-                await f.ApplyFinalFilters(rpt, rows, false);
+                await f.ApplyFinalFilters(rpt, rows, false).ConfigureAwait(false);
 
             SetMyUserData(rpt, rows);
         }
@@ -758,7 +758,7 @@ namespace Majorsilence.Reporting.Rdl
                 {
                     paramName = "@" + qp.Name.Nm;
                 }
-                object pvalue = bValue ? await qp.Value.Evaluate(rpt, null) : null;
+                object pvalue = bValue ? await qp.Value.Evaluate(rpt, null).ConfigureAwait(false) : null;
                 IDbDataParameter dp = cmSQL.CreateParameter();
 
                 dp.ParameterName = paramName;
@@ -904,7 +904,7 @@ namespace Majorsilence.Reporting.Rdl
                 string svalue;
                 if (bValue)
                 {	// use the value provided
-                    svalue = await this.ParameterValue(rpt, qp);
+                    svalue = await ParameterValue(rpt, qp).ConfigureAwait(false);
                 }
                 else
                 {   // just need a place holder value that will pass parsing
@@ -941,7 +941,7 @@ namespace Majorsilence.Reporting.Rdl
             if (!qp.IsArray)
             {
                 // handle non-array
-                string svalue = await qp.Value.EvaluateString(rpt, null);
+                string svalue = await qp.Value.EvaluateString(rpt, null).ConfigureAwait(false);
                 if (svalue == null)
                     svalue = "null";
                 else switch (qp.Value.Expr.GetTypeCode())
@@ -958,7 +958,7 @@ namespace Majorsilence.Reporting.Rdl
             }
 
             StringBuilder sb = new StringBuilder();
-            ArrayList ar = await qp.Value.Evaluate(rpt, null) as ArrayList;
+            ArrayList ar = await qp.Value.Evaluate(rpt, null).ConfigureAwait(false) as ArrayList;
 
             if (ar == null)
                 return null;

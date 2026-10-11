@@ -130,17 +130,17 @@ namespace Majorsilence.Reporting.Rdl
 		// Handle parsing of function in final pass
 		async override internal Task FinalPass()
 		{
-            await _FilterExpression.FinalPass();
-            await _FilterValues.FinalPass();
+            await _FilterExpression.FinalPass().ConfigureAwait(false);
+            await _FilterValues.FinalPass().ConfigureAwait(false);
 			return;
 		}
 
 		// Apply the filters to a row to determine if row is valid
 		internal async Task<bool> Apply(Report rpt, Row datarow)
 		{
-			object left = await _FilterExpression.Evaluate(rpt, datarow);
+			object left = await _FilterExpression.Evaluate(rpt, datarow).ConfigureAwait(false);
 			TypeCode tc = _FilterExpression.GetTypeCode();
-			object right = await ((FilterValue)(_FilterValues.Items[0])).Expression.Evaluate(rpt, datarow);
+			object right = await ((FilterValue)(_FilterValues.Items[0])).Expression.Evaluate(rpt, datarow).ConfigureAwait(false);
 			switch (_FilterOperator)
 			{
 				case FilterOperatorEnum.Equal:
@@ -169,7 +169,7 @@ namespace Majorsilence.Reporting.Rdl
 				case FilterOperatorEnum.In:
 					foreach (FilterValue fv in _FilterValues.Items)
 					{
-						right = await fv.Expression.Evaluate(rpt, datarow);
+						right = await fv.Expression.Evaluate(rpt, datarow).ConfigureAwait(false);
                         if (right is ArrayList)         // this can only happen with MultiValue parameters
                         {   // check each object in the array
                             foreach (object v in right as ArrayList)
@@ -185,7 +185,7 @@ namespace Majorsilence.Reporting.Rdl
 				case FilterOperatorEnum.Between:
 					if (ApplyCompare(tc, left, right) < 0)
 						return false;
-					right = await ((FilterValue)(_FilterValues.Items[1])).Expression.Evaluate(rpt, datarow);
+					right = await ((FilterValue)(_FilterValues.Items[1])).Expression.Evaluate(rpt, datarow).ConfigureAwait(false);
 					return ApplyCompare(tc, left, right) <= 0? true: false;
 				default:
 					return true;
@@ -195,9 +195,9 @@ namespace Majorsilence.Reporting.Rdl
 		internal async Task Apply(Report rpt, Rows data)
 		{
 			if (this._FilterOperatorSingleRow)
-                await ApplySingleRowFilter(rpt, data);
+                await ApplySingleRowFilter(rpt, data).ConfigureAwait(false);
 			else
-                await ApplyTopBottomFilter(rpt, data);
+                await ApplyTopBottomFilter(rpt, data).ConfigureAwait(false);
 		}
 
 		private async Task ApplySingleRowFilter(Report rpt, Rows data)
@@ -209,7 +209,7 @@ namespace Majorsilence.Reporting.Rdl
 			while (iRow < ar.Count)
 			{
 				Row datarow = ar[iRow];
-				if (await Apply(rpt, datarow))
+				if (await Apply(rpt, datarow).ConfigureAwait(false))
 					iRow++;
 				else
 					ar.RemoveAt(iRow);
@@ -224,7 +224,7 @@ namespace Majorsilence.Reporting.Rdl
 
 			// Get the filter value and validate it 
 			FilterValue fv = this._FilterValues.Items[0];
-			double val = await fv.Expression.EvaluateDouble(rpt, data.Data[0]);
+			double val = await fv.Expression.EvaluateDouble(rpt, data.Data[0]).ConfigureAwait(false);
 			if (val <= 0)			// if less than equal 0; then request results in no data
 			{
 				data.Data.Clear();
@@ -262,7 +262,7 @@ namespace Majorsilence.Reporting.Rdl
             List<RowsSortExpression> sl = new List<RowsSortExpression>();
 			sl.Add(new RowsSortExpression(this._FilterExpression));
 			data.SortBy = sl;					// update the sort by
-			await data.SortAsync();			// sort the data
+			await data.SortAsync().ConfigureAwait(false);			// sort the data
 			
 			// reverse the order of the data for top so that data is in the beginning
 			if (_FilterOperator == FilterOperatorEnum.TopN ||
@@ -271,13 +271,13 @@ namespace Majorsilence.Reporting.Rdl
 
 			List<Row> ar = data.Data;
 			TypeCode tc = _FilterExpression.GetTypeCode();
-			object o = await this._FilterExpression.Evaluate(rpt, data.Data[ival]);
+			object o = await _FilterExpression.Evaluate(rpt, data.Data[ival]).ConfigureAwait(false);
 
 			// adjust the ival based on duplicate values
 			ival++;
 			while (ival < ar.Count)
 			{
-				object n = await this._FilterExpression.Evaluate(rpt, data.Data[ival]);
+				object n = await _FilterExpression.Evaluate(rpt, data.Data[ival]).ConfigureAwait(false);
 				if (ApplyCompare(tc, o, n) != 0)
 					break;
 				ival++;

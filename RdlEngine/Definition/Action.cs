@@ -58,11 +58,11 @@ namespace Majorsilence.Reporting.Rdl
 		async override internal Task FinalPass()
 		{
 			if (_Hyperlink != null)
-                await _Hyperlink.FinalPass();
+                await _Hyperlink.FinalPass().ConfigureAwait(false);
 			if (_Drillthrough != null)
-                await _Drillthrough.FinalPass();
+                await _Drillthrough.FinalPass().ConfigureAwait(false);
 			if (_BookmarkLink != null)
-                await _BookmarkLink.FinalPass();
+                await _BookmarkLink.FinalPass().ConfigureAwait(false);
 			return;
 		}
 
@@ -77,7 +77,7 @@ namespace Majorsilence.Reporting.Rdl
 			if (_Hyperlink == null)
 				return null;
 
-			return await _Hyperlink.EvaluateString(rpt, r);
+			return await _Hyperlink.EvaluateString(rpt, r).ConfigureAwait(false);
 		}
 
 		internal Drillthrough Drill
@@ -97,7 +97,7 @@ namespace Majorsilence.Reporting.Rdl
 			if (_BookmarkLink == null)
 				return null;
 
-			return await _BookmarkLink.EvaluateString(rpt, r);
+			return await _BookmarkLink.EvaluateString(rpt, r).ConfigureAwait(false);
 		}
 	}
 }

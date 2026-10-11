@@ -58,32 +58,32 @@ namespace Majorsilence.Reporting.Rdl
  
 		async override internal Task FinalPass()
 		{
-            await base.FinalPass();
+            await base.FinalPass().ConfigureAwait(false);
 
 			if (_ReportItems != null)
-                await _ReportItems.FinalPass();
+                await _ReportItems.FinalPass().ConfigureAwait(false);
 
 			return;
 		}
  
 		async override internal Task Run(IPresent ip, Row row)
 		{
-            await base.Run(ip, row);
+            await base.Run(ip, row).ConfigureAwait(false);
 
 			if (_ReportItems == null)
 				return;
 
-			if (await ip.RectangleStart(this, row))
+			if (await ip.RectangleStart(this, row).ConfigureAwait(false))
 			{
-                await _ReportItems.Run(ip, row);
-                await ip.RectangleEnd(this, row);
+                await _ReportItems.Run(ip, row).ConfigureAwait(false);
+                await ip.RectangleEnd(this, row).ConfigureAwait(false);
 			}
 		}
 
 		async override internal Task RunPage(Pages pgs, Row row)
 		{
 			Report r = pgs.Report;
-            bool bHidden = await IsHidden(r, row);
+            bool bHidden = await IsHidden(r, row).ConfigureAwait(false);
 
 			SetPagePositionBegin(pgs);
 
@@ -95,7 +95,7 @@ namespace Majorsilence.Reporting.Rdl
             }
 
 			PageRectangle pr = new PageRectangle();
-            await SetPagePositionAndStyle(r, pr, row);
+            await SetPagePositionAndStyle(r, pr, row).ConfigureAwait(false);
 			if (pr.SI.BackgroundImage != null)
 				pr.SI.BackgroundImage.H = pr.H;		//   and in the background image
 
@@ -110,7 +110,7 @@ namespace Majorsilence.Reporting.Rdl
        //             p.YOffset += (Top == null ? 0 : this.Top.Points);
                     p.YOffset = pr.Y;       // top of rectangle is base for contained report items
                     int firstContained = p.Count;
-                    await _ReportItems.RunPage(pgs, row, GetOffsetCalc(pgs.Report) + LeftCalc(r));
+                    await _ReportItems.RunPage(pgs, row, GetOffsetCalc(pgs.Report) + LeftCalc(r)).ConfigureAwait(false);
                     p.YOffset = saveY;
                     if (pgs.CurrentPage == p)
                         GrowToContents(p, firstContained, pr);

@@ -37,14 +37,14 @@ namespace Majorsilence.Reporting.Rdl
 
 		public async Task<bool> IsConstant()
 		{
-			return await _rhs.IsConstant();
+			return await _rhs.IsConstant().ConfigureAwait(false);
 		}
 
 		public async Task<IExpr> ConstantOptimization()
 		{
-            await _rhs.ConstantOptimization();
-			if (await _rhs.IsConstant())
-				return new ConstantDouble(await EvaluateDouble(null, null));
+            await _rhs.ConstantOptimization().ConfigureAwait(false);
+			if (await _rhs.IsConstant().ConfigureAwait(false))
+				return new ConstantDouble(await EvaluateDouble(null, null).ConfigureAwait(false));
 			else
 				return this;
 		}
@@ -52,39 +52,39 @@ namespace Majorsilence.Reporting.Rdl
 		// Evaluate is for interpretation  (and is relatively slow)
 		public async Task<object> Evaluate(Report rpt, Row row)
 		{
-			return await EvaluateDouble(rpt, row);
+			return await EvaluateDouble(rpt, row).ConfigureAwait(false);
 		}
 		
 		public async Task<double> EvaluateDouble(Report rpt, Row row)
 		{
-			double rhs = await _rhs.EvaluateDouble(rpt, row);
+			double rhs = await _rhs.EvaluateDouble(rpt, row).ConfigureAwait(false);
 
 			return -rhs;
 		}
 		
 		public async Task<decimal> EvaluateDecimal(Report rpt, Row row)
 		{
-			double result = await EvaluateDouble(rpt, row);
+			double result = await EvaluateDouble(rpt, row).ConfigureAwait(false);
 
 			return Convert.ToDecimal(result);
 		}
 
         public async Task<int> EvaluateInt32(Report rpt, Row row)
         {
-            double result = await EvaluateDouble(rpt, row);
+            double result = await EvaluateDouble(rpt, row).ConfigureAwait(false);
 
             return Convert.ToInt32(result);
         }
 
 		public async Task<string> EvaluateString(Report rpt, Row row)
 		{
-			double result = await EvaluateDouble(rpt, row);
+			double result = await EvaluateDouble(rpt, row).ConfigureAwait(false);
 			return result.ToString();
 		}
 
 		public async Task<DateTime> EvaluateDateTime(Report rpt, Row row)
 		{
-			double result = await EvaluateDouble(rpt, row);
+			double result = await EvaluateDouble(rpt, row).ConfigureAwait(false);
 			return Convert.ToDateTime(result);
 		}
 

@@ -46,7 +46,7 @@ namespace Majorsilence.Reporting.Rdl
 		{
 			foreach (CategoryGrouping cg in _Items)
 			{
-                await cg.FinalPass();
+                await cg.FinalPass().ConfigureAwait(false);
 			}
 			return;
 		}

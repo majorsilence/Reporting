@@ -29,17 +29,17 @@ namespace Majorsilence.Reporting.Rdl
 
 		public async Task SetData(IDataReader dr)
 		{
-            await _dsd.Query.SetData(_rpt, dr, _dsd.Fields, _dsd.Filters);		// get the data (and apply the filters
+            await _dsd.Query.SetData(_rpt, dr, _dsd.Fields, _dsd.Filters).ConfigureAwait(false);		// get the data (and apply the filters
 		}
 
 		public async Task SetData(DataTable dt)
 		{
-            await _dsd.Query.SetData(_rpt, dt, _dsd.Fields, _dsd.Filters);
+            await _dsd.Query.SetData(_rpt, dt, _dsd.Fields, _dsd.Filters).ConfigureAwait(false);
 		}
 
 		public async Task SetData(XmlDocument xmlDoc)
 		{
-            await _dsd.Query.SetData(_rpt, xmlDoc, _dsd.Fields, _dsd.Filters);
+            await _dsd.Query.SetData(_rpt, xmlDoc, _dsd.Fields, _dsd.Filters).ConfigureAwait(false);
 		}
 
         /// <summary>
@@ -55,7 +55,7 @@ namespace Majorsilence.Reporting.Rdl
 		[RequiresUnreferencedCode("When collection is false, items are mapped by reflection over their runtime type, whose members may be trimmed. Use SetData<T> or SetCollectionData for Native AOT / trimmed apps.")]
 		public async Task SetData(IEnumerable ie, bool collection = false)
 		{
-            await _dsd.Query.SetData(_rpt, ie, _dsd.Fields, _dsd.Filters, collection);
+            await _dsd.Query.SetData(_rpt, ie, _dsd.Fields, _dsd.Filters, collection).ConfigureAwait(false);
 		}
 
         /// <summary>
@@ -65,7 +65,7 @@ namespace Majorsilence.Reporting.Rdl
         /// </summary>
         public async Task SetData<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicFields | DynamicallyAccessedMemberTypes.PublicProperties)] T>(IEnumerable<T> items)
         {
-            await _dsd.Query.SetDataCore(_rpt, items, _dsd.Fields, _dsd.Filters, false, typeof(T));
+            await _dsd.Query.SetDataCore(_rpt, items, _dsd.Fields, _dsd.Filters, false, typeof(T)).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -74,12 +74,12 @@ namespace Majorsilence.Reporting.Rdl
         /// </summary>
         public async Task SetCollectionData(IEnumerable ie)
         {
-            await _dsd.Query.SetDataCore(_rpt, ie, _dsd.Fields, _dsd.Filters, true, null);
+            await _dsd.Query.SetDataCore(_rpt, ie, _dsd.Fields, _dsd.Filters, true, null).ConfigureAwait(false);
         }
 
         public async Task SetSource(string sql)
         {
-            await _dsd.Query.CommandText.SetSource(sql);
+            await _dsd.Query.CommandText.SetSource(sql).ConfigureAwait(false);
         }
 
 

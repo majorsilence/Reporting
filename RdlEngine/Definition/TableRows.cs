@@ -57,7 +57,7 @@ namespace Majorsilence.Reporting.Rdl
 			foreach (TableRow t in _Items)
 			{
 				_HeightOfRows += t.Height.Points;
-                await t.FinalPass();
+                await t.FinalPass().ConfigureAwait(false);
 				_CanGrow |= t.CanGrow;
 				_CanShrink |= t.CanShrink;
 			}
@@ -69,14 +69,14 @@ namespace Majorsilence.Reporting.Rdl
 		{
 			foreach (TableRow t in _Items)
 			{
-                await t.Run(ip, row);
+                await t.Run(ip, row).ConfigureAwait(false);
 			}
 			return;
 		}
 
 		internal async Task RunPage(Pages pgs, Row row)
 		{
-            await RunPage(pgs, row, false);
+            await RunPage(pgs, row, false).ConfigureAwait(false);
 		}
 
 		internal async Task RunPage(Pages pgs, Row row, bool bCheckRows)
@@ -86,20 +86,20 @@ namespace Majorsilence.Reporting.Rdl
 				foreach (TableRow t in _Items)
 				{
 					Page p = pgs.CurrentPage;			// this can change after running a row
-					float hrows = await t.HeightOfRow(pgs, row);	// height of this row
+					float hrows = await t.HeightOfRow(pgs, row).ConfigureAwait(false);	// height of this row
 					float height = p.YOffset + hrows;
 					if (height > pgs.BottomOfPage)
 					{
 						p = OwnerTable.RunPageNew(pgs, p);
-                        await OwnerTable.RunPageHeader(pgs, row, false, null);
+                        await OwnerTable.RunPageHeader(pgs, row, false, null).ConfigureAwait(false);
 					}
-                    await t.RunPage(pgs, row);
+                    await t.RunPage(pgs, row).ConfigureAwait(false);
 				}
 			}
 			else
 			{	// all rows will fit on the page
 				foreach (TableRow t in _Items)
-                    await t.RunPage(pgs, row);
+                    await t.RunPage(pgs, row).ConfigureAwait(false);
 			}
 			return;
 		}
@@ -136,7 +136,7 @@ namespace Majorsilence.Reporting.Rdl
 			float height=0;
 			foreach (TableRow tr in this._Items)
 			{
-				height += await tr.HeightOfRow(pgs, r);
+				height += await tr.HeightOfRow(pgs, r).ConfigureAwait(false);
 			}
 
 			// When rows can shrink, the total may legitimately fall below the sum of

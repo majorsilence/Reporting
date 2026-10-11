@@ -62,7 +62,7 @@ namespace Majorsilence.Reporting.Rdl
 			for (int i=0; i < _Args.GetLength(0); i++)
 			{
 				IExpr e = (IExpr)_Args[i];
-				_Args[i] = await e.ConstantOptimization();
+				_Args[i] = await e.ConstantOptimization().ConfigureAwait(false);
 			}
 
 			// Can't assume that the function doesn't vary
@@ -80,7 +80,7 @@ namespace Majorsilence.Reporting.Rdl
             bool bNull = false;
 			foreach(IExpr a  in _Args)
 			{
-				argResults[i] = await a.Evaluate(rpt, row);
+				argResults[i] = await a.Evaluate(rpt, row).ConfigureAwait(false);
                 if (argResults[i] == null)
                     bNull = true;
 				else if (argResults[i].GetType() != _ArgTypes[i])
@@ -129,33 +129,33 @@ namespace Majorsilence.Reporting.Rdl
 
 		public async Task<double> EvaluateDouble(Report rpt, Row row)
 		{
-			return Convert.ToDouble(await Evaluate(rpt, row));
+			return Convert.ToDouble(await Evaluate(rpt, row).ConfigureAwait(false));
 		}
 		
 		public async Task<decimal> EvaluateDecimal(Report rpt, Row row)
 		{
-			return Convert.ToDecimal(await Evaluate(rpt, row));
+			return Convert.ToDecimal(await Evaluate(rpt, row).ConfigureAwait(false));
 		}
 
         public async Task<int> EvaluateInt32(Report rpt, Row row)
         {
-            return Convert.ToInt32(await Evaluate(rpt, row));
+            return Convert.ToInt32(await Evaluate(rpt, row).ConfigureAwait(false));
         }
 
 		public async Task<string> EvaluateString(Report rpt, Row row)
 		{
-			return Convert.ToString(await Evaluate(rpt, row));
+			return Convert.ToString(await Evaluate(rpt, row).ConfigureAwait(false));
 		}
 
 		public async Task<DateTime> EvaluateDateTime(Report rpt, Row row)
 		{
-			return Convert.ToDateTime(await Evaluate(rpt, row));
+			return Convert.ToDateTime(await Evaluate(rpt, row).ConfigureAwait(false));
 		}
 
 
 		public async Task<bool> EvaluateBoolean(Report rpt, Row row)
 		{
-			return Convert.ToBoolean(await Evaluate(rpt, row));
+			return Convert.ToBoolean(await Evaluate(rpt, row).ConfigureAwait(false));
 		}
 
 		public string Cls

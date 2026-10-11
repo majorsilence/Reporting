@@ -35,8 +35,8 @@ namespace Majorsilence.Reporting.Rdl
 
 		public async Task<bool> IsConstant()
 		{
-			if (await _lhs.IsConstant())
-				return await _rhs.IsConstant();
+			if (await _lhs.IsConstant().ConfigureAwait(false))
+				return await _rhs.IsConstant().ConfigureAwait(false);
 
 			return false;
 		}

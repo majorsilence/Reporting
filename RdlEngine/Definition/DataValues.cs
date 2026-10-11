@@ -48,7 +48,7 @@ namespace Majorsilence.Reporting.Rdl
 		{
 			foreach (DataValue dv in _Items)
 			{
-                await dv.FinalPass();
+                await dv.FinalPass().ConfigureAwait(false);
 			}
 			return;
 		}

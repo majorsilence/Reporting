@@ -84,27 +84,27 @@ namespace Majorsilence.Reporting.Rdl
 
 		public async Task<object> Evaluate(Report rpt, Row row)
 		{
-			return await EvaluateBoolean(rpt, row);
+			return await EvaluateBoolean(rpt, row).ConfigureAwait(false);
 		}
 
 		public async Task<double> EvaluateDouble(Report rpt, Row row)
 		{
-			return await EvaluateBoolean(rpt, row) ? 1 : 0;
+			return await EvaluateBoolean(rpt, row).ConfigureAwait(false) ? 1 : 0;
 		}
 
 		public async Task<decimal> EvaluateDecimal(Report rpt, Row row)
 		{
-			return await EvaluateBoolean(rpt, row) ? 1m : 0m;
+			return await EvaluateBoolean(rpt, row).ConfigureAwait(false) ? 1m : 0m;
 		}
 
 		public async Task<int> EvaluateInt32(Report rpt, Row row)
 		{
-			return await EvaluateBoolean(rpt, row) ? 1 : 0;
+			return await EvaluateBoolean(rpt, row).ConfigureAwait(false) ? 1 : 0;
 		}
 
 		public async Task<string> EvaluateString(Report rpt, Row row)
 		{
-			return await EvaluateBoolean(rpt, row) ? "True" : "False";
+			return await EvaluateBoolean(rpt, row).ConfigureAwait(false) ? "True" : "False";
 		}
 
 		public Task<DateTime> EvaluateDateTime(Report rpt, Row row)

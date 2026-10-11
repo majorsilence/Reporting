@@ -84,19 +84,19 @@ namespace Majorsilence.Reporting.Rdl
 
         async override internal Task FinalPass()
         {
-            await base.FinalPass();       // this handles the finalpass of the AltReportItems
+            await base.FinalPass().ConfigureAwait(false);       // this handles the finalpass of the AltReportItems
 
             // Handle the final pass for the Custom Properties
             if (_Properties != null)
             {
                 foreach (CustomProperty cp in _Properties)
                 {
-                    await cp.Name.FinalPass();
-                    await cp.Value.FinalPass();
+                    await cp.Name.FinalPass().ConfigureAwait(false);
+                    await cp.Value.FinalPass().ConfigureAwait(false);
                 }
             }
             
-            await GetCriType(null, null);
+            await GetCriType(null, null).ConfigureAwait(false);
 
             // Find out whether the type is known
             ICustomReportItem cri = null;
@@ -125,17 +125,17 @@ namespace Majorsilence.Reporting.Rdl
             ICustomReportItem cri = null;
             try
             {
-                await GetCriType(row, rpt);
+                await GetCriType(row, rpt).ConfigureAwait(false);
                 cri = RdlEngineConfig.CreateCustomReportItem(_Type);
 				Type a = cri.GetType();
 				Draw2.Bitmap bm = null;
-                await SetProperties(rpt, row, cri);
+                await SetProperties(rpt, row, cri).ConfigureAwait(false);
 				int width = WidthCalc(rpt, null) -
 					(Style == null ? 0 :
-						(await Style.EvalPaddingLeftPx(rpt, row) + await Style.EvalPaddingRightPx(rpt, row)));
+						(await Style.EvalPaddingLeftPx(rpt, row).ConfigureAwait(false) + await Style.EvalPaddingRightPx(rpt, row).ConfigureAwait(false)));
 				int height = RSize.PixelsFromPoints(this.HeightOrOwnerHeight) -
 					(Style == null ? 0 :
-						(await Style.EvalPaddingTopPx(rpt, row) + await Style.EvalPaddingBottomPx(rpt, row)));
+						(await Style.EvalPaddingTopPx(rpt, row).ConfigureAwait(false) + await Style.EvalPaddingBottomPx(rpt, row).ConfigureAwait(false)));
 				bm = new Draw2.Bitmap(width, height);
 				cri.DrawImage(ref bm);
 
@@ -158,7 +158,7 @@ namespace Majorsilence.Reporting.Rdl
 				bm.Save(ostrm, codec, encoderParameters);
                 bm.Dispose();
 
-                await ip.Image(new Image(rpt.ReportDefinition, this, xNode), row, null, ostrm);
+                await ip.Image(new Image(rpt.ReportDefinition, this, xNode), row, null, ostrm).ConfigureAwait(false);
 				ostrm.Close();
             }
             catch (Exception ex)
@@ -180,8 +180,8 @@ namespace Majorsilence.Reporting.Rdl
             if (_typeExpression != null)
             {
                 //_Type = await exp.EvaluateString(OwnerReport, null);
-                await _typeExpression.FinalPass();
-                _Type = await _typeExpression.EvaluateString(rpt, row);
+                await _typeExpression.FinalPass().ConfigureAwait(false);
+                _Type = await _typeExpression.EvaluateString(rpt, row).ConfigureAwait(false);
             }
         }
 
@@ -189,7 +189,7 @@ namespace Majorsilence.Reporting.Rdl
         {
             Report rpt = pgs.Report;
 
-            if (await IsHidden(pgs.Report, row))
+            if (await IsHidden(pgs.Report, row).ConfigureAwait(false))
                 return;
 
             SetPagePositionBegin(pgs);
@@ -199,9 +199,9 @@ namespace Majorsilence.Reporting.Rdl
             ICustomReportItem cri = null;
             try
             {
-                await GetCriType(row, rpt);
+                await GetCriType(row, rpt).ConfigureAwait(false);
                 cri = RdlEngineConfig.CreateCustomReportItem(_Type);
-                await SetProperties(pgs.Report, row, cri);
+                await SetProperties(pgs.Report, row, cri).ConfigureAwait(false);
                 
                 Draw2.Imaging.EncoderParameters encoderParameters = new Draw2.Imaging.EncoderParameters(1);
                 // 20022008 AJM GJL - Using centralised image quality
@@ -212,7 +212,7 @@ namespace Majorsilence.Reporting.Rdl
                     ((format, width, height) => GenerateImage(codec, encoderParameters, width, height, cri)),
                     ImageSizingEnum.Clip);	// Create an image
 
-                await SetPagePositionAndStyle(rpt, pi, row);
+                await SetPagePositionAndStyle(rpt, pi, row).ConfigureAwait(false);
 
                 if (pgs.CurrentPage.YOffset + pi.Y + pi.H >= pgs.BottomOfPage && !pgs.CurrentPage.IsEmpty())
                 {	// force page break if it doesn't fit on the page
@@ -279,8 +279,8 @@ namespace Majorsilence.Reporting.Rdl
                 new Dictionary<string, object>(_Properties.Count, StringComparer.OrdinalIgnoreCase);
             foreach (CustomProperty cp in _Properties)
             {
-                string name = await cp.Name.EvaluateString(rpt, row);
-                object val = await cp.Value.Evaluate(rpt, row);
+                string name = await cp.Name.EvaluateString(rpt, row).ConfigureAwait(false);
+                object val = await cp.Value.Evaluate(rpt, row).ConfigureAwait(false);
                 try { dict.Add(name, val); }
                 catch
                 {

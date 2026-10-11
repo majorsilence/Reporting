@@ -230,63 +230,63 @@ namespace Majorsilence.Reporting.Rdl
 		async override internal Task FinalPass()
 		{
 			if (_BorderColor != null)
-				await _BorderColor.FinalPass();
+				await _BorderColor.FinalPass().ConfigureAwait(false);
 			if (_BorderStyle != null)
-                await _BorderStyle.FinalPass();
+                await _BorderStyle.FinalPass().ConfigureAwait(false);
 			if (_BorderWidth != null)
-                await _BorderWidth.FinalPass();
+                await _BorderWidth.FinalPass().ConfigureAwait(false);
 			if (_BackgroundColor != null)
-                await _BackgroundColor.FinalPass();
+                await _BackgroundColor.FinalPass().ConfigureAwait(false);
 			if (_BackgroundGradientType != null)
-                await _BackgroundGradientType.FinalPass();
+                await _BackgroundGradientType.FinalPass().ConfigureAwait(false);
 			if (_BackgroundGradientEndColor != null)
-                await _BackgroundGradientEndColor.FinalPass();
+                await _BackgroundGradientEndColor.FinalPass().ConfigureAwait(false);
 			if (_BackgroundImage != null)
-                await _BackgroundImage.FinalPass();
+                await _BackgroundImage.FinalPass().ConfigureAwait(false);
 			if (_FontStyle != null)
-                await _FontStyle.FinalPass();
+                await _FontStyle.FinalPass().ConfigureAwait(false);
 			if (_FontFamily != null)
-                await _FontFamily.FinalPass();
+                await _FontFamily.FinalPass().ConfigureAwait(false);
 			if (_FontSize != null)
-                await _FontSize.FinalPass();
+                await _FontSize.FinalPass().ConfigureAwait(false);
 			if (_FontWeight != null)
-                await _FontWeight.FinalPass();
+                await _FontWeight.FinalPass().ConfigureAwait(false);
 			if (_Format != null)
-                await _Format.FinalPass();
+                await _Format.FinalPass().ConfigureAwait(false);
 			if (_TextDecoration != null)
-                await _TextDecoration.FinalPass();
+                await _TextDecoration.FinalPass().ConfigureAwait(false);
 			if (_TextAlign != null)
-                await _TextAlign.FinalPass();
+                await _TextAlign.FinalPass().ConfigureAwait(false);
 			if (_VerticalAlign != null)
-                await _VerticalAlign.FinalPass();
+                await _VerticalAlign.FinalPass().ConfigureAwait(false);
 			if (_Color != null)
-                await _Color.FinalPass();
+                await _Color.FinalPass().ConfigureAwait(false);
 			if (_PaddingLeft != null)
-                await _PaddingLeft.FinalPass();
+                await _PaddingLeft.FinalPass().ConfigureAwait(false);
 			if (_PaddingRight != null)
-                await _PaddingRight.FinalPass();
+                await _PaddingRight.FinalPass().ConfigureAwait(false);
 			if (_PaddingTop != null)
-                await _PaddingTop.FinalPass();
+                await _PaddingTop.FinalPass().ConfigureAwait(false);
 			if (_PaddingBottom != null)
-                await _PaddingBottom.FinalPass();
+                await _PaddingBottom.FinalPass().ConfigureAwait(false);
 			if (_LineHeight != null)
-                await _LineHeight.FinalPass();
+                await _LineHeight.FinalPass().ConfigureAwait(false);
 			if (_Direction != null)
-                await _Direction.FinalPass();
+                await _Direction.FinalPass().ConfigureAwait(false);
 			if (_WritingMode != null)
-                await _WritingMode.FinalPass();
+                await _WritingMode.FinalPass().ConfigureAwait(false);
 			if (_Language != null)
-                await _Language.FinalPass();
+                await _Language.FinalPass().ConfigureAwait(false);
 			if (_UnicodeBiDirectional != null)
-                await _UnicodeBiDirectional.FinalPass();
+                await _UnicodeBiDirectional.FinalPass().ConfigureAwait(false);
 			if (_Calendar != null)
-                await _Calendar.FinalPass();
+                await _Calendar.FinalPass().ConfigureAwait(false);
 			if (_NumeralLanguage != null)
-                await _NumeralLanguage.FinalPass();
+                await _NumeralLanguage.FinalPass().ConfigureAwait(false);
 			if (_NumeralVariant != null)
-                await _NumeralVariant.FinalPass();
+                await _NumeralVariant.FinalPass().ConfigureAwait(false);
 
-			_ConstantStyle = await this.IsConstant();
+			_ConstantStyle = await IsConstant().ConfigureAwait(false);
 			return;
 		}
 
@@ -298,12 +298,12 @@ namespace Majorsilence.Reporting.Rdl
 				this.BackgroundGradientEndColor != null &&
 				this.BackgroundColor != null)
 			{
-				string bgt = await this.BackgroundGradientType.EvaluateString(rpt, r);
-				string bgc = await this.BackgroundColor.EvaluateString(rpt, r);
+				string bgt = await BackgroundGradientType.EvaluateString(rpt, r).ConfigureAwait(false);
+				string bgc = await BackgroundColor.EvaluateString(rpt, r).ConfigureAwait(false);
 				
 				System.Drawing.Color c = XmlUtil.ColorFromHtml(bgc, System.Drawing.Color.White, rpt);
 
-				string bgec = await this.BackgroundGradientEndColor.EvaluateString(rpt, r);
+				string bgec = await BackgroundGradientEndColor.EvaluateString(rpt, r).ConfigureAwait(false);
 				System.Drawing.Color ec = XmlUtil.ColorFromHtml(bgec, System.Drawing.Color.White, rpt);
 
 				switch (bgt)
@@ -344,7 +344,7 @@ namespace Majorsilence.Reporting.Rdl
 			{
 				if (this.BackgroundColor != null)
 				{
-					string bgc = await this.BackgroundColor.EvaluateString(rpt, r);
+					string bgc = await BackgroundColor.EvaluateString(rpt, r).ConfigureAwait(false);
 					System.Drawing.Color c = XmlUtil.ColorFromHtml(bgc, System.Drawing.Color.White, rpt);
 
 					using (Draw2.SolidBrush sb = new Draw2.SolidBrush(c)) {
@@ -360,7 +360,7 @@ namespace Majorsilence.Reporting.Rdl
 			//    background.  (Routine is only used by ChartPie in the doughnut case.)
 			if (this.BackgroundColor != null)
 			{
-				string bgc = await this.BackgroundColor.EvaluateString(rpt, r);
+				string bgc = await BackgroundColor.EvaluateString(rpt, r).ConfigureAwait(false);
 				System.Drawing.Color c = XmlUtil.ColorFromHtml(bgc, System.Drawing.Color.White, rpt);
 
 				using (Draw2.SolidBrush sb = new Draw2.SolidBrush(c)) {
@@ -391,27 +391,27 @@ namespace Majorsilence.Reporting.Rdl
 			{
 				if (BorderStyle.Default != null)
 				{
-					v = await BorderStyle.Default.EvaluateString(rpt, r);
+					v = await BorderStyle.Default.EvaluateString(rpt, r).ConfigureAwait(false);
 					topBS = bottomBS = leftBS = rightBS = StyleBorderStyle.GetBorderStyle(v, BorderStyleEnum.None);
 				}
 				if (BorderStyle.Top != null)
 				{
-					v = await BorderStyle.Top.EvaluateString(rpt, r);
+					v = await BorderStyle.Top.EvaluateString(rpt, r).ConfigureAwait(false);
 					topBS = StyleBorderStyle.GetBorderStyle(v, topBS);
 				}
 				if (BorderStyle.Bottom != null)
 				{
-					v = await BorderStyle.Bottom.EvaluateString(rpt, r);
+					v = await BorderStyle.Bottom.EvaluateString(rpt, r).ConfigureAwait(false);
 					bottomBS = StyleBorderStyle.GetBorderStyle(v, bottomBS);
 				}
 				if (BorderStyle.Left != null)
 				{
-					v = await BorderStyle.Left.EvaluateString(rpt, r);
+					v = await BorderStyle.Left.EvaluateString(rpt, r).ConfigureAwait(false);
 					leftBS = StyleBorderStyle.GetBorderStyle(v, leftBS);
 				}
 				if (BorderStyle.Right != null)
 				{
-					v = await BorderStyle.Right.EvaluateString(rpt, r);
+					v = await BorderStyle.Right.EvaluateString(rpt, r).ConfigureAwait(false);
 					rightBS = StyleBorderStyle.GetBorderStyle(v, rightBS);
 				}
 			}
@@ -422,28 +422,28 @@ namespace Majorsilence.Reporting.Rdl
 			{
 				if (BorderColor.Default != null)
 				{
-					v = await BorderColor.Default.EvaluateString(rpt, r);
+					v = await BorderColor.Default.EvaluateString(rpt, r).ConfigureAwait(false);
 					topColor = bottomColor = leftColor = rightColor = 
 						XmlUtil.ColorFromHtml(v, System.Drawing.Color.Black, rpt);
 				}
 				if (BorderColor.Top != null)
 				{
-					v = await BorderColor.Top.EvaluateString(rpt, r);
+					v = await BorderColor.Top.EvaluateString(rpt, r).ConfigureAwait(false);
 					topColor = XmlUtil.ColorFromHtml(v, System.Drawing.Color.Black, rpt);
 				}
 				if (BorderColor.Bottom != null)
 				{
-					v = await BorderColor.Bottom.EvaluateString(rpt, r);
+					v = await BorderColor.Bottom.EvaluateString(rpt, r).ConfigureAwait(false);
 					bottomColor = XmlUtil.ColorFromHtml(v, System.Drawing.Color.Black, rpt);
 				}
 				if (BorderColor.Left != null)
 				{
-					v = await BorderColor.Left.EvaluateString(rpt, r);
+					v = await BorderColor.Left.EvaluateString(rpt, r).ConfigureAwait(false);
 					leftColor = XmlUtil.ColorFromHtml(v, System.Drawing.Color.Black, rpt);
 				}
 				if (BorderColor.Right != null)
 				{
-					v = await BorderColor.Right.EvaluateString(rpt, r);
+					v = await BorderColor.Right.EvaluateString(rpt, r).ConfigureAwait(false);
 					rightColor = XmlUtil.ColorFromHtml(v, System.Drawing.Color.Black, rpt);
 				}
 			}
@@ -454,23 +454,23 @@ namespace Majorsilence.Reporting.Rdl
 			{
 				if (BorderWidth.Default != null)
 				{
-					topWidth = bottomWidth = leftWidth = rightWidth = (int) new RSize(this.OwnerReport, await BorderWidth.Default.EvaluateString(rpt, r)).PixelsX;
+					topWidth = bottomWidth = leftWidth = rightWidth = (int) new RSize(this.OwnerReport, await BorderWidth.Default.EvaluateString(rpt, r).ConfigureAwait(false)).PixelsX;
 				}
 				if (BorderWidth.Top != null)
 				{
-					topWidth = (int) new RSize(this.OwnerReport, await BorderWidth.Top.EvaluateString(rpt, r)).PixelsX;
+					topWidth = (int) new RSize(this.OwnerReport, await BorderWidth.Top.EvaluateString(rpt, r).ConfigureAwait(false)).PixelsX;
 				}
 				if (BorderWidth.Bottom != null)
 				{
-					bottomWidth = (int) new RSize(this.OwnerReport, await BorderWidth.Bottom.EvaluateString(rpt, r)).PixelsX;
+					bottomWidth = (int) new RSize(this.OwnerReport, await BorderWidth.Bottom.EvaluateString(rpt, r).ConfigureAwait(false)).PixelsX;
 				}
 				if (BorderWidth.Left != null)
 				{
-					leftWidth = (int) new RSize(this.OwnerReport, await BorderWidth.Left.EvaluateString(rpt, r)).PixelsY;
+					leftWidth = (int) new RSize(this.OwnerReport, await BorderWidth.Left.EvaluateString(rpt, r).ConfigureAwait(false)).PixelsY;
 				}
 				if (BorderWidth.Right != null)
 				{
-					rightWidth = (int) new RSize(this.OwnerReport, await BorderWidth.Right.EvaluateString(rpt, r)).PixelsY;
+					rightWidth = (int) new RSize(this.OwnerReport, await BorderWidth.Right.EvaluateString(rpt, r).ConfigureAwait(false)).PixelsY;
 				}
 			}
 
@@ -565,14 +565,14 @@ namespace Majorsilence.Reporting.Rdl
 
 			// Border Width default is used for the line width
 			if (BorderWidth != null && BorderWidth.Default != null)
-				width = (int) new RSize(this.OwnerReport, await BorderWidth.Default.EvaluateString(rpt, r)).PixelsX;
+				width = (int) new RSize(this.OwnerReport, await BorderWidth.Default.EvaluateString(rpt, r).ConfigureAwait(false)).PixelsX;
 			else
 				width = 1;
 
 			// Border Color default is used for the line color
 			if (BorderColor != null && BorderColor.Default != null)
 			{
-				string v = await BorderColor.Default.EvaluateString(rpt, r);
+				string v = await BorderColor.Default.EvaluateString(rpt, r).ConfigureAwait(false);
 				color = XmlUtil.ColorFromHtml(v, System.Drawing.Color.Black, rpt);
 			}
 			else
@@ -580,7 +580,7 @@ namespace Majorsilence.Reporting.Rdl
 			
 			if (BorderStyle != null && BorderStyle.Default != null)
 			{
-				string v = await BorderStyle.Default.EvaluateString(rpt, r);
+				string v = await BorderStyle.Default.EvaluateString(rpt, r).ConfigureAwait(false);
 				bs = StyleBorderStyle.GetBorderStyle(v, BorderStyleEnum.None);
 			}
 			else
@@ -599,11 +599,11 @@ namespace Majorsilence.Reporting.Rdl
 		internal async Task DrawString(Report rpt, Draw2.Graphics g, object o, TypeCode tc, Row r, System.Drawing.Rectangle rect)
 		{
 			// the string to draw
-			var s = await Style.GetFormatedString(rpt, this, r, o, tc);
+			var s = await GetFormatedString(rpt, this, r, o, tc).ConfigureAwait(false);
 				
-			using (Draw2.Font drawFont = await GetFont(rpt, r)) // Font we'll draw with
-			using (Draw2.Brush drawBrush = await GetBrush(rpt, r)) // Brush we'll draw with
-			using (Draw2.StringFormat drawFormat = await GetStringFormat(rpt, r)) // StringFormat we'll draw with
+			using (Draw2.Font drawFont = await GetFont(rpt, r).ConfigureAwait(false)) // Font we'll draw with
+			using (Draw2.Brush drawBrush = await GetBrush(rpt, r).ConfigureAwait(false)) // Brush we'll draw with
+			using (Draw2.StringFormat drawFormat = await GetStringFormat(rpt, r).ConfigureAwait(false)) // StringFormat we'll draw with
 			{
 				// Draw string
 				drawFormat.FormatFlags |= Draw2.StringFormatFlags.NoWrap;
@@ -640,10 +640,10 @@ namespace Majorsilence.Reporting.Rdl
 		//  information
 		internal async Task<System.Drawing.Size> MeasureString(Report rpt, Draw2.Graphics g, object o, TypeCode tc, Row r, int maxWidth)
 		{
-			string s = await Style.GetFormatedString(rpt, this, r, o, tc); // the string to draw
+			string s = await GetFormatedString(rpt, this, r, o, tc).ConfigureAwait(false); // the string to draw
 
-			using (Draw2.Font drawFont = await GetFont(rpt, r)) // Font we'll draw with
-			using (Draw2.StringFormat drawFormat = await GetStringFormat(rpt, r)) // StringFormat we'll draw with
+			using (Draw2.Font drawFont = await GetFont(rpt, r).ConfigureAwait(false)) // Font we'll draw with
+			using (Draw2.StringFormat drawFormat = await GetStringFormat(rpt, r).ConfigureAwait(false)) // StringFormat we'll draw with
 			{
 				// Measure string
 				if (maxWidth == int.MaxValue)
@@ -651,7 +651,7 @@ namespace Majorsilence.Reporting.Rdl
 
 				// 06122007AJM need to add w to make slightly bigger
 				System.Drawing.SizeF ms = g.MeasureStringLocked(s + "w", drawFont, maxWidth, drawFormat);
-				float lineH = await EvalLineHeight(rpt, r);
+				float lineH = await EvalLineHeight(rpt, r).ConfigureAwait(false);
 				if (lineH > 0)
 				{
 					// an explicit line height replaces the font's own line pitch
@@ -670,7 +670,7 @@ namespace Majorsilence.Reporting.Rdl
 		// Measure a string using the defaults for a Style font
 		static internal async Task<System.Drawing.Size> MeasureStringDefaults(Report rpt, Draw2.Graphics g, object o, TypeCode tc, Row r, int maxWidth)
 		{
-			string s = await Style.GetFormatedString(rpt, null, r, o, tc); // the string to draw
+			string s = await GetFormatedString(rpt, null, r, o, tc).ConfigureAwait(false); // the string to draw
 
 			System.Drawing.Size size = System.Drawing.Size.Empty;
 			using (Draw2.Font drawFont = new Draw2.Font("Arial", 10)) // Font we'll draw with
@@ -694,7 +694,7 @@ namespace Majorsilence.Reporting.Rdl
 			// Get the brush information
 			if (this.Color != null)
 			{
-				string c = await this.Color.EvaluateString(rpt, r);
+				string c = await Color.EvaluateString(rpt, r).ConfigureAwait(false);
 				System.Drawing.Color color = XmlUtil.ColorFromHtml(c, System.Drawing.Color.Black, rpt);
 				drawBrush = new Draw2.SolidBrush(color);
 			}
@@ -709,7 +709,7 @@ namespace Majorsilence.Reporting.Rdl
 			// FAMILY
 			string ff;
 			if (this.FontFamily != null)
-				ff = await this.FontFamily.EvaluateString(rpt, r) ?? "Arial";	// null: e.g. an expression that evaluated to no result
+				ff = await FontFamily.EvaluateString(rpt, r).ConfigureAwait(false) ?? "Arial";	// null: e.g. an expression that evaluated to no result
 			else
 				ff = "Arial";
 
@@ -717,13 +717,13 @@ namespace Majorsilence.Reporting.Rdl
 			Draw2.FontStyle fs = 0;
 			if (this.FontStyle != null)
 			{
-				string fStyle = await this.FontStyle.EvaluateString(rpt, r);
+				string fStyle = await FontStyle.EvaluateString(rpt, r).ConfigureAwait(false);
 				if (fStyle == "Italic")
 					fs |= Draw2.FontStyle.Italic;
 			}
 			if (this.TextDecoration != null)
 			{
-				string td = await this.TextDecoration.EvaluateString(rpt, r);
+				string td = await TextDecoration.EvaluateString(rpt, r).ConfigureAwait(false);
 				switch (td)
 				{
 					case "Underline":
@@ -743,7 +743,7 @@ namespace Majorsilence.Reporting.Rdl
 			// WEIGHT
 			if (this.FontWeight != null)
 			{
-				string weight = await this.FontWeight.EvaluateString(rpt, r);
+				string weight = await FontWeight.EvaluateString(rpt, r).ConfigureAwait(false);
 				switch(weight?.ToLower())		// null: e.g. an expression that evaluated to no result
 				{
 					case "bold":
@@ -771,7 +771,7 @@ namespace Majorsilence.Reporting.Rdl
 			float size;			// Value is in points
 			if (this.FontSize != null)
 			{
-				string lsize = await this.FontSize.EvaluateString(rpt, r);
+				string lsize = await FontSize.EvaluateString(rpt, r).ConfigureAwait(false);
 				if (lsize == null)		// e.g. an expression that evaluated to no result
 					size = 10;
 				else
@@ -790,7 +790,7 @@ namespace Majorsilence.Reporting.Rdl
         
         internal async Task<Draw2.StringFormat> GetStringFormat(Report rpt, Row r)
         {
-            return await GetStringFormat(rpt, r, Draw2.StringAlignment.Center);
+            return await GetStringFormat(rpt, r, Draw2.StringAlignment.Center).ConfigureAwait(false);
         }
 
 		internal async Task<Draw2.StringFormat> GetStringFormat(Report rpt, Row r, Draw2.StringAlignment defTextAlign)
@@ -800,20 +800,20 @@ namespace Majorsilence.Reporting.Rdl
 			
 			if (this.Direction != null)
 			{
-				string dir = await this.Direction.EvaluateString(rpt, r);
+				string dir = await Direction.EvaluateString(rpt, r).ConfigureAwait(false);
 				if (dir == "RTL")
 					drawFormat.FormatFlags |= Draw2.StringFormatFlags.DirectionRightToLeft;
 			}
 			if (this.WritingMode != null)
 			{
-				string wm = await this.WritingMode.EvaluateString(rpt, r);
+				string wm = await WritingMode.EvaluateString(rpt, r).ConfigureAwait(false);
 				if (wm == "tb-rl")
 					drawFormat.FormatFlags |= Draw2.StringFormatFlags.DirectionVertical;
 			}
 
 			if (this.TextAlign != null)
 			{
-				string ta = await this.TextAlign.EvaluateString(rpt, r);
+				string ta = await TextAlign.EvaluateString(rpt, r).ConfigureAwait(false);
 				switch (ta?.ToLower())		// null: e.g. an expression that evaluated to no result
 				{
 					case "left":
@@ -836,7 +836,7 @@ namespace Majorsilence.Reporting.Rdl
 
 			if (this.VerticalAlign != null)
 			{
-				string va = await this.VerticalAlign.EvaluateString(rpt, r);
+				string va = await VerticalAlign.EvaluateString(rpt, r).ConfigureAwait(false);
 				switch (va.ToLower())
 				{
 					case "top":
@@ -871,95 +871,95 @@ namespace Majorsilence.Reporting.Rdl
 				sb.Append("border-collapse:collapse;");	// collapse the borders
 
 			if (_BorderColor != null)
-				sb.Append(await _BorderColor.GetCSS(rpt, row, bDefaults));
+				sb.Append(await _BorderColor.GetCSS(rpt, row, bDefaults).ConfigureAwait(false));
 			else if (bDefaults)
 				sb.Append(StyleBorderColor.GetCSSDefaults());
 
 			if (_BorderStyle != null)
-				sb.Append(await _BorderStyle.GetCSS(rpt, row, bDefaults));
+				sb.Append(await _BorderStyle.GetCSS(rpt, row, bDefaults).ConfigureAwait(false));
 			else if (bDefaults)
 				sb.Append(StyleBorderStyle.GetCSSDefaults());
 
 			if (_BorderWidth != null)
-				sb.Append(await _BorderWidth.GetCSS(rpt, row, bDefaults));
+				sb.Append(await _BorderWidth.GetCSS(rpt, row, bDefaults).ConfigureAwait(false));
 			else if (bDefaults)
 				sb.Append(StyleBorderWidth.GetCSSDefaults());
 
 			if (_BackgroundColor != null)
-				sb.AppendFormat(NumberFormatInfo.InvariantInfo, "background-color:{0};", await _BackgroundColor.EvaluateString(rpt, row));
+				sb.AppendFormat(NumberFormatInfo.InvariantInfo, "background-color:{0};", await _BackgroundColor.EvaluateString(rpt, row).ConfigureAwait(false));
 			else if (bDefaults)
 				sb.Append("background-color:transparent;");
 
 			if (_BackgroundImage != null)
-				sb.Append(await _BackgroundImage.GetCSS(rpt, row, bDefaults));
+				sb.Append(await _BackgroundImage.GetCSS(rpt, row, bDefaults).ConfigureAwait(false));
 			else if (bDefaults)
 				sb.Append(StyleBackgroundImage.GetCSSDefaults());
 
 			if (_FontStyle != null)
-				sb.AppendFormat(NumberFormatInfo.InvariantInfo, "font-style:{0};",await _FontStyle.EvaluateString(rpt, row));
+				sb.AppendFormat(NumberFormatInfo.InvariantInfo, "font-style:{0};",await _FontStyle.EvaluateString(rpt, row).ConfigureAwait(false));
 			else if (bDefaults)
 				sb.Append("font-style:normal;");
 
 			if (_FontFamily != null)
 			{
-				var _ff = await _FontFamily.EvaluateString(rpt, row);
+				var _ff = await _FontFamily.EvaluateString(rpt, row).ConfigureAwait(false);
 				sb.AppendFormat(NumberFormatInfo.InvariantInfo, "font-family:{0};", Draw2.FontResourceLoader.GetCssFontStack(_ff));
 			}
 			else if (bDefaults)
 				sb.Append("font-family:" + Draw2.FontResourceLoader.GetCssFontStack("Arial") + ";");
 
 			if (_FontSize != null)
-				sb.AppendFormat(NumberFormatInfo.InvariantInfo, "font-size:{0};", await _FontSize.EvaluateString(rpt, row));
+				sb.AppendFormat(NumberFormatInfo.InvariantInfo, "font-size:{0};", await _FontSize.EvaluateString(rpt, row).ConfigureAwait(false));
 			else if (bDefaults)
 				sb.Append("font-size:10pt;");
 
 			if (_FontWeight != null)
-				sb.AppendFormat(NumberFormatInfo.InvariantInfo, "font-weight:{0};",await _FontWeight.EvaluateString(rpt, row));
+				sb.AppendFormat(NumberFormatInfo.InvariantInfo, "font-weight:{0};",await _FontWeight.EvaluateString(rpt, row).ConfigureAwait(false));
 			else if (bDefaults)
 				sb.Append("font-weight:normal;");
 
 			if (_TextDecoration != null)
-				sb.AppendFormat(NumberFormatInfo.InvariantInfo, "text-decoration:{0};",await _TextDecoration.EvaluateString(rpt, row));
+				sb.AppendFormat(NumberFormatInfo.InvariantInfo, "text-decoration:{0};",await _TextDecoration.EvaluateString(rpt, row).ConfigureAwait(false));
 			else if (bDefaults)
 				sb.Append("text-decoration:none;");
 
 			if (_TextAlign != null)
-				sb.AppendFormat(NumberFormatInfo.InvariantInfo, "text-align:{0};",await _TextAlign.EvaluateString(rpt, row));
+				sb.AppendFormat(NumberFormatInfo.InvariantInfo, "text-align:{0};",await _TextAlign.EvaluateString(rpt, row).ConfigureAwait(false));
 			else if (bDefaults)
 				sb.Append("");	// no CSS default for text align
 
 			if (_VerticalAlign != null)
-				sb.AppendFormat(NumberFormatInfo.InvariantInfo, "vertical-align:{0};",await _VerticalAlign.EvaluateString(rpt, row));
+				sb.AppendFormat(NumberFormatInfo.InvariantInfo, "vertical-align:{0};",await _VerticalAlign.EvaluateString(rpt, row).ConfigureAwait(false));
 			else if (bDefaults)
 				sb.Append("vertical-align:top;");
 
 			if (_Color != null)
-				sb.AppendFormat(NumberFormatInfo.InvariantInfo, "color:{0};",await _Color.EvaluateString(rpt, row));
+				sb.AppendFormat(NumberFormatInfo.InvariantInfo, "color:{0};",await _Color.EvaluateString(rpt, row).ConfigureAwait(false));
 			else if (bDefaults)
 				sb.Append("color:black;");
 
 			if (_PaddingLeft != null)
-				sb.AppendFormat(NumberFormatInfo.InvariantInfo, "padding-left:{0};",await _PaddingLeft.EvaluateString(rpt, row));
+				sb.AppendFormat(NumberFormatInfo.InvariantInfo, "padding-left:{0};",await _PaddingLeft.EvaluateString(rpt, row).ConfigureAwait(false));
 			else if (bDefaults)
 				sb.Append("padding-left:0pt;");
 
 			if (_PaddingRight != null)
-				sb.AppendFormat(NumberFormatInfo.InvariantInfo, "padding-right:{0};",await _PaddingRight.EvaluateString(rpt, row));
+				sb.AppendFormat(NumberFormatInfo.InvariantInfo, "padding-right:{0};",await _PaddingRight.EvaluateString(rpt, row).ConfigureAwait(false));
 			else if (bDefaults)
 				sb.Append("padding-right:0pt;");
 
 			if (_PaddingTop != null)
-				sb.AppendFormat(NumberFormatInfo.InvariantInfo, "padding-top:{0};",await _PaddingTop.EvaluateString(rpt, row));
+				sb.AppendFormat(NumberFormatInfo.InvariantInfo, "padding-top:{0};",await _PaddingTop.EvaluateString(rpt, row).ConfigureAwait(false));
 			else if (bDefaults)
 				sb.Append("padding-top:0pt;");
 
 			if (_PaddingBottom != null)
-				sb.AppendFormat(NumberFormatInfo.InvariantInfo, "padding-bottom:{0};",await _PaddingBottom.EvaluateString(rpt, row));
+				sb.AppendFormat(NumberFormatInfo.InvariantInfo, "padding-bottom:{0};",await _PaddingBottom.EvaluateString(rpt, row).ConfigureAwait(false));
 			else if (bDefaults)
 				sb.Append("padding-bottom:0pt;");
 
 			if (_LineHeight != null)
-				sb.AppendFormat(NumberFormatInfo.InvariantInfo, "line-height:{0};",await _LineHeight.EvaluateString(rpt, row));
+				sb.AppendFormat(NumberFormatInfo.InvariantInfo, "line-height:{0};",await _LineHeight.EvaluateString(rpt, row).ConfigureAwait(false));
 			else if (bDefaults)
 				sb.Append("line-height:normal;");
 
@@ -986,31 +986,31 @@ namespace Majorsilence.Reporting.Rdl
 			if (this.BorderColor != null)
 			{
 				StyleBorderColor bc = this.BorderColor;
-				si.BColorLeft = await bc.EvalLeft(rpt, r);
-				si.BColorRight = await bc.EvalRight(rpt, r);
-				si.BColorTop = await bc.EvalTop(rpt, r);
-				si.BColorBottom = await bc.EvalBottom(rpt, r);
+				si.BColorLeft = await bc.EvalLeft(rpt, r).ConfigureAwait(false);
+				si.BColorRight = await bc.EvalRight(rpt, r).ConfigureAwait(false);
+				si.BColorTop = await bc.EvalTop(rpt, r).ConfigureAwait(false);
+				si.BColorBottom = await bc.EvalBottom(rpt, r).ConfigureAwait(false);
 			}
 
 			if (this.BorderStyle != null)
 			{
 				StyleBorderStyle bs = this.BorderStyle;
-				si.BStyleLeft = await bs.EvalLeft(rpt, r);
-				si.BStyleRight = await bs.EvalRight(rpt, r);
-				si.BStyleTop = await bs.EvalTop(rpt, r);
-				si.BStyleBottom = await bs.EvalBottom(rpt, r);
+				si.BStyleLeft = await bs.EvalLeft(rpt, r).ConfigureAwait(false);
+				si.BStyleRight = await bs.EvalRight(rpt, r).ConfigureAwait(false);
+				si.BStyleTop = await bs.EvalTop(rpt, r).ConfigureAwait(false);
+				si.BStyleBottom = await bs.EvalBottom(rpt, r).ConfigureAwait(false);
 			}
 
 			if (this.BorderWidth != null)
 			{
 				StyleBorderWidth bw = this.BorderWidth;
-				si.BWidthLeft = await bw.EvalLeft(rpt, r);
-				si.BWidthRight = await bw.EvalRight(rpt, r);
-				si.BWidthTop = await bw.EvalTop(rpt, r);
-				si.BWidthBottom = await bw.EvalBottom(rpt, r);
+				si.BWidthLeft = await bw.EvalLeft(rpt, r).ConfigureAwait(false);
+				si.BWidthRight = await bw.EvalRight(rpt, r).ConfigureAwait(false);
+				si.BWidthTop = await bw.EvalTop(rpt, r).ConfigureAwait(false);
+				si.BWidthBottom = await bw.EvalBottom(rpt, r).ConfigureAwait(false);
 			}
 
-			si.BackgroundColor = await this.EvalBackgroundColor(rpt, r);
+			si.BackgroundColor = await EvalBackgroundColor(rpt, r).ConfigureAwait(false);
 			// When background color not specified; and reportitem part of table
 			//   use the tables background color
 			if (si.BackgroundColor == System.Drawing.Color.Empty)
@@ -1022,40 +1022,40 @@ namespace Majorsilence.Reporting.Rdl
 					{
 						Table t = ri.TC.OwnerTable;
 						if (t.Style != null)
-							si.BackgroundColor = await t.Style.EvalBackgroundColor(rpt, r);
+							si.BackgroundColor = await t.Style.EvalBackgroundColor(rpt, r).ConfigureAwait(false);
 					}
 				}
 			}
-			si.BackgroundGradientType = await this.EvalBackgroundGradientType(rpt, r);
-			si.BackgroundGradientEndColor = await this.EvalBackgroundGradientEndColor(rpt, r);
+			si.BackgroundGradientType = await EvalBackgroundGradientType(rpt, r).ConfigureAwait(false);
+			si.BackgroundGradientEndColor = await EvalBackgroundGradientEndColor(rpt, r).ConfigureAwait(false);
 			if (this._BackgroundImage != null)
 			{
-				si.BackgroundImage = await _BackgroundImage.GetPageImage(rpt, r);
+				si.BackgroundImage = await _BackgroundImage.GetPageImage(rpt, r).ConfigureAwait(false);
 			}
 			else
 				si.BackgroundImage = null;
 
-			si.FontStyle = await this.EvalFontStyle(rpt, r);
-			si.FontFamily = await this.EvalFontFamily(rpt, r);
-			si.FontSize = await this.EvalFontSize(rpt, r);
-			si.FontWeight = await this.EvalFontWeight(rpt, r);
-			si._Format = await this.EvalFormat(rpt, r);			//(string) .NET Framework formatting string1
-			si.TextDecoration = await this.EvalTextDecoration(rpt, r);
-			si.TextAlign = await this.EvalTextAlign(rpt, r);
-			si.VerticalAlign = await this.EvalVerticalAlign(rpt, r);
-			si.Color = await this.EvalColor(rpt, r);
-			si.PaddingLeft = await this.EvalPaddingLeft(rpt, r);
-			si.PaddingRight = await this.EvalPaddingRight(rpt, r);
-			si.PaddingTop = await this.EvalPaddingTop(rpt, r);
-			si.PaddingBottom = await this.EvalPaddingBottom(rpt, r);
-			si.LineHeight = await this.EvalLineHeight(rpt, r);
-			si.Direction = await this.EvalDirection(rpt, r);
-			si.WritingMode = await this.EvalWritingMode(rpt, r);
-			si.Language = await this.EvalLanguage(rpt, r);
-			si.UnicodeBiDirectional = await this.EvalUnicodeBiDirectional(rpt, r);
-			si.Calendar = await this.EvalCalendar(rpt, r);
-			si.NumeralLanguage = await this.EvalNumeralLanguage(rpt, r);
-			si.NumeralVariant = await this.EvalNumeralVariant(rpt, r);
+			si.FontStyle = await EvalFontStyle(rpt, r).ConfigureAwait(false);
+			si.FontFamily = await EvalFontFamily(rpt, r).ConfigureAwait(false);
+			si.FontSize = await EvalFontSize(rpt, r).ConfigureAwait(false);
+			si.FontWeight = await EvalFontWeight(rpt, r).ConfigureAwait(false);
+			si._Format = await EvalFormat(rpt, r).ConfigureAwait(false);			//(string) .NET Framework formatting string1
+			si.TextDecoration = await EvalTextDecoration(rpt, r).ConfigureAwait(false);
+			si.TextAlign = await EvalTextAlign(rpt, r).ConfigureAwait(false);
+			si.VerticalAlign = await EvalVerticalAlign(rpt, r).ConfigureAwait(false);
+			si.Color = await EvalColor(rpt, r).ConfigureAwait(false);
+			si.PaddingLeft = await EvalPaddingLeft(rpt, r).ConfigureAwait(false);
+			si.PaddingRight = await EvalPaddingRight(rpt, r).ConfigureAwait(false);
+			si.PaddingTop = await EvalPaddingTop(rpt, r).ConfigureAwait(false);
+			si.PaddingBottom = await EvalPaddingBottom(rpt, r).ConfigureAwait(false);
+			si.LineHeight = await EvalLineHeight(rpt, r).ConfigureAwait(false);
+			si.Direction = await EvalDirection(rpt, r).ConfigureAwait(false);
+			si.WritingMode = await EvalWritingMode(rpt, r).ConfigureAwait(false);
+			si.Language = await EvalLanguage(rpt, r).ConfigureAwait(false);
+			si.UnicodeBiDirectional = await EvalUnicodeBiDirectional(rpt, r).ConfigureAwait(false);
+			si.Calendar = await EvalCalendar(rpt, r).ConfigureAwait(false);
+			si.NumeralLanguage = await EvalNumeralLanguage(rpt, r).ConfigureAwait(false);
+			si.NumeralVariant = await EvalNumeralVariant(rpt, r).ConfigureAwait(false);
 
 			if (this._ConstantStyle)		// We'll only do this work once
 			{
@@ -1078,10 +1078,10 @@ namespace Majorsilence.Reporting.Rdl
 			{
                 if (s != null && s.Format != null)
                 {
-                    format = await s.Format.EvaluateString(rpt, row);
+                    format = await s.Format.EvaluateString(rpt, row).ConfigureAwait(false);
                     if (format != null && format.Length > 0)
                     {
-                        string language = await s.EvalLanguage(rpt, row);
+                        string language = await s.EvalLanguage(rpt, row).ConfigureAwait(false);
                         t = FormatValue(o, tc, format, language);
                     }
                     else
@@ -1156,109 +1156,109 @@ namespace Majorsilence.Reporting.Rdl
 			bool rc = true;
 
 			if (_BorderColor != null)
-				rc = await _BorderColor.IsConstant();
+				rc = await _BorderColor.IsConstant().ConfigureAwait(false);
 
 			if (!rc)
 				return false;
 
 			if (_BorderStyle != null)
-				rc = await _BorderStyle.IsConstant();
+				rc = await _BorderStyle.IsConstant().ConfigureAwait(false);
 
 			if (!rc)
 				return false;
 
 			if (_BorderWidth != null)
-				rc = await _BorderWidth.IsConstant();
+				rc = await _BorderWidth.IsConstant().ConfigureAwait(false);
 
 			if (!rc)
 				return false;
 
 			if (_BackgroundColor != null)
-				rc = await _BackgroundColor.IsConstant();
+				rc = await _BackgroundColor.IsConstant().ConfigureAwait(false);
 
 			if (!rc)
 				return false;
 
 			if (_BackgroundImage != null)
-				rc = await _BackgroundImage.IsConstant();
+				rc = await _BackgroundImage.IsConstant().ConfigureAwait(false);
 
 			if (!rc)
 				return false;
 
 			if (_FontStyle != null)
-				rc = await _FontStyle.IsConstant();
+				rc = await _FontStyle.IsConstant().ConfigureAwait(false);
 
 			if (!rc)
 				return false;
 
 			if (_FontFamily != null)
-				rc = await _FontFamily.IsConstant();
+				rc = await _FontFamily.IsConstant().ConfigureAwait(false);
 
 			if (!rc)
 				return false;
 
 			if (_FontSize != null)
-				rc = await _FontSize.IsConstant();
+				rc = await _FontSize.IsConstant().ConfigureAwait(false);
 
 			if (!rc)
 				return false;
 
 			if (_FontWeight != null)
-				rc = await _FontWeight.IsConstant();
+				rc = await _FontWeight.IsConstant().ConfigureAwait(false);
 
 			if (!rc)
 				return false;
 
 			if (_TextDecoration != null)
-				rc = await _TextDecoration.IsConstant();
+				rc = await _TextDecoration.IsConstant().ConfigureAwait(false);
 
 			if (!rc)
 				return false;
 
 			if (_TextAlign != null)
-				rc = await _TextAlign.IsConstant();
+				rc = await _TextAlign.IsConstant().ConfigureAwait(false);
 
 			if (!rc)
 				return false;
 
 			if (_VerticalAlign != null)
-				rc = await _VerticalAlign.IsConstant();
+				rc = await _VerticalAlign.IsConstant().ConfigureAwait(false);
 
 			if (!rc)
 				return false;
 
 			if (_Color != null)
-				rc = await _Color.IsConstant();
+				rc = await _Color.IsConstant().ConfigureAwait(false);
 
 			if (!rc)
 				return false;
 
 			if (_PaddingLeft != null)
-				rc = await _PaddingLeft.IsConstant();
+				rc = await _PaddingLeft.IsConstant().ConfigureAwait(false);
 
 			if (!rc)
 				return false;
 
 			if (_PaddingRight != null)
-				rc = await _PaddingRight.IsConstant();
+				rc = await _PaddingRight.IsConstant().ConfigureAwait(false);
 
 			if (!rc)
 				return false;
 
 			if (_PaddingTop != null)
-				rc = await _PaddingTop.IsConstant();
+				rc = await _PaddingTop.IsConstant().ConfigureAwait(false);
 
 			if (!rc)
 				return false;
 
 			if (_PaddingBottom != null)
-				rc = await _PaddingBottom.IsConstant();
+				rc = await _PaddingBottom.IsConstant().ConfigureAwait(false);
 
 			if (!rc)
 				return false;
 
 			if (_LineHeight != null)
-				rc = await _LineHeight.IsConstant();
+				rc = await _LineHeight.IsConstant().ConfigureAwait(false);
 
 			if (!rc)
 				return false;
@@ -1268,10 +1268,10 @@ namespace Majorsilence.Reporting.Rdl
 
 		internal async Task<System.Drawing.Rectangle> PaddingAdjust(Report rpt, Row r, System.Drawing.Rectangle rect, bool bAddIn)
 		{
-			int pbottom = await this.EvalPaddingBottomPx(rpt, r);
-			int ptop = await this.EvalPaddingTopPx(rpt, r);
-			int pleft = await this.EvalPaddingLeftPx(rpt, r);
-			int pright = await this.EvalPaddingRightPx(rpt, r);
+			int pbottom = await EvalPaddingBottomPx(rpt, r).ConfigureAwait(false);
+			int ptop = await EvalPaddingTopPx(rpt, r).ConfigureAwait(false);
+			int pleft = await EvalPaddingLeftPx(rpt, r).ConfigureAwait(false);
+			int pright = await EvalPaddingRightPx(rpt, r).ConfigureAwait(false);
 
 			System.Drawing.Rectangle rt;
 			if (bAddIn)		// add in when trying to size the object
@@ -1312,7 +1312,7 @@ namespace Majorsilence.Reporting.Rdl
 			if (_BackgroundColor == null)
 				return System.Drawing.Color.Empty;
 
-			string c = await _BackgroundColor.EvaluateString(rpt, row);
+			string c = await _BackgroundColor.EvaluateString(rpt, row).ConfigureAwait(false);
 			return XmlUtil.ColorFromHtml(c, System.Drawing.Color.Empty, rpt);
 		}
 
@@ -1327,7 +1327,7 @@ namespace Majorsilence.Reporting.Rdl
 			if (_BackgroundGradientType == null)
 				return BackgroundGradientTypeEnum.None;
 
-			string bgt = await _BackgroundGradientType.EvaluateString(rpt, r);
+			string bgt = await _BackgroundGradientType.EvaluateString(rpt, r).ConfigureAwait(false);
 			return 	StyleInfo.GetBackgroundGradientType(bgt, BackgroundGradientTypeEnum.None);
 		}
 
@@ -1342,7 +1342,7 @@ namespace Majorsilence.Reporting.Rdl
 			if (_BackgroundGradientEndColor == null)
 				return System.Drawing.Color.Empty;
 
-			string c = await _BackgroundGradientEndColor.EvaluateString(rpt, r);
+			string c = await _BackgroundGradientEndColor.EvaluateString(rpt, r).ConfigureAwait(false);
 			return XmlUtil.ColorFromHtml(c, System.Drawing.Color.Empty, rpt);
 		}
 
@@ -1365,7 +1365,7 @@ namespace Majorsilence.Reporting.Rdl
 
 		internal async Task<bool> IsFontItalic(Report rpt, Row r)
 		{
-			if (await EvalFontStyle(rpt, r) == FontStyleEnum.Italic)
+			if (await EvalFontStyle(rpt, r).ConfigureAwait(false) == FontStyleEnum.Italic)
 				return true;
 
 			return false;
@@ -1376,7 +1376,7 @@ namespace Majorsilence.Reporting.Rdl
 			if (_FontStyle == null)
 				return FontStyleEnum.Normal;
 
-			string fs = await _FontStyle.EvaluateString(rpt, row);
+			string fs = await _FontStyle.EvaluateString(rpt, row).ConfigureAwait(false);
 			return StyleInfo.GetFontStyle(fs, FontStyleEnum.Normal);
 		}
 
@@ -1391,7 +1391,7 @@ namespace Majorsilence.Reporting.Rdl
 			if (_FontFamily == null)
 				return "Arial";
 
-			return await _FontFamily.EvaluateString(rpt, row) ?? "Arial";	// null: e.g. an expression that evaluated to no result
+			return await _FontFamily.EvaluateString(rpt, row).ConfigureAwait(false) ?? "Arial";	// null: e.g. an expression that evaluated to no result
 		}
 
 		internal Expression FontSize
@@ -1406,7 +1406,7 @@ namespace Majorsilence.Reporting.Rdl
 				return 10;
 
 			string pts;
-			pts = await _FontSize.EvaluateString(rpt, row);
+			pts = await _FontSize.EvaluateString(rpt, row).ConfigureAwait(false);
 			if (pts == null)		// e.g. an expression that evaluated to no result
 				return 10;
 			RSize sz = new RSize(this.OwnerReport, pts);
@@ -1425,7 +1425,7 @@ namespace Majorsilence.Reporting.Rdl
 			if (_FontWeight == null)
 				return FontWeightEnum.Normal;
 
-			string weight = await this.FontWeight.EvaluateString(rpt, row);
+			string weight = await FontWeight.EvaluateString(rpt, row).ConfigureAwait(false);
 			return StyleInfo.GetFontWeight(weight, FontWeightEnum.Normal);
 		}
 
@@ -1434,7 +1434,7 @@ namespace Majorsilence.Reporting.Rdl
 			if (this.FontWeight == null)
 				return false;
 
-			string weight = await this.FontWeight.EvaluateString(rpt, r);
+			string weight = await FontWeight.EvaluateString(rpt, r).ConfigureAwait(false);
 			switch(weight.ToLower())
 			{
 				case "bold":
@@ -1461,7 +1461,7 @@ namespace Majorsilence.Reporting.Rdl
             if (_Format == null)
                 return "General";
             
-            string f = await _Format.EvaluateString(rpt, row);
+            string f = await _Format.EvaluateString(rpt, row).ConfigureAwait(false);
 
             if (f == null || f.Length == 0)
                 return "General";
@@ -1481,7 +1481,7 @@ namespace Majorsilence.Reporting.Rdl
 			if (_TextDecoration == null)
 				return TextDecorationEnum.None;
 
-			string td = await _TextDecoration.EvaluateString(rpt, r);
+			string td = await _TextDecoration.EvaluateString(rpt, r).ConfigureAwait(false);
 			return StyleInfo.GetTextDecoration(td, TextDecorationEnum.None);
 		}
 
@@ -1496,7 +1496,7 @@ namespace Majorsilence.Reporting.Rdl
 			if (_TextAlign == null)
 				return TextAlignEnum.General;
 	
-			string a = await _TextAlign.EvaluateString(rpt, row);
+			string a = await _TextAlign.EvaluateString(rpt, row).ConfigureAwait(false);
 			return StyleInfo.GetTextAlign(a, TextAlignEnum.General);
 		}
 
@@ -1511,7 +1511,7 @@ namespace Majorsilence.Reporting.Rdl
 			if (_VerticalAlign == null)
 				return VerticalAlignEnum.Top;
 
-			string v = await _VerticalAlign.EvaluateString(rpt, row);
+			string v = await _VerticalAlign.EvaluateString(rpt, row).ConfigureAwait(false);
 			return StyleInfo.GetVerticalAlign(v, VerticalAlignEnum.Top);
 		}
 
@@ -1526,7 +1526,7 @@ namespace Majorsilence.Reporting.Rdl
 			if (_Color == null)
 				return System.Drawing.Color.Black;
 
-			string c = await _Color.EvaluateString(rpt, row);
+			string c = await _Color.EvaluateString(rpt, row).ConfigureAwait(false);
 			return XmlUtil.ColorFromHtml(c, System.Drawing.Color.Black, rpt);
 		}
 
@@ -1541,7 +1541,7 @@ namespace Majorsilence.Reporting.Rdl
 			if (_PaddingLeft == null)
 				return 0;
 
-			string v = await _PaddingLeft.EvaluateString(rpt, row);
+			string v = await _PaddingLeft.EvaluateString(rpt, row).ConfigureAwait(false);
 			RSize rz = new RSize(OwnerReport, v);
 			return rz.Points;
 		}
@@ -1551,7 +1551,7 @@ namespace Majorsilence.Reporting.Rdl
 			if (_PaddingLeft == null)
 				return 0;
 
-			string v = await _PaddingLeft.EvaluateString(rpt, row);
+			string v = await _PaddingLeft.EvaluateString(rpt, row).ConfigureAwait(false);
 			RSize rz = new RSize(OwnerReport, v);
 			return rz.PixelsX;
 		}
@@ -1567,7 +1567,7 @@ namespace Majorsilence.Reporting.Rdl
 			if (_PaddingRight == null)
 				return 0;
 
-			string v = await _PaddingRight.EvaluateString(rpt, row);
+			string v = await _PaddingRight.EvaluateString(rpt, row).ConfigureAwait(false);
 			RSize rz = new RSize(OwnerReport, v);
 			return rz.Points;
 		}
@@ -1577,7 +1577,7 @@ namespace Majorsilence.Reporting.Rdl
 			if (_PaddingRight == null)
 				return 0;
 
-			string v = await _PaddingRight.EvaluateString(rpt, row);
+			string v = await _PaddingRight.EvaluateString(rpt, row).ConfigureAwait(false);
 			RSize rz = new RSize(OwnerReport, v);
 			return rz.PixelsX;
 		}
@@ -1593,7 +1593,7 @@ namespace Majorsilence.Reporting.Rdl
 			if (_PaddingTop == null)
 				return 0;
 
-			string v = await _PaddingTop.EvaluateString(rpt, row);
+			string v = await _PaddingTop.EvaluateString(rpt, row).ConfigureAwait(false);
 			RSize rz = new RSize(OwnerReport, v);
 			return rz.Points;
 		}
@@ -1603,7 +1603,7 @@ namespace Majorsilence.Reporting.Rdl
 			if (_PaddingTop == null)
 				return 0;
 
-			string v = await _PaddingTop.EvaluateString(rpt, row);
+			string v = await _PaddingTop.EvaluateString(rpt, row).ConfigureAwait(false);
 			RSize rz = new RSize(OwnerReport, v);
 			return rz.PixelsY;
 		}
@@ -1619,7 +1619,7 @@ namespace Majorsilence.Reporting.Rdl
 			if (_PaddingBottom == null)
 				return 0;
 
-			string v = await _PaddingBottom.EvaluateString(rpt, row);
+			string v = await _PaddingBottom.EvaluateString(rpt, row).ConfigureAwait(false);
 			RSize rz = new RSize(OwnerReport, v);
 			return rz.Points;
 		}
@@ -1629,7 +1629,7 @@ namespace Majorsilence.Reporting.Rdl
 			if (_PaddingBottom == null)
 				return 0;
 
-			string v = await _PaddingBottom.EvaluateString(rpt, row);
+			string v = await _PaddingBottom.EvaluateString(rpt, row).ConfigureAwait(false);
 			RSize rz = new RSize(OwnerReport, v);
 			return rz.PixelsY;
 		}
@@ -1645,7 +1645,7 @@ namespace Majorsilence.Reporting.Rdl
 			if (_LineHeight == null)
 				return float.NaN;
 
-			string sz = await _LineHeight.EvaluateString(rpt, r);
+			string sz = await _LineHeight.EvaluateString(rpt, r).ConfigureAwait(false);
 			RSize rz = new RSize(OwnerReport, sz);
 			return rz.Points;
 		}
@@ -1661,7 +1661,7 @@ namespace Majorsilence.Reporting.Rdl
 			if (_Direction == null)
 				return DirectionEnum.LTR;
 
-			string d = await _Direction.EvaluateString(rpt, r);
+			string d = await _Direction.EvaluateString(rpt, r).ConfigureAwait(false);
 			return StyleInfo.GetDirection(d, DirectionEnum.LTR);
 		}
 
@@ -1676,7 +1676,7 @@ namespace Majorsilence.Reporting.Rdl
 			if (_WritingMode == null)
 				return WritingModeEnum.lr_tb;
 
-			string w = await _WritingMode.EvaluateString(rpt, r);
+			string w = await _WritingMode.EvaluateString(rpt, r).ConfigureAwait(false);
 
 			return StyleInfo.GetWritingMode(w, WritingModeEnum.lr_tb ); 
 		}
@@ -1690,9 +1690,9 @@ namespace Majorsilence.Reporting.Rdl
 		internal async Task<string> EvalLanguage(Report rpt, Row r)
 		{
 			if (_Language == null)
-				return await OwnerReport.EvalLanguage(rpt, r);
+				return await OwnerReport.EvalLanguage(rpt, r).ConfigureAwait(false);
 
-			return await _Language.EvaluateString(rpt, r) ?? await OwnerReport.EvalLanguage(rpt, r);
+			return await _Language.EvaluateString(rpt, r).ConfigureAwait(false) ?? await OwnerReport.EvalLanguage(rpt, r).ConfigureAwait(false);
 		}
 
 		internal Expression UnicodeBiDirectional
@@ -1706,7 +1706,7 @@ namespace Majorsilence.Reporting.Rdl
 			if (_UnicodeBiDirectional == null)
 				return UnicodeBiDirectionalEnum.Normal;
 
-			string u = await _UnicodeBiDirectional.EvaluateString(rpt, r);
+			string u = await _UnicodeBiDirectional.EvaluateString(rpt, r).ConfigureAwait(false);
 			return StyleInfo.GetUnicodeBiDirectional(u, UnicodeBiDirectionalEnum.Normal);
 		}
 
@@ -1721,7 +1721,7 @@ namespace Majorsilence.Reporting.Rdl
 			if (_Calendar == null)
 				return CalendarEnum.Gregorian;
 
-			string c = await _Calendar.EvaluateString(rpt, r);
+			string c = await _Calendar.EvaluateString(rpt, r).ConfigureAwait(false);
 			return StyleInfo.GetCalendar(c, CalendarEnum.Gregorian);
 		}
 
@@ -1734,9 +1734,9 @@ namespace Majorsilence.Reporting.Rdl
 		internal async Task<string> EvalNumeralLanguage(Report rpt, Row r)
 		{
 			if (_NumeralLanguage == null)
-				return await EvalLanguage(rpt, r);
+				return await EvalLanguage(rpt, r).ConfigureAwait(false);
 
-			return await _NumeralLanguage.EvaluateString(rpt, r) ?? await EvalLanguage(rpt, r);
+			return await _NumeralLanguage.EvaluateString(rpt, r).ConfigureAwait(false) ?? await EvalLanguage(rpt, r).ConfigureAwait(false);
 		}
 
 		internal Expression NumeralVariant
@@ -1750,7 +1750,7 @@ namespace Majorsilence.Reporting.Rdl
 			if (_NumeralVariant == null)
 				return 1;
 
-			int v = (int)await _NumeralVariant.EvaluateDouble(rpt, r);
+			int v = (int)await _NumeralVariant.EvaluateDouble(rpt, r).ConfigureAwait(false);
 			if (v < 1 || v > 7)		// correct for bad data
 				v = 1;
 			return v;

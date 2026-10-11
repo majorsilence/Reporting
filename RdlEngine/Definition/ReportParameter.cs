@@ -121,9 +121,9 @@ namespace Majorsilence.Reporting.Rdl
 		async override internal Task FinalPass()
 		{
 			if (_DefaultValue != null)
-                await _DefaultValue.FinalPass();
+                await _DefaultValue.FinalPass().ConfigureAwait(false);
 			if (_ValidValues != null)
-                await _ValidValues.FinalPass();
+                await _ValidValues.FinalPass().ConfigureAwait(false);
 			return;
 		}
 
@@ -143,7 +143,7 @@ namespace Majorsilence.Reporting.Rdl
 			if (_DefaultValue == null)
 				return null;
 				
-			object[] result = await _DefaultValue.GetValue(rpt);
+			object[] result = await _DefaultValue.GetValue(rpt).ConfigureAwait(false);
 			if (result == null)
 				return null;
 			object v = result[0];
@@ -168,7 +168,7 @@ namespace Majorsilence.Reporting.Rdl
             if (_DefaultValue == null)
                 return null;
 
-            object[] result = await _DefaultValue.GetValue(rpt);
+            object[] result = await _DefaultValue.GetValue(rpt).ConfigureAwait(false);
             if (result == null)
                 return null;
 
@@ -447,7 +447,7 @@ namespace Majorsilence.Reporting.Rdl
 					if (_rp.DefaultValue != null)
 					{
 						// HACK: async
-						_DefaultValue = Task.Run(async () => await _rp.DefaultValue.ValuesCalc(this._rpt)).GetAwaiter().GetResult();
+						_DefaultValue = Task.Run(async () => await _rp.DefaultValue.ValuesCalc(_rpt).ConfigureAwait(false)).GetAwaiter().GetResult();
 					}
 				}
 				return _DefaultValue;
@@ -500,7 +500,7 @@ namespace Majorsilence.Reporting.Rdl
 					if (_rp.ValidValues != null)
 					{
 						// HACK: async
-						_DisplayValues = Task.Run(async () => await _rp.ValidValues.DisplayValues(_rpt)).GetAwaiter().GetResult();
+						_DisplayValues = Task.Run(async () => await _rp.ValidValues.DisplayValues(_rpt).ConfigureAwait(false)).GetAwaiter().GetResult();
 					}
 				}
 				return  _DisplayValues;		 
@@ -530,7 +530,7 @@ namespace Majorsilence.Reporting.Rdl
 					if (_rp.ValidValues != null)
 					{
 						// HACK: async
-						_DataValues = Task.Run(async () => await _rp.ValidValues.DataValues(this._rpt)).GetAwaiter().GetResult();
+						_DataValues = Task.Run(async () => await _rp.ValidValues.DataValues(_rpt).ConfigureAwait(false)).GetAwaiter().GetResult();
 					}
 				}
 				return  _DataValues;		 
@@ -589,9 +589,9 @@ namespace Majorsilence.Reporting.Rdl
             {
                 // HACK: async - synchronous wrapper needed for property getter;
                 // use GetValueAsync() when an async context is available.
-                return Task.Run(async () => await _rp.GetRuntimeValue(this._rpt)).GetAwaiter().GetResult();
+                return Task.Run(async () => await _rp.GetRuntimeValue(_rpt).ConfigureAwait(false)).GetAwaiter().GetResult();
             }
-			set { Task.Run(async () => await SetValueAsync(value)).GetAwaiter().GetResult(); }   // compatibility only
+			set { Task.Run(async () => await SetValueAsync(value).ConfigureAwait(false)).GetAwaiter().GetResult(); }   // compatibility only
 		}
 
         /// <summary>
@@ -658,9 +658,9 @@ namespace Majorsilence.Reporting.Rdl
         {
             get { 
 				// HACK: async
-				return Task.Run(async () => await _rp.GetRuntimeValues(this._rpt)).GetAwaiter().GetResult(); 
+				return Task.Run(async () => await _rp.GetRuntimeValues(_rpt).ConfigureAwait(false)).GetAwaiter().GetResult(); 
 			}
-            set { Task.Run(async () => await SetValuesAsync(value)).GetAwaiter().GetResult(); }   // compatibility only
+            set { Task.Run(async () => await SetValuesAsync(value).ConfigureAwait(false)).GetAwaiter().GetResult(); }   // compatibility only
         }
     }
 }

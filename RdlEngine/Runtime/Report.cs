@@ -157,7 +157,7 @@ namespace Majorsilence.Reporting.Rdl
 
         public async Task<bool> RunGetData()
         {
-            return await RunGetData(null);
+            return await RunGetData(null).ConfigureAwait(false);
         }
         
 		/// <summary>
@@ -167,7 +167,7 @@ namespace Majorsilence.Reporting.Rdl
 		public async Task<bool> RunGetData(IDictionary parms)
 		{
 			ExecutionTime = DateTime.Now;
-			bool bRows = await _Report.RunGetData(this, parms);
+			bool bRows = await _Report.RunGetData(this, parms).ConfigureAwait(false);
 			return bRows;
 		}
 
@@ -178,7 +178,7 @@ namespace Majorsilence.Reporting.Rdl
 		/// <param name="type">Presentation type: HTML, XML, PDF, or ASP compatible HTML</param>
 		public async Task RunRender(IStreamGen sg, OutputPresentationType type)
 		{
-            await RunRender(sg, type, "");
+            await RunRender(sg, type, "").ConfigureAwait(false);
 		}
 
         /// <summary>
@@ -191,7 +191,7 @@ namespace Majorsilence.Reporting.Rdl
         {
             if (security == null && signature == null)
             {
-                await RunRender(sg, type);
+                await RunRender(sg, type).ConfigureAwait(false);
                 return;
             }
 
@@ -206,14 +206,14 @@ namespace Majorsilence.Reporting.Rdl
                     PageNumber = 1;
                     TotalPages = 1;
                     IPresent ip = new RenderPdf_Raw(this, sg, security, signature);
-                    await _Report.Run(ip);
+                    await _Report.Run(ip).ConfigureAwait(false);
                     // Same ending as the unsecured path: without this the output file stays open
                     // and unflushed until the caller disposes the stream generator.
                     sg.CloseMainStream();
                     ResetRenderCache();
                     break;
                 default:
-                    await RunRender(sg, type);
+                    await RunRender(sg, type).ConfigureAwait(false);
                     break;
             }
         }
@@ -242,52 +242,52 @@ namespace Majorsilence.Reporting.Rdl
                 case OutputPresentationType.PDFOldStyle:
                 case OutputPresentationType.RenderPdf_Majorsilence:
                     ip = new RenderPdf_Raw(this, sg);
-                    await _Report.Run(ip);
+                    await _Report.Run(ip).ConfigureAwait(false);
                     break;
 				case OutputPresentationType.TIF:
                     ip = new RenderTif(this, sg);
-                    await _Report.Run(ip);
+                    await _Report.Run(ip).ConfigureAwait(false);
                     break;
                 case OutputPresentationType.TIFBW:
                     RenderTif rtif = new RenderTif(this, sg);
                     rtif.RenderColor = false;
                     ip = rtif;
-                    await _Report.Run(ip);
+                    await _Report.Run(ip).ConfigureAwait(false);
                     break;
                 case OutputPresentationType.XML:
 					if (_Report.DataTransform != null && _Report.DataTransform.Length > 0)
 					{
 						msg = new MemoryStreamGen();
 						ip = new RenderXml(this, msg);
-                        await _Report.Run(ip);
+                        await _Report.Run(ip).ConfigureAwait(false);
 						RunRenderXmlTransform(sg, msg);
 					}
 					else
 					{
 						ip = new RenderXml(this, sg);
-                        await _Report.Run(ip);
+                        await _Report.Run(ip).ConfigureAwait(false);
 					}
 					break;
 				case OutputPresentationType.MHTML:
-                    await this.RunRenderMht(sg);
+                    await RunRenderMht(sg).ConfigureAwait(false);
 					break;
                 case OutputPresentationType.CSV:
                     ip = new RenderCsv(this, sg);
-                    await _Report.Run(ip);
+                    await _Report.Run(ip).ConfigureAwait(false);
                     break;
                 case OutputPresentationType.RTF:
                     ip = new RenderRtf(this, sg);
-                    await _Report.Run(ip);
+                    await _Report.Run(ip).ConfigureAwait(false);
                     break;
 				case OutputPresentationType.Excel2003:
                 case OutputPresentationType.Excel2007:
 					ip = new RenderExcel2007(this, sg);
-                    await _Report.Run(ip);
+                    await _Report.Run(ip).ConfigureAwait(false);
 					break;
                 case OutputPresentationType.ExcelTableOnly:
                 case OutputPresentationType.Excel2007DataOnly:
                     ip = new RenderExcel2007DataOnly(this, sg);
-                    await _Report.Run(ip);
+                    await _Report.Run(ip).ConfigureAwait(false);
                     break;
                 case OutputPresentationType.ASPHTML:
 				case OutputPresentationType.HTML:
@@ -295,7 +295,7 @@ namespace Majorsilence.Reporting.Rdl
 					ip = rh = new RenderHtml(this, sg);
 					rh.Asp = (type == OutputPresentationType.ASPHTML);
 					rh.Prefix = prefix;
-                    await _Report.Run(ip);
+                    await _Report.Run(ip).ConfigureAwait(false);
 					// Retain the CSS and JavaScript
 					if (rh != null)
 					{
@@ -318,13 +318,13 @@ namespace Majorsilence.Reporting.Rdl
 			{
 				string tempHtmlReportFileName = Path.ChangeExtension(Path.GetTempFileName(), "htm");
 				temp = new OneFileStreamGen(tempHtmlReportFileName, true);
-                await RunRender(temp, OutputPresentationType.HTML);
+                await RunRender(temp, OutputPresentationType.HTML).ConfigureAwait(false);
 				temp.CloseMainStream();
 
 				// Create the mht file (into a temporary file position)
 				MhtBuilder mhtConverter = new MhtBuilder();
 				string fileName = Path.ChangeExtension(Path.GetTempFileName(), "mht");
-                await mhtConverter.SavePageArchive(fileName, "file://" + tempHtmlReportFileName);
+                await mhtConverter.SavePageArchive(fileName, "file://" + tempHtmlReportFileName).ConfigureAwait(false);
 
 				// clean up the temporary files
 				foreach (string tempFileName in temp.FileList)
@@ -378,8 +378,8 @@ namespace Majorsilence.Reporting.Rdl
 			try
 			{
 				ip.Start();
-				await ip.RunPages(pgs);
-				await ip.End();
+				await ip.RunPages(pgs).ConfigureAwait(false);
+				await ip.End().ConfigureAwait(false);
 			}
 			finally
 			{
@@ -405,8 +405,8 @@ namespace Majorsilence.Reporting.Rdl
             try
             {
                 ip.Start();
-                await ip.RunPages(pgs);
-                await ip.End();
+                await ip.RunPages(pgs).ConfigureAwait(false);
+                await ip.End().ConfigureAwait(false);
             }
             finally
             {
@@ -458,16 +458,16 @@ namespace Majorsilence.Reporting.Rdl
 				pgs.AddPage(p);
 
                 // Create all the pages
-                await _Report.Body.RunPage(pgs);
+                await _Report.Body.RunPage(pgs).ConfigureAwait(false);
 
 				if (pgs.LastPage.IsEmpty() && pgs.PageCount > 1) // get rid of extraneous pages which
 					pgs.RemoveLastPage();			//   can be caused by region page break at end
 
 				// Now create the headers and footers for all the pages (as needed)
 				if (_Report.PageHeader != null)
-                    await _Report.PageHeader.RunPage(pgs);
+                    await _Report.PageHeader.RunPage(pgs).ConfigureAwait(false);
 				if (_Report.PageFooter != null)
-                    await _Report.PageFooter.RunPage(pgs);
+                    await _Report.PageFooter.RunPage(pgs).ConfigureAwait(false);
 				// clear out any runtime clutter
 				foreach (Page pg in pgs)
 					pg.ResetPageExpressions();
@@ -730,7 +730,7 @@ namespace Majorsilence.Reporting.Rdl
 				if (_Report.Language != null)
 				{
 					// HACK: async
-					return Task.Run(async () => await _Report.Language.EvaluateString(this, null)).GetAwaiter().GetResult();
+					return Task.Run(async () => await _Report.Language.EvaluateString(this, null).ConfigureAwait(false)).GetAwaiter().GetResult();
 				}
 
                 return CultureInfo.CurrentCulture.ThreeLetterISOLanguageName;

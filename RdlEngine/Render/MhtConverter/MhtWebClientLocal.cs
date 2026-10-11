@@ -206,7 +206,7 @@ namespace Majorsilence.Reporting.Rdl
 		/// </summary>
 		public async Task<byte[]> DownloadBytes(string url)
 		{
-			await GetUrlData(url);
+			await GetUrlData(url).ConfigureAwait(false);
 			return _ResponseBytes;
 		}
 
@@ -227,7 +227,7 @@ namespace Majorsilence.Reporting.Rdl
 
             // HttpClient does not support file:// URIs on non-Windows platforms.
             // Read local files directly to avoid the platform limitation.
-            _ResponseBytes = await File.ReadAllBytesAsync(localPath);
+            _ResponseBytes = await File.ReadAllBytesAsync(localPath).ConfigureAwait(false);
             _ContentLocation = "";
 
                 // if we have string content, determine encoding type

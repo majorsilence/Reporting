@@ -38,25 +38,25 @@ namespace Majorsilence.Reporting.Rdl
 		// Evaluate is for interpretation  
 		public async Task<object> Evaluate(Report rpt, Row row)
 		{
-			return await EvaluateString(rpt, row);
+			return await EvaluateString(rpt, row).ConfigureAwait(false);
 		}
 		
 		public async Task<double> EvaluateDouble(Report rpt, Row row)
 		{	
-			string result = await EvaluateString(rpt, row);
+			string result = await EvaluateString(rpt, row).ConfigureAwait(false);
 			return Convert.ToDouble(result);		
 		}
 		
 		public async Task<decimal> EvaluateDecimal(Report rpt, Row row)
 		{
-			string result = await EvaluateString(rpt, row);
+			string result = await EvaluateString(rpt, row).ConfigureAwait(false);
 
 			return Convert.ToDecimal(result);
 		}
 
         public async Task<int> EvaluateInt32(Report rpt, Row row)
         {
-            string result = await EvaluateString(rpt, row);
+            string result = await EvaluateString(rpt, row).ConfigureAwait(false);
 
             return Convert.ToInt32(result);
         }
@@ -70,7 +70,7 @@ namespace Majorsilence.Reporting.Rdl
 
 		public async Task<DateTime> EvaluateDateTime(Report rpt, Row row)
 		{
-			string result = await EvaluateString(rpt, row);
+			string result = await EvaluateString(rpt, row).ConfigureAwait(false);
 			return Convert.ToDateTime(result);
 		}
 

@@ -37,15 +37,15 @@ namespace Majorsilence.Reporting.Rdl
 
 		public async Task<bool> IsConstant()
 		{
-			return await _rhs.IsConstant();
+			return await _rhs.IsConstant().ConfigureAwait(false);
 		}
 
 		public async Task<IExpr> ConstantOptimization()
 		{
-			_rhs = await _rhs.ConstantOptimization();
-			if (await _rhs.IsConstant())
+			_rhs = await _rhs.ConstantOptimization().ConfigureAwait(false);
+			if (await _rhs.IsConstant().ConfigureAwait(false))
 			{
-				decimal d = await EvaluateDecimal(null, null);
+				decimal d = await EvaluateDecimal(null, null).ConfigureAwait(false);
 				return new ConstantDecimal(d);
 			}
 
@@ -55,39 +55,39 @@ namespace Majorsilence.Reporting.Rdl
 		// Evaluate is for interpretation  (and is relatively slow)
 		public async Task<object> Evaluate(Report rpt, Row row)
 		{
-			return await EvaluateDecimal(rpt, row);
+			return await EvaluateDecimal(rpt, row).ConfigureAwait(false);
 		}
 		
 		public async Task<double> EvaluateDouble(Report rpt, Row row)
 		{
-			decimal result = await EvaluateDecimal(rpt, row);
+			decimal result = await EvaluateDecimal(rpt, row).ConfigureAwait(false);
 
 			return Convert.ToDouble(result);
 		}
 
         public async Task<int> EvaluateInt32(Report rpt, Row row)
         {
-            decimal result = await EvaluateDecimal(rpt, row);
+            decimal result = await EvaluateDecimal(rpt, row).ConfigureAwait(false);
 
             return Convert.ToInt32(result);
         }
 		
 		public async Task<decimal> EvaluateDecimal(Report rpt, Row row)
 		{
-			decimal rhs = await _rhs.EvaluateDecimal(rpt, row);
+			decimal rhs = await _rhs.EvaluateDecimal(rpt, row).ConfigureAwait(false);
 
 			return (decimal) (-rhs);
 		}
 
 		public async Task<string> EvaluateString(Report rpt, Row row)
 		{
-			decimal result = await EvaluateDecimal(rpt, row);
+			decimal result = await EvaluateDecimal(rpt, row).ConfigureAwait(false);
 			return result.ToString();
 		}
 
 		public async Task<DateTime> EvaluateDateTime(Report rpt, Row row)
 		{
-			decimal result = await EvaluateDecimal(rpt, row);
+			decimal result = await EvaluateDecimal(rpt, row).ConfigureAwait(false);
 			return Convert.ToDateTime(result);
 		}
 

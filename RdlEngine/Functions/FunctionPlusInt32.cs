@@ -35,24 +35,24 @@ namespace Majorsilence.Reporting.Rdl
 
 		public async Task<IExpr> ConstantOptimization()
 		{
-			_lhs = await _lhs.ConstantOptimization();
-			_rhs = await _rhs.ConstantOptimization();
-			bool bLeftConst = await _lhs.IsConstant();
-			bool bRightConst = await _rhs.IsConstant();
+			_lhs = await _lhs.ConstantOptimization().ConfigureAwait(false);
+			_rhs = await _rhs.ConstantOptimization().ConfigureAwait(false);
+			bool bLeftConst = await _lhs.IsConstant().ConfigureAwait(false);
+			bool bRightConst = await _rhs.IsConstant().ConfigureAwait(false);
 			if (bLeftConst && bRightConst)
 			{
-				int d = await EvaluateInt32(null, null);
+				int d = await EvaluateInt32(null, null).ConfigureAwait(false);
 				return new ConstantInteger(d);
 			}
 			else if (bRightConst)
 			{
-				int d = await _rhs.EvaluateInt32(null, null);
+				int d = await _rhs.EvaluateInt32(null, null).ConfigureAwait(false);
 				if (d == 0)
 					return _lhs;
 			}
 			else if (bLeftConst)
 			{
-				int d = await _lhs.EvaluateInt32(null, null);
+				int d = await _lhs.EvaluateInt32(null, null).ConfigureAwait(false);
 				if (d == 0)
 					return _rhs;
 			}
@@ -63,46 +63,46 @@ namespace Majorsilence.Reporting.Rdl
 		// Evaluate is for interpretation  (and is relatively slow)
 		public async Task<object> Evaluate(Report rpt, Row row)
 		{
-			return await EvaluateInt32(rpt, row);
+			return await EvaluateInt32(rpt, row).ConfigureAwait(false);
 		}
 		
 		public async Task<double> EvaluateDouble(Report rpt, Row row)
 		{
-			int result = await EvaluateInt32(rpt, row);
+			int result = await EvaluateInt32(rpt, row).ConfigureAwait(false);
 
 			return Convert.ToDouble(result);
 		}
 
         public async Task<decimal> EvaluateDecimal(Report rpt, Row row)
         {
-            int result = await EvaluateInt32(rpt, row);
+            int result = await EvaluateInt32(rpt, row).ConfigureAwait(false);
 
             return Convert.ToDecimal(result);
         }
 
         public async Task<int> EvaluateInt32(Report rpt, Row row)
 		{
-			int lhs = await _lhs.EvaluateInt32(rpt, row);
-			int rhs = await _rhs.EvaluateInt32(rpt, row);
+			int lhs = await _lhs.EvaluateInt32(rpt, row).ConfigureAwait(false);
+			int rhs = await _rhs.EvaluateInt32(rpt, row).ConfigureAwait(false);
 
 			return (lhs+rhs);
 		}
 
 		public async Task<string> EvaluateString(Report rpt, Row row)
 		{
-			int result = await EvaluateInt32(rpt, row);
+			int result = await EvaluateInt32(rpt, row).ConfigureAwait(false);
 			return result.ToString();
 		}
 
 		public async Task<DateTime> EvaluateDateTime(Report rpt, Row row)
 		{
-			int result = await EvaluateInt32(rpt, row);
+			int result = await EvaluateInt32(rpt, row).ConfigureAwait(false);
 			return Convert.ToDateTime(result);
 		}
 
 		public async Task<bool> EvaluateBoolean(Report rpt, Row row)
 		{
-			int result = await EvaluateInt32(rpt, row);
+			int result = await EvaluateInt32(rpt, row).ConfigureAwait(false);
 			return Convert.ToBoolean(result);
 		}
 	}

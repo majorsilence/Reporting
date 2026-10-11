@@ -62,15 +62,15 @@ namespace Majorsilence.Reporting.Rdl
 		async override internal Task FinalPass()
 		{
 			if (_Default != null)
-                await _Default.FinalPass();
+                await _Default.FinalPass().ConfigureAwait(false);
 			if (_Left != null)
-                await _Left.FinalPass();
+                await _Left.FinalPass().ConfigureAwait(false);
 			if (_Right != null)
-                await _Right.FinalPass();
+                await _Right.FinalPass().ConfigureAwait(false);
 			if (_Top != null)
-                await _Top.FinalPass();
+                await _Top.FinalPass().ConfigureAwait(false);
 			if (_Bottom != null)
-                await _Bottom.FinalPass();
+                await _Bottom.FinalPass().ConfigureAwait(false);
 			return;
 		}
 
@@ -80,21 +80,21 @@ namespace Majorsilence.Reporting.Rdl
 			StringBuilder sb = new StringBuilder();
 
 			if (_Default != null)
-				sb.AppendFormat("border-style:{0};", await _Default.EvaluateString(rpt, row));
+				sb.AppendFormat("border-style:{0};", await _Default.EvaluateString(rpt, row).ConfigureAwait(false));
 			else if (bDefaults)
 				sb.Append("border-style:none;");
 
 			if (_Left != null)
-				sb.AppendFormat("border-left-style:{0};", await _Left.EvaluateString(rpt, row));
+				sb.AppendFormat("border-left-style:{0};", await _Left.EvaluateString(rpt, row).ConfigureAwait(false));
 
 			if (_Right != null)
-				sb.AppendFormat("border-right-style:{0};", await _Right.EvaluateString(rpt, row));
+				sb.AppendFormat("border-right-style:{0};", await _Right.EvaluateString(rpt, row).ConfigureAwait(false));
 
 			if (_Top != null)
-				sb.AppendFormat("border-top-style:{0};", await _Top.EvaluateString(rpt, row));
+				sb.AppendFormat("border-top-style:{0};", await _Top.EvaluateString(rpt, row).ConfigureAwait(false));
 
 			if (_Bottom != null)
-				sb.AppendFormat("border-bottom-style:{0};", await _Bottom.EvaluateString(rpt, row));
+				sb.AppendFormat("border-bottom-style:{0};", await _Bottom.EvaluateString(rpt, row).ConfigureAwait(false));
 
 			return sb.ToString();
 		}
@@ -104,31 +104,31 @@ namespace Majorsilence.Reporting.Rdl
 			bool rc = true;
 
 			if (_Default != null)
-				rc = await _Default.IsConstant();
+				rc = await _Default.IsConstant().ConfigureAwait(false);
 
 			if (!rc)
 				return false;
 
 			if (_Left != null)
-				rc = await _Left.IsConstant();
+				rc = await _Left.IsConstant().ConfigureAwait(false);
 
 			if (!rc)
 				return false;
 
 			if (_Right != null)
-				rc = await _Right.IsConstant();
+				rc = await _Right.IsConstant().ConfigureAwait(false);
 
 			if (!rc)
 				return false;
 
 			if (_Top != null)
-				rc = await _Top.IsConstant();
+				rc = await _Top.IsConstant().ConfigureAwait(false);
 
 			if (!rc)
 				return false;
 
 			if (_Bottom != null)
-				rc = await _Bottom.IsConstant();
+				rc = await _Bottom.IsConstant().ConfigureAwait(false);
 
 			return rc;
 		}
@@ -149,7 +149,7 @@ namespace Majorsilence.Reporting.Rdl
 			if (_Default == null)
 				return BorderStyleEnum.None;
 
-			string bs = await _Default.EvaluateString(rpt, r);
+			string bs = await _Default.EvaluateString(rpt, r).ConfigureAwait(false);
 			return GetBorderStyle(bs, BorderStyleEnum.Solid);
 		}
 
@@ -162,9 +162,9 @@ namespace Majorsilence.Reporting.Rdl
 		internal async Task<BorderStyleEnum> EvalLeft(Report rpt, Row r)
 		{
 			if (_Left == null)
-				return await EvalDefault(rpt, r);
+				return await EvalDefault(rpt, r).ConfigureAwait(false);
 
-			string bs = await _Left.EvaluateString(rpt, r);
+			string bs = await _Left.EvaluateString(rpt, r).ConfigureAwait(false);
 			return GetBorderStyle(bs, BorderStyleEnum.Solid);
 		}
 
@@ -177,9 +177,9 @@ namespace Majorsilence.Reporting.Rdl
 		internal async Task<BorderStyleEnum> EvalRight(Report rpt, Row r)
 		{
 			if (_Right == null)
-				return await EvalDefault(rpt, r);
+				return await EvalDefault(rpt, r).ConfigureAwait(false);
 
-			string bs = await _Right.EvaluateString(rpt, r);
+			string bs = await _Right.EvaluateString(rpt, r).ConfigureAwait(false);
 			return GetBorderStyle(bs, BorderStyleEnum.Solid);
 		}
 
@@ -192,9 +192,9 @@ namespace Majorsilence.Reporting.Rdl
 		internal async Task<BorderStyleEnum> EvalTop(Report rpt, Row r)
 		{
 			if (_Top == null)
-				return await EvalDefault(rpt, r);
+				return await EvalDefault(rpt, r).ConfigureAwait(false);
 
-			string bs = await _Top.EvaluateString(rpt, r);
+			string bs = await _Top.EvaluateString(rpt, r).ConfigureAwait(false);
 			return GetBorderStyle(bs, BorderStyleEnum.Solid);
 		}
 
@@ -207,9 +207,9 @@ namespace Majorsilence.Reporting.Rdl
 		internal async Task<BorderStyleEnum> EvalBottom(Report rpt, Row r)
 		{
 			if (_Bottom == null)
-				return await EvalDefault(rpt, r);
+				return await EvalDefault(rpt, r).ConfigureAwait(false);
 
-			string bs = await _Bottom.EvaluateString(rpt, r);
+			string bs = await _Bottom.EvaluateString(rpt, r).ConfigureAwait(false);
 			return GetBorderStyle(bs, BorderStyleEnum.Solid);
 		}
 

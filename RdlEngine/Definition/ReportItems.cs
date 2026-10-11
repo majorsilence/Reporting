@@ -93,7 +93,7 @@ namespace Majorsilence.Reporting.Rdl
 		{
 			foreach (ReportItem ri in _Items)
 			{		
-				await ri.FinalPass(); 
+				await ri.FinalPass().ConfigureAwait(false); 
 			}
 			_Items.Sort();				// sort on ZIndex; y, x (see ReportItem compare routine)
 
@@ -112,7 +112,7 @@ namespace Majorsilence.Reporting.Rdl
 		{
 			foreach (ReportItem ri in _Items)
 			{
-				await ri.Run(ip, row);
+				await ri.Run(ip, row).ConfigureAwait(false);
 			}
 			return;
 		}
@@ -122,7 +122,7 @@ namespace Majorsilence.Reporting.Rdl
 			SetXOffset(pgs.Report, xOffset);
 			foreach (ReportItem ri in _Items)
 			{
-                await ri.RunPage(pgs, row);
+                await ri.RunPage(pgs, row).ConfigureAwait(false);
 			}
 			return;
 		}

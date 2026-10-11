@@ -23,7 +23,7 @@ namespace Majorsilence.Reporting.Rdl
 		async override internal Task FinalPass()
 		{
 			if (_Expression != null)
-                await _Expression.FinalPass();
+                await _Expression.FinalPass().ConfigureAwait(false);
 			return;
 		}
 
