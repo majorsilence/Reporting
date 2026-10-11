@@ -1,4 +1,4 @@
-﻿using BenchmarkDotNet.Attributes;
+using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Engines;
 using BenchmarkDotNet.Jobs;
 using System.Collections.Generic;
@@ -15,12 +15,12 @@ namespace Majorsilence.Reporting.Benchmarks
     [HtmlExporter]
     [MemoryDiagnoser]
     //[RPlotExporter]
-    //[SimpleJob(baseline: true)]
-    [DrawingCompatJob(runStrategy: RunStrategy.Throughput, baseline: true, buildConfiguration: "Release-DrawingCompat")]
+    [SimpleJob(RunStrategy.Throughput)]
     public class JsonDataProviderBenchmark
     {
         DataProviders dataProvider = DataProviders.Json;
-        private string connectionString = "file=NestedJsonData.json";
+        private readonly string connectionString =
+            "file=" + Path.Combine(AppContext.BaseDirectory, "NestedJsonData.json");
         
         [Benchmark]
         public async Task NestedJson()

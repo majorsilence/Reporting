@@ -260,3 +260,6 @@ obj/
 
 # Microsoft RDL schemas are downloaded locally, see ReportTests/Schemas/README.md
 ReportTests/Schemas/*.xsd
+
+# BenchmarkDotNet output
+BenchmarkDotNet.Artifacts/
