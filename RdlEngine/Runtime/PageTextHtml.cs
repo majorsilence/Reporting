@@ -824,18 +824,10 @@ namespace Majorsilence.Reporting.Rdl
 				if (cache.TryGetSize(sizeKey, out var known))
 					return known;
 
-				drawFormat = new Draw.StringFormat();
-				drawFormat.Alignment = Draw.StringAlignment.Near;
+				System.Drawing.SizeF run = g.MeasureRun(s, cached.font);
 
-				Draw.CharacterRange[] cr = {new Draw.CharacterRange(0, s.Length)};
-				drawFormat.SetMeasurableCharacterRanges(cr);
-				Draw.Region[] rs = new Draw.Region[1];
-				rs = g.MeasureCharacterRanges(s, cached.font, new System.Drawing.RectangleF(0,0,float.MaxValue,float.MaxValue),
-					drawFormat);
-				System.Drawing.RectangleF mr = rs[0].GetBounds(g);
-
-				ms.Height = RSize.PointsFromPixels(g, mr.Height);	// convert to points from pixels
-				ms.Width = RSize.PointsFromPixels(g, mr.Width);		// convert to points from pixels
+				ms.Height = RSize.PointsFromPixels(g, run.Height);	// convert to points from pixels
+				ms.Width = RSize.PointsFromPixels(g, run.Width);		// convert to points from pixels
 				cache.SetSize(sizeKey, ms);
 				return ms;
 			}

@@ -36,6 +36,12 @@ if (args.Length > 0 && args[0] == "profile")
     return 0;
 }
 
+if (args.Length > 0 && args[0] == "cold")
+{
+    await Cold.Run(args);
+    return 0;
+}
+
 if (args.Length > 0 && args[0] == "sweep")
 {
     await Smoke.Sweep(args[1], args.Length > 2 ? args[2] : null);

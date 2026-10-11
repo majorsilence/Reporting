@@ -623,7 +623,7 @@ namespace Majorsilence.Reporting.Rdl
 
 				// 06122007AJM Fixed so that long names are written vertically
 				// need to add w to make slightly bigger
-				System.Drawing.SizeF len = g.MeasureStringLocked(o.ToString() + "w", drawFont);
+				System.Drawing.SizeF len = g.MeasureString(o.ToString() + "w", drawFont);
 				if (len.Width > rect.Width)
 				{
 					drawFormat.FormatFlags = Draw2.StringFormatFlags.DirectionVertical;
@@ -650,12 +650,12 @@ namespace Majorsilence.Reporting.Rdl
 					drawFormat.FormatFlags |= Draw2.StringFormatFlags.NoWrap;
 
 				// 06122007AJM need to add w to make slightly bigger
-				System.Drawing.SizeF ms = g.MeasureStringLocked(s + "w", drawFont, maxWidth, drawFormat);
+				System.Drawing.SizeF ms = g.MeasureString(s + "w", drawFont, maxWidth, drawFormat);
 				float lineH = await EvalLineHeight(rpt, r).ConfigureAwait(false);
 				if (lineH > 0)
 				{
 					// an explicit line height replaces the font's own line pitch
-					float oneLine = g.MeasureStringLocked("Xg", drawFont, int.MaxValue, drawFormat).Height;
+					float oneLine = g.MeasureString("Xg", drawFont, int.MaxValue, drawFormat).Height;
 					if (oneLine > 0)
 					{
 						int lines = Math.Max(1, (int) Math.Round(ms.Height / oneLine));
@@ -682,7 +682,7 @@ namespace Majorsilence.Reporting.Rdl
 				if (maxWidth == int.MaxValue)
 					drawFormat.FormatFlags |= Draw2.StringFormatFlags.NoWrap;
                 // 06122007AJM need to add w to make slightly bigger
-                System.Drawing.SizeF ms = g.MeasureStringLocked(s + "w", drawFont, maxWidth, drawFormat);
+                System.Drawing.SizeF ms = g.MeasureString(s + "w", drawFont, maxWidth, drawFormat);
 				return new System.Drawing.Size((int) Math.Ceiling(ms.Width), 
 					(int) Math.Ceiling(ms.Height));
 			}
