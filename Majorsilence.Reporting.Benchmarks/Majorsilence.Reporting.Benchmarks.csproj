@@ -32,6 +32,7 @@
     <ItemGroup>
       <!-- Report workloads. Files are linked from the test projects so there is a single copy. -->
       <None Include="Workloads\LargeTable.rdl" CopyToOutputDirectory="PreserveNewest" />
+      <None Include="..\ReportTests\Reports\MatrixSortTest.rdl" Link="Workloads\MatrixSortTest.rdl" CopyToOutputDirectory="PreserveNewest" />
       <None Include="..\ReportTests\Reports\GroupSortTest.rdl" Link="Workloads\GroupSortTest.rdl" CopyToOutputDirectory="PreserveNewest" />
       <None Include="..\ReportTests\Reports\RecursiveGroupTest.rdl" Link="Workloads\RecursiveGroupTest.rdl" CopyToOutputDirectory="PreserveNewest" />
       <None Include="..\ReportTests\Reports\testdata.rdl" Link="Workloads\testdata.rdl" CopyToOutputDirectory="PreserveNewest" />

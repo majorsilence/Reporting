@@ -754,6 +754,10 @@ namespace Majorsilence.Reporting.Rdl
                 iRow++;
             }
 
+            // Sort the entries now, awaiting the sort expressions; the code below reads them synchronously
+            await mcg.PrepareSortedDataAsync(rpt);
+            await mrg.PrepareSortedDataAsync(rpt);
+
             // Determine how many subtotal columns are needed
             maxColumns += RunCountSubtotalColumns(rpt, wc, mcg, 0);
 

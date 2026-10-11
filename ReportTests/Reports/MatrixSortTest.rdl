@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Report xmlns="http://schemas.microsoft.com/sqlserver/reporting/2005/01/reportdefinition" xmlns:rd="http://schemas.microsoft.com/SQLServer/reporting/reportdesigner">
+  <Description>Matrix with dynamic rows sorted descending by an aggregate and dynamic columns sorted descending: regression workload for matrix entry sorting.</Description>
+  <Width>8in</Width><PageWidth>8.5in</PageWidth><PageHeight>11in</PageHeight>
+  <TopMargin>.5in</TopMargin><BottomMargin>.5in</BottomMargin><LeftMargin>.25in</LeftMargin><RightMargin>.25in</RightMargin>
+  <DataSources><DataSource Name="DS1"><ConnectionProperties><DataProvider>xxx</DataProvider><ConnectString>none</ConnectString></ConnectionProperties></DataSource></DataSources>
+  <DataSets>
+    <DataSet Name="Data">
+      <Query><DataSourceName>DS1</DataSourceName><CommandText></CommandText></Query>
+      <Fields>
+        <Field Name="Region"><DataField>Region</DataField><rd:TypeName>System.String</rd:TypeName></Field>
+        <Field Name="Quarter"><DataField>Quarter</DataField><rd:TypeName>System.String</rd:TypeName></Field>
+        <Field Name="Amount"><DataField>Amount</DataField><rd:TypeName>System.Int32</rd:TypeName></Field>
+      </Fields>
+      <fyi:Rows xmlns:fyi="http://www.fyireporting.com/schemas">
+        <Row><Region>North</Region><Quarter>Q1</Quarter><Amount>10</Amount></Row>
+        <Row><Region>North</Region><Quarter>Q2</Quarter><Amount>5</Amount></Row>
+        <Row><Region>South</Region><Quarter>Q1</Quarter><Amount>50</Amount></Row>
+        <Row><Region>South</Region><Quarter>Q3</Quarter><Amount>1</Amount></Row>
+        <Row><Region>East</Region><Quarter>Q2</Quarter><Amount>30</Amount></Row>
+        <Row><Region>East</Region><Quarter>Q1</Quarter><Amount>40</Amount></Row>
+        <Row><Region>West</Region><Quarter>Q4</Quarter><Amount>20</Amount></Row>
+        <Row><Region>West</Region><Quarter>Q1</Quarter><Amount>25</Amount></Row>
+        <Row><Region>Central</Region><Quarter>Q3</Quarter><Amount>99</Amount></Row>
+        <Row><Region>Central</Region><Quarter>Q2</Quarter><Amount>1</Amount></Row>
+      </fyi:Rows>
+    </DataSet>
+  </DataSets>
+  <Body>
+    <Height>1in</Height>
+    <ReportItems>
+      <Matrix Name="Matrix1">
+        <DataSetName>Data</DataSetName>
+        <ColumnGroupings>
+          <ColumnGrouping>
+            <Height>0.25in</Height>
+            <DynamicColumns>
+              <Grouping Name="ByQuarter"><GroupExpressions><GroupExpression>=Fields!Quarter.Value</GroupExpression></GroupExpressions></Grouping>
+              <Sorting><SortBy><SortExpression>=Fields!Quarter.Value</SortExpression><Direction>Descending</Direction></SortBy></Sorting>
+              <ReportItems><Textbox Name="QuarterHdr"><Value>=Fields!Quarter.Value</Value></Textbox></ReportItems>
+            </DynamicColumns>
+          </ColumnGrouping>
+        </ColumnGroupings>
+        <RowGroupings>
+          <RowGrouping>
+            <Width>1.5in</Width>
+            <DynamicRows>
+              <Grouping Name="ByRegion"><GroupExpressions><GroupExpression>=Fields!Region.Value</GroupExpression></GroupExpressions></Grouping>
+              <Sorting><SortBy><SortExpression>=Sum(Fields!Amount.Value)</SortExpression><Direction>Descending</Direction></SortBy></Sorting>
+              <ReportItems><Textbox Name="RegionHdr"><Value>=Fields!Region.Value</Value></Textbox></ReportItems>
+            </DynamicRows>
+          </RowGrouping>
+        </RowGroupings>
+        <MatrixRows><MatrixRow><Height>0.25in</Height><MatrixCells><MatrixCell><ReportItems><Textbox Name="Total"><Value>=Sum(Fields!Amount.Value)</Value></Textbox></ReportItems></MatrixCell></MatrixCells></MatrixRow></MatrixRows>
+        <MatrixColumns><MatrixColumn><Width>1in</Width></MatrixColumn></MatrixColumns>
+      </Matrix>
+    </ReportItems>
+  </Body>
+</Report>

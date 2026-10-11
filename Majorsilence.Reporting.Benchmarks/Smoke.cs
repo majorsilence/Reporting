@@ -9,7 +9,7 @@ public static class Smoke
     public static async Task Run()
     {
         WorkloadSupport.Init();
-        string[] names = [Workloads.Small, Workloads.Tabular, Workloads.Matrix, Workloads.Paging, Workloads.CanGrow, Workloads.Charts, Workloads.Images, "GroupSortTest", "RecursiveGroupTest"];
+        string[] names = [Workloads.Small, Workloads.Tabular, Workloads.Matrix, Workloads.Paging, Workloads.CanGrow, Workloads.Charts, Workloads.Images, "GroupSortTest", "RecursiveGroupTest", "MatrixSortTest"];
         OutputPresentationType[] formats = [OutputPresentationType.PDF, OutputPresentationType.HTML, OutputPresentationType.CSV, OutputPresentationType.XML, OutputPresentationType.RTF, OutputPresentationType.Excel2007];
         Console.WriteLine("|Workload|Format|Bytes|SHA256 (first 12)|Status|");
         Console.WriteLine("|--------|------|----:|-----------------|------|");
