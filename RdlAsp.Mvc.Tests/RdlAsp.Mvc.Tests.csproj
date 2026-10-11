@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <IsPackable>false</IsPackable>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\RdlAsp.Mvc\Majorsilence.Reporting.RdlAsp.Mvc.csproj" />
+    <ProjectReference Include="..\DataProviders\Majorsilence.Reporting.DataProviders.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Data.Sqlite" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="NUnit" />
+    <PackageReference Include="NUnit3TestAdapter" />
+    <PackageReference Include="coverlet.collector">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Reports\**" CopyToOutputDirectory="PreserveNewest" />
+    <!-- The long list report is shared with the engine tests. -->
+    <None Include="..\ReportTests\Reports\ListPagingTest.rdl" Link="Reports\ListPagingTest.rdl" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+</Project>

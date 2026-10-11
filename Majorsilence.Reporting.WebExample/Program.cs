@@ -4,13 +4,9 @@ using Majorsilence.Reporting.WebDesigner;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddControllersWithViews();
-
-builder.Services.AddSingleton<Settings>(sp =>
+builder.Services.AddRdlAsp(settings =>
 {
-    var settings = new Settings();
     builder.Configuration.Bind("Settings", settings);
-    return settings;
 });
 
 builder.Services.AddRdlDesigner(o =>
