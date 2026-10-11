@@ -98,7 +98,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			_DrawPanel.MouseWheel += DrawPanelMouseWheel;
 			_DrawPanel.KeyDown += DrawPanelKeyDown;
 			_DrawPanel.MouseMove += DrawPanelMouseMove;
-			_DrawPanel.MouseLeave += (s, e) => _DrawPanel.HoverNode = null;
+			_DrawPanel.MouseLeave += (s, e) => { _DrawPanel.HoverNode = null; _DrawPanel.HoverTable = null; };
 			_DrawPanel.DoubleClick += DrawPanelDoubleClick;
 
 			this.Layout += DesignCtl_Layout;
@@ -1666,6 +1666,19 @@ namespace Majorsilence.Reporting.RdlDesign
 			// outline the item under the mouse (not while dragging)
 			_DrawPanel.HoverNode = (_MouseDownNode == null && !_bHaveMouse) ? b : null;
 
+			// show the table handles, and a hand cursor over them
+			if (_MouseDownNode == null && !_bHaveMouse)
+			{
+				if (_DrawPanel.HitTableDecorator(newMousePosition, PointsX(_hScroll.Value), PointsY(_vScroll.Value)).Kind
+					!= DesignXmlDraw.TableDecoratorKind.None)
+				{
+					_MousePosition = newMousePosition;
+					this.Cursor = Cursors.Hand;
+					return;
+				}
+				_DrawPanel.HoverTable = DesignXmlDraw.TableOf(b);
+			}
+
 			_MousePosition = newMousePosition;
 			DrawPanelSetCursor(b, hle);
 		}
@@ -1691,6 +1704,9 @@ namespace Majorsilence.Reporting.RdlDesign
 
 			if (e.Button == MouseButtons.Left)
 				_Undo.StartUndoGroup(Strings.DesignCtl_Undo_Move_Size);
+
+			if (e.Button == MouseButtons.Left && DrawPanelMouseDownTableDecorator())	// Handle row/column/table handles
+				return;
 
 			if (DrawPanelMouseDownRubberBand(sender, e))	// Handle rubber banding
 				return;
@@ -1735,6 +1751,18 @@ namespace Majorsilence.Reporting.RdlDesign
                 _DrawPanel.SetSelection(node, false);
             SelectionChanged(this, new EventArgs());
         }
+
+		// Clicking a handle beside a table selects the whole row, column or table (Ctrl adds to the selection)
+		private bool DrawPanelMouseDownTableDecorator()
+		{
+			var hit = _DrawPanel.HitTableDecorator(_MousePosition, PointsX(_hScroll.Value), PointsY(_vScroll.Value));
+			if (hit.Kind == DesignXmlDraw.TableDecoratorKind.None)
+				return false;
+			_MouseDownNode = null;
+			if (_DrawPanel.SelectTableDecorator(hit, (Control.ModifierKeys & Keys.Control) == Keys.Control))
+				SelectionChanged(this, new EventArgs());
+			return true;
+		}
 
 		private bool DrawPanelMouseDownRubberBand(object sender, MouseEventArgsE e)
 		{
