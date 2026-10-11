@@ -199,6 +199,30 @@ public class RdlReportTests
     }
 
     [Test]
+    public async Task BinaryExports_ConcurrentRequests_EachGetACompleteDocument()
+    {
+        // The pdf is sent from the stream the engine wrote it to; each request must get all of its own bytes.
+        var responses = await Task.WhenAll(Enumerable.Range(0, 16).Select(_ => Task.Run(async () =>
+        {
+            var response = await _client.GetAsync("/msr/RdlReport/ShowFile/ListPagingTest/pdf");
+            return (response, bytes: await response.Content.ReadAsByteArrayAsync());
+        })));
+
+        var pageCounts = new HashSet<int>();
+        foreach (var (response, bytes) in responses)
+        {
+            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
+            if (response.Content.Headers.ContentLength is long length)
+                Assert.That(bytes.Length, Is.EqualTo(length));
+            string text = System.Text.Encoding.Latin1.GetString(bytes);
+            Assert.That(text, Does.StartWith("%PDF-"));
+            Assert.That(text.TrimEnd(), Does.EndWith("%%EOF"));
+            pageCounts.Add(Regex.Matches(text, @"/Type\s*/Page[^s]").Count);
+        }
+        Assert.That(pageCounts, Has.Count.EqualTo(1), "every request renders the same document");
+    }
+
+    [Test]
     public async Task ReportList_LinksEveryReport()
     {
         string html = await _client.GetStringAsync("/msr/RdlList");

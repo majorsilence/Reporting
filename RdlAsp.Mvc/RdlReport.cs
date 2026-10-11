@@ -91,8 +91,8 @@ namespace Majorsilence.Reporting.RdlAsp
                 return Failure(500, null);
 
             if (format.Type != OutputPresentationType.HTML)
-                return rendered.Bytes != null
-                    ? File(rendered.Bytes, format.ContentType)
+                return rendered.Stream != null
+                    ? File(rendered.Stream, format.ContentType)     // the result disposes it once written
                     : Content(rendered.Text, format.ContentType);
 
             string name = Path.GetFileNameWithoutExtension(file);
@@ -162,7 +162,11 @@ namespace Majorsilence.Reporting.RdlAsp
                 if (format.IsText)
                     rendered.Text = sg.GetText();
                 else
-                    rendered.Bytes = ((MemoryStream)sg.MemoryList[0]).ToArray();
+                {
+                    // The output is sent from the stream the engine wrote it to, not from a copy of it.
+                    rendered.Stream = (MemoryStream)sg.MemoryList[0];
+                    rendered.Stream.Position = 0;
+                }
                 return rendered;
             }
             finally
@@ -315,7 +319,7 @@ namespace Majorsilence.Reporting.RdlAsp
         private sealed class RenderedReport
         {
             public string Text;
-            public byte[] Bytes;
+            public MemoryStream Stream;
         }
     }
 }
