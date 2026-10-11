@@ -687,6 +687,18 @@ namespace Majorsilence.Reporting.Rdl
 			set {  _Language = value; }
 		}
 
+		// The report's language when that needs no evaluation.
+		internal bool TryEvalLanguage(out string language)
+		{
+			if (_Language == null)
+			{
+				language = CultureInfo.CurrentCulture.Name;
+				return true;
+			}
+
+			return _Language.TryEvaluateString(out language);
+		}
+
 		internal async Task<string> EvalLanguage(Report rpt, Row r)
 		{
 			if (_Language == null)

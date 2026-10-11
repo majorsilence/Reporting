@@ -1081,6 +1081,59 @@ namespace Majorsilence.Reporting.Rdl
 			return si;
 		}
 
+		// The language for formatting, when it needs no evaluation (nothing set, or constants).
+		internal bool TryEvalLanguage(out string language)
+		{
+			if (_Language == null)
+				return OwnerReport.TryEvalLanguage(out language);
+
+			if (!_Language.TryEvaluateString(out language))
+				return false;
+			if (language != null)
+				return true;
+			return OwnerReport.TryEvalLanguage(out language);
+		}
+
+		// Format a string without a Task when the style's Format and Language are constants (or absent);
+		// false means GetFormatedString has to do it. Same result and error handling as GetFormatedString.
+		static internal bool TryGetFormatedString(Report rpt, Style s, object o, TypeCode tc, out string t)
+		{
+			if (o == null)
+			{
+				t = "";
+				return true;
+			}
+
+			if (s == null || s.Format == null)
+			{   // No style or format provided
+				t = o.ToString();
+				return true;
+			}
+
+			t = null;
+			if (!s.Format.TryEvaluateString(out string format))
+				return false;
+
+			try
+			{
+				if (format != null && format.Length > 0)
+				{
+					if (!s.TryEvalLanguage(out string language))
+						return false;
+					t = FormatValue(o, tc, format, language);
+				}
+				else
+					t = o.ToString();       // No format provided
+			}
+			catch (Exception ex)
+			{
+				rpt.rl.LogError(1, string.Format("Value:{0} Format:{1} exception: {2}", o, format,
+					ex.InnerException != null ? ex.InnerException.Message : ex.Message));
+				t = o.ToString();       // probably type mismatch from expectation
+			}
+			return true;
+		}
+
 		// Format a string; passed a style but style may be null;
 		static internal async Task<string> GetFormatedString(Report rpt, Style s, Row row, object o, TypeCode tc)
 		{
