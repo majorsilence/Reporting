@@ -972,6 +972,21 @@ namespace Majorsilence.Reporting.Rdl
 			return sb.ToString();
 		}
 
+		/// <summary>
+		/// The evaluated style for callers that only read it. When every part of the style is constant this is
+		/// one instance shared by every item that uses the style, so it must not be modified (clone it first,
+		/// as <see cref="GetStyleInfo"/> callers get); otherwise it is a fresh instance, as GetStyleInfo returns.
+		/// </summary>
+		internal async Task<StyleInfo> GetStyleInfoShared(Report rpt, Row r)
+		{
+			WorkClass wc = GetWC(rpt);
+			if (wc != null && wc.StyleInfo != null)
+				return wc.StyleInfo;
+
+			StyleInfo si = await GetStyleInfo(rpt, r).ConfigureAwait(false);   // fills wc.StyleInfo when the style is constant
+			return wc?.StyleInfo ?? si;
+		}
+
 		// Generate an evaluated version of all the style parameters; used for page processing
 		internal async Task<StyleInfo> GetStyleInfo(Report rpt, Row r)
 		{
@@ -1064,6 +1079,59 @@ namespace Majorsilence.Reporting.Rdl
 			}
 
 			return si;
+		}
+
+		// The language for formatting, when it needs no evaluation (nothing set, or constants).
+		internal bool TryEvalLanguage(out string language)
+		{
+			if (_Language == null)
+				return OwnerReport.TryEvalLanguage(out language);
+
+			if (!_Language.TryEvaluateString(out language))
+				return false;
+			if (language != null)
+				return true;
+			return OwnerReport.TryEvalLanguage(out language);
+		}
+
+		// Format a string without a Task when the style's Format and Language are constants (or absent);
+		// false means GetFormatedString has to do it. Same result and error handling as GetFormatedString.
+		static internal bool TryGetFormatedString(Report rpt, Style s, object o, TypeCode tc, out string t)
+		{
+			if (o == null)
+			{
+				t = "";
+				return true;
+			}
+
+			if (s == null || s.Format == null)
+			{   // No style or format provided
+				t = o.ToString();
+				return true;
+			}
+
+			t = null;
+			if (!s.Format.TryEvaluateString(out string format))
+				return false;
+
+			try
+			{
+				if (format != null && format.Length > 0)
+				{
+					if (!s.TryEvalLanguage(out string language))
+						return false;
+					t = FormatValue(o, tc, format, language);
+				}
+				else
+					t = o.ToString();       // No format provided
+			}
+			catch (Exception ex)
+			{
+				rpt.rl.LogError(1, string.Format("Value:{0} Format:{1} exception: {2}", o, format,
+					ex.InnerException != null ? ex.InnerException.Message : ex.Message));
+				t = o.ToString();       // probably type mismatch from expectation
+			}
+			return true;
 		}
 
 		// Format a string; passed a style but style may be null;

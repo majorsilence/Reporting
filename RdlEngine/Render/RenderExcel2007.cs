@@ -37,7 +37,7 @@ namespace Majorsilence.Reporting.Rdl
 
         protected IStreamGen StreamGen { get => _sg; set => _sg = value; }
 
-        public void Dispose() { }
+        public void Dispose() => excelBuilder.Dispose();
 
         public Report Report() => report;
 
@@ -114,6 +114,7 @@ namespace Majorsilence.Reporting.Rdl
             }
 
             workbook.Write(_sg.GetStream());
+            excelBuilder.Dispose();
             return Task.CompletedTask;
         }
 

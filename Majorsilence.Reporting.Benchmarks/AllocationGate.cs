@@ -18,17 +18,23 @@ public static class AllocationGate
         string baselinePath = ArgValue(args, "--baseline") ?? FindBaseline();
 
         WorkloadSupport.Init();
-        var workloads = new (string Name, string Rdl, System.Data.DataTable? Rows)[]
+        var workloads = new (string Name, string Rdl, System.Data.DataTable? Rows, OutputPresentationType Format)[]
         {
-            ("testdata", Workloads.Small, null),
-            ("WorldFacts", Workloads.Tabular, null),
-            ("MatrixExample", Workloads.Matrix, null),
-            ("ListPagingTest", Workloads.Paging, null),
-            ("large:1000", "LargeTable", WorkloadSupport.MakeRows(1000)),
+            ("testdata", Workloads.Small, null, OutputPresentationType.PDF),
+            ("WorldFacts", Workloads.Tabular, null, OutputPresentationType.PDF),
+            ("MatrixExample", Workloads.Matrix, null, OutputPresentationType.PDF),
+            ("ListPagingTest", Workloads.Paging, null, OutputPresentationType.PDF),
+            ("large:1000", "LargeTable", WorkloadSupport.MakeRows(1000), OutputPresentationType.PDF),
+            // the other writers, on the same report as the PDF row above
+            ("WorldFacts html", Workloads.Tabular, null, OutputPresentationType.HTML),
+            ("WorldFacts csv", Workloads.Tabular, null, OutputPresentationType.CSV),
+            ("WorldFacts xml", Workloads.Tabular, null, OutputPresentationType.XML),
+            ("WorldFacts rtf", Workloads.Tabular, null, OutputPresentationType.RTF),
+            ("WorldFacts xlsx", Workloads.Tabular, null, OutputPresentationType.Excel2007),
         };
 
         var measured = new SortedDictionary<string, long>(StringComparer.Ordinal);
-        foreach (var (name, rdl, rows) in workloads)
+        foreach (var (name, rdl, rows, format) in workloads)
         {
             string source = WorkloadSupport.ReadRdl(rdl);
 
@@ -41,7 +47,7 @@ public static class AllocationGate
                 }
 
                 await report.RunGetData();
-                await WorkloadSupport.Render(report, OutputPresentationType.PDF);
+                await WorkloadSupport.Render(report, format);
             }
 
             for (int i = 0; i < 5; i++)
@@ -58,7 +64,7 @@ public static class AllocationGate
 
             long perOp = (GC.GetTotalAllocatedBytes(true) - before) / iterations;
             measured[name] = perOp;
-            Console.WriteLine($"{name,-16} {perOp / 1024.0,10:N0} KB/op");
+            Console.WriteLine($"{name,-18} {perOp / 1024.0,10:N0} KB/op");
         }
 
         if (update)

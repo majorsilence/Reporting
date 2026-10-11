@@ -834,11 +834,11 @@ namespace Majorsilence.Reporting.Rdl
 
     internal class RCache
     {
-        ConcurrentDictionary<string, object> _RunCache;
+        ConcurrentDictionary<RCacheKey, object> _RunCache;
 
         internal RCache()
         {
-            _RunCache = new ConcurrentDictionary<string, object>();
+            _RunCache = new ConcurrentDictionary<RCacheKey, object>();
         }
 
         internal void Add(ReportLink rl, string name, object o)
@@ -848,7 +848,7 @@ namespace Majorsilence.Reporting.Rdl
 
         internal void AddReplace(ReportLink rl, string name, object o)
         {
-            string key = GetKey(rl, name);
+            RCacheKey key = GetKey(rl, name);
             _RunCache.AddOrUpdate(key, o, (k, v) => o);
         }
 
@@ -870,7 +870,7 @@ namespace Majorsilence.Reporting.Rdl
 
         internal void AddReplace(ReportDefn rd, string name, object o)
         {
-            string key = GetKey(rd, name);
+            RCacheKey key = GetKey(rd, name);
             _RunCache.AddOrUpdate(key, o, (k, v) => o);
         }
 
@@ -887,23 +887,23 @@ namespace Majorsilence.Reporting.Rdl
 
         internal void Add(string key, object o)
         {
-            _RunCache.TryAdd(key, o);
+            _RunCache.TryAdd(new RCacheKey(int.MinValue, key), o);
         }
 
         internal void AddReplace(string key, object o)
         {
-            _RunCache.AddOrUpdate(key, o, (k, v) => o);
+            _RunCache.AddOrUpdate(new RCacheKey(int.MinValue, key), o, (k, v) => o);
         }
 
         internal object Get(string key)
         {
-            _RunCache.TryGetValue(key, out var value);
+            _RunCache.TryGetValue(new RCacheKey(int.MinValue, key), out var value);
             return value;
         }
 
         internal void Remove(string key)
         {
-            _RunCache.TryRemove(key, out _);
+            _RunCache.TryRemove(new RCacheKey(int.MinValue, key), out _);
         }
 
         internal object Get(int i, string name)
@@ -917,12 +917,12 @@ namespace Majorsilence.Reporting.Rdl
             _RunCache.TryRemove(GetKey(i, name), out _);
         }
 
-        string GetKey(ReportLink rl, string name)
+        static RCacheKey GetKey(ReportLink rl, string name)
         {
             return GetKey(rl.ObjectNumber, name);
         }
 
-        string GetKey(ReportDefn rd, string name)
+        static RCacheKey GetKey(ReportDefn rd, string name)
         {
             if (rd.Subreport == null) // top level report use 0 
             {
@@ -934,9 +934,27 @@ namespace Majorsilence.Reporting.Rdl
             }
         }
 
-        string GetKey(int onum, string name)
+        // A struct key: the lookup is made 8-12 times per table cell, and building "name" + number as a string
+        // each time was a pair of allocations per lookup.
+        static RCacheKey GetKey(int onum, string name)
         {
-            return name + onum.ToString();
+            return new RCacheKey(onum, name);
+        }
+
+        readonly struct RCacheKey : IEquatable<RCacheKey>
+        {
+            readonly int _id;
+            readonly string _name;
+
+            internal RCacheKey(int id, string name)
+            {
+                _id = id;
+                _name = name;
+            }
+
+            public bool Equals(RCacheKey other) => _id == other._id && string.Equals(_name, other._name, StringComparison.Ordinal);
+            public override bool Equals(object obj) => obj is RCacheKey k && Equals(k);
+            public override int GetHashCode() => HashCode.Combine(_id, _name);
         }
 
         internal void TransferRowsTo(RCache target)

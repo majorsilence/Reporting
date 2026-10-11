@@ -73,6 +73,32 @@ namespace Majorsilence.Reporting.Rdl
 			else
 				o = row.Data[f.ColumnNumber];
 
+			return Normalize(o);
+		}
+
+		/// <summary>
+		/// The value of a plain field of a row, without a Task: false when the field is calculated (its Value
+		/// expression has to be evaluated, which may be async).
+		/// </summary>
+		internal bool TryGet(Row row, out object value)
+		{
+			if (row == null)
+			{
+				value = null;
+				return true;
+			}
+			if (f.Value != null)
+			{
+				value = null;
+				return false;
+			}
+
+			value = Normalize(row.Data[f.ColumnNumber]);
+			return true;
+		}
+
+		private object Normalize(object o)
+		{
             if (o == DBNull.Value)
             {
                 if (IsNumericType(f.RunType))

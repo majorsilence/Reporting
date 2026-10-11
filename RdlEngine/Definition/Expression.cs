@@ -44,12 +44,14 @@ namespace Majorsilence.Reporting.Rdl
 			if (_Source == null)
 			{
 				_Expr = new Constant("");
+				_constant = _Expr as ICachedConstant;
 				return;
 			}
 			else if (_Source == "" ||			// empty expression
 				_Source[0] != '=')	// if 1st char not '='
 			{
 				_Expr = new Constant(_Source);	//   this is a constant value
+				_constant = _Expr as ICachedConstant;
 				return;
 			}
 
@@ -146,6 +148,8 @@ namespace Majorsilence.Reporting.Rdl
 				OwnerReport.rl.LogError(4, "Expression:" + _Source + "\r\nConstant Optimization exception:\r\n" + ex.Message + "\r\nStack trace:\r\n" + ex.StackTrace );
 			}
 			_Type = _Expr.GetTypeCode();
+			_constant = _Expr as ICachedConstant;
+			_field = (_Expr != null && _Expr.GetType() == typeof(FunctionField) && UniqueName == null) ? (FunctionField) _Expr : null;
 
 			return;
 		}
@@ -219,7 +223,66 @@ namespace Majorsilence.Reporting.Rdl
 			return Task.FromResult(this as IExpr);
 		}
 
-		public async Task<object> Evaluate(Report rpt, Row row)
+		// Set in FinalPass when the expression is a constant; Evaluate / EvaluateString then answer with its
+		// ready-made task and skip the async method (a state machine and a Task per call).
+		private ICachedConstant _constant;
+
+		// Set in FinalPass when the expression is a plain field (not calculated, not in a page header or footer).
+		private FunctionField _field;
+
+		/// <summary>
+		/// Evaluates without a Task when that is possible: a constant, or a plain field of the row. False means the
+		/// value has to come from <see cref="Evaluate"/>. Errors are reported and give null, as Evaluate does.
+		/// </summary>
+		internal bool TryEvaluate(Report rpt, Row row, out object value)
+		{
+			ICachedConstant c = _constant;
+			if (c != null)
+			{
+				value = c.ObjectTask.Result;       // already complete
+				return true;
+			}
+
+			FunctionField ff = _field;
+			if (ff != null)
+			{
+				try
+				{
+					return ff.TryGet(row, out value);
+				}
+				catch (Exception e)
+				{
+					ReportError(rpt, 4, String.Format("Exception evaluating {0}.  {1}", _Source, e.Message));
+					value = null;
+					return true;
+				}
+			}
+
+			value = null;
+			return false;
+		}
+
+		/// <summary>The string of a constant without a Task; false for anything that has to be evaluated.</summary>
+		internal bool TryEvaluateString(out string value)
+		{
+			ICachedConstant c = _constant;
+			if (c != null)
+			{
+				value = c.StringTask.Result;       // already complete
+				return true;
+			}
+
+			value = null;
+			return false;
+		}
+
+		public Task<object> Evaluate(Report rpt, Row row)
+		{
+			ICachedConstant c = _constant;
+			return c != null ? c.ObjectTask : EvaluateAsync(rpt, row);
+		}
+
+		private async Task<object> EvaluateAsync(Report rpt, Row row)
 		{
 			try 
 			{
@@ -247,7 +310,13 @@ namespace Majorsilence.Reporting.Rdl
 			}
 		}
 
-		public async Task<string> EvaluateString(Report rpt, Row row)
+		public Task<string> EvaluateString(Report rpt, Row row)
+		{
+			ICachedConstant c = _constant;
+			return c != null ? c.StringTask : EvaluateStringAsync(rpt, row);
+		}
+
+		private async Task<string> EvaluateStringAsync(Report rpt, Row row)
 		{
 			try 
 			{

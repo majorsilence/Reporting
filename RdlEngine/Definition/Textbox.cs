@@ -56,9 +56,6 @@ namespace Majorsilence.Reporting.Rdl
 
         static readonly Regex HTMLEXPR = new Regex("(<expr>.+</expr>)");     // Split on all expressions.
 
-		object lastEvaluatedValue = null;
-		Report lastValueForReport = null;
-		Row lastValueForRow = null;
 
 		internal Textbox(ReportDefn r, ReportLink p, XmlNode xNode):base(r,p,xNode)
 		{
@@ -210,7 +207,8 @@ namespace Majorsilence.Reporting.Rdl
 			TextboxRuntime tbr = TextboxRuntime.GetTextboxRuntime(rpt, this);
 
 			tbr.RunCount++;		// Increment the run count
-			string t = await RunText(rpt, row).ConfigureAwait(false);
+			if (!TryRunText(rpt, row, out string t))
+				t = await RunTextAsync(rpt, row).ConfigureAwait(false);
 			bool bDup =	RunTextIsDuplicate(tbr, t, null);
 			if (bDup)
 			{
@@ -239,7 +237,10 @@ namespace Majorsilence.Reporting.Rdl
             if (bHidden)
                 t = "";
             else
-                t = await RunText(r, row).ConfigureAwait(false);	// get the text
+            {
+                if (!TryRunText(r, row, out t))
+                    t = await RunTextAsync(r, row).ConfigureAwait(false);	// get the text
+            }
 
 			bool bDup =	RunTextIsDuplicate(tbr, t, pgs.CurrentPage);
 			if (bDup)
@@ -250,7 +251,7 @@ namespace Majorsilence.Reporting.Rdl
 			}
 			PageText pt;
 			PageTextHtml pth=null;
-			if (await IsHtml(r, row).ConfigureAwait(false))
+			if (TryIsHtml(out bool pageIsHtml) ? pageIsHtml : await IsHtml(r, row).ConfigureAwait(false))
 				pt = pth = new PageTextHtml(t);
 			else
 				pt = new PageText(t);
@@ -268,7 +269,10 @@ namespace Majorsilence.Reporting.Rdl
             if (pt.SI.TextAlign == TextAlignEnum.General)
             {
                 if (DataType.IsNumeric(this.Value.GetTypeCode() ))
+                {
+                    pt.SI = (StyleInfo) pt.SI.Clone();      // the style may be shared with other items
                     pt.SI.TextAlign = TextAlignEnum.Right;
+                }
             }
 
             // Hidden objects don't affect the current page?
@@ -529,7 +533,31 @@ namespace Majorsilence.Reporting.Rdl
 			return false;
 		}
 
-		internal async Task<string> RunText(Report rpt, Row row)
+		internal Task<string> RunText(Report rpt, Row row)
+		{
+			return TryRunText(rpt, row, out string t) ? Task.FromResult(t) : RunTextAsync(rpt, row);
+		}
+
+		/// <summary>
+		/// The text of the textbox without a Task, when everything it needs is a plain field or a constant (the
+		/// usual table cell): the value, the Format, the Language, and no embedded expressions. False means
+		/// <see cref="RunTextAsync"/> has to do it. The result is the same either way.
+		/// </summary>
+		internal bool TryRunText(Report rpt, Row row, out string t)
+		{
+			t = null;
+			if (!TryEvaluate(rpt, row, out object o))
+				return false;
+			if (o is double d && Double.IsNaN(d))
+				o = null;                           // suppress NaN, as RunTextAsync does
+			if (!Style.TryGetFormatedString(rpt, Style, o, _Value.GetTypeCode(), out t))
+				return false;
+			if (!TryIsHtml(out bool isHtml))
+				return false;
+			return !(isHtml && t != null && t.Contains("<expr>"));   // dynamic expressions take the async path
+		}
+
+		internal async Task<string> RunTextAsync(Report rpt, Row row)
 		{
 			object o = await Evaluate(rpt, row).ConfigureAwait(false);
             // AJM 15082008: Suppress NaN from appearing in a textbox
@@ -605,16 +633,50 @@ namespace Majorsilence.Reporting.Rdl
 			return tbr.RunHeight;
 		}
 
-		internal async Task<object> Evaluate(Report rpt, Row r)
+		internal Task<object> Evaluate(Report rpt, Row r)
 		{
-			if(r == null || lastValueForRow != r || lastValueForReport != rpt)
+			return TryEvaluate(rpt, r, out object v) ? Task.FromResult(v) : EvaluateAsync(rpt, r);
+		}
+
+		// The value of the textbox for a row. The last row's value is kept (in the report's run state, not in this
+		// definition: a definition may be shared by reports running at the same time) because one row asks several times.
+		internal bool TryEvaluate(Report rpt, Row r, out object value)
+		{
+			if (rpt == null)
 			{
-				lastEvaluatedValue = await _Value.Evaluate(rpt, r).ConfigureAwait(false);
-				lastValueForReport = rpt;
-				lastValueForRow = r;
+				value = null;
+				return false;
 			}
-				
-			return lastEvaluatedValue;
+
+			TextboxRuntime tbr = TextboxRuntime.GetTextboxRuntime(rpt, this);
+			if (r != null && tbr.LastRow == r)
+			{
+				value = tbr.LastValue;
+				return true;
+			}
+
+			if (_Value.TryEvaluate(rpt, r, out value))
+			{
+				tbr.LastRow = r;
+				tbr.LastValue = value;
+				return true;
+			}
+			return false;
+		}
+
+		private async Task<object> EvaluateAsync(Report rpt, Row r)
+		{
+			if (rpt == null)
+				return await _Value.Evaluate(rpt, r).ConfigureAwait(false);
+
+			TextboxRuntime tbr = TextboxRuntime.GetTextboxRuntime(rpt, this);
+			if (r != null && tbr.LastRow == r)
+				return tbr.LastValue;
+
+			object value = await _Value.Evaluate(rpt, r).ConfigureAwait(false);
+			tbr.LastRow = r;
+			tbr.LastValue = value;
+			return value;
 		}
 
 		internal Expression Value
@@ -646,6 +708,18 @@ namespace Majorsilence.Reporting.Rdl
 		{
 			get { return  _HideDuplicates; }
 			set {  _HideDuplicates = value; }
+		}
+
+		// Whether the Format says html, when the Format is absent or a constant.
+		internal bool TryIsHtml(out bool isHtml)
+		{
+			isHtml = false;
+			if (this.Style == null || this.Style.Format == null)
+				return true;
+			if (!this.Style.Format.TryEvaluateString(out string format))
+				return false;
+			isHtml = format != null && string.Equals(format, "html", StringComparison.OrdinalIgnoreCase);
+			return true;
 		}
 
 		internal async Task<bool> IsHtml(Report rpt, Row row)
@@ -699,6 +773,8 @@ namespace Majorsilence.Reporting.Rdl
 		internal string PreviousText=null;	// previous text displayed
 		internal Page PreviousPage=null;	//  page previous text was shown on
 		internal object LastObject=null;	// last object calculated
+		internal Row LastRow=null;			// the row LastValue is the textbox's value for
+		internal object LastValue=null;
 
 		static internal TextboxRuntime GetTextboxRuntime(Report rpt, Textbox tb)
 		{

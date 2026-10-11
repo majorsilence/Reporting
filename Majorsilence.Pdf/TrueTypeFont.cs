@@ -21,6 +21,7 @@ namespace Majorsilence.Pdf
         private short _ascender;
         private short _descender;
         private int _numGlyphs;
+        private int[]? _glyphOffsets;   // loca as byte offsets; built on first Subset, never changed after
         private int _numberOfHMetrics;
         private ushort[]? _advanceWidths;
         private Dictionary<int, ushort> _charToGlyph = new Dictionary<int, ushort>();
@@ -462,14 +463,20 @@ namespace Majorsilence.Pdf
 
             int locFormat = S16(_data, headEntry.offset + 50); // 0=short, 1=long
 
-            // Read loca — build array of (offset, length) per glyph
-            var glyphOffsets = new int[_numGlyphs + 1];
-            if (locFormat == 0)
-                for (int i = 0; i <= _numGlyphs; i++)
-                    glyphOffsets[i] = U16(_data, locaEntry.offset + i * 2) * 2;
-            else
-                for (int i = 0; i <= _numGlyphs; i++)
-                    glyphOffsets[i] = (int)(uint)S32(_data, locaEntry.offset + i * 4);
+            // Read loca once per font: the fonts are shared by every document, and the array is never changed
+            // after it is built, so two threads racing to build it publish equal contents.
+            int[]? glyphOffsets = _glyphOffsets;
+            if (glyphOffsets == null)
+            {
+                glyphOffsets = new int[_numGlyphs + 1];
+                if (locFormat == 0)
+                    for (int i = 0; i <= _numGlyphs; i++)
+                        glyphOffsets[i] = U16(_data, locaEntry.offset + i * 2) * 2;
+                else
+                    for (int i = 0; i <= _numGlyphs; i++)
+                        glyphOffsets[i] = (int)(uint)S32(_data, locaEntry.offset + i * 4);
+                _glyphOffsets = glyphOffsets;
+            }
 
             // Expand to include glyph 0 and composite components
             var needed = new HashSet<ushort>(usedGlyphIds) { 0 };
@@ -499,28 +506,29 @@ namespace Majorsilence.Pdf
                 }
             }
 
-            // Build new glyf — only include outline data for needed glyphs
-            var newGlyf = new MemoryStream();
-            var newLocaOff = new int[_numGlyphs + 1];
+            // New loca (always long format to keep it simple). First it holds each needed glyph's length, then
+            // it is turned into running offsets in place; the glyphs are copied to those offsets.
+            byte[] newLocaData = new byte[(_numGlyphs + 1) * 4];
+            int totalGlyf = 0;
+            foreach (ushort gid in needed)
+            {
+                if (gid >= _numGlyphs) continue;
+                int srcLen = glyphOffsets[gid + 1] - glyphOffsets[gid];
+                if (srcLen <= 0) continue;
+                WriteU32(newLocaData, gid * 4, (uint)srcLen);
+                totalGlyf += srcLen;
+            }
+            byte[] newGlyfData = new byte[totalGlyf];
+            int running = 0;
             for (int gid = 0; gid < _numGlyphs; gid++)
             {
-                newLocaOff[gid] = (int)newGlyf.Position;
-                if (needed.Contains((ushort)gid))
-                {
-                    int srcOff = glyfEntry.offset + glyphOffsets[gid];
-                    int srcLen = glyphOffsets[gid + 1] - glyphOffsets[gid];
-                    if (srcLen > 0)
-                        newGlyf.Write(_data, srcOff, srcLen);
-                }
-                // else: loca[gid]==loca[gid+1] → zero-length / empty glyph
+                int len = (int)ReadU32(newLocaData, gid * 4);
+                WriteU32(newLocaData, gid * 4, (uint)running);
+                if (len > 0)
+                    Buffer.BlockCopy(_data, glyfEntry.offset + glyphOffsets[gid], newGlyfData, running, len);
+                running += len;
             }
-            newLocaOff[_numGlyphs] = (int)newGlyf.Position;
-            byte[] newGlyfData = newGlyf.ToArray();
-
-            // Build new loca (always long format to keep it simple)
-            byte[] newLocaData = new byte[(_numGlyphs + 1) * 4];
-            for (int i = 0; i <= _numGlyphs; i++)
-                WriteU32(newLocaData, i * 4, (uint)newLocaOff[i]);
+            WriteU32(newLocaData, _numGlyphs * 4, (uint)running);
 
             // Patch head.indexToLocFormat = 1 (long)
             byte[] newHead = new byte[headEntry.length];
@@ -538,35 +546,42 @@ namespace Majorsilence.Pdf
             tagList.Sort(StringComparer.Ordinal);
             int nT = tagList.Count;
 
-            // First pass: compute table data bytes
-            var tableData = new Dictionary<string, byte[]>(nT, StringComparer.Ordinal);
-            foreach (var tag in tagList)
+            // Where each table's bytes come from: a rebuilt array, or the original font data copied as it is.
+            var srcArray = new byte[nT][];
+            var srcOffset = new int[nT];
+            var srcLength = new int[nT];
+            for (int t = 0; t < nT; t++)
             {
-                if      (tag == "glyf") tableData[tag] = newGlyfData;
-                else if (tag == "loca") tableData[tag] = newLocaData;
-                else if (tag == "head") tableData[tag] = newHead;
-                else if (tag == "post") tableData[tag] = PostVersion3;
+                string tag = tagList[t];
+                if      (tag == "glyf") srcArray[t] = newGlyfData;
+                else if (tag == "loca") srcArray[t] = newLocaData;
+                else if (tag == "head") srcArray[t] = newHead;
+                else if (tag == "post") srcArray[t] = PostVersion3;
                 else
                 {
                     var (off, len) = tables[tag];
-                    var td = new byte[len];
-                    Buffer.BlockCopy(_data, off, td, 0, len);
-                    tableData[tag] = td;
+                    srcArray[t] = _data;
+                    srcOffset[t] = off;
+                    srcLength[t] = len;
+                    continue;
                 }
+                srcLength[t] = srcArray[t].Length;
             }
 
-            // Second pass: lay out table offsets (each table padded to 4 bytes)
+            // Lay out the tables (each padded to 4 bytes)
             int headerBytes = 12 + nT * 16;
-            var tableOffset = new Dictionary<string, int>(nT, StringComparer.Ordinal);
+            var tableOffset = new int[nT];
             int cursor = headerBytes;
-            foreach (var tag in tagList)
+            int headIndex = -1;
+            for (int t = 0; t < nT; t++)
             {
-                tableOffset[tag] = cursor;
-                cursor += tableData[tag].Length;
+                tableOffset[t] = cursor;
+                if (tagList[t] == "head") headIndex = t;
+                cursor += srcLength[t];
                 if (cursor % 4 != 0) cursor += 4 - cursor % 4;
             }
 
-            // Third pass: write font bytes
+            // Write font bytes
             byte[] output = new byte[cursor];
 
             // Offset table (sfVersion, numTables, searchRange, entrySelector, rangeShift)
@@ -581,24 +596,24 @@ namespace Majorsilence.Pdf
 
             // Table directory + data
             int dirBase = 12;
-            foreach (var tag in tagList)
+            for (int t = 0; t < nT; t++)
             {
-                byte[] td   = tableData[tag];
-                int    toff = tableOffset[tag];
-                uint   tcs  = TableChecksum(td);
-                Encoding.ASCII.GetBytes(tag.PadRight(4), 0, 4, output, dirBase);
+                uint tcs = TableChecksum(srcArray[t], srcOffset[t], srcLength[t]);
+                string tag = tagList[t];
+                for (int c = 0; c < 4; c++)
+                    output[dirBase + c] = c < tag.Length ? (byte)tag[c] : (byte)' ';
                 WriteU32(output, dirBase + 4,  tcs);
-                WriteU32(output, dirBase + 8,  (uint)toff);
-                WriteU32(output, dirBase + 12, (uint)td.Length);
+                WriteU32(output, dirBase + 8,  (uint)tableOffset[t]);
+                WriteU32(output, dirBase + 12, (uint)srcLength[t]);
                 dirBase += 16;
-                Buffer.BlockCopy(td, 0, output, toff, td.Length);
+                Buffer.BlockCopy(srcArray[t], srcOffset[t], output, tableOffset[t], srcLength[t]);
             }
 
             // Fix head.checkSumAdjustment (bytes 8-11 of the head table in output)
-            int headOutOff = tableOffset["head"];
+            int headOutOff = tableOffset[headIndex];
             output[headOutOff + 8] = output[headOutOff + 9] =
             output[headOutOff + 10] = output[headOutOff + 11] = 0;
-            uint whole = TableChecksum(output);
+            uint whole = TableChecksum(output, 0, output.Length);
             WriteU32(output, headOutOff + 8, 0xB1B0AFBA - whole);
 
             return output;
@@ -612,16 +627,20 @@ namespace Majorsilence.Pdf
         private static void WriteU32(byte[] b, int o, uint v)
             { b[o] = (byte)(v >> 24); b[o+1] = (byte)(v >> 16); b[o+2] = (byte)(v >> 8); b[o+3] = (byte)v; }
 
-        private static uint TableChecksum(byte[] data)
+        private static uint ReadU32(byte[] b, int o) =>
+            ((uint)b[o] << 24) | ((uint)b[o + 1] << 16) | ((uint)b[o + 2] << 8) | b[o + 3];
+
+        private static uint TableChecksum(byte[] data, int offset, int length)
         {
             uint sum = 0;
-            int i = 0;
-            for (; i + 3 < data.Length; i += 4)
+            int end = offset + length;
+            int i = offset;
+            for (; i + 3 < end; i += 4)
                 sum += ((uint)data[i] << 24) | ((uint)data[i+1] << 16) | ((uint)data[i+2] << 8) | data[i+3];
-            if (i < data.Length)
+            if (i < end)
             {
                 uint tail = 0;
-                for (int j = i; j < data.Length; j++)
+                for (int j = i; j < end; j++)
                     tail |= (uint)data[j] << ((3 - (j - i)) * 8);
                 sum += tail;
             }

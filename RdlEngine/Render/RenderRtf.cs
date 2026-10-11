@@ -292,6 +292,19 @@ namespace Majorsilence.Reporting.Rdl
 
         private string EscapeText(string s)
         {
+            // most text needs no change at all, and then it is returned as it is
+            bool changes = false;
+            foreach (char c in s)
+            {
+                if (c == '{' || c == '}' || c == '\\' || c == '\n' || (int)c > 127)
+                {
+                    changes = true;
+                    break;
+                }
+            }
+            if (!changes)
+                return s;
+
 			StringBuilder rs = new StringBuilder(s.Length);
 
 			foreach (char c in s)
@@ -312,6 +325,18 @@ namespace Majorsilence.Reporting.Rdl
 
         private string RtfAnsi(string s)
         {
+            bool changes = false;
+            foreach (char c in s)
+            {
+                if ((int)c > 127)
+                {
+                    changes = true;
+                    break;
+                }
+            }
+            if (!changes)
+                return s;
+
             StringBuilder rs = new StringBuilder(s.Length);
             foreach (char c in s)
             {
@@ -328,7 +353,7 @@ namespace Majorsilence.Reporting.Rdl
             if (style == null)
                 return;
 
-            StyleInfo si = await style.GetStyleInfo(r, row).ConfigureAwait(false);
+            StyleInfo si = await style.GetStyleInfoShared(r, row).ConfigureAwait(false);   // read only
 
 //            tw.Write(@"\plain");        // reset current attributes
 
@@ -477,7 +502,7 @@ namespace Majorsilence.Reporting.Rdl
                     ReportItem ri = tr.TableCells.Items[ci].ReportItems[0];
                     if (ri.Style != null)
                     {
-                        StyleInfo si = await ri.Style.GetStyleInfo(r, row).ConfigureAwait(false);
+                        StyleInfo si = await ri.Style.GetStyleInfoShared(r, row).ConfigureAwait(false);   // read only
                         border = string.Format(@"\clbrdrt\{0}\clbrdrl\{1}\clbrdrb\{2}\clbrdrr\{3}",
                             GetBorderStyle(si.BStyleTop),
                             GetBorderStyle(si.BStyleLeft),
@@ -587,7 +612,7 @@ namespace Majorsilence.Reporting.Rdl
                 string border;
                 if (ri != null && ri.Style != null)
                 {
-                    StyleInfo si = await ri.Style.GetStyleInfo(this.r, r).ConfigureAwait(false);
+                    StyleInfo si = await ri.Style.GetStyleInfoShared(this.r, r).ConfigureAwait(false);   // read only
                     border = string.Format(@"\clbrdrt\{0}\clbrdrl\{1}\clbrdrb\{2}\clbrdrr\{3}",
                         GetBorderStyle(si.BStyleTop),
                         GetBorderStyle(si.BStyleLeft),

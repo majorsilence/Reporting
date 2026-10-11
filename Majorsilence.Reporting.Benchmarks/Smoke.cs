@@ -87,6 +87,49 @@ public static class Smoke
     // PDF and OOXML embed creation times / random ids; mask them so equal output hashes equally.
     private static byte[] Normalise(OutputPresentationType format, byte[] bytes)
     {
+        if (format == OutputPresentationType.Excel2007)
+        {
+            // a zip: compare what is inside (entry names and uncompressed bytes), not the zip's own timestamps
+            using var zip = new System.IO.Compression.ZipArchive(new MemoryStream(bytes), System.IO.Compression.ZipArchiveMode.Read);
+            using var ms = new MemoryStream();
+            foreach (var entry in zip.Entries.OrderBy(e => e.FullName, StringComparer.Ordinal))
+            {
+                using var es = entry.Open();
+                using var content = new MemoryStream();
+                es.CopyTo(content);
+                string entryText = System.Text.Encoding.UTF8.GetString(content.ToArray());
+                entryText = System.Text.RegularExpressions.Regex.Replace(entryText, @"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?Z?", "DATE");
+                var name = System.Text.Encoding.UTF8.GetBytes(entry.FullName + "\n");
+                ms.Write(name, 0, name.Length);
+                var body = System.Text.Encoding.UTF8.GetBytes(entryText);
+                ms.Write(body, 0, body.Length);
+            }
+
+            return ms.ToArray();
+        }
+
+        if (format == OutputPresentationType.HTML)
+        {
+            // temp image names are random and the style rules come out in hash-table order
+            string html = System.Text.Encoding.UTF8.GetString(bytes);
+            html = System.Text.RegularExpressions.Regex.Replace(html, @"tmp[A-Za-z0-9]+\.(png|jpg|htm)", "TMP.$1");
+            var m = System.Text.RegularExpressions.Regex.Match(html, @"(<style[^>]*>)(.*?)(</style>)", System.Text.RegularExpressions.RegexOptions.Singleline | System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+            if (m.Success)
+            {
+                string rules = string.Join("\n", m.Groups[2].Value.Split('\n').Where(l => l.Trim().Length > 0).OrderBy(l => l, StringComparer.Ordinal));
+                html = html.Substring(0, m.Index) + m.Groups[1].Value + rules + m.Groups[3].Value + html.Substring(m.Index + m.Length);
+            }
+
+            return System.Text.Encoding.UTF8.GetBytes(html);
+        }
+
+        if (format == OutputPresentationType.RTF)
+        {
+            string rtf = System.Text.Encoding.Latin1.GetString(bytes);
+            rtf = System.Text.RegularExpressions.Regex.Replace(rtf, @"\\yr\d+\\mo\d+\\dy\d+\\hr\d+\\min\d+(\\sec\d+)?", "DATE");
+            return System.Text.Encoding.Latin1.GetBytes(rtf);
+        }
+
         if (format != OutputPresentationType.PDF)
         {
             return bytes;

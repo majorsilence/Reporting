@@ -468,6 +468,13 @@ function findObject(id) {
 				bForceRelative = true;
 
 			string position = await CssPosition(rl, row, bForceRelative, h, w).ConfigureAwait(false);
+
+			// A constant style with no positioning (every table cell) always gives the same css, so the class
+			// name is remembered per (style, item) and the long css string is not rebuilt and hashed per cell.
+			bool constantCss = s != null && position.Length == 0 && s.ConstantStyle;
+			if (constantCss && _constantCssNames.TryGetValue((s, rl), out string known))
+				return known;
+
 			if (s != null)
 				css = prefix + "{" + position + await s.GetCSS(r, row, true).ConfigureAwait(false) + "}";
 			else if (rl is Table || rl is Matrix)
@@ -484,11 +491,14 @@ function findObject(id) {
 			}
 
 			int i = cce.Name.IndexOf('#');
-			if (i > 0)
-				return cce.Name.Substring(i+1);
-			else
-				return cce.Name;
+			string result = i > 0 ? cce.Name.Substring(i+1) : cce.Name;
+			if (constantCss)
+				_constantCssNames[(s, rl)] = result;
+			return result;
 		}
+
+		// css class names of items with a constant style and no positioning; per render, so no locking
+		private readonly System.Collections.Generic.Dictionary<(Style, ReportLink), string> _constantCssNames = new System.Collections.Generic.Dictionary<(Style, ReportLink), string>();
 
 		private async Task<string> CssPosition(ReportLink rl,Row row, bool bForceRelative, float h, float w)
 		{

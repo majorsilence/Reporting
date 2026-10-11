@@ -329,6 +329,48 @@ namespace Majorsilence.Pdf.Tests
         }
 
         [Test]
+        public void MeasureTextWidth_RepeatedAndInterleavedCallsAlwaysAnswerForTheirOwnArguments()
+        {
+            // A canvas remembers the last font/text it found to cover each other and the last width it measured,
+            // because a cell is measured, wrapped, measured again and drawn with the same string. Alternating
+            // strings, sizes and fonts must never be answered from the previous call.
+            Assume.That(BundledFontsExist, "Bundled fonts directory not found");
+            var registry = new FontRegistry().AddDirectory(BundledFontsDir);
+            var regular = TextStyle.Default.WithFamily("LiberationSans").WithSize(12);
+            var larger = TextStyle.Default.WithFamily("LiberationSans").WithSize(24);
+            var bold = TextStyle.Default.WithFamily("LiberationSans").WithSize(12).WithBold();
+            string a = "Quarterly results";
+            string b = "Total";
+            string aCopy = new string(a.AsSpan());      // equal text, different instance
+
+            float Fresh(string text, TextStyle style)
+            {
+                float width = 0;
+                PdfDocument.Create().WithFontRegistry(registry).AddPage(PageSizes.A4, c => width = c.MeasureTextWidth(text, style));
+                return width;
+            }
+
+            float expectedA = Fresh(a, regular), expectedB = Fresh(b, regular), expectedLarge = Fresh(a, larger), expectedBold = Fresh(a, bold);
+            Assert.That(expectedA, Is.Not.EqualTo(expectedB));
+            Assert.That(expectedLarge, Is.EqualTo(expectedA * 2).Within(0.01f));
+            Assert.That(expectedBold, Is.Not.EqualTo(expectedA));
+
+            var got = new System.Collections.Generic.List<float>();
+            PdfDocument.Create().WithFontRegistry(registry).AddPage(PageSizes.A4, c =>
+            {
+                got.Add(c.MeasureTextWidth(a, regular));
+                got.Add(c.MeasureTextWidth(a, regular));          // same instance: remembered
+                got.Add(c.MeasureTextWidth(b, regular));          // different text
+                got.Add(c.MeasureTextWidth(a, larger));           // same text, different size
+                got.Add(c.MeasureTextWidth(a, bold));             // same text, different font
+                got.Add(c.MeasureTextWidth(aCopy, regular));      // equal text, other instance
+                got.Add(c.MeasureTextWidth(a, regular));
+            });
+
+            Assert.That(got, Is.EqualTo(new[] { expectedA, expectedA, expectedB, expectedLarge, expectedBold, expectedA, expectedA }));
+        }
+
+        [Test]
         public void AddInstalledFonts_AMissingDirectoryAddsNothing()
         {
             var reg = new FontRegistry().AddInstalledFonts(

@@ -115,10 +115,19 @@ namespace Majorsilence.Reporting.Rdl
 		/// <returns></returns>
 		static public string XmlAnsi(string s)
 		{
-			StringBuilder rs = new StringBuilder(s.Length);
+			// most text needs no change at all, and then it is returned as it is
+			int firstChange = 0;
+			while (firstChange < s.Length && s[firstChange] <= 127 && s[firstChange] != '<' && s[firstChange] != '&')
+				firstChange++;
+			if (firstChange == s.Length)
+				return s;
 
-			foreach (char c in s)
+			StringBuilder rs = new StringBuilder(s.Length + 16);
+			rs.Append(s, 0, firstChange);
+
+			for (int i = firstChange; i < s.Length; i++)
 			{
+				char c = s[i];
 				if (c == '<')
 					rs.Append("&lt;");
 				else if (c == '&')
@@ -126,7 +135,7 @@ namespace Majorsilence.Reporting.Rdl
 				else if ((int) c <= 127)	// in ANSI range
 					rs.Append(c);
 				else
-					rs.Append("&#" + ((int) c).ToString() + ";");
+					rs.Append("&#").Append((int) c).Append(';');
 			}
 
 			return rs.ToString();
@@ -138,14 +147,23 @@ namespace Majorsilence.Reporting.Rdl
         /// <returns></returns>
         static public string HtmlAnsi(string s)
         {
-            StringBuilder rs = new StringBuilder(s.Length);
+            // most text needs no change at all, and then it is returned as it is
+            int firstChange = 0;
+            while (firstChange < s.Length && s[firstChange] <= 127)
+                firstChange++;
+            if (firstChange == s.Length)
+                return s;
 
-            foreach (char c in s)
+            StringBuilder rs = new StringBuilder(s.Length + 16);
+            rs.Append(s, 0, firstChange);
+
+            for (int i = firstChange; i < s.Length; i++)
             {
+                char c = s[i];
                 if ((int)c <= 127)	// in ANSI range
                     rs.Append(c);
                 else
-                    rs.Append("&#" + ((int)c).ToString() + ";");
+                    rs.Append("&#").Append((int)c).Append(';');
             }
 
             return rs.ToString();
