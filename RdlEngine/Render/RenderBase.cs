@@ -159,8 +159,35 @@ namespace Majorsilence.Reporting.Rdl
             return font;
         }
 
+        private const int MaxMeasureCache = 20000;
+
+        // (surface, font, text) -> measured size, for this render. Reference equality for the surface and font,
+        // value equality for the text. One render runs on one thread, so no lock.
+        private readonly struct MeasureKey : IEquatable<MeasureKey>
+        {
+            private readonly Draw2.Graphics _g;
+            private readonly Draw2.Font _font;
+            private readonly string _text;
+
+            internal MeasureKey(Draw2.Graphics g, Draw2.Font font, string text)
+            {
+                _g = g;
+                _font = font;
+                _text = text;
+            }
+
+            public bool Equals(MeasureKey other) =>
+                ReferenceEquals(_g, other._g) && ReferenceEquals(_font, other._font) && string.Equals(_text, other._text, StringComparison.Ordinal);
+            public override bool Equals(object obj) => obj is MeasureKey k && Equals(k);
+            public override int GetHashCode() => HashCode.Combine(System.Runtime.CompilerServices.RuntimeHelpers.GetHashCode(_g),
+                System.Runtime.CompilerServices.RuntimeHelpers.GetHashCode(_font), _text);
+        }
+
+        private readonly Dictionary<MeasureKey, System.Drawing.SizeF> _measureCache = new Dictionary<MeasureKey, System.Drawing.SizeF>();
+
         private void ReleaseMeasureResources()
         {
+            _measureCache.Clear();
             foreach (var f in _measureFonts.Values)
                 f.Dispose();
             _measureFonts.Clear();
@@ -486,6 +513,20 @@ namespace Majorsilence.Reporting.Rdl
                 float ptWidth = pt.W - pt.SI.PaddingLeft - pt.SI.PaddingRight;
                 if (ptWidth <= 0)
                     ptWidth = 1;
+
+                // The usual table cell: one line that fits. No line breaks to split on and no lists to build.
+                // (A line that does not fit goes on to the general code below, whose measurement is a cache hit.)
+                if (s.IndexOfAny(LINEBREAK) < 0)
+                {
+                    string single = s.Length > 0 && s[s.Length - 1] == ' ' ? s.TrimEnd(' ') : s;
+                    ms = MeasureString(single, g, drawFont, drawFormat);
+                    float singleWidth = Measurement.PointsFromPixels(ms.Width, g.DpiX);
+                    if (singleWidth <= ptWidth)
+                    {
+                        width = new float[] { singleWidth };
+                        return new string[] { single };
+                    }
+                }
                 foreach (string tfl in flines)
                 {
                     string fl;
@@ -699,6 +740,12 @@ namespace Majorsilence.Reporting.Rdl
             if (s == null || s.Length == 0)
                 return System.Drawing.SizeF.Empty;
 
+            // The same text in the same font on the same surface always measures the same, and a report repeats
+            // itself (labels, categories) and asks twice about a line that has to wrap.
+            var key = new MeasureKey(g, drawFont, s);
+            if (_measureCache.TryGetValue(key, out System.Drawing.SizeF known))
+                return known;
+
             Draw2.CharacterRange[] cr = { new Draw2.CharacterRange(0, s.Length) };
             drawFormat.SetMeasurableCharacterRanges(cr);
             Draw2.Region[] rs = g.MeasureCharacterRanges(s, drawFont, new System.Drawing.RectangleF(0, 0, float.MaxValue, float.MaxValue),
@@ -706,7 +753,11 @@ namespace Majorsilence.Reporting.Rdl
             System.Drawing.RectangleF mr = rs[0].GetBounds(g);
             rs[0].Dispose();
 
-            return new System.Drawing.SizeF(mr.Width, mr.Height);
+            var size = new System.Drawing.SizeF(mr.Width, mr.Height);
+            if (_measureCache.Count >= MaxMeasureCache)
+                _measureCache.Clear();      // bounded: a report of mostly distinct text would otherwise keep every string
+            _measureCache[key] = size;
+            return size;
         }
 
 

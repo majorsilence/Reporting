@@ -109,7 +109,9 @@ namespace Majorsilence.Pdf
                 var fallbacks = LoadFallbacks(text, primaryTtf, primarySource, style);
 
                 // Segment text so each run uses the first font that has every glyph.
-                var segments = SegmentByFont(text, primaryTtf, primarySource, fallbacks);
+                var segments = fallbacks.Count == 0
+                    ? SingleSegment(text, primaryTtf, primarySource)
+                    : SegmentByFont(text, primaryTtf, primarySource, fallbacks);
 
                 totalWidth = 0f;
                 float cursorX = x;
@@ -193,7 +195,7 @@ namespace Majorsilence.Pdf
                         sb.Append("/").Append(font.PdfName).Append(" ").AppendNum(style.FontSize).Append(" Tf\n");
                         PdfSerializer.AppendGlyphIds(sb, segText, segTtf, font.UsedGlyphs);
                         sb.Append(" Tj\n");
-                        float segW = segTtf.GetWidthPoint(segText, style.FontSize);
+                        float segW = WidthOf(segTtf, segText, style.FontSize);
                         cursorX   += segW;
                         totalWidth += segW;
                     }
@@ -366,11 +368,27 @@ namespace Majorsilence.Pdf
 
         // The fallback fonts a string needs. A fallback chain can hold large CJK fonts, so they
         // are only loaded when the primary font lacks a glyph for something in the text.
+        // The answer when no fallback font is needed. Shared and never added to: callers only read the result.
+        private static readonly List<(TrueTypeFont ttf, FontSource src)> NoFallbacks = new List<(TrueTypeFont, FontSource)>();
+
+        // The last font and text found to cover each other. A cell is measured, wrapped, measured again and drawn
+        // with the same string, and scanning every glyph for each of those was most of the work.
+        private TrueTypeFont? _coveringFont;
+        private string? _coveredText;
+
         private List<(TrueTypeFont ttf, FontSource src)> LoadFallbacks(
             string text, TrueTypeFont primaryTtf, FontSource primarySrc, TextStyle style)
         {
+            if (_registry == null) return NoFallbacks;
+            if (ReferenceEquals(primaryTtf, _coveringFont) && ReferenceEquals(text, _coveredText)) return NoFallbacks;
+            if (CoversText(primaryTtf, text))
+            {
+                _coveringFont = primaryTtf;
+                _coveredText = text;
+                return NoFallbacks;
+            }
+
             var fallbacks = new List<(TrueTypeFont ttf, FontSource src)>();
-            if (_registry == null || CoversText(primaryTtf, text)) return fallbacks;
 
             foreach (var fbSrc in _registry.GetFallbackSources(style.IsBold, style.IsItalic))
             {
@@ -397,6 +415,38 @@ namespace Majorsilence.Pdf
 
         // Segment text into runs where each run uses the same font.
         // Primary font is tried first; if its glyph ID is 0 the fallbacks are tried in order.
+        // One run in one font, which is nearly every string: a reused one-item list instead of a new list and tuple.
+        // A canvas is used by one thread and DrawText does not call itself, so the list is free again by the next call.
+        private readonly List<(string text, TrueTypeFont ttf, FontSource src)> _singleSegment =
+            new List<(string, TrueTypeFont, FontSource)>(1);
+
+        private List<(string text, TrueTypeFont ttf, FontSource src)> SingleSegment(string text, TrueTypeFont ttf, FontSource src)
+        {
+            _singleSegment.Clear();
+            _singleSegment.Add((text, ttf, src));
+            return _singleSegment;
+        }
+
+        // The width of text in a font. The last answer is kept: a string is measured by the wrap check, again by the
+        // layout and again by the draw call, all with the same font, size and string.
+        private TrueTypeFont? _widthFont;
+        private string? _widthText;
+        private float _widthSize;
+        private float _width;
+
+        private float WidthOf(TrueTypeFont ttf, string text, float size)
+        {
+            if (ReferenceEquals(ttf, _widthFont) && ReferenceEquals(text, _widthText) && size == _widthSize)
+                return _width;
+
+            float width = ttf.GetWidthPoint(text, size);
+            _widthFont = ttf;
+            _widthText = text;
+            _widthSize = size;
+            _width = width;
+            return width;
+        }
+
         private static List<(string text, TrueTypeFont ttf, FontSource src)> SegmentByFont(
             string text,
             TrueTypeFont primaryTtf,
@@ -751,7 +801,7 @@ namespace Majorsilence.Pdf
 
             // Explicit TTF file
             if (style.FontFilePath != null)
-                return _fontCache.GetOrLoad(style.FontFilePath).GetWidthPoint(text, style.FontSize);
+                return WidthOf(_fontCache.GetOrLoad(style.FontFilePath), text, style.FontSize);
 
             // Registry-resolved family (may have fallback segments)
             if (_registry != null)
@@ -762,12 +812,12 @@ namespace Majorsilence.Pdf
                     var primary = _fontCache.GetOrLoad(src);
                     var fallbacks = LoadFallbacks(text, primary, src, style);
                     if (fallbacks.Count == 0)
-                        return primary.GetWidthPoint(text, style.FontSize);
+                        return WidthOf(primary, text, style.FontSize);
 
                     // Width of each run in the font that will draw it.
                     float total = 0f;
                     foreach (var (segText, segTtf, _) in SegmentByFont(text, primary, src, fallbacks))
-                        total += segTtf.GetWidthPoint(segText, style.FontSize);
+                        total += WidthOf(segTtf, segText, style.FontSize);
                     return total;
                 }
             }
