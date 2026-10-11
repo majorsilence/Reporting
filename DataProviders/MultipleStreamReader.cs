@@ -36,8 +36,7 @@ namespace Majorsilence.Reporting.Data
         {
             GetFileList(pathlist);          // split the string into multiple files
 
-            // HACK: async
-            Task.Run(async()=> await GetStream()).GetAwaiter().GetResult();             // get the first file
+            GetStream();             // get the first file
         }
 
         void GetFileList(string pathlist)
@@ -102,7 +101,9 @@ namespace Majorsilence.Reporting.Data
                 _files.Enqueue(f);
         }
 
-        async Task<StreamReader> GetStream()
+        // This class is a TextReader, whose ReadLine is synchronous, so the files are read synchronously
+        // too (HttpClient.Send is a real synchronous call): no thread-pool hop or blocked pool thread.
+        StreamReader GetStream()
         {
             if (_sr != null)        // close out the previous file before getting another
             {
@@ -120,9 +121,10 @@ namespace Majorsilence.Reporting.Data
                 fname.StartsWith("file:") ||
                 fname.StartsWith("https:"))
             {
-                HttpResponseMessage response = await _httpClient.GetAsync(fname);
+                using var request = new HttpRequestMessage(HttpMethod.Get, fname);
+                HttpResponseMessage response = _httpClient.Send(request);
                 response.EnsureSuccessStatusCode();
-                strm = await response.Content.ReadAsStreamAsync();
+                strm = response.Content.ReadAsStream();
             }
             else
                 strm = new FileStream(fname, System.IO.FileMode.Open, FileAccess.Read);
@@ -145,22 +147,17 @@ namespace Majorsilence.Reporting.Data
 
         public override string ReadLine()
         {
-            if (_sr == null)
-                return null;
-
-            // HACK: async
-            string rs = Task.Run(async () => await _sr.ReadLineAsync()).GetAwaiter().GetResult();
-
-            if (rs == null)
+            // At the end of a file, carry on with the next one (an empty file is skipped).
+            while (_sr != null)
             {
-                // HACK: async
-                Task.Run(async () => { 
-                    await GetStream();
-                    rs = await ReadLineAsync();
-                }).GetAwaiter().GetResult();               
+                string rs = _sr.ReadLine();
+                if (rs != null)
+                    return rs;
+
+                GetStream();
             }
 
-            return rs;
+            return null;
         }
 
     }

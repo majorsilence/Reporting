@@ -38,8 +38,7 @@ namespace Majorsilence.Reporting.Data
             bool header = _tcmd.Header;
             char separator = _tcmd.Separator;
 
-            // HACK: async
-            Task.Run(async () => _sr = await GetStream()).GetAwaiter().GetResult();             // get the main stream
+            _sr = GetStream();             // get the main stream
 
             Type tstring = "".GetType();
 
@@ -165,7 +164,9 @@ namespace Majorsilence.Reporting.Data
             return "".GetType();                // just assume string for now
         }
 
-        async Task<StreamReader> GetStream()
+        // IDataReader is synchronous, so the stream is opened synchronously (HttpClient.Send is a real
+        // synchronous call): no thread-pool hop or blocked pool thread.
+        StreamReader GetStream()
         {
             string fname = _tcmd.Url;
             Stream strm = null;
@@ -175,9 +176,10 @@ namespace Majorsilence.Reporting.Data
                 using (HttpClient client = new HttpClient())
                 {
                     client.AddMajorsilenceReportingUserAgent();
-                    HttpResponseMessage response = await client.GetAsync(fname);
+                    using var request = new HttpRequestMessage(HttpMethod.Get, fname);
+                    HttpResponseMessage response = client.Send(request);
                     response.EnsureSuccessStatusCode();
-                    strm = await response.Content.ReadAsStreamAsync();
+                    strm = response.Content.ReadAsStream();
                 }
             }
             else if (fname.StartsWith("file:"))
