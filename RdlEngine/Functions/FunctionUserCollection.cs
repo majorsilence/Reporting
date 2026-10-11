@@ -72,9 +72,8 @@ namespace Majorsilence.Reporting.Rdl
 				case "userid":
 					return rpt.UserID;
 				case "language":
-					return rpt.ClientLanguage == null?
-						CultureInfo.CurrentCulture.ThreeLetterISOLanguageName:
-						rpt.ClientLanguage;
+					return await rpt.GetClientLanguageAsync().ConfigureAwait(false) ??
+						CultureInfo.CurrentCulture.ThreeLetterISOLanguageName;
 				default:
 					return null;
 			}

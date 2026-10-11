@@ -47,7 +47,7 @@ namespace ReportTests
             var rdlp = new RDLParser(RdlWithoutLanguage);
             using var report = await rdlp.Parse();
 
-            Assert.That(report.ClientLanguage,
+            Assert.That(await report.GetClientLanguageAsync(),
                 Is.EqualTo(CultureInfo.CurrentCulture.ThreeLetterISOLanguageName));
         }
 
@@ -57,9 +57,9 @@ namespace ReportTests
             var rdlp = new RDLParser(RdlWithoutLanguage);
             using var report = await rdlp.Parse();
 
-            report.ClientLanguage = "fr-FR";
+            report.SetClientLanguage("fr-FR");
 
-            Assert.That(report.ClientLanguage, Is.EqualTo("fr-FR"));
+            Assert.That(await report.GetClientLanguageAsync(), Is.EqualTo("fr-FR"));
         }
 
         [Test]
@@ -68,7 +68,7 @@ namespace ReportTests
             var rdlp = new RDLParser(RdlWithLanguage);
             using var report = await rdlp.Parse();
 
-            Assert.That(report.ClientLanguage, Is.EqualTo("en-US"));
+            Assert.That(await report.GetClientLanguageAsync(), Is.EqualTo("en-US"));
         }
 
         /// <summary>
@@ -82,10 +82,38 @@ namespace ReportTests
             var rdlp = new RDLParser(RdlWithLanguage);
             using var report = await rdlp.Parse();
 
-            report.ClientLanguage = "fr-FR";
+            report.SetClientLanguage("fr-FR");
 
-            Assert.That(report.ClientLanguage, Is.EqualTo("fr-FR"),
+            Assert.That(await report.GetClientLanguageAsync(), Is.EqualTo("fr-FR"),
                 "Explicitly set ClientLanguage should take precedence over the RDL <Language> element");
+        }
+
+        [Test]
+        public async Task ObsoleteProperty_StillWorks()
+        {
+#pragma warning disable CS0618 // the point of this test
+            var rdlp = new RDLParser(RdlWithLanguage);
+            using var report = await rdlp.Parse();
+
+            Assert.That(report.ClientLanguage, Is.EqualTo("en-US"));
+            report.ClientLanguage = "fr-FR";
+            Assert.That(report.ClientLanguage, Is.EqualTo("fr-FR"));
+            Assert.That(await report.GetClientLanguageAsync(), Is.EqualTo("fr-FR"));
+#pragma warning restore CS0618
+        }
+
+        [Test]
+        public async Task EmbeddedCode_SeesTheReportLanguage()
+        {
+            // User.Language in a report's Code is read synchronously; the engine works it out when the run starts
+            var rdlp = new RDLParser(RdlWithLanguage);
+            using var report = await rdlp.Parse();
+            await report.RunGetData();
+
+            Assert.That(new CodeUser(report).Language, Is.EqualTo("en-US"));
+
+            report.SetClientLanguage("fr-FR");
+            Assert.That(new CodeUser(report).Language, Is.EqualTo("fr-FR"));
         }
     }
 }

@@ -167,6 +167,7 @@ namespace Majorsilence.Reporting.Rdl
 		public async Task<bool> RunGetData(IDictionary parms)
 		{
 			ExecutionTime = DateTime.Now;
+			await ResolveClientLanguageAsync().ConfigureAwait(false);
 			bool bRows = await _Report.RunGetData(this, parms).ConfigureAwait(false);
 			return bRows;
 		}
@@ -205,6 +206,7 @@ namespace Majorsilence.Reporting.Rdl
                         throw new ArgumentException("IStreamGen cannot be null.", nameof(sg));
                     PageNumber = 1;
                     TotalPages = 1;
+                    await ResolveClientLanguageAsync().ConfigureAwait(false);
                     IPresent ip = new RenderPdf_Raw(this, sg, security, signature);
                     await _Report.Run(ip).ConfigureAwait(false);
                     // Same ending as the unsecured path: without this the output file stays open
@@ -233,6 +235,7 @@ namespace Majorsilence.Reporting.Rdl
 			RenderFormatName = MapRenderFormatName(type);
 			PageNumber = 1;		// reset page numbers
 			TotalPages = 1;
+			await ResolveClientLanguageAsync().ConfigureAwait(false);
 			IPresent ip;
 			MemoryStreamGen msg = null;
 			switch (type)
@@ -718,24 +721,52 @@ namespace Majorsilence.Reporting.Rdl
 			set { _UserID = value; }
 		}
 		/// <summary>
-		/// Get/Set the three letter ISO language of the client of the report.
+		/// Get/Set the three letter ISO language of the client of the report. When it has not been set the
+		/// report's Language expression is evaluated, which is async: the getter blocks the calling thread
+		/// while it does.
 		/// </summary>
+		[Obsolete("The getter blocks the calling thread. Read the language with GetClientLanguageAsync() and set it with SetClientLanguage().")]
 		public string ClientLanguage
 		{
-			get
-            {
-                if (_ClientLanguage != null)
-                    return _ClientLanguage;
-
-				if (_Report.Language != null)
-				{
-					// HACK: async
-					return Task.Run(async () => await _Report.Language.EvaluateString(this, null).ConfigureAwait(false)).GetAwaiter().GetResult();
-				}
-
-                return CultureInfo.CurrentCulture.ThreeLetterISOLanguageName;
-            }
+			get { return Task.Run(async () => await GetClientLanguageAsync().ConfigureAwait(false)).GetAwaiter().GetResult(); }   // compatibility only
 			set { _ClientLanguage = value; }
+		}
+
+		/// <summary>
+		/// The three letter ISO language of the client of the report: the value given to
+		/// <see cref="SetClientLanguage"/> if any, else the report's Language expression, else the current culture's.
+		/// </summary>
+		public async Task<string> GetClientLanguageAsync()
+		{
+			if (_ClientLanguage != null)
+				return _ClientLanguage;
+
+			if (_Report.Language != null)
+				return await _Report.Language.EvaluateString(this, null).ConfigureAwait(false);
+
+			return CultureInfo.CurrentCulture.ThreeLetterISOLanguageName;
+		}
+
+		/// <summary>
+		/// Sets the language of the client of the report; it takes precedence over the report's Language expression.
+		/// </summary>
+		public void SetClientLanguage(string language)
+		{
+			_ClientLanguage = language;
+		}
+
+		// The effective language, for synchronous readers (the report's embedded Code, through User.Language),
+		// which cannot await. Worked out once at the start of RunGetData / RunRender.
+		private string _clientLanguageResolved;
+
+		internal async Task ResolveClientLanguageAsync()
+		{
+			_clientLanguageResolved = await GetClientLanguageAsync().ConfigureAwait(false);
+		}
+
+		internal string ClientLanguageResolved
+		{
+			get { return _ClientLanguage ?? _clientLanguageResolved ?? CultureInfo.CurrentCulture.ThreeLetterISOLanguageName; }
 		}
 
 		/// <summary>

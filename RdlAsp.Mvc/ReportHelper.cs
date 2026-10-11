@@ -100,7 +100,7 @@ namespace Majorsilence.Reporting.RdlAsp
             {
                 string l = accept.Split(',')[0].Split(';')[0].Trim();
                 if (l.Length > 0)
-                    r.ClientLanguage = l;
+                    r.SetClientLanguage(l);
             }
 
             System.Security.Principal.IIdentity id = context.User?.Identity;
