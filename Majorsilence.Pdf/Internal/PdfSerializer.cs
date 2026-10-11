@@ -295,8 +295,7 @@ namespace Majorsilence.Pdf.Internal
 
                 pageContentIdx[pi] = objects.Count;
                 int contentObjNum  = objects.Count + 1;
-                byte[] raw         = Latin1.GetBytes(page.Content.ToString());
-                byte[] compressed  = Compress(raw);
+                byte[] compressed  = Compress(page.Content);
                 byte[] streamData  = _encryptor != null
                     ? _encryptor.EncryptStream(contentObjNum, 0, compressed)
                     : compressed;
@@ -959,6 +958,42 @@ namespace Majorsilence.Pdf.Internal
             var sb = new StringBuilder(bytes.Length * 2);
             foreach (byte b in bytes) sb.Append(b.ToString("X2"));
             return sb.ToString();
+        }
+
+        /// <summary>
+        /// Compresses a content stream straight from the builder's chunks as Latin-1, so the whole
+        /// page is never copied into a string and a byte array first (both are large-object-heap
+        /// allocations for a busy page). The bytes are the same as compressing the finished string.
+        /// </summary>
+        private static byte[] Compress(StringBuilder content)
+        {
+#if NET6_0_OR_GREATER
+            byte[] buf = System.Buffers.ArrayPool<byte>.Shared.Rent(16 * 1024);
+            try
+            {
+                using (var ms = new MemoryStream())
+                {
+                    using (var zs = new ZLibStream(ms, CompressionLevel.SmallestSize, leaveOpen: true))
+                    {
+                        foreach (ReadOnlyMemory<char> chunk in content.GetChunks())
+                        {
+                            for (int offset = 0; offset < chunk.Length; offset += buf.Length)
+                            {
+                                int n = Latin1.GetBytes(chunk.Span.Slice(offset, Math.Min(buf.Length, chunk.Length - offset)), buf);
+                                zs.Write(buf, 0, n);
+                            }
+                        }
+                    }
+                    return ms.ToArray();
+                }
+            }
+            finally
+            {
+                System.Buffers.ArrayPool<byte>.Shared.Return(buf);
+            }
+#else
+            return Compress(Latin1.GetBytes(content.ToString()));
+#endif
         }
 
         private static byte[] Compress(byte[] data)
