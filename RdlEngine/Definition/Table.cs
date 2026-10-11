@@ -402,7 +402,7 @@ namespace Majorsilence.Reporting.Rdl
 
 				wc.Data = new Rows(rpt, _TableGroups, gr, srt);
 				wc.Data.Data = saveData;
-				wc.Data.Sort();
+				await wc.Data.SortAsync();
                 await PrepGroups(rpt, wc);
 			}
 

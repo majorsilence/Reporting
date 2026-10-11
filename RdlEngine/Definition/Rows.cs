@@ -147,6 +147,84 @@ namespace Majorsilence.Reporting.Rdl
 			_Data.Sort(this);
 		}
 
+		/// <summary>
+		/// Sorts the rows like <see cref="Sort"/>, but evaluates each row's sort expressions once
+		/// (awaited, in order) instead of twice per comparison. Compare has to be synchronous, so it
+		/// ran every evaluation through Task.Run(...).GetResult(): a thread-pool hop per evaluation,
+		/// O(n log n) of them, each blocking a pool thread while it waited - slow, and a way to
+		/// starve the pool when several reports render at once.
+		/// </summary>
+		internal async Task SortAsync()
+		{
+			if (_SortBy == null || _Data.Count < 2)
+			{
+				_Data.Sort(this);
+				return;
+			}
+
+			int keyCount = _SortBy.Count;
+			var types = new TypeCode[keyCount];
+			for (int k = 0; k < keyCount; k++)
+				types[k] = _SortBy[k].expr.GetTypeCode();
+
+			var entries = new SortEntry[_Data.Count];
+			for (int i = 0; i < entries.Length; i++)
+			{
+				Row row = _Data[i];
+				var keys = new object[keyCount];
+				bool failed = false;
+				int k = 0;
+				try
+				{
+					for (; k < keyCount; k++)
+						keys[k] = await _SortBy[k].expr.Evaluate(_Rpt, row);
+				}
+				catch (Exception e)		// this really shouldn't happen
+				{
+					failed = true;
+					_Rpt.rl.LogError(8,
+						string.Format("Sort rows exception\r\nSort key: {0} of row {1}\r\n{2}\r\n{3}",
+						k, row.RowNumber, e.Message, e.StackTrace));
+				}
+				entries[i] = new SortEntry { Row = row, Keys = keys, Failed = failed };
+			}
+
+			Array.Sort(entries, (a, b) =>
+			{
+				if (a.Row == b.Row)
+					return 0;
+				if (!a.Failed && !b.Failed)
+				{
+					try
+					{
+						for (int k = 0; k < keyCount; k++)
+						{
+							int rc = Filter.ApplyCompare(types[k], a.Keys[k], b.Keys[k]);
+							if (rc != 0)
+								return _SortBy[k].bAscending ? rc : -rc;
+						}
+					}
+					catch (Exception e)		// this really shouldn't happen
+					{
+						_Rpt.rl.LogError(8,
+							string.Format("Sort rows exception\r\nRows: {0} {1}\r\n{2}\r\n{3}",
+							a.Row.RowNumber, b.Row.RowNumber, e.Message, e.StackTrace));
+					}
+				}
+				return a.Row.RowNumber - b.Row.RowNumber;	// in case of tie use original row number
+			});
+
+			for (int i = 0; i < entries.Length; i++)
+				_Data[i] = entries[i].Row;
+		}
+
+		private struct SortEntry
+		{
+			internal Row Row;
+			internal object[] Keys;
+			internal bool Failed;
+		}
+
 		internal List<Row> Data
 		{
 			get { return  _Data; }
