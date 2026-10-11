@@ -60,6 +60,7 @@ public static class Profile
 
         using var listener = alloc ? new AllocListener() : null;
         parseTicks = dataTicks = renderTicks = 0;
+        long items0 = ThreadPool.CompletedWorkItemCount;
         long bytes0 = GC.GetTotalAllocatedBytes(true);
         int gc0 = GC.CollectionCount(0), gc1 = GC.CollectionCount(1), gc2 = GC.CollectionCount(2);
         var sw = Stopwatch.StartNew();
@@ -75,6 +76,7 @@ public static class Profile
         Console.WriteLine($"{workload} {format}: {n} iterations, {sw.Elapsed.TotalMilliseconds / n:N2} ms/op, {bytes / n / 1024.0:N0} KB/op, GC0/1/2 per 1000 ops: {(GC.CollectionCount(0) - gc0) * 1000.0 / n:N0}/{(GC.CollectionCount(1) - gc1) * 1000.0 / n:N0}/{(GC.CollectionCount(2) - gc2) * 1000.0 / n:N0}");
         double ms(long ticks) => ticks * 1000.0 / Stopwatch.Frequency / n;
         Console.WriteLine($"  phases ms/op: parse {ms(parseTicks):N2}, getdata {ms(dataTicks):N2}, render {ms(renderTicks):N2}");
+        Console.WriteLine($"  thread-pool work items/op: {(ThreadPool.CompletedWorkItemCount - items0) / (double)n:N1}");
         listener?.Print(top: 40);
     }
 
