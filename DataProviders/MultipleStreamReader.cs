@@ -16,7 +16,16 @@ namespace Majorsilence.Reporting.Data
     {
         Queue _files;
         StreamReader _sr = null;
-        static readonly HttpClient _httpClient = new HttpClient();
+        // The user agent is set once here: DefaultRequestHeaders is not thread-safe, so adding it on every
+        // fetch could corrupt the headers when readers run on several threads.
+        static readonly HttpClient _httpClient = CreateHttpClient();
+
+        static HttpClient CreateHttpClient()
+        {
+            var client = new HttpClient();
+            client.AddMajorsilenceReportingUserAgent();
+            return client;
+        }
 
         /// <summary>
         /// Constructor taking a path list string.  Files are separated with blanks.  
@@ -111,7 +120,6 @@ namespace Majorsilence.Reporting.Data
                 fname.StartsWith("file:") ||
                 fname.StartsWith("https:"))
             {
-                _httpClient.AddMajorsilenceReportingUserAgent();
                 HttpResponseMessage response = await _httpClient.GetAsync(fname);
                 response.EnsureSuccessStatusCode();
                 strm = await response.Content.ReadAsStreamAsync();

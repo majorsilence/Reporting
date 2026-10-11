@@ -449,7 +449,7 @@ namespace Majorsilence.Reporting.Rdl
                     var doc = item.OwnerDocument;
                     var rectangle = doc.CreateElement ("Rectangle", item.NamespaceURI);
                     var name = item.GetAttribute ("Name");
-                    rectangle.SetAttribute ("Name", string.IsNullOrEmpty (name) ? "RdlUnsupported" + (++_generatedNameCounter) : name);
+                    rectangle.SetAttribute ("Name", string.IsNullOrEmpty (name) ? "RdlUnsupported" + System.Threading.Interlocked.Increment(ref _generatedNameCounter) : name);
                     foreach (var keep in new[] { "Top", "Left", "Height", "Width", "ZIndex", "Visibility" }) {
                         var source = FindChild (item, keep);
                         if (source != null)
@@ -1223,7 +1223,7 @@ namespace Majorsilence.Reporting.Rdl
         private static XmlElement BuildEmptyTextbox (XmlDocument doc, string ns)
         {
             var textbox = doc.CreateElement ("Textbox", ns);
-            textbox.SetAttribute ("Name", "RdlNormalizedEmpty" + (++_generatedNameCounter));
+            textbox.SetAttribute ("Name", "RdlNormalizedEmpty" + System.Threading.Interlocked.Increment(ref _generatedNameCounter));
 
             var value = doc.CreateElement ("Value", ns);
             value.InnerText = string.Empty;
@@ -1235,7 +1235,7 @@ namespace Majorsilence.Reporting.Rdl
         private static XmlElement WrapInRectangle (XmlDocument doc, string ns, XmlElement items)
         {
             var rectangle = doc.CreateElement ("Rectangle", ns);
-            rectangle.SetAttribute ("Name", "RdlNormalizedGroup" + (++_generatedNameCounter));
+            rectangle.SetAttribute ("Name", "RdlNormalizedGroup" + System.Threading.Interlocked.Increment(ref _generatedNameCounter));
             rectangle.AppendChild (items);
 
             var wrapper = doc.CreateElement ("ReportItems", ns);
