@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Report xmlns="http://schemas.microsoft.com/sqlserver/reporting/2005/01/reportdefinition" xmlns:rd="http://schemas.microsoft.com/SQLServer/reporting/reportdesigner">
+  <Description>Html text with embedded &lt;expr&gt; expressions, evaluated while the text is built.</Description>
+  <Width>6in</Width><PageWidth>8.5in</PageWidth><PageHeight>11in</PageHeight>
+  <TopMargin>.5in</TopMargin><BottomMargin>.5in</BottomMargin><LeftMargin>.5in</LeftMargin><RightMargin>.5in</RightMargin>
+  <Body>
+    <Height>1in</Height>
+    <ReportItems>
+      <Textbox Name="Html1">
+        <Top>0in</Top><Left>0in</Left><Width>5in</Width><Height>0.5in</Height>
+        <Value>Total: &lt;expr&gt;=1+2&lt;/expr&gt; done</Value>
+        <Style><Format>html</Format></Style>
+      </Textbox>
+    </ReportItems>
+  </Body>
+</Report>

@@ -262,7 +262,7 @@ namespace Majorsilence.Reporting.Rdl
             List<RowsSortExpression> sl = new List<RowsSortExpression>();
 			sl.Add(new RowsSortExpression(this._FilterExpression));
 			data.SortBy = sl;					// update the sort by
-			data.Sort();						// sort the data
+			await data.SortAsync();			// sort the data
 			
 			// reverse the order of the data for top so that data is in the beginning
 			if (_FilterOperator == FilterOperatorEnum.TopN ||

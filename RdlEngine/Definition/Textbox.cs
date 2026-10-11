@@ -549,7 +549,7 @@ namespace Majorsilence.Reporting.Rdl
                     if (s.StartsWith("<expr>") && s.EndsWith("</expr>"))
                     {
                         string expr = s.Substring(6, s.Length - 13);
-                        DynamicExpression de = new DynamicExpression(rpt, this, expr, row);
+                        DynamicExpression de = await DynamicExpression.CreateAsync(rpt, this, expr, row);
                         sb.Append(await de.Evaluate(rpt, row));
                     }
                     else

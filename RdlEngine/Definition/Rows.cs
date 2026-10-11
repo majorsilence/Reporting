@@ -11,7 +11,7 @@ namespace Majorsilence.Reporting.Rdl
 	///<summary>
 	/// A collection of rows.
 	///</summary>
-    internal class Rows : System.Collections.Generic.IComparer<Row>, IDisposable
+    internal class Rows : IDisposable
 	{
 		List<Row> _Data;	// array of Row object;
         List<RowsSortExpression> _SortBy;	// array of expressions used to sort the data
@@ -141,26 +141,16 @@ namespace Majorsilence.Reporting.Rdl
 			get {return this._Rpt;}
 		}
 
-		internal void Sort()
-		{
-			// sort the data array by the data.
-			_Data.Sort(this);
-		}
-
 		/// <summary>
-		/// Sorts the rows like <see cref="Sort"/>, but evaluates each row's sort expressions once
-		/// (awaited, in order) instead of twice per comparison. Compare has to be synchronous, so it
-		/// ran every evaluation through Task.Run(...).GetResult(): a thread-pool hop per evaluation,
-		/// O(n log n) of them, each blocking a pool thread while it waited - slow, and a way to
-		/// starve the pool when several reports render at once.
+		/// Sorts the rows by their sort expressions, evaluating each row's keys once, awaited, in order.
+		/// (A comparer has to be synchronous, so sorting with one meant running every evaluation through
+		/// Task.Run(...).GetResult(): a thread-pool hop per evaluation, O(n log n) of them, each blocking a
+		/// pool thread - slow, and a way to starve the pool when several reports render at once.)
 		/// </summary>
 		internal async Task SortAsync()
 		{
 			if (_SortBy == null || _Data.Count < 2)
-			{
-				_Data.Sort(this);
-				return;
-			}
+				return;     // nothing to sort by (or nothing to sort)
 
 			int keyCount = _SortBy.Count;
 			var types = new TypeCode[keyCount];
@@ -251,39 +241,6 @@ namespace Majorsilence.Reporting.Rdl
 			set { _CurrentGroups = value; }
 		}
 
-		#region IComparer Members
-
-		public int Compare(Row r1, Row r2)
-		{
-			if (r1 == r2)				// why does the sort routine do this??
-				return 0;
-
-			object o1=null,o2=null;
-			TypeCode tc = TypeCode.Object;
-			int rc;
-			try 
-			{
-				foreach (RowsSortExpression se in _SortBy)
-				{
-					// HACK: async
-					o1 = Task.Run(async () => await se.expr.Evaluate(this._Rpt, r1)).GetAwaiter().GetResult();
-					o2 = Task.Run(async () => await se.expr.Evaluate(this._Rpt, r2)).GetAwaiter().GetResult();
-					tc = se.expr.GetTypeCode();
-					rc = Filter.ApplyCompare(tc, o1, o2);
-					if (rc != 0)
-						return se.bAscending? rc: -rc;
-				}
-			}
-			catch (Exception e)		// this really shouldn't happen
-			{
-				_Rpt.rl.LogError(8, 
-                    string.Format("Sort rows exception\r\nArguments: {0} {1}\r\nTypecode: {2}\r\n{3}\r\n{4}", 
-                    o1, o2, tc.ToString(), e.Message, e.StackTrace));
-			}
-			return r1.RowNumber - r2.RowNumber;		// in case of tie use original row number
-		}
-
-		#endregion
 
 		public void Dispose()
 		{

@@ -90,6 +90,28 @@ namespace ReportTests
                 "\"Central\",0,99,1,0",
             }));
         }
+
+        [Test]
+        public async Task HtmlText_EmbeddedExpression_IsEvaluated()
+        {
+            // an <expr> part of html text is parsed and evaluated while the text is built (DynamicExpression)
+            Report report = await RdlUtils.GetReport(new Uri(_reportFolder, "HtmlExprTest.rdl"));
+            report.Folder = _reportFolder.LocalPath;
+            await report.RunGetData();
+            using var ms = new MemoryStreamGen();
+            await report.RunRender(ms, OutputPresentationType.HTML);
+            Assert.That(ms.GetText(), Does.Contain("Total: 3 done"));
+        }
+
+        [Test]
+        public async Task TopNFilter_KeepsTheLargestRows()
+        {
+            string[] lines = await RenderCsvLines("TopNFilterTest.rdl");
+
+            // Top 3 amounts are 99, 50 and 40. The filter sorts the rows by the filter expression and, for a
+            // top filter, reverses them so the kept rows come first.
+            Assert.That(lines, Is.EqualTo(new[] { "9,99", "2,50", "7,40" }));
+        }
     }
 }
 #endif

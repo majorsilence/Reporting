@@ -21,13 +21,19 @@ namespace Majorsilence.Reporting.Rdl
         TypeCode _Type;
         ReportLink _rl;
 	
-		internal DynamicExpression(Report rpt, ReportLink p, string expr, Row row)
+		private DynamicExpression(string expr, ReportLink p)
 		{
 			_Source=expr;
 			_Expr = null;
             _rl = p;
-			// HACK: async
-            _Type = Task.Run(async ()=> await DoParse(rpt)).GetAwaiter().GetResult();
+		}
+
+		// Parsing is async, which a constructor cannot be.
+		internal static async Task<DynamicExpression> CreateAsync(Report rpt, ReportLink p, string expr, Row row)
+		{
+			var de = new DynamicExpression(expr, p);
+			de._Type = await de.DoParse(rpt);
+			return de;
 		}
 
 		internal async Task<TypeCode> DoParse(Report rpt)
