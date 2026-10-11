@@ -103,6 +103,9 @@ namespace Majorsilence.Reporting.RdlDesign
                     case "List":
                         this.pgSelected.SelectedObject = new PropertyList(_Draw, dc, _Draw.SelectedList);
                         break;
+                    case "Table":
+                        this.pgSelected.SelectedObject = new PropertyTable(_Draw, dc, _Draw.SelectedList);
+                        break;
                     case "Subreport":
                         this.pgSelected.SelectedObject = new PropertySubreport(_Draw, dc, _Draw.SelectedList);
                         break;
