@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
         <OutputType>Exe</OutputType>
@@ -12,10 +12,12 @@
 
     <ItemGroup>
       <PackageReference Include="BenchmarkDotNet" />
+      <PackageReference Include="Microsoft.Data.Sqlite" />
     </ItemGroup>
 
     <ItemGroup>
       <ProjectReference Include="..\RdlCreator\Majorsilence.Reporting.RdlCreator.csproj" />
+      <ProjectReference Include="..\DataProviders\Majorsilence.Reporting.DataProviders.csproj" />
       <ProjectReference Include="..\RdlCri\Majorsilence.Reporting.RdlCri.csproj" />
       <ProjectReference Include="..\RdlEngine\Majorsilence.Reporting.RdlEngine.csproj" />
     </ItemGroup>
@@ -25,6 +27,21 @@
         <Link>NestedJsonData.json</Link>
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </None>
+    </ItemGroup>
+
+    <ItemGroup>
+      <!-- Report workloads. Files are linked from the test projects so there is a single copy. -->
+      <None Include="Workloads\LargeTable.rdl" CopyToOutputDirectory="PreserveNewest" />
+      <None Include="..\ReportTests\Reports\testdata.rdl" Link="Workloads\testdata.rdl" CopyToOutputDirectory="PreserveNewest" />
+      <None Include="..\ReportTests\Reports\WorldFacts.rdl" Link="Workloads\WorldFacts.rdl" CopyToOutputDirectory="PreserveNewest" />
+      <None Include="..\ReportTests\Reports\WorldFacts.xml" Link="Workloads\WorldFacts.xml" CopyToOutputDirectory="PreserveNewest" />
+      <None Include="..\ReportTests\Reports\MatrixExample.rdl" Link="Workloads\MatrixExample.rdl" CopyToOutputDirectory="PreserveNewest" />
+      <None Include="..\ReportTests\Reports\ListPagingTest.rdl" Link="Workloads\ListPagingTest.rdl" CopyToOutputDirectory="PreserveNewest" />
+      <None Include="..\ReportTests\Reports\CanGrowSplitTest.rdl" Link="Workloads\CanGrowSplitTest.rdl" CopyToOutputDirectory="PreserveNewest" />
+      <None Include="..\ReportTests\Reports\ChartTypes.rdl" Link="Workloads\ChartTypes.rdl" CopyToOutputDirectory="PreserveNewest" />
+      <None Include="..\ReportTests\Reports\ImageSizing.rdl" Link="Workloads\ImageSizing.rdl" CopyToOutputDirectory="PreserveNewest" />
+      <None Include="..\ReportTests\Reports\logo-example.png" Link="Workloads\logo-example.png" CopyToOutputDirectory="PreserveNewest" />
+      <None Include="..\Examples\northwindEF.db" Link="Workloads\northwindEF.db" CopyToOutputDirectory="PreserveNewest" />
     </ItemGroup>
 
 </Project>
