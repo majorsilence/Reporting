@@ -52,7 +52,7 @@ namespace Majorsilence.Reporting.Rdl
             try
             {
                 g.ResetTransform();
-                await BuildPrivate(g);
+                await BuildPrivate(g).ConfigureAwait(false);
             }
             finally
             {
@@ -258,7 +258,7 @@ namespace Majorsilence.Reporting.Rdl
 					}
                     else if (ltoken.StartsWith("<img"))
                     {
-                        PageImage pimg = await BuildImage(g, token.Substring(1), cs, model);
+                        PageImage pimg = await BuildImage(g, token.Substring(1), cs, model).ConfigureAwait(false);
                         if (pimg != null)   // We got an image; add to process list
                         {
                             pimg.Y = this.Y + yPos;
@@ -437,7 +437,7 @@ namespace Majorsilence.Reporting.Rdl
                     using (HttpClient client = new HttpClient())
                     {
 						client.AddMajorsilenceReportingUserAgent();
-                        strm = await client.GetStreamAsync(src);
+                        strm = await client.GetStreamAsync(src).ConfigureAwait(false);
                     }
                 }
                 else

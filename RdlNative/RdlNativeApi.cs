@@ -237,6 +237,8 @@ public static class RdlNativeApi
             if (ctx is null) { SetError("Invalid handle."); return -1; }
             string outPath = Marshal.PtrToStringUTF8((nint)outputPathUtf8) ?? "";
             string fmt     = Marshal.PtrToStringUTF8((nint)formatUtf8)     ?? "pdf";
+            // The C ABI is synchronous - the caller (Python, PHP, Ruby, Rust...) is waiting for the return value -
+            // so this is where the async render is waited for. A native thread has no SynchronizationContext.
             RenderToFile(ctx, outPath, fmt).GetAwaiter().GetResult();
             return 0;
         }
@@ -259,6 +261,7 @@ public static class RdlNativeApi
             var ctx = GetCtx(handle);
             if (ctx is null) { SetError("Invalid handle."); return -1; }
             string fmt = Marshal.PtrToStringUTF8((nint)formatUtf8) ?? "pdf";
+            // Synchronous by contract (see ReportRenderFile).
             byte[] data = RenderToBytes(ctx, fmt).GetAwaiter().GetResult();
             byte* ptr = (byte*)NativeMemory.Alloc((nuint)data.Length);
             data.AsSpan().CopyTo(new Span<byte>(ptr, data.Length));

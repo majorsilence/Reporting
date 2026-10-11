@@ -44,7 +44,7 @@ namespace Majorsilence.Reporting.Rdl
 		async override internal Task FinalPass()
 		{
 			if (_MatrixCells != null)
-                await _MatrixCells.FinalPass();
+                await _MatrixCells.FinalPass().ConfigureAwait(false);
 			return;
 		}
 

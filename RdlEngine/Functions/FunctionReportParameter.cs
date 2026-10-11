@@ -104,14 +104,14 @@ namespace Majorsilence.Reporting.Rdl
 		// Evaluate is for interpretation  (and is relatively slow)
 		public async virtual Task<object> Evaluate(Report rpt, Row row)
 		{
-            return this.p.MultiValue? await EvaluateMV(rpt, row): await p.GetRuntimeValue(rpt);
+            return this.p.MultiValue? await EvaluateMV(rpt, row).ConfigureAwait(false) : await p.GetRuntimeValue(rpt).ConfigureAwait(false);
 		}
 
         private async Task<object> EvaluateMV(Report rpt, Row row)
         {
-            ArrayList ar = await p.GetRuntimeValues(rpt);
+            ArrayList ar = await p.GetRuntimeValues(rpt).ConfigureAwait(false);
             
-            object va = this._arg == null ? null : await _arg.Evaluate(rpt, row);
+            object va = this._arg == null ? null : await _arg.Evaluate(rpt, row).ConfigureAwait(false);
 
             switch(_type) 
             {
@@ -137,7 +137,7 @@ namespace Majorsilence.Reporting.Rdl
 		
 		public virtual async Task<double> EvaluateDouble(Report rpt, Row row)
 		{
-            object rtv = await Evaluate(rpt, row);
+            object rtv = await Evaluate(rpt, row).ConfigureAwait(false);
 			if (rtv == null)
 				return Double.NaN;
 
@@ -162,7 +162,7 @@ namespace Majorsilence.Reporting.Rdl
 		
 		public virtual async Task<decimal> EvaluateDecimal(Report rpt, Row row)
 		{
-            object rtv = await Evaluate(rpt, row);
+            object rtv = await Evaluate(rpt, row).ConfigureAwait(false);
 			if (rtv == null)
 				return Decimal.MinValue;
 
@@ -187,7 +187,7 @@ namespace Majorsilence.Reporting.Rdl
 
         public virtual async Task<int> EvaluateInt32(Report rpt, Row row)
         {
-            object rtv = await Evaluate(rpt, row);
+            object rtv = await Evaluate(rpt, row).ConfigureAwait(false);
             if (rtv == null)
                 return int.MinValue;
 
@@ -215,7 +215,7 @@ namespace Majorsilence.Reporting.Rdl
 
 		public virtual async  Task<string> EvaluateString(Report rpt, Row row)
 		{
-            object rtv = this.p.MultiValue ? await EvaluateMV(rpt, row) : await p.GetRuntimeValue(rpt);
+            object rtv = this.p.MultiValue ? await EvaluateMV(rpt, row).ConfigureAwait(false) : await p.GetRuntimeValue(rpt).ConfigureAwait(false);
 //            object rtv = Evaluate(rpt, row);
 			if (rtv == null)
 				return null;
@@ -225,7 +225,7 @@ namespace Majorsilence.Reporting.Rdl
 
 		public virtual async Task<DateTime> EvaluateDateTime(Report rpt, Row row)
 		{
-            object rtv = await Evaluate(rpt, row);
+            object rtv = await Evaluate(rpt, row).ConfigureAwait(false);
 			if (rtv == null)
 				return DateTime.MinValue;
 
@@ -250,7 +250,7 @@ namespace Majorsilence.Reporting.Rdl
 
 		public virtual async Task<bool> EvaluateBoolean(Report rpt, Row row)
 		{
-            object rtv = await Evaluate(rpt, row);
+            object rtv = await Evaluate(rpt, row).ConfigureAwait(false);
 
 			if (rtv == null)
 				return false;

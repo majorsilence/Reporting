@@ -80,23 +80,23 @@ namespace Majorsilence.Reporting.Rdl
 		// Handle parsing of function in final pass
 		async override internal Task FinalPass()
 		{
-            await base.FinalPass();
+            await base.FinalPass().ConfigureAwait(false);
 			if (_Values != null)
-                await _Values.FinalPass();
+                await _Values.FinalPass().ConfigureAwait(false);
             if (_DataPoint != null)
-                await _DataPoint.FinalPass();
+                await _DataPoint.FinalPass().ConfigureAwait(false);
             if (_ChartLabel != null)
-                await _ChartLabel.FinalPass();
+                await _ChartLabel.FinalPass().ConfigureAwait(false);
             if (_PlotType != null)
-                await _PlotType.FinalPass();
+                await _PlotType.FinalPass().ConfigureAwait(false);
             if (_YAxis != null)
-                await _YAxis.FinalPass();
+                await _YAxis.FinalPass().ConfigureAwait(false);
             if (_NoMarker != null)
-                await _NoMarker.FinalPass();
+                await _NoMarker.FinalPass().ConfigureAwait(false);
             if (_LineSize != null)
-                await _LineSize.FinalPass();
+                await _LineSize.FinalPass().ConfigureAwait(false);
             if (_Colour != null)
-                await _Colour.FinalPass();
+                await _Colour.FinalPass().ConfigureAwait(false);
             return;
 		}
 

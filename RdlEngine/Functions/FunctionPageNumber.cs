@@ -53,20 +53,20 @@ namespace Majorsilence.Reporting.Rdl
 		
 		public async Task<decimal> EvaluateDecimal(Report rpt, Row row)
 		{
-			double result = await EvaluateDouble(rpt, row);
+			double result = await EvaluateDouble(rpt, row).ConfigureAwait(false);
 
 			return Convert.ToDecimal(result);
 		}
 
 		public async Task<string> EvaluateString(Report rpt, Row row)
 		{
-			double result = await EvaluateDouble(rpt, row);
+			double result = await EvaluateDouble(rpt, row).ConfigureAwait(false);
 			return result.ToString();
 		}
 
 		public async Task<DateTime> EvaluateDateTime(Report rpt, Row row)
 		{
-			double result = await EvaluateDouble(rpt, row);
+			double result = await EvaluateDouble(rpt, row).ConfigureAwait(false);
 			return Convert.ToDateTime(result);
 		}
 

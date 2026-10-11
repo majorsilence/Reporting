@@ -32,18 +32,18 @@ namespace Majorsilence.Reporting.Rdl
 
 		public async Task<IExpr> ConstantOptimization()
 		{
-			_lhs = await _lhs.ConstantOptimization();
-			_rhs = await _rhs.ConstantOptimization();
-			bool bLeftConst = await _lhs.IsConstant();
-			bool bRightConst = await _rhs.IsConstant();
+			_lhs = await _lhs.ConstantOptimization().ConfigureAwait(false);
+			_rhs = await _rhs.ConstantOptimization().ConfigureAwait(false);
+			bool bLeftConst = await _lhs.IsConstant().ConfigureAwait(false);
+			bool bRightConst = await _rhs.IsConstant().ConfigureAwait(false);
 			if (bLeftConst && bRightConst)
 			{
-				bool b = await EvaluateBoolean(null, null);
+				bool b = await EvaluateBoolean(null, null).ConfigureAwait(false);
 				return new ConstantBoolean(b);
 			}
 			else if (bRightConst)
 			{
-				bool b = await _rhs.EvaluateBoolean(null, null);
+				bool b = await _rhs.EvaluateBoolean(null, null).ConfigureAwait(false);
 				if (b)
 					return _lhs;
 				else 
@@ -51,7 +51,7 @@ namespace Majorsilence.Reporting.Rdl
 			}
 			else if (bLeftConst)
 			{
-				bool b = await _lhs.EvaluateBoolean(null, null);
+				bool b = await _lhs.EvaluateBoolean(null, null).ConfigureAwait(false);
 				if (b)
 					return _rhs;
 				else
@@ -64,7 +64,7 @@ namespace Majorsilence.Reporting.Rdl
 		// Evaluate is for interpretation  (and is relatively slow)
 		public async Task<object> Evaluate(Report rpt, Row row)
 		{
-			return await EvaluateBoolean(rpt, row);
+			return await EvaluateBoolean(rpt, row).ConfigureAwait(false);
 		}
 		
 		public Task<double> EvaluateDouble(Report rpt, Row row)
@@ -84,7 +84,7 @@ namespace Majorsilence.Reporting.Rdl
 
 		public async Task<string> EvaluateString(Report rpt, Row row)
 		{
-			bool result = await EvaluateBoolean(rpt, row);
+			bool result = await EvaluateBoolean(rpt, row).ConfigureAwait(false);
 			return result.ToString();
 		}
 
@@ -95,10 +95,10 @@ namespace Majorsilence.Reporting.Rdl
 
 		public async Task<bool> EvaluateBoolean(Report rpt, Row row)
 		{
-			bool r = await _lhs.EvaluateBoolean(rpt, row);
+			bool r = await _lhs.EvaluateBoolean(rpt, row).ConfigureAwait(false);
 			if (!r)
 				return false;
-			return await _rhs.EvaluateBoolean(rpt, row);
+			return await _rhs.EvaluateBoolean(rpt, row).ConfigureAwait(false);
 		}
 	}
 }

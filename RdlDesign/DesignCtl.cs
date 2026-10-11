@@ -1004,16 +1004,19 @@ namespace Majorsilence.Reporting.RdlDesign
 		}
 		
 		
+		[Obsolete("Blocks the calling thread. Use GetSelectedStyleAsync().")]
 		public StyleInfo SelectedStyle
 		{
-			get
-			{
-				if (_DrawPanel.SelectedCount == 0)
-					return null;
-				XmlNode xNode = _DrawPanel.SelectedList[0];
-				// HACK: async
-				return Task.Run(async () => await _DrawPanel.GetStyleInfo(xNode)).GetAwaiter().GetResult();
-			}
+			get { return Task.Run(async () => await GetSelectedStyleAsync()).GetAwaiter().GetResult(); }   // compatibility only
+		}
+
+		/// <summary>The style of the first selected item, or null when nothing is selected.</summary>
+		public async Task<StyleInfo> GetSelectedStyleAsync()
+		{
+			if (_DrawPanel.SelectedCount == 0)
+				return null;
+			XmlNode xNode = _DrawPanel.SelectedList[0];
+			return await _DrawPanel.GetStyleInfo(xNode);
 		}
 
 		public void ApplyStyleToSelected(string name, string v)

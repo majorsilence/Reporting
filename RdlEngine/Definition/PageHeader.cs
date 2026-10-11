@@ -65,9 +65,9 @@ namespace Majorsilence.Reporting.Rdl
 		async override internal Task FinalPass()
 		{
 			if (_ReportItems != null)
-                await _ReportItems.FinalPass();
+                await _ReportItems.FinalPass().ConfigureAwait(false);
 			if (_Style != null)
-                await _Style.FinalPass();
+                await _Style.FinalPass().ConfigureAwait(false);
 			return;
 		}
 
@@ -79,7 +79,7 @@ namespace Majorsilence.Reporting.Rdl
 			rpt.TotalPages = rpt.PageNumber = 1;
 			ip.PageHeaderStart(this);
 			if (_ReportItems != null)
-                await _ReportItems.Run(ip, row);
+                await _ReportItems.Run(ip, row).ConfigureAwait(false);
 			ip.PageHeaderEnd(this);
 		}
 
@@ -103,7 +103,7 @@ namespace Majorsilence.Reporting.Rdl
 					continue;		// Don't put header on the first page
 				if (p.PageNumber == pgs.Count && !_PrintOnLastPage)
 					continue;       // Don't put header on the last page
-                await _ReportItems.RunPage(pgs, null, OwnerReport.LeftMargin.Points);
+                await _ReportItems.RunPage(pgs, null, OwnerReport.LeftMargin.Points).ConfigureAwait(false);
 			}
 		}
 

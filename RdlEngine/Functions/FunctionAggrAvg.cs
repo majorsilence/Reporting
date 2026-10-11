@@ -45,7 +45,7 @@ namespace Majorsilence.Reporting.Rdl
 		// Evaluate is for interpretation  (and is relatively slow)
 		public async Task<object> Evaluate(Report rpt, Row row)
 		{
-			return _tc==TypeCode.Decimal? (object)await EvaluateDecimal(rpt, row): (object) await EvaluateDouble(rpt, row);
+			return _tc==TypeCode.Decimal? (object)await EvaluateDecimal(rpt, row).ConfigureAwait(false) : (object) await EvaluateDouble(rpt, row).ConfigureAwait(false);
 		}
 		
 		public async Task<double> EvaluateDouble(Report rpt, Row row)
@@ -64,7 +64,7 @@ namespace Majorsilence.Reporting.Rdl
 			double temp;
 			foreach (Row r in re)
 			{
-				temp = await _Expr.EvaluateDouble(rpt, r);
+				temp = await _Expr.EvaluateDouble(rpt, r).ConfigureAwait(false);
 				if (temp.CompareTo(double.NaN) != 0)
 				{
 					sum += temp;
@@ -87,7 +87,7 @@ namespace Majorsilence.Reporting.Rdl
         {
             if (row == null)
                 return int.MinValue;
-            return Convert.ToInt32(await EvaluateDouble(rpt, row));
+            return Convert.ToInt32(await EvaluateDouble(rpt, row).ConfigureAwait(false));
         }		
 		public async Task<decimal> EvaluateDecimal(Report rpt, Row row)
 		{
@@ -105,7 +105,7 @@ namespace Majorsilence.Reporting.Rdl
 			decimal temp;
 			foreach (Row r in re)
 			{
-				temp = await _Expr.EvaluateDecimal(rpt, r);
+				temp = await _Expr.EvaluateDecimal(rpt, r).ConfigureAwait(false);
 				if (temp != decimal.MinValue)		// indicate null value
 				{
 					sum += temp;
@@ -125,13 +125,13 @@ namespace Majorsilence.Reporting.Rdl
 
 		public async Task<string> EvaluateString(Report rpt, Row row)
 		{
-			object result = await Evaluate(rpt, row);
+			object result = await Evaluate(rpt, row).ConfigureAwait(false);
 			return Convert.ToString(result);
 		}
 
 		public async Task<DateTime> EvaluateDateTime(Report rpt, Row row)
 		{
-			object result = await Evaluate(rpt, row);
+			object result = await Evaluate(rpt, row).ConfigureAwait(false);
 			return Convert.ToDateTime(result);
 		}
 

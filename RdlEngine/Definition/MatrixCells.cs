@@ -48,7 +48,7 @@ namespace Majorsilence.Reporting.Rdl
 		{
 			foreach (MatrixCell m in _Items)
 			{
-                await m.FinalPass();
+                await m.FinalPass().ConfigureAwait(false);
 			}
 			return;
 		}

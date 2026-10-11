@@ -43,7 +43,7 @@ namespace Majorsilence.Reporting.Rdl
 			// simplify all expression if possible
 			for (int i=0; i < _expr.Length; i++)
 			{
-				_expr[i] = await _expr[i].ConstantOptimization();
+				_expr[i] = await _expr[i].ConstantOptimization().ConfigureAwait(false);
 			}
 
 			return this;
@@ -55,10 +55,10 @@ namespace Majorsilence.Reporting.Rdl
 			bool result;
 			for (int i=0; i < _expr.Length; i = i+2)
 			{
-				result = await _expr[i].EvaluateBoolean(rpt, row);
+				result = await _expr[i].EvaluateBoolean(rpt, row).ConfigureAwait(false);
 				if (result)
 				{
-					object o = await _expr[i+1].Evaluate(rpt, row);
+					object o = await _expr[i+1].Evaluate(rpt, row).ConfigureAwait(false);
 					// We may need to convert to same type as first type
 					if (i == 0 || _tc == _expr[i+1].GetTypeCode())	// first typecode will always match 
 						return o;
@@ -72,37 +72,37 @@ namespace Majorsilence.Reporting.Rdl
 
 		public async Task<bool> EvaluateBoolean(Report rpt, Row row)
 		{
-			object result = await Evaluate(rpt, row);
+			object result = await Evaluate(rpt, row).ConfigureAwait(false);
 			return Convert.ToBoolean(result);
 		}
 		
 		public async Task<double> EvaluateDouble(Report rpt, Row row)
 		{
-			object result = await Evaluate(rpt, row);
+			object result = await Evaluate(rpt, row).ConfigureAwait(false);
 			return Convert.ToDouble(result);
 		}
 		
 		public async Task<decimal> EvaluateDecimal(Report rpt, Row row)
 		{
-			object result = await Evaluate(rpt, row);
+			object result = await Evaluate(rpt, row).ConfigureAwait(false);
 			return Convert.ToDecimal(result);
 		}
 
         public async Task<int> EvaluateInt32(Report rpt, Row row)
         {
-            object result = await Evaluate(rpt, row);
+            object result = await Evaluate(rpt, row).ConfigureAwait(false);
             return Convert.ToInt32(result);
         }
 
         public async Task<string> EvaluateString(Report rpt, Row row)
 		{
-			object result = await Evaluate(rpt, row);
+			object result = await Evaluate(rpt, row).ConfigureAwait(false);
 			return Convert.ToString(result);
 		}
 
 		public async Task<DateTime> EvaluateDateTime(Report rpt, Row row)
 		{
-			object result = await Evaluate(rpt, row);
+			object result = await Evaluate(rpt, row).ConfigureAwait(false);
 			return Convert.ToDateTime(result);
 		}
 	}

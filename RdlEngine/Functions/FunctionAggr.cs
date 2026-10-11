@@ -42,7 +42,7 @@ namespace Majorsilence.Reporting.Rdl
 		public async Task<IExpr> ConstantOptimization()
 		{
 			if (_Expr != null)
-				_Expr = await _Expr.ConstantOptimization();
+				_Expr = await _Expr.ConstantOptimization().ConfigureAwait(false);
 			return (IExpr) this;
 		}
 

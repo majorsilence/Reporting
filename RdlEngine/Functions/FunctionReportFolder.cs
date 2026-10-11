@@ -62,7 +62,7 @@ namespace Majorsilence.Reporting.Rdl
 
 		public async Task<DateTime> EvaluateDateTime(Report rpt, Row row)
 		{
-			string result = await EvaluateString(rpt, row);
+			string result = await EvaluateString(rpt, row).ConfigureAwait(false);
 			return Convert.ToDateTime(result);
 		}
 

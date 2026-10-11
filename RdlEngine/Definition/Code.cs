@@ -411,7 +411,7 @@ namespace Majorsilence.Reporting.Rdl
                     case "userid":
                         return report.UserID;
                     case "language":
-                        return report.ClientLanguage;
+                        return report.ClientLanguageResolved;
                 }
                 return null;
             }
@@ -421,7 +421,7 @@ namespace Majorsilence.Reporting.Rdl
         {
             get
             {
-                return report.ClientLanguage;
+                return report.ClientLanguageResolved;
             }
         }
 

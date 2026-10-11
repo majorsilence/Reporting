@@ -87,18 +87,18 @@ namespace Majorsilence.Reporting.Rdl
 		// Handle parsing of function in final pass
 		override async internal Task FinalPass()
 		{
-			await base.FinalPass();
+			await base.FinalPass().ConfigureAwait(false);
 
 			// Subreports aren't allowed in PageHeader or PageFooter; 
 			if (this.InPageHeaderOrFooter())
 				OwnerReport.rl.LogError(8, String.Format("The Subreport '{0}' is not allowed in a PageHeader or PageFooter", this.Name == null? "unknown": Name.Nm) );
 
 			if (_Parameters != null)
-                await _Parameters.FinalPass();
+                await _Parameters.FinalPass().ConfigureAwait(false);
 			if (_NoRows != null)
-                await _NoRows.FinalPass();
+                await _NoRows.FinalPass().ConfigureAwait(false);
 
-			_ReportDefn = await GetReport(OwnerReport.ParseFolder);
+			_ReportDefn = await GetReport(OwnerReport.ParseFolder).ConfigureAwait(false);
             if (_ReportDefn != null)    // only null in error case (e.g. subreport not found)
 			    _ReportDefn.Subreport = this;
 			return;
@@ -107,7 +107,7 @@ namespace Majorsilence.Reporting.Rdl
 		async override internal Task Run(IPresent ip, Row row)
 		{
 			Report r = ip.Report();
-            await base.Run(ip, row);
+            await base.Run(ip, row).ConfigureAwait(false);
 
 			// need to save the owner report and nest in this defintion
 			ReportDefn saveReport = r.ReportDefinition;
@@ -128,18 +128,18 @@ namespace Majorsilence.Reporting.Rdl
 			{	// When no parameters we only retrieve data once
 				if (r.Cache.Get(this, "report") == null)
 				{
-                    await r.RunGetData(null);
+                    await r.RunGetData(null).ConfigureAwait(false);
                     if (!r.IsSubreportDataRetrievalDefined)       // if use has defined subreportdataretrieval they might
                         r.Cache.Add(this, "report", this);      //    set the data; so we don't cache
 				}
 			}
 			else
 			{
-                await SetSubreportParameters(r, row);
-                await r.RunGetData(null);
+                await SetSubreportParameters(r, row).ConfigureAwait(false);
+                await r.RunGetData(null).ConfigureAwait(false);
 			}
 
-            await ip.Subreport(this, row);
+            await ip.Subreport(this, row).ConfigureAwait(false);
 
 			r.SetReportDefinition(saveReport);			// restore the current report
 			r.ParentConnections = saveDS;				// restore the data connnections
@@ -151,10 +151,10 @@ namespace Majorsilence.Reporting.Rdl
         async override internal Task RunPage(Pages pgs, Row row)
 		{
 			Report r = pgs.Report;
-			if (await IsHidden(r, row))
+			if (await IsHidden(r, row).ConfigureAwait(false))
 				return;
 
-            await base.RunPage(pgs, row);
+            await base.RunPage(pgs, row).ConfigureAwait(false);
 
 			// need to save the owner report and nest in this defintion
 			ReportDefn saveReport = r.ReportDefinition;
@@ -179,7 +179,7 @@ namespace Majorsilence.Reporting.Rdl
 
 				if (wc == null)
 				{   // run report first time; 
-					bRows = await r.RunGetData(null);
+					bRows = await r.RunGetData(null).ConfigureAwait(false);
                     if (!r.IsSubreportDataRetrievalDefined)       // if use has defined subreportdataretrieval they might set data
                         r.Cache.Add(this, "report", new SubreportWorkClass(bRows));	    // so we can't cache
 				}
@@ -188,8 +188,8 @@ namespace Majorsilence.Reporting.Rdl
 			}
 			else
 			{
-                await SetSubreportParameters(r, row);		// apply the parameters
-				bRows = await r.RunGetData(null);
+                await SetSubreportParameters(r, row).ConfigureAwait(false);		// apply the parameters
+				bRows = await r.RunGetData(null).ConfigureAwait(false);
 			}
 
 			SetPageLeft(r);				// Set the Left attribute since this will be the margin for this report
@@ -216,21 +216,21 @@ namespace Majorsilence.Reporting.Rdl
                 //
                 // Run the subreport -- this is the major effort in creating the display objects in the page
                 //
-                await r.ReportDefinition.Body.RunPage(pgs);		// create a the subreport items
+                await r.ReportDefinition.Body.RunPage(pgs).ConfigureAwait(false);		// create a the subreport items
                 yOffset = pgs.CurrentPage.YOffset;
             }
             else
             {   // Handle NoRows message 
                 string msg;
                 if (this.NoRows != null)
-                    msg = await this.NoRows.EvaluateString(pgs.Report, null);
+                    msg = await NoRows.EvaluateString(pgs.Report, null).ConfigureAwait(false);
                 else
                     msg = null;
 
                 if (msg != null)
                 {
                     PageText pt = new PageText(msg);
-                    await SetPagePositionAndStyle(pgs.Report, pt, null);
+                    await SetPagePositionAndStyle(pgs.Report, pt, null).ConfigureAwait(false);
 
                     if (pt.SI.BackgroundImage != null)
                         pt.SI.BackgroundImage.H = pt.H;		//   and in the background image
@@ -315,7 +315,7 @@ namespace Majorsilence.Reporting.Rdl
 				// with no real database at all, confirmed via a real report's subreport).
 				rdlp.SkipDatabaseSchemaValidation = OwnerReport.SkipDatabaseSchemaValidation;
 
-				r = await rdlp.Parse(OwnerReport.GetObjectNumber());
+				r = await rdlp.Parse(OwnerReport.GetObjectNumber()).ConfigureAwait(false);
 				OwnerReport.SetObjectNumber(r.ReportDefinition.GetObjectNumber());
 				if (r.ErrorMaxSeverity > 0) 
 				{
@@ -396,8 +396,8 @@ namespace Majorsilence.Reporting.Rdl
 					throw new Exception(
 						string.Format(Strings.Subreport_Error_SubreportNotParameter, _ReportName, srp.Name.Nm));
 				}
-				object v = await srp.Value.Evaluate(rpt, row);
-				userp.Value = v;
+				object v = await srp.Value.Evaluate(rpt, row).ConfigureAwait(false);
+				await userp.SetValueAsync(v).ConfigureAwait(false);
 			}
 		}
 

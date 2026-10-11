@@ -1318,7 +1318,7 @@ namespace Majorsilence.Reporting.RdlViewer
                 _ReportDescription = r.Description;
                 _ReportAuthor = r.Author;
                 r.SubreportDataRetrieval += new EventHandler<SubreportDataRetrievalEventArgs>(r_SubreportDataRetrieval);
-                ParametersBuild(r);
+                await ParametersBuildAsync(r);
             }
             else
             {
@@ -1332,6 +1332,17 @@ namespace Majorsilence.Reporting.RdlViewer
         }
 
         void r_SubreportDataRetrieval(object sender, SubreportDataRetrievalEventArgs e)
+        {
+            // The engine does not resume on the UI thread after an await (ConfigureAwait(false)), but
+            // applications handle this event expecting the UI thread. The UI thread is awaiting, not
+            // blocked, so handing the call to it here cannot deadlock.
+            if (InvokeRequired)
+                Invoke(new Action(() => RaiseSubreportDataRetrieval(e)));
+            else
+                RaiseSubreportDataRetrieval(e);
+        }
+
+        void RaiseSubreportDataRetrieval(SubreportDataRetrievalEventArgs e)
         {
             if (this.SubreportDataRetrieval != null)
                 SubreportDataRetrieval(this, e);
@@ -1609,7 +1620,7 @@ namespace Majorsilence.Reporting.RdlViewer
             }
         }
 
-        private void ParametersBuild(Report r)
+        private async Task ParametersBuildAsync(Report r)
         {
             // Remove all previous controls
             _ParameterPanel.Controls.Clear();
@@ -1631,7 +1642,8 @@ namespace Majorsilence.Reporting.RdlViewer
                 // Create a control
                 Control v;
                 int width = 90;
-                if (rp.DisplayValues == null)
+                string[] displayValues = await rp.GetDisplayValuesAsync();
+                if (displayValues == null)
                 {
                     TextBox tb = new TextBox();
                     v = tb;
@@ -1651,7 +1663,7 @@ namespace Majorsilence.Reporting.RdlViewer
                     cb.Leave += new EventHandler(ParametersLeave);
                     v = cb;
                     width = 0;
-                    foreach (string s in rp.DisplayValues)
+                    foreach (string s in displayValues)
                     {
                         l.Text = s;
                         if (width < l.Width)
@@ -1673,16 +1685,20 @@ namespace Majorsilence.Reporting.RdlViewer
                 {
                     v.Text = _Parameters[rp.Name];
                 }
-                else if (rp.DefaultValue != null)
+                else
                 {
-                    StringBuilder sb = new StringBuilder();
-                    for (int i = 0; i < rp.DefaultValue.Length; i++)
+                    object[] defaultValues = await rp.GetDefaultValueAsync();
+                    if (defaultValues != null)
                     {
-                        if (i > 0)
-                            sb.Append(", ");
-                        sb.Append(rp.DefaultValue[i].ToString());
+                        StringBuilder sb = new StringBuilder();
+                        for (int i = 0; i < defaultValues.Length; i++)
+                        {
+                            if (i > 0)
+                                sb.Append(", ");
+                            sb.Append(defaultValues[i].ToString());
+                        }
+                        v.Text = sb.ToString();
                     }
-                    v.Text = sb.ToString();
                 }
                 v.Tag = rp;
 
@@ -1692,7 +1708,13 @@ namespace Majorsilence.Reporting.RdlViewer
             this._ParametersMaxHeight = yPos;
         }
 
-        private void ParametersLeave(object sender, EventArgs e)
+        // The event handlers are async void because events are; everything else awaits the Task versions.
+        private async void ParametersLeave(object sender, EventArgs e)
+        {
+            await ParametersLeaveAsync(sender);
+        }
+
+        private async Task ParametersLeaveAsync(object sender)
         {
             ComboBox cb = sender as ComboBox;
             if (cb == null)
@@ -1704,7 +1726,7 @@ namespace Majorsilence.Reporting.RdlViewer
 
             try
             {
-                rp.Value = cb.Text;
+                await rp.SetValueAsync(cb.Text);
                 SetParameterValue(rp.Name, cb.Text);
             }
             catch (ArgumentException ae)
@@ -1713,7 +1735,12 @@ namespace Majorsilence.Reporting.RdlViewer
             }
         }
 
-        private void ParametersTextValidated(object sender, System.EventArgs e)
+        private async void ParametersTextValidated(object sender, System.EventArgs e)
+        {
+            await ParametersTextValidatedAsync(sender);
+        }
+
+        private async Task ParametersTextValidatedAsync(object sender)
         {
             TextBox tb = sender as TextBox;
             if (tb == null)
@@ -1725,7 +1752,7 @@ namespace Majorsilence.Reporting.RdlViewer
 
             try
             {
-                rp.Value = tb.Text;
+                await rp.SetValueAsync(tb.Text);
                 SetParameterValue(rp.Name, tb.Text);
             }
             catch (ArgumentException ae)
@@ -1753,11 +1780,11 @@ namespace Majorsilence.Reporting.RdlViewer
                     {
                         if (ctl is TextBox)
                         {
-                            this.ParametersTextValidated(ctl, new EventArgs());
+                            await this.ParametersTextValidatedAsync(ctl);
                         }
                         else if (ctl is ComboBox)
                         {
-                            this.ParametersLeave(ctl, new EventArgs());
+                            await this.ParametersLeaveAsync(ctl);
                         }
                     }
                 }
@@ -1767,7 +1794,7 @@ namespace Majorsilence.Reporting.RdlViewer
                 {
                     if (rp.Prompt == null)
                         continue;
-                    if (rp.Value == null && !rp.Nullable)
+                    if (await rp.GetValueAsync() == null && !rp.Nullable)
                     {
                         MessageBox.Show(string.Format(Strings.RdlViewer_ParametersViewClick_RequiredParameterNotProvided, String.IsNullOrEmpty(rp.Prompt) ? rp.Name : rp.Prompt), Strings.RdlViewer_ParametersViewClick_ReportParameterMissing);
                         bFail = true;

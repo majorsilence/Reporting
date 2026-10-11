@@ -106,7 +106,7 @@ namespace RdlEngine.Render.ExcelConverter
 			if(CurrentExcelTable.Table == null) {
 				return;
 			}
-			float rowHeight = (tr.CanGrow || tr.CanShrink) ? await tr.HeightOfRow(Report, g, row) : tr.Height.Points;
+			float rowHeight = (tr.CanGrow || tr.CanShrink) ? await tr.HeightOfRow(Report, g, row).ConfigureAwait(false) : tr.Height.Points;
 
 			var shiftingRows = Rows.Where(x => x.YPosition >= rowPosition);
 			ShiftBottomRows(shiftingRows, rowHeight);
@@ -114,12 +114,12 @@ namespace RdlEngine.Render.ExcelConverter
 			var currentRow = AddRow(rowPosition, rowHeight);
 			foreach(var cell in tr.TableCells.Items) {
 				var column = CurrentExcelTable.Table.TableColumns.Items[cell.ColIndex];
-				if(await column.IsHidden(Report, row))
+				if(await column.IsHidden(Report, row).ConfigureAwait(false))
 					continue;
 				var xPosition = CurrentExcelTable.Table.Left?.Points ?? 0;
 				for(int i = 0; i < cell.ColIndex; i++) {
 					var columnBefore = CurrentExcelTable.Table.TableColumns.Items[i];
-					if(await columnBefore.IsHidden(Report, row))
+					if(await columnBefore.IsHidden(Report, row).ConfigureAwait(false))
 						continue;
 					xPosition += columnBefore.Width.Points;
 				}
@@ -128,7 +128,7 @@ namespace RdlEngine.Render.ExcelConverter
 				if(cellTextBox == null || (cellTextBox as Textbox) == null) {
 					continue;
 				}
-				string value = await (cellTextBox as Textbox).RunText(Report, row);
+				string value = await (cellTextBox as Textbox).RunText(Report, row).ConfigureAwait(false);
 				ExcelCell currentCell = new ExcelCell(cellTextBox, value, currentRow, currentColumn);
 				currentCell.ExcelTable = CurrentExcelTable;
 				currentCell.OriginalWidth = column.Width.Points;
@@ -142,7 +142,7 @@ namespace RdlEngine.Render.ExcelConverter
 					currentCell.OriginalWidth = spanWidth;
 				}
 				currentCell.GrowedBottomPosition = rowPosition + rowHeight;
-                await SetCellStyle(currentCell, cellTextBox, row);
+                await SetCellStyle(currentCell, cellTextBox, row).ConfigureAwait(false);
 				Cells.Add(currentCell);
 			}
 
@@ -178,7 +178,7 @@ namespace RdlEngine.Render.ExcelConverter
 
 			float topPosition = reportItem.Top.Points;
 			float leftPosition = reportItem.Left.Points;
-			float height = reportItem.CanGrow ? await reportItem.RunTextCalcHeight(Report, g, row) : reportItem.Height.Points;
+			float height = reportItem.CanGrow ? await reportItem.RunTextCalcHeight(Report, g, row).ConfigureAwait(false) : reportItem.Height.Points;
 			float width = reportItem.Width.Points;
 
 			FillAbsolutePosition(reportItem, ref topPosition, ref leftPosition);
@@ -193,7 +193,7 @@ namespace RdlEngine.Render.ExcelConverter
 
 			ExcelCell currentCell = new ExcelCell(reportItem, value, currentRow, currentColumn);
 			currentCell.OriginalBottomPosition = OriginalBottomPosition;
-            await SetCellStyle(currentCell, reportItem, row);
+            await SetCellStyle(currentCell, reportItem, row).ConfigureAwait(false);
 			Cells.Add(currentCell);
 			currentCell.OriginalHeight = height;
 			currentCell.GrowedBottomPosition = topPosition + height;
@@ -203,7 +203,7 @@ namespace RdlEngine.Render.ExcelConverter
 		{
 			StyleInfo si = new StyleInfo();
 			if(reportItem.Style != null) {
-				var itemStyleInfo = await reportItem.Style.GetStyleInfo(Report, row);
+				var itemStyleInfo = await reportItem.Style.GetStyleInfo(Report, row).ConfigureAwait(false);
 				if(itemStyleInfo != null) {
 					si = itemStyleInfo;
 				}

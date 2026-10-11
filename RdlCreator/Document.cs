@@ -83,7 +83,7 @@ namespace Majorsilence.Reporting.RdlCreator
         public async Task<byte[]> Create()
         {
             using var ms = new MemoryStream();
-            await Create(ms);
+            await Create(ms).ConfigureAwait(false);
             return ms.ToArray();
         }
 
@@ -110,15 +110,15 @@ namespace Majorsilence.Reporting.RdlCreator
 
                 // Render via the RDL engine to a PDF byte stream
                 var create    = new RdlCreator.Create();
-                var fyiReport = await create.GenerateRdl(report);
+                var fyiReport = await create.GenerateRdl(report).ConfigureAwait(false);
                 using var ms  = new Majorsilence.Reporting.Rdl.MemoryStreamGen();
-                await fyiReport.RunGetData();
-                await fyiReport.RunRender(ms, Majorsilence.Reporting.Rdl.OutputPresentationType.PDF);
+                await fyiReport.RunGetData().ConfigureAwait(false);
+                await fyiReport.RunRender(ms, Rdl.OutputPresentationType.PDF).ConfigureAwait(false);
 
                 var pdf = ms.GetStream();
                 pdf.Position = 0;
                 using var pagePdf = new MemoryStream();
-                await pdf.CopyToAsync(pagePdf);
+                await pdf.CopyToAsync(pagePdf).ConfigureAwait(false);
                 merger.Add(pagePdf.ToArray());
             }
 

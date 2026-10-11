@@ -255,7 +255,7 @@ namespace Majorsilence.Reporting.Rdl
 
 			if (rl.MaxSeverity <= 4)	// don't do final pass if already have serious errors
 			{
-				await FinalPass(_ParseFolder);	// call final parser pass for expression resolution
+				await FinalPass(_ParseFolder).ConfigureAwait(false);	// call final parser pass for expression resolution
 			}
 
 			// Cleanup any dangling resources
@@ -280,35 +280,35 @@ namespace Majorsilence.Reporting.Rdl
 			_LUUser.Add("Language", new FunctionUserLanguage());
 			if (_CodeModules != null)
 			{
-                await _CodeModules.FinalPass();
+                await _CodeModules.FinalPass().ConfigureAwait(false);
 				_CodeModules.LoadModules();
 			}
 			if (_Classes != null)
 			{
-                await _Classes.FinalPass();
+                await _Classes.FinalPass().ConfigureAwait(false);
 				// _Classes.Load();
 			}
 			if (_Code != null)
 			{
-                await _Code.FinalPass();
+                await _Code.FinalPass().ConfigureAwait(false);
 				_CodeType = _Code.CodeType();
 			}
 
 			if (_ReportParameters != null)      // report parameters might be used in data source connection strings
-                await _ReportParameters.FinalPass();
+                await _ReportParameters.FinalPass().ConfigureAwait(false);
 			if (_DataSourcesDefn != null)
-                await _DataSourcesDefn.FinalPass();
+                await _DataSourcesDefn.FinalPass().ConfigureAwait(false);
 			if (_DataSetsDefn != null)
-				await _DataSetsDefn.FinalPass();
-            await _Body.FinalPass();
+				await _DataSetsDefn.FinalPass().ConfigureAwait(false);
+            await _Body.FinalPass().ConfigureAwait(false);
 			if (_PageHeader != null)
-                await _PageHeader.FinalPass();
+                await _PageHeader.FinalPass().ConfigureAwait(false);
 			if (_PageFooter != null)
-                await _PageFooter.FinalPass();
+                await _PageFooter.FinalPass().ConfigureAwait(false);
 			if (_EmbeddedImages != null)
-                await _EmbeddedImages.FinalPass();
+                await _EmbeddedImages.FinalPass().ConfigureAwait(false);
 			if (_Language != null)
-                await _Language.FinalPass();
+                await _Language.FinalPass().ConfigureAwait(false);
 
             _DataCache.TrimExcess();	// reduce size of array of expressions that cache data
 			return;
@@ -342,20 +342,20 @@ namespace Majorsilence.Reporting.Rdl
 			// Step 1- set the parameter values for the runtime
             if (parms != null && ReportParameters != null)
             {
-                await ReportParameters.SetRuntimeValues(rpt, parms);	// set the parameters
+                await ReportParameters.SetRuntimeValues(rpt, parms).ConfigureAwait(false);	// set the parameters
             }
 
 			// Step 2- prep the datasources (ie connect and execute the queries)
             if (this._DataSourcesDefn != null)
             {
-                await _DataSourcesDefn.ConnectDataSources(rpt);
+                await _DataSourcesDefn.ConnectDataSources(rpt).ConfigureAwait(false);
             }
 
 			// Step 3- obtain the data; applying filters
 			if (_DataSetsDefn != null)
 			{
 				ResetCachedData(rpt);
-				bRows = await _DataSetsDefn.GetData(rpt);
+				bRows = await _DataSetsDefn.GetData(rpt).ConfigureAwait(false);
 			}
 
 			// Step 4- cleanup any DB connections
@@ -400,19 +400,19 @@ namespace Majorsilence.Reporting.Rdl
 
 			if (ip.IsPagingNeeded())
 			{
-                await RunPage(ip);
+                await RunPage(ip).ConfigureAwait(false);
 			}
 			else
 			{
 				if (_PageHeader != null && !(ip is RenderXml))
-                    await _PageHeader.Run(ip, null);
-                await _Body.Run(ip, null);
+                    await _PageHeader.Run(ip, null).ConfigureAwait(false);
+                await _Body.Run(ip, null).ConfigureAwait(false);
 				if (_PageFooter != null && !(ip is RenderXml))
-                    await _PageFooter.Run(ip, null);
+                    await _PageFooter.Run(ip, null).ConfigureAwait(false);
 			}
 
 			if (_Subreport == null)
-				await ip.End();
+				await ip.End().ConfigureAwait(false);
 
 			if (_DataSourcesDefn != null)
 				_DataSourcesDefn.CleanUp(ip.Report());	// datasets may not have been cleaned up
@@ -427,20 +427,20 @@ namespace Majorsilence.Reporting.Rdl
 				pgs.AddPage(p);
 
                 // Create all the pages
-                await _Body.RunPage(pgs);
+                await _Body.RunPage(pgs).ConfigureAwait(false);
 
  				if (pgs.LastPage.IsEmpty()&& pgs.PageCount > 1)	// get rid of extraneous pages which
 					pgs.RemoveLastPage();			//   can be caused by region page break at end
 
 				// Now create the headers and footers for all the pages (as needed)
 				if (_PageHeader != null)
-                    await _PageHeader.RunPage(pgs);
+                    await _PageHeader.RunPage(pgs).ConfigureAwait(false);
 				if (_PageFooter != null)
-                    await _PageFooter.RunPage(pgs);
+                    await _PageFooter.RunPage(pgs).ConfigureAwait(false);
 
                 pgs.SortPageItems();             // Handle ZIndex ordering of pages
 
-                await ip.RunPages(pgs);
+                await ip.RunPages(pgs).ConfigureAwait(false);
 			}
 			finally
 			{
@@ -695,7 +695,7 @@ namespace Majorsilence.Reporting.Rdl
 				return ci.Name;				
 			}
 
-			return await _Language.EvaluateString(rpt, r);
+			return await _Language.EvaluateString(rpt, r).ConfigureAwait(false);
 		}
 
 		internal CodeModules CodeModules

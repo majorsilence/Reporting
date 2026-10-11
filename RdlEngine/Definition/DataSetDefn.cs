@@ -141,11 +141,11 @@ namespace Majorsilence.Reporting.Rdl
 		async override internal Task FinalPass()
 		{
 			if (_Query != null)         // query must be resolved before fields
-                await _Query.FinalPass();
+                await _Query.FinalPass().ConfigureAwait(false);
 			if (_Fields != null)
-                await _Fields.FinalPass();
+                await _Fields.FinalPass().ConfigureAwait(false);
 			if (_Filters != null)
-                await _Filters.FinalPass();
+                await _Filters.FinalPass().ConfigureAwait(false);
 			return;
 		}
 
@@ -163,13 +163,13 @@ namespace Majorsilence.Reporting.Rdl
             bool bRows = false;
 			if (_XmlRowData != null)
 			{		// Override the query and provide data from XML
-				string xdata = await GetDataFile(rpt, _XmlRowFile);
+				string xdata = await GetDataFile(rpt, _XmlRowFile).ConfigureAwait(false);
                 if (xdata == null)
                 {
                     xdata = _XmlRowData;					// didn't find any data
                 }
 
-				bRows = await _Query.GetData(rpt, xdata, _Fields, _Filters);	// get the data (and apply the filters
+				bRows = await _Query.GetData(rpt, xdata, _Fields, _Filters).ConfigureAwait(false);	// get the data (and apply the filters
 				return bRows;
 			}
 
@@ -178,7 +178,7 @@ namespace Majorsilence.Reporting.Rdl
                 return bRows;
             }
 
-			bRows = await _Query.GetData(rpt, this._Fields, _Filters);	// get the data (and apply the filters
+			bRows = await _Query.GetData(rpt, _Fields, _Filters).ConfigureAwait(false);	// get the data (and apply the filters
             return bRows;
 		}
 
@@ -205,7 +205,7 @@ namespace Majorsilence.Reporting.Rdl
 			try
 			{
 				fs = new StreamReader(fullpath);
-				d = await fs.ReadToEndAsync();
+				d = await fs.ReadToEndAsync().ConfigureAwait(false);
 			}
 			catch (FileNotFoundException fe)
 			{
@@ -227,23 +227,23 @@ namespace Majorsilence.Reporting.Rdl
 
 		internal async Task SetData(Report rpt, IDataReader dr)
 		{
-            await Query.SetData(rpt, dr, _Fields, _Filters);		// get the data (and apply the filters
+            await Query.SetData(rpt, dr, _Fields, _Filters).ConfigureAwait(false);		// get the data (and apply the filters
 		}
 
 		internal async Task SetData(Report rpt, DataTable dt)
 		{
-            await Query.SetData(rpt, dt, _Fields, _Filters);
+            await Query.SetData(rpt, dt, _Fields, _Filters).ConfigureAwait(false);
 		}
 
 		internal async Task SetData(Report rpt, XmlDocument xmlDoc)
 		{
-            await Query.SetData(rpt, xmlDoc, _Fields, _Filters);
+            await Query.SetData(rpt, xmlDoc, _Fields, _Filters).ConfigureAwait(false);
 		}
 
 		[RequiresUnreferencedCode("Reflects over user-provided object types to map fields; members may be trimmed")]
 		internal async Task SetData(Report rpt, IEnumerable ie)
 		{
-            await Query.SetData(rpt, ie, _Fields, _Filters);
+            await Query.SetData(rpt, ie, _Fields, _Filters).ConfigureAwait(false);
 		}
 
 		internal void ResetHideDuplicates(Report rpt)

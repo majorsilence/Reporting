@@ -56,7 +56,7 @@ namespace Majorsilence.Reporting.Rdl
 				{
 					saver=r;
 				}
-				v = await _Expr.Evaluate(rpt, saver);
+				v = await _Expr.Evaluate(rpt, saver).ConfigureAwait(false);
 				if (bSave)
 					SetValue(rpt, v);
 			}
@@ -65,36 +65,36 @@ namespace Majorsilence.Reporting.Rdl
 
 		public override async Task<bool> EvaluateBoolean(Report rpt,Row row)
 		{
-			object result = await Evaluate(rpt, row);
+			object result = await Evaluate(rpt, row).ConfigureAwait(false);
 			return Convert.ToBoolean(result);
 		}
 		
 		public async Task<double> EvaluateDouble(Report rpt, Row row)
 		{
-			object result = await Evaluate(rpt, row);
+			object result = await Evaluate(rpt, row).ConfigureAwait(false);
 			return Convert.ToDouble(result);
 		}
 		
 		public async Task<decimal> EvaluateDecimal(Report rpt, Row row)
 		{
-			object result = await Evaluate(rpt, row);
+			object result = await Evaluate(rpt, row).ConfigureAwait(false);
 			return Convert.ToDecimal(result);
 		}
 
         public async Task<int> EvaluateInt32(Report rpt, Row row)
         {
-            return Convert.ToInt32(await Evaluate(rpt, row));
+            return Convert.ToInt32(await Evaluate(rpt, row).ConfigureAwait(false));
         }
 
 		public async Task<string> EvaluateString(Report rpt, Row row)
 		{
-			object result = await Evaluate(rpt, row);
+			object result = await Evaluate(rpt, row).ConfigureAwait(false);
 			return Convert.ToString(result);
 		}
 
 		public async Task<DateTime> EvaluateDateTime(Report rpt, Row row)
 		{
-			object result = await Evaluate(rpt, row);
+			object result = await Evaluate(rpt, row).ConfigureAwait(false);
 			return Convert.ToDateTime(result);
 		}
 		private object GetValue(Report rpt)

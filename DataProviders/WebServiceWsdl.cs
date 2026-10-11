@@ -123,10 +123,10 @@ namespace Majorsilence.Reporting.Data
                 using (HttpClient client = new HttpClient())
                 {
                     client.AddMajorsilenceReportingUserAgent();
-                    HttpResponseMessage response = await client.GetAsync(fname);
+                    HttpResponseMessage response = await client.GetAsync(fname).ConfigureAwait(false);
                     if (response.IsSuccessStatusCode)
                     {
-                        strm = await response.Content.ReadAsStreamAsync();
+                        strm = await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
                     }
                     else
                     {

@@ -11,20 +11,41 @@ Blocking on async work (`Task.Run(...).GetAwaiter().GetResult()`, `.Result`, `.W
 | `MatrixEntryComparer` | blocked per comparison | `MatrixEntrySort.SortAsync`; `Matrix.RunBuildSet` awaits `PrepareSortedDataAsync` once after building, so the many synchronous matrix methods only read sorted lists |
 | `ChartBase` constructor | blocked on the tooltip expressions | `InitAsync()` awaited from `Chart.RunChartBuild` |
 | `DynamicExpression` constructor | blocked on parsing | `CreateAsync` factory |
+| `Report.ClientLanguage` | getter ran the Language expression through `Task.Run(...).GetResult()` | `GetClientLanguageAsync()` / `SetClientLanguage()`; the embedded Code's synchronous `User.Language` reads a value resolved at the start of each run |
+| `ReportItem.DataElementOutput` | getter blocked on `IsConstant()` | `Textbox.FinalPass` awaits it once |
+| `MhtWebFile.ToString()` | started a download and blocked on it | no longer downloads (every caller awaits `Download()` first) |
+| Designer `SelectedStyle`, save and exit menus | blocked | async (`GetSelectedStyleAsync`, `FileSaveAsync`, `OkToCloseAsync`); `bSuppressChange` no longer left set by an early return |
+| `PdfSigner` timestamp request | blocked on `PostAsync` | `HttpClient.Send` (net5+) |
 | `JsonDataReader`, `TxtDataReader`, `MultipleStreamReader` | wrapped async stream opening / `ReadLineAsync` in `Task.Run(...).GetResult()` | synchronous I/O where the contract is synchronous (`IDataReader`, `TextReader.ReadLine`): files were already sync streams, HTTP uses `HttpClient.Send` / `ReadAsStream` |
 
 Measured effect: WorldFacts 50 -> 44 ms and 9.5 -> 8.0 MB per render; thread-pool work items per WorldFacts render fell from ~3,700 to ~15 (0 for the tiny and matrix reports); `-- profile` prints the count.
 
-## Remaining (not done)
-| Where | What it needs | Public API? |
-|---|---|---|
-| `ReportParameter.cs` (5 sites: `DefaultValue`, `DisplayValues`, `DataValues`, `RuntimeValue`, `RuntimeValues` on the report-parameter wrapper) | async methods (`GetDefaultValueAsync()` ...) next to the properties; properties kept as a documented blocking compatibility path. ~50 call sites in the viewer, designer and ASP projects to move over | **Yes** (additive). Decision needed |
-| `Report.ClientLanguage` getter (`Report.cs:733`) | evaluate the language expression once, awaited, when the run starts (it has no row), then the getter returns the stored value | Internal; 28 references |
-| `ReportItem.DataElementOutput` getter (`ReportItem.cs:895`) | resolve once in `FinalPass` (awaited) and store | Internal |
-| `MhtWebFile` download (`MhtWebFile.cs:514`) | MHT/web-archive export only; make the download path async or use `HttpClient.Send` | Internal |
-| UI only: `RdlDesign/MDIChild.cs:182` (`FileSaveAs`), `RdlDesign/DesignCtl.cs:1015` (`GetStyleInfo`) | event-handler/command plumbing; belongs with a designer pass, not the engine | Internal |
+## Public API: `UserReportParameter`
+`DefaultValue`, `DisplayValues`, `DataValues`, `Value` and `Values` blocked the calling thread. They are marked `[Obsolete]` (they still work) and the replacements are `GetDefaultValueAsync()`, `GetDisplayValuesAsync()`, `GetDataValuesAsync()`, `GetValueAsync()`, `GetValuesAsync()`, `SetValueAsync()` and `SetValuesAsync()`. Every caller in this repository (Subreport, ASP.NET Core, MCP, the WinForms-style, Avalonia and Gtk3 viewers, RdlDesktop) uses the async methods; `UserReportParameterAsyncTests` covers them.
 
-`RdlViewer` already replaced its blocking calls (the remaining hits are comments).
+## `ConfigureAwait(false)`
+All awaits in `RdlEngine`, `DataProviders` and `RdlCreator` (~2,200) now use `ConfigureAwait(false)`, applied with the CA2007 code fix, and CA2007 is a warning for those projects in `.editorconfig` so new code is held to it. UI, ASP.NET Core and command-line projects are deliberately not covered: a UI project needs to resume on its UI thread, and ASP.NET Core has no synchronization context. `SynchronizationContextTests` renders reports under a counting context and requires zero posts back to it (WorldFacts posted 6 times before the pass). The one event the engine raises, `SubreportDataRetrieval`, used to arrive on the UI thread by accident of the captured context; the WinForms-style and Avalonia viewers now marshal it back to the UI thread explicitly.
+
+## Remaining blocking calls (what is left, and why)
+| Where | Why it stays |
+|---|---|
+| `UserReportParameter` `DefaultValue` / `DisplayValues` / `DataValues` / `Value` / `Values`, `Report.ClientLanguage`, `DesignCtl` / `RdlEditPreview` / `MDIChild` `SelectedStyle`, `MDIChild.FileSave` / `OkToClose` | Public compatibility members, all `[Obsolete]` with an async replacement; nothing in this repository calls them any more (the tests that pin their behaviour use a pragma) |
+| *(none)* | The report designer and map designer closing handlers are async now (cancel, ask, close again; see below) |
+| `RdlNative` C entry points (`rdl_report_render_file`, `..._buffer`) | The C ABI is synchronous by definition: the Python / PHP / Ruby / Rust caller is waiting for the return value, on a thread with no `SynchronizationContext` |
+| `RdlReader.Main` silent print | Process entry point, no UI loop or context yet, and the thread must stay the STA thread that runs the application |
+| `PdfSigner` on netstandard2.0 | `HttpClient.Send` needs .NET 5+; net6.0 and later use it |
+| Benchmark harness (`Program.cs`, `ConcurrencyBenchmarks`) | Deliberate: the concurrency benchmark measures render CPU scaling on blocked threads |
+
+## Behaviour changes to be aware of
+Things that are observably different, in the order they matter to an application:
+1. **Engine continuations no longer resume on the caller's context** (`ConfigureAwait(false)`). Code the engine runs after an await may be on a thread-pool thread: expressions, the report's embedded Code, custom report items, and the engine's one event, `SubreportDataRetrieval`. The WinForms-style and Avalonia viewers marshal that event back to the UI thread; an application that subscribes to `Report.SubreportDataRetrieval` directly now receives it on whatever thread is running the report, and must marshal to its UI itself if it touches controls.
+2. **Sort expressions are evaluated once per row, not once per comparison.** Table, list, group, matrix and Top N/Bottom N sorts evaluate each key once, then sort. The order produced is the same for any deterministic expression. An expression with side effects or a changing value (`Rnd()`, `Now()`, a custom function with state) used to be re-evaluated on every comparison, which could not give a consistent order anyway.
+3. **`MhtWebFile.ToString()` no longer downloads.** An undownloaded file reads as an empty string. Nothing in the engine reaches this (it awaits `Download()` first); the class is internal.
+4. **Obsolete members still block** (`UserReportParameter` value members, `Report.ClientLanguage`, the designer's `SelectedStyle`, `MDIChild.FileSave()` / `OkToClose()`). They behave as before; new code should use the async methods.
+5. **Report designer: closing.** `FormClosing` stays synchronous, so a modified report that is closed cancels that close, asks, and closes itself again once answered. The main window, when closed with modified reports open, asks about all of them once and then closes everything (previously each report asked as it closed). A report answered "No" (discard) is no longer asked a second time on exit. The map designer works the same way for its one document.
+6. **`Report.ClientLanguage` is resolved at the start of `RunGetData` / `RunRender`** for the report's embedded Code (`User.Language`); a change to the report's Language expression's inputs between those calls and a later code read is not seen until the next run.
+7. **ASP.NET Core:** `ReportHelper.GetParameterHtml` and the page builder are async; the HTML produced is the same.
+8. **PDF** (earlier round, already merged): zlib level 6 instead of 9, so the compressed bytes differ while inflating to the same content.
 
 ## Findings along the way (existing behaviour, not changed)
 - Matrix rows sorted on an aggregate such as `Sum(...)` keep first-met order: the sort expression is evaluated against the entry's first row. Plain sort expressions work. Pinned in `AsyncSortTests`.

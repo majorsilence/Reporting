@@ -32,7 +32,7 @@ namespace Majorsilence.Reporting.Rdl
 		internal static async Task<DynamicExpression> CreateAsync(Report rpt, ReportLink p, string expr, Row row)
 		{
 			var de = new DynamicExpression(expr, p);
-			de._Type = await de.DoParse(rpt);
+			de._Type = await de.DoParse(rpt).ConfigureAwait(false);
 			return de;
 		}
 
@@ -108,7 +108,7 @@ namespace Majorsilence.Reporting.Rdl
 
 			try 
 			{
-				_Expr = await p.Parse(lu, _Source);
+				_Expr = await p.Parse(lu, _Source).ConfigureAwait(false);
 			}
 			catch (Exception e)
 			{
@@ -120,7 +120,7 @@ namespace Majorsilence.Reporting.Rdl
 			// Optimize removing any expression that always result in a constant
 			try
 			{
-				_Expr = await _Expr.ConstantOptimization();
+				_Expr = await _Expr.ConstantOptimization().ConfigureAwait(false);
 			}
 			catch(Exception ex)
 			{
@@ -176,7 +176,7 @@ namespace Majorsilence.Reporting.Rdl
 
 		public async Task<bool> IsConstant()
 		{
-			return await _Expr.IsConstant();
+			return await _Expr.IsConstant().ConfigureAwait(false);
 		}
 
 		public Task<IExpr> ConstantOptimization()
@@ -188,7 +188,7 @@ namespace Majorsilence.Reporting.Rdl
 		{
 			try 
 			{
-				return await _Expr.Evaluate(rpt, row);
+				return await _Expr.Evaluate(rpt, row).ConfigureAwait(false);
 			}
 			catch (Exception e)
 			{
@@ -207,7 +207,7 @@ namespace Majorsilence.Reporting.Rdl
 		{
 			try 
 			{
-				return await _Expr.EvaluateString(rpt, row);
+				return await _Expr.EvaluateString(rpt, row).ConfigureAwait(false);
 			}
 			catch (Exception e)
 			{	
@@ -221,7 +221,7 @@ namespace Majorsilence.Reporting.Rdl
 		{
 			try 
 			{
-				return await _Expr.EvaluateDouble(rpt, row);
+				return await _Expr.EvaluateDouble(rpt, row).ConfigureAwait(false);
 			}
 			catch (Exception e)
 			{	
@@ -235,7 +235,7 @@ namespace Majorsilence.Reporting.Rdl
 		{
 			try 
 			{
-				return await _Expr.EvaluateDecimal(rpt, row);
+				return await _Expr.EvaluateDecimal(rpt, row).ConfigureAwait(false);
 			}
 			catch (Exception e)
 			{	
@@ -249,7 +249,7 @@ namespace Majorsilence.Reporting.Rdl
         {
             try
             {
-                return await _Expr.EvaluateInt32(rpt, row);
+                return await _Expr.EvaluateInt32(rpt, row).ConfigureAwait(false);
             }
             catch (Exception e)
             {
@@ -263,7 +263,7 @@ namespace Majorsilence.Reporting.Rdl
 		{
 			try 
 			{
-				return await _Expr.EvaluateDateTime(rpt, row);
+				return await _Expr.EvaluateDateTime(rpt, row).ConfigureAwait(false);
 			}
 			catch (Exception e)
 			{	
@@ -277,7 +277,7 @@ namespace Majorsilence.Reporting.Rdl
 		{
 			try 
 			{
-                return await _Expr.EvaluateBoolean(rpt, row);
+                return await _Expr.EvaluateBoolean(rpt, row).ConfigureAwait(false);
 			}
 			catch (Exception e)
 			{	

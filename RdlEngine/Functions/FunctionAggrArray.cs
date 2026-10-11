@@ -50,7 +50,7 @@ namespace Majorsilence.Reporting.Rdl
                 ArrayList ar = new ArrayList(Math.Max(1,re.LastRow - re.FirstRow + 1));
                 foreach (Row r in re)
                 {
-                    temp = await _Expr.Evaluate(rpt, r);
+                    temp = await _Expr.Evaluate(rpt, r).ConfigureAwait(false);
                     ar.Add(temp);
                 }
 

@@ -45,7 +45,7 @@ namespace Majorsilence.Reporting.Rdl
 		
 		async override internal Task FinalPass()
 		{
-            await _TableRows.FinalPass();
+            await _TableRows.FinalPass().ConfigureAwait(false);
 
 			OwnerReport.DataCache.Add(this);
 			return;
@@ -53,7 +53,7 @@ namespace Majorsilence.Reporting.Rdl
 
 		internal async Task Run(IPresent ip, Row row)
 		{
-            await _TableRows.Run(ip, row);
+            await _TableRows.Run(ip, row).ConfigureAwait(false);
 			return;
 		}
 
@@ -75,19 +75,19 @@ namespace Majorsilence.Reporting.Rdl
 			// page can genuinely help with. Otherwise, render on this page as-is and let
 			// the content overflow rather than loop forever.
 			bool currentPageAlreadyHasContent = !pgs.CurrentPage.IsEmpty();
-			float height = p.YOffset + await HeightOfRows(pgs, row);
-            height += await OwnerTable.GetPageFooterHeight(pgs, row);
+			float height = p.YOffset + await HeightOfRows(pgs, row).ConfigureAwait(false);
+            height += await OwnerTable.GetPageFooterHeight(pgs, row).ConfigureAwait(false);
 			if (height > pgs.BottomOfPage && currentPageAlreadyHasContent)
 			{
 				Table t = OwnerTable;
-                await t.RunPageFooter(pgs, row, false);
+                await t.RunPageFooter(pgs, row, false).ConfigureAwait(false);
 				p = t.RunPageNew(pgs, p);
-                await t.RunPageHeader(pgs, row, false, null);
+                await t.RunPageHeader(pgs, row, false, null).ConfigureAwait(false);
 				if (this.RepeatOnNewPage)
 					return;		// should already be on the page
 			}
 
-            await _TableRows.RunPage(pgs, row);
+            await _TableRows.RunPage(pgs, row).ConfigureAwait(false);
 			wc.OutputRow = row;
 			wc.OutputPage = pgs.CurrentPage;
 			wc.OutputXOffset = pgs.CurrentPage.XOffset;
@@ -116,7 +116,7 @@ namespace Majorsilence.Reporting.Rdl
  
 		internal async Task<float> HeightOfRows(Pages pgs, Row r)
 		{
-			return await _TableRows.HeightOfRows(pgs, r);
+			return await _TableRows.HeightOfRows(pgs, r).ConfigureAwait(false);
 		}
 
 		internal bool RepeatOnNewPage

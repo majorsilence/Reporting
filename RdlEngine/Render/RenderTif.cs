@@ -102,7 +102,7 @@ namespace Majorsilence.Reporting.Rdl
 
                 g.FillRectangle(Draw2.Brushes.White, 0F, 0F, (float)bm.Width, (float)bm.Height);
 
-                await ProcessPage(g, p);
+                await ProcessPage(g, p).ConfigureAwait(false);
 
                 tiffWriter.WritePage(skBitmap, _RenderColor, DpiX, DpiY);
 
@@ -119,7 +119,7 @@ namespace Majorsilence.Reporting.Rdl
             {
                 if (pi is PageTextHtml)
                 {   // PageTextHtml is actually a composite object (just like a page)
-                    await ProcessHtml(pi as PageTextHtml, g);
+                    await ProcessHtml(pi as PageTextHtml, g).ConfigureAwait(false);
                     continue;
                 }
 
@@ -183,8 +183,8 @@ namespace Majorsilence.Reporting.Rdl
 
         private async Task ProcessHtml(PageTextHtml pth, Draw2.Graphics g)
         {
-            await pth.Build(g);            // Builds the subobjects that make up the html
-            await this.ProcessPage(g, pth);
+            await pth.Build(g).ConfigureAwait(false);            // Builds the subobjects that make up the html
+            await ProcessPage(g, pth).ConfigureAwait(false);
         }
 
         private void DrawLine(System.Drawing.Color c, BorderStyleEnum bs, float w, Draw2.Graphics g, float x, float y, float x2, float y2)

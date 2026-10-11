@@ -96,17 +96,17 @@ namespace Majorsilence.Reporting.Rdl
 					foreach (System.Text.RegularExpressions.Match m in
 						System.Text.RegularExpressions.Regex.Matches(src, @"Fields!(\w+)"))
 						if (byName.TryGetValue(m.Groups[1].Value, out Field dep) && dep != f)
-							await Visit(dep, path);
+							await Visit(dep, path).ConfigureAwait(false);
 				path.Remove(f);
 				if (done.Add(f))
-					await f.FinalPass();
+					await f.FinalPass().ConfigureAwait(false);
 			}
 
 			foreach (Field f in _Items.Values)
 				if (f.Value == null && done.Add(f))
-					await f.FinalPass();
+					await f.FinalPass().ConfigureAwait(false);
 			foreach (Field f in _Items.Values)
-				await Visit(f, new System.Collections.Generic.HashSet<Field>());
+				await Visit(f, new System.Collections.Generic.HashSet<Field>()).ConfigureAwait(false);
 			return;
 		}
 

@@ -61,7 +61,7 @@ namespace Majorsilence.Reporting.Rdl
 		async override internal Task FinalPass()
 		{
 			if (_Hidden != null)
-                await _Hidden.FinalPass();
+                await _Hidden.FinalPass().ConfigureAwait(false);
 			return;
 		}
 
@@ -76,7 +76,7 @@ namespace Majorsilence.Reporting.Rdl
 			if (_Hidden == null)
 				return false;
 
-			return await _Hidden.EvaluateBoolean(rpt, r);
+			return await _Hidden.EvaluateBoolean(rpt, r).ConfigureAwait(false);
 		}
 
 		internal string ToggleItem

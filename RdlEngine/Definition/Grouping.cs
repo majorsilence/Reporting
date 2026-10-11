@@ -156,17 +156,17 @@ namespace Majorsilence.Reporting.Rdl
 		async override internal Task FinalPass()
 		{
 			if (_Label != null)
-                await _Label.FinalPass();
+                await _Label.FinalPass().ConfigureAwait(false);
 			if (_GroupExpressions != null)
-                await _GroupExpressions.FinalPass();
+                await _GroupExpressions.FinalPass().ConfigureAwait(false);
 			if (_Custom != null)
-                await _Custom.FinalPass();
+                await _Custom.FinalPass().ConfigureAwait(false);
 			if (_Filters != null)
-                await _Filters.FinalPass();
+                await _Filters.FinalPass().ConfigureAwait(false);
 			if (_ParentGroup != null)
-                await _ParentGroup.FinalPass();
+                await _ParentGroup.FinalPass().ConfigureAwait(false);
             if (_PageBreakCondition != null)
-                await _PageBreakCondition.FinalPass();
+                await _PageBreakCondition.FinalPass().ConfigureAwait(false);
 
             // Determine if group is defined inside of a Matrix;  these get
             //   different runtime expression handling in FunctionAggr
@@ -240,7 +240,7 @@ namespace Majorsilence.Reporting.Rdl
         {
             bool result;
             if (_PageBreakCondition != null)
-                result = await _PageBreakCondition.EvaluateBoolean(r, row);
+                result = await _PageBreakCondition.EvaluateBoolean(r, row).ConfigureAwait(false);
             else
                 result = SeMancaDefinizione;
             return result;

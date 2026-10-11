@@ -34,24 +34,24 @@ namespace Majorsilence.Reporting.Rdl
 		// 
 		public async Task<object> Evaluate(Report rpt, Row row)
 		{
-			return await EvaluateString(rpt, row);
+			return await EvaluateString(rpt, row).ConfigureAwait(false);
 		}
 
 		public async Task<bool> IsConstant()
 		{
-			if (await _Formatee.IsConstant())
-				return await _Format.IsConstant();
+			if (await _Formatee.IsConstant().ConfigureAwait(false))
+				return await _Format.IsConstant().ConfigureAwait(false);
 
 			return false;
 		}
 	
 		public async Task<IExpr> ConstantOptimization()
 		{
-			_Formatee = await _Formatee.ConstantOptimization();
-			_Format = await _Format.ConstantOptimization();
-			if (await _Formatee.IsConstant() && await _Format.IsConstant())
+			_Formatee = await _Formatee.ConstantOptimization().ConfigureAwait(false);
+			_Format = await _Format.ConstantOptimization().ConfigureAwait(false);
+			if (await _Formatee.IsConstant().ConfigureAwait(false) && await _Format.IsConstant().ConfigureAwait(false))
 			{
-				string s = await EvaluateString(null, null);
+				string s = await EvaluateString(null, null).ConfigureAwait(false);
 				return new ConstantString(s);
 			}
 
@@ -60,36 +60,36 @@ namespace Majorsilence.Reporting.Rdl
 		
 		public async Task<bool> EvaluateBoolean(Report rpt, Row row)
 		{
-			string result = await EvaluateString(rpt, row);
+			string result = await EvaluateString(rpt, row).ConfigureAwait(false);
 
 			return Convert.ToBoolean(result);
 		}
 		
 		public async Task<double> EvaluateDouble(Report rpt, Row row)
 		{
-			string result = await EvaluateString(rpt, row);
+			string result = await EvaluateString(rpt, row).ConfigureAwait(false);
 
 			return Convert.ToDouble(result);
 		}
 		
 		public async Task<decimal> EvaluateDecimal(Report rpt, Row row)
 		{
-			string result = await EvaluateString(rpt, row);
+			string result = await EvaluateString(rpt, row).ConfigureAwait(false);
 			return Convert.ToDecimal(result);
 		}
 
         public async Task<int> EvaluateInt32(Report rpt, Row row)
         {
-            string result = await EvaluateString(rpt, row);
+            string result = await EvaluateString(rpt, row).ConfigureAwait(false);
             return Convert.ToInt32(result);
         }
 
 		public async Task<string> EvaluateString(Report rpt, Row row)
 		{
-			object o = await _Formatee.Evaluate(rpt, row);
+			object o = await _Formatee.Evaluate(rpt, row).ConfigureAwait(false);
 			if (o == null)
 				return null;
-			string format = await _Format.EvaluateString(rpt, row);
+			string format = await _Format.EvaluateString(rpt, row).ConfigureAwait(false);
 			if (format == null)
 				return o.ToString();	// just return string version of object
 
@@ -100,7 +100,7 @@ namespace Majorsilence.Reporting.Rdl
 				// that locale-sensitive formats (C, N, P, etc.) honour the RDL <Language> element
 				// instead of falling back to the ambient/thread culture (which is the invariant
 				// culture -- generic "¤" currency symbol -- in many server/container deployments).
-				string language = rpt != null ? await rpt.ReportDefinition.EvalLanguage(rpt, row) : null;
+				string language = rpt != null ? await rpt.ReportDefinition.EvalLanguage(rpt, row).ConfigureAwait(false) : null;
 				result = Style.FormatValue(o, Convert.GetTypeCode(o), format, language);
 			}
 			catch (Exception ex) 		// invalid format string specified
@@ -113,7 +113,7 @@ namespace Majorsilence.Reporting.Rdl
 
 		public async Task<DateTime> EvaluateDateTime(Report rpt, Row row)
 		{
-			string result = await EvaluateString(rpt, row);
+			string result = await EvaluateString(rpt, row).ConfigureAwait(false);
 			return Convert.ToDateTime(result);
 		}
 	}

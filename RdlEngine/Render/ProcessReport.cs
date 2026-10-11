@@ -62,9 +62,9 @@ namespace Majorsilence.Reporting.Rdl
 		// Run the report passing the parameter values and the output
 		public async Task Run(IDictionary parms, OutputPresentationType type)
 		{
-            await r.RunGetData(parms);
+            await r.RunGetData(parms).ConfigureAwait(false);
 
-            await r.RunRender(_sg, type);
+            await r.RunRender(_sg, type).ConfigureAwait(false);
 
 			return;
 		}

@@ -78,7 +78,7 @@ namespace Majorsilence.Reporting.Rdl
 
         public async Task Textbox(Textbox tb, string t, Row r)
         {
-            object value = await tb.Evaluate(report, r);
+            object value = await tb.Evaluate(report, r).ConfigureAwait(false);
             tw.Write(value);
         }	
         

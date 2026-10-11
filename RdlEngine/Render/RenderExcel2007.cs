@@ -126,8 +126,8 @@ namespace Majorsilence.Reporting.Rdl
 
         public async Task Textbox(Textbox tb, string t, Row row)
         {
-            if (!await tb.IsHidden(report, row))
-                await excelBuilder.AddTextbox(tb, t, row);
+            if (!await tb.IsHidden(report, row).ConfigureAwait(false))
+                await excelBuilder.AddTextbox(tb, t, row).ConfigureAwait(false);
         }
 
         public Task DataRegionNoRows(DataRegion d, string noRowsMsg) => Task.CompletedTask;
@@ -139,7 +139,7 @@ namespace Majorsilence.Reporting.Rdl
 
         public async Task<bool> TableStart(Table t, Row row)
         {
-            if (t.Visibility == null || !await t.Visibility.IsHidden(report, row))
+            if (t.Visibility == null || !await t.Visibility.IsHidden(report, row).ConfigureAwait(false))
             {
                 excelBuilder.AddTable(t);
                 return true;
@@ -157,7 +157,7 @@ namespace Majorsilence.Reporting.Rdl
         public void TableHeaderEnd(Header h, Row row) { }
 
         public async Task TableRowStart(TableRow tr, Row row)
-            => await excelBuilder.AddRow(tr, row);
+            => await excelBuilder.AddRow(tr, row).ConfigureAwait(false);
 
         public void TableRowEnd(TableRow tr, Row row) { }
         public Task TableCellStart(TableCell t, Row row) => Task.CompletedTask;
@@ -174,7 +174,7 @@ namespace Majorsilence.Reporting.Rdl
         public Task MatrixEnd(Matrix m, Row r) => Task.CompletedTask;
         public async Task Chart(Chart c, Row row, ChartBase cb)
         {
-            if (c.Visibility != null && await c.Visibility.IsHidden(report, row))
+            if (c.Visibility != null && await c.Visibility.IsHidden(report, row).ConfigureAwait(false))
                 return;
             using var ms = new MemoryStream();
             cb.Save(report, ms, ImageFormat.Png);
@@ -183,12 +183,12 @@ namespace Majorsilence.Reporting.Rdl
 
         public async Task Image(Image i, Row r, string mimeType, Stream ioin)
         {
-            if (i.Visibility == null || !await i.Visibility.IsHidden(report, r))
+            if (i.Visibility == null || !await i.Visibility.IsHidden(report, r).ConfigureAwait(false))
             {
                 byte[] data;
                 using (var ms = new MemoryStream())
                 {
-                    await ioin.CopyToAsync(ms);
+                    await ioin.CopyToAsync(ms).ConfigureAwait(false);
                     data = ms.ToArray();
                 }
                 excelBuilder.AddImage(i, data);
@@ -199,9 +199,9 @@ namespace Majorsilence.Reporting.Rdl
         {
             float borderWidth = 1;
             if (l.Style.BorderWidth != null)
-                borderWidth = await l.Style.BorderWidth.EvalDefault(report, row);
+                borderWidth = await l.Style.BorderWidth.EvalDefault(report, row).ConfigureAwait(false);
             else if (l.Style.BorderStyle != null)
-                borderWidth = (float)await l.Style.BorderStyle.EvalDefault(report, row);
+                borderWidth = (float)await l.Style.BorderStyle.EvalDefault(report, row).ConfigureAwait(false);
             excelBuilder.AddLine(l, borderWidth);
         }
 

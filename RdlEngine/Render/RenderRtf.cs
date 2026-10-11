@@ -91,7 +91,7 @@ namespace Majorsilence.Reporting.Rdl
 		{
             TextWriter ftw = _sg.GetTextWriter();	// the final text writer location
 
-            await ftw.WriteAsync(@"{\rtf1\ansi");      // start of the rtf file
+            await ftw.WriteAsync(@"{\rtf1\ansi").ConfigureAwait(false);      // start of the rtf file
 
             // information group
             PutInformationGroup(ftw);
@@ -251,7 +251,7 @@ namespace Majorsilence.Reporting.Rdl
 
 		public async Task Textbox(Textbox tb, string t, Row row)
 		{
-            if (await tb.IsHtml(this.r, row))		    
+            if (await tb.IsHtml(r, row).ConfigureAwait(false))		    
             {                                   // just do escape chars > 128?
                 t = RtfAnsi(t);
             }
@@ -266,7 +266,7 @@ namespace Majorsilence.Reporting.Rdl
             if (t != "")
             {
                 tw.Write("{");
-                await DoStyle(tb.Style, row);
+                await DoStyle(tb.Style, row).ConfigureAwait(false);
                 tw.Write(t);
                 tw.Write("}");
             }
@@ -328,7 +328,7 @@ namespace Majorsilence.Reporting.Rdl
             if (style == null)
                 return;
 
-            StyleInfo si = await style.GetStyleInfo(r, row);
+            StyleInfo si = await style.GetStyleInfo(r, row).ConfigureAwait(false);
 
 //            tw.Write(@"\plain");        // reset current attributes
 
@@ -373,7 +373,7 @@ namespace Majorsilence.Reporting.Rdl
 
 			bool bTableCell = d.Parent.Parent.GetType() == typeof(TableCell);
 
-            await DoStyle(d.Style, null);
+            await DoStyle(d.Style, null).ConfigureAwait(false);
             tw.Write(noRowsMsg);
 			if (bTableCell)
 			{
@@ -477,7 +477,7 @@ namespace Majorsilence.Reporting.Rdl
                     ReportItem ri = tr.TableCells.Items[ci].ReportItems[0];
                     if (ri.Style != null)
                     {
-                        StyleInfo si = await ri.Style.GetStyleInfo(r, row);
+                        StyleInfo si = await ri.Style.GetStyleInfo(r, row).ConfigureAwait(false);
                         border = string.Format(@"\clbrdrt\{0}\clbrdrl\{1}\clbrdrb\{2}\clbrdrr\{3}",
                             GetBorderStyle(si.BStyleTop),
                             GetBorderStyle(si.BStyleLeft),
@@ -587,7 +587,7 @@ namespace Majorsilence.Reporting.Rdl
                 string border;
                 if (ri != null && ri.Style != null)
                 {
-                    StyleInfo si = await ri.Style.GetStyleInfo(this.r, r);
+                    StyleInfo si = await ri.Style.GetStyleInfo(this.r, r).ConfigureAwait(false);
                     border = string.Format(@"\clbrdrt\{0}\clbrdrl\{1}\clbrdrb\{2}\clbrdrr\{3}",
                         GetBorderStyle(si.BStyleTop),
                         GetBorderStyle(si.BStyleLeft),

@@ -64,7 +64,7 @@ namespace Majorsilence.Reporting.Rdl
 		async override internal Task FinalPass()
 		{
 			if (_ConnectString != null)
-                await _ConnectString.FinalPass();
+                await _ConnectString.FinalPass().ConfigureAwait(false);
 			return;
 		}
 
@@ -76,7 +76,7 @@ namespace Majorsilence.Reporting.Rdl
 
 		internal async Task<string> Connectstring(Report rpt)
 		{
-			return await _ConnectString.EvaluateString(rpt, null);
+			return await _ConnectString.EvaluateString(rpt, null).ConfigureAwait(false);
 		}
 
 		internal string ConnectstringValue

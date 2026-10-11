@@ -107,13 +107,13 @@ namespace Majorsilence.Reporting.Rdl
         // Handle parsing of function in final pass
         async override internal Task FinalPass()
         {
-            await base.FinalPass();
+            await base.FinalPass().ConfigureAwait(false);
 
-            await _Value.FinalPass();
+            await _Value.FinalPass().ConfigureAwait(false);
             if (_MIMEType != null)
-                await _MIMEType.FinalPass();
+                await _MIMEType.FinalPass().ConfigureAwait(false);
 
-            _ConstantImage = await this.IsConstant();
+            _ConstantImage = await IsConstant().ConfigureAwait(false);
 
             return;
         }
@@ -122,9 +122,9 @@ namespace Majorsilence.Reporting.Rdl
         async Task<bool> IsConstant()
         {
 
-            if (await _Value.IsConstant())
+            if (await _Value.IsConstant().ConfigureAwait(false))
             {
-                if (_MIMEType == null || await _MIMEType.IsConstant())
+                if (_MIMEType == null || await _MIMEType.IsConstant().ConfigureAwait(false))
                 {
                     //					if (this.Style == null || this.Style.ConstantStyle)
                     //						return true;
@@ -136,15 +136,15 @@ namespace Majorsilence.Reporting.Rdl
 
         async override internal Task Run(IPresent ip, Row row)
         {
-            await base.Run(ip, row);
+            await base.Run(ip, row).ConfigureAwait(false);
 
             string mtype = null;
             Stream strm = null;
             try
             {
-                (strm, mtype) = await GetImageStream(ip.Report(), row);
+                (strm, mtype) = await GetImageStream(ip.Report(), row).ConfigureAwait(false);
 
-                await ip.Image(this, row, mtype, strm);
+                await ip.Image(this, row, mtype, strm).ConfigureAwait(false);
             }
             catch
             {
@@ -161,7 +161,7 @@ namespace Majorsilence.Reporting.Rdl
         override internal async Task RunPage(Pages pgs, Row row)
         {
             Report r = pgs.Report;
-            bool bHidden = await IsHidden(r, row);
+            bool bHidden = await IsHidden(r, row).ConfigureAwait(false);
 
             WorkClass wc = GetWC(r);
             string mtype = null;
@@ -172,7 +172,7 @@ namespace Majorsilence.Reporting.Rdl
             if (bHidden)
             {
                 PageImage pi = new PageImage(ImageFormat.Jpeg, (byte[])null, 0, 0);
-                await this.SetPagePositionAndStyle(r, pi, row);
+                await SetPagePositionAndStyle(r, pi, row).ConfigureAwait(false);
                 SetPagePositionEnd(pgs, pi.Y + pi.H);
                 return;
             }
@@ -183,7 +183,7 @@ namespace Majorsilence.Reporting.Rdl
                 PageImage pi = new PageImage(wc.PgImage.ImgFormat, wc.PgImage.GetImageData(), wc.PgImage.SamplesW, wc.PgImage.SamplesH);
                 pi.Name = wc.PgImage.Name;              // this is name it will be shared under
                 pi.Sizing = this._Sizing;
-                await this.SetPagePositionAndStyle(r, pi, row);
+                await SetPagePositionAndStyle(r, pi, row).ConfigureAwait(false);
                 pgs.CurrentPage.AddObject(pi);
                 SetPagePositionEnd(pgs, pi.Y + pi.H);
                 return;
@@ -191,7 +191,7 @@ namespace Majorsilence.Reporting.Rdl
 
             try
             {
-                (strm, mtype) = await GetImageStream(r, row);
+                (strm, mtype) = await GetImageStream(r, row).ConfigureAwait(false);
                 if (strm == null)
                 {
                     r.rl.LogError(4, string.Format("Unable to load image {0}.", this.Name.Nm));
@@ -241,7 +241,7 @@ namespace Majorsilence.Reporting.Rdl
                 ostrm.Close();
                 PageImage pi = new PageImage(imf, ba, width, height);
                 pi.Sizing = this._Sizing;
-                await this.SetPagePositionAndStyle(r, pi, row);
+                await SetPagePositionAndStyle(r, pi, row).ConfigureAwait(false);
 
                 pgs.CurrentPage.AddObject(pi);
                 if (_ConstantImage)
@@ -279,12 +279,12 @@ namespace Majorsilence.Reporting.Rdl
                     case ImageSourceEnum.Database:
                         if (_MIMEType == null)
                             return (null, mtype);
-                        mtype = await _MIMEType.EvaluateString(rpt, row);
-                        object o = await _Value.Evaluate(rpt, row);
+                        mtype = await _MIMEType.EvaluateString(rpt, row).ConfigureAwait(false);
+                        object o = await _Value.Evaluate(rpt, row).ConfigureAwait(false);
                         strm = new MemoryStream((byte[])o);
                         break;
                     case ImageSourceEnum.Embedded:
-                        string name = await _Value.EvaluateString(rpt, row);
+                        string name = await _Value.EvaluateString(rpt, row).ConfigureAwait(false);
                         EmbeddedImage ei = (EmbeddedImage)OwnerReport.LUEmbeddedImages[name];
                         mtype = ei.MIMEType;
                         byte[] ba = Convert.FromBase64String(ei.ImageData);
@@ -292,7 +292,7 @@ namespace Majorsilence.Reporting.Rdl
                         strm = new MemoryStream(ba);
                         break;
                     case ImageSourceEnum.External:
-                        string fname = this.ImageUrl = await _Value.EvaluateString(rpt, row);
+                        string fname = this.ImageUrl = await _Value.EvaluateString(rpt, row).ConfigureAwait(false);
                         mtype = GetMimeType(fname);
                         if (fname.StartsWith("http:") ||
                             fname.StartsWith("file:") ||
@@ -310,7 +310,7 @@ namespace Majorsilence.Reporting.Rdl
                                 break;
                             }
 
-                            HttpResponseMessage response = await ExternalImageClient.GetAsync(fname);
+                            HttpResponseMessage response = await ExternalImageClient.GetAsync(fname).ConfigureAwait(false);
                             response.EnsureSuccessStatusCode();
                             // GetMimeType reads the extension off the URL, which an API
                             // endpoint -- ".../render/image?source=..." -- does not
@@ -323,7 +323,7 @@ namespace Majorsilence.Reporting.Rdl
                             // Read to bytes rather than handing back the response stream: the
                             // stream can be read once, and the cache has to serve the next
                             // caller as well as this one.
-                            byte[] content = await response.Content.ReadAsByteArrayAsync();
+                            byte[] content = await response.Content.ReadAsByteArrayAsync().ConfigureAwait(false);
                             rpt.AddExternalImage(fname, content, mtype);
                             strm = new MemoryStream(content);
                         }

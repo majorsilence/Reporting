@@ -63,9 +63,9 @@ namespace Majorsilence.Reporting.Rdl
 		async override internal Task FinalPass()
 		{
 			if (_Style != null)
-                await _Style.FinalPass();
+                await _Style.FinalPass().ConfigureAwait(false);
 			if (_Value != null)
-                await _Value.FinalPass();
+                await _Value.FinalPass().ConfigureAwait(false);
 			return;
 		}
 

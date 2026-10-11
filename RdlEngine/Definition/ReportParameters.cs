@@ -57,14 +57,14 @@ namespace Majorsilence.Reporting.Rdl
                 object parmValue = parms[pname];
                 if (parmValue is string && rp.ValidValues != null)
                 {
-                    string[] dvs = await rp.ValidValues.DisplayValues(rpt);
+                    string[] dvs = await rp.ValidValues.DisplayValues(rpt).ConfigureAwait(false);
                     if (dvs != null && dvs.Length > 0)
                     {
                         for (int i = 0; i < dvs.Length; i++)
                         {
                             if (dvs[i] == (string) parmValue)
                             {
-                                object[] dv = await rp.ValidValues.DataValues(rpt);
+                                object[] dv = await rp.ValidValues.DataValues(rpt).ConfigureAwait(false);
                                 parmValue = dv[i];
                                 break;
                             }
@@ -81,7 +81,7 @@ namespace Majorsilence.Reporting.Rdl
 		{
 			foreach (ReportParameter rp in _Items.Values)
 			{
-                await rp.FinalPass();
+                await rp.FinalPass().ConfigureAwait(false);
 			}
 			return;
 		}

@@ -56,43 +56,43 @@ namespace Majorsilence.Reporting.Rdl
 				crow = r;
 			}
 			if (crow != null)
-				v = await _Expr.Evaluate(rpt, crow);
+				v = await _Expr.Evaluate(rpt, crow).ConfigureAwait(false);
 			return v;
 		}
 
 		public override async Task<bool> EvaluateBoolean(Report rpt,Row row)
 		{
-			object result = await Evaluate(rpt, row);
+			object result = await Evaluate(rpt, row).ConfigureAwait(false);
 			return result == null? false: Convert.ToBoolean(result);
 		}
 		
 		public async Task<double> EvaluateDouble(Report rpt, Row row)
 		{
-			object result = await Evaluate(rpt, row);
+			object result = await Evaluate(rpt, row).ConfigureAwait(false);
 			return result == null? double.MinValue: Convert.ToDouble(result);
 		}
 		
 		public async Task<decimal> EvaluateDecimal(Report rpt, Row row)
 		{
-			object result = await Evaluate(rpt, row);
+			object result = await Evaluate(rpt, row).ConfigureAwait(false);
 			return result == null? decimal.MinValue: Convert.ToDecimal(result);
 		}
 
         public async Task<int> EvaluateInt32(Report rpt, Row row)
         {
-            object result = await Evaluate(rpt, row);
+            object result = await Evaluate(rpt, row).ConfigureAwait(false);
             return result == null ? int.MinValue : Convert.ToInt32(result);
         }
 
 		public async Task<string> EvaluateString(Report rpt, Row row)
 		{
-			object result = await Evaluate(rpt, row);
+			object result = await Evaluate(rpt, row).ConfigureAwait(false);
 			return result == null? null: Convert.ToString(result);
 		}
 
 		public async Task<DateTime> EvaluateDateTime(Report rpt, Row row)
 		{
-			object result = await Evaluate(rpt, row);
+			object result = await Evaluate(rpt, row).ConfigureAwait(false);
 			return result == null? DateTime.MinValue: Convert.ToDateTime(result);
 		}
 

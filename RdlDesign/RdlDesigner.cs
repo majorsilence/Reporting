@@ -761,11 +761,11 @@ namespace Majorsilence.Reporting.RdlDesign
 
 
 
-		private bool OkToSave()
+		private async Task<bool> OkToSaveAsync()
 		{
 			foreach (MDIChild mc in this.MdiChildren)
 			{
-				if (!mc.OkToClose())
+				if (!await mc.OkToCloseAsync())
 					return false;
 			}
 			return true;
@@ -793,10 +793,18 @@ namespace Majorsilence.Reporting.RdlDesign
 				mc.Close();
 		}
 
-		private void menuFileExit_Click(object sender, EventArgs e)
+		// The user has answered "save changes?" for every report: none needs to ask again as it closes.
+		private void ConfirmAllClosing()
 		{
-			if (!OkToSave())
+			foreach (MDIChild mc in this.MdiChildren)
+				mc.CloseConfirmed = true;
+		}
+
+		private async void menuFileExit_Click(object sender, EventArgs e)
+		{
+			if (!await OkToSaveAsync())
 				return;
+			ConfirmAllClosing();
 			SaveStartupState();
 			menuToolsCloseProcess(false);
 			CleanupTempFiles();
@@ -1330,7 +1338,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			SetStatusNameAndPosition();
 		}
 
-		private void SelectionChanged(object sender, System.EventArgs e)
+		private async void SelectionChanged(object sender, System.EventArgs e)
 		{
 			MDIChild mc = this.ActiveMdiChild as MDIChild;
 			if (mc == null)
@@ -1347,9 +1355,12 @@ namespace Majorsilence.Reporting.RdlDesign
 			SetStatusNameAndPosition();
 			this.EnableEditTextBox();   // handling enabling/disabling of textbox
 
-			StyleInfo si = mc.SelectedStyle;
+			StyleInfo si = await mc.GetSelectedStyleAsync();
 			if (si == null)
+			{
+				bSuppressChange = false;   // the early exit used to leave it set
 				return;
+			}
 
 			if (centerAlignToolStripButton2 != null)
 				centerAlignToolStripButton2.Checked = si.TextAlign == TextAlignEnum.Center ? true : false;
@@ -1665,13 +1676,13 @@ namespace Majorsilence.Reporting.RdlDesign
 			printChild = null;
 		}
 
-		private void menuFileSave_Click(object sender, EventArgs e)
+		private async void menuFileSave_Click(object sender, EventArgs e)
 		{
 			MDIChild mc = this.ActiveMdiChild as MDIChild;
 			if (mc == null)
 				return;
 
-			if (!mc.FileSave())
+			if (!await mc.FileSaveAsync())
 				return;
 
 			if (this.SavedFileEvent != null)
@@ -2334,8 +2345,32 @@ namespace Majorsilence.Reporting.RdlDesign
 			await CreateMDIChildAsync(file, null, true);
 		}
 
-		private void RdlDesigner_Closing(object sender, Majorsilence.Forms.FormClosingEventArgs e)
+		private bool _exitConfirmed;
+
+		// Closing the main window with modified reports open: ask about all of them once, up front, then
+		// close again with each report marked as answered. (Left to each report, a cancelled close would
+		// have to be repeated once per modified report.)
+		private async void RdlDesigner_Closing(object sender, Majorsilence.Forms.FormClosingEventArgs e)
 		{
+			if (!_exitConfirmed)
+			{
+				bool anyModified = false;
+				foreach (MDIChild mc in this.MdiChildren)
+					anyModified |= mc.Modified;
+
+				if (anyModified)
+				{
+					e.Cancel = true;
+					if (await OkToSaveAsync())
+					{
+						ConfirmAllClosing();
+						_exitConfirmed = true;
+						Close();
+					}
+					return;
+				}
+			}
+
 			SaveStartupState();
 			menuToolsCloseProcess(false);
 			CleanupTempFiles();

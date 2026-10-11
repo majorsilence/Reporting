@@ -45,7 +45,7 @@ namespace Majorsilence.Reporting.Rdl
 		// Evaluate is for interpretation  (and is relatively slow)
 		public async Task<object> Evaluate(Report rpt, Row row)
 		{
-			return _tc==TypeCode.Decimal? (object)await EvaluateDecimal(rpt, row): (object)await EvaluateDouble(rpt, row);
+			return _tc==TypeCode.Decimal? (object)await EvaluateDecimal(rpt, row).ConfigureAwait(false) : (object)await EvaluateDouble(rpt, row).ConfigureAwait(false);
 		}
 		
 		public async Task<double> EvaluateDouble(Report rpt, Row row)
@@ -62,7 +62,7 @@ namespace Majorsilence.Reporting.Rdl
 				break;
 			}
 
-			double currentValue = await _Expr.EvaluateDouble(rpt, row);
+			double currentValue = await _Expr.EvaluateDouble(rpt, row).ConfigureAwait(false);
 			WorkClass wc = GetValue(rpt);
 			if (row == startrow)
 			{
@@ -90,7 +90,7 @@ namespace Majorsilence.Reporting.Rdl
 			}
 
 			WorkClass wc = GetValue(rpt);
-			decimal currentValue = await _Expr.EvaluateDecimal(rpt, row);
+			decimal currentValue = await _Expr.EvaluateDecimal(rpt, row).ConfigureAwait(false);
 			if (row == startrow)
 			{
 				// must be the start of a new group
@@ -104,19 +104,19 @@ namespace Majorsilence.Reporting.Rdl
 
         public async Task<int> EvaluateInt32(Report rpt, Row row)
         {
-            object result = await Evaluate(rpt, row);
+            object result = await Evaluate(rpt, row).ConfigureAwait(false);
             return Convert.ToInt32(result);
         }
 
 		public async Task<string> EvaluateString(Report rpt, Row row)
 		{
-			object result = await Evaluate(rpt, row);
+			object result = await Evaluate(rpt, row).ConfigureAwait(false);
 			return Convert.ToString(result);
 		}
 
 		public async Task<DateTime> EvaluateDateTime(Report rpt, Row row)
 		{
-			object result = await Evaluate(rpt, row);
+			object result = await Evaluate(rpt, row).ConfigureAwait(false);
 			return Convert.ToDateTime(result);
 		}
 		private WorkClass GetValue(Report rpt)

@@ -51,7 +51,7 @@ namespace Majorsilence.Reporting.Rdl
 		async override internal Task FinalPass()
 		{
 			if (_Visibility != null)
-                await _Visibility.FinalPass();
+                await _Visibility.FinalPass().ConfigureAwait(false);
 			return;
 		}
 
@@ -87,7 +87,7 @@ namespace Majorsilence.Reporting.Rdl
 		{
 			if (_Visibility == null)
 				return false;
-			return await _Visibility.IsHidden(rpt, r);
+			return await _Visibility.IsHidden(rpt, r).ConfigureAwait(false);
 		}
 
 		private WorkClass GetWC(Report rpt)

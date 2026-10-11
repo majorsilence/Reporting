@@ -37,11 +37,11 @@ namespace Majorsilence.Reporting.Rdl
 		override internal async Task RunPage(Pages pgs, Row row)
 		{
 			Report r = pgs.Report;
-            bool bHidden = await IsHidden(r, row);
+            bool bHidden = await IsHidden(r, row).ConfigureAwait(false);
 
 			SetPagePositionBegin(pgs);
 			PageLine pl = new PageLine();
-            await SetPagePositionAndStyle(r, pl, row);
+            await SetPagePositionAndStyle(r, pl, row).ConfigureAwait(false);
             if (!bHidden)
 			    pgs.CurrentPage.AddObject(pl);
 			SetPagePositionEnd(pgs, pl.Y);

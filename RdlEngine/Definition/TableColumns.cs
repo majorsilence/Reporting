@@ -57,7 +57,7 @@ namespace Majorsilence.Reporting.Rdl
 		{
 			foreach (TableColumn tc in _Items)
 			{
-                await tc.FinalPass();
+                await tc.FinalPass().ConfigureAwait(false);
 			}
 			return;
 		}
@@ -78,7 +78,7 @@ namespace Majorsilence.Reporting.Rdl
 
 			foreach (TableColumn tc in _Items)
 			{
-				if (await tc.IsHidden(rpt, row))
+				if (await tc.IsHidden(rpt, row).ConfigureAwait(false))
 					continue;
 				tc.SetXPosition(rpt, x);
 				x += tc.Width.Points;

@@ -65,9 +65,9 @@ namespace Majorsilence.Reporting.Rdl
 		
 		async override internal Task FinalPass()
 		{
-            await _TableCells.FinalPass();
+            await _TableCells.FinalPass().ConfigureAwait(false);
 			if (_Visibility != null)
-                await _Visibility.FinalPass();
+                await _Visibility.FinalPass().ConfigureAwait(false);
 
 			foreach (TableCell tc in _TableCells.Items)
 			{
@@ -94,21 +94,21 @@ namespace Majorsilence.Reporting.Rdl
 
 		internal async Task Run(IPresent ip, Row row)
 		{
-			if (this.Visibility != null && await Visibility.IsHidden(ip.Report(), row))
+			if (this.Visibility != null && await Visibility.IsHidden(ip.Report(), row).ConfigureAwait(false))
 				return;
 
-            await ip.TableRowStart(this, row);
-            await _TableCells.Run(ip, row);
+            await ip.TableRowStart(this, row).ConfigureAwait(false);
+            await _TableCells.Run(ip, row).ConfigureAwait(false);
 			ip.TableRowEnd(this, row);
 			return ;
 		}
  
 		internal async Task RunPage(Pages pgs, Row row)
 		{
-			if (this.Visibility != null && await Visibility.IsHidden(pgs.Report, row))
+			if (this.Visibility != null && await Visibility.IsHidden(pgs.Report, row).ConfigureAwait(false))
 				return;
 
-            await _TableCells.RunPage(pgs, row);
+            await _TableCells.RunPage(pgs, row).ConfigureAwait(false);
 
 			WorkClass wc = GetWC(pgs.Report);
 			pgs.CurrentPage.YOffset += wc.CalcHeight;
@@ -128,12 +128,12 @@ namespace Majorsilence.Reporting.Rdl
 		}
         internal async Task<float> HeightOfRow(Pages pgs, Row r)
         {
-            return await HeightOfRow(pgs.Report, pgs.G, r);
+            return await HeightOfRow(pgs.Report, pgs.G, r).ConfigureAwait(false);
         }
 		internal async Task<float> HeightOfRow(Report rpt, Graphics g, Row r)
 		{
 			WorkClass wc = GetWC(rpt);
-			if (this.Visibility != null && await Visibility.IsHidden(rpt, r))
+			if (this.Visibility != null && await Visibility.IsHidden(rpt, r).ConfigureAwait(false))
 			{
 				wc.CalcHeight = 0;
 				return 0;
@@ -159,9 +159,9 @@ namespace Majorsilence.Reporting.Rdl
 				if (tb != null && (tb.CanGrow || tb.CanShrink))
 				{
 					int ci = tb.TC.ColIndex;
-					if (await tcs[ci].IsHidden(rpt, r))    // if column is hidden don't use in calculation
+					if (await tcs[ci].IsHidden(rpt, r).ConfigureAwait(false))    // if column is hidden don't use in calculation
 						continue;
-					float content = await tb.RunTextCalcHeight(rpt, g, r);
+					float content = await tb.RunTextCalcHeight(rpt, g, r).ConfigureAwait(false);
 					if (tb.CanGrow && !tb.CanShrink)
 						cellHeight = Math.Max(content, defnHeight);  // grow only
 					else

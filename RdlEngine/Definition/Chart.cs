@@ -173,46 +173,46 @@ namespace Majorsilence.Reporting.Rdl
 
 		async override internal Task FinalPass()
 		{
-            await base.FinalPass();
+            await base.FinalPass().ConfigureAwait(false);
 			if (_SeriesGroupings != null)
-                await _SeriesGroupings.FinalPass();
+                await _SeriesGroupings.FinalPass().ConfigureAwait(false);
 			if (_CategoryGroupings != null)
-                await _CategoryGroupings.FinalPass();
+                await _CategoryGroupings.FinalPass().ConfigureAwait(false);
 			if (_ChartData != null)
-                await _ChartData.FinalPass();
+                await _ChartData.FinalPass().ConfigureAwait(false);
 			if (_Legend != null)
-                await _Legend.FinalPass();
+                await _Legend.FinalPass().ConfigureAwait(false);
 			if (_CategoryAxis != null)
-                await _CategoryAxis.FinalPass();
+                await _CategoryAxis.FinalPass().ConfigureAwait(false);
 			if (_ValueAxis != null)
-                await _ValueAxis.FinalPass();
+                await _ValueAxis.FinalPass().ConfigureAwait(false);
 			if (_Title != null)
-                await _Title.FinalPass();
+                await _Title.FinalPass().ConfigureAwait(false);
 			if (_ThreeDProperties != null)
-                await _ThreeDProperties.FinalPass();
+                await _ThreeDProperties.FinalPass().ConfigureAwait(false);
 			if (_PlotArea != null)
-                await _PlotArea.FinalPass();
+                await _PlotArea.FinalPass().ConfigureAwait(false);
 			//AJM GJL 14082008
             if (_Palette != null)
-                await _Palette.FinalPass();
+                await _Palette.FinalPass().ConfigureAwait(false);
             if (_isHYNEsWonderfulVector != null)
-                await _isHYNEsWonderfulVector.FinalPass();
+                await _isHYNEsWonderfulVector.FinalPass().ConfigureAwait(false);
             if (_showTooltips != null)
-                await _showTooltips.FinalPass();
+                await _showTooltips.FinalPass().ConfigureAwait(false);
             if (_showTooltipsX != null)
-                await _showTooltipsX.FinalPass();
+                await _showTooltipsX.FinalPass().ConfigureAwait(false);
             if (_Subtype != null)
-                await _Subtype.FinalPass();
+                await _Subtype.FinalPass().ConfigureAwait(false);
             if (_ToolTipXFormat != null)
-                await _ToolTipXFormat.FinalPass();
+                await _ToolTipXFormat.FinalPass().ConfigureAwait(false);
             if (_ToolTipYFormat != null)
-                await _ToolTipYFormat.FinalPass();
+                await _ToolTipYFormat.FinalPass().ConfigureAwait(false);
 
 
 			if (this.OwnerReport.rl.MaxSeverity < 8)	// Don't take this step if already have errors
 			{
 				_ChartMatrix = GenerateMatrix();        //   GenerateMatrix() needs no error in defn to date
-                await _ChartMatrix.FinalPass();
+                await _ChartMatrix.FinalPass().ConfigureAwait(false);
 			}
 			return;
 		}
@@ -222,19 +222,19 @@ namespace Majorsilence.Reporting.Rdl
 			Report rpt = ip.Report();
 
 			_ChartMatrix.RunReset(rpt);
-			Rows _Data = await GetFilteredData(ip.Report(), row);
+			Rows _Data = await GetFilteredData(ip.Report(), row).ConfigureAwait(false);
 			SetMyData(ip.Report(), _Data);
 
-			if (!await AnyRows(ip, _Data))		// if no rows, return
+			if (!await AnyRows(ip, _Data).ConfigureAwait(false))		// if no rows, return
 				return;
 
 			// Build the Chart bitmap, along with data regions
 			ChartBase cb=null;
 			try
 			{
-				cb = await RunChartBuild(rpt, row);
+				cb = await RunChartBuild(rpt, row).ConfigureAwait(false);
 
-                await ip.Chart(this, row, cb);
+                await ip.Chart(this, row, cb).ConfigureAwait(false);
 			}
 			catch (Exception ex)
 			{
@@ -252,19 +252,19 @@ namespace Majorsilence.Reporting.Rdl
 		{
 			Report rpt = pgs.Report;
 
-			if (await IsHidden(pgs.Report, row))
+			if (await IsHidden(pgs.Report, row).ConfigureAwait(false))
 				return;
 
 			if (_ChartMatrix == null)	// FinalPass skips building this when the report already has other errors
 				return;
 
 			_ChartMatrix.RunReset(rpt);
-			Rows _Data = await GetFilteredData(rpt, row);
+			Rows _Data = await GetFilteredData(rpt, row).ConfigureAwait(false);
 			SetMyData(rpt, _Data);
 
 			SetPagePositionBegin(pgs);
 
-			if (!await AnyRowsPage(pgs, _Data))		// if no rows return
+			if (!await AnyRowsPage(pgs, _Data).ConfigureAwait(false))		// if no rows return
 				return;						//   nothing left to do
 
 			// Build the Chart bitmap, along with data regions
@@ -272,9 +272,9 @@ namespace Majorsilence.Reporting.Rdl
 			ChartBase cb=null;
 			try
 			{
-				cb = await RunChartBuild(rpt, row);                   // Build the chart
+				cb = await RunChartBuild(rpt, row).ConfigureAwait(false);                   // Build the chart
 
-                p = await RunPage_Bitmap(pgs, row, rpt, cb);
+                p = await RunPage_Bitmap(pgs, row, rpt, cb).ConfigureAwait(false);
 
             }
             catch (Exception ex)
@@ -331,7 +331,7 @@ namespace Majorsilence.Reporting.Rdl
 
             RunPageRegionBegin(pgs);
 
-            await SetPagePositionAndStyle(rpt, pi, row);
+            await SetPagePositionAndStyle(rpt, pi, row).ConfigureAwait(false);
             pi.SI.BackgroundImage = null;   // chart already has the background image
 
             if (pgs.CurrentPage.YOffset + pi.Y + pi.H >= pgs.BottomOfPage && !pgs.CurrentPage.IsEmpty())
@@ -364,7 +364,7 @@ namespace Majorsilence.Reporting.Rdl
 			int maxColumns;
 			int maxRows;
             MatrixCellEntry[,] matrix;
-            (matrix, maxRows, maxColumns)= await _ChartMatrix.RunBuild(rpt);
+            (matrix, maxRows, maxColumns)= await _ChartMatrix.RunBuild(rpt).ConfigureAwait(false);
 
 			// Build the Chart bitmap, along with data regions
 			ChartBase cb=null;
@@ -397,7 +397,7 @@ namespace Majorsilence.Reporting.Rdl
 					break;
 			}
 
-			await cb.InitAsync();
+			await cb.InitAsync().ConfigureAwait(false);
 			return cb;
 		}
 

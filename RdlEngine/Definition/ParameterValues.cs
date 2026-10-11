@@ -49,7 +49,7 @@ namespace Majorsilence.Reporting.Rdl
         {
             foreach (ParameterValue pv in _Items)
             {
-                await pv.FinalPass();
+                await pv.FinalPass().ConfigureAwait(false);
             }
             return;
         }
@@ -70,7 +70,7 @@ namespace Majorsilence.Reporting.Rdl
                 if (pv.Value == null)
                     dataValues[index] = null;
                 else
-                    dataValues[index] = await pv.Value.Evaluate(rpt, null);
+                    dataValues[index] = await pv.Value.Evaluate(rpt, null).ConfigureAwait(false);
                 if (pv.Label == null)
                 {   // if label is null use the data value; if not provided use ""
                     if (dataValues[index] == null)
@@ -80,7 +80,7 @@ namespace Majorsilence.Reporting.Rdl
                 }
                 else
                 {
-                    displayValues[index] = await pv.Label.EvaluateString(rpt, null);
+                    displayValues[index] = await pv.Label.EvaluateString(rpt, null).ConfigureAwait(false);
                     if (displayValues[index] == null)
                         displayValues[index] = "";
                 }

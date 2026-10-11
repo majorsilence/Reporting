@@ -46,7 +46,7 @@ namespace Majorsilence.Reporting.Rdl
 		{
 			foreach (SubreportParameter rp in _Items)
 			{
-                await rp.FinalPass();
+                await rp.FinalPass().ConfigureAwait(false);
 			}
 			return;
 		}

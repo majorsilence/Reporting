@@ -47,7 +47,7 @@ namespace Majorsilence.Reporting.Rdl
 		{
 			foreach (ChartSeries cs in _Items)
 			{
-                await cs.FinalPass();
+                await cs.FinalPass().ConfigureAwait(false);
 			}
 			return;
 		}

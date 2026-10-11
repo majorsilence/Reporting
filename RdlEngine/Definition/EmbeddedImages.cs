@@ -43,7 +43,7 @@ namespace Majorsilence.Reporting.Rdl
 		{
 			foreach (EmbeddedImage ei in _Items)
 			{
-                await ei.FinalPass();
+                await ei.FinalPass().ConfigureAwait(false);
 			}
 			return;
 		}

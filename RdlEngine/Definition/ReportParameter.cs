@@ -121,9 +121,9 @@ namespace Majorsilence.Reporting.Rdl
 		async override internal Task FinalPass()
 		{
 			if (_DefaultValue != null)
-                await _DefaultValue.FinalPass();
+                await _DefaultValue.FinalPass().ConfigureAwait(false);
 			if (_ValidValues != null)
-                await _ValidValues.FinalPass();
+                await _ValidValues.FinalPass().ConfigureAwait(false);
 			return;
 		}
 
@@ -143,7 +143,7 @@ namespace Majorsilence.Reporting.Rdl
 			if (_DefaultValue == null)
 				return null;
 				
-			object[] result = await _DefaultValue.GetValue(rpt);
+			object[] result = await _DefaultValue.GetValue(rpt).ConfigureAwait(false);
 			if (result == null)
 				return null;
 			object v = result[0];
@@ -168,7 +168,7 @@ namespace Majorsilence.Reporting.Rdl
             if (_DefaultValue == null)
                 return null;
 
-            object[] result = await _DefaultValue.GetValue(rpt);
+            object[] result = await _DefaultValue.GetValue(rpt).ConfigureAwait(false);
             if (result == null)
                 return null;
 
@@ -437,6 +437,7 @@ namespace Majorsilence.Reporting.Rdl
 		/// <summary>
 		/// Default value(s) of the parameter.
 		/// </summary>
+		[Obsolete("Blocks the calling thread while the default is calculated. Use GetDefaultValueAsync().")]
 		public object[] DefaultValue
 		{
 			get 
@@ -446,7 +447,7 @@ namespace Majorsilence.Reporting.Rdl
 					if (_rp.DefaultValue != null)
 					{
 						// HACK: async
-						_DefaultValue = Task.Run(async () => await _rp.DefaultValue.ValuesCalc(this._rpt)).GetAwaiter().GetResult();
+						_DefaultValue = Task.Run(async () => await _rp.DefaultValue.ValuesCalc(_rpt).ConfigureAwait(false)).GetAwaiter().GetResult();
 					}
 				}
 				return _DefaultValue;
@@ -477,8 +478,19 @@ namespace Majorsilence.Reporting.Rdl
 		}
 
 		/// <summary>
+		/// Default value(s) of the parameter, calculated without blocking the calling thread.
+		/// </summary>
+		public async Task<object[]> GetDefaultValueAsync()
+		{
+			if (_DefaultValue == null && _rp.DefaultValue != null)
+				_DefaultValue = await _rp.DefaultValue.ValuesCalc(_rpt).ConfigureAwait(false);
+			return _DefaultValue;
+		}
+
+		/// <summary>
 		/// The display values for the parameter.  These may differ from the data values.
 		/// </summary>
+		[Obsolete("Blocks the calling thread while the values are read. Use GetDisplayValuesAsync().")]
 		public string[] DisplayValues
 		{
 			get 
@@ -488,7 +500,7 @@ namespace Majorsilence.Reporting.Rdl
 					if (_rp.ValidValues != null)
 					{
 						// HACK: async
-						_DisplayValues = Task.Run(async () => await _rp.ValidValues.DisplayValues(_rpt)).GetAwaiter().GetResult();
+						_DisplayValues = Task.Run(async () => await _rp.ValidValues.DisplayValues(_rpt).ConfigureAwait(false)).GetAwaiter().GetResult();
 					}
 				}
 				return  _DisplayValues;		 
@@ -496,8 +508,19 @@ namespace Majorsilence.Reporting.Rdl
 		}
 
 		/// <summary>
+		/// The display values for the parameter, read without blocking the calling thread.
+		/// </summary>
+		public async Task<string[]> GetDisplayValuesAsync()
+		{
+			if (_DisplayValues == null && _rp.ValidValues != null)
+				_DisplayValues = await _rp.ValidValues.DisplayValues(_rpt).ConfigureAwait(false);
+			return _DisplayValues;
+		}
+
+		/// <summary>
 		/// The data values of the parameter.
 		/// </summary>
+		[Obsolete("Blocks the calling thread while the values are read. Use GetDataValuesAsync().")]
 		public object[] DataValues
 		{
 			get 
@@ -507,11 +530,21 @@ namespace Majorsilence.Reporting.Rdl
 					if (_rp.ValidValues != null)
 					{
 						// HACK: async
-						_DataValues = Task.Run(async () => await _rp.ValidValues.DataValues(this._rpt)).GetAwaiter().GetResult();
+						_DataValues = Task.Run(async () => await _rp.ValidValues.DataValues(_rpt).ConfigureAwait(false)).GetAwaiter().GetResult();
 					}
 				}
 				return  _DataValues;		 
 			}
+		}
+
+		/// <summary>
+		/// The data values of the parameter, read without blocking the calling thread.
+		/// </summary>
+		public async Task<object[]> GetDataValuesAsync()
+		{
+			if (_DataValues == null && _rp.ValidValues != null)
+				_DataValues = await _rp.ValidValues.DataValues(_rpt).ConfigureAwait(false);
+			return _DataValues;
 		}
 
         /// <summary>
@@ -519,23 +552,26 @@ namespace Majorsilence.Reporting.Rdl
         /// </summary>
         /// <param name="dvalue">Display value</param>
         /// <returns>The data value cooresponding to the display value.</returns>
-        private object GetDataValueFromDisplay(object dvalue)
+        private async Task<object> GetDataValueFromDisplayAsync(object dvalue)
         {
             object val = dvalue;
+            if (dvalue == null)
+                return val;
 
-            if (dvalue != null &&
-                DisplayValues != null &&
-                DataValues != null &&
-                DisplayValues.Length == DataValues.Length)		// this should always be true
+            string[] displayValues = await GetDisplayValuesAsync().ConfigureAwait(false);
+            object[] dataValues = await GetDataValuesAsync().ConfigureAwait(false);
+            if (displayValues != null &&
+                dataValues != null &&
+                displayValues.Length == dataValues.Length)		// this should always be true
             {	// if display values are provided then we may need to 
                 //  use the provided value with a display value and use
                 //  the cooresponding data value
                 string sval = dvalue.ToString();
-                for (int index = 0; index < DisplayValues.Length; index++)
+                for (int index = 0; index < displayValues.Length; index++)
                 {
-                    if (DisplayValues[index].CompareTo(sval) == 0)
+                    if (displayValues[index].CompareTo(sval) == 0)
                     {
-                        val = DataValues[index];
+                        val = dataValues[index];
                         break;
                     }
                 }
@@ -545,28 +581,17 @@ namespace Majorsilence.Reporting.Rdl
 
 		/// <summary>
 		/// The runtime value of the parameter.
-		/// Prefer using GetValueAsync() to avoid synchronous blocking on an async call.
 		/// </summary>
+		[Obsolete("Blocks the calling thread. Read the value with GetValueAsync() and set it with SetValueAsync().")]
 		public object Value
 		{
             get
             {
                 // HACK: async - synchronous wrapper needed for property getter;
                 // use GetValueAsync() when an async context is available.
-                return Task.Run(async () => await _rp.GetRuntimeValue(this._rpt)).GetAwaiter().GetResult();
+                return Task.Run(async () => await _rp.GetRuntimeValue(_rpt).ConfigureAwait(false)).GetAwaiter().GetResult();
             }
-			set 
-			{
-                if (this.MultiValue && value is string)
-                {   // treat this as a multiValue request
-                    Values = ParseValue(value as string);
-                    return;
-                }
-
-                object dvalue = GetDataValueFromDisplay(value);
-
-                _rp.SetRuntimeValue(_rpt, dvalue); 
-			}
+			set { Task.Run(async () => await SetValueAsync(value).ConfigureAwait(false)).GetAwaiter().GetResult(); }   // compatibility only
 		}
 
         /// <summary>
@@ -575,7 +600,22 @@ namespace Majorsilence.Reporting.Rdl
         /// </summary>
         public async Task<object> GetValueAsync()
         {
-            return await _rp.GetRuntimeValue(this._rpt);
+            return await _rp.GetRuntimeValue(this._rpt).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Sets the runtime value of the parameter. A display value is translated to its data value; a string
+        /// given to a MultiValue parameter is parsed into its values, as with the Value setter.
+        /// </summary>
+        public async Task SetValueAsync(object value)
+        {
+            if (this.MultiValue && value is string)
+            {   // treat this as a multiValue request
+                await SetValuesAsync(ParseValue(value as string)).ConfigureAwait(false);
+                return;
+            }
+
+            _rp.SetRuntimeValue(_rpt, await GetDataValueFromDisplayAsync(value).ConfigureAwait(false));
         }
 
         /// <summary>
@@ -590,23 +630,37 @@ namespace Majorsilence.Reporting.Rdl
         }
 
         /// <summary>
+        /// The runtime values of the parameter when MultiValue, read without blocking the calling thread.
+        /// </summary>
+        public async Task<ArrayList> GetValuesAsync()
+        {
+            return await _rp.GetRuntimeValues(this._rpt).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Sets the runtime values of the parameter when MultiValue.
+        /// </summary>
+        public async Task SetValuesAsync(ArrayList values)
+        {
+            ArrayList ar = new ArrayList(values.Count);
+            foreach (object v in values)
+            {
+                ar.Add(await GetDataValueFromDisplayAsync(v).ConfigureAwait(false));
+            }
+            _rp.SetRuntimeValues(_rpt, ar);
+        }
+
+        /// <summary>
         /// The runtime values of the parameter when MultiValue.
         /// </summary>
+        [Obsolete("Blocks the calling thread. Read the values with GetValuesAsync() and set them with SetValuesAsync().")]
         public ArrayList Values
         {
             get { 
 				// HACK: async
-				return Task.Run(async () => await _rp.GetRuntimeValues(this._rpt)).GetAwaiter().GetResult(); 
+				return Task.Run(async () => await _rp.GetRuntimeValues(_rpt).ConfigureAwait(false)).GetAwaiter().GetResult(); 
 			}
-            set
-            {
-                ArrayList ar = new ArrayList(value.Count);
-                foreach (object v in value)
-                {
-                    ar.Add(GetDataValueFromDisplay(v));
-                }
-                _rp.SetRuntimeValues(_rpt, ar);
-            }
+            set { Task.Run(async () => await SetValuesAsync(value).ConfigureAwait(false)).GetAwaiter().GetResult(); }   // compatibility only
         }
     }
 }

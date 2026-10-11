@@ -44,9 +44,9 @@ namespace Majorsilence.Reporting.Rdl
 		async override internal Task FinalPass()
 		{
 			if (_DataSetReference != null)
-                await _DataSetReference.FinalPass();
+                await _DataSetReference.FinalPass().ConfigureAwait(false);
 			if (_Values != null)
-                await _Values.FinalPass();
+                await _Values.FinalPass().ConfigureAwait(false);
 			return;
 		}
 
@@ -59,14 +59,14 @@ namespace Majorsilence.Reporting.Rdl
 		internal async Task<object[]> GetValue(Report rpt)
 		{
 			if (_Values != null)
-				return await ValuesCalc(rpt);
+				return await ValuesCalc(rpt).ConfigureAwait(false);
 			object[] dValues = this.GetDataValues(rpt);
 			if (dValues != null)
 				return dValues;
 
 			string[] dsValues;
 			if (_DataSetReference != null)
-				(dsValues, dValues) = await _DataSetReference.SupplyValues(rpt);
+				(dsValues, dValues) = await _DataSetReference.SupplyValues(rpt).ConfigureAwait(false);
 
 			this.SetDataValues(rpt, dValues);
 			return dValues;
@@ -86,7 +86,7 @@ namespace Majorsilence.Reporting.Rdl
 			int index=0;
 			foreach (Expression v in _Values)
 			{
-				result[index++] = await v.Evaluate(rpt, null);
+				result[index++] = await v.Evaluate(rpt, null).ConfigureAwait(false);
 			}
 			return result;
 		}

@@ -52,7 +52,7 @@ namespace Majorsilence.Reporting.Rdl
 		{
 			foreach (RowGrouping g in _Items)
 			{
-                await g.FinalPass();
+                await g.FinalPass().ConfigureAwait(false);
 			}
 			return;
 		}

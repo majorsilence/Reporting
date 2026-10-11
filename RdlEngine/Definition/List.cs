@@ -75,14 +75,14 @@ namespace Majorsilence.Reporting.Rdl
 
 		async override internal Task FinalPass()
 		{
-            await base.FinalPass();
+            await base.FinalPass().ConfigureAwait(false);
 
 			if (_Grouping != null)
-                await _Grouping.FinalPass();
+                await _Grouping.FinalPass().ConfigureAwait(false);
 			if (_Sorting != null)
-                await _Sorting.FinalPass();
+                await _Sorting.FinalPass().ConfigureAwait(false);
 			if (_ReportItems != null)
-                await _ReportItems.FinalPass();
+                await _ReportItems.FinalPass().ConfigureAwait(false);
 
 			// determine if the size is dynamic depending on any of its
 			//   contained textbox have cangrow true
@@ -113,43 +113,43 @@ namespace Majorsilence.Reporting.Rdl
 			Report r = ip.Report();
 			WorkClass wc = GetValue(r);
 
-			wc.Data = await GetFilteredData(r, row);
+			wc.Data = await GetFilteredData(r, row).ConfigureAwait(false);
 
-			if (!await AnyRows(ip, wc.Data))		// if no rows return
+			if (!await AnyRows(ip, wc.Data).ConfigureAwait(false))		// if no rows return
 				return;                 //   nothing left to do
 
-            await RunSetGrouping(r, wc);
+            await RunSetGrouping(r, wc).ConfigureAwait(false);
 
-            await base.Run(ip, row);
+            await base.Run(ip, row).ConfigureAwait(false);
 
-			if (!await ip.ListStart(this, row))	
+			if (!await ip.ListStart(this, row).ConfigureAwait(false))	
 				return;                         // renderer doesn't want to continue
 
-            await RunGroups(ip, wc, wc.Groups);
+            await RunGroups(ip, wc, wc.Groups).ConfigureAwait(false);
 
-            await ip.ListEnd(this, row);
+            await ip.ListEnd(this, row).ConfigureAwait(false);
 			RemoveValue(r);
 		}
 
 		async override internal Task RunPage(Pages pgs, Row row)
 		{
 			Report r = pgs.Report;
-			if (await IsHidden(r, row))
+			if (await IsHidden(r, row).ConfigureAwait(false))
 				return;
 
 			WorkClass wc = GetValue(r);
-			wc.Data = await GetFilteredData(r, row);
+			wc.Data = await GetFilteredData(r, row).ConfigureAwait(false);
 
 			SetPagePositionBegin(pgs);
 
-			if (!await AnyRowsPage(pgs, wc.Data))		// if no rows return
+			if (!await AnyRowsPage(pgs, wc.Data).ConfigureAwait(false))		// if no rows return
 				return;						//   nothing left to do
 
 			RunPageRegionBegin(pgs);
 
-            await RunSetGrouping(pgs.Report, wc);
+            await RunSetGrouping(pgs.Report, wc).ConfigureAwait(false);
 
-            await RunPageGroups(pgs, wc, wc.Groups);
+            await RunPageGroups(pgs, wc, wc.Groups).ConfigureAwait(false);
 
 			RunPageRegionEnd(pgs);
 			SetPagePositionEnd(pgs, pgs.CurrentPage.YOffset);
@@ -169,8 +169,8 @@ namespace Majorsilence.Reporting.Rdl
 				Rows saveData = wc.Data;
 				wc.Data = new Rows(rpt, null, _Grouping, _Sorting);
 				wc.Data.Data = saveData.Data;
-				await wc.Data.SortAsync();
-                await PrepGroups(rpt, wc);
+				await wc.Data.SortAsync().ConfigureAwait(false);
+                await PrepGroups(rpt, wc).ConfigureAwait(false);
 			}
 			// If we haven't formed any groups then form one with all rows
 			if (wc.Groups == null)
@@ -229,7 +229,7 @@ namespace Majorsilence.Reporting.Rdl
 				i=0;
 				foreach (GroupExpression ge in gea)  // Could optimize to only calculate as needed in comparison loop below??
 				{
-					grpValues[i++] = await ge.Expression.Evaluate(rpt, row);
+					grpValues[i++] = await ge.Expression.Evaluate(rpt, row).ConfigureAwait(false);
 				}
 
 				// For first row we just primed the pump; action starts on next row
@@ -302,19 +302,19 @@ namespace Majorsilence.Reporting.Rdl
 				{	// need to run all the rows since no group defined
 					for (int r=ge.StartRow; r <= ge.EndRow; r++)
 					{
-						await ip.ListEntryBegin(this,  wc.Data.Data[r]);
+						await ip.ListEntryBegin(this,  wc.Data.Data[r]).ConfigureAwait(false);
                         if (_ReportItems != null)
-                            await _ReportItems.Run(ip, wc.Data.Data[r]);
+                            await _ReportItems.Run(ip, wc.Data.Data[r]).ConfigureAwait(false);
 						ip.ListEntryEnd(this, wc.Data.Data[r]);
 					}
 				}
 				else
 				{	// need to process just whole group as a List entry
-					await ip.ListEntryBegin(this,  wc.Data.Data[ge.StartRow]);
+					await ip.ListEntryBegin(this,  wc.Data.Data[ge.StartRow]).ConfigureAwait(false);
 
 					// pass the first row of the group
                     if (_ReportItems != null)
-                        await _ReportItems.Run(ip, wc.Data.Data[ge.StartRow]);
+                        await _ReportItems.Run(ip, wc.Data.Data[ge.StartRow]).ConfigureAwait(false);
 
 					ip.ListEntryEnd(this, wc.Data.Data[ge.StartRow]);
 				}
@@ -353,7 +353,7 @@ namespace Majorsilence.Reporting.Rdl
 					for (int r=ge.StartRow; r <= ge.EndRow; r++)
 					{
 						row = wc.Data.Data[r];
-						height = await HeightOfList(rpt, pgs.G, row);
+						height = await HeightOfList(rpt, pgs.G, row).ConfigureAwait(false);
                         
                         if (p.YOffset + height > pagebottom && !p.IsEmpty())		// need another page for this row?
                             p = RunPageNew(pgs, p);					// yes; if at end this page is empty
@@ -362,13 +362,13 @@ namespace Majorsilence.Reporting.Rdl
                         PageRectangle border = null;
                         if (Style != null) {
 	                        border = new PageRectangle();
-                            await SetPagePositionAndStyle(rpt, border, row);
+                            await SetPagePositionAndStyle(rpt, border, row).ConfigureAwait(false);
 	                        p.AddObject(border);
                         }
 
                         int firstItem = p.Count;
                         if (_ReportItems != null)
-                            await _ReportItems.RunPage(pgs, row, listoffset);
+                            await _ReportItems.RunPage(pgs, row, listoffset).ConfigureAwait(false);
 
                         if (p == pgs.CurrentPage)       // did subitems force new page?
                         {   // no use the height of the list
@@ -380,7 +380,7 @@ namespace Majorsilence.Reporting.Rdl
                             p.YOffset = Math.Max(p.YOffset, BottomOfItems(p));  // carry on below what the row put there
                             if (this.Style != null)
                             {
-                                p.YOffset += await this.Style.EvalPaddingBottom(rpt, row);
+                                p.YOffset += await Style.EvalPaddingBottom(rpt, row).ConfigureAwait(false);
                             }
                         }
                         
@@ -395,7 +395,7 @@ namespace Majorsilence.Reporting.Rdl
 
 					// pass the first row of the group
 					row = wc.Data.Data[ge.StartRow];
-					height = await HeightOfList(rpt, pgs.G, row);
+					height = await HeightOfList(rpt, pgs.G, row).ConfigureAwait(false);
                     
                     if (p.YOffset + height > pagebottom && !p.IsEmpty())		// need another page for this row?
                         p = RunPageNew(pgs, p);					// yes; if at end this page is empty
@@ -403,7 +403,7 @@ namespace Majorsilence.Reporting.Rdl
 
                     int firstItem = p.Count;
                     if (_ReportItems != null)
-                        await _ReportItems.RunPage(pgs, row, listoffset);
+                        await _ReportItems.RunPage(pgs, row, listoffset).ConfigureAwait(false);
 
 
                     if (p == pgs.CurrentPage)       // did subitems force new page?
@@ -416,7 +416,7 @@ namespace Majorsilence.Reporting.Rdl
                         p.YOffset = Math.Max(p.YOffset, BottomOfItems(p));  // carry on below what the row put there
                         if (this.Style != null)
                         {
-                            p.YOffset += await this.Style.EvalPaddingBottom(rpt, row);
+                            p.YOffset += await Style.EvalPaddingBottom(rpt, row).ConfigureAwait(false);
                         }
                     }
 					
@@ -505,9 +505,9 @@ namespace Majorsilence.Reporting.Rdl
 			foreach (Textbox tb in this._GrowList)
 			{
 				float top = (float) (tb.Top == null? 0.0 : tb.Top.Points);
-				height = top + await tb.RunTextCalcHeight(rpt, g, r);
+				height = top + await tb.RunTextCalcHeight(rpt, g, r).ConfigureAwait(false);
 				if (tb.Style != null)
-					height += (await tb.Style.EvalPaddingBottom(rpt, r) + await tb.Style.EvalPaddingTop(rpt, r));
+					height += (await tb.Style.EvalPaddingBottom(rpt, r).ConfigureAwait(false) + await tb.Style.EvalPaddingTop(rpt, r).ConfigureAwait(false));
 				defnHeight = Math.Max(height, defnHeight);
 			}
 			wc.CalcHeight = defnHeight;

@@ -50,7 +50,7 @@ namespace Majorsilence.Reporting.Rdl
 		{
 			foreach (QueryParameter q in _Items)
 			{
-                await q.FinalPass();
+                await q.FinalPass().ConfigureAwait(false);
                 if (q.IsArray)
                     _ContainsArray = true;
 			}

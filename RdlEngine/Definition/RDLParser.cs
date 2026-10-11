@@ -97,7 +97,7 @@ namespace Majorsilence.Reporting.Rdl
 		/// <returns>A Report instance.</returns>
 		public async Task<Report> Parse()
 		{
-			return await Parse(0);
+			return await Parse(0).ConfigureAwait(false);
 		}
 		
 		internal async Task<Report> Parse(int oc)
@@ -126,7 +126,7 @@ namespace Majorsilence.Reporting.Rdl
 			}
 
 			ReportDefn rd = new ReportDefn(xNode, rl, this._Folder, this._DataSourceReferencePassword, oc, OnSubReportGetContent, OverwriteConnectionString, OverwriteInSubreport, SkipDatabaseSchemaValidation);
-			await rd.InitializeAsync();
+			await rd.InitializeAsync().ConfigureAwait(false);
 			_Report = new Report(rd);
 			
 			bPassed = true;

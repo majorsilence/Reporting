@@ -53,7 +53,7 @@ namespace Majorsilence.Reporting.Rdl
 
 				foreach (Row r in re)
 				{
-					current_value = await _Expr.Evaluate(rpt, r);
+					current_value = await _Expr.Evaluate(rpt, r).ConfigureAwait(false);
 					if (current_value == null || (current_value is double && double.IsNaN((double)current_value)))
 						continue;
 					else if (max_value == null)
@@ -70,31 +70,31 @@ namespace Majorsilence.Reporting.Rdl
 		
 		public async Task<double> EvaluateDouble(Report rpt, Row row)
 		{
-			object result = await Evaluate(rpt, row);
+			object result = await Evaluate(rpt, row).ConfigureAwait(false);
 			return Convert.ToDouble(result);
 		}
 		
 		public async Task<decimal> EvaluateDecimal(Report rpt, Row row)
 		{
-			object result = await Evaluate(rpt, row);
+			object result = await Evaluate(rpt, row).ConfigureAwait(false);
 			return Convert.ToDecimal(result);
 		}
 
         public async Task<int> EvaluateInt32(Report rpt, Row row)
         {
-            object result = await Evaluate(rpt, row);
+            object result = await Evaluate(rpt, row).ConfigureAwait(false);
             return Convert.ToInt32(result);
         }
 
 		public async Task<string> EvaluateString(Report rpt, Row row)
 		{
-			object result = await Evaluate(rpt, row);
+			object result = await Evaluate(rpt, row).ConfigureAwait(false);
 			return Convert.ToString(result);
 		}
 
 		public async Task<DateTime> EvaluateDateTime(Report rpt, Row row)
 		{
-			object result = await Evaluate(rpt, row);
+			object result = await Evaluate(rpt, row).ConfigureAwait(false);
 			return Convert.ToDateTime(result);
 		}
 

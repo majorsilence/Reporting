@@ -182,19 +182,19 @@ namespace Majorsilence.Reporting.Rdl
 		async override internal Task FinalPass()
 		{
 			if (_Style != null)
-                await _Style.FinalPass();
+                await _Style.FinalPass().ConfigureAwait(false);
 			if (_Action != null)
-                await _Action.FinalPass();
+                await _Action.FinalPass().ConfigureAwait(false);
 			if (_Visibility != null)
-                await _Visibility.FinalPass();
+                await _Visibility.FinalPass().ConfigureAwait(false);
 			if (_ToolTip != null)
-                await _ToolTip.FinalPass();
+                await _ToolTip.FinalPass().ConfigureAwait(false);
 			if (_Label != null)
-                await _Label.FinalPass();
+                await _Label.FinalPass().ConfigureAwait(false);
 			if (_Bookmark != null)
-                await _Bookmark.FinalPass();
+                await _Bookmark.FinalPass().ConfigureAwait(false);
 			if (_Custom != null)
-                await _Custom.FinalPass();
+                await _Custom.FinalPass().ConfigureAwait(false);
 
 			if (Parent.Parent is TableCell)	// This is part of a table
 			{
@@ -469,7 +469,7 @@ namespace Majorsilence.Reporting.Rdl
 		{
 			if (this._Visibility == null)
 				return false;
-			return await _Visibility.IsHidden(rpt, r);
+			return await _Visibility.IsHidden(rpt, r).ConfigureAwait(false);
 		}
 
 		internal void SetPageLeft(Report rpt)
@@ -541,7 +541,7 @@ namespace Majorsilence.Reporting.Rdl
                     pi.W = this.WidthOrOwnerWidth(rpt);
             }
 			if (Style != null)
-				pi.SI = await Style.GetStyleInfo(rpt, row);
+				pi.SI = await Style.GetStyleInfo(rpt, row).ConfigureAwait(false);
 			else
 				pi.SI = new StyleInfo();	// this will just default everything
 
@@ -550,15 +550,15 @@ namespace Majorsilence.Reporting.Rdl
 			// Catch any action needed
 			if (this._Action != null)
 			{
-				pi.BookmarkLink = await _Action.BookmarkLinkValue(rpt, row);
-				pi.HyperLink = await _Action.HyperLinkValue(rpt, row);
+				pi.BookmarkLink = await _Action.BookmarkLinkValue(rpt, row).ConfigureAwait(false);
+				pi.HyperLink = await _Action.HyperLinkValue(rpt, row).ConfigureAwait(false);
 			}
 
             if (this._Bookmark != null)
-                pi.Bookmark = await _Bookmark.EvaluateString(rpt, row);
+                pi.Bookmark = await _Bookmark.EvaluateString(rpt, row).ConfigureAwait(false);
 
 			if (this._ToolTip != null)
-				pi.Tooltip = await _ToolTip.EvaluateString(rpt, row);
+				pi.Tooltip = await _ToolTip.EvaluateString(rpt, row).ConfigureAwait(false);
 		}
 
 		internal MatrixCellEntry GetMC(Report rpt)
@@ -817,7 +817,7 @@ namespace Majorsilence.Reporting.Rdl
 			if (_ToolTip == null)
 				return null;
 
-			return await _ToolTip.EvaluateString(rpt, r);
+			return await _ToolTip.EvaluateString(rpt, r).ConfigureAwait(false);
 		}
 
 		internal Expression Label
@@ -843,7 +843,7 @@ namespace Majorsilence.Reporting.Rdl
 			if (_Bookmark == null)
 				return null;
 
-			return await _Bookmark.EvaluateString(rpt, r);
+			return await _Bookmark.EvaluateString(rpt, r).ConfigureAwait(false);
 		}
 
 		internal TableCell TC
@@ -882,6 +882,10 @@ namespace Majorsilence.Reporting.Rdl
 			get { return this._YParents; }
 		}
 
+		// Whether a Textbox's value is a constant decides its Auto data element output. Finding that out is
+		// async, so Textbox.FinalPass works it out once and the getter below reads the answer.
+		internal bool ValueIsConstant;
+
 		virtual internal DataElementOutputEnum DataElementOutput
 		{
 			get 
@@ -890,10 +894,7 @@ namespace Majorsilence.Reporting.Rdl
 				{
 					if (this is Textbox)
 					{
-						Textbox tb = this as Textbox;
-						// HACK: async
-						bool isConstant = Task.Run(async () => await tb.Value.IsConstant()).GetAwaiter().GetResult();
-                        if (isConstant)
+                        if (ValueIsConstant)
 							return DataElementOutputEnum.NoOutput;
 						else
 							return DataElementOutputEnum.Output;

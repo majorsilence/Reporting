@@ -44,6 +44,8 @@ public static class Smoke
     /// Renders every .rdl under a folder to PDF and reports the ones that throw (data sources the machine lacks
     /// fail with a connection error; those are listed too). <c>-- sweep ../Examples [text]</c> only lists
     /// failures whose message contains the text.
+    /// Careful: a report whose sqlite connect string names a missing file makes the provider create an empty
+    /// database there, so run it from a scratch copy of the folder or check <c>git status</c> afterwards.
     /// </summary>
     public static async Task Sweep(string folder, string? contains)
     {

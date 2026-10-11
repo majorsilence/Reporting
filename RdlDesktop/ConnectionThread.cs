@@ -271,7 +271,7 @@ namespace Majorsilence.Reporting.RdlDesktop
 					ReportRender rr = new ReportRender(report);
 					rr.ActionUrl = "/" + url;
 					
-					string p = rr.ParameterHtml(ld);
+					string p = await rr.ParameterHtmlAsync(ld);
 					// put this into a file.
 					string parmUrl;
 					StreamWriter sw=null;

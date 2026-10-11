@@ -204,8 +204,9 @@ namespace Majorsilence.Reporting.RdlReader
                 {
                     if (!string.IsNullOrWhiteSpace(printerName))
                     {
-                        // HACK: async
-                        Task.Run(async ()=> await SilentPrint(reportFile, parameters, printerName)).GetAwaiter().GetResult();
+                        // Main is the process entry point: there is no UI loop or SynchronizationContext yet, so
+                        // waiting here cannot deadlock, and the STA thread has to stay the one that runs Application.
+                        SilentPrint(reportFile, parameters, printerName).GetAwaiter().GetResult();
                         return;
                     }
 

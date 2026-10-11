@@ -212,7 +212,7 @@ namespace Majorsilence.Reporting.Rdl
 
                 //Create a Page 
                 CreatePage();
-                await ProcessPage(pgs, p);
+                await ProcessPage(pgs, p).ConfigureAwait(false);
                 // after a page
                 AfterProcessPage();
             }
@@ -282,8 +282,8 @@ namespace Majorsilence.Reporting.Rdl
                 if (pi is PageTextHtml)
                 {
                     PageTextHtml pth = pi as PageTextHtml;
-                    await pth.Build(pgs.G);
-                    await ProcessPage(pgs, pth);
+                    await pth.Build(pgs.G).ConfigureAwait(false);
+                    await ProcessPage(pgs, pth).ConfigureAwait(false);
                     continue;
                 }
 

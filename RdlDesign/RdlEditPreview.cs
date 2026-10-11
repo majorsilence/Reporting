@@ -218,9 +218,17 @@ namespace Majorsilence.Reporting.RdlDesign
 			}
 		}
 		
+		[Obsolete("Blocks the calling thread. Use GetSelectedStyleAsync().")]
 		public StyleInfo SelectedStyle
 		{
+#pragma warning disable CS0618
 			get {return dcDesign.SelectedStyle;}
+#pragma warning restore CS0618
+		}
+
+		public Task<StyleInfo> GetSelectedStyleAsync()
+		{
+			return dcDesign.GetSelectedStyleAsync();
 		}
 		
 		public string SelectionName

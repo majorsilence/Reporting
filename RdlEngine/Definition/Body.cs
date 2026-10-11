@@ -64,9 +64,9 @@ namespace Majorsilence.Reporting.Rdl
 		async override internal Task FinalPass()
 		{
 			if (_ReportItems != null)
-				await _ReportItems.FinalPass();
+				await _ReportItems.FinalPass().ConfigureAwait(false);
 			if (_Style != null)
-                await _Style.FinalPass();
+                await _Style.FinalPass().ConfigureAwait(false);
 			return;
 		}
 
@@ -75,7 +75,7 @@ namespace Majorsilence.Reporting.Rdl
 			ip.BodyStart(this);
 
 			if (_ReportItems != null)
-                await _ReportItems.Run(ip, null);	// not sure about the row here?
+                await _ReportItems.Run(ip, null).ConfigureAwait(false);	// not sure about the row here?
 
 			ip.BodyEnd(this);
 			return ;
@@ -91,7 +91,7 @@ namespace Majorsilence.Reporting.Rdl
 			this.SetCurrentColumn(pgs.Report, 0);
 
 			if (_ReportItems != null)
-                await _ReportItems.RunPage(pgs, null, OwnerReport.LeftMargin.Points);
+                await _ReportItems.RunPage(pgs, null, OwnerReport.LeftMargin.Points).ConfigureAwait(false);
 
 			return ;
 		}

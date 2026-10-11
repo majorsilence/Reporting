@@ -39,7 +39,7 @@ namespace Majorsilence.Reporting.Rdl
 		// Evaluate is for interpretation  (and is relatively slow)
 		public async Task<object> Evaluate(Report rpt, Row row)
 		{
-			return (object)await EvaluateDouble(rpt, row);
+			return (object)await EvaluateDouble(rpt, row).ConfigureAwait(false);
 		}
 		
 		public async Task<int> EvaluateInt32(Report rpt, Row row)
@@ -57,7 +57,7 @@ namespace Majorsilence.Reporting.Rdl
 				Hashtable ht = new Hashtable(count);
 				foreach (Row r in re)
 				{
-					temp = await _Expr.Evaluate(rpt, r);
+					temp = await _Expr.Evaluate(rpt, r).ConfigureAwait(false);
 					if (temp != null)
 					{
 						object o = ht[temp];	// search for it
@@ -76,27 +76,27 @@ namespace Majorsilence.Reporting.Rdl
 
         public async Task<double> EvaluateDouble(Report rpt, Row row)
         {
-            int d = await EvaluateInt32(rpt, row);
+            int d = await EvaluateInt32(rpt, row).ConfigureAwait(false);
 
             return Convert.ToDouble(d);
         }
 		
 		public async Task<decimal> EvaluateDecimal(Report rpt, Row row)
 		{
-			int d = await EvaluateInt32(rpt, row);
+			int d = await EvaluateInt32(rpt, row).ConfigureAwait(false);
 
 			return Convert.ToDecimal(d);
 		}
 
 		public async Task<string> EvaluateString(Report rpt, Row row)
 		{
-			double result = await EvaluateDouble(rpt, row);
+			double result = await EvaluateDouble(rpt, row).ConfigureAwait(false);
 			return Convert.ToString(result);
 		}
 
 		public async Task<DateTime> EvaluateDateTime(Report rpt, Row row)
 		{
-			object result = await Evaluate(rpt, row);
+			object result = await Evaluate(rpt, row).ConfigureAwait(false);
 			return Convert.ToDateTime(result);
 		}
 

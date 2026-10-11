@@ -33,38 +33,38 @@ namespace Majorsilence.Reporting.Rdl
                 g.CompositingQuality = Draw2.Drawing2D.CompositingQuality.HighQuality;
 			
 				// Adjust the top margin to depend on the title height
-				System.Drawing.Size titleSize = await DrawTitleMeasure(rpt, g, ChartDefn.Title);
+				System.Drawing.Size titleSize = await DrawTitleMeasure(rpt, g, ChartDefn.Title).ConfigureAwait(false);
 				Layout.TopMargin = titleSize.Height;
 
-                await DrawChartStyle(rpt, g);
+                await DrawChartStyle(rpt, g).ConfigureAwait(false);
 
                 // Draw title; routine determines if necessary
-                await DrawTitle(rpt, g, ChartDefn.Title, new System.Drawing.Rectangle(0, 0, _bm.Width, Layout.TopMargin));
+                await DrawTitle(rpt, g, ChartDefn.Title, new System.Drawing.Rectangle(0, 0, _bm.Width, Layout.TopMargin)).ConfigureAwait(false);
 
 				// Draw legend
-				System.Drawing.Rectangle lRect = await DrawLegend(rpt, g, false, true);
+				System.Drawing.Rectangle lRect = await DrawLegend(rpt, g, false, true).ConfigureAwait(false);
 
 				// Adjust the bottom margin to depend on the Category Axis
-				System.Drawing.Size caSize = await CategoryAxisSize(rpt, g);
+				System.Drawing.Size caSize = await CategoryAxisSize(rpt, g).ConfigureAwait(false);
 				Layout.BottomMargin = caSize.Height;
 
 				// 20022008 AJM GJL - Added required info
 				AdjustMargins(lRect,rpt,g);     // Adjust margins based on legend.
 
                 // Draw Plot area
-                await DrawPlotAreaStyle(rpt, g, lRect);
+                await DrawPlotAreaStyle(rpt, g, lRect).ConfigureAwait(false);
 
 				// Draw Category Axis
 				if (caSize.Height > 0)
                     await DrawCategoryAxis(rpt, g,  
-						new System.Drawing.Rectangle(Layout.LeftMargin, _bm.Height-Layout.BottomMargin, _bm.Width - Layout.LeftMargin - Layout.RightMargin, caSize.Height));
+						new System.Drawing.Rectangle(Layout.LeftMargin, _bm.Height-Layout.BottomMargin, _bm.Width - Layout.LeftMargin - Layout.RightMargin, caSize.Height)).ConfigureAwait(false);
 
 				if (ChartDefn.Type == ChartTypeEnum.Doughnut)
-                    await DrawPlotAreaDoughnut(rpt, g);
+                    await DrawPlotAreaDoughnut(rpt, g).ConfigureAwait(false);
 				else
-                    await DrawPlotAreaPie(rpt, g);
+                    await DrawPlotAreaPie(rpt, g).ConfigureAwait(false);
 
-                await DrawLegend(rpt, g, false, false);
+                await DrawLegend(rpt, g, false, false).ConfigureAwait(false);
 			}
 		}
 
@@ -95,7 +95,7 @@ namespace Majorsilence.Reporting.Rdl
 				double total=0;		// sum up for this category
 				for (int iCol=1; iCol <= SeriesCount; iCol++)
 				{
-					total += await this.GetDataValue(rpt, iRow, iCol);
+					total += await GetDataValue(rpt, iRow, iCol).ConfigureAwait(false);
 				}
 
 				// Pie size decreases as we go in
@@ -103,11 +103,11 @@ namespace Majorsilence.Reporting.Rdl
 				pieSize = maxPieSize - ((iRow - 1) * doughWidth * 2);
 				for (int iCol=1; iCol <= SeriesCount; iCol++)
 				{
-					double v = await this.GetDataValue(rpt, iRow, iCol);
+					double v = await GetDataValue(rpt, iRow, iCol).ConfigureAwait(false);
 					endAngle = (float) (startAngle + (v / total * 360));
 
-                    await DrawPie(g, rpt, await GetSeriesBrush(rpt, iRow, iCol), 
-						new System.Drawing.Rectangle(pieLocX, pieLocY, pieSize, pieSize), iRow, iCol, startAngle, endAngle);
+                    await DrawPie(g, rpt, await GetSeriesBrush(rpt, iRow, iCol).ConfigureAwait(false), 
+						new System.Drawing.Rectangle(pieLocX, pieLocY, pieSize, pieSize), iRow, iCol, startAngle, endAngle).ConfigureAwait(false);
 
 					startAngle = endAngle;
 				}
@@ -123,7 +123,7 @@ namespace Majorsilence.Reporting.Rdl
 
 			Rows cData = ChartDefn.ChartMatrix.GetMyData(rpt);
 			Row r = cData.Data[0];
-            await s.DrawBackgroundCircle(rpt, g, r, rect);
+            await s.DrawBackgroundCircle(rpt, g, r, rect).ConfigureAwait(false);
 		}
 
 		async Task DrawPlotAreaPie(Report rpt, Draw2.Graphics g)
@@ -149,7 +149,7 @@ namespace Majorsilence.Reporting.Rdl
 				double total=0;
 				for (int iCol=1; iCol <= SeriesCount; iCol++)
 				{
-					total += await this.GetDataValue(rpt, iRow, iCol);
+					total += await GetDataValue(rpt, iRow, iCol).ConfigureAwait(false);
 				}
 				if (total > maxCategory)
 					maxCategory = total;
@@ -164,7 +164,7 @@ namespace Majorsilence.Reporting.Rdl
 				double total=0;
 				for (int iCol=1; iCol <= SeriesCount; iCol++)
 				{
-					total += await this.GetDataValue(rpt, iRow, iCol);
+					total += await GetDataValue(rpt, iRow, iCol).ConfigureAwait(false);
 				}
 
 				// Pie size is a ratio of the area of the pies (not the diameter)
@@ -172,11 +172,11 @@ namespace Majorsilence.Reporting.Rdl
 				int pieSize = (int) (2 * Math.Sqrt(Math.PI * ((maxPieSize/2) * (maxPieSize/2) * total/maxCategory) / Math.PI));
 				for (int iCol=1; iCol <= SeriesCount; iCol++)
 				{
-					double v = await this.GetDataValue(rpt, iRow, iCol);
+					double v = await GetDataValue(rpt, iRow, iCol).ConfigureAwait(false);
 					endAngle = (float) (startAngle + (v / total * 360));
 
-                    await DrawPie(g, rpt, await GetSeriesBrush(rpt, iRow, iCol), 
-						new System.Drawing.Rectangle(pieLocX, pieLocY, pieSize, pieSize), iRow, iCol, startAngle, endAngle);
+                    await DrawPie(g, rpt, await GetSeriesBrush(rpt, iRow, iCol).ConfigureAwait(false), 
+						new System.Drawing.Rectangle(pieLocX, pieLocY, pieSize, pieSize), iRow, iCol, startAngle, endAngle).ConfigureAwait(false);
 
 					startAngle = endAngle;
 				}
@@ -196,7 +196,7 @@ namespace Majorsilence.Reporting.Rdl
 			Style s = a.Style;
 
 			// Measure the title
-			size = await DrawTitleMeasure(rpt, g, a.Title);
+			size = await DrawTitleMeasure(rpt, g, a.Title).ConfigureAwait(false);
 
 			if (!a.Visible)		// don't need to calculate the height
 				return size;
@@ -206,13 +206,13 @@ namespace Majorsilence.Reporting.Rdl
 			int maxHeight=0;
 			for (int iRow=1; iRow <= CategoryCount; iRow++)
 			{
-				(object v, tc) = await this.GetCategoryValue(rpt, iRow);
+				(object v, tc) = await GetCategoryValue(rpt, iRow).ConfigureAwait(false);
 				System.Drawing.Size tSize;
 				if (s == null)
-					tSize = await Style.MeasureStringDefaults(rpt, g, v, tc, null, int.MaxValue);
+					tSize = await Style.MeasureStringDefaults(rpt, g, v, tc, null, int.MaxValue).ConfigureAwait(false);
 
 				else
-					tSize = await s.MeasureString(rpt, g, v, tc, null, int.MaxValue);
+					tSize = await s.MeasureString(rpt, g, v, tc, null, int.MaxValue).ConfigureAwait(false);
 
 				if (tSize.Height > maxHeight)
 					maxHeight = tSize.Height;
@@ -233,14 +233,14 @@ namespace Majorsilence.Reporting.Rdl
 				return;
 			Style s = a.Style;
 
-			System.Drawing.Size tSize = await DrawTitleMeasure(rpt, g, a.Title);
-            await DrawTitle(rpt, g, a.Title, new System.Drawing.Rectangle(rect.Left, rect.Bottom-tSize.Height, rect.Width, tSize.Height));
+			System.Drawing.Size tSize = await DrawTitleMeasure(rpt, g, a.Title).ConfigureAwait(false);
+            await DrawTitle(rpt, g, a.Title, new System.Drawing.Rectangle(rect.Left, rect.Bottom-tSize.Height, rect.Width, tSize.Height)).ConfigureAwait(false);
 
 			int drawWidth = rect.Width / CategoryCount;
 			TypeCode tc;
 			for (int iRow=1; iRow <= CategoryCount; iRow++)
 			{
-				(object v, tc) = await this.GetCategoryValue(rpt, iRow);
+				(object v, tc) = await GetCategoryValue(rpt, iRow).ConfigureAwait(false);
 
 				int drawLoc=(int) (rect.Left + ((iRow-1) * ((double) rect.Width / CategoryCount)));
 
@@ -251,7 +251,7 @@ namespace Majorsilence.Reporting.Rdl
 					if (s == null)
 						Style.DrawStringDefaults(g, v, drawRect);
 					else
-                        await s.DrawString(rpt, g, v, tc, null, drawRect);
+                        await s.DrawString(rpt, g, v, tc, null, drawRect).ConfigureAwait(false);
 				}
 			}
 
@@ -260,7 +260,7 @@ namespace Majorsilence.Reporting.Rdl
 
 		async Task DrawPie(Draw2.Graphics g, Report rpt, Draw2.Brush brush, System.Drawing.Rectangle rect, int iRow, int iCol, float startAngle, float endAngle)
 		{
-            if ((ChartSubTypeEnum)Enum.Parse(typeof(ChartSubTypeEnum), await _ChartDefn.Subtype.EvaluateString(rpt, _row)) == ChartSubTypeEnum.Exploded)
+            if ((ChartSubTypeEnum)Enum.Parse(typeof(ChartSubTypeEnum), await _ChartDefn.Subtype.EvaluateString(rpt, _row).ConfigureAwait(false)) == ChartSubTypeEnum.Exploded)
 			{
 				// Need to adjust the rectangle 
 				int side = (int) (rect.Width * .75);	// side needs to be smaller to account for exploded pies

@@ -56,10 +56,10 @@ namespace Majorsilence.Reporting.Rdl
         /// <summary>Evaluates the tooltip settings; call once after construction, before Draw.</summary>
         internal async Task InitAsync()
         {
-            _showToolTips = await _showTooltipsExpr.EvaluateBoolean(_initReport, _row);
-            _showToolTipsX = await _showTooltipsXExpr.EvaluateBoolean(_initReport, _row);
-            _tooltipYFormat = await _tooltipYFormatExpr.EvaluateString(_initReport, _row);
-            _tooltipXFormat = await _tooltipXFormatExpr.EvaluateString(_initReport, _row);
+            _showToolTips = await _showTooltipsExpr.EvaluateBoolean(_initReport, _row).ConfigureAwait(false);
+            _showToolTipsX = await _showTooltipsXExpr.EvaluateBoolean(_initReport, _row).ConfigureAwait(false);
+            _tooltipYFormat = await _tooltipYFormatExpr.EvaluateString(_initReport, _row).ConfigureAwait(false);
+            _tooltipXFormat = await _tooltipXFormatExpr.EvaluateString(_initReport, _row).ConfigureAwait(false);
         }
 
         internal virtual Task Draw(Report rpt)
@@ -137,7 +137,7 @@ namespace Majorsilence.Reporting.Rdl
         protected async Task<Draw2.Brush[]> SeriesBrush(Report rpt, Row row, ReportDefn defn)
         {
             if (_SeriesBrush == null)
-                _SeriesBrush = await GetSeriesBrushes(rpt, row, defn);  // These are all from Brushes class; so no Dispose should be used
+                _SeriesBrush = await GetSeriesBrushes(rpt, row, defn).ConfigureAwait(false);  // These are all from Brushes class; so no Dispose should be used
             return _SeriesBrush;
         }
 
@@ -166,8 +166,8 @@ namespace Majorsilence.Reporting.Rdl
             else
             {
                 Row r = FirstChartRow(rpt);
-                await _ChartDefn.Style.DrawBorder(rpt, g, r, rect);
-                await _ChartDefn.Style.DrawBackground(rpt, g, r, rect);
+                await _ChartDefn.Style.DrawBorder(rpt, g, r, rect).ConfigureAwait(false);
+                await _ChartDefn.Style.DrawBackground(rpt, g, r, rect).ConfigureAwait(false);
             }
 
             return;
@@ -209,9 +209,9 @@ namespace Majorsilence.Reporting.Rdl
                 }
                 else
                 {
-                    drawFont = await s.GetFont(rpt, null);
-                    drawBrush = await s.GetBrush(rpt, null);
-                    drawFormat = await s.GetStringFormat(rpt, null, Draw2.StringAlignment.Near);
+                    drawFont = await s.GetFont(rpt, null).ConfigureAwait(false);
+                    drawBrush = await s.GetBrush(rpt, null).ConfigureAwait(false);
+                    drawFormat = await s.GetStringFormat(rpt, null, Draw2.StringAlignment.Near).ConfigureAwait(false);
                 }
 
                 int x, y, h;
@@ -220,7 +220,7 @@ namespace Majorsilence.Reporting.Rdl
                 System.Drawing.Size[] sizes;
 
                 (sizes, maxTextWidth, maxTextHeight) = await DrawLegendMeasure(rpt, g, drawFont, drawFormat,
-                 new System.Drawing.SizeF(Layout.Width, Layout.Height));
+                 new System.Drawing.SizeF(Layout.Width, Layout.Height)).ConfigureAwait(false);
                 int boxSize = (int)(maxTextHeight * .8);
                 int totalItemWidth = 0;         // width of a legend item
                 int totalWidth, totalHeight;    // final height and width of legend
@@ -345,15 +345,15 @@ namespace Majorsilence.Reporting.Rdl
                 rRect = new System.Drawing.Rectangle(x - 1, y - 1, totalWidth + 2, totalHeight + 2);
                 if (s != null)
                 {
-                    await s.DrawBackground(rpt, g, null, rRect);  // draw (or not draw) background 
-                    await s.DrawBorder(rpt, g, null, rRect);      // draw (or not draw) border depending on style
+                    await s.DrawBackground(rpt, g, null, rRect).ConfigureAwait(false);  // draw (or not draw) background 
+                    await s.DrawBorder(rpt, g, null, rRect).ConfigureAwait(false);      // draw (or not draw) border depending on style
                 }
 
                 int saveX = x;
                 ChartMarkerEnum cm = this.ChartDefn.Type == ChartTypeEnum.Bubble ? ChartMarkerEnum.Bubble : ChartMarkerEnum.None;
                 for (int iCol = 1; iCol <= SeriesCount; iCol++)
                 {
-                    string c = await GetSeriesValue(rpt, iCol);
+                    string c = await GetSeriesValue(rpt, iCol).ConfigureAwait(false);
                     if (c != "") //14052008WRP Cater for empty strings in the legend
                     {
                         System.Drawing.Rectangle rect;
@@ -408,7 +408,7 @@ namespace Majorsilence.Reporting.Rdl
 
                                     if ((cm != ChartMarkerEnum.None || this.ChartDefn.Type == ChartTypeEnum.Scatter) && (t == typeof(Drawing2D.HatchBrush))) //GJL 110208 - Don't draw pattern for lines or Bubbles
                                     {
-                                        Drawing2D.HatchBrush hb = (Drawing2D.HatchBrush)await GetSeriesBrush(rpt, 1, iCol);
+                                        Drawing2D.HatchBrush hb = (Drawing2D.HatchBrush)await GetSeriesBrush(rpt, 1, iCol).ConfigureAwait(false);
                                         b = new Draw2.SolidBrush(hb.ForegroundColor);
 
                                         DrawLegendBox(g, b,
@@ -416,7 +416,7 @@ namespace Majorsilence.Reporting.Rdl
                                     }
                                     else
                                     {
-                                        DrawLegendBox(g, await GetSeriesBrush(rpt, 1, iCol),
+                                        DrawLegendBox(g, await GetSeriesBrush(rpt, 1, iCol).ConfigureAwait(false),
                                             cm, x, y + 1, boxSize, intLineSize);
                                     }
 
@@ -430,14 +430,14 @@ namespace Majorsilence.Reporting.Rdl
 
                                 if (cm != ChartMarkerEnum.None && (t == typeof(Drawing2D.HatchBrush))) //GJL 110208 - Don't draw pattern for lines
                                 {
-                                    Drawing2D.HatchBrush hb = (Drawing2D.HatchBrush)await GetSeriesBrush(rpt, 1, iCol);
+                                    Drawing2D.HatchBrush hb = (Drawing2D.HatchBrush)await GetSeriesBrush(rpt, 1, iCol).ConfigureAwait(false);
                                     b = new Draw2.SolidBrush(hb.ForegroundColor);
 
                                     DrawLegendBox(g, /*GetSeriesBrushesExcel(iCol - 1)*/ b,
                                     cm, x, y + 1, boxSize, intLineSize);
                                 }
                                 else
-                                { DrawLegendBox(g, await GetSeriesBrush(rpt, 1, iCol), cm, x + 1, y, boxSize, intLineSize); }
+                                { DrawLegendBox(g, await GetSeriesBrush(rpt, 1, iCol).ConfigureAwait(false), cm, x + 1, y, boxSize, intLineSize); }
 
 
                                 if (iCol % 2 == 0)
@@ -458,7 +458,7 @@ namespace Majorsilence.Reporting.Rdl
 
                                 if (cm != ChartMarkerEnum.None && (t == typeof(Drawing2D.HatchBrush)))       //GJL 110208 - Don't draw pattern for lines                          
                                 {
-                                    Drawing2D.HatchBrush hb = (Drawing2D.HatchBrush)await GetSeriesBrush(rpt, 1, iCol);
+                                    Drawing2D.HatchBrush hb = (Drawing2D.HatchBrush)await GetSeriesBrush(rpt, 1, iCol).ConfigureAwait(false);
                                     b = new Draw2.SolidBrush(hb.ForegroundColor);
 
                                     DrawLegendBox(g, /*GetSeriesBrushesExcel(iCol - 1)*/ b,
@@ -466,7 +466,7 @@ namespace Majorsilence.Reporting.Rdl
                                 }
                                 else
                                 {
-                                    DrawLegendBox(g, await GetSeriesBrush(rpt, 1, iCol),
+                                    DrawLegendBox(g, await GetSeriesBrush(rpt, 1, iCol).ConfigureAwait(false),
                                         cm, x + 1, y, boxSize, intLineSize);
                                 }
 
@@ -486,7 +486,7 @@ namespace Majorsilence.Reporting.Rdl
                     drawFormat.Dispose();
             }
             if (s != null)
-                rRect = await s.PaddingAdjust(rpt, null, rRect, true);
+                rRect = await s.PaddingAdjust(rpt, null, rRect, true).ConfigureAwait(false);
             return rRect;
 
         }
@@ -592,7 +592,7 @@ namespace Majorsilence.Reporting.Rdl
 
             for (int iCol = 1; iCol <= SeriesCount; iCol++)
             {
-                string c = await GetSeriesValue(rpt, iCol);
+                string c = await GetSeriesValue(rpt, iCol).ConfigureAwait(false);
                 if (c != "")  //14052008WRP cater for empty strings in legend names
                 {
                     System.Drawing.SizeF ms = g.MeasureStringLocked(c, f, maxSize, sf);
@@ -628,7 +628,7 @@ namespace Majorsilence.Reporting.Rdl
                     //				rg.Complement(crect);
                     //				Region saver = g.Clip;
                     //				g.Clip = rg;
-                    await s.DrawBackground(rpt, g, r, rect);
+                    await s.DrawBackground(rpt, g, r, rect).ConfigureAwait(false);
                     //				g.Clip = saver;
                 }
                 finally
@@ -638,7 +638,7 @@ namespace Majorsilence.Reporting.Rdl
                 }
             }
             else
-                await s.DrawBackground(rpt, g, r, rect);
+                await s.DrawBackground(rpt, g, r, rect).ConfigureAwait(false);
 
             return;
         }
@@ -652,11 +652,11 @@ namespace Majorsilence.Reporting.Rdl
                 return;
 
             Row r = FirstChartRow(rpt);
-            object title = await t.Caption.Evaluate(rpt, r);
+            object title = await t.Caption.Evaluate(rpt, r).ConfigureAwait(false);
             if (t.Style != null)
             {
-                await t.Style.DrawString(rpt, g, title, t.Caption.GetTypeCode(), r, rect);
-                await t.Style.DrawBorder(rpt, g, r, rect);
+                await t.Style.DrawString(rpt, g, title, t.Caption.GetTypeCode(), r, rect).ConfigureAwait(false);
+                await t.Style.DrawBorder(rpt, g, r, rect).ConfigureAwait(false);
             }
             else
                 Style.DrawStringDefaults(g, title, rect);
@@ -672,11 +672,11 @@ namespace Majorsilence.Reporting.Rdl
                 return size;
 
             Row r = FirstChartRow(rpt);
-            object title = await t.Caption.Evaluate(rpt, r);
+            object title = await t.Caption.Evaluate(rpt, r).ConfigureAwait(false);
             if (t.Style != null)
-                size = await t.Style.MeasureString(rpt, g, title, t.Caption.GetTypeCode(), r, int.MaxValue);
+                size = await t.Style.MeasureString(rpt, g, title, t.Caption.GetTypeCode(), r, int.MaxValue).ConfigureAwait(false);
             else
-                size = await Style.MeasureStringDefaults(rpt, g, title, t.Caption.GetTypeCode(), r, int.MaxValue);
+                size = await Style.MeasureStringDefaults(rpt, g, title, t.Caption.GetTypeCode(), r, int.MaxValue).ConfigureAwait(false);
 
             return size;
         }
@@ -692,8 +692,8 @@ namespace Majorsilence.Reporting.Rdl
 
             if (a != null)
             {
-                await a.DrawString(rpt, g, t, t.GetTypeCode(), r, rect);
-                await a.DrawBorder(rpt, g, r, rect);
+                await a.DrawString(rpt, g, t, t.GetTypeCode(), r, rect).ConfigureAwait(false);
+                await a.DrawBorder(rpt, g, r, rect).ConfigureAwait(false);
             }
             else
                 Style.DrawStringDefaults(g, t, rect);
@@ -710,9 +710,9 @@ namespace Majorsilence.Reporting.Rdl
                 return size;
 
             if (a != null)
-                size = await a.MeasureString(rpt, g, t, t.GetTypeCode(), r, int.MaxValue);
+                size = await a.MeasureString(rpt, g, t, t.GetTypeCode(), r, int.MaxValue).ConfigureAwait(false);
             else
-                size = await Style.MeasureStringDefaults(rpt, g, t, t.GetTypeCode(), r, int.MaxValue);
+                size = await Style.MeasureStringDefaults(rpt, g, t, t.GetTypeCode(), r, int.MaxValue).ConfigureAwait(false);
 
             return size;
 
@@ -736,14 +736,14 @@ namespace Majorsilence.Reporting.Rdl
                 lrow = null;
             ChartExpression ce = (ChartExpression)(mce.DisplayItem);
 
-            object v = await ce.Value.Evaluate(rpt, lrow);
+            object v = await ce.Value.Evaluate(rpt, lrow).ConfigureAwait(false);
             tc = ce.Value.GetTypeCode();
             return (v, tc);
         }
 
         protected async Task<double> GetDataValue(Report rpt, int row, int col)
         {
-            return await GetDataValue(rpt, row, col, 0);
+            return await GetDataValue(rpt, row, col, 0).ConfigureAwait(false);
         }
 
         /* Added this function to return the plot type
@@ -840,13 +840,13 @@ namespace Majorsilence.Reporting.Rdl
             double v = double.MinValue;
             if (xyb == 0)
             {
-                v = await ce.Value.EvaluateDouble(rpt, lrow);
+                v = await ce.Value.EvaluateDouble(rpt, lrow).ConfigureAwait(false);
                 mce.Value = v;					// cache so we don't need to calculate again
             }
             else if (xyb == 1)
-                v = await ce.Value2.EvaluateDouble(rpt, lrow);
+                v = await ce.Value2.EvaluateDouble(rpt, lrow).ConfigureAwait(false);
             else if (xyb == 2)
-                v = await ce.Value3.EvaluateDouble(rpt, lrow);
+                v = await ce.Value3.EvaluateDouble(rpt, lrow).ConfigureAwait(false);
 
             return v;
         }
@@ -867,13 +867,13 @@ namespace Majorsilence.Reporting.Rdl
                 lrow = null;
             ChartExpression ce = (ChartExpression)(mce.DisplayItem);
 
-            string v = await ce.Value.EvaluateString(rpt, lrow);
+            string v = await ce.Value.EvaluateString(rpt, lrow).ConfigureAwait(false);
             return v;
         }
 
         protected async Task<Draw2.Brush> GetSeriesBrush(Report rpt, int row, int col)
         {
-            Draw2.Brush br = (await SeriesBrush(rpt, _row, ChartDefn.OwnerReport))[col - 1];            // this will be the default brush
+            Draw2.Brush br = (await SeriesBrush(rpt, _row, ChartDefn.OwnerReport).ConfigureAwait(false))[col - 1];            // this will be the default brush
 
             //  obtain the rows we're acting upon
             MatrixCellEntry mce = _DataDefn[row, col];
@@ -888,7 +888,7 @@ namespace Majorsilence.Reporting.Rdl
             Row lrow = (mce.Data.Data.Count > 0) ? mce.Data.Data[0] : null;
 
             Style s = ce.DP.Style;
-            string sc = await s.BackgroundColor.EvaluateString(rpt, lrow);
+            string sc = await s.BackgroundColor.EvaluateString(rpt, lrow).ConfigureAwait(false);
 
             System.Drawing.Color rc = XmlUtil.ColorFromHtml(sc, System.Drawing.Color.Empty, rpt);
             if (rc != System.Drawing.Color.Empty)
@@ -899,12 +899,12 @@ namespace Majorsilence.Reporting.Rdl
 
         protected async Task DrawDataPoint(Report rpt, Draw2.Graphics g, System.Drawing.Point p, int row, int col)
         {
-            await DrawDataPoint(rpt, g, p, System.Drawing.Rectangle.Empty, row, col);
+            await DrawDataPoint(rpt, g, p, System.Drawing.Rectangle.Empty, row, col).ConfigureAwait(false);
         }
 
         protected async Task DrawDataPoint(Report rpt, Draw2.Graphics g, System.Drawing.Rectangle rect, int row, int col)
         {
-            await DrawDataPoint(rpt, g, System.Drawing.Point.Empty, rect, row, col);
+            await DrawDataPoint(rpt, g, System.Drawing.Point.Empty, rect, row, col).ConfigureAwait(false);
         }
 
         async Task DrawDataPoint(Report rpt, Draw2.Graphics g, System.Drawing.Point p, System.Drawing.Rectangle rect, int row, int col)
@@ -932,12 +932,12 @@ namespace Majorsilence.Reporting.Rdl
             TypeCode tc;
             if (dp.DataLabel.Value == null)
             {       // No DataLabel value specified so we use the actual value
-                v = await ce.Value.EvaluateDouble(rpt, lrow);
+                v = await ce.Value.EvaluateDouble(rpt, lrow).ConfigureAwait(false);
                 tc = TypeCode.Double;
             }
             else
             {       // Evaluate the DataLable value for the display
-                v = await dp.DataLabel.Value.Evaluate(rpt, lrow);
+                v = await dp.DataLabel.Value.Evaluate(rpt, lrow).ConfigureAwait(false);
                 tc = dp.DataLabel.Value.GetTypeCode();
             }
 
@@ -945,7 +945,7 @@ namespace Majorsilence.Reporting.Rdl
             {
                 if (rect == System.Drawing.Rectangle.Empty)
                 {
-                    System.Drawing.Size size = await Style.MeasureStringDefaults(rpt, g, v, tc, lrow, int.MaxValue);
+                    System.Drawing.Size size = await Style.MeasureStringDefaults(rpt, g, v, tc, lrow, int.MaxValue).ConfigureAwait(false);
                     rect = new System.Drawing.Rectangle(p, size);
                 }
                 Style.DrawStringDefaults(g, v, rect);
@@ -954,10 +954,10 @@ namespace Majorsilence.Reporting.Rdl
             {
                 if (rect == System.Drawing.Rectangle.Empty)
                 {
-                    System.Drawing.Size size = await dp.DataLabel.Style.MeasureString(rpt, g, v, tc, lrow, int.MaxValue);
+                    System.Drawing.Size size = await dp.DataLabel.Style.MeasureString(rpt, g, v, tc, lrow, int.MaxValue).ConfigureAwait(false);
                     rect = new System.Drawing.Rectangle(p, size);
                 }
-                await dp.DataLabel.Style.DrawString(rpt, g, v, tc, lrow, rect);
+                await dp.DataLabel.Style.DrawString(rpt, g, v, tc, lrow, rect).ConfigureAwait(false);
             }
 
             return;
@@ -974,8 +974,8 @@ namespace Majorsilence.Reporting.Rdl
             ChartExpression ce = (ChartExpression)(mce.DisplayItem);
 
             string v = ce.ChartLabel == null ?
-                await ce.Value.EvaluateString(rpt, lrow) :
-                await ce.ChartLabel.EvaluateString(rpt, lrow);
+                await ce.Value.EvaluateString(rpt, lrow).ConfigureAwait(false) :
+                await ce.ChartLabel.EvaluateString(rpt, lrow).ConfigureAwait(false);
 
             return v;
         }
@@ -997,9 +997,9 @@ namespace Majorsilence.Reporting.Rdl
         }
         protected async Task<(double max, double min)> GetMaxMinDataValue(Report rpt, int xyb, int WhichYAxis)
         {
-            if ((ChartSubTypeEnum)Enum.Parse(typeof(ChartSubTypeEnum), await _ChartDefn.Subtype.EvaluateString(rpt, _row)) == ChartSubTypeEnum.Stacked)
+            if ((ChartSubTypeEnum)Enum.Parse(typeof(ChartSubTypeEnum), await _ChartDefn.Subtype.EvaluateString(rpt, _row).ConfigureAwait(false)) == ChartSubTypeEnum.Stacked)
             {
-                var result = await GetMaxMinDataValueStacked(rpt);
+                var result = await GetMaxMinDataValueStacked(rpt).ConfigureAwait(false);
                 return (result.max, result.min);
             }
             double min = double.MaxValue;
@@ -1015,7 +1015,7 @@ namespace Majorsilence.Reporting.Rdl
                     {
                         if (GetYAxis(rpt, iCol, 1).ToUpper() == "RIGHT")
                         {
-                            v = await GetDataValue(rpt, iRow, iCol, xyb);
+                            v = await GetDataValue(rpt, iRow, iCol, xyb).ConfigureAwait(false);
                             if (v < min)
                                 min = v;
                             if (v > max)
@@ -1027,7 +1027,7 @@ namespace Majorsilence.Reporting.Rdl
                     {
                         if (GetYAxis(rpt, iCol, 1).ToUpper() != "RIGHT")
                         {
-                            v = await GetDataValue(rpt, iRow, iCol, xyb);
+                            v = await GetDataValue(rpt, iRow, iCol, xyb).ConfigureAwait(false);
                             if (v < min)
                                 min = v;
                             if (v > max)
@@ -1051,7 +1051,7 @@ namespace Majorsilence.Reporting.Rdl
                 v = 0;
                 for (int iCol = 1; iCol <= SeriesCount; iCol++)
                 {
-                    v += await GetDataValue(rpt, iRow, iCol);
+                    v += await GetDataValue(rpt, iRow, iCol).ConfigureAwait(false);
                 }
                 if (v < min)
                     min = v;
@@ -1070,7 +1070,7 @@ namespace Majorsilence.Reporting.Rdl
             {
                 // TODO: In general all the palettes could use a good going over
                 //   both in terms of the colors in the lists and their order
-                switch (ChartPalette.GetStyle(await ChartDefn.Palette.EvaluateString(rpt, row), defn.rl))
+                switch (ChartPalette.GetStyle(await ChartDefn.Palette.EvaluateString(rpt, row).ConfigureAwait(false), defn.rl))
                 {
                     case ChartPaletteEnum.Default:
                         b[i] = GetSeriesBrushesExcel(i); break;
@@ -1333,7 +1333,7 @@ namespace Majorsilence.Reporting.Rdl
         protected async Task<(double max, double min)> GetValueMaxMin(Report rpt,  double max,  double min, int xyb, int WhichYAxis)// 20022008 AJM GJL
         {
 
-            if ((ChartSubTypeEnum)Enum.Parse(typeof(ChartSubTypeEnum), await _ChartDefn.Subtype.EvaluateString(rpt, _row)) == ChartSubTypeEnum.PercentStacked)
+            if ((ChartSubTypeEnum)Enum.Parse(typeof(ChartSubTypeEnum), await _ChartDefn.Subtype.EvaluateString(rpt, _row).ConfigureAwait(false)) == ChartSubTypeEnum.PercentStacked)
             {   // Percent stacked is easy; and overrides user provided values
                 max = 1;
                 min = 0;
@@ -1361,8 +1361,8 @@ namespace Majorsilence.Reporting.Rdl
             double vAxisMin;
             if (ax != null)
             {
-                vAxisMax = await ax.MaxEval(rpt, _row);
-                vAxisMin = await ax.MinEval(rpt, _row);
+                vAxisMax = await ax.MaxEval(rpt, _row).ConfigureAwait(false);
+                vAxisMin = await ax.MinEval(rpt, _row).ConfigureAwait(false);
             }
             else
             {
@@ -1379,7 +1379,7 @@ namespace Majorsilence.Reporting.Rdl
             }
 
             // OK We have to work for it;  Calculate min/max of data
-            (max, min) = await GetMaxMinDataValue(rpt, xyb, 1);  // 20022008 AJM GJL
+            (max, min) = await GetMaxMinDataValue(rpt, xyb, 1).ConfigureAwait(false);  // 20022008 AJM GJL
 
             if (vAxisMax != int.MinValue && !vAxisMax.Equals(double.NaN))
                 max = vAxisMax;
@@ -1506,7 +1506,7 @@ namespace Majorsilence.Reporting.Rdl
 
             if (a.MajorInterval != null)
             {
-                incr = await a.MajorInterval.EvaluateDouble(rpt, this.ChartRow);
+                incr = await a.MajorInterval.EvaluateDouble(rpt, ChartRow).ConfigureAwait(false);
                 if (incr.CompareTo(double.MinValue) == 0)
                     incr = (max - min) / interval;
                 else

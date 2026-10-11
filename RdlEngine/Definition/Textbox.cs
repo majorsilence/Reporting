@@ -122,8 +122,9 @@ namespace Majorsilence.Reporting.Rdl
 		// Handle parsing of function in final pass
 		async override internal Task FinalPass()
 		{
-            await base.FinalPass();
-            await _Value.FinalPass();
+            await base.FinalPass().ConfigureAwait(false);
+            await _Value.FinalPass().ConfigureAwait(false);
+            ValueIsConstant = await _Value.IsConstant().ConfigureAwait(false);   // read by DataElementOutput
 
 			if (this.DataElementName == null && this.Name == null)
 			{
@@ -148,7 +149,7 @@ namespace Majorsilence.Reporting.Rdl
 			}
 
 			if (_ToggleImage != null)
-                await _ToggleImage.FinalPass();
+                await _ToggleImage.FinalPass().ConfigureAwait(false);
 
 			if (_HideDuplicates != null)
 			{
@@ -204,12 +205,12 @@ namespace Majorsilence.Reporting.Rdl
 		async override internal Task Run(IPresent ip, Row row)
 		{
 			Report rpt = ip.Report();
-            await base.Run(ip, row);
+            await base.Run(ip, row).ConfigureAwait(false);
 
 			TextboxRuntime tbr = TextboxRuntime.GetTextboxRuntime(rpt, this);
 
 			tbr.RunCount++;		// Increment the run count
-			string t = await RunText(rpt, row);
+			string t = await RunText(rpt, row).ConfigureAwait(false);
 			bool bDup =	RunTextIsDuplicate(tbr, t, null);
 			if (bDup)
 			{
@@ -217,7 +218,7 @@ namespace Majorsilence.Reporting.Rdl
 					return;
 				t = "";		// still need to put out the cell
 			}
-            await ip.Textbox(this, t, row);
+            await ip.Textbox(this, t, row).ConfigureAwait(false);
 
 			if (!bDup)
 				tbr.PreviousText=t;	// set for next time
@@ -230,7 +231,7 @@ namespace Majorsilence.Reporting.Rdl
 
 			tbr.RunCount++;		// Increment the run count
 
-            bool bHidden = await IsHidden(r, row);
+            bool bHidden = await IsHidden(r, row).ConfigureAwait(false);
 
 			SetPagePositionBegin(pgs);
 
@@ -238,7 +239,7 @@ namespace Majorsilence.Reporting.Rdl
             if (bHidden)
                 t = "";
             else
-                t = await RunText(r, row);	// get the text
+                t = await RunText(r, row).ConfigureAwait(false);	// get the text
 
 			bool bDup =	RunTextIsDuplicate(tbr, t, pgs.CurrentPage);
 			if (bDup)
@@ -249,14 +250,14 @@ namespace Majorsilence.Reporting.Rdl
 			}
 			PageText pt;
 			PageTextHtml pth=null;
-			if (await IsHtml(r, row))
+			if (await IsHtml(r, row).ConfigureAwait(false))
 				pt = pth = new PageTextHtml(t);
 			else
 				pt = new PageText(t);
-            await SetPagePositionAndStyle(r, pt, row);
+            await SetPagePositionAndStyle(r, pt, row).ConfigureAwait(false);
 			if (this.CanGrow && tbr.RunHeight == 0)	// when textbox is in a DataRegion this will already be called
 			{
-                await this.RunTextCalcHeight(r, pgs.G, row, pt as PageTextHtml);
+                await RunTextCalcHeight(r, pgs.G, row, pt as PageTextHtml).ConfigureAwait(false);
 			}
 			pt.H = Math.Max(pt.H, tbr.RunHeight);		// reset height
 			if (pt.SI.BackgroundImage != null)
@@ -290,7 +291,7 @@ namespace Majorsilence.Reporting.Rdl
                     p.YOffset + pt.Y + pt.H > pgs.BottomOfPage)
                 {   // Issue #159: grown taller than the space any page can offer;
                     // split the text across pages instead of clipping the overflow
-                    pt = await RunPageSplitOverflow(r, pgs, pt, row);
+                    pt = await RunPageSplitOverflow(r, pgs, pt, row).ConfigureAwait(false);
                     p = pgs.CurrentPage;
                 }
                 else
@@ -305,7 +306,7 @@ namespace Majorsilence.Reporting.Rdl
 			SetPagePositionEnd(pgs, pt.Y+pt.H);
 			if (pth != null)
 				pth.Reset();
-			if (this.CanGrow && !await Value.IsConstant())
+			if (this.CanGrow && !await Value.IsConstant().ConfigureAwait(false))
 			{
 				tbr.RunHeight = 0;					// need to recalculate
 			}
@@ -323,11 +324,11 @@ namespace Majorsilence.Reporting.Rdl
 			float padV = 0;
 			if (this.Style != null)
 			{
-				widthPx -= (await Style.EvalPaddingLeftPx(rpt, row) + await Style.EvalPaddingRightPx(rpt, row));
-				padV = await Style.EvalPaddingTop(rpt, row) + await Style.EvalPaddingBottom(rpt, row);
+				widthPx -= (await Style.EvalPaddingLeftPx(rpt, row).ConfigureAwait(false) + await Style.EvalPaddingRightPx(rpt, row).ConfigureAwait(false));
+				padV = await Style.EvalPaddingTop(rpt, row).ConfigureAwait(false) + await Style.EvalPaddingBottom(rpt, row).ConfigureAwait(false);
 			}
 			bool html = pt is PageTextHtml;
-			float lineH = await MeasureTextHeightPoints(rpt, g, "Xg", row, widthPx, html);
+			float lineH = await MeasureTextHeightPoints(rpt, g, "Xg", row, widthPx, html).ConfigureAwait(false);
 
 			PageText chunk = pt;
 			string remaining = pt.Text;
@@ -336,7 +337,7 @@ namespace Majorsilence.Reporting.Rdl
 			{
 				Page p = pgs.CurrentPage;
 				float availText = pgs.BottomOfPage - (p.YOffset + chunk.Y) - padV;
-				float textH = await MeasureTextHeightPoints(rpt, g, remaining, row, widthPx, html);
+				float textH = await MeasureTextHeightPoints(rpt, g, remaining, row, widthPx, html).ConfigureAwait(false);
 				bool freshPage = chunk.Y == 0 && p.YOffset <= OwnerReport.TopOfPage;
 
 				if (textH <= availText)
@@ -356,18 +357,18 @@ namespace Majorsilence.Reporting.Rdl
 					continue;
 				}
 
-				(string head, string tail) = await SplitTextToFit(rpt, g, remaining, row, widthPx, availText, html);
+				(string head, string tail) = await SplitTextToFit(rpt, g, remaining, row, widthPx, availText, html).ConfigureAwait(false);
 				if (tail.Length == 0)
 				{	// couldn't split (single unbreakable run); emit as-is
 					SetChunkText(chunk, head);
-					chunk.H = await MeasureTextHeightPoints(rpt, g, head, row, widthPx, html) + padV;
+					chunk.H = await MeasureTextHeightPoints(rpt, g, head, row, widthPx, html).ConfigureAwait(false) + padV;
 					p.AddObject(chunk);
 					return chunk;
 				}
 
 				PageText next = (PageText)chunk.Clone();	// clone BEFORE AddObject adjusts coordinates
 				SetChunkText(chunk, head);
-				chunk.H = await MeasureTextHeightPoints(rpt, g, head, row, widthPx, html) + padV;
+				chunk.H = await MeasureTextHeightPoints(rpt, g, head, row, widthPx, html).ConfigureAwait(false) + padV;
 				p.AddObject(chunk);
 
 				pgs.NextOrNew();
@@ -397,7 +398,7 @@ namespace Majorsilence.Reporting.Rdl
 			while (lo <= hi)
 			{
 				int mid = (lo + hi) / 2;
-				float h = await MeasureTextHeightPoints(rpt, g, text.Substring(0, breaks[mid].pos) + breaks[mid].closers, row, widthPx, html);
+				float h = await MeasureTextHeightPoints(rpt, g, text.Substring(0, breaks[mid].pos) + breaks[mid].closers, row, widthPx, html).ConfigureAwait(false);
 				if (h <= availPts)
 				{
 					best = mid;
@@ -501,18 +502,18 @@ namespace Majorsilence.Reporting.Rdl
 			if (html)
 			{
 				var pth = new PageTextHtml(text);
-				await SetPagePositionAndStyle(rpt, pth, row);
-				await pth.Build(g);
+				await SetPagePositionAndStyle(rpt, pth, row).ConfigureAwait(false);
+				await pth.Build(g).ConfigureAwait(false);
 				return pth.TotalHeight;
 			}
-			return await MeasureTextHeightPoints(rpt, g, text, row, widthPx);
+			return await MeasureTextHeightPoints(rpt, g, text, row, widthPx).ConfigureAwait(false);
 		}
 
 		private async Task<float> MeasureTextHeightPoints(Report rpt, Graphics g, string text, Row row, int widthPx)
 		{
 			Size s = this.Style != null
-				? await Style.MeasureString(rpt, g, text, TypeCode.String, row, widthPx)
-				: await Style.MeasureStringDefaults(rpt, g, text, TypeCode.String, row, widthPx);
+				? await Style.MeasureString(rpt, g, text, TypeCode.String, row, widthPx).ConfigureAwait(false)
+                : await Style.MeasureStringDefaults(rpt, g, text, TypeCode.String, row, widthPx).ConfigureAwait(false);
 			return RSize.PointsFromPixels(g, s.Height);
 		}
 
@@ -530,7 +531,7 @@ namespace Majorsilence.Reporting.Rdl
 
 		internal async Task<string> RunText(Report rpt, Row row)
 		{
-			object o = await Evaluate(rpt, row);
+			object o = await Evaluate(rpt, row).ConfigureAwait(false);
             // AJM 15082008: Suppress NaN from appearing in a textbox
             if (o is double) 
             {
@@ -539,8 +540,8 @@ namespace Majorsilence.Reporting.Rdl
                     o = null; 
                 } 
             }   
-			string t = await Style.GetFormatedString(rpt, this.Style, row, o, _Value.GetTypeCode());
-            if (await IsHtml(rpt, row) && t != null && t.Contains("<expr>"))
+			string t = await Style.GetFormatedString(rpt, Style, row, o, _Value.GetTypeCode()).ConfigureAwait(false);
+            if (await IsHtml(rpt, row).ConfigureAwait(false) && t != null && t.Contains("<expr>"))
             {
                 string[] parts = HTMLEXPR.Split(t);
                 StringBuilder sb = new StringBuilder(t.Length);
@@ -549,8 +550,8 @@ namespace Majorsilence.Reporting.Rdl
                     if (s.StartsWith("<expr>") && s.EndsWith("</expr>"))
                     {
                         string expr = s.Substring(6, s.Length - 13);
-                        DynamicExpression de = await DynamicExpression.CreateAsync(rpt, this, expr, row);
-                        sb.Append(await de.Evaluate(rpt, row));
+                        DynamicExpression de = await DynamicExpression.CreateAsync(rpt, this, expr, row).ConfigureAwait(false);
+                        sb.Append(await de.Evaluate(rpt, row).ConfigureAwait(false));
                     }
                     else
                         sb.Append(s);
@@ -562,45 +563,45 @@ namespace Majorsilence.Reporting.Rdl
 
 		internal async Task<float> RunTextCalcHeight(Report rpt, Graphics g, Row row)
 		{
-			return await RunTextCalcHeight(rpt, g, row, null);
+			return await RunTextCalcHeight(rpt, g, row, null).ConfigureAwait(false);
 		}
 		
 		internal async Task<float> RunTextCalcHeight(Report rpt, Graphics g, Row row, PageTextHtml pth)
 		{	// normally only called when CanGrow is true
 			Size s = Size.Empty;
 
-			if (await IsHidden(rpt, row))
+			if (await IsHidden(rpt, row).ConfigureAwait(false))
 				return 0;
 
-			object o = await Evaluate(rpt, row);
+			object o = await Evaluate(rpt, row).ConfigureAwait(false);
 
 			TypeCode tc = _Value.GetTypeCode();
 			int width = this.WidthCalc(rpt, g);
 
 			if (this.Style != null)
 			{
-				width -= (await Style.EvalPaddingLeftPx(rpt, row) + await Style.EvalPaddingRightPx(rpt, row));
+				width -= (await Style.EvalPaddingLeftPx(rpt, row).ConfigureAwait(false) + await Style.EvalPaddingRightPx(rpt, row).ConfigureAwait(false));
 
-				if (await this.IsHtml(rpt, row))
+				if (await IsHtml(rpt, row).ConfigureAwait(false))
 				{
 					if (pth == null)
 					{
 						pth = new PageTextHtml(o==null? "": o.ToString());
-						await SetPagePositionAndStyle(rpt, pth, row);
+						await SetPagePositionAndStyle(rpt, pth, row).ConfigureAwait(false);
 					}
-					await pth.Build(g);
+					await pth.Build(g).ConfigureAwait(false);
 					s.Height = RSize.PixelsFromPoints(pth.TotalHeight);
 				}
 				else
-					s = await Style.MeasureString(rpt, g, o, tc, row, width);
+					s = await Style.MeasureString(rpt, g, o, tc, row, width).ConfigureAwait(false);
 			}
 			else	// call the class static method
-				s = await Style.MeasureStringDefaults(rpt, g, o, tc, row, width);
+				s = await Style.MeasureStringDefaults(rpt, g, o, tc, row, width).ConfigureAwait(false);
 
 			TextboxRuntime tbr = TextboxRuntime.GetTextboxRuntime(rpt, this);
 			tbr.RunHeight = RSize.PointsFromPixels(g, s.Height);
 			if (Style != null)
-				tbr.RunHeight += (await Style.EvalPaddingBottom(rpt, row) + await Style.EvalPaddingTop(rpt, row));
+				tbr.RunHeight += (await Style.EvalPaddingBottom(rpt, row).ConfigureAwait(false) + await Style.EvalPaddingTop(rpt, row).ConfigureAwait(false));
 			return tbr.RunHeight;
 		}
 
@@ -608,7 +609,7 @@ namespace Majorsilence.Reporting.Rdl
 		{
 			if(r == null || lastValueForRow != r || lastValueForReport != rpt)
 			{
-				lastEvaluatedValue = await _Value.Evaluate(rpt, r);
+				lastEvaluatedValue = await _Value.Evaluate(rpt, r).ConfigureAwait(false);
 				lastValueForReport = rpt;
 				lastValueForRow = r;
 			}
@@ -651,7 +652,7 @@ namespace Majorsilence.Reporting.Rdl
 		{
 			if (this.Style == null || this.Style.Format == null)
 				return false;
-			string format = await Style.Format.EvaluateString(rpt, row);
+			string format = await Style.Format.EvaluateString(rpt, row).ConfigureAwait(false);
 			if (format == null)
 				return false;
 			return format.ToLower() == "html";

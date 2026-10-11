@@ -81,10 +81,10 @@ namespace Majorsilence.Reporting.Rdl
 		async override internal Task FinalPass()
 		{
 			if (_ConnectionProperties != null)
-                await _ConnectionProperties.FinalPass();
+                await _ConnectionProperties.FinalPass().ConfigureAwait(false);
 
 			if (!OwnerReport.SkipDatabaseSchemaValidation)
-                await ConnectDataSource(null);
+                await ConnectDataSource(null).ConfigureAwait(false);
 			return;
 		}
 
@@ -120,7 +120,7 @@ namespace Majorsilence.Reporting.Rdl
 
             if (_DataSourceReference != null)
             {
-                await ConnectDataSourceReference(rpt);	// this will create a _ConnectionProperties
+                await ConnectDataSourceReference(rpt).ConfigureAwait(false);	// this will create a _ConnectionProperties
             }
 
             if (_ConnectionProperties == null ||
@@ -133,12 +133,12 @@ namespace Majorsilence.Reporting.Rdl
             try
             {
                 cn = RdlEngineConfig.GetConnection(_ConnectionProperties.DataProvider,
-                    await ConnectstringFor(rpt));
+                    await ConnectstringFor(rpt).ConfigureAwait(false));
                 if (cn != null)
                 {
 					if (cn is DbConnection dbConnection)
 					{
-						await dbConnection.OpenAsync();
+						await dbConnection.OpenAsync().ConfigureAwait(false);
                     }
 					else
 					{
@@ -169,7 +169,7 @@ namespace Majorsilence.Reporting.Rdl
 
             if (_DataSourceReference != null)
             {
-                await ConnectDataSourceReference(rpt);	// this will create a _ConnectionProperties
+                await ConnectDataSourceReference(rpt).ConfigureAwait(false);	// this will create a _ConnectionProperties
             }
 
             if (_ConnectionProperties == null ||
@@ -182,12 +182,12 @@ namespace Majorsilence.Reporting.Rdl
             try
             {
                 cn = RdlEngineConfig.GetConnection(_ConnectionProperties.DataProvider,
-                    await ConnectstringFor(rpt));
+                    await ConnectstringFor(rpt).ConfigureAwait(false));
                 if (cn != null)
                 {
                     if (cn is DbConnection dbConnection)
                     {
-                        await dbConnection.OpenAsync();
+                        await dbConnection.OpenAsync().ConfigureAwait(false);
                     }
                     else
                     {
@@ -212,7 +212,7 @@ namespace Majorsilence.Reporting.Rdl
         // designer, which runs from wherever it was launched.
         private async Task<string> ConnectstringFor(Report rpt)
         {
-            string cs = await _ConnectionProperties.Connectstring(rpt);
+            string cs = await _ConnectionProperties.Connectstring(rpt).ConfigureAwait(false);
 
             if (!string.Equals(_ConnectionProperties.DataProvider, "Json", StringComparison.OrdinalIgnoreCase))
                 return cs;
@@ -307,7 +307,7 @@ namespace Majorsilence.Reporting.Rdl
 				XmlNode xNodeLoop = xDoc.FirstChild;
 				
 				_ConnectionProperties = new ConnectionProperties(OwnerReport, this, xNodeLoop);
-                await _ConnectionProperties.FinalPass();
+                await _ConnectionProperties.FinalPass().ConfigureAwait(false);
 			}
 			catch (Exception e)
 			{

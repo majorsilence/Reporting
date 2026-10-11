@@ -33,7 +33,7 @@ namespace Majorsilence.Reporting.RdlCreator
 #endif
 
             var rdlp = new RDLParser(xml);
-            var fyiReport = await rdlp.Parse();
+            var fyiReport = await rdlp.Parse().ConfigureAwait(false);
 
             ValidateReport(fyiReport);
 
@@ -114,9 +114,9 @@ namespace Majorsilence.Reporting.RdlCreator
                 rightMargin, bottomMargin, pageHeaderText, headerTableCells, bodyTableCells, fields, name);
 
             var rdlp = new RDLParser(xml);
-            var fyiReport = await rdlp.Parse();
+            var fyiReport = await rdlp.Parse().ConfigureAwait(false);
             ValidateReport(fyiReport);
-            await fyiReport.DataSets["Data"].SetData(data);
+            await fyiReport.DataSets["Data"].SetData(data).ConfigureAwait(false);
             return fyiReport;
         }
 
@@ -183,9 +183,9 @@ namespace Majorsilence.Reporting.RdlCreator
 
             var rdlp = new RDLParser(xml);
 
-            var fyiReport = await rdlp.Parse();
+            var fyiReport = await rdlp.Parse().ConfigureAwait(false);
             ValidateReport(fyiReport);
-            await fyiReport.DataSets["Data"].SetData(data);
+            await fyiReport.DataSets["Data"].SetData(data).ConfigureAwait(false);
             return fyiReport;
         }
 
@@ -247,7 +247,7 @@ namespace Majorsilence.Reporting.RdlCreator
                 rightMargin,
                 bottomMargin,
                 pageHeaderText,
-                name);
+                name).ConfigureAwait(false);
         }
         
         public async Task<Rdl.Report> GenerateRdl(string dataProvider,
@@ -329,7 +329,7 @@ namespace Majorsilence.Reporting.RdlCreator
                 rightMargin, bottomMargin, pageHeaderText, headerTableCells, bodyTableCells, fields, name);
 
             var rdlp = new RDLParser(xml);
-            var fyiReport = await rdlp.Parse();
+            var fyiReport = await rdlp.Parse().ConfigureAwait(false);
             ValidateReport(fyiReport);
             return fyiReport;
         }

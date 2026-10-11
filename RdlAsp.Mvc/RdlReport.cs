@@ -96,7 +96,7 @@ namespace Majorsilence.Reporting.RdlAsp
                     : Content(rendered.Text, format.ContentType);
 
             string name = Path.GetFileNameWithoutExtension(file);
-            return Content(HtmlPage(report, rendered, parameters, name), format.ContentType);
+            return Content(await HtmlPage(report, rendered, parameters, name), format.ContentType);
         }
 
         private string GetPassword()
@@ -106,10 +106,10 @@ namespace Majorsilence.Reporting.RdlAsp
 
         // The report is a whole html document (its styles and images are in it). The parameters
         // and any errors are put at the top of its body.
-        private string HtmlPage(Report report, RenderedReport rendered, IDictionary parameters, string name)
+        private async Task<string> HtmlPage(Report report, RenderedReport rendered, IDictionary parameters, string name)
         {
             var top = new StringBuilder();
-            top.AppendLine(ReportHelper.GetParameterHtml(report, parameters, HttpContext, name, true));
+            top.AppendLine(await ReportHelper.GetParameterHtml(report, parameters, HttpContext, name, true));
             AppendErrors(top);
 
             string html = rendered.Text;
