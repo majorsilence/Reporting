@@ -973,7 +973,7 @@ namespace Majorsilence.Pdf.Internal
             {
                 using (var ms = new MemoryStream())
                 {
-                    using (var zs = new ZLibStream(ms, CompressionLevel.SmallestSize, leaveOpen: true))
+                    using (var zs = new ZLibStream(ms, CompressionLevel.Optimal, leaveOpen: true))
                     {
                         foreach (ReadOnlyMemory<char> chunk in content.GetChunks())
                         {
@@ -1001,7 +1001,7 @@ namespace Majorsilence.Pdf.Internal
 #if NET6_0_OR_GREATER
             using (var ms = new MemoryStream())
             {
-                using (var zs = new ZLibStream(ms, CompressionLevel.SmallestSize, leaveOpen: true))
+                using (var zs = new ZLibStream(ms, CompressionLevel.Optimal, leaveOpen: true))
                     zs.Write(data, 0, data.Length);
                 return ms.ToArray();
             }

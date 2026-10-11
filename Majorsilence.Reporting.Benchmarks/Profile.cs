@@ -32,16 +32,25 @@ public static class Profile
             rdl = WorkloadSupport.ReadRdl(workload);
         }
 
+        long parseTicks = 0, dataTicks = 0, renderTicks = 0;
         async Task<long> Once()
         {
+            long t0 = Stopwatch.GetTimestamp();
             var report = await WorkloadSupport.Parse(rdl);
             if (rows != null)
             {
                 await report.DataSets["Data"].SetData(rows);
             }
 
+            long t1 = Stopwatch.GetTimestamp();
             await report.RunGetData();
-            return await WorkloadSupport.Render(report, format);
+            long t2 = Stopwatch.GetTimestamp();
+            long size = await WorkloadSupport.Render(report, format);
+            long t3 = Stopwatch.GetTimestamp();
+            parseTicks += t1 - t0;
+            dataTicks += t2 - t1;
+            renderTicks += t3 - t2;
+            return size;
         }
 
         for (int i = 0; i < 3; i++)
@@ -50,6 +59,7 @@ public static class Profile
         }
 
         using var listener = alloc ? new AllocListener() : null;
+        parseTicks = dataTicks = renderTicks = 0;
         long bytes0 = GC.GetTotalAllocatedBytes(true);
         int gc0 = GC.CollectionCount(0), gc1 = GC.CollectionCount(1), gc2 = GC.CollectionCount(2);
         var sw = Stopwatch.StartNew();
@@ -63,6 +73,8 @@ public static class Profile
         sw.Stop();
         long bytes = GC.GetTotalAllocatedBytes(false) - bytes0;
         Console.WriteLine($"{workload} {format}: {n} iterations, {sw.Elapsed.TotalMilliseconds / n:N2} ms/op, {bytes / n / 1024.0:N0} KB/op, GC0/1/2 per 1000 ops: {(GC.CollectionCount(0) - gc0) * 1000.0 / n:N0}/{(GC.CollectionCount(1) - gc1) * 1000.0 / n:N0}/{(GC.CollectionCount(2) - gc2) * 1000.0 / n:N0}");
+        double ms(long ticks) => ticks * 1000.0 / Stopwatch.Frequency / n;
+        Console.WriteLine($"  phases ms/op: parse {ms(parseTicks):N2}, getdata {ms(dataTicks):N2}, render {ms(renderTicks):N2}");
         listener?.Print(top: 40);
     }
 
