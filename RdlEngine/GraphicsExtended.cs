@@ -3,6 +3,7 @@ using System.Collections;
 using System.Text;
 using System.Text.RegularExpressions;
 using Draw = Majorsilence.Forms.Drawing;
+using Majorsilence.Reporting.Rdl;
 
 namespace Majorsilence.Forms.Drawing
 {
@@ -53,14 +54,14 @@ namespace Majorsilence.Forms.Drawing
                 rightAlignHandle.LineAlignment = Draw.StringAlignment.Far;
 
                 //measure space for the given font
-                System.Drawing.SizeF stringSize = graphics.MeasureString(" ", font, layoutRectangle.Size, stringFormat);
+                System.Drawing.SizeF stringSize = graphics.MeasureStringLocked(" ", font, layoutRectangle.Size, stringFormat);
                 double spaceWidth = stringSize.Width + 1;
 
                 //measure paragraph format for the given font
                 double paragraphFormatWidth = 0;
                 if (paragraphFormat != ' ')
                 {
-                    System.Drawing.SizeF paragraphFormatSize = graphics.MeasureString(paragraphFormat.ToString(), 
+                    System.Drawing.SizeF paragraphFormatSize = graphics.MeasureStringLocked(paragraphFormat.ToString(), 
                         new Draw.Font(font.FontFamily, font.Size, Draw.FontStyle.Regular), layoutRectangle.Size, stringFormat);
                     paragraphFormatWidth = paragraphFormatSize.Width;
                 }
@@ -96,7 +97,7 @@ namespace Majorsilence.Forms.Drawing
                     currentWord.StopItalic = word.ToLower().Contains("</i>");
 
                     //size of the word
-                    System.Drawing.SizeF wordSize = graphics.MeasureString(currentWord.String, font, layoutRectangle.Size, stringFormat);
+                    System.Drawing.SizeF wordSize = graphics.MeasureStringLocked(currentWord.String, font, layoutRectangle.Size, stringFormat);
                     float wordWidth = wordSize.Width;
 
                     if (wordWidth > layoutRectangle.Width && currentWord.String != "<CR>")
@@ -108,7 +109,7 @@ namespace Majorsilence.Forms.Drawing
                             string cutWord = currentWord.String.Substring(0, lengthChars);
 
                             //the new size of the word
-                            wordSize = graphics.MeasureString(cutWord, font, layoutRectangle.Size, stringFormat);
+                            wordSize = graphics.MeasureStringLocked(cutWord, font, layoutRectangle.Size, stringFormat);
                             wordWidth = wordSize.Width;
 
                             //update the word string
