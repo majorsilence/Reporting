@@ -103,6 +103,7 @@ private System.ComponentModel.Container components = null;
 			// 
 			resources.ApplyResources(this.lbTableColumns, "lbTableColumns");
 			this.lbTableColumns.Name = "lbTableColumns";
+			this.lbTableColumns.CheckOnClick = true;
 			// 
 			// bUp
 			// 

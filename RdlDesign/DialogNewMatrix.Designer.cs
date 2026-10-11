@@ -100,6 +100,7 @@ private System.ComponentModel.Container components = null;
 			// 
 			resources.ApplyResources(this.lbMatrixColumns, "lbMatrixColumns");
 			this.lbMatrixColumns.Name = "lbMatrixColumns";
+			this.lbMatrixColumns.CheckOnClick = true;
 			// 
 			// bColumnUp
 			// 
@@ -129,6 +130,7 @@ private System.ComponentModel.Container components = null;
 			// 
 			resources.ApplyResources(this.lbMatrixRows, "lbMatrixRows");
 			this.lbMatrixRows.Name = "lbMatrixRows";
+			this.lbMatrixRows.CheckOnClick = true;
 			// 
 			// bColumnDelete
 			// 
