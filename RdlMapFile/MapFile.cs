@@ -58,9 +58,11 @@ namespace Majorsilence.Reporting.RdlMapFile
             bToolStrip.Image = selectionToolStripMenuItem.Image;
         }
 
+        // The Closing event is synchronous and cancelable, so the "save changes?" and Save As dialogs cannot be
+        // awaited here; this is the one place that still blocks (OkToCloseBlocking).
         void MapFile_Closing(object sender, CancelEventArgs e)
         {
-            e.Cancel = !OkToClose();
+            e.Cancel = !OkToCloseBlocking();
         }
 
         void map_SelectionChange(DesignXmlDraw dxd)
@@ -151,42 +153,65 @@ namespace Majorsilence.Reporting.RdlMapFile
         [DllImport("user32.dll")]
         private static extern IntPtr SendMessage(IntPtr hWnd, int msg, IntPtr wp, IntPtr lp);
 
-        private void exitToolStripMenuItem_Click(object sender, EventArgs e)
+        private async void exitToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (!OkToClose())
+            if (!await OkToCloseAsync())
                 return;
             Application.Exit();
 
         }
 
-        private bool OkToClose()
+        private DialogResult AskToSave()
+        {
+            return MessageBox.Show(string.Format(Strings.MapFile_ShowB_WantSave, map.File == null ? Strings.MapFile_ShowB_Untitled : Path.GetFileName(map.File)),
+                Strings.MapFile_ShowB_RdlMapFileDesigner, MessageBoxButtons.YesNoCancel);
+        }
+
+        private async System.Threading.Tasks.Task<bool> OkToCloseAsync()
         {
             if (!map.Modified)
                 return true;
 
-            DialogResult mb = MessageBox.Show(string.Format(Strings.MapFile_ShowB_WantSave, map.File == null ? Strings.MapFile_ShowB_Untitled : Path.GetFileName(map.File)),
-                Strings.MapFile_ShowB_RdlMapFileDesigner, MessageBoxButtons.YesNoCancel) ;
+            DialogResult mb = AskToSave();
             if (mb == DialogResult.Cancel)
                 return false;
 
             if (mb == DialogResult.No)
                 return true;
 
-            
-            return Save();
+            return await SaveAsync();
         }
 
-        private bool Save()
+        // For the synchronous Closing event only: waits for a Save As dialog if the map has no file name yet.
+        private bool OkToCloseBlocking()
+        {
+            if (!map.Modified)
+                return true;
+
+            DialogResult mb = AskToSave();
+            if (mb == DialogResult.Cancel)
+                return false;
+
+            if (mb == DialogResult.No)
+                return true;
+
+            if (map.File == null &&
+                !System.Threading.Tasks.Task.Run(async () => await SaveAsAsync()).GetAwaiter().GetResult())
+                return false;
+            return WriteMapFile();
+        }
+
+        private async System.Threading.Tasks.Task<bool> SaveAsync()
         {
             // need to save file first then exit
-            if (map.File == null)
-            {
-                // SaveAs is async (FileDialog.ShowDialog(Form) is async in Majorsilence.Forms),
-                // but Save/OkToClose have synchronous callers (e.g. the Closing event handler),
-                // so bridge synchronously here -- same pattern as D4's MDIChild.FileSave().
-                if (!System.Threading.Tasks.Task.Run(async () => await SaveAsAsync()).GetAwaiter().GetResult())
-                    return false;
-            }
+            if (map.File == null && !await SaveAsAsync())
+                return false;
+
+            return WriteMapFile();
+        }
+
+        private bool WriteMapFile()
+        {
             string file = map.File;
 
             StreamWriter writer = null;
@@ -250,7 +275,7 @@ namespace Majorsilence.Reporting.RdlMapFile
         }
         private async void openToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (!OkToClose())
+            if (!await OkToCloseAsync())
                 return;
 
             OpenFileDialog ofd = new OpenFileDialog();
@@ -347,15 +372,15 @@ namespace Majorsilence.Reporting.RdlMapFile
             selectAllToolStripMenuItem.Enabled = map.MapDoc != null;
         }
 
-        private void saveToolStripMenuItem_Click(object sender, EventArgs e)
+        private async void saveToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            this.Save();
+            await this.SaveAsync();
         }
 
         private async void saveAsToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (await SaveAsAsync())
-                Save();
+                WriteMapFile();
         }
 
         private void aboutToolStripMenuItem_Click(object sender, EventArgs e)
@@ -390,9 +415,9 @@ namespace Majorsilence.Reporting.RdlMapFile
             bToolStrip.Image = ((ToolStripMenuItem)sender).Image;
         }
 
-        private void newToolStripMenuItem_Click(object sender, EventArgs e)
+        private async void newToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (!OkToClose())
+            if (!await OkToCloseAsync())
                 return;
             
             map.SetNew();

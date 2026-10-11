@@ -11,6 +11,11 @@ Blocking on async work (`Task.Run(...).GetAwaiter().GetResult()`, `.Result`, `.W
 | `MatrixEntryComparer` | blocked per comparison | `MatrixEntrySort.SortAsync`; `Matrix.RunBuildSet` awaits `PrepareSortedDataAsync` once after building, so the many synchronous matrix methods only read sorted lists |
 | `ChartBase` constructor | blocked on the tooltip expressions | `InitAsync()` awaited from `Chart.RunChartBuild` |
 | `DynamicExpression` constructor | blocked on parsing | `CreateAsync` factory |
+| `Report.ClientLanguage` | getter ran the Language expression through `Task.Run(...).GetResult()` | `GetClientLanguageAsync()` / `SetClientLanguage()`; the embedded Code's synchronous `User.Language` reads a value resolved at the start of each run |
+| `ReportItem.DataElementOutput` | getter blocked on `IsConstant()` | `Textbox.FinalPass` awaits it once |
+| `MhtWebFile.ToString()` | started a download and blocked on it | no longer downloads (every caller awaits `Download()` first) |
+| Designer `SelectedStyle`, save and exit menus | blocked | async (`GetSelectedStyleAsync`, `FileSaveAsync`, `OkToCloseAsync`); `bSuppressChange` no longer left set by an early return |
+| `PdfSigner` timestamp request | blocked on `PostAsync` | `HttpClient.Send` (net5+) |
 | `JsonDataReader`, `TxtDataReader`, `MultipleStreamReader` | wrapped async stream opening / `ReadLineAsync` in `Task.Run(...).GetResult()` | synchronous I/O where the contract is synchronous (`IDataReader`, `TextReader.ReadLine`): files were already sync streams, HTTP uses `HttpClient.Send` / `ReadAsStream` |
 
 Measured effect: WorldFacts 50 -> 44 ms and 9.5 -> 8.0 MB per render; thread-pool work items per WorldFacts render fell from ~3,700 to ~15 (0 for the tiny and matrix reports); `-- profile` prints the count.
@@ -21,14 +26,15 @@ Measured effect: WorldFacts 50 -> 44 ms and 9.5 -> 8.0 MB per render; thread-poo
 ## `ConfigureAwait(false)`
 All awaits in `RdlEngine`, `DataProviders` and `RdlCreator` (~2,200) now use `ConfigureAwait(false)`, applied with the CA2007 code fix, and CA2007 is a warning for those projects in `.editorconfig` so new code is held to it. UI, ASP.NET Core and command-line projects are deliberately not covered: a UI project needs to resume on its UI thread, and ASP.NET Core has no synchronization context. `SynchronizationContextTests` renders reports under a counting context and requires zero posts back to it (WorldFacts posted 6 times before the pass). The one event the engine raises, `SubreportDataRetrieval`, used to arrive on the UI thread by accident of the captured context; the WinForms-style and Avalonia viewers now marshal it back to the UI thread explicitly.
 
-## Remaining (not done)
-| Where | What it needs | Public API? |
-|---|---|---|| `Report.ClientLanguage` getter (`Report.cs:733`) | evaluate the language expression once, awaited, when the run starts (it has no row), then the getter returns the stored value | Internal; 28 references |
-| `ReportItem.DataElementOutput` getter (`ReportItem.cs:895`) | resolve once in `FinalPass` (awaited) and store | Internal |
-| `MhtWebFile` download (`MhtWebFile.cs:514`) | MHT/web-archive export only; make the download path async or use `HttpClient.Send` | Internal |
-| UI only: `RdlDesign/MDIChild.cs:182` (`FileSaveAs`), `RdlDesign/DesignCtl.cs:1015` (`GetStyleInfo`) | event-handler/command plumbing; belongs with a designer pass, not the engine | Internal |
-
-`RdlViewer` already replaced its blocking calls (the remaining hits are comments).
+## Remaining blocking calls (what is left, and why)
+| Where | Why it stays |
+|---|---|
+| `UserReportParameter` `DefaultValue` / `DisplayValues` / `DataValues` / `Value` / `Values`, `Report.ClientLanguage`, `DesignCtl` / `RdlEditPreview` / `MDIChild` `SelectedStyle`, `MDIChild.FileSave` / `OkToClose` | Public compatibility members, all `[Obsolete]` with an async replacement; nothing in this repository calls them any more (the tests that pin their behaviour use a pragma) |
+| `MDIChild_Closing` (report designer) and `MapFile_Closing` (map designer) | `FormClosing` is a synchronous, cancelable event. Awaiting the "save changes?" / Save As dialogs there means cancelling the close and closing again afterwards, which for an MDI parent closing with several modified documents costs one extra close per document. Left on the obsolete blocking path until that UX is decided |
+| `RdlNative` C entry points (`rdl_report_render_file`, `..._buffer`) | The C ABI is synchronous by definition: the Python / PHP / Ruby / Rust caller is waiting for the return value, on a thread with no `SynchronizationContext` |
+| `RdlReader.Main` silent print | Process entry point, no UI loop or context yet, and the thread must stay the STA thread that runs the application |
+| `PdfSigner` on netstandard2.0 | `HttpClient.Send` needs .NET 5+; net6.0 and later use it |
+| Benchmark harness (`Program.cs`, `ConcurrencyBenchmarks`) | Deliberate: the concurrency benchmark measures render CPU scaling on blocked threads |
 
 ## Findings along the way (existing behaviour, not changed)
 - Matrix rows sorted on an aggregate such as `Sum(...)` keep first-met order: the sort expression is evaluated against the entry's first row. Plain sort expressions work. Pinned in `AsyncSortTests`.

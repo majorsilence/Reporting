@@ -177,6 +177,19 @@ namespace Majorsilence.Reporting.RdlDesign
             rdlDesigner.ApplyStyleToSelected(name, v);
         }
 
+        /// <summary>
+        /// Saves the report, asking for a file name first when it has none.
+        /// </summary>
+        public async Task<bool> FileSaveAsync()
+        {
+            Uri file = SourceFile;
+            if (file == null || file.LocalPath == "")		// if no file name then do SaveAs
+                return await FileSaveAs();
+
+            return FileSave(file, GetRdlText());
+        }
+
+        [Obsolete("Blocks the calling thread while the Save As dialog is open when the report has no file name. Use FileSaveAsync().")]
         public bool FileSave()
         {
             Uri file = SourceFile;
@@ -536,9 +549,15 @@ namespace Majorsilence.Reporting.RdlDesign
             await rdlDesigner.SaveAs(filename, type);
         }
 
+        // FormClosing is a synchronous, cancelable event, so the possible "Save changes?" / Save As dialogs
+        // cannot be awaited here without cancelling the close and closing again afterwards, which for an
+        // MDI parent closing with several modified children would take one extra close per document.
+        // This is the one place that still uses the blocking OkToClose().
         private void MDIChild_Closing(object sender, Majorsilence.Forms.FormClosingEventArgs e)
         {
+#pragma warning disable CS0618
             if (!OkToClose())
+#pragma warning restore CS0618
             {
                 e.Cancel = true;
                 return;
@@ -553,24 +572,48 @@ namespace Majorsilence.Reporting.RdlDesign
             Tab = null;
         }
 
+        /// <summary>
+        /// True when the report can be closed: it is unmodified, or the user chose to save it (and it saved)
+        /// or to discard the changes. False when the user cancelled.
+        /// </summary>
+        public async Task<bool> OkToCloseAsync()
+        {
+            if (!Modified)
+                return true;
+
+            DialogResult r = AskToSaveChanges();
+            if (r == DialogResult.Cancel)
+                return false;
+            if (r == DialogResult.Yes)
+                return await FileSaveAsync();
+            return true;
+        }
+
+        private DialogResult AskToSaveChanges()
+        {
+            return MessageBox.Show(this, String.Format(Strings.MDIChild_ShowH_WantSaveChanges,
+                    _SourceFile == null ? Strings.MDIChild_ShowH_Untitled : Path.GetFileName(_SourceFile.LocalPath)),
+                    Strings.MDIChild_ShowH_fyiReportingDesigner,
+                    MessageBoxButtons.YesNoCancel,
+                    MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button3);
+        }
+
+        [Obsolete("Blocks the calling thread if a Save As dialog is needed. Use OkToCloseAsync().")]
         public bool OkToClose()
         {
             if (!Modified)
                 return true;
 
-            DialogResult r =
-                    MessageBox.Show(this, String.Format(Strings.MDIChild_ShowH_WantSaveChanges,
-                    _SourceFile == null ? Strings.MDIChild_ShowH_Untitled : Path.GetFileName(_SourceFile.LocalPath)),
-                    Strings.MDIChild_ShowH_fyiReportingDesigner,
-                    MessageBoxButtons.YesNoCancel,
-                    MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button3);
+            DialogResult r = AskToSaveChanges();
 
             bool bOK = true;
             if (r == DialogResult.Cancel)
                 bOK = false;
             else if (r == DialogResult.Yes)
             {
+#pragma warning disable CS0618
                 if (!FileSave())
+#pragma warning restore CS0618
                     bOK = false;
             }
             return bOK;
@@ -619,9 +662,9 @@ namespace Majorsilence.Reporting.RdlDesign
             }
         }
 
-        private void rdlDesigner_SaveRequested(object sender, System.EventArgs e)
+        private async void rdlDesigner_SaveRequested(object sender, System.EventArgs e)
         {
-            FileSave();
+            await FileSaveAsync();
         }
 
 

@@ -761,11 +761,11 @@ namespace Majorsilence.Reporting.RdlDesign
 
 
 
-		private bool OkToSave()
+		private async Task<bool> OkToSaveAsync()
 		{
 			foreach (MDIChild mc in this.MdiChildren)
 			{
-				if (!mc.OkToClose())
+				if (!await mc.OkToCloseAsync())
 					return false;
 			}
 			return true;
@@ -793,9 +793,9 @@ namespace Majorsilence.Reporting.RdlDesign
 				mc.Close();
 		}
 
-		private void menuFileExit_Click(object sender, EventArgs e)
+		private async void menuFileExit_Click(object sender, EventArgs e)
 		{
-			if (!OkToSave())
+			if (!await OkToSaveAsync())
 				return;
 			SaveStartupState();
 			menuToolsCloseProcess(false);
@@ -1668,13 +1668,13 @@ namespace Majorsilence.Reporting.RdlDesign
 			printChild = null;
 		}
 
-		private void menuFileSave_Click(object sender, EventArgs e)
+		private async void menuFileSave_Click(object sender, EventArgs e)
 		{
 			MDIChild mc = this.ActiveMdiChild as MDIChild;
 			if (mc == null)
 				return;
 
-			if (!mc.FileSave())
+			if (!await mc.FileSaveAsync())
 				return;
 
 			if (this.SavedFileEvent != null)
