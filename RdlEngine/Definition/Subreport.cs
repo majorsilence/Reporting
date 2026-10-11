@@ -397,7 +397,7 @@ namespace Majorsilence.Reporting.Rdl
 						string.Format(Strings.Subreport_Error_SubreportNotParameter, _ReportName, srp.Name.Nm));
 				}
 				object v = await srp.Value.Evaluate(rpt, row);
-				userp.Value = v;
+				await userp.SetValueAsync(v);
 			}
 		}
 

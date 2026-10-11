@@ -5,6 +5,7 @@ using System.Collections.Specialized;
 using System.Globalization;
 using System.Net;
 using System.Text;
+using System.Threading.Tasks;
 using Majorsilence.Reporting.Rdl;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Caching.Memory;
@@ -133,7 +134,7 @@ namespace Majorsilence.Reporting.RdlAsp
         /// </summary>
         /// <param name="reportName">Name of the report as it is in the url (no extension).</param>
         /// <param name="showReport">True when the report itself is shown, which makes the export links useful.</param>
-        static internal string GetParameterHtml(Report rpt, IDictionary pd, HttpContext context, string reportName, bool showReport)
+        static internal async Task<string> GetParameterHtml(Report rpt, IDictionary pd, HttpContext context, string reportName, bool showReport)
         {
             if (rpt == null)
                 return "";
@@ -156,20 +157,23 @@ namespace Majorsilence.Reporting.RdlAsp
                 pHtml.Append("</td><td>");	// end of label; start of control
 
                 string defaultValue = "";
-                if (rp.DefaultValue != null)
+                object[] defaultValues = await rp.GetDefaultValueAsync();
+                string[] displayValues = await rp.GetDisplayValuesAsync();
+                object[] dataValues = await rp.GetDataValuesAsync();
+                if (defaultValues != null)
                 {
                     StringBuilder sb = new StringBuilder();
-                    for (int i = 0; i < rp.DefaultValue.Length; i++)
+                    for (int i = 0; i < defaultValues.Length; i++)
                     {
                         if (i > 0)
                             sb.Append(", ");
-                        sb.Append(Convert.ToString(rp.DefaultValue[i], CultureInfo.InvariantCulture));
+                        sb.Append(Convert.ToString(defaultValues[i], CultureInfo.InvariantCulture));
                     }
                     defaultValue = sb.ToString();
                 }
 
                 string pv = pd[rp.Name] as string;
-                if (rp.DisplayValues == null)
+                if (displayValues == null)
                 {
                     // provide actual value if passed as parm otherwise default
                     pHtml.AppendFormat("<input type=\"text\" name=\"{0}\" value=\"{1}\" tabindex=\"{2}\" size=\"32\"/></td>",
@@ -180,11 +184,11 @@ namespace Majorsilence.Reporting.RdlAsp
                     pHtml.AppendFormat("<select name=\"{0}\" tabindex=\"{1}\" size=\"1\">", H(rp.Name), row + 1);
                     if (pv == null)
                         pv = defaultValue;
-                    for (int i = 0; i < rp.DisplayValues.Length; i++)
+                    for (int i = 0; i < displayValues.Length; i++)
                     {
-                        string selected = pv == Convert.ToString(rp.DataValues[i], CultureInfo.InvariantCulture) ? " selected" : "";
+                        string selected = pv == Convert.ToString(dataValues[i], CultureInfo.InvariantCulture) ? " selected" : "";
                         pHtml.AppendFormat("<option value=\"{0}\"{2}>{1}</option>",
-                            H(Convert.ToString(rp.DataValues[i], CultureInfo.InvariantCulture)), H(rp.DisplayValues[i]), selected);
+                            H(Convert.ToString(dataValues[i], CultureInfo.InvariantCulture)), H(displayValues[i]), selected);
                     }
                     pHtml.Append("</select></td>");
                 }

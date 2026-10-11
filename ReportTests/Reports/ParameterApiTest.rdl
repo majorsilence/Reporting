@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Report xmlns="http://schemas.microsoft.com/sqlserver/reporting/2005/01/reportdefinition" xmlns:rd="http://schemas.microsoft.com/SQLServer/reporting/reportdesigner">
+  <Description>Parameters with display labels that differ from their data values, and a default.</Description>
+  <Width>6in</Width><PageWidth>8.5in</PageWidth><PageHeight>11in</PageHeight>
+  <TopMargin>.5in</TopMargin><BottomMargin>.5in</BottomMargin><LeftMargin>.5in</LeftMargin><RightMargin>.5in</RightMargin>
+  <ReportParameters>
+    <ReportParameter Name="Region">
+      <DataType>String</DataType>
+      <DefaultValue><Values><Value>S</Value></Values></DefaultValue>
+      <Prompt>Region</Prompt>
+      <ValidValues>
+        <ParameterValues>
+          <ParameterValue><Value>N</Value><Label>North</Label></ParameterValue>
+          <ParameterValue><Value>S</Value><Label>South</Label></ParameterValue>
+        </ParameterValues>
+      </ValidValues>
+    </ReportParameter>
+    <ReportParameter Name="Free">
+      <DataType>String</DataType>
+      <Prompt>Free text</Prompt>
+    </ReportParameter>
+  </ReportParameters>
+  <Body>
+    <Height>1in</Height>
+    <ReportItems>
+      <Textbox Name="Out">
+        <Top>0in</Top><Left>0in</Left><Width>5in</Width><Height>0.3in</Height>
+        <Value>=Parameters!Region.Value &amp; "/" &amp; Parameters!Free.Value</Value>
+      </Textbox>
+    </ReportItems>
+  </Body>
+</Report>

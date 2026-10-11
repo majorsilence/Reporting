@@ -94,7 +94,7 @@ public sealed class ReportTools
                 structure.pageWidth,
                 structure.pageHeight,
                 structure.margins,
-                parameters = report is not null ? ReadParameters(report) : structure.parameters,
+                parameters = report is not null ? await ReadParametersAsync(report).ConfigureAwait(false) : structure.parameters,
                 structure.dataSources,
                 structure.dataSets,
                 structure.bodyItems,
@@ -436,14 +436,15 @@ public sealed class ReportTools
         return dict;
     }
 
-    private static IEnumerable<object> ReadParameters(Report report)
+    private static async Task<object[]> ReadParametersAsync(Report report)
     {
+        var list = new List<object>();
         foreach (UserReportParameter p in report.UserReportParameters)
         {
             object[]? defaults = null;
-            try { defaults = p.DefaultValue; } catch { /* expression default that needs data */ }
+            try { defaults = await p.GetDefaultValueAsync().ConfigureAwait(false); } catch { /* expression default that needs data */ }
 
-            yield return new
+            list.Add(new
             {
                 name = p.Name,
                 type = p.dt.ToString(),
@@ -452,8 +453,10 @@ public sealed class ReportTools
                 multiValue = p.MultiValue,
                 prompt = p.Prompt,
                 defaultValues = defaults?.Select(d => d?.ToString()).ToArray(),
-            };
+            });
         }
+
+        return list.ToArray();
     }
 
     // Namespace-agnostic structural read straight off the XML — works even when the report will not

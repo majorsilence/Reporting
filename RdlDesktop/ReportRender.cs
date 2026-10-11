@@ -48,7 +48,7 @@ namespace Majorsilence.Reporting.RdlDesktop
 		/// <summary>
 		/// Returns the HTML needed to represent the parameters of a report.
 		/// </summary>
-		internal string ParameterHtml(IDictionary pd)
+		internal async System.Threading.Tasks.Task<string> ParameterHtmlAsync(IDictionary pd)
 		{
 			if (_ParameterHtml != null)
 				return _ParameterHtml;
@@ -93,21 +93,24 @@ namespace Majorsilence.Reporting.RdlDesktop
 
 				// Create the control
 				string defaultValue;
-				if (rp.DefaultValue != null)
+				object[] defaultValues = await rp.GetDefaultValueAsync();
+				string[] displayValues = await rp.GetDisplayValuesAsync();
+				object[] dataValues = await rp.GetDataValuesAsync();
+				if (defaultValues != null)
 				{
 					StringBuilder sb = new StringBuilder();
-					for (int i=0; i < rp.DefaultValue.Length; i++)
+					for (int i=0; i < defaultValues.Length; i++)
 					{
 						if (i > 0)
 							sb.Append(", ");
-						sb.Append(rp.DefaultValue[i].ToString());
+						sb.Append(defaultValues[i].ToString());
 					}
 					defaultValue = sb.ToString();
 				}
 				else
 					defaultValue="";
 
-				if (rp.DisplayValues == null)
+				if (displayValues == null)
 				{
 					string pv = (string) pd[rp.Name];
 
@@ -122,18 +125,18 @@ namespace Majorsilence.Reporting.RdlDesktop
 					if (pv == null)
 						pv = defaultValue;
 					string selected;
-					for (int i=0; i < rp.DisplayValues.Length; i++)
+					for (int i=0; i < displayValues.Length; i++)
 					{
-						if (pv.CompareTo(rp.DataValues[i].ToString()) == 0)
+						if (pv.CompareTo(dataValues[i].ToString()) == 0)
 							selected = " selected";
 						else
 							selected = "";
 
-						if (rp.DataValues[i] is String &&
-							rp.DisplayValues[i].CompareTo(rp.DataValues[i]) == 0)	// When display and data values are same don't put out a value tag
-							pHtml.AppendFormat("<option{1}>{0}</option>", XmlUtil.XmlAnsi(rp.DisplayValues[i]), selected);	
+						if (dataValues[i] is String &&
+							displayValues[i].CompareTo(dataValues[i]) == 0)	// When display and data values are same don't put out a value tag
+							pHtml.AppendFormat("<option{1}>{0}</option>", XmlUtil.XmlAnsi(displayValues[i]), selected);	
 						else
-							pHtml.AppendFormat("<option value=\"{0}\"{2}>{1}</option>", XmlUtil.XmlAnsi(rp.DataValues[i].ToString()), XmlUtil.XmlAnsi(rp.DisplayValues[i]), selected);
+							pHtml.AppendFormat("<option value=\"{0}\"{2}>{1}</option>", XmlUtil.XmlAnsi(dataValues[i].ToString()), XmlUtil.XmlAnsi(displayValues[i]), selected);
 					}
 					pHtml.Append("</select></td>");
 				}

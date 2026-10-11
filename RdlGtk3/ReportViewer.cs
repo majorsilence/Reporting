@@ -316,7 +316,7 @@ namespace Majorsilence.Reporting.RdlGtk3
                 return;
             }
 
-            AddParameterControls();
+            await AddParameterControlsAsync();
 
             await RefreshReport();
         }
@@ -523,7 +523,7 @@ namespace Majorsilence.Reporting.RdlGtk3
 #pragma warning restore CS0612 // Type or member is obsolete
         }
 
-        private void AddParameterControls()
+        private async Task AddParameterControlsAsync()
         {
             foreach (Widget child in _vboxParameters.Children.Cast<Widget>().ToList())
             {
@@ -552,17 +552,18 @@ namespace Majorsilence.Reporting.RdlGtk3
                 }
                 else
                 {
-                    if (rp.DefaultValue != null)
+                    object[] defaultValues = await rp.GetDefaultValueAsync();
+                    if (defaultValues != null)
                     {
                         StringBuilder sb = new();
-                        for (int i = 0; i < rp.DefaultValue.Length; i++)
+                        for (int i = 0; i < defaultValues.Length; i++)
                         {
                             if (i > 0)
                             {
                                 sb.Append(", ");
                             }
 
-                            sb.Append(rp.DefaultValue[i]);
+                            sb.Append(defaultValues[i]);
                         }
 
                         entryValue.Text = sb.ToString();

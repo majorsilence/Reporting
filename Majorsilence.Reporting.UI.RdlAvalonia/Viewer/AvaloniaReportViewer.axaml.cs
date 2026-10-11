@@ -170,7 +170,7 @@ namespace Majorsilence.Reporting.UI.RdlAvalonia.Viewer
                 ReportCanvas.SetReport(_report, _pages);
                 UpdatePageUi();
                 UpdateErrorsUi();
-                BuildParameterUi();
+                await BuildParameterUiAsync();
                 _thumbnailsDirty = true;
                 if (ThumbnailPanel.IsVisible)
                     await BuildThumbnailsAsync();
@@ -832,7 +832,7 @@ namespace Majorsilence.Reporting.UI.RdlAvalonia.Viewer
 
         // ── Parameter UI ─────────────────────────────────────────────
 
-        private void BuildParameterUi()
+        private async Task BuildParameterUiAsync()
         {
             ParameterItemsControl.Items.Clear();
 
@@ -850,20 +850,22 @@ namespace Majorsilence.Reporting.UI.RdlAvalonia.Viewer
                 if (string.IsNullOrEmpty(urp.Prompt)) continue;
                 hasVisible = true;
 
-                var defaultStr = (urp.DefaultValue != null && urp.DefaultValue.Length > 0)
-                    ? urp.DefaultValue[0]?.ToString() ?? string.Empty
+                var defaultValues = await urp.GetDefaultValueAsync();
+                var displayValues = await urp.GetDisplayValuesAsync();
+                var defaultStr = (defaultValues != null && defaultValues.Length > 0)
+                    ? defaultValues[0]?.ToString() ?? string.Empty
                     : string.Empty;
 
                 Control input;
-                if (urp.DisplayValues is { Length: > 0 })
+                if (displayValues is { Length: > 0 })
                 {
                     var combo = new ComboBox
                     {
-                        ItemsSource = urp.DisplayValues,
+                        ItemsSource = displayValues,
                         Width = 150,
                         Height = 28
                     };
-                    var idx = Array.IndexOf(urp.DisplayValues, defaultStr);
+                    var idx = Array.IndexOf(displayValues, defaultStr);
                     combo.SelectedIndex = idx >= 0 ? idx : 0;
                     input = combo;
                 }
