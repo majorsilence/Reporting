@@ -102,12 +102,24 @@ namespace Majorsilence.Reporting.Rdl
             float width, System.Drawing.Color c, BorderStyleEnum ls)
         {
             if (width <= 0) return;
-            _currentPage.DrawLine(x, y, x2, y2,
-                StrokeStyle.Default
+            var line = ConvertLineStyle(ls);
+            var key = (width, (c.R << 16) | (c.G << 8) | c.B, line);
+            if (!_strokeStyles.TryGetValue(key, out var stroke))
+            {
+                stroke = StrokeStyle.Default
                     .WithWidth(width)
                     .WithColor(PdfColor.FromRgb(c.R, c.G, c.B))
-                    .WithLineStyle(ConvertLineStyle(ls)));
+                    .WithLineStyle(line);
+                _strokeStyles[key] = stroke;
+            }
+            _currentPage.DrawLine(x, y, x2, y2, stroke);
         }
+
+        // Stroke and fill styles are immutable and a report repeats a handful of them (cell borders,
+        // backgrounds), so each distinct one is made once per render.
+        private readonly Dictionary<(float Width, int Rgb, LineStyle Line), StrokeStyle> _strokeStyles =
+            new Dictionary<(float, int, LineStyle), StrokeStyle>();
+        private readonly Dictionary<int, ShapeStyle> _fillStyles = new Dictionary<int, ShapeStyle>();
 
         // ── images ────────────────────────────────────────────────────────────
 
@@ -759,8 +771,13 @@ namespace Majorsilence.Reporting.Rdl
 
         private void iAddFillRect(float x, float y, float width, float height, System.Drawing.Color c)
         {
-            _currentPage.DrawRectangle(x, y, width, height,
-                ShapeStyle.Filled(PdfColor.FromRgb(c.R, c.G, c.B)));
+            int rgb = (c.R << 16) | (c.G << 8) | c.B;
+            if (!_fillStyles.TryGetValue(rgb, out var fill))
+            {
+                fill = ShapeStyle.Filled(PdfColor.FromRgb(c.R, c.G, c.B));
+                _fillStyles[rgb] = fill;
+            }
+            _currentPage.DrawRectangle(x, y, width, height, fill);
         }
 
         private ShapeStyle BuildShapeStyle(StyleInfo si)
