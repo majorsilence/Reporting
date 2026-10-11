@@ -10,9 +10,33 @@ using Majorsilence.Forms.Drawing.Drawing2D;
 
 namespace RdlEngine.Render.ExcelConverter
 {
-	internal class ExcelCellsBuilder
+	internal class ExcelCellsBuilder : IDisposable
 	{
-		Graphics g;
+		// A drawing surface for measuring text, made the first time a row or cell can grow and disposed with the
+		// builder. It used to be made for every render, used by few, and never disposed (native memory held until finalizers ran).
+		Bitmap _measureBitmap;
+		Graphics _g;
+		Graphics g
+		{
+			get
+			{
+				if (_g == null)
+				{
+					_measureBitmap = new Bitmap(10, 10);
+					_g = Graphics.FromImage(_measureBitmap);
+				}
+				return _g;
+			}
+		}
+
+		public void Dispose()
+		{
+			_g?.Dispose();
+			_g = null;
+			_measureBitmap?.Dispose();
+			_measureBitmap = null;
+		}
+
 		public Report Report { get; set; }
 		public static float Tolerance = 2f;
 
@@ -28,7 +52,6 @@ namespace RdlEngine.Render.ExcelConverter
 
 		public ExcelCellsBuilder()
 		{
-			g = Graphics.FromImage(new Bitmap(10, 10));
 			Tables = new List<ExcelTable>();
 			Rows = new List<ExcelRow>();
 			AddRow(0, 1);
@@ -213,9 +236,14 @@ namespace RdlEngine.Render.ExcelConverter
 
 		public float GetCellAboveRelativePosition(float top)
 		{
-			var aboveCell = Cells.Where(x => x.OriginalBottomPosition < top)
-			                     .OrderByDescending(x => x.GrowedBottomPosition)
-			                     .FirstOrDefault();
+			// the cell above (bottom before top) that has grown lowest; the first of equals, as OrderByDescending gave
+			ExcelCell aboveCell = null;
+			foreach (ExcelCell x in Cells)
+			{
+				if (x.OriginalBottomPosition < top &&
+					(aboveCell == null || Comparer<float>.Default.Compare(x.GrowedBottomPosition, aboveCell.GrowedBottomPosition) > 0))
+					aboveCell = x;
+			}
 			if(aboveCell == null) {
 				return top;
 			}

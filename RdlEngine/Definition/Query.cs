@@ -237,16 +237,22 @@ namespace Majorsilence.Reporting.Rdl
                     }
                 }
 
+                // The columns that come from the query, worked out once: enumerating the fields for every row
+                // allocated an enumerator (and a wrapper) per row.
+                var fromQuery = new List<(int Field, int Column)>(fieldCount);
+                for (int fi = 0; fi < qcn.Length; fi++)
+                {
+                    if (qcn[fi] != -1)
+                        fromQuery.Add((fi, qcn[fi]));
+                }
+
                 while (dr.Read())
                 {
                     Row or = new Row(_Data, fieldCount);
 
-                    foreach (Field fld in flds)
+                    for (int ci = 0; ci < fromQuery.Count; ci++)
                     {
-                        if (qcn[fld.ColumnNumber] != -1)
-                        {
-                            or.Data[fld.ColumnNumber] = dr.GetValue(qcn[fld.ColumnNumber]);
-                        }
+                        or.Data[fromQuery[ci].Field] = dr.GetValue(fromQuery[ci].Column);
                     }
 
                     // Apply the filters

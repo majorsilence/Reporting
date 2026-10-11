@@ -100,10 +100,13 @@ namespace Majorsilence.Reporting.Rdl
 		// create a new file in the directory specified and return
 		//   a Stream caller can then write to.   relativeName is filled in with
 		//   name we generate (sans the directory).
+		// A private lock: locking on typeof(StreamGen) would also serialise with anyone else locking the type.
+		private static readonly object _createFileLock = new object();
+
 		public Stream GetIOStream(out string relativeName, string extension)
 		{
 			Stream io=null;
-			lock (typeof(StreamGen))	// single thread lock while we're creating a file
+			lock (_createFileLock)	// single thread lock while we're creating a file
 			{							//  this assumes no other routine creates files in this directory
 				// Obtain a new file name
 				if (_rand == null)

@@ -1,7 +1,12 @@
 {
-  "ListPagingTest": 15369573,
-  "MatrixExample": 2756762,
-  "WorldFacts": 8192147,
-  "large:1000": 11259867,
-  "testdata": 898703
+  "ListPagingTest": 15423165,
+  "MatrixExample": 2567614,
+  "WorldFacts": 7081396,
+  "WorldFacts csv": 2278854,
+  "WorldFacts html": 3418030,
+  "WorldFacts rtf": 4778646,
+  "WorldFacts xlsx": 7514355,
+  "WorldFacts xml": 3463414,
+  "large:1000": 9198664,
+  "testdata": 873712
 }

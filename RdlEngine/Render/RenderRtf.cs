@@ -292,6 +292,19 @@ namespace Majorsilence.Reporting.Rdl
 
         private string EscapeText(string s)
         {
+            // most text needs no change at all, and then it is returned as it is
+            bool changes = false;
+            foreach (char c in s)
+            {
+                if (c == '{' || c == '}' || c == '\\' || c == '\n' || (int)c > 127)
+                {
+                    changes = true;
+                    break;
+                }
+            }
+            if (!changes)
+                return s;
+
 			StringBuilder rs = new StringBuilder(s.Length);
 
 			foreach (char c in s)
@@ -312,6 +325,18 @@ namespace Majorsilence.Reporting.Rdl
 
         private string RtfAnsi(string s)
         {
+            bool changes = false;
+            foreach (char c in s)
+            {
+                if ((int)c > 127)
+                {
+                    changes = true;
+                    break;
+                }
+            }
+            if (!changes)
+                return s;
+
             StringBuilder rs = new StringBuilder(s.Length);
             foreach (char c in s)
             {

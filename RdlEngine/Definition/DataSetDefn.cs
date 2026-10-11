@@ -163,7 +163,7 @@ namespace Majorsilence.Reporting.Rdl
             bool bRows = false;
 			if (_XmlRowData != null)
 			{		// Override the query and provide data from XML
-				string xdata = await GetDataFile(rpt, _XmlRowFile).ConfigureAwait(false);
+				string xdata = GetDataFile(rpt, _XmlRowFile);
                 if (xdata == null)
                 {
                     xdata = _XmlRowData;					// didn't find any data
@@ -182,7 +182,9 @@ namespace Majorsilence.Reporting.Rdl
             return bRows;
 		}
 
-		private async Task<string> GetDataFile(Report rpt, string file)
+		// Synchronous on purpose: StreamReader opens a synchronous FileStream, and awaiting ReadToEndAsync on it queued a
+		// thread-pool work item per 4 KB buffer refill, so a 50 KB data file cost about fifteen pool hops.
+		private string GetDataFile(Report rpt, string file)
 		{
             if (file == null)		// no file no data
             {
@@ -205,7 +207,7 @@ namespace Majorsilence.Reporting.Rdl
 			try
 			{
 				fs = new StreamReader(fullpath);
-				d = await fs.ReadToEndAsync().ConfigureAwait(false);
+				d = fs.ReadToEnd();
 			}
 			catch (FileNotFoundException fe)
 			{

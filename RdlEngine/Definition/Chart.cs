@@ -291,6 +291,17 @@ namespace Majorsilence.Reporting.Rdl
 		}
 
 
+        // Found once: GetImageEncoders() and the search through it ran for every chart.
+        private static readonly Lazy<Imaging.ImageCodecInfo> JpegCodec = new Lazy<Imaging.ImageCodecInfo>(() =>
+        {
+            foreach (Imaging.ImageCodecInfo c in Imaging.ImageCodecInfo.GetImageEncoders())
+            {
+                if (c.FormatDescription == "JPEG")
+                    return c;
+            }
+            return null;
+        });
+
         private async Task<Page> RunPage_Bitmap(Pages pgs, Row row, Report rpt, ChartBase cb)
         {
             Page p;
@@ -302,23 +313,13 @@ namespace Majorsilence.Reporting.Rdl
             /* The following is a new image saving logic which will allow for higher 
              * quality images using JPEG with 100% quality
              * 06122007AJM */
-            Imaging.ImageCodecInfo[] info;
-            info = Imaging.ImageCodecInfo.GetImageEncoders();
             Imaging.EncoderParameters encoderParameters;
             encoderParameters = new Imaging.EncoderParameters(1);
             // 20022008 AJM GJL - Centralised class with global encoder settings
             // Assign the whole Param array, not Param[0]: portable across System.Drawing and the
             // SkiaSharp compat shim (whose count-ctor left Param empty before Majorsilence.Forms 26.0.51).
             encoderParameters.Param = new[] { new Imaging.EncoderParameter(Imaging.Encoder.Quality, ImageQualityManager.ChartImageQuality) };
-            Imaging.ImageCodecInfo codec = null;
-            for (int i = 0; i < info.Length; i++)
-            {
-                if (info[i].FormatDescription == "JPEG")
-                {
-                    codec = info[i];
-                    break;
-                }
-            }
+            Imaging.ImageCodecInfo codec = JpegCodec.Value;
             // NOTE: if you are on linux and see "System.ArgumentException: A null reference or invalid value was found [GDI+ status: InvalidParameter]"
             // then you need to install a newer libgdiplus package. This should work on Ubuntu 24.04 or newer "sudo apt-get install libgdiplus"
             im.Save(ostrm, codec, encoderParameters);
