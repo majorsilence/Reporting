@@ -98,6 +98,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			_DrawPanel.MouseWheel += DrawPanelMouseWheel;
 			_DrawPanel.KeyDown += DrawPanelKeyDown;
 			_DrawPanel.MouseMove += DrawPanelMouseMove;
+			_DrawPanel.MouseLeave += (s, e) => _DrawPanel.HoverNode = null;
 			_DrawPanel.DoubleClick += DrawPanelDoubleClick;
 
 			this.Layout += DesignCtl_Layout;
@@ -1661,6 +1662,9 @@ namespace Majorsilence.Reporting.RdlDesign
 					hle = hl.HitSpot;
 				}
 			}
+
+			// outline the item under the mouse (not while dragging)
+			_DrawPanel.HoverNode = (_MouseDownNode == null && !_bHaveMouse) ? b : null;
 
 			_MousePosition = newMousePosition;
 			DrawPanelSetCursor(b, hle);

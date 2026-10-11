@@ -73,6 +73,7 @@ namespace Majorsilence.Reporting.RdlDesign
 		RectangleF _GetRect;
 
         bool _ShowReportItemOutline=false;
+        XmlNode _HoverNode;
 
 
 		// For Scaling and AlignMent grid display
@@ -183,6 +184,59 @@ namespace Majorsilence.Reporting.RdlDesign
                     return 0;
                 float height = GetSize(h.InnerText);
                 return height;
+            }
+        }
+
+        /// <summary>
+        /// The report item under the mouse. It is drawn with a light dashed outline, even when it
+        /// has no border of its own, so borderless items (e.g. an empty Rectangle) can be found and grabbed.
+        /// </summary>
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        internal XmlNode HoverNode
+        {
+            get { return _HoverNode; }
+            set
+            {
+                if (!IsMovableReportItem(value))
+                    value = null;
+                if (ReferenceEquals(value, _HoverNode))
+                    return;
+                _HoverNode = value;
+                this.Invalidate();
+            }
+        }
+
+        internal static readonly Color HoverOutlineColor = Color.FromArgb(0x4A, 0x90, 0xD9);
+        internal static readonly Color GridDotColor = Color.FromArgb(0xA0, 0xA0, 0xA0);
+
+        /// <summary>
+        /// Positions of the dots of the design-canvas grid inside <paramref name="area"/>, one every
+        /// <paramref name="step"/>, starting at the area's top-left corner.
+        /// </summary>
+        internal static IEnumerable<PointF> GridDots(RectangleF area, Size step)
+        {
+            if (step.Width <= 0 || step.Height <= 0 || area.Width <= 0 || area.Height <= 0)
+                yield break;
+            for (float y = area.Top; y < area.Bottom; y += step.Height)
+                for (float x = area.Left; x < area.Right; x += step.Width)
+                    yield return new PointF(x, y);
+        }
+
+        private void DrawGridDots(RectangleF area)
+        {
+            // only paint what is visible
+            RectangleF visible = RectangleF.Intersect(area, new RectangleF(0, 0, this.Width, this.Height));
+            if (visible.IsEmpty)
+                return;
+            // keep the dots aligned to the grid origin, not to the visible corner
+            float ox = (float)Math.Floor((visible.X - area.X) / SizeGridPt.Width) * SizeGridPt.Width;
+            float oy = (float)Math.Floor((visible.Y - area.Y) / SizeGridPt.Height) * SizeGridPt.Height;
+            RectangleF aligned = new RectangleF(area.X + ox, area.Y + oy,
+                visible.Right - (area.X + ox), visible.Bottom - (area.Y + oy));
+            using (var brush = new SolidBrush(GridDotColor))
+            {
+                foreach (PointF pt in GridDots(aligned, SizeGridPt))
+                    g.FillRectangle(brush, pt.X, pt.Y, 1, 1);
             }
         }
 
@@ -1137,7 +1191,7 @@ namespace Majorsilence.Reporting.RdlDesign
                 // adjust coordinates for scrolling
                 TempRect.X -= _hScroll - 1;
                 TempRect.Y -= _vScroll - 1;
-                ControlPaint.DrawGrid(g, Rectangle.Round(TempRect), SizeGridPt, Color.White);
+                DrawGridDots(TempRect);
             }
 
 
@@ -1233,6 +1287,8 @@ namespace Majorsilence.Reporting.RdlDesign
 				{
 					if (this._SelectedReportItems.IndexOf(xNodeLoop) >= 0)
 						DrawSelected(xNodeLoop, rir);
+					else if (ReferenceEquals(xNodeLoop, _HoverNode))
+						DrawHoverOutline(rir);
 				}
 			}
 		}
@@ -1959,6 +2015,15 @@ namespace Majorsilence.Reporting.RdlDesign
 				await DrawReportItems(items, ri);
 			
 			return ri;
+		}
+
+		private void DrawHoverOutline(RectangleF r)
+		{
+			StyleInfo si = new StyleInfo();
+			si.BStyleBottom = si.BStyleLeft = si.BStyleTop = si.BStyleRight = BorderStyleEnum.Dashed;
+			si.BWidthBottom = si.BWidthLeft = si.BWidthRight = si.BWidthTop = 1;
+			si.BColorBottom = si.BColorLeft = si.BColorRight = si.BColorTop = HoverOutlineColor;
+			DrawBorder(si, r);
 		}
 
 		private void DrawSelected(XmlNode xNode, RectangleF r)
