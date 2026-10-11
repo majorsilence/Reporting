@@ -508,12 +508,8 @@ namespace Majorsilence.Reporting.Rdl
 		/// </summary>
 		public override string ToString()
 		{
-			if (!_WasDownloaded)
-			{
-				// HACK: async
-				Task.Run(async () => await Download().ConfigureAwait(false)).GetAwaiter().GetResult();
-			}
-			
+			// Not downloaded yet means empty. ToString used to start the download itself (blocking on it),
+			// but a download is async and every caller in MhtBuilder awaits Download() first.
 			if (!_WasDownloaded || _DownloadedBytes.Length <= 0)
 				return "";
 		
