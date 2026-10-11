@@ -773,7 +773,6 @@ namespace Majorsilence.Reporting.Rdl
 
 		private System.Drawing.SizeF MeasureString(string s, StyleInfo si, Draw.Graphics g, out float descent)
 		{
-			Draw.Font drawFont=null;
 			Draw.StringFormat drawFormat=null;
 			System.Drawing.SizeF ms = System.Drawing.SizeF.Empty;
 			descent = 0;				
@@ -801,42 +800,93 @@ namespace Majorsilence.Reporting.Rdl
 					default:
 						break;
 				}
-				try
+
+				var cache = _measureCaches.GetValue(g, _ => new MeasureCache());
+				var key = (si.FontFamilyFull, si.FontSize, fs);
+				var cached = cache.GetFont(key, () =>
 				{
-					Draw.FontFamily ff = si.GetFontFamily();
-					drawFont = new Draw.Font(ff, si.FontSize, fs);
-					// following algorithm comes from the C# Font Metrics documentation
-					float descentPixel = si.FontSize * ff.GetCellDescent(fs) / ff.GetEmHeight(fs);
-					descent = RSize.PointsFromPixels(g, descentPixel);
-				}
-				catch
-				{
-					drawFont = new Draw.Font("Arial", si.FontSize, fs);	// usually because font not found
-					descent = 0;
-				}
+					try
+					{
+						Draw.FontFamily ff = si.GetFontFamily();
+						Draw.Font f = new Draw.Font(ff, si.FontSize, fs);
+						// following algorithm comes from the C# Font Metrics documentation
+						float descentPixel = si.FontSize * ff.GetCellDescent(fs) / ff.GetEmHeight(fs);
+						return (f, RSize.PointsFromPixels(g, descentPixel));
+					}
+					catch
+					{
+						return (new Draw.Font("Arial", si.FontSize, fs), 0f);	// usually because font not found
+					}
+				});
+				descent = cached.descent;
+
+				var sizeKey = (key.Item1, key.Item2, key.Item3, s);
+				if (cache.TryGetSize(sizeKey, out var known))
+					return known;
+
 				drawFormat = new Draw.StringFormat();
 				drawFormat.Alignment = Draw.StringAlignment.Near;
 
 				Draw.CharacterRange[] cr = {new Draw.CharacterRange(0, s.Length)};
 				drawFormat.SetMeasurableCharacterRanges(cr);
 				Draw.Region[] rs = new Draw.Region[1];
-				rs = g.MeasureCharacterRanges(s, drawFont, new System.Drawing.RectangleF(0,0,float.MaxValue,float.MaxValue),
+				rs = g.MeasureCharacterRanges(s, cached.font, new System.Drawing.RectangleF(0,0,float.MaxValue,float.MaxValue),
 					drawFormat);
 				System.Drawing.RectangleF mr = rs[0].GetBounds(g);
 
 				ms.Height = RSize.PointsFromPixels(g, mr.Height);	// convert to points from pixels
 				ms.Width = RSize.PointsFromPixels(g, mr.Width);		// convert to points from pixels
+				cache.SetSize(sizeKey, ms);
 				return ms;
 			}
 			finally
 			{
-				if (drawFont != null)
-					drawFont.Dispose();
 				if (drawFormat != null)
-					drawFont.Dispose();
+					drawFormat.Dispose();
 			}
 		}
-		
+
+		// What has been measured with one Graphics. Looking up a font and its metrics is slow, the
+		// same words are measured over and over, and a long text is laid out again for every page
+		// it is split over, so fonts and measurements are kept for as long as the Graphics lives.
+		sealed class MeasureCache
+		{
+			const int MaxKeptWordSizes = 50000;
+			readonly Dictionary<(string, float, Draw.FontStyle), (Draw.Font font, float descent)> _fonts =
+				new Dictionary<(string, float, Draw.FontStyle), (Draw.Font, float)>();
+			readonly Dictionary<(string, float, Draw.FontStyle, string), System.Drawing.SizeF> _sizes =
+				new Dictionary<(string, float, Draw.FontStyle, string), System.Drawing.SizeF>();
+
+			public (Draw.Font font, float descent) GetFont((string, float, Draw.FontStyle) key, Func<(Draw.Font, float)> create)
+			{
+				lock (this)
+				{
+					if (!_fonts.TryGetValue(key, out var f))
+						_fonts[key] = f = create();
+					return f;
+				}
+			}
+
+			public bool TryGetSize((string, float, Draw.FontStyle, string) key, out System.Drawing.SizeF size)
+			{
+				lock (this)
+					return _sizes.TryGetValue(key, out size);
+			}
+
+			public void SetSize((string, float, Draw.FontStyle, string) key, System.Drawing.SizeF size)
+			{
+				lock (this)
+				{
+					if (_sizes.Count >= MaxKeptWordSizes)
+						_sizes.Clear();
+					_sizes[key] = size;
+				}
+			}
+		}
+
+		static readonly System.Runtime.CompilerServices.ConditionalWeakTable<Draw.Graphics, MeasureCache> _measureCaches =
+			new System.Runtime.CompilerServices.ConditionalWeakTable<Draw.Graphics, MeasureCache>();
+
 		#region IEnumerable Members
 
 		public IEnumerator GetEnumerator()

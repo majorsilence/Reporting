@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Report Name="ListPagingTest">
+  <Description>Issue #121: a List of long CanGrow textboxes must flow onto several pages in both PDF and HTML, with a page footer that counts them.</Description>
+  <DataSources>
+    <DataSource Name="DS1">
+      <ConnectionProperties>
+        <DataProvider>Microsoft.Data.Sqlite</DataProvider>
+        <ConnectString>Data Source=:memory:</ConnectString>
+        <IntegratedSecurity>false</IntegratedSecurity>
+      </ConnectionProperties>
+    </DataSource>
+  </DataSources>
+  <DataSets>
+    <DataSet Name="Data">
+      <Query>
+        <DataSourceName>DS1</DataSourceName>
+        <CommandText>select 1 as Id union all select 2 union all select 3 union all select 4 union all select 5</CommandText>
+      </Query>
+      <Fields>
+        <Field Name="Id"><DataField>Id</DataField></Field>
+      </Fields>
+    </DataSet>
+  </DataSets>
+  <Body>
+    <Height>1in</Height>
+    <ReportItems>
+      <List Name="List1">
+        <DataSetName>Data</DataSetName>
+        <Top>0in</Top>
+        <Left>0in</Left>
+        <Width>6in</Width>
+        <Height>1in</Height>
+        <ReportItems>
+          <Textbox Name="Row">
+            <Top>0in</Top>
+            <Left>0in</Left>
+            <Height>0.3in</Height>
+            <Width>5in</Width>
+            <CanGrow>true</CanGrow>
+            <Value>="ROW" &amp; Fields!Id.Value &amp; " WORD01 text here WORD02 text here WORD03 text here WORD04 text here WORD05 text here WORD06 text here WORD07 text here WORD08 text here WORD09 text here WORD10 text here WORD11 text here WORD12 text here WORD13 text here WORD14 text here WORD15 text here WORD16 text here WORD17 text here WORD18 text here WORD19 text here WORD20 text here WORD21 text here WORD22 text here WORD23 text here WORD24 text here WORD25 text here WORD26 text here WORD27 text here WORD28 text here WORD29 text here WORD30 text here WORD31 text here WORD32 text here WORD33 text here WORD34 text here WORD35 text here WORD36 text here WORD37 text here WORD38 text here WORD39 text here WORD40 text here ROWEND" &amp; Fields!Id.Value</Value>
+            <Style><FontSize>10pt</FontSize></Style>
+          </Textbox>
+          <Textbox Name="HtmlRow">
+            <Top>0.4in</Top>
+            <Left>0in</Left>
+            <Height>0.3in</Height>
+            <Width>5in</Width>
+            <CanGrow>true</CanGrow>
+            <Value>="&lt;p&gt;&lt;b&gt;HPARA01&lt;/b&gt; some html formatted proposal text for paragraph&lt;/p&gt;&lt;p&gt;&lt;b&gt;HPARA02&lt;/b&gt; some html formatted proposal text for paragraph&lt;/p&gt;&lt;p&gt;&lt;b&gt;HPARA03&lt;/b&gt; some html formatted proposal text for paragraph&lt;/p&gt;&lt;p&gt;&lt;b&gt;HPARA04&lt;/b&gt; some html formatted proposal text for paragraph&lt;/p&gt;&lt;p&gt;&lt;b&gt;HPARA05&lt;/b&gt; some html formatted proposal text for paragraph&lt;/p&gt;&lt;p&gt;&lt;b&gt;HPARA06&lt;/b&gt; some html formatted proposal text for paragraph&lt;/p&gt;&lt;p&gt;&lt;b&gt;HPARA07&lt;/b&gt; some html formatted proposal text for paragraph&lt;/p&gt;&lt;p&gt;&lt;b&gt;HPARA08&lt;/b&gt; some html formatted proposal text for paragraph&lt;/p&gt;&lt;p&gt;&lt;b&gt;HPARA09&lt;/b&gt; some html formatted proposal text for paragraph&lt;/p&gt;&lt;p&gt;&lt;b&gt;HPARA10&lt;/b&gt; some html formatted proposal text for paragraph&lt;/p&gt;&lt;p&gt;&lt;b&gt;HPARA11&lt;/b&gt; some html formatted proposal text for paragraph&lt;/p&gt;&lt;p&gt;&lt;b&gt;HPARA12&lt;/b&gt; some html formatted proposal text for paragraph&lt;/p&gt;&lt;p&gt;&lt;b&gt;HPARA13&lt;/b&gt; some html formatted proposal text for paragraph&lt;/p&gt;&lt;p&gt;&lt;b&gt;HPARA14&lt;/b&gt; some html formatted proposal text for paragraph&lt;/p&gt;&lt;p&gt;&lt;b&gt;HPARA15&lt;/b&gt; some html formatted proposal text for paragraph&lt;/p&gt;&lt;p&gt;&lt;b&gt;HPARA16&lt;/b&gt; some html formatted proposal text for paragraph&lt;/p&gt;&lt;p&gt;&lt;b&gt;HPARA17&lt;/b&gt; some html formatted proposal text for paragraph&lt;/p&gt;&lt;p&gt;&lt;b&gt;HPARA18&lt;/b&gt; some html formatted proposal text for paragraph&lt;/p&gt;&lt;p&gt;&lt;b&gt;HPARA19&lt;/b&gt; some html formatted proposal text for paragraph&lt;/p&gt;&lt;p&gt;&lt;b&gt;HPARA20&lt;/b&gt; some html formatted proposal text for paragraph&lt;/p&gt;&lt;p&gt;&lt;b&gt;HPARA21&lt;/b&gt; some html formatted proposal text for paragraph&lt;/p&gt;&lt;p&gt;&lt;b&gt;HPARA22&lt;/b&gt; some html formatted proposal text for paragraph&lt;/p&gt;&lt;p&gt;&lt;b&gt;HPARA23&lt;/b&gt; some html formatted proposal text for paragraph&lt;/p&gt;&lt;p&gt;&lt;b&gt;HPARA24&lt;/b&gt; some html formatted proposal text for paragraph&lt;/p&gt;&lt;p&gt;&lt;b&gt;HPARA25&lt;/b&gt; some html formatted proposal text for paragraph&lt;/p&gt;&lt;p&gt;&lt;b&gt;HPARA26&lt;/b&gt; some html formatted proposal text for paragraph&lt;/p&gt;&lt;p&gt;&lt;b&gt;HPARA27&lt;/b&gt; some html formatted proposal text for paragraph&lt;/p&gt;&lt;p&gt;&lt;b&gt;HPARA28&lt;/b&gt; some html formatted proposal text for paragraph&lt;/p&gt;&lt;p&gt;&lt;b&gt;HPARA29&lt;/b&gt; some html formatted proposal text for paragraph&lt;/p&gt;&lt;p&gt;&lt;b&gt;HPARA30&lt;/b&gt; some html formatted proposal text for paragraph&lt;/p&gt;HEND" &amp; Fields!Id.Value</Value>
+            <Style><FontSize>10pt</FontSize><Format>html</Format></Style>
+          </Textbox>
+        </ReportItems>
+      </List>
+    </ReportItems>
+  </Body>
+  <PageFooter>
+    <Height>0.25in</Height>
+    <ReportItems>
+      <Textbox Name="Footer">
+        <Top>0in</Top>
+        <Left>0in</Left>
+        <Height>0.2in</Height>
+        <Width>3in</Width>
+        <Value>="Page " &amp; Globals!PageNumber &amp; " of " &amp; Globals!TotalPages</Value>
+        <Style><FontSize>9pt</FontSize></Style>
+      </Textbox>
+    </ReportItems>
+  </PageFooter>
+  <Width>6in</Width>
+  <PageWidth>8.5in</PageWidth>
+  <PageHeight>3in</PageHeight>
+  <TopMargin>0.25in</TopMargin>
+  <BottomMargin>0.25in</BottomMargin>
+</Report>
