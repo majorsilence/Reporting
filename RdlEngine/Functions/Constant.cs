@@ -13,9 +13,17 @@ namespace Majorsilence.Reporting.Rdl
 	/// <p>Expression definition</p>
 	/// </summary>
 	[Serializable]
-	internal class Constant : IExpr
+	internal class Constant : IExpr, ICachedConstant
 	{
 		string _Value;		// value of the constant
+		readonly Task<object> _objectTask;
+		readonly Task<string> _stringTask;
+		readonly Task<IExpr> _optimizedTask;
+
+		static readonly Task<bool> TrueTask = Task.FromResult(true);
+
+		public Task<object> ObjectTask { get { return _objectTask; } }
+		public Task<string> StringTask { get { return _stringTask; } }
 
 		/// <summary>
 		/// Constant - as opposed to an expression
@@ -23,6 +31,9 @@ namespace Majorsilence.Reporting.Rdl
 		public Constant(string v) 
 		{
 			_Value = v;
+			_objectTask = Task.FromResult((object)v);
+			_stringTask = Task.FromResult(v);
+			_optimizedTask = Task.FromResult((IExpr)this);
 		}
 
 		public TypeCode GetTypeCode()
@@ -32,22 +43,22 @@ namespace Majorsilence.Reporting.Rdl
 
 		public Task<bool> IsConstant()
 		{
-			return Task.FromResult(true);
+			return TrueTask;
 		}
 
 		public Task<IExpr> ConstantOptimization()
 		{	// already constant expression
-			return Task.FromResult(this as IExpr);
+			return _optimizedTask;
 		}
 
 		public Task<object> Evaluate(Report rpt, Row row)
 		{
-			return Task.FromResult((object)_Value);
+			return _objectTask;
 		}
 
 		public Task<string> EvaluateString(Report rpt, Row row)
 		{
-			return Task.FromResult(_Value);
+			return _stringTask;
 		}
 		
 		public Task<double> EvaluateDouble(Report rpt, Row row)

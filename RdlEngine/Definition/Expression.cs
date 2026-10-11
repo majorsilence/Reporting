@@ -44,12 +44,14 @@ namespace Majorsilence.Reporting.Rdl
 			if (_Source == null)
 			{
 				_Expr = new Constant("");
+				_constant = _Expr as ICachedConstant;
 				return;
 			}
 			else if (_Source == "" ||			// empty expression
 				_Source[0] != '=')	// if 1st char not '='
 			{
 				_Expr = new Constant(_Source);	//   this is a constant value
+				_constant = _Expr as ICachedConstant;
 				return;
 			}
 
@@ -146,6 +148,7 @@ namespace Majorsilence.Reporting.Rdl
 				OwnerReport.rl.LogError(4, "Expression:" + _Source + "\r\nConstant Optimization exception:\r\n" + ex.Message + "\r\nStack trace:\r\n" + ex.StackTrace );
 			}
 			_Type = _Expr.GetTypeCode();
+			_constant = _Expr as ICachedConstant;
 
 			return;
 		}
@@ -219,7 +222,17 @@ namespace Majorsilence.Reporting.Rdl
 			return Task.FromResult(this as IExpr);
 		}
 
-		public async Task<object> Evaluate(Report rpt, Row row)
+		// Set in FinalPass when the expression is a constant; Evaluate / EvaluateString then answer with its
+		// ready-made task and skip the async method (a state machine and a Task per call).
+		private ICachedConstant _constant;
+
+		public Task<object> Evaluate(Report rpt, Row row)
+		{
+			ICachedConstant c = _constant;
+			return c != null ? c.ObjectTask : EvaluateAsync(rpt, row);
+		}
+
+		private async Task<object> EvaluateAsync(Report rpt, Row row)
 		{
 			try 
 			{
@@ -247,7 +260,13 @@ namespace Majorsilence.Reporting.Rdl
 			}
 		}
 
-		public async Task<string> EvaluateString(Report rpt, Row row)
+		public Task<string> EvaluateString(Report rpt, Row row)
+		{
+			ICachedConstant c = _constant;
+			return c != null ? c.StringTask : EvaluateStringAsync(rpt, row);
+		}
+
+		private async Task<string> EvaluateStringAsync(Report rpt, Row row)
 		{
 			try 
 			{
