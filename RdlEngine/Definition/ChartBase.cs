@@ -609,7 +609,7 @@ namespace Majorsilence.Reporting.Rdl
                 string c = await GetSeriesValue(rpt, iCol).ConfigureAwait(false);
                 if (c != "")  //14052008WRP cater for empty strings in legend names
                 {
-                    System.Drawing.SizeF ms = g.MeasureStringLocked(c, f, maxSize, sf);
+                    System.Drawing.SizeF ms = g.MeasureString(c, f, maxSize, sf);
                     sizes[iCol - 1] = new System.Drawing.Size((int)Math.Ceiling(ms.Width),
                                              (int)Math.Ceiling(ms.Height));
                     if (sizes[iCol - 1].Width > maxWidth)

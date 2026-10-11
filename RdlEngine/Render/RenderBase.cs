@@ -713,18 +713,12 @@ namespace Majorsilence.Reporting.Rdl
             if (s == null || s.Length == 0)
                 return null;
 
-            drawFormat.SetMeasurableCharacterRanges(cra);
-            Draw2.Region[] rs = g.MeasureCharacterRanges(s, drawFont, new System.Drawing.RectangleF(0, 0, float.MaxValue, float.MaxValue),
-                drawFormat);
+            var edges = g.MeasureRunSpans(s, drawFont, cra);
             WordStartFinish[] sz = new WordStartFinish[cra.Length];
-            int isz = 0;
-            foreach (Draw2.Region r in rs)
+            for (int i = 0; i < edges.Length; i++)
             {
-                System.Drawing.RectangleF mr = r.GetBounds(g);
-                r.Dispose();
-                sz[isz].start = Measurement.PointsFromPixels(mr.Left, g.DpiX);
-                sz[isz].end = Measurement.PointsFromPixels(mr.Right, g.DpiX);
-                isz++;
+                sz[i].start = Measurement.PointsFromPixels(edges[i].Left, g.DpiX);
+                sz[i].end = Measurement.PointsFromPixels(edges[i].Right, g.DpiX);
             }
             return sz;
         }
@@ -746,14 +740,7 @@ namespace Majorsilence.Reporting.Rdl
             if (_measureCache.TryGetValue(key, out System.Drawing.SizeF known))
                 return known;
 
-            Draw2.CharacterRange[] cr = { new Draw2.CharacterRange(0, s.Length) };
-            drawFormat.SetMeasurableCharacterRanges(cr);
-            Draw2.Region[] rs = g.MeasureCharacterRanges(s, drawFont, new System.Drawing.RectangleF(0, 0, float.MaxValue, float.MaxValue),
-                drawFormat);
-            System.Drawing.RectangleF mr = rs[0].GetBounds(g);
-            rs[0].Dispose();
-
-            var size = new System.Drawing.SizeF(mr.Width, mr.Height);
+            var size = g.MeasureRun(s, drawFont);
             if (_measureCache.Count >= MaxMeasureCache)
                 _measureCache.Clear();      // bounded: a report of mostly distinct text would otherwise keep every string
             _measureCache[key] = size;

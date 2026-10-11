@@ -83,7 +83,7 @@ Concurrent requests (time per request, parse + data + PDF):
 PDF, CSV and XML output was byte-identical across steps 1-3, 5, 6 (checked with `-- smoke` hashes); step 4 changes the compressed bytes only. All tests pass: ReportTests 574, Majorsilence.Pdf 306, RdlAsp.Mvc 16, RdlCreator 24.
 
 ### Thread safety finding in a dependency
-`Graphics.MeasureString` in `Majorsilence.Forms` goes through `TextMeasurer`, whose static `Dictionary` cache was corrupted by concurrent use (a 16-thread run failed with "Operations that change non-concurrent collections must have exclusive access"; the baseline code path had the same race). Fixed in `Majorsilence.Forms` (`TextMeasurer.cs`, with a regression test that reproduces the exception without the fix). Until that release is referenced, the engine measures through one lock (`GraphicsMeasureExtensions.MeasureStringLocked`); remove it afterwards.
+`Graphics.MeasureString` in `Majorsilence.Forms` goes through `TextMeasurer`, whose static `Dictionary` cache was corrupted by concurrent use (a 16-thread run failed with "Operations that change non-concurrent collections must have exclusive access"; the baseline code path had the same race). Fixed in `Majorsilence.Forms` (`TextMeasurer.cs`, with a regression test that reproduces the exception without the fix). The fix shipped in Majorsilence.Forms 26.11.3, and the engine's temporary lock (`MeasureStringLocked`) is gone. The engine now measures single lines with `Graphics.MeasureRunWidth` / `MeasureRunSpans` (same floats as `MeasureCharacterRanges`, no Region per cell).
 
 ## Round 2 (allocation, KB per render; timings not re-measured on mains power)
 | Workload | Before | After |
