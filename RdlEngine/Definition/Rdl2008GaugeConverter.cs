@@ -44,6 +44,29 @@ namespace Majorsilence.Reporting.Rdl
                     indicators.AppendChild (item);
             }
 
+            foreach (var gauge in Kids (Child (panel, "RadialGauges"), "RadialGauge")) {
+                var itemName = name + "_Radial" + (++index);
+                var drawn = DrawnGauge (doc, ns, gauge, itemName, width, height, radial: true);
+                if (drawn != null) {
+                    indicators.AppendChild (drawn);     // like the indicators, it needs the dataset's scope
+                    continue;
+                }
+                var item = Gauge (doc, ns, gauge, itemName, width, height, dataSet, radial: true);
+                if (item != null)
+                    items.AppendChild (item);
+            }
+            foreach (var gauge in Kids (Child (panel, "LinearGauges"), "LinearGauge")) {
+                var itemName = name + "_Linear" + (++index);
+                var drawn = DrawnGauge (doc, ns, gauge, itemName, width, height, radial: false);
+                if (drawn != null) {
+                    indicators.AppendChild (drawn);
+                    continue;
+                }
+                var item = Gauge (doc, ns, gauge, itemName, width, height, dataSet, radial: false);
+                if (item != null)
+                    items.AppendChild (item);
+            }
+
             // Indicator values are aggregates over the panel's dataset. A Textbox or Rectangle outside
             // a data region has no dataset scope, so they sit in a List with one instance (grouped on
             // a constant) bound to it. Charts carry their own DataSetName and stay outside.
@@ -71,17 +94,6 @@ namespace Majorsilence.Reporting.Rdl
                     items.AppendChild (list);
                 }
             }
-            foreach (var gauge in Kids (Child (panel, "RadialGauges"), "RadialGauge")) {
-                var item = Gauge (doc, ns, gauge, name + "_Radial" + (++index), width, height, dataSet, radial: true);
-                if (item != null)
-                    items.AppendChild (item);
-            }
-            foreach (var gauge in Kids (Child (panel, "LinearGauges"), "LinearGauge")) {
-                var item = Gauge (doc, ns, gauge, name + "_Linear" + (++index), width, height, dataSet, radial: false);
-                if (item != null)
-                    items.AppendChild (item);
-            }
-
             if (!items.HasChildNodes)
                 return null;
 
@@ -160,6 +172,90 @@ namespace Majorsilence.Reporting.Rdl
         #endregion
 
         #region Gauges
+
+        // The gauge drawing lives in the RdlCri module (GaugeRadial / GaugeLinear custom report items).
+        // When that module is not available the gauges fall back to a bar chart, below.
+        private const string RadialType = "Gauge Radial";
+        private const string LinearType = "Gauge Linear";
+
+        /// <summary>Tests set this to false to exercise the fallback.</summary>
+        internal static bool DrawnGaugesEnabled = true;
+
+        private static bool IsAvailable (string type)
+        {
+            if (!DrawnGaugesEnabled)
+                return false;
+            try {
+                RdlEngineConfig.GetCustomReportTypes ();     // makes sure the configuration is loaded
+                using (RdlEngineConfig.CreateCustomReportItem (type))
+                    return true;
+            } catch (Exception) {
+                return false;
+            }
+        }
+
+        /// <summary>A custom report item that draws the gauge, or null when the drawing module is missing.</summary>
+        private static XmlElement DrawnGauge (XmlDocument doc, string ns, XmlElement gauge, string name,
+            string panelWidth, string panelHeight, bool radial)
+        {
+            var type = radial ? RadialType : LinearType;
+            var scale = radial
+                ? Child (Child (gauge, "GaugeScales"), "RadialScale")
+                : Child (Child (gauge, "GaugeScales"), "LinearScale");
+            var pointer = radial
+                ? Child (Child (scale, "GaugePointers"), "RadialPointer")
+                : Child (Child (scale, "GaugePointers"), "LinearPointer");
+            var value = ValueOf (Child (pointer, "GaugeInputValue"));
+            if (value == null || !IsAvailable (type))
+                return null;
+
+            var item = El (doc, ns, "CustomReportItem");
+            item.SetAttribute ("Name", name);
+            item.AppendChild (El (doc, ns, "Type", type));
+            Place (doc, ns, item, gauge, panelWidth, panelHeight);
+            var properties = El (doc, ns, "CustomProperties");
+            item.AppendChild (properties);
+
+            void Property (string propertyName, string text)
+            {
+                if (string.IsNullOrEmpty (text))
+                    return;
+                var property = El (doc, ns, "CustomProperty");
+                property.AppendChild (El (doc, ns, "Name", propertyName));
+                property.AppendChild (El (doc, ns, "Value", text));
+                properties.AppendChild (property);
+            }
+
+            Property ("Value", "=" + value);
+            Property ("Min", "=" + (ValueOf (Child (scale, "MinimumValue")) ?? "0"));
+            Property ("Max", "=" + (ValueOf (Child (scale, "MaximumValue")) ?? "100"));
+            Property ("Interval", Child (scale, "Interval")?.InnerText?.Trim ());
+
+            // Ranges travel as one "from:to:color;..." string, built by an expression because the ends can be expressions.
+            var pieces = new List<string> ();
+            foreach (var range in Kids (Child (scale, "ScaleRanges"), "ScaleRange")) {
+                var from = ValueOf (Child (range, "StartValue"));
+                var to = ValueOf (Child (range, "EndValue"));
+                var color = Child (Child (range, "Style"), "BackgroundColor")?.InnerText?.Trim ();
+                if (from == null || to == null || string.IsNullOrEmpty (color) || color.StartsWith ("=", StringComparison.Ordinal))
+                    continue;
+                pieces.Add ($"CStr(({from})) & \":\" & CStr(({to})) & \":{color.Replace ("\"", string.Empty)}\"");
+            }
+            if (pieces.Count > 0)
+                Property ("Ranges", "=" + string.Join (" & \";\" & ", pieces));
+
+            var pointerColor = Child (Child (pointer, "Style"), "BackgroundColor")?.InnerText?.Trim ();
+            if (!string.IsNullOrEmpty (pointerColor) && !pointerColor.StartsWith ("=", StringComparison.Ordinal))
+                Property ("PointerColor", pointerColor);
+
+            if (radial) {
+                Property ("StartAngle", Child (scale, "StartAngle")?.InnerText?.Trim ());
+                Property ("SweepAngle", Child (scale, "SweepAngle")?.InnerText?.Trim ());
+            } else {
+                Property ("Orientation", Child (gauge, "Orientation")?.InnerText?.Trim ());
+            }
+            return item;
+        }
 
         private static XmlElement Gauge (XmlDocument doc, string ns, XmlElement gauge, string name,
             string panelWidth, string panelHeight, string dataSet, bool radial)

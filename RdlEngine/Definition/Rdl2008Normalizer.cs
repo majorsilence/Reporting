@@ -462,7 +462,7 @@ namespace Majorsilence.Reporting.Rdl
 
                 if (approximated > 0) {
                     rl?.LogError (4, $"The report contains {approximated} {kind} item(s), which are approximated: " +
-                        "indicators as coloured boxes and numbers, gauges as a bar on their scale.");
+                        "indicators as coloured boxes and numbers, gauges as a simplified dial or bar with the scale, ranges and value.");
                 }
 
                 if (replaced > 0) {

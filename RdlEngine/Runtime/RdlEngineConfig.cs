@@ -317,6 +317,16 @@ namespace Majorsilence.Reporting.Rdl
 	</Compression>
 	<CustomReportItems>
 		<CustomReportItem>
+			<Type>Gauge Radial</Type>
+			<CodeModule>Majorsilence.Reporting.RdlCri.dll</CodeModule>
+			<ClassName>Majorsilence.Reporting.Cri.GaugeRadial</ClassName>
+		</CustomReportItem>
+		<CustomReportItem>
+			<Type>Gauge Linear</Type>
+			<CodeModule>Majorsilence.Reporting.RdlCri.dll</CodeModule>
+			<ClassName>Majorsilence.Reporting.Cri.GaugeLinear</ClassName>
+		</CustomReportItem>
+		<CustomReportItem>
 			<Type>BarCode EAN-13</Type>
 			<CodeModule>Majorsilence.Reporting.RdlCri.dll</CodeModule>
 			<ClassName>Majorsilence.Reporting.Cri.BarCodeEAN13</ClassName>

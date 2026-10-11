@@ -34,8 +34,12 @@ namespace ReportTests
   <RadialGauges><RadialGauge Name=""Dial"">
     <Top>25</Top><Left>0</Left><Height>75</Height><Width>50</Width>
     <GaugeScales><RadialScale Name=""Scale1"">
-      <MinimumValue><Value>0</Value></MinimumValue><MaximumValue><Value>50</Value></MaximumValue>
-      <GaugePointers><RadialPointer Name=""Needle""><GaugeInputValue><Value>=Sum(Fields!Amount.Value)</Value></GaugeInputValue></RadialPointer></GaugePointers>
+      <MinimumValue><Value>0</Value></MinimumValue><MaximumValue><Value>50</Value></MaximumValue><Interval>10</Interval><StartAngle>30</StartAngle><SweepAngle>300</SweepAngle>
+      <ScaleRanges>
+        <ScaleRange><StartValue><Value>0</Value></StartValue><EndValue><Value>30</Value></EndValue><Style><BackgroundColor>Green</BackgroundColor></Style></ScaleRange>
+        <ScaleRange><StartValue><Value>30</Value></StartValue><EndValue><Value>=50</Value></EndValue><Style><BackgroundColor>Red</BackgroundColor></Style></ScaleRange>
+      </ScaleRanges>
+      <GaugePointers><RadialPointer Name=""Needle""><Style><BackgroundColor>Blue</BackgroundColor></Style><GaugeInputValue><Value>=Sum(Fields!Amount.Value)</Value></GaugeInputValue></RadialPointer></GaugePointers>
     </RadialScale></GaugeScales>
   </RadialGauge></RadialGauges>
   <LinearGauges><LinearGauge Name=""Bar"">
@@ -96,9 +100,9 @@ namespace ReportTests
             var rectangle = doc.GetElementsByTagName ("Rectangle").Cast<XmlElement> ().First (r => r.GetAttribute ("Name") == "Kpi");
             Assert.That (rectangle["Top", Rdl2010].InnerText, Is.EqualTo ("0.5in"));
             Assert.That (rectangle["Width", Rdl2010].InnerText, Is.EqualTo ("4in"));
-            // the two indicators share a one-instance list for the dataset; the two gauges are charts
-            Assert.That (rectangle["ReportItems", Rdl2010].ChildNodes, Has.Count.EqualTo (3));
-            Assert.That (rectangle["ReportItems", Rdl2010]["List", Rdl2010]["ReportItems", Rdl2010].ChildNodes, Has.Count.EqualTo (2));
+            // the two indicators and the two drawn gauges share a one-instance list for the dataset
+            Assert.That (rectangle["ReportItems", Rdl2010].ChildNodes, Has.Count.EqualTo (1));
+            Assert.That (rectangle["ReportItems", Rdl2010]["List", Rdl2010]["ReportItems", Rdl2010].ChildNodes, Has.Count.EqualTo (4));
         }
 
         [Test]
@@ -141,22 +145,55 @@ namespace ReportTests
             Assert.That (box["Style", Rdl2010]["Format", Rdl2010].InnerText, Is.EqualTo ("N1"));
         }
 
+        private static XmlElement Drawn (XmlDocument doc, string name)
+            => doc.GetElementsByTagName ("CustomReportItem").Cast<XmlElement> ().First (c => c.GetAttribute ("Name") == name);
+
+        private static string Property (XmlElement item, string name)
+            => item.SelectNodes (".//*[local-name()='CustomProperty']").Cast<XmlElement> ()
+                .FirstOrDefault (p => p["Name", Rdl2010].InnerText == name)?["Value", Rdl2010].InnerText;
+
         [Test]
-        public void Gauges_BecomeABarOnTheirScale ()
+        public void Gauges_BecomeDrawnItemsWithTheirScale ()
         {
             var doc = Load (ReportWith (Panel));
             Rdl2008Normalizer.Normalize (doc, null);
 
-            var charts = doc.GetElementsByTagName ("Chart").Cast<XmlElement> ().ToList ();
-            Assert.That (charts, Has.Count.EqualTo (2));
-            var radial = charts.First (c => c.GetAttribute ("Name") == "Kpi_Radial3");
-            Assert.That (radial["Type", Rdl2010].InnerText, Is.EqualTo ("Bar"));
-            Assert.That (radial["DataSetName", Rdl2010].InnerText, Is.EqualTo ("Data"));
-            Assert.That (radial.GetElementsByTagName ("DataPoint"), Has.Count.EqualTo (1));
-            Assert.That (radial["ValueAxis", Rdl2010]["Axis", Rdl2010]["Max", Rdl2010].InnerText, Is.EqualTo ("=50"));
-            var linear = charts.First (c => c.GetAttribute ("Name") == "Kpi_Linear4");
-            Assert.That (linear["ValueAxis", Rdl2010]["Axis", Rdl2010]["Max", Rdl2010].InnerText, Is.EqualTo ("=100"));
-            Assert.That (linear["ValueAxis", Rdl2010]["Axis", Rdl2010]["Min", Rdl2010].InnerText, Is.EqualTo ("=0"));
+            Assert.That (doc.GetElementsByTagName ("Chart"), Is.Empty, "the drawing module is present, so no fallback chart");
+            var radial = Drawn (doc, "Kpi_Radial3");
+            Assert.That (radial["Type", Rdl2010].InnerText, Is.EqualTo ("Gauge Radial"));
+            Assert.That (radial["Width", Rdl2010].InnerText, Is.EqualTo ("2in"), "50% of the 4in panel");
+            Assert.That (Property (radial, "Value"), Is.EqualTo ("=Sum(Fields!Amount.Value)"));
+            Assert.That (Property (radial, "Min"), Is.EqualTo ("=0"));
+            Assert.That (Property (radial, "Max"), Is.EqualTo ("=50"));
+            Assert.That (Property (radial, "Interval"), Is.EqualTo ("10"));
+            Assert.That (Property (radial, "StartAngle"), Is.EqualTo ("30"));
+            Assert.That (Property (radial, "SweepAngle"), Is.EqualTo ("300"));
+            Assert.That (Property (radial, "PointerColor"), Is.EqualTo ("Blue"));
+            var ranges = Property (radial, "Ranges");
+            Assert.That (ranges, Does.StartWith ("=CStr((0)) & \":\" & CStr((30)) & \":Green\""));
+            Assert.That (ranges, Does.Contain ("CStr((50)) & \":Red\""), "an expression end value is kept as an expression");
+            var linear = Drawn (doc, "Kpi_Linear4");
+            Assert.That (linear["Type", Rdl2010].InnerText, Is.EqualTo ("Gauge Linear"));
+            Assert.That (Property (linear, "Max"), Is.EqualTo ("=100"));
+        }
+
+        [Test]
+        public void Gauges_FallBackToABarWhenTheDrawingModuleIsMissing ()
+        {
+            Rdl2008GaugeConverter.DrawnGaugesEnabled = false;
+            try {
+                var doc = Load (ReportWith (Panel));
+                Rdl2008Normalizer.Normalize (doc, null);
+
+                var charts = doc.GetElementsByTagName ("Chart").Cast<XmlElement> ().ToList ();
+                Assert.That (charts, Has.Count.EqualTo (2));
+                Assert.That (doc.GetElementsByTagName ("CustomReportItem"), Is.Empty);
+                var radial = charts.First (c => c.GetAttribute ("Name") == "Kpi_Radial3");
+                Assert.That (radial["Type", Rdl2010].InnerText, Is.EqualTo ("Bar"));
+                Assert.That (radial["ValueAxis", Rdl2010]["Axis", Rdl2010]["Max", Rdl2010].InnerText, Is.EqualTo ("=50"));
+            } finally {
+                Rdl2008GaugeConverter.DrawnGaugesEnabled = true;
+            }
         }
 
         [Test]
