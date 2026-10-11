@@ -206,7 +206,287 @@ namespace Majorsilence.Reporting.RdlDesign
             }
         }
 
-        internal static readonly Color HoverOutlineColor = Color.FromArgb(0x4A, 0x90, 0xD9);
+        // ---- Table row/column/table selection decorator (issue #293) ----
+
+        internal const float DecoratorSize = 8f;
+        internal static readonly Color DecoratorColor = Color.FromArgb(0xD6, 0xE4, 0xF5);
+        internal static readonly Color DecoratorBorderColor = Color.FromArgb(0x4A, 0x90, 0xD9);
+
+        private XmlNode _HoverTable;
+
+        /// <summary>
+        /// The table under the mouse. Together with the table of the current selection it
+        /// shows the row/column handles.
+        /// </summary>
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        internal XmlNode HoverTable
+        {
+            get { return _HoverTable; }
+            set
+            {
+                if (value != null && !IsTableNode(value))
+                    value = null;
+                if (ReferenceEquals(value, _HoverTable))
+                    return;
+                _HoverTable = value;
+                this.Invalidate();
+            }
+        }
+
+        internal static bool IsTableNode(XmlNode node)
+        {
+            return node != null && (node.Name == "Table" || node.Name == "fyi:Grid");
+        }
+
+        /// <summary>The table the node is, or is inside of (through a table cell); otherwise null.</summary>
+        internal static XmlNode TableOf(XmlNode node)
+        {
+            for (XmlNode n = node; n != null; n = n.ParentNode)
+            {
+                if (IsTableNode(n))
+                    return n;
+                if (n.Name == "Body" || n.Name == "PageHeader" || n.Name == "PageFooter")
+                    break;
+            }
+            return null;
+        }
+
+        /// <summary>The table that currently shows its handles: the selected one, else the hovered one.</summary>
+        internal XmlNode DecoratedTable
+        {
+            get
+            {
+                foreach (XmlNode n in _SelectedReportItems)
+                {
+                    XmlNode t = TableOf(n);
+                    if (t != null)
+                        return t;
+                }
+                return _HoverTable;
+            }
+        }
+
+        private static IEnumerable<XmlNode> TableCells(XmlNode tableRow)
+        {
+            XmlNode cells = GetChild(tableRow, "TableCells");
+            if (cells == null)
+                yield break;
+            foreach (XmlNode c in cells.ChildNodes)
+                if (c.Name == "TableCell")
+                    yield return c;
+        }
+
+        private static XmlNode GetChild(XmlNode node, string name)
+        {
+            if (node == null)
+                return null;
+            foreach (XmlNode c in node.ChildNodes)
+                if (c.Name == name)
+                    return c;
+            return null;
+        }
+
+        private static IEnumerable<XmlNode> CellItems(XmlNode tableCell)
+        {
+            XmlNode items = GetChild(tableCell, "ReportItems");
+            if (items == null)
+                yield break;
+            foreach (XmlNode i in items.ChildNodes)
+                if (IsMovableReportItem(i))
+                    yield return i;
+        }
+
+        private static int CellColSpan(XmlNode tableCell)
+        {
+            XmlNode cs = GetChild(tableCell, "ColSpan");
+            int span;
+            return cs != null && int.TryParse(cs.InnerText, out span) && span > 0 ? span : 1;
+        }
+
+        /// <summary>The report items in all the cells of a table row.</summary>
+        internal static List<XmlNode> TableRowItems(XmlNode tableRow)
+        {
+            var result = new List<XmlNode>();
+            foreach (XmlNode cell in TableCells(tableRow))
+                result.AddRange(CellItems(cell));
+            return result;
+        }
+
+        /// <summary>The report items of the cells covering the (zero based) column of a table, honoring ColSpan.</summary>
+        internal List<XmlNode> TableColumnItems(XmlNode table, int column)
+        {
+            var result = new List<XmlNode>();
+            foreach (XmlNode row in GetTableRows(table))
+            {
+                int col = 0;
+                foreach (XmlNode cell in TableCells(row))
+                {
+                    int span = CellColSpan(cell);
+                    if (column >= col && column < col + span)
+                    {
+                        result.AddRange(CellItems(cell));
+                        break;
+                    }
+                    col += span;
+                }
+            }
+            return result;
+        }
+
+        /// <summary>The report items in all the cells of a table.</summary>
+        internal List<XmlNode> TableAllItems(XmlNode table)
+        {
+            var result = new List<XmlNode>();
+            foreach (XmlNode row in GetTableRows(table))
+                result.AddRange(TableRowItems(row));
+            return result;
+        }
+
+        internal enum TableDecoratorKind { None, Table, Row, Column }
+
+        internal struct TableDecoratorHit
+        {
+            internal TableDecoratorKind Kind;
+            internal XmlNode Table;
+            internal int Index;
+        }
+
+        /// <summary>The handles of a table: a corner (whole table), one per row on the left, one per column on top.</summary>
+        internal struct TableDecoratorLayout
+        {
+            internal RectangleF Corner;
+            internal List<RectangleF> Rows;
+            internal List<RectangleF> Columns;
+        }
+
+        internal static TableDecoratorLayout LayoutDecorator(RectangleF table, IList<float> colWidths, IList<float> rowHeights)
+        {
+            var l = new TableDecoratorLayout
+            {
+                Corner = new RectangleF(table.Left - DecoratorSize, table.Top - DecoratorSize, DecoratorSize, DecoratorSize),
+                Rows = new List<RectangleF>(),
+                Columns = new List<RectangleF>(),
+            };
+            float x = table.Left;
+            foreach (float w in colWidths)
+            {
+                l.Columns.Add(new RectangleF(x, table.Top - DecoratorSize, w, DecoratorSize));
+                x += w;
+            }
+            float y = table.Top;
+            foreach (float h in rowHeights)
+            {
+                l.Rows.Add(new RectangleF(table.Left - DecoratorSize, y, DecoratorSize, h));
+                y += h;
+            }
+            return l;
+        }
+
+        internal static TableDecoratorHit HitDecorator(TableDecoratorLayout l, PointF p)
+        {
+            var hit = new TableDecoratorHit { Kind = TableDecoratorKind.None };
+            if (l.Corner.Contains(p))
+                hit.Kind = TableDecoratorKind.Table;
+            else
+            {
+                for (int i = 0; i < l.Columns.Count; i++)
+                    if (l.Columns[i].Contains(p)) { hit.Kind = TableDecoratorKind.Column; hit.Index = i; return hit; }
+                for (int i = 0; i < l.Rows.Count; i++)
+                    if (l.Rows[i].Contains(p)) { hit.Kind = TableDecoratorKind.Row; hit.Index = i; return hit; }
+            }
+            return hit;
+        }
+
+        private TableDecoratorLayout LayoutDecorator(XmlNode table, RectangleF tableRect)
+        {
+            float[] cols = GetTableColumnWidths(GetNamedChildNode(table, "TableColumns"));
+            var rows = new List<float>();
+            foreach (XmlNode r in GetTableRows(table))
+            {
+                XmlNode h = GetNamedChildNode(r, "Height");
+                rows.Add(h == null ? 0 : GetSize(h.InnerText));
+            }
+            return LayoutDecorator(tableRect, cols, rows);
+        }
+
+        /// <summary>
+        /// Which handle of the decorated table (if any) is at the point.
+        /// </summary>
+        /// <param name="p">Location in pixels</param>
+        /// <param name="hScroll">Horizontal scroll position in points</param>
+        /// <param name="vScroll">Vertical scroll position in points</param>
+        internal TableDecoratorHit HitTableDecorator(Point p, float hScroll, float vScroll)
+        {
+            var none = new TableDecoratorHit { Kind = TableDecoratorKind.None };
+            XmlNode table = DecoratedTable;
+            if (rDoc == null || table == null)
+                return none;
+            _hScroll = hScroll;
+            _vScroll = vScroll;
+            ProcessReport(rDoc.LastChild);
+            PointF hp = new PointF(PointsX(p.X) + _hScroll - lMargin, PointsY(p.Y) + _vScroll);
+            RectangleF tr = GetRectangle(table);
+            if (tr.IsEmpty)
+                return none;
+            TableDecoratorHit hit = HitDecorator(LayoutDecorator(table, tr), hp);
+            hit.Table = table;
+            return hit.Kind == TableDecoratorKind.None ? none : hit;
+        }
+
+        /// <summary>Selects everything the handle stands for. Returns false when it holds no items.</summary>
+        internal bool SelectTableDecorator(TableDecoratorHit hit, bool add)
+        {
+            if (hit.Table == null)
+                return false;
+            List<XmlNode> items;
+            switch (hit.Kind)
+            {
+                case TableDecoratorKind.Table:
+                    items = new List<XmlNode>();
+                    items.Add(hit.Table);
+                    break;
+                case TableDecoratorKind.Row:
+                    var rows = GetTableRows(hit.Table);
+                    if (hit.Index < 0 || hit.Index >= rows.Count)
+                        return false;
+                    items = TableRowItems(rows[hit.Index]);
+                    break;
+                case TableDecoratorKind.Column:
+                    items = TableColumnItems(hit.Table, hit.Index);
+                    break;
+                default:
+                    return false;
+            }
+            if (items.Count == 0)
+                return false;
+            if (!add)
+                _SelectedReportItems.Clear();
+            foreach (XmlNode n in items)
+                AddSelection(n);
+            this.Invalidate();
+            return true;
+        }
+
+        private void DrawTableDecorator(XmlNode table, RectangleF tr)
+        {
+            if (!ReferenceEquals(table, DecoratedTable))
+                return;
+            TableDecoratorLayout l = LayoutDecorator(table, tr);
+            using (var fill = new SolidBrush(DecoratorColor))
+            using (var pen = new Pen(DecoratorBorderColor))
+            {
+                var all = new List<RectangleF>(l.Rows);
+                all.AddRange(l.Columns);
+                all.Add(l.Corner);
+                foreach (RectangleF h in all)
+                {
+                    g.FillRectangle(fill, h);
+                    g.DrawRectangle(pen, h.X, h.Y, h.Width, h.Height);
+                }
+            }
+        }
+
+        internal static readonly Color HoverOutlineColor =Color.FromArgb(0x4A, 0x90, 0xD9);
         internal static readonly Color GridDotColor = Color.FromArgb(0xA0, 0xA0, 0xA0);
 
         /// <summary>
@@ -2241,6 +2521,7 @@ namespace Majorsilence.Reporting.RdlDesign
 				}
 				yPos += h;
 			}
+			DrawTableDecorator(xNode, tr);
 			return tr;
 		}
 
