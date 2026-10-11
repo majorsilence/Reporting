@@ -124,6 +124,7 @@ namespace Majorsilence.Reporting.Rdl
 		{
             await base.FinalPass().ConfigureAwait(false);
             await _Value.FinalPass().ConfigureAwait(false);
+            ValueIsConstant = await _Value.IsConstant().ConfigureAwait(false);   // read by DataElementOutput
 
 			if (this.DataElementName == null && this.Name == null)
 			{

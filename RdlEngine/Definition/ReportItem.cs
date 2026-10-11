@@ -882,6 +882,10 @@ namespace Majorsilence.Reporting.Rdl
 			get { return this._YParents; }
 		}
 
+		// Whether a Textbox's value is a constant decides its Auto data element output. Finding that out is
+		// async, so Textbox.FinalPass works it out once and the getter below reads the answer.
+		internal bool ValueIsConstant;
+
 		virtual internal DataElementOutputEnum DataElementOutput
 		{
 			get 
@@ -890,10 +894,7 @@ namespace Majorsilence.Reporting.Rdl
 				{
 					if (this is Textbox)
 					{
-						Textbox tb = this as Textbox;
-						// HACK: async
-						bool isConstant = Task.Run(async () => await tb.Value.IsConstant().ConfigureAwait(false)).GetAwaiter().GetResult();
-                        if (isConstant)
+                        if (ValueIsConstant)
 							return DataElementOutputEnum.NoOutput;
 						else
 							return DataElementOutputEnum.Output;
