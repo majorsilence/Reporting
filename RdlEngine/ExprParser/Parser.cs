@@ -906,7 +906,7 @@ namespace Majorsilence.Reporting.Rdl
 					break;
 				case "inscope":
 					(scope, bSimple) = await ResolveAggrScope(args, 1);
-					result = new FunctionInScope(scope);
+					result = new FunctionInScope(scope, idLookup);
 					break;
                 case "aggregate":
                     (scope, bSimple) = await ResolveAggrScope(args, 2);

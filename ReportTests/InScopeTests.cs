@@ -139,5 +139,52 @@ namespace ReportTests
 
             Assert.That (report.ErrorMaxSeverity, Is.GreaterThanOrEqualTo (8), "a misspelt scope should be reported, not silently true");
         }
+
+        // --- tables: the answer depends on where the expression sits ---------------------------------------
+
+        private static string TableRow (string name)
+            => $@"<TableRows><TableRow><Height>0.25in</Height><TableCells><TableCell><ReportItems><Textbox Name=""{name}""><Value>=IIf(InScope(&quot;Names&quot;), &quot;N&quot;, &quot;-&quot;) &amp; IIf(InScope(&quot;Years&quot;), &quot;Y&quot;, &quot;-&quot;)</Value></Textbox></ReportItems></TableCell></TableCells></TableRow></TableRows>";
+
+        private static string GroupedTable () => $@"<?xml version=""1.0"" encoding=""UTF-8""?>
+<Report xmlns=""{Rdl2005}"">
+  <DataSources><DataSource Name=""DS1""><ConnectionProperties><DataProvider>SQLite</DataProvider><ConnectString>Data Source=none.db</ConnectString></ConnectionProperties></DataSource></DataSources>
+  <DataSets><DataSet Name=""Data"">
+    <Query><DataSourceName>DS1</DataSourceName><CommandText>/* Local Query */</CommandText></Query>
+    <Fields><Field Name=""Name""><DataField>Name</DataField></Field><Field Name=""Year""><DataField>Year</DataField></Field><Field Name=""Amount""><DataField>Amount</DataField></Field></Fields>
+  </DataSet></DataSets>
+  <Body><Height>3in</Height><ReportItems>
+    <Table Name=""T""><DataSetName>Data</DataSetName>
+      <TableColumns><TableColumn><Width>2in</Width></TableColumn></TableColumns>
+      <Header>{TableRow ("TableHeader")}</Header>
+      <TableGroups>
+        <TableGroup><Grouping Name=""Names""><GroupExpressions><GroupExpression>=Fields!Name.Value</GroupExpression></GroupExpressions></Grouping>
+          <Header>{TableRow ("NameHeader")}</Header><Footer>{TableRow ("NameFooter")}</Footer></TableGroup>
+        <TableGroup><Grouping Name=""Years""><GroupExpressions><GroupExpression>=Fields!Year.Value</GroupExpression></GroupExpressions></Grouping>
+          <Header>{TableRow ("YearHeader")}</Header><Footer>{TableRow ("YearFooter")}</Footer></TableGroup>
+      </TableGroups>
+      <Details>{TableRow ("Detail")}</Details>
+      <Footer>{TableRow ("TableFooter")}</Footer>
+    </Table>
+  </ReportItems></Body>
+  <Width>6in</Width>
+</Report>";
+
+        [Test]
+        public async Task InScope_InATable_FollowsTheSectionTheExpressionIsIn ()
+        {
+            var html = await Render (GroupedTable ());
+            var rows = Cells (html).Select (r => r[0]).ToArray ();
+
+            // Gadget has one year, Widget two. Each section reports which groups it is inside: the table's
+            // own header and footer neither, a name header or footer only the name group, and the year
+            // header, detail and year footer rows both.
+            var expected = new[] {
+                "--",
+                "N-", "NY", "NY", "NY", "N-",                       // Gadget: one year (groups come out sorted)
+                "N-", "NY", "NY", "NY", "NY", "NY", "NY", "N-",     // Widget: two years
+                "--",
+            };
+            Assert.That (rows, Is.EqualTo (expected), string.Join (" ", rows));
+        }
     }
 }

@@ -152,6 +152,11 @@ namespace Majorsilence.Reporting.Rdl
 			return g;
 		}
 
+		// Where an expression sits in a table, for InScope(): the table, and whether it is in the
+		// detail section (as opposed to a group header or footer, or the table's own header/footer).
+		internal Table ContextTable { get; set; }
+		internal bool InTableDetails { get; set; }
+
 		internal Matrix LookupMatrix()
 		{
 			return m;
