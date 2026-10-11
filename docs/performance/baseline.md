@@ -85,6 +85,23 @@ PDF, CSV and XML output was byte-identical across steps 1-3, 5, 6 (checked with 
 ### Thread safety finding in a dependency
 `Graphics.MeasureString` in `Majorsilence.Forms` goes through `TextMeasurer`, whose static `Dictionary` cache was corrupted by concurrent use (a 16-thread run failed with "Operations that change non-concurrent collections must have exclusive access"; the baseline code path had the same race). Fixed in `Majorsilence.Forms` (`TextMeasurer.cs`, with a regression test that reproduces the exception without the fix). Until that release is referenced, the engine measures through one lock (`GraphicsMeasureExtensions.MeasureStringLocked`); remove it afterwards.
 
+## Round 2 (allocation, KB per render; timings not re-measured on mains power)
+| Workload | Before | After |
+|---|---:|---:|
+| WorldFacts PDF | 7,958 | 5,345 |
+| WorldFacts CSV | 2,299 | 1,461 |
+| WorldFacts HTML | 5,349 | 2,458 |
+| WorldFacts XML | 3,645 | 2,619 |
+| WorldFacts RTF | 6,119 | 3,787 |
+| WorldFacts Excel | 8,130 | 6,027 |
+| testdata PDF | 816 | 705 |
+| large:1000 PDF | 6,983 | 5,499 |
+| large:10000 PDF | 104,000 | ~50,000 |
+
+Thread-pool work items per WorldFacts render: 15 -> 0. Output is unchanged in every format (normalised smoke hashes). What changed: shared constant `StyleInfo` (copy on write), struct cache keys, completed tasks for constant expressions, synchronous fast paths for plain fields and cell text, synchronous data-file read, escape fast paths, HTML CSS class cache, lazy Excel builder objects, `Textbox` per-row cache moved to `TextboxRuntime` (fixes a data race on shared definitions), PDF text path (no per-cell tuple list, remembered coverage and widths), per-render measurement cache, and `TrueTypeFont.Subset` without intermediate arrays.
+
+What is left is mostly the PDF content-stream builder's growth, `MeasureCharacterRanges` (the Forms `MeasureRunWidth` API, once released), the finished-font-object cache (needs the approved base-Latin glyph set), and `CompiledReport`.
+
 ## Remaining opportunities (not done)
 - **Async overhead in expression evaluation**: `Task<object>` / `Task<string>` per expression per row and ~3,700 thread-pool work items per WorldFacts render (`FunctionField.Evaluate`, `Expression.Evaluate`, `Rows.Compare`: 5-7% of allocation). A synchronous fast path for constant/field expressions is the next biggest item; it touches the `IExpr` surface.
 - **Text measurement** still costs ~20% of CPU (`MeasureCharacterRanges` per cell). A per-render cache keyed by (font, string) helps repeated values.
