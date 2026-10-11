@@ -495,10 +495,66 @@ namespace Majorsilence.Pdf.Internal
 
             var used = font.UsedGlyphs;
 
+            // The finished, unencrypted pieces depend only on the font and the glyphs used, so they are shared by
+            // documents. With glyphs in use, the printable ASCII glyphs are always embedded too, so that
+            // documents mostly ask for the same subset. A font nothing was drawn with is embedded whole.
+            FontParts parts;
+            if (used != null && used.Count > 0)
+            {
+                var glyphs = FontPartsCache.WithBaseGlyphs(ttf, used);
+                parts = FontPartsCache.GetOrBuild(ttf, glyphs, () => BuildFontParts(ttf, glyphs, true));
+            }
+            else
+            {
+                parts = BuildFontParts(ttf, used, false);
+            }
+
             // ── ToUnicode CMap ────────────────────────────────────────────────
-            var allMappings = ttf.GetCharGlyphMappings();
+            byte[] cmapComp = parts.ToUnicodeCompressed;
+            byte[] cmapData = _encryptor != null
+                ? _encryptor.EncryptStream(toUnicodeObjNum, 0, cmapComp) : cmapComp;
+            string cmapHdr  = $"<< /Filter /FlateDecode /Length {cmapData.Length} >>\nstream\n";
+            objects.Add(Concat(Latin1.GetBytes(cmapHdr), cmapData, Latin1.GetBytes("\nendstream")));
+
+            string wArray = parts.Widths;
+
+            float scale = 1000f / ttf.UnitsPerEm;
+            int llx = (int)Math.Round(ttf.XMin * scale), lly = (int)Math.Round(ttf.YMin * scale);
+            int urx = (int)Math.Round(ttf.XMax * scale), ury = (int)Math.Round(ttf.YMax * scale);
+            int asc = (int)Math.Round(ttf.Ascender * scale), desc = (int)Math.Round(ttf.Descender * scale);
+
+            // ── FontDescriptor ────────────────────────────────────────────────
+            objects.Add(Latin1.GetBytes(
+                $"<< /Type /FontDescriptor /FontName /{psName} /Flags 32 " +
+                $"/FontBBox [{llx} {lly} {urx} {ury}] " +
+                $"/ItalicAngle 0 /Ascent {asc} /Descent {desc} " +
+                $"/CapHeight {asc} /StemV 80 /FontFile2 {fontFileObjNum} 0 R >>"));
+
+            // ── FontFile2 stream ───────────────────────────────────────────────
+            byte[] fontStream = _encryptor != null
+                ? _encryptor.EncryptStream(fontFileObjNum, 0, parts.FontCompressed) : parts.FontCompressed;
+            string ffHdr = $"<< /Filter /FlateDecode /Length {fontStream.Length} /Length1 {parts.FontLength} >>\nstream\n";
+            objects.Add(Concat(Latin1.GetBytes(ffHdr), fontStream, Latin1.GetBytes("\nendstream")));
+
+            // ── CIDFont ───────────────────────────────────────────────────────
+            objects.Add(Latin1.GetBytes(
+                $"<< /Type /Font /Subtype /CIDFontType2 /BaseFont /{psName} " +
+                $"/CIDSystemInfo << /Registry {EncLitStr(cidFontObjNum, "Adobe")} /Ordering {EncLitStr(cidFontObjNum, "Identity")} /Supplement 0 >> " +
+                $"/FontDescriptor {descriptorObjNum} 0 R /DW 1000 {wArray} >>"));
+
+            // ── Type0 Font ────────────────────────────────────────────────────
+            objects.Add(Latin1.GetBytes(
+                $"<< /Type /Font /Subtype /Type0 /BaseFont /{psName} " +
+                $"/Encoding /Identity-H /DescendantFonts [{cidFontObjNum} 0 R] " +
+                $"/ToUnicode {toUnicodeObjNum} 0 R >>"));
+        }
+
+        // The ToUnicode CMap, /W array and font program for the glyphs in used (every glyph when null or when
+        // subsetting is not wanted), compressed but not encrypted.
+        private static FontParts BuildFontParts(TrueTypeFont ttf, HashSet<ushort>? used, bool subset)
+        {
             var mapList = new List<(int codePoint, ushort glyphId)>();
-            foreach (var m in allMappings)
+            foreach (var m in ttf.GetCharGlyphMappings())
                 if (used == null || used.Contains(m.glyphId)) mapList.Add(m);
 
             var cmap = new StringBuilder();
@@ -515,15 +571,8 @@ namespace Majorsilence.Pdf.Internal
                 cmap.Append("endbfchar\n");
             }
             cmap.Append("endcmap\nCMapName currentdict /CMap defineresource pop\nend\nend");
+            byte[] cmapComp = Compress(Latin1.GetBytes(cmap.ToString()));
 
-            byte[] cmapBytes = Latin1.GetBytes(cmap.ToString());
-            byte[] cmapComp  = Compress(cmapBytes);
-            byte[] cmapData  = _encryptor != null
-                ? _encryptor.EncryptStream(toUnicodeObjNum, 0, cmapComp) : cmapComp;
-            string cmapHdr   = $"<< /Filter /FlateDecode /Length {cmapData.Length} >>\nstream\n";
-            objects.Add(Concat(Latin1.GetBytes(cmapHdr), cmapData, Latin1.GetBytes("\nendstream")));
-
-            // ── /W array ──────────────────────────────────────────────────────
             var glyphWidths = new SortedDictionary<ushort, int>();
             foreach (var m in mapList)
             {
@@ -534,37 +583,8 @@ namespace Majorsilence.Pdf.Internal
             foreach (var kv in glyphWidths) wArray.Append($" {kv.Key} [{kv.Value}]");
             wArray.Append(" ]");
 
-            float scale = 1000f / ttf.UnitsPerEm;
-            int llx = (int)Math.Round(ttf.XMin * scale), lly = (int)Math.Round(ttf.YMin * scale);
-            int urx = (int)Math.Round(ttf.XMax * scale), ury = (int)Math.Round(ttf.YMax * scale);
-            int asc = (int)Math.Round(ttf.Ascender * scale), desc = (int)Math.Round(ttf.Descender * scale);
-
-            // ── FontDescriptor ────────────────────────────────────────────────
-            objects.Add(Latin1.GetBytes(
-                $"<< /Type /FontDescriptor /FontName /{psName} /Flags 32 " +
-                $"/FontBBox [{llx} {lly} {urx} {ury}] " +
-                $"/ItalicAngle 0 /Ascent {asc} /Descent {desc} " +
-                $"/CapHeight {asc} /StemV 80 /FontFile2 {fontFileObjNum} 0 R >>"));
-
-            // ── FontFile2 stream ───────────────────────────────────────────────
-            byte[] fontData  = (used != null && used.Count > 0) ? ttf.Subset(used) : ttf.Data;
-            byte[] fontComp  = Compress(fontData);
-            byte[] fontStream = _encryptor != null
-                ? _encryptor.EncryptStream(fontFileObjNum, 0, fontComp) : fontComp;
-            string ffHdr = $"<< /Filter /FlateDecode /Length {fontStream.Length} /Length1 {fontData.Length} >>\nstream\n";
-            objects.Add(Concat(Latin1.GetBytes(ffHdr), fontStream, Latin1.GetBytes("\nendstream")));
-
-            // ── CIDFont ───────────────────────────────────────────────────────
-            objects.Add(Latin1.GetBytes(
-                $"<< /Type /Font /Subtype /CIDFontType2 /BaseFont /{psName} " +
-                $"/CIDSystemInfo << /Registry {EncLitStr(cidFontObjNum, "Adobe")} /Ordering {EncLitStr(cidFontObjNum, "Identity")} /Supplement 0 >> " +
-                $"/FontDescriptor {descriptorObjNum} 0 R /DW 1000 {wArray} >>"));
-
-            // ── Type0 Font ────────────────────────────────────────────────────
-            objects.Add(Latin1.GetBytes(
-                $"<< /Type /Font /Subtype /Type0 /BaseFont /{psName} " +
-                $"/Encoding /Identity-H /DescendantFonts [{cidFontObjNum} 0 R] " +
-                $"/ToUnicode {toUnicodeObjNum} 0 R >>"));
+            byte[] fontData = subset && used != null && used.Count > 0 ? ttf.Subset(used) : ttf.Data;
+            return new FontParts(cmapComp, wArray.ToString(), Compress(fontData), fontData.Length);
         }
 
         private byte[] BuildImageObj(ImageResource img, int objNum)
