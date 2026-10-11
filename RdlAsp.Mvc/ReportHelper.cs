@@ -57,7 +57,7 @@ namespace Majorsilence.Reporting.RdlAsp
             return "rdl:" + file + "|" + File.GetLastWriteTimeUtc(file).Ticks;
         }
 
-        static internal Report GetCachedReport(string file, IMemoryCache c)
+        static internal CompiledReport GetCachedReport(string file, IMemoryCache c)
         {
             if (!ReportHelper.DoCaching)			// caching is disabled
             {
@@ -65,22 +65,22 @@ namespace Majorsilence.Reporting.RdlAsp
                 return null;
             }
 
-            ReportDefn rd = c.Get(CacheKey(file)) as ReportDefn;
-            if (rd == null)
+            CompiledReport compiled = c.Get(CacheKey(file)) as CompiledReport;
+            if (compiled == null)
             {
                 ReportHelper.IncrMisses(c);
                 return null;
             }
             ReportHelper.IncrHits(c);
-            return new Report(rd);
+            return compiled;
         }
 
-        static internal void SaveCachedReport(Report r, string file, IMemoryCache c)
+        static internal void SaveCachedReport(CompiledReport r, string file, IMemoryCache c)
         {
             if (!ReportHelper.DoCaching)			// caching is disabled
                 return;
 
-            c.Set(CacheKey(file), r.ReportDefinition);
+            c.Set(CacheKey(file), r);
         }
 
         static internal string GetSource(string file)
@@ -90,7 +90,8 @@ namespace Majorsilence.Reporting.RdlAsp
 
         static internal void SetUserContext(Report r, HttpContext context, NeedPassword np)
         {
-            r.GetDataSourceReferencePassword = np;
+            // The password is part of the compiled definition (see RdlReport.LoadReport); a report made from a
+            // CompiledReport cannot change it.
             if (context == null)                // may not always have a context
                 return;
 

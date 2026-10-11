@@ -114,7 +114,7 @@ namespace Majorsilence.Reporting.Rdl
             NeedPassword np = r.GetDataSourceReferencePassword;   // get current password
             r.SetReportDefinition(_ReportDefn);
 			r.Folder = _ReportDefn.ParseFolder;		// folder needs to get set since the id of the report is used by the cache
-            r.GetDataSourceReferencePassword = np;
+            r.PassPasswordToSubreport(np);
 		
             DataSourcesDefn saveDS = r.ParentConnections;
 			if (this.MergeTransactions)
@@ -162,7 +162,7 @@ namespace Majorsilence.Reporting.Rdl
 
 			r.SetReportDefinition(_ReportDefn);
 			r.Folder = _ReportDefn.ParseFolder;		// folder needs to get set since the id of the report is used by the cache
-            r.GetDataSourceReferencePassword = np;
+            r.PassPasswordToSubreport(np);
 
 			DataSourcesDefn saveDS = r.ParentConnections;
 			if (this.MergeTransactions)

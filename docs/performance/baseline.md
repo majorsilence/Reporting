@@ -102,6 +102,11 @@ Thread-pool work items per WorldFacts render: 15 -> 0. Output is unchanged in ev
 
 What is left is mostly the PDF content-stream builder's growth, `MeasureCharacterRanges` (the Forms `MeasureRunWidth` API, once released), the finished-font-object cache (needs the approved base-Latin glyph set), and `CompiledReport`.
 
+## CompiledReport (parse once, run many)
+`CompiledReport.CompileAsync(rdl, options)` parses a definition once; `CreateReport()` makes a per-run `Report` that shares it and is safe to use from any thread (one thread per Report, as always). Disposing such a report leaves the definition alone. `CompiledReportBenchmarks` (PDF, in-process data, so no database schema queries): testdata 1.45 -> 1.17 ms, MatrixExample 4.5 -> 3.5 ms, WorldFacts 35.9 -> 29.2 ms per request; allocation -5% to -21%. A real database adds its schema queries to every parse, so the saving there is larger.
+
+Shared-definition hazards fixed for this: `Report.Dispose` no longer disposes a definition it does not own; the report log is locked; a `.dsr` data source reference publishes its connection properties only once built; the data source password is fixed at compile time (setting it on a shared report throws `InvalidOperationException`; subreports no longer write it into their definition); the Textbox per-row cache lives in the per-run state (round 2). `Subreport.ContainerOffset` is still written during a run, with the same value every time. `CompiledReportTests` renders nine reports (two with subreports) in four formats from one shared definition on eight threads and compares with a fresh parse. RdlAsp.Mvc now caches a `CompiledReport` instead of a bare definition (which the first request's `Report.Dispose` could have emptied).
+
 ## Remaining opportunities (not done)
 - **Async overhead in expression evaluation**: `Task<object>` / `Task<string>` per expression per row and ~3,700 thread-pool work items per WorldFacts render (`FunctionField.Evaluate`, `Expression.Evaluate`, `Rows.Compare`: 5-7% of allocation). A synchronous fast path for constant/field expressions is the next biggest item; it touches the `IExpr` surface.
 - **Text measurement** still costs ~20% of CPU (`MeasureCharacterRanges` per cell). A per-render cache keyed by (font, string) helps repeated values.

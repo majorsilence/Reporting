@@ -185,6 +185,20 @@ public class RdlReportTests
     }
 
     [Test]
+    public async Task ConcurrentRequestsForOneCachedReportAllGetTheSameReport()
+    {
+        // The parsed definition is shared by every request; each request runs its own Report from it.
+        string first = await _client.GetStringAsync("/msr/RdlReport/ShowFile/Parameters/html");
+        var responses = await Task.WhenAll(Enumerable.Range(0, 24).Select(_ =>
+            Task.Run(() => _client.GetStringAsync("/msr/RdlReport/ShowFile/Parameters/html"))));
+
+        // the html embeds generated names; compare what is left once those are masked
+        static string Mask(string html) => Regex.Replace(html, @"[A-Za-z0-9_\-]{8,}\.tmp|[0-9a-f]{8}-[0-9a-f-]{27}", "x");
+        Assert.That(responses.Select(Mask).Distinct().Count(), Is.EqualTo(1));
+        Assert.That(Mask(responses[0]), Is.EqualTo(Mask(first)));
+    }
+
+    [Test]
     public async Task ReportList_LinksEveryReport()
     {
         string html = await _client.GetStringAsync("/msr/RdlList");

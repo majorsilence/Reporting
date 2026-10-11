@@ -306,13 +306,14 @@ namespace Majorsilence.Reporting.Rdl
 				xDoc.LoadXml(xml);
 				XmlNode xNodeLoop = xDoc.FirstChild;
 				
-				_ConnectionProperties = new ConnectionProperties(OwnerReport, this, xNodeLoop);
-                await _ConnectionProperties.FinalPass().ConfigureAwait(false);
+				// Finish building before publishing: another report using this shared definition may be looking.
+				var props = new ConnectionProperties(OwnerReport, this, xNodeLoop);
+				await props.FinalPass().ConfigureAwait(false);
+				System.Threading.Interlocked.CompareExchange(ref _ConnectionProperties, props, null);
 			}
 			catch (Exception e)
 			{
 				OwnerReport.rl.LogError(4, e.Message);
-				_ConnectionProperties = null;
 			}
 			return;
 		}

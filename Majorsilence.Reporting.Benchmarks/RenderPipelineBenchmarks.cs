@@ -153,3 +153,43 @@ public class LargeRowsBenchmarks
         return await WorkloadSupport.Render(report, OutputPresentationType.PDF);
     }
 }
+
+/// <summary>A request that parses the report each time, against one that makes a Report from a CompiledReport.</summary>
+[MemoryDiagnoser]
+public class CompiledReportBenchmarks
+{
+    private string _source = "";
+    private CompiledReport _compiled = null!;
+
+    [Params(Workloads.Small, Workloads.Tabular, Workloads.Matrix)]
+    public string Workload { get; set; } = "";
+
+    [GlobalSetup]
+    public async Task Setup()
+    {
+        WorkloadSupport.Init();
+        _source = WorkloadSupport.ReadRdl(Workload);
+        _compiled = await CompiledReport.CompileAsync(_source, new CompiledReportOptions { Folder = WorkloadSupport.Folder });
+    }
+
+    [GlobalCleanup]
+    public void Cleanup() => _compiled.Dispose();
+
+    [Benchmark(Baseline = true)]
+    public async Task<long> ParseEveryRequest()
+    {
+        using var report = await WorkloadSupport.Parse(_source);
+        report.Folder = WorkloadSupport.Folder;
+        await report.RunGetData();
+        return await WorkloadSupport.Render(report, OutputPresentationType.PDF);
+    }
+
+    [Benchmark]
+    public async Task<long> CompiledReportPerRequest()
+    {
+        using var report = _compiled.CreateReport();
+        report.Folder = WorkloadSupport.Folder;
+        await report.RunGetData();
+        return await WorkloadSupport.Render(report, OutputPresentationType.PDF);
+    }
+}
