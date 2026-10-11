@@ -321,6 +321,20 @@ namespace Majorsilence.Reporting.Rdl
 			return;
 		}
 
+		/// <summary>
+		/// Whether the matrix cell being evaluated lies inside one instance of this group (true) or
+		/// totals over all of them, as a subtotal does (false). See FunctionInScope.
+		/// </summary>
+		internal bool GetInScope(Report rpt)
+		{
+			return GetValue(rpt).inScope;
+		}
+
+		internal void SetInScope(Report rpt, bool inScope)
+		{
+			GetValue(rpt).inScope = inScope;
+		}
+
 		private WorkClass GetValue(Report rpt)
 		{
 			WorkClass wc = rpt.Cache.Get(this, "wc") as WorkClass;
@@ -336,9 +350,11 @@ namespace Majorsilence.Reporting.Rdl
 		{
 			internal int index;			// used by tables (and others) to set grouping values
 			internal Rows rows;			// used by matrixes to get/set grouping values
+			internal bool inScope;		// used by matrixes: the cell being evaluated is inside this group
 			internal WorkClass()
 			{
 				index = -1;
+				inScope = true;
 			}
 		}
 

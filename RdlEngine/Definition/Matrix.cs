@@ -280,6 +280,7 @@ namespace Majorsilence.Reporting.Rdl
                 ip.MatrixRowEnd(this, iRow, row);
             }
             await ip.MatrixEnd(this, row);
+            ResetInScope(rpt);
             RemoveValue(rpt);
         }
 
@@ -332,6 +333,7 @@ namespace Majorsilence.Reporting.Rdl
 
             RunPageRegionEnd(pgs);
             SetPagePositionEnd(pgs, pgs.CurrentPage.YOffset);
+            ResetInScope(r);
             RemoveValue(r);
             return;
         }
@@ -1458,6 +1460,26 @@ namespace Majorsilence.Reporting.Rdl
             set { _CellDataElementName = value; }
         }
 
+        // Rendering leaves each group flagged as the last cell left it, usually "totalled over". Put
+        // them back so an InScope() evaluated after the matrix, outside it, is not misled.
+        private void ResetInScope(Report rpt)
+        {
+            foreach (ColumnGrouping cg in this.ColumnGroupings.Items)
+                cg.DynamicColumns?.Grouping?.SetInScope(rpt, true);
+            foreach (ColumnSet set in _ExtraColumnSets)
+            {
+                foreach (ColumnGrouping cg in set.ColumnGroupings.Items)
+                    cg.DynamicColumns?.Grouping?.SetInScope(rpt, true);
+            }
+            foreach (RowGrouping rg in this.RowGroupings.Items)
+                rg.DynamicRows?.Grouping?.SetInScope(rpt, true);
+            foreach (RowSet set in _ExtraRowSets)
+            {
+                foreach (RowGrouping rg in set.RowGroupings.Items)
+                    rg.DynamicRows?.Grouping?.SetInScope(rpt, true);
+            }
+        }
+
         private void SetGroupingValues(Report rpt, MatrixCellEntry mce)
         {
             WorkClass wc = GetValue(rpt);
@@ -1478,7 +1500,16 @@ namespace Majorsilence.Reporting.Rdl
                 foreach (ColumnGrouping cg in this.ColumnGroupings.Items)
                 {
                     if (cg.DynamicColumns != null)
-                        SetGrouping(rpt, cg.DynamicColumns.Grouping, cme, data);
+                        SetGrouping(rpt, cg.DynamicColumns.Grouping, cme, data, inScope: false);
+                }
+                // groups of the other column sets are not on this cell's chain either
+                foreach (ColumnSet set in _ExtraColumnSets)
+                {
+                    foreach (ColumnGrouping cg in set.ColumnGroupings.Items)
+                    {
+                        if (cg.DynamicColumns != null)
+                            SetGrouping(rpt, cg.DynamicColumns.Grouping, cme, data, inScope: false);
+                    }
                 }
             }
             // handle the row grouping
@@ -1487,7 +1518,16 @@ namespace Majorsilence.Reporting.Rdl
                 foreach (RowGrouping rg in this.RowGroupings.Items)
                 {
                     if (rg.DynamicRows != null)
-                        SetGrouping(rpt, rg.DynamicRows.Grouping, rme, data);
+                        SetGrouping(rpt, rg.DynamicRows.Grouping, rme, data, inScope: false);
+                }
+                // groups of the other row sets are not on this cell's chain either
+                foreach (RowSet set in _ExtraRowSets)
+                {
+                    foreach (RowGrouping rg in set.RowGroupings.Items)
+                    {
+                        if (rg.DynamicRows != null)
+                            SetGrouping(rpt, rg.DynamicRows.Grouping, rme, data, inScope: false);
+                    }
                 }
             }
         }
@@ -1498,17 +1538,19 @@ namespace Majorsilence.Reporting.Rdl
                 return;
             // handle the column grouping
             if (me.ColumnGroup != null && me.ColumnGroup.DynamicColumns != null)
-                SetGrouping(rpt, me.ColumnGroup.DynamicColumns.Grouping, me, data);
+                SetGrouping(rpt, me.ColumnGroup.DynamicColumns.Grouping, me, data, inScope: true);
 
             // handle the row grouping
             if (me.RowGroup != null && me.RowGroup.DynamicRows != null)
-                SetGrouping(rpt, me.RowGroup.DynamicRows.Grouping, me, data);
+                SetGrouping(rpt, me.RowGroup.DynamicRows.Grouping, me, data, inScope: true);
 
             if (me.Parent != null)  // go up the tree??
                 SetGroupingValuesMe(rpt, data, me.Parent);
         }
 
-        private void SetGrouping(Report rpt, Grouping g, MatrixEntry me, Rows data)
+        // inScope: the group is one the cell's entry chain passes through (true), as opposed to one
+        // that SetGroupingValuesInit points at the cell's own data because the cell totals over it.
+        private void SetGrouping(Report rpt, Grouping g, MatrixEntry me, Rows data, bool inScope)
         {
             if (g == null)
                 return;
@@ -1516,6 +1558,7 @@ namespace Majorsilence.Reporting.Rdl
             if (me.Data == null)
                 me.Data = new Rows(rpt, data, me.FirstRow, me.LastRow, me.Rows);
             g.SetRows(rpt, me.Data);
+            g.SetInScope(rpt, inScope);
         }
 
         internal MatrixCellDataElementOutputEnum CellDataElementOutput

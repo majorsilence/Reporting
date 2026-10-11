@@ -61,6 +61,7 @@ namespace Majorsilence.Reporting.Rdl
 			Grouping grp= null;		// remember if in a table group or detail group or list group
 			Matrix m=null;
 			ReportLink phpf=null;
+			bool inDetails = false;
 			while (dr != null)
 			{
 				if (dr is Grouping)
@@ -75,6 +76,7 @@ namespace Majorsilence.Reporting.Rdl
 				else if (dr is Details)
 				{
 					grp = ((Details) dr).Grouping;
+					inDetails = true;
 				}
 				else if (dr is List)
 				{
@@ -111,6 +113,9 @@ namespace Majorsilence.Reporting.Rdl
 				OwnerReport.LUUser, OwnerReport.LUAggrScope,
 				grp, m, OwnerReport.CodeModules, OwnerReport.Classes, OwnerReport.DataSetsDefn,
 				OwnerReport.CodeType);
+
+			lu.ContextTable = dr as Table;
+			lu.InTableDetails = inDetails;
 
 			if (phpf != null)
 			{
