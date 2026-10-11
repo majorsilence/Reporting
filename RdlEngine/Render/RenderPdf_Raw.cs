@@ -710,10 +710,26 @@ namespace Majorsilence.Reporting.Rdl
             }
         }
 
+        // TextStyle is immutable, and the style ResolveFont builds depends only on these values, so one
+        // is made per distinct combination per render rather than per text item (each With* call clones).
+        private readonly Dictionary<(string Family, float Size, int Rgb, bool Bold, bool Italic), TextStyle> _textStyles =
+            new Dictionary<(string, float, int, bool, bool), TextStyle>();
+
         private TextStyle ResolveFont(StyleInfo si)
         {
             bool bold   = si.IsFontBold();
             bool italic = si.FontStyle == FontStyleEnum.Italic;
+            var key = (si.FontFamily ?? "", si.FontSize, (si.Color.R << 16) | (si.Color.G << 8) | si.Color.B, bold, italic);
+            if (!_textStyles.TryGetValue(key, out var style))
+            {
+                style = BuildTextStyle(si, bold, italic);
+                _textStyles[key] = style;
+            }
+            return style;
+        }
+
+        private TextStyle BuildTextStyle(StyleInfo si, bool bold, bool italic)
+        {
             string face = NormalizeFace(si.FontFamily);
 
             var baseStyle = TextStyle.Default
