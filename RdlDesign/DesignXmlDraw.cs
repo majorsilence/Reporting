@@ -486,6 +486,139 @@ namespace Majorsilence.Reporting.RdlDesign
             }
         }
 
+        // ---- Table resize handles (issue #295) ----
+
+        /// <summary>The eight sizing handles of a selected table: corners and edge middles.</summary>
+        internal static List<KeyValuePair<HitLocationEnum, PointF>> TableResizeHandles(RectangleF r)
+        {
+            float cx = r.X + r.Width / 2, cy = r.Y + r.Height / 2;
+            return new List<KeyValuePair<HitLocationEnum, PointF>>
+            {
+                new KeyValuePair<HitLocationEnum, PointF>(HitLocationEnum.TopLeft, new PointF(r.Left, r.Top)),
+                new KeyValuePair<HitLocationEnum, PointF>(HitLocationEnum.TopMiddle, new PointF(cx, r.Top)),
+                new KeyValuePair<HitLocationEnum, PointF>(HitLocationEnum.TopRight, new PointF(r.Right, r.Top)),
+                new KeyValuePair<HitLocationEnum, PointF>(HitLocationEnum.LeftMiddle, new PointF(r.Left, cy)),
+                new KeyValuePair<HitLocationEnum, PointF>(HitLocationEnum.RightMiddle, new PointF(r.Right, cy)),
+                new KeyValuePair<HitLocationEnum, PointF>(HitLocationEnum.BottomLeft, new PointF(r.Left, r.Bottom)),
+                new KeyValuePair<HitLocationEnum, PointF>(HitLocationEnum.BottomMiddle, new PointF(cx, r.Bottom)),
+                new KeyValuePair<HitLocationEnum, PointF>(HitLocationEnum.BottomRight, new PointF(r.Right, r.Bottom)),
+            };
+        }
+
+        /// <summary>The sizing handle of a table rectangle at the point, or Inside when none.</summary>
+        internal static HitLocationEnum HitTableResizeHandle(RectangleF r, PointF p)
+        {
+            foreach (var h in TableResizeHandles(r))
+            {
+                if (new RectangleF(h.Value.X - RADIUS, h.Value.Y - RADIUS, 2 * RADIUS, 2 * RADIUS).Contains(p))
+                    return h.Key;
+            }
+            return HitLocationEnum.Inside;
+        }
+
+        private bool IsOnlySelected(XmlNode node)
+        {
+            return this.SelectedCount == 1 && ReferenceEquals(this._SelectedReportItems[0], node);
+        }
+
+        /// <summary>
+        /// Resizes a table by scaling its column widths and row heights so the table
+        /// grows or shrinks by the amount dragged. Left and top handles also move the table.
+        /// </summary>
+        /// <param name="xIncPt">Horizontal drag in points</param>
+        /// <param name="yIncPt">Vertical drag in points</param>
+        internal bool ResizeTable(XmlNode table, float xIncPt, float yIncPt, HitLocationEnum hle)
+        {
+            if (!IsTableNode(table))
+                return false;
+
+            bool left = hle == HitLocationEnum.TopLeft || hle == HitLocationEnum.LeftMiddle || hle == HitLocationEnum.BottomLeft;
+            bool right = hle == HitLocationEnum.TopRight || hle == HitLocationEnum.RightMiddle || hle == HitLocationEnum.BottomRight;
+            bool top = hle == HitLocationEnum.TopLeft || hle == HitLocationEnum.TopMiddle || hle == HitLocationEnum.TopRight;
+            bool bottom = hle == HitLocationEnum.BottomLeft || hle == HitLocationEnum.BottomMiddle || hle == HitLocationEnum.BottomRight;
+            if (!(left || right || top || bottom))
+                return false;
+            if (!(left || right))
+                xIncPt = 0;
+            if (!(top || bottom))
+                yIncPt = 0;
+            if (xIncPt == 0 && yIncPt == 0)
+                return false;
+
+            XmlNode lNode = GetCreateNamedChildNode(table, "Left", "0pt");
+            XmlNode tNode = GetCreateNamedChildNode(table, "Top", "0pt");
+            float l = GetSize(lNode.InnerText), t = GetSize(tNode.InnerText);
+
+            // the table can't move off the top/left of the page
+            if (left && l + xIncPt < 0)
+                xIncPt = -l;
+            if (top && t + yIncPt < 0)
+                yIncPt = -t;
+
+            var cols = new List<XmlNode>();
+            XmlNode tcols = GetNamedChildNode(table, "TableColumns");
+            if (tcols != null)
+                foreach (XmlNode c in tcols.ChildNodes)
+                    if (c.Name == "TableColumn" && GetNamedChildNode(c, "Width") != null)
+                        cols.Add(c);
+            var rows = new List<XmlNode>();
+            foreach (XmlNode r in GetTableRows(table))
+                if (GetNamedChildNode(r, "Height") != null)
+                    rows.Add(r);
+
+            float w = 0, h = 0;
+            foreach (XmlNode c in cols) w += GetSize(GetNamedChildNode(c, "Width").InnerText);
+            foreach (XmlNode r in rows) h += GetSize(GetNamedChildNode(r, "Height").InnerText);
+
+            const float MinCell = .1f;
+            float newW = w, newH = h;
+            if (xIncPt != 0 && w > 0)
+                newW = Math.Max(left ? w - xIncPt : w + xIncPt, MinCell * cols.Count);
+            if (yIncPt != 0 && h > 0)
+                newH = Math.Max(top ? h - yIncPt : h + yIncPt, MinCell * rows.Count);
+
+            bool changed = false;
+            if (newW != w)
+            {
+                changed |= ScaleSizes(cols, "Width", newW / w);
+                if (left)
+                    changed |= SetPoints(lNode, l + (w - newW));
+            }
+            if (newH != h)
+            {
+                changed |= ScaleSizes(rows, "Height", newH / h);
+                if (top)
+                    changed |= SetPoints(tNode, t + (h - newH));
+            }
+            return changed;
+        }
+
+        private bool ScaleSizes(List<XmlNode> nodes, string child, float factor)
+        {
+            bool changed = false;
+            foreach (XmlNode n in nodes)
+            {
+                XmlNode s = GetNamedChildNode(n, child);
+                changed |= SetPoints(s, Math.Max(GetSize(s.InnerText) * factor, 0.1f));
+            }
+            return changed;
+        }
+
+        private static bool SetPoints(XmlNode node, float pts)
+        {
+            string v = string.Format(NumberFormatInfo.InvariantInfo, "{0:0.00}pt", pts);
+            if (node.InnerText == v)
+                return false;
+            node.InnerText = v;
+            return true;
+        }
+
+        private void DrawTableResizeHandles(RectangleF r)
+        {
+            foreach (var h in TableResizeHandles(r))
+                DrawCircle(Color.Black, BorderStyleEnum.Solid, 1, h.Value.X - RADIUS, h.Value.Y - RADIUS, RADIUS * 2, true);
+        }
+
         internal static readonly Color HoverOutlineColor =Color.FromArgb(0x4A, 0x90, 0xD9);
         internal static readonly Color GridDotColor = Color.FromArgb(0xA0, 0xA0, 0xA0);
 
@@ -2347,6 +2480,8 @@ namespace Majorsilence.Reporting.RdlDesign
                 if (xNode.Name == "Table")
                 {
                     HighLightTableRegion(xNode, r);
+                    if (IsOnlySelected(xNode))
+                        DrawTableResizeHandles(r);
                 }
             
             }
@@ -4849,6 +4984,14 @@ namespace Majorsilence.Reporting.RdlDesign
             List<XmlNode> trs = GetTableRows(xNode);
 			tr.Height = GetTableRowsHeight(trs);
 
+			// sizing handles of a selected table straddle its edge and take priority over the column/row resize areas
+			if (IsOnlySelected(xNode))
+			{
+				HitLocationEnum handle = HitTableResizeHandle(tr, _HitPoint);
+				if (handle != HitLocationEnum.Inside)
+					return new HitLocation(xNode, null, handle, new PointF(0, 0));
+			}
+
 			// If not in the bigger rectangle; its not in any smaller rectangles
 			if (!tr.Contains(_HitPoint))
 				return null;
@@ -5080,6 +5223,8 @@ namespace Majorsilence.Reporting.RdlDesign
 				return false;
 			if (InTable(xNode) || InMatrix(xNode))
 				return false;
+			if (IsTableNode(xNode))
+				return ResizeTable(xNode, PointsX(xInc), PointsY(yInc), hle);
 
 			bool rc=false;
 
