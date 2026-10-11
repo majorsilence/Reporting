@@ -3,6 +3,7 @@ using Majorsilence.Reporting.Benchmarks;
 using System.Diagnostics;
 
 // Benchmarks:  dotnet run -c Release -f net10.0 -- --filter '*Json*'
+// CI allocation gate (compares bytes/op with docs/performance/allocation-baseline.json):  -- gate [--update]
 // Loop one workload for profilers + allocation-by-type sample:  -- profile WorldFacts pdf 20 alloc
 // Render every workload once and print size + hash:  -- smoke
 // Thread scaling (not a BDN benchmark):  dotnet run -c Release -f net10.0 -- scale [seconds] [threads...]
@@ -19,22 +20,28 @@ if (args.Length > 0 && args[0] == "scale")
         ConcurrentCallCount(bench, threads, seconds);
     }
 
-    return;
+    return 0;
+}
+
+if (args.Length > 0 && args[0] == "gate")
+{
+    return await AllocationGate.Run(args);
 }
 
 if (args.Length > 0 && args[0] == "profile")
 {
     await Profile.Run(args);
-    return;
+    return 0;
 }
 
 if (args.Length > 0 && args[0] == "smoke")
 {
     await Smoke.Run();
-    return;
+    return 0;
 }
 
 BenchmarkSwitcher.FromAssembly(typeof(Program).Assembly).Run(args);
+return 0;
 
 static void ConcurrentCallCount(JsonDataProviderBenchmark inst, int threadCount, int durationInSeconds)
 {

@@ -46,6 +46,10 @@ jobs:
           name: unit tests
           path: "**/TestResults/*.trx"
           reporter: dotnet-trx
+      - name: Allocation gate
+        # Fails when rendering allocates over 20% more bytes per report than docs/performance/allocation-baseline.json.
+        # Intended increase: run `dotnet run -c Release -f net10.0 --project Majorsilence.Reporting.Benchmarks -- gate --update`.
+        run: dotnet run -c Release -f net10.0 --no-build --project Majorsilence.Reporting.Benchmarks -- gate
       - name: SBOM
         uses: CycloneDX/gh-dotnet-generate-sbom@v1
         with:
