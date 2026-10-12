@@ -378,3 +378,27 @@ namespace Majorsilence.Pdf.Layout
             _content.Draw(canvas, x, y, width, height);
     }
 }
+
+namespace Majorsilence.Pdf.Layout
+{
+    /// <summary>Zero-height marker that registers a bookmark and/or named destination where it lands.</summary>
+    internal sealed class AnchorElement : LayoutElement
+    {
+        private readonly string? _bookmark;
+        private readonly int _level;
+        private readonly string? _destination;
+
+        public AnchorElement(string? bookmark, int level, string? destination)
+        {
+            _bookmark = bookmark; _level = level; _destination = destination;
+        }
+
+        public override Fit Measure(PdfCanvas canvas, float width, float available) => Fit.Full(this, 0f);
+
+        public override void Draw(PdfCanvas canvas, float x, float y, float width, float height)
+        {
+            if (_bookmark != null) canvas.AddBookmark(_bookmark, y, _level);
+            if (_destination != null) canvas.AddDestination(_destination, x, y);
+        }
+    }
+}

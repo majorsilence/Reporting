@@ -79,6 +79,22 @@ namespace Majorsilence.Pdf.Layout
             return this;
         }
 
+        /// <summary>Add a bookmark (outline entry) at this position. <paramref name="level"/> 0 is top level.</summary>
+        public LayoutColumn Bookmark(string title, int level = 0)
+        {
+            if (title == null) throw new ArgumentNullException(nameof(title));
+            _items.Add(new AnchorElement(title, level, null));
+            return this;
+        }
+
+        /// <summary>Name this position so internal links can jump to it.</summary>
+        public LayoutColumn Destination(string name)
+        {
+            if (string.IsNullOrEmpty(name)) throw new ArgumentException("A destination needs a name.", nameof(name));
+            _items.Add(new AnchorElement(null, 0, name));
+            return this;
+        }
+
         /// <summary>Escape hatch for arbitrary drawing in a region of the given height.</summary>
         public LayoutColumn Canvas(Action<PdfCanvas, LayoutRect> draw, float height)
         {

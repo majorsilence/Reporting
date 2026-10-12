@@ -42,8 +42,24 @@ namespace Majorsilence.Pdf.Internal
         internal readonly float X1, Y1, X2, Y2;
         internal readonly string? Uri;
         internal readonly string? Tooltip;
-        internal PageAnnotation(float x1, float y1, float x2, float y2, string? uri, string? tooltip)
-        { X1 = x1; Y1 = y1; X2 = x2; Y2 = y2; Uri = uri; Tooltip = tooltip; }
+        internal readonly string? DestName;
+        internal PageAnnotation(float x1, float y1, float x2, float y2, string? uri, string? tooltip, string? destName = null)
+        { X1 = x1; Y1 = y1; X2 = x2; Y2 = y2; Uri = uri; Tooltip = tooltip; DestName = destName; }
+    }
+
+    internal sealed class PageDestination
+    {
+        internal readonly string Name;
+        internal readonly float X, Y; // PDF space (bottom-left origin)
+        internal PageDestination(string name, float x, float y) { Name = name; X = x; Y = y; }
+    }
+
+    internal sealed class PageBookmark
+    {
+        internal readonly string Title;
+        internal readonly int Level;
+        internal readonly float Y; // PDF space (bottom-left origin)
+        internal PageBookmark(string title, int level, float y) { Title = title; Level = level; Y = y; }
     }
 
     internal sealed class PageData
@@ -51,6 +67,8 @@ namespace Majorsilence.Pdf.Internal
         internal readonly float Width, Height;
         internal readonly StringBuilder Content = new StringBuilder();
         internal readonly List<PageAnnotation> Annotations = new List<PageAnnotation>();
+        internal readonly List<PageDestination> Destinations = new List<PageDestination>();
+        internal readonly List<PageBookmark> Bookmarks = new List<PageBookmark>();
         internal PageData(float width, float height) { Width = width; Height = height; }
     }
 
@@ -289,6 +307,19 @@ namespace Majorsilence.Pdf.Internal
             var pageContentIdx = new int[_pages.Count];
             var pageDictIdx    = new int[_pages.Count];
 
+            // Page object numbers are needed up front: internal links and bookmarks may point at
+            // pages that have not been written yet. Each page is content + dict + its annotations.
+            var pageObjNums = new int[_pages.Count];
+            for (int pi = 0, run = objects.Count; pi < _pages.Count; pi++)
+            {
+                pageObjNums[pi] = run + 2;
+                run += 2 + _pages[pi].Annotations.Count;
+            }
+            var namedDests = new Dictionary<string, (int Page, float X, float Y)>(StringComparer.Ordinal);
+            for (int pi = 0; pi < _pages.Count; pi++)
+                foreach (var d in _pages[pi].Destinations)
+                    if (!namedDests.ContainsKey(d.Name)) namedDests[d.Name] = (pi, d.X, d.Y);
+
             for (int pi = 0; pi < _pages.Count; pi++)
             {
                 var page = _pages[pi];
@@ -324,12 +355,15 @@ namespace Majorsilence.Pdf.Internal
                 objects.Add(Latin1.GetBytes(pageDict));
 
                 foreach (var ann in page.Annotations)
-                    objects.Add(BuildAnnotationObj(ann, objects.Count + 1));
+                    objects.Add(BuildAnnotationObj(ann, objects.Count + 1, pageObjNums, namedDests));
             }
 
             // ── info dict ─────────────────────────────────────────────────────
             int infoObjIdx = objects.Count;
             objects.Add(BuildInfoObj(objects.Count + 1));
+
+            // ── bookmarks (outlines) ──────────────────────────────────────────
+            int outlinesObjNum = BuildOutlines(objects, pageObjNums);
 
             // ── signature placeholder ─────────────────────────────────────────
             int sigObjIdx       = -1;
@@ -363,6 +397,15 @@ namespace Majorsilence.Pdf.Internal
             string catalog = "<< /Type /Catalog /Pages 2 0 R";
             if (xmpObjNum > 0) catalog += $" /Metadata {xmpObjNum} 0 R";
             if (outputIntentsObjNum > 0) catalog += $" /OutputIntents [{outputIntentsObjNum} 0 R]";
+            if (outlinesObjNum > 0) catalog += $" /Outlines {outlinesObjNum} 0 R /PageMode /UseOutlines";
+            if (namedDests.Count > 0)
+            {
+                var dests = new StringBuilder(" /Dests << ");
+                foreach (var kv in namedDests)
+                    dests.Append($"/{PdfName(kv.Key)} [{pageObjNums[kv.Value.Page]} 0 R /XYZ {Fmt(kv.Value.X)} {Fmt(kv.Value.Y)} null] ");
+                dests.Append(">>");
+                catalog += dests.ToString();
+            }
             if (hasSig) catalog += $" /AcroForm << /Fields [{sigWidgetObjNum} 0 R] /SigFlags 3 >>";
             catalog += " >>";
             objects[0] = Latin1.GetBytes(catalog);
@@ -854,8 +897,87 @@ namespace Majorsilence.Pdf.Internal
             return Latin1.GetBytes(dict);
         }
 
-        private byte[] BuildAnnotationObj(PageAnnotation ann, int objNum)
+        // Writes the outline tree for all bookmarks, in page order. Returns the root object number,
+        // or -1 when there are no bookmarks.
+        private int BuildOutlines(List<byte[]> objects, int[] pageObjNums)
         {
+            var flat = new List<(PageBookmark Mark, int Page)>();
+            for (int pi = 0; pi < _pages.Count; pi++)
+                foreach (var b in _pages[pi].Bookmarks) flat.Add((b, pi));
+            if (flat.Count == 0) return -1;
+
+            int rootNum = objects.Count + 1;
+            int n = flat.Count;
+            var parent = new int[n];
+            var first = new int[n]; var last = new int[n];
+            var prev = new int[n]; var next = new int[n];
+            var count = new int[n];
+            for (int k = 0; k < n; k++) { first[k] = last[k] = prev[k] = next[k] = -1; }
+            int rootFirst = -1, rootLast = -1;
+
+            // A bookmark can nest at most one level below the previous one.
+            var stack = new List<int>(); // item index per depth
+            for (int k = 0; k < n; k++)
+            {
+                int depth = Math.Max(0, Math.Min(flat[k].Mark.Level, stack.Count));
+                stack.RemoveRange(depth, stack.Count - depth);
+                int par = depth == 0 ? -1 : stack[depth - 1];
+                parent[k] = par;
+                int sibling = par < 0 ? rootLast : last[par];
+                if (sibling >= 0) { prev[k] = sibling; next[sibling] = k; }
+                if (par < 0) { if (rootFirst < 0) rootFirst = k; rootLast = k; }
+                else { if (first[par] < 0) first[par] = k; last[par] = k; }
+                for (int a = par; a >= 0; a = parent[a]) count[a]++;
+                stack.Add(k);
+            }
+
+            string Ref(int k) => $"{rootNum + 1 + k} 0 R";
+            objects.Add(Latin1.GetBytes(
+                $"<< /Type /Outlines /First {Ref(rootFirst)} /Last {Ref(rootLast)} /Count {n} >>"));
+            for (int k = 0; k < n; k++)
+            {
+                int objNum = rootNum + 1 + k;
+                var (mark, page) = flat[k];
+                var sb = new StringBuilder();
+                sb.Append($"<< /Title {EncStr(objNum, mark.Title)} ");
+                sb.Append(parent[k] < 0 ? $"/Parent {rootNum} 0 R " : $"/Parent {Ref(parent[k])} ");
+                if (prev[k] >= 0) sb.Append($"/Prev {Ref(prev[k])} ");
+                if (next[k] >= 0) sb.Append($"/Next {Ref(next[k])} ");
+                if (first[k] >= 0) sb.Append($"/First {Ref(first[k])} /Last {Ref(last[k])} /Count {count[k]} ");
+                sb.Append($"/Dest [{pageObjNums[page]} 0 R /XYZ 0 {Fmt(mark.Y)} null] >>");
+                objects.Add(Latin1.GetBytes(sb.ToString()));
+            }
+            return rootNum;
+        }
+
+        // A PDF name for a destination: anything outside [A-Za-z0-9._-] becomes #XX (UTF-8 bytes).
+        private static string PdfName(string name)
+        {
+            var sb = new StringBuilder();
+            foreach (byte b in Encoding.UTF8.GetBytes(name))
+            {
+                char c = (char)b;
+                if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || c == '.' || c == '_' || c == '-')
+                    sb.Append(c);
+                else
+                    sb.Append('#').Append(b.ToString("X2"));
+            }
+            return sb.ToString();
+        }
+
+        private byte[] BuildAnnotationObj(PageAnnotation ann, int objNum, int[] pageObjNums,
+            Dictionary<string, (int Page, float X, float Y)> namedDests)
+        {
+            if (ann.DestName != null)
+            {
+                if (!namedDests.TryGetValue(ann.DestName, out var dest))
+                    throw new InvalidOperationException(
+                        $"Internal link refers to destination '{ann.DestName}', which was never added.");
+                return Latin1.GetBytes(
+                    $"<< /Type /Annot /Subtype /Link " +
+                    $"/Rect [{Fmt(ann.X1)} {Fmt(ann.Y1)} {Fmt(ann.X2)} {Fmt(ann.Y2)}] " +
+                    $"/Border [0 0 0] /Dest [{pageObjNums[dest.Page]} 0 R /XYZ {Fmt(dest.X)} {Fmt(dest.Y)} null] >>");
+            }
             if (ann.Uri != null)
             {
                 string uriStr = _encryptor != null

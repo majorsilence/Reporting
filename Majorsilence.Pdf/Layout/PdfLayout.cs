@@ -271,6 +271,20 @@ namespace Majorsilence.Pdf.Layout
             return this;
         }
 
+        /// <summary>Add a bookmark (outline entry) at this position. <paramref name="level"/> 0 is top level.</summary>
+        public PdfLayout Bookmark(string title, int level = 0)
+        {
+            if (title == null) throw new ArgumentNullException(nameof(title));
+            return Add(new AnchorElement(title, level, null), "Bookmark");
+        }
+
+        /// <summary>Name this position so internal links (<see cref="PdfCanvas.AddInternalLink"/>) can jump to it.</summary>
+        public PdfLayout Destination(string name)
+        {
+            if (string.IsNullOrEmpty(name)) throw new ArgumentException("A destination needs a name.", nameof(name));
+            return Add(new AnchorElement(null, 0, name), "Destination");
+        }
+
         /// <summary>
         /// Escape hatch for arbitrary drawing in a region of the given height. <paramref name="draw"/>
         /// is invoked when the document is ended, on the page the region landed on.

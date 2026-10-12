@@ -33,6 +33,7 @@ namespace Majorsilence.Pdf
         private readonly FontCache _fontCache;
         private readonly FontRegistry? _registry;
         private StringBuilder Content => _page.Content;
+        private int _stateDepth;
 
         internal PdfCanvas(PageData page, PdfSerializer ser, FontCache fontCache, FontRegistry? registry = null)
         {
@@ -807,6 +808,151 @@ namespace Majorsilence.Pdf
             _page.Annotations.Add(new PageAnnotation(x, PdfY(y + height), x + width, PdfY(y), null, tooltip));
             return this;
         }
+
+        // ── internal links, destinations and bookmarks ───────────────────────
+
+        /// <summary>
+        /// Name a position on this page (top-left coordinates) so internal links and viewers can
+        /// jump to it. Names are document-wide; if a name is added twice the first one wins.
+        /// </summary>
+        public PdfCanvas AddDestination(string name, float x, float y)
+        {
+            if (string.IsNullOrEmpty(name)) throw new ArgumentException("A destination needs a name.", nameof(name));
+            _page.Destinations.Add(new PageDestination(name, x, PdfY(y)));
+            return this;
+        }
+
+        /// <summary>
+        /// Add a clickable area that jumps to the destination called <paramref name="destinationName"/>
+        /// (added with <see cref="AddDestination"/> on any page). Saving throws
+        /// <see cref="InvalidOperationException"/> if the destination does not exist.
+        /// </summary>
+        public PdfCanvas AddInternalLink(float x, float y, float width, float height, string destinationName)
+        {
+            if (string.IsNullOrEmpty(destinationName))
+                throw new ArgumentException("A destination name is required.", nameof(destinationName));
+            _page.Annotations.Add(new PageAnnotation(x, PdfY(y + height), x + width, PdfY(y), null, null, destinationName));
+            return this;
+        }
+
+        /// <summary>
+        /// Add an entry to the document outline (the bookmarks pane) pointing at vertical position
+        /// <paramref name="y"/> on this page. <paramref name="level"/> 0 is top level; deeper levels
+        /// nest under the previous bookmark (at most one level deeper than it).
+        /// </summary>
+        public PdfCanvas AddBookmark(string title, float y = 0f, int level = 0)
+        {
+            if (title == null) throw new ArgumentNullException(nameof(title));
+            _page.Bookmarks.Add(new PageBookmark(title, Math.Max(0, level), PdfY(y)));
+            return this;
+        }
+
+        // ── graphics state: clipping and transforms ──────────────────────────
+
+        /// <summary>Push the graphics state (clip, transform, colours). Pair with <see cref="RestoreState"/>.</summary>
+        public PdfCanvas SaveState()
+        {
+            Content.Append("q\n");
+            _stateDepth++;
+            return this;
+        }
+
+        /// <summary>Pop the graphics state pushed by <see cref="SaveState"/>.</summary>
+        public PdfCanvas RestoreState()
+        {
+            if (_stateDepth == 0)
+                throw new InvalidOperationException("RestoreState called without a matching SaveState.");
+            Content.Append("Q\n");
+            _stateDepth--;
+            return this;
+        }
+
+        /// <summary>
+        /// Restrict all following drawing to the rectangle (top-left coordinates). The clip lasts
+        /// until the enclosing <see cref="RestoreState"/>, so call <see cref="SaveState"/> first.
+        /// </summary>
+        public PdfCanvas ClipRectangle(float x, float y, float width, float height)
+        {
+            Content.AppendNum(x).Append(" ").AppendNum(PdfY(y + height)).Append(" ")
+                   .AppendNum(width).Append(" ").AppendNum(height).Append(" re W n\n");
+            return this;
+        }
+
+        /// <summary>Like <see cref="ClipRectangle"/> but with rounded corners of the given radius.</summary>
+        public PdfCanvas ClipRoundedRectangle(float x, float y, float width, float height, float radius)
+        {
+            float r = Math.Max(0f, Math.Min(radius, Math.Min(width, height) / 2f));
+            const float k = 0.5522847498f; // bezier circle approximation
+            float c = r * k;
+            float left = x, right = x + width, bottom = PdfY(y + height), top = PdfY(y);
+            var sb = Content;
+            sb.AppendNum(left + r).Append(" ").AppendNum(bottom).Append(" m\n");
+            sb.AppendNum(right - r).Append(" ").AppendNum(bottom).Append(" l\n");
+            sb.AppendNum(right - r + c).Append(" ").AppendNum(bottom).Append(" ").AppendNum(right).Append(" ").AppendNum(bottom + r - c).Append(" ").AppendNum(right).Append(" ").AppendNum(bottom + r).Append(" c\n");
+            sb.AppendNum(right).Append(" ").AppendNum(top - r).Append(" l\n");
+            sb.AppendNum(right).Append(" ").AppendNum(top - r + c).Append(" ").AppendNum(right - r + c).Append(" ").AppendNum(top).Append(" ").AppendNum(right - r).Append(" ").AppendNum(top).Append(" c\n");
+            sb.AppendNum(left + r).Append(" ").AppendNum(top).Append(" l\n");
+            sb.AppendNum(left + r - c).Append(" ").AppendNum(top).Append(" ").AppendNum(left).Append(" ").AppendNum(top - r + c).Append(" ").AppendNum(left).Append(" ").AppendNum(top - r).Append(" c\n");
+            sb.AppendNum(left).Append(" ").AppendNum(bottom + r).Append(" l\n");
+            sb.AppendNum(left).Append(" ").AppendNum(bottom + r - c).Append(" ").AppendNum(left + r - c).Append(" ").AppendNum(bottom).Append(" ").AppendNum(left + r).Append(" ").AppendNum(bottom).Append(" c\n");
+            sb.Append("h W n\n");
+            return this;
+        }
+
+        /// <summary>Move the origin by (<paramref name="dx"/>, <paramref name="dy"/>) points (y grows downward).</summary>
+        public PdfCanvas Translate(float dx, float dy) => Concat(1f, 0f, 0f, 1f, dx, -dy);
+
+        /// <summary>Rotate clockwise by <paramref name="degrees"/> around the point (<paramref name="cx"/>, <paramref name="cy"/>).</summary>
+        public PdfCanvas Rotate(float degrees, float cx = 0f, float cy = 0f)
+        {
+            double a = -degrees * Math.PI / 180.0; // PDF's y axis points up, so clockwise is negative
+            float cos = (float)Math.Cos(a), sin = (float)Math.Sin(a);
+            float px = cx, py = PdfY(cy);
+            return Concat(cos, sin, -sin, cos, px - cos * px + sin * py, py - sin * px - cos * py);
+        }
+
+        /// <summary>Scale by (<paramref name="sx"/>, <paramref name="sy"/>) around the point (<paramref name="cx"/>, <paramref name="cy"/>).</summary>
+        public PdfCanvas Scale(float sx, float sy, float cx = 0f, float cy = 0f)
+        {
+            float px = cx, py = PdfY(cy);
+            return Concat(sx, 0f, 0f, sy, px * (1f - sx), py * (1f - sy));
+        }
+
+        private PdfCanvas Concat(float a, float b, float c, float d, float e, float f)
+        {
+            Content.AppendNum(a).Append(" ").AppendNum(b).Append(" ").AppendNum(c).Append(" ")
+                   .AppendNum(d).Append(" ").AppendNum(e).Append(" ").AppendNum(f).Append(" cm\n");
+            return this;
+        }
+
+        // ── line breaking ────────────────────────────────────────────────────
+
+        /// <summary>
+        /// Break <paramref name="text"/> into the lines <see cref="DrawTextBox"/> would draw at the
+        /// given width: word-wrapped, with explicit '\n' forcing a break. Line text excludes the
+        /// trailing newline and trailing spaces.
+        /// </summary>
+        public IReadOnlyList<TextLine> BreakLines(string text, float width, TextStyle? style = null)
+        {
+            var lines = new List<TextLine>();
+            if (string.IsNullOrEmpty(text)) return lines;
+            style ??= TextStyle.Default;
+            int pos = 0;
+            while (pos < text.Length)
+            {
+                int end = BreakTextLine(text, pos, width, style);
+                int drawEnd = end;
+                if (drawEnd > pos && text[drawEnd - 1] == '\n') drawEnd--;
+                string line = text.Substring(pos, drawEnd - pos).TrimEnd(' ');
+                lines.Add(new TextLine(line, pos, end - pos, MeasureTextWidth(line, style)));
+                pos = end;
+            }
+            return lines;
+        }
+
+        /// <summary>The distance between consecutive baselines for <paramref name="style"/>.</summary>
+        public float GetLineHeight(TextStyle? style = null, float lineSpacing = 1.2f) =>
+            (style ?? TextStyle.Default).FontSize * lineSpacing;
 
         // ── measurement ──────────────────────────────────────────────────────
 
