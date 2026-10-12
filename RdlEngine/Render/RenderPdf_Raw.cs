@@ -475,7 +475,7 @@ namespace Majorsilence.Reporting.Rdl
             // FontFolder sets _liberationFonts / _dejavuFonts as a side-effect
             string sysFolder = FontFolder;
             string home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-            string key = string.Join("|", sysFolder, _liberationFonts, _dejavuFonts, home, IsOSX, _osPlatform);
+            string key = string.Join("|", sysFolder, _liberationFonts, _dejavuFonts, home, IsOSX, _osPlatform, PdfFonts.CacheKey);
             return _sharedRegistries.GetOrAdd(key,
                 _ => new Lazy<FontRegistry>(() => BuildFontRegistryUncached(sysFolder))).Value;
         }
@@ -584,6 +584,10 @@ namespace Majorsilence.Reporting.Rdl
                 if (!string.IsNullOrEmpty(localAppData))
                     reg.AddInstalledFonts(Path.Combine(localAppData, "Microsoft", "Windows", "Fonts"));
             }
+
+            // Fonts the application registered: their families replace scanned ones of the same
+            // name, and their fallbacks come before the built-in chain below.
+            PdfFonts.ApplyTo(reg);
 
             // ── fallback chain ────────────────────────────────────────────────
             // Prefer wide-coverage fonts; first match wins

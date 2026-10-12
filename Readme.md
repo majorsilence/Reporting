@@ -43,6 +43,20 @@ If running on linux install the [required fonts](https://github.com/majorsilence
 sudo apt install ttf-mscorefonts-installer
 ```
 
+### Custom fonts for PDF export
+
+Fonts shipped with your app, or kept in a folder the renderer does not scan, can be registered once at startup, before rendering. Registrations are process-wide.
+
+```cs
+using Majorsilence.Reporting.Rdl;
+
+PdfFonts.RegisterFont("MICR Encoding", regular: "/app/fonts/MICREncoding.ttf");
+PdfFonts.RegisterFontDirectory("/app/fonts");     // each font under the family it declares
+PdfFonts.AddFallbackFamily("Noto Sans CJK JP");   // tried before the built-in fallbacks
+```
+
+A family you register replaces an installed one of the same name. Without code (RdlCmd, RdlMcp), set `MAJORSILENCE_PDF_FONT_DIRS` to a list of font folders separated by `:` (`;` on Windows).
+
 You are now ready to create and generate reports.
 
 ## c# example, create report, connected to an sql database
