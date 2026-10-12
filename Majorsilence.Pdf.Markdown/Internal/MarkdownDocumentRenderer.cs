@@ -36,6 +36,7 @@ namespace Majorsilence.Pdf.Markdown.Internal
                     {
                         Runs = CollectInlineRuns(heading.Inline, style.HeadingStyle(heading.Level), style, warnings),
                         SpacingAfter = style.BlockSpacingValue,
+                        KeepWithNextHeight = style.HeadingStyle(heading.Level).FontSize * 1.2f * 3f,
                     });
                     break;
 
