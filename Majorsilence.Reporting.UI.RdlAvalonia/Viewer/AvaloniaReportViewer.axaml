@@ -2,6 +2,21 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:viewer="clr-namespace:Majorsilence.Reporting.UI.RdlAvalonia.Viewer"
              x:Class="Majorsilence.Reporting.UI.RdlAvalonia.Viewer.AvaloniaReportViewer">
+  <!-- Toolbar icons are vector geometries rather than emoji: emoji need a system emoji font, which the
+       browser (and some Linux installs) lack, and they draw as placeholder boxes. 16x16 grid; F0 = even-odd. -->
+  <UserControl.Resources>
+    <StreamGeometry x:Key="Icon.Open">F1 M1,3 H6 L8,5 H15 V14 H1 Z</StreamGeometry>
+    <StreamGeometry x:Key="Icon.Save">F0 M2,2 H11.5 L14,4.5 V14 H2 Z M4.5,2 V6 H10.5 V2 Z M4,9 H12 V14 H4 Z</StreamGeometry>
+    <StreamGeometry x:Key="Icon.Print">F1 M4,2 H12 V5 H4 Z M2,6 H14 V12 H12 V10 H4 V12 H2 Z M5,11 H11 V14 H5 Z</StreamGeometry>
+    <StreamGeometry x:Key="Icon.Copy">F1 M3,5 H10 V15 H3 Z M6,1 H13 V12 H11 V3 H6 Z</StreamGeometry>
+    <StreamGeometry x:Key="Icon.SelectAll">F0 M2,2 H14 V14 H2 Z M4,4 V12 H12 V4 Z M6,6 H10 V10 H6 Z</StreamGeometry>
+    <StreamGeometry x:Key="Icon.Pages">F1 M2,3 H14 V5 H2 Z M2,7 H14 V9 H2 Z M2,11 H14 V13 H2 Z</StreamGeometry>
+    <StreamGeometry x:Key="Icon.Find">F0 M6.5,1 A5.5,5.5 0 1 0 6.5,12 A5.5,5.5 0 1 0 6.5,1 Z M6.5,3 A3.5,3.5 0 1 1 6.5,10 A3.5,3.5 0 1 1 6.5,3 Z M10.5,11.5 L12,10 L15,13 L13.5,14.5 Z</StreamGeometry>
+    <StreamGeometry x:Key="Icon.Warning">F0 M8,1 L15,14 H1 Z M7.2,5.5 H8.8 V9.5 H7.2 Z M7.2,10.5 H8.8 V12 H7.2 Z</StreamGeometry>
+    <StreamGeometry x:Key="Icon.Document">F0 M3,1 H10 L14,5 V15 H3 Z M5,8 H12 V9.5 H5 Z M5,11 H12 V12.5 H5 Z</StreamGeometry>
+    <StreamGeometry x:Key="Icon.FirstPage">F1 M2,2 H4 V14 H2 Z M14,2 V14 L5,8 Z</StreamGeometry>
+    <StreamGeometry x:Key="Icon.LastPage">F1 M12,2 H14 V14 H12 Z M2,2 L11,8 L2,14 Z</StreamGeometry>
+  </UserControl.Resources>
   <UserControl.Styles>
 
     <Style Selector="Button.toolbar">
@@ -54,19 +69,19 @@
         <!-- File group -->
         <Button x:Name="OpenButton"  Classes="toolbar" ToolTip.Tip="Open report…">
           <StackPanel Orientation="Horizontal" Spacing="5">
-            <TextBlock Text="📂" FontSize="14" VerticalAlignment="Center"/>
+            <PathIcon Data="{StaticResource Icon.Open}" Width="14" Height="14" VerticalAlignment="Center"/>
             <TextBlock Text="Open" VerticalAlignment="Center"/>
           </StackPanel>
         </Button>
         <Button x:Name="SaveButton"  Classes="toolbar" ToolTip.Tip="Save / export…">
           <StackPanel Orientation="Horizontal" Spacing="5">
-            <TextBlock Text="💾" FontSize="14" VerticalAlignment="Center"/>
+            <PathIcon Data="{StaticResource Icon.Save}" Width="14" Height="14" VerticalAlignment="Center"/>
             <TextBlock Text="Save" VerticalAlignment="Center"/>
           </StackPanel>
         </Button>
         <Button x:Name="PrintButton" Classes="toolbar" ToolTip.Tip="Save as PDF for printing">
           <StackPanel Orientation="Horizontal" Spacing="5">
-            <TextBlock Text="🖨" FontSize="14" VerticalAlignment="Center"/>
+            <PathIcon Data="{StaticResource Icon.Print}" Width="14" Height="14" VerticalAlignment="Center"/>
             <TextBlock Text="Print" VerticalAlignment="Center"/>
           </StackPanel>
         </Button>
@@ -84,13 +99,13 @@
         <!-- Selection group -->
         <Button x:Name="CopyButton"      Classes="toolbar" ToolTip.Tip="Copy selected text (Ctrl+C)">
           <StackPanel Orientation="Horizontal" Spacing="5">
-            <TextBlock Text="⎘" FontSize="15" VerticalAlignment="Center"/>
+            <PathIcon Data="{StaticResource Icon.Copy}" Width="14" Height="14" VerticalAlignment="Center"/>
             <TextBlock Text="Copy" VerticalAlignment="Center"/>
           </StackPanel>
         </Button>
         <Button x:Name="SelectAllButton" Classes="toolbar" ToolTip.Tip="Select all text (Ctrl+A)">
           <StackPanel Orientation="Horizontal" Spacing="5">
-            <TextBlock Text="☰" FontSize="14" VerticalAlignment="Center"/>
+            <PathIcon Data="{StaticResource Icon.SelectAll}" Width="14" Height="14" VerticalAlignment="Center"/>
             <TextBlock Text="Select All" VerticalAlignment="Center"/>
           </StackPanel>
         </Button>
@@ -99,7 +114,7 @@
                    Background="{DynamicResource SystemControlForegroundBaseLowBrush}"/>
 
         <!-- Page navigation -->
-        <Button x:Name="FirstPageButton"    Classes="toolbar" Content="⏮" FontSize="14" ToolTip.Tip="First page"/>
+        <Button x:Name="FirstPageButton"    Classes="toolbar" ToolTip.Tip="First page"><PathIcon Data="{StaticResource Icon.FirstPage}" Width="12" Height="12"/></Button>
         <Button x:Name="PreviousPageButton" Classes="toolbar" Content="◀"  FontSize="12" ToolTip.Tip="Previous page"/>
         <TextBox x:Name="PageTextBox"
                  Width="44" Height="28"
@@ -114,7 +129,7 @@
                    FontSize="13"
                    Opacity="0.6"/>
         <Button x:Name="NextPageButton" Classes="toolbar" Content="▶"  FontSize="12" ToolTip.Tip="Next page"/>
-        <Button x:Name="LastPageButton" Classes="toolbar" Content="⏭" FontSize="14" ToolTip.Tip="Last page"/>
+        <Button x:Name="LastPageButton" Classes="toolbar" ToolTip.Tip="Last page"><PathIcon Data="{StaticResource Icon.LastPage}" Width="12" Height="12"/></Button>
 
         <!-- Vertical divider -->
         <Separator Width="1" Height="18" Margin="4,0"
@@ -137,7 +152,7 @@
         <!-- Thumbnails toggle -->
         <ToggleButton x:Name="ThumbnailsButton" Classes="toolbar" ToolTip.Tip="Toggle page thumbnails panel">
           <StackPanel Orientation="Horizontal" Spacing="5">
-            <TextBlock Text="☰" FontSize="14" VerticalAlignment="Center"/>
+            <PathIcon Data="{StaticResource Icon.Pages}" Width="14" Height="14" VerticalAlignment="Center"/>
             <TextBlock Text="Pages" VerticalAlignment="Center"/>
           </StackPanel>
         </ToggleButton>
@@ -145,7 +160,7 @@
         <!-- Find button -->
         <Button x:Name="FindButton" Classes="toolbar" ToolTip.Tip="Find text (Ctrl+F)">
           <StackPanel Orientation="Horizontal" Spacing="5">
-            <TextBlock Text="🔍" FontSize="13" VerticalAlignment="Center"/>
+            <PathIcon Data="{StaticResource Icon.Find}" Width="14" Height="14" VerticalAlignment="Center"/>
             <TextBlock Text="Find" VerticalAlignment="Center"/>
           </StackPanel>
         </Button>
@@ -156,7 +171,7 @@
                      Background="{DynamicResource SystemControlForegroundBaseLowBrush}"/>
           <ToggleButton x:Name="ErrorsToggleButton" Classes="toolbar" ToolTip.Tip="Toggle errors panel">
             <StackPanel Orientation="Horizontal" Spacing="5">
-              <TextBlock x:Name="ErrorsIconText" Text="⚠" FontSize="14" VerticalAlignment="Center"/>
+              <PathIcon x:Name="ErrorsIconText" Data="{StaticResource Icon.Warning}" Width="14" Height="14" VerticalAlignment="Center"/>
               <TextBlock x:Name="ErrorsButtonText" Text="Errors" VerticalAlignment="Center"/>
             </StackPanel>
           </ToggleButton>
@@ -294,7 +309,7 @@
               IsVisible="True"
               IsHitTestVisible="False">
         <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="10">
-          <TextBlock Text="📄" FontSize="52" HorizontalAlignment="Center" Opacity="0.2"/>
+          <PathIcon Data="{StaticResource Icon.Document}" Width="52" Height="52" HorizontalAlignment="Center" Opacity="0.2"/>
           <TextBlock Text="Open a report to get started"
                      HorizontalAlignment="Center"
                      Opacity="0.4"

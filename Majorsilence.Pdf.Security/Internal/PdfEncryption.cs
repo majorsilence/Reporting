@@ -98,18 +98,18 @@ namespace Majorsilence.Pdf.Security.Internal
 
         private static byte[] ComputeKey(string userPw, byte[] oEntry, int p, byte[] fileId)
         {
-            using var md5 = MD5.Create();
-            md5.TransformBlock(PadPw(userPw), 0, 32, null, 0);
-            md5.TransformBlock(oEntry, 0, 32, null, 0);
             byte[] pb = BitConverter.GetBytes(p);
-            md5.TransformBlock(pb, 0, 4, null, 0);
             // PDF spec §7.6.3.3 Algorithm 2 step f: only append 0xFFFFFFFF when
             // /EncryptMetadata false is present in the /Encrypt dict.  We omit
             // /EncryptMetadata (defaulting to true) for maximum viewer compatibility —
             // many viewers (including Flatpak/Snap-bundled builds of Evince) do not
             // honour that flag and always skip the 0xFFFFFFFF step.
-            md5.TransformFinalBlock(fileId, 0, fileId.Length);
-            byte[] hash = md5.Hash!;
+            byte[] input = new byte[32 + 32 + 4 + fileId.Length];
+            Buffer.BlockCopy(PadPw(userPw), 0, input, 0, 32);
+            Buffer.BlockCopy(oEntry, 0, input, 32, 32);
+            Buffer.BlockCopy(pb, 0, input, 64, 4);
+            Buffer.BlockCopy(fileId, 0, input, 68, fileId.Length);
+            byte[] hash = Md5(input);
             for (int i = 0; i < 50; i++) hash = Md5(hash, 0, 16);
             var key = new byte[16];
             Buffer.BlockCopy(hash, 0, key, 0, 16);
@@ -149,29 +149,12 @@ namespace Majorsilence.Pdf.Security.Internal
 
         private static byte[] AesEncryptWithIv(byte[] key, byte[] plaintext)
         {
-            using var aes = Aes.Create();
-            aes.Key = key; aes.Mode = CipherMode.CBC; aes.Padding = PaddingMode.PKCS7;
-            aes.GenerateIV();
-            byte[] iv = aes.IV;
-            using var enc = aes.CreateEncryptor();
-            byte[] ct = enc.TransformFinalBlock(plaintext, 0, plaintext.Length);
-            byte[] result = new byte[16 + ct.Length];
-            Buffer.BlockCopy(iv, 0, result, 0,  16);
-            Buffer.BlockCopy(ct, 0, result, 16, ct.Length);
-            return result;
+            return PlatformCrypto.AesCbcEncryptWithRandomIv(key, plaintext);
         }
 
-        private static byte[] Md5(byte[] data)
-        {
-            using var m = MD5.Create();
-            return m.ComputeHash(data);
-        }
+        private static byte[] Md5(byte[] data) => PlatformCrypto.Md5(data);
 
-        private static byte[] Md5(byte[] data, int offset, int count)
-        {
-            using var m = MD5.Create();
-            return m.ComputeHash(data, offset, count);
-        }
+        private static byte[] Md5(byte[] data, int offset, int count) => PlatformCrypto.Md5(data, offset, count);
 
         private static string ToHex(byte[] bytes)
         {

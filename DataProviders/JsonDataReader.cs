@@ -141,7 +141,7 @@ namespace Majorsilence.Reporting.Data
                         new System.Net.Http.Headers.AuthenticationHeaderValue(authScheme, authParameters);
                 }
 
-                HttpResponseMessage response = _tconn.Client.Send(request);
+                HttpResponseMessage response = _tconn.Client.SendSync(request);
                 response.EnsureSuccessStatusCode();
                 strm = response.Content.ReadAsStream();
             }

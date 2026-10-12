@@ -1,0 +1,69 @@
+name: wasm
+
+permissions:
+  contents: read
+
+on:
+  push:
+    branches: [main, "release/**"]
+  pull_request:
+    branches: [main, "release/**"]
+
+jobs:
+  pdf-wasm:
+    # Publishes Majorsilence.Pdf + Majorsilence.Pdf.Security as a browser-wasm app and runs it under
+    # Node, the same way the Native AOT smoke test proves the AOT build actually runs.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 10.0.x
+      - name: Setup Node
+        uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - name: Install wasm-tools workload
+        run: dotnet workload install wasm-tools
+      - name: Publish the browser-wasm smoke test
+        run: dotnet publish Examples/PdfWasmSmokeTest -c Release -p:WasmTestFont=/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf
+      - name: Run it under Node
+        run: node Examples/PdfWasmSmokeTest/run-node.mjs | tee wasm-smoke.log && grep -q AOT-SMOKE-TEST-OK wasm-smoke.log
+
+  rdl-wasm:
+    # Renders reports (expressions, grouping, charts, PDF/HTML/Excel/TIFF, file-based data providers)
+    # with RdlEngine published as browser-wasm and run under Node.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 10.0.x
+      - name: Setup Node
+        uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - name: Install wasm-tools workload
+        run: dotnet workload install wasm-tools
+      - name: Publish the browser-wasm smoke test
+        run: dotnet publish Examples/RdlWasmSmokeTest -c Release
+      - name: Run it under Node
+        run: node Examples/RdlWasmSmokeTest/run-node.mjs | tee rdl-wasm.log && grep -q RDL-WASM-SMOKE-TEST-OK rdl-wasm.log
+
+  viewers-wasm:
+    # The two browser viewer hosts (Avalonia report viewer, Majorsilence.Forms report viewer) must publish.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 10.0.x
+      - name: Install wasm-tools workload
+        run: dotnet workload install wasm-tools
+      - name: Publish the Avalonia viewer for the browser
+        run: dotnet publish Majorsilence.Reporting.UI.Browser -c Release
+      - name: Publish the Majorsilence.Forms viewer for the browser
+        run: dotnet publish Examples/Hosting/Browser -c Release

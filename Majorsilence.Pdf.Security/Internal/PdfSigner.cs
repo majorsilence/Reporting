@@ -16,6 +16,9 @@ namespace Majorsilence.Pdf.Security.Internal
     // Two-pass PDF digital signature.
     // Pass 1: builds a placeholder dictionary with zeros for ByteRange / Contents.
     // Pass 2: seeks into the MemoryStream, fills ByteRange, signs, fills Contents.
+#if NET6_0_OR_GREATER
+    [System.Runtime.Versioning.UnsupportedOSPlatform("browser")]
+#endif
     internal static class PdfSigner
     {
         // Bytes reserved for the DER-encoded PKCS#7 payload inside /Contents <>.

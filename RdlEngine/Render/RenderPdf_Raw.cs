@@ -491,7 +491,11 @@ namespace Majorsilence.Reporting.Rdl
 
             // ── system fonts — explicit registrations for known naming schemes ──
 
-            if (IsOSX)
+            if (OperatingSystem.IsBrowser())
+            {
+                // Nothing installed to look for: the bundled fonts registered above are all there is.
+            }
+            else if (IsOSX)
             {
                 // macOS: "Arial.ttf", "Arial Bold.ttf", etc. (spaces in names)
                 TryAddFamily(reg, sysFolder, "Arial",
@@ -534,12 +538,12 @@ namespace Majorsilence.Reporting.Rdl
             // /usr/share/fonts/truetype/msttcorefonts/Arial.ttf, so a report asking for Arial got
             // the fallback even where Arial was installed. Families registered above keep their
             // registration. Fonts live a folder or more below these roots, so the walk goes down.
-            if (IsOSX || _osPlatform == (int)PlatformID.Unix)
+            if ((IsOSX || _osPlatform == (int)PlatformID.Unix) && !OperatingSystem.IsBrowser())
             {
                 foreach (string dir in InstalledFontRoots())
                     reg.AddInstalledFonts(dir, includeSubfolders: true);
             }
-            else
+            else if (!OperatingSystem.IsBrowser())
             {
                 // Windows: abbreviated filenames (arial.ttf, arialbd.ttf, etc.)
                 TryAddFamily(reg, sysFolder, "Arial",
@@ -847,6 +851,10 @@ namespace Majorsilence.Reporting.Rdl
         {
             get
             {
+                // The browser has no system fonts; only the fonts bundled with Majorsilence.Forms.Drawing exist.
+                if (OperatingSystem.IsBrowser())
+                { _liberationFonts = true; return Majorsilence.Forms.Drawing.FontResourceLoader.GetFontDirectory(); }
+
                 if (IsOSX) return "/System/Library/Fonts/Supplemental";
 
                 if (_osPlatform == (int)PlatformID.Unix)

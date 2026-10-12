@@ -28,6 +28,9 @@ namespace Majorsilence.Pdf.Security
     ///     .Save("pubkey-encrypted.pdf");
     /// </code>
     /// </example>
+#if NET6_0_OR_GREATER
+    [System.Runtime.Versioning.UnsupportedOSPlatform("browser")]
+#endif
     public sealed class PdfPublicKeySecurity
     {
         /// <summary>Permitted operations when the document is opened. Defaults to <see cref="PdfPermissions.All"/>.</summary>
@@ -66,6 +69,9 @@ namespace Majorsilence.Pdf.Security
         /// can open it (<c>/Filter /Adobe.PubSec</c>, V=4 / AES-128).
         /// Pass <c>null</c> to remove any previously configured encryption.
         /// </summary>
+#if NET6_0_OR_GREATER
+        [System.Runtime.Versioning.UnsupportedOSPlatform("browser")]
+#endif
         public static PdfDocument WithPublicKeySecurity(
             this PdfDocument doc, PdfPublicKeySecurity? security)
         {
@@ -82,6 +88,9 @@ namespace Majorsilence.Pdf.Security.Internal
 {
     // Implements IStreamEncryptor for Adobe.PubSec (V=4, R=4, AES-128-CBC).
     // Key derivation follows PDF spec ISO 32000-1:2008 §7.6.5.
+#if NET6_0_OR_GREATER
+    [System.Runtime.Versioning.UnsupportedOSPlatform("browser")]
+#endif
     internal sealed class PubKeyEncryptionProvider : IStreamEncryptor
     {
         private static readonly Encoding Latin1 = Encoding.GetEncoding("iso-8859-1");
@@ -188,8 +197,7 @@ namespace Majorsilence.Pdf.Security.Internal
             data[16] = (byte)objNum;  data[17] = (byte)(objNum >> 8);  data[18] = (byte)(objNum >> 16);
             data[19] = (byte)genNum;  data[20] = (byte)(genNum >> 8);
             data[21] = 0x73; data[22] = 0x41; data[23] = 0x6C; data[24] = 0x54; // "sAlT"
-            byte[] hash;
-            using (var md5 = MD5.Create()) hash = md5.ComputeHash(data);
+            byte[] hash = PlatformCrypto.Md5(data);
             var key = new byte[16];
             Buffer.BlockCopy(hash, 0, key, 0, 16);
             return key;
@@ -197,16 +205,7 @@ namespace Majorsilence.Pdf.Security.Internal
 
         private static byte[] AesEncryptWithIv(byte[] key, byte[] plaintext)
         {
-            using var aes = Aes.Create();
-            aes.Key = key; aes.Mode = CipherMode.CBC; aes.Padding = PaddingMode.PKCS7;
-            aes.GenerateIV();
-            byte[] iv = aes.IV;
-            using var enc = aes.CreateEncryptor();
-            byte[] ct = enc.TransformFinalBlock(plaintext, 0, plaintext.Length);
-            byte[] result = new byte[16 + ct.Length];
-            Buffer.BlockCopy(iv, 0, result, 0,  16);
-            Buffer.BlockCopy(ct, 0, result, 16, ct.Length);
-            return result;
+            return PlatformCrypto.AesCbcEncryptWithRandomIv(key, plaintext);
         }
     }
 }

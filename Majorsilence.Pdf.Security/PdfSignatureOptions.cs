@@ -25,6 +25,9 @@ namespace Majorsilence.Pdf.Security
     ///     .Save("signed.pdf");
     /// </code>
     /// </example>
+#if NET6_0_OR_GREATER
+    [System.Runtime.Versioning.UnsupportedOSPlatform("browser")]
+#endif
     public sealed class PdfSignatureOptions
     {
         /// <summary>Certificate (with private key) used to sign the document.</summary>

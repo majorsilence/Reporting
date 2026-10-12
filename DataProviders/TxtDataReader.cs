@@ -177,7 +177,7 @@ namespace Majorsilence.Reporting.Data
                 {
                     client.AddMajorsilenceReportingUserAgent();
                     using var request = new HttpRequestMessage(HttpMethod.Get, fname);
-                    HttpResponseMessage response = client.Send(request);
+                    HttpResponseMessage response = client.SendSync(request);
                     response.EnsureSuccessStatusCode();
                     strm = response.Content.ReadAsStream();
                 }

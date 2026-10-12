@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk.WebAssembly">
+  <!--
+    Publishes Majorsilence.Reporting.RdlEngine as a browser-wasm app and renders reports with pushed-in
+    data under Node. Needs the wasm-tools workload (dotnet workload install wasm-tools) and Node.
+
+      dotnet publish -c Release
+      node run-node.mjs
+  -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <OutputType>Exe</OutputType>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <IsPackable>false</IsPackable>
+    <InvariantGlobalization>true</InvariantGlobalization>
+  </PropertyGroup>
+  <PropertyGroup>
+    <DefineConstants>$(DefineConstants);DRAWINGCOMPAT</DefineConstants>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="..\RdlAotSmokeTest\Support.cs" Link="Support.cs" />
+    <!-- SkiaSharp's native library for WebAssembly; must match the SDK's Emscripten version. -->
+    <PackageReference Include="SkiaSharp.NativeAssets.WebAssembly" />
+    <ProjectReference Include="..\..\RdlEngine\Majorsilence.Reporting.RdlEngine.csproj" />
+  </ItemGroup>
+</Project>
