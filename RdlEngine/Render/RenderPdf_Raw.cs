@@ -602,7 +602,7 @@ namespace Majorsilence.Reporting.Rdl
         // machine lacks - or in a Latin font - would draw as .notdef boxes. A CJK family goes
         // on the end of the fallback chain so those characters come from it instead. The chain
         // is consulted per character and its fonts are only loaded when a string needs them.
-        // Only TrueType-outline fonts can be embedded, so Noto Sans CJK (CFF) is not usable.
+        // Noto Sans CJK (CFF outlines) is embedded as a subset, so it is a fallback too.
         private static readonly string[] CjkFallbackFamilies =
         {
             // Windows
@@ -611,6 +611,7 @@ namespace Majorsilence.Reporting.Rdl
             // Linux
             "WenQuanYi Micro Hei", "WenQuanYi Zen Hei", "Droid Sans Fallback",
             "AR PL UMing CN", "AR PL UKai CN",
+            "Noto Sans CJK SC", "Noto Sans CJK JP", "Noto Sans CJK TC", "Noto Sans CJK KR", "Noto Sans CJK HK",
             // macOS
             "PingFang SC", "PingFang TC", "STHeiti", "Apple SD Gothic Neo",
         };

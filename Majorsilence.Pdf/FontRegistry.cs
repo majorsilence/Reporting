@@ -113,8 +113,8 @@ namespace Majorsilence.Pdf
         ///
         /// A family already registered is left exactly as it is, so explicit registrations and
         /// their preferences win. Within a new family the first file found for each style is
-        /// used. Every font of a TrueType collection (<c>.ttc</c>) is registered; CFF-outline fonts,
-        /// which the embedder cannot use, are skipped.
+        /// used. Every font of a TrueType collection (<c>.ttc</c>) is registered, and CFF-outline
+        /// OpenType fonts (such as Noto Sans CJK) are embedded as CIDFontType0.
         /// A missing directory is not an error; it simply adds nothing.
         /// </summary>
         public FontRegistry AddInstalledFonts(string directory) => AddInstalledFonts(directory, includeSubfolders: false);

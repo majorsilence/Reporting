@@ -533,7 +533,7 @@ namespace Majorsilence.Pdf.Internal
                 $"<< /Type /FontDescriptor /FontName /{psName} /Flags 32 " +
                 $"/FontBBox [{llx} {lly} {urx} {ury}] " +
                 $"/ItalicAngle 0 /Ascent {asc} /Descent {desc} " +
-                $"/CapHeight {asc} /StemV 80 /FontFile2 {fontFileObjNum} 0 R >>"));
+                $"/CapHeight {asc} /StemV 80 /{(ttf.IsCff ? "FontFile3" : "FontFile2")} {fontFileObjNum} 0 R >>"));
 
             // ── FontFile2 stream ───────────────────────────────────────────────
             if (_encryptor == null)
@@ -543,13 +543,15 @@ namespace Majorsilence.Pdf.Internal
             else
             {
                 byte[] fontStream = _encryptor.EncryptStream(fontFileObjNum, 0, parts.FontCompressed);
-                string ffHdr = $"<< /Filter /FlateDecode /Length {fontStream.Length} /Length1 {parts.FontLength} >>\nstream\n";
+                string ffHdr = ttf.IsCff
+                    ? $"<< /Subtype /CIDFontType0C /Filter /FlateDecode /Length {fontStream.Length} >>\nstream\n"
+                    : $"<< /Filter /FlateDecode /Length {fontStream.Length} /Length1 {parts.FontLength} >>\nstream\n";
                 objects.Add(Concat(Latin1.GetBytes(ffHdr), fontStream, Latin1.GetBytes("\nendstream")));
             }
 
             // ── CIDFont ───────────────────────────────────────────────────────
             objects.Add(Latin1.GetBytes(
-                $"<< /Type /Font /Subtype /CIDFontType2 /BaseFont /{psName} " +
+                $"<< /Type /Font /Subtype /{(ttf.IsCff ? "CIDFontType0" : "CIDFontType2")} /BaseFont /{psName} " +
                 $"/CIDSystemInfo << /Registry {EncLitStr(cidFontObjNum, "Adobe")} /Ordering {EncLitStr(cidFontObjNum, "Identity")} /Supplement 0 >> " +
                 $"/FontDescriptor {descriptorObjNum} 0 R /DW 1000 {wArray} >>"));
 
@@ -594,13 +596,28 @@ namespace Majorsilence.Pdf.Internal
             foreach (var kv in glyphWidths) wArray.Append($" {kv.Key} [{kv.Value}]");
             wArray.Append(" ]");
 
-            byte[] fontData = subset && used != null && used.Count > 0 ? ttf.Subset(used) : ttf.Data;
+            // A CFF font is always rewritten, even when every glyph is kept, so that its CIDs are glyph IDs.
+            bool subsetting = subset && used != null && used.Count > 0;
+            byte[] fontData;
+            if (ttf.IsCff) fontData = ttf.SubsetCff(subsetting ? used! : AllGlyphs(ttf));
+            else if (subsetting) fontData = ttf.Subset(used!);
+            else fontData = ttf.Data;
             byte[] fontComp = Compress(fontData);
             byte[] cmapObject = Concat(Latin1.GetBytes($"<< /Filter /FlateDecode /Length {cmapComp.Length} >>\nstream\n"),
                 cmapComp, Latin1.GetBytes("\nendstream"));
-            byte[] fontObject = Concat(Latin1.GetBytes($"<< /Filter /FlateDecode /Length {fontComp.Length} /Length1 {fontData.Length} >>\nstream\n"),
+            string fontHdr = ttf.IsCff
+                ? $"<< /Subtype /CIDFontType0C /Filter /FlateDecode /Length {fontComp.Length} >>\nstream\n"
+                : $"<< /Filter /FlateDecode /Length {fontComp.Length} /Length1 {fontData.Length} >>\nstream\n";
+            byte[] fontObject = Concat(Latin1.GetBytes(fontHdr),
                 fontComp, Latin1.GetBytes("\nendstream"));
             return new FontParts(cmapComp, wArray.ToString(), fontComp, fontData.Length, cmapObject, fontObject);
+        }
+
+        private static HashSet<ushort> AllGlyphs(TrueTypeFont ttf)
+        {
+            var all = new HashSet<ushort>();
+            for (int g = 0; g < ttf.NumGlyphs; g++) all.Add((ushort)g);
+            return all;
         }
 
         private byte[] BuildImageObj(ImageResource img, int objNum)
