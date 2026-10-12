@@ -69,8 +69,10 @@ parts:
   app:
     plugin: dump
     source: publish
+    stage-packages: [libfontconfig1]
 YAML
 
 cd "$WORK"
-snapcraft pack --destructive-mode --output "$OUT/"
+snapcraft pack --destructive-mode
+cp ./*.snap "$OUT/"
 ls -lh "$OUT"

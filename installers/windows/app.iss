@@ -1,7 +1,4 @@
 ; Inno Setup script. Driven by build-windows-installer.ps1, which passes every /D define below.
-#ifndef AppIsCli
-  #define AppIsCli 0
-#endif
 #ifndef AppName
   #error AppName must be defined
 #endif
@@ -33,7 +30,7 @@ ArchitecturesInstallIn64BitMode=x64compatible
 [Files]
 Source: "{#PublishDir}\*"; DestDir: "{app}"; Flags: recursesubdirs createallsubdirs ignoreversion
 
-#if AppIsCli == 1
+#ifdef AppIsCli
 ; Command line tool: no shortcuts, offer to put it on PATH instead.
 [Tasks]
 Name: "addtopath"; Description: "Add RdlCmd to the system PATH"

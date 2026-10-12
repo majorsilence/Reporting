@@ -33,6 +33,8 @@ dotnet publish (Join-Path $root $App) -c Release -r $Rid -f net10.0 --self-conta
 $iscc = Get-Command iscc -ErrorAction SilentlyContinue
 if ($iscc) { $iscc = $iscc.Source } else { $iscc = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe" }
 
-& $iscc "/DAppName=$App" "/DAppTitle=$($apps.Title)" "/DAppGuid=$($apps.Guid)" "/DAppVersion=$version" `
-    "/DAppIsCli=$([int]($apps.Cli -eq 1))" "/DRid=$Rid" "/DPublishDir=$publishDir" "/DOutDir=$outDir" (Join-Path $PSScriptRoot "app.iss")
+$isccArgs = @()
+if ($apps.Cli -eq 1) { $isccArgs += "/DAppIsCli=1" }
+& $iscc @isccArgs "/DAppName=$App" "/DAppTitle=$($apps.Title)" "/DAppGuid=$($apps.Guid)" "/DAppVersion=$version" `
+    "/DRid=$Rid" "/DPublishDir=$publishDir" "/DOutDir=$outDir" (Join-Path $PSScriptRoot "app.iss")
 Get-ChildItem $outDir

@@ -53,34 +53,32 @@ Categories=Office;Development;
 DESKTOP
 fi
 
-# nfpm expands \${VAR} in the config from the environment.
-export NFPM_VERSION="$VERSION" NFPM_ARCH="$ARCH" NFPM_PKG="$PKG" NFPM_SUMMARY="$SUMMARY" \
-       NFPM_OPT="$OPT" NFPM_BIN="$BIN" NFPM_APP="$APP" NFPM_WORK="$WORK"
-cat > "$WORK/nfpm.yaml" <<'YAML'
-name: ${NFPM_PKG}
-arch: ${NFPM_ARCH}
+# nfpm does not expand environment variables in contents paths, so the shell fills them in.
+cat > "$WORK/nfpm.yaml" <<YAML
+name: ${PKG}
+arch: ${ARCH}
 platform: linux
-version: ${NFPM_VERSION}
+version: ${VERSION}
 section: utils
 priority: optional
 maintainer: Majorsilence <https://github.com/majorsilence/Reporting>
-description: ${NFPM_SUMMARY}
+description: "${SUMMARY}"
 homepage: https://github.com/majorsilence/Reporting
 license: Apache-2.0
 contents:
-  - src: ${NFPM_WORK}/publish
-    dst: ${NFPM_OPT}
+  - src: ${WORK}/publish
+    dst: ${OPT}
     type: tree
-  - src: ${NFPM_OPT}/${NFPM_APP}
-    dst: /usr/bin/${NFPM_BIN}
+  - src: ${OPT}/${APP}
+    dst: /usr/bin/${BIN}
     type: symlink
 YAML
 if $GUI; then
-cat >> "$WORK/nfpm.yaml" <<'YAML'
-  - src: ${NFPM_WORK}/${NFPM_PKG}.desktop
-    dst: /usr/share/applications/${NFPM_PKG}.desktop
-  - src: ${NFPM_WORK}/${NFPM_PKG}.png
-    dst: /usr/share/icons/hicolor/256x256/apps/${NFPM_PKG}.png
+cat >> "$WORK/nfpm.yaml" <<YAML
+  - src: ${WORK}/${PKG}.desktop
+    dst: /usr/share/applications/${PKG}.desktop
+  - src: ${WORK}/${PKG}.png
+    dst: /usr/share/icons/hicolor/256x256/apps/${PKG}.png
 YAML
 fi
 cat >> "$WORK/nfpm.yaml" <<'YAML'
