@@ -30,6 +30,7 @@ namespace Majorsilence.Pdf
 
         // Color bitmap (CBDT/CBLC) fields — populated only when no outline glyf table is present.
         private bool _isColorBitmapOnly;
+        private bool _isCff;
         private int _cbdtPpem;
         // Maps glyph ID → (absolute byte offset in _data, record length)
         private readonly Dictionary<ushort, (int offset, int length)> _cbdtGlyphs =
@@ -45,6 +46,12 @@ namespace Majorsilence.Pdf
         public short XMax => _xMax;
         public short YMax => _yMax;
         public byte[] Data => _data;
+
+        /// <summary>
+        /// True for an OpenType font with CFF outlines (a <c>CFF </c> table and no <c>glyf</c>),
+        /// which a PDF embeds as a CIDFontType0 in <c>/FontFile3</c> rather than as TrueType.
+        /// </summary>
+        public bool IsCff => _isCff;
 
         // True when the font contains only color bitmap glyphs (CBDT/CBLC) and no outlines.
         public bool IsColorBitmapOnly => _isColorBitmapOnly;
@@ -114,6 +121,7 @@ namespace Majorsilence.Pdf
             ParseHmtx(tables);
             ParseCmap(tables);
             ParseName(tables);
+            _isCff = tables.ContainsKey("CFF ") && !tables.ContainsKey("glyf");
             if (!tables.ContainsKey("glyf") && tables.ContainsKey("CBDT") && tables.ContainsKey("CBLC"))
             {
                 _isColorBitmapOnly = true;
@@ -440,6 +448,26 @@ namespace Majorsilence.Pdf
         };
 
 
+        /// <summary>
+        /// For a CFF-outline font, the bare <c>CFF </c> table reduced to <paramref name="usedGlyphIds"/>
+        /// (glyph 0 is always kept; glyph IDs and CIDs are the same number). This is what a PDF
+        /// embeds as <c>/FontFile3</c> with <c>/Subtype /CIDFontType0C</c>: the viewer needs none
+        /// of the other OpenType tables, which for a CJK font are most of its size.
+        /// </summary>
+        public byte[] SubsetCff(HashSet<ushort> usedGlyphIds)
+        {
+            int numTables = U16(_data, _fontOffset + 4);
+            for (int i = 0; i < numTables; i++)
+            {
+                int e = _fontOffset + 12 + i * 16;
+                if (Encoding.ASCII.GetString(_data, e, 4) != "CFF ") continue;
+                var cff = new byte[S32(_data, e + 12)];
+                Buffer.BlockCopy(_data, S32(_data, e + 8), cff, 0, cff.Length);
+                return CffSubsetter.Subset(cff, usedGlyphIds);
+            }
+            throw new InvalidOperationException("The font has no CFF table.");
+        }
+
         // Returns a new font binary containing only the glyphs in usedGlyphIds
         // (plus glyph 0 / .notdef and any composite components).
         // All other glyph slots are present in loca/glyf as zero-length entries
@@ -456,84 +484,21 @@ namespace Majorsilence.Pdf
                 tables[tag] = (S32(_data, e + 8), S32(_data, e + 12));
             }
 
-            if (!tables.TryGetValue("loca", out var locaEntry) ||
-                !tables.TryGetValue("glyf", out var glyfEntry) ||
-                !tables.TryGetValue("head", out var headEntry))
-                return _data; // can't subset without these tables
-
-            int locFormat = S16(_data, headEntry.offset + 50); // 0=short, 1=long
-
-            // Read loca once per font: the fonts are shared by every document, and the array is never changed
-            // after it is built, so two threads racing to build it publish equal contents.
-            int[]? glyphOffsets = _glyphOffsets;
-            if (glyphOffsets == null)
+            byte[]? newCff = null;
+            byte[]? newGlyfData = null, newLocaData = null, newHead = null;
+            if (_isCff)
             {
-                glyphOffsets = new int[_numGlyphs + 1];
-                if (locFormat == 0)
-                    for (int i = 0; i <= _numGlyphs; i++)
-                        glyphOffsets[i] = U16(_data, locaEntry.offset + i * 2) * 2;
-                else
-                    for (int i = 0; i <= _numGlyphs; i++)
-                        glyphOffsets[i] = (int)(uint)S32(_data, locaEntry.offset + i * 4);
-                _glyphOffsets = glyphOffsets;
+                if (!tables.ContainsKey("CFF ")) return _data;
+                newCff = SubsetCff(usedGlyphIds);
             }
-
-            // Expand to include glyph 0 and composite components
-            var needed = new HashSet<ushort>(usedGlyphIds) { 0 };
-            var queue = new Queue<ushort>(needed);
-            while (queue.Count > 0)
+            else
             {
-                ushort gid = queue.Dequeue();
-                if (gid >= _numGlyphs) continue;
-                int gLen = glyphOffsets[gid + 1] - glyphOffsets[gid];
-                if (gLen < 10) continue;
-                int gOff = glyfEntry.offset + glyphOffsets[gid];
-                if (S16(_data, gOff) >= 0) continue; // simple glyph, no components
-
-                // Composite glyph — walk component records
-                int pos = gOff + 10;
-                while (pos + 4 <= _data.Length)
-                {
-                    ushort flags = U16(_data, pos);
-                    ushort compGid = U16(_data, pos + 2);
-                    pos += 4;
-                    pos += (flags & 0x0001) != 0 ? 4 : 2; // ARG_1_AND_2_ARE_WORDS
-                    if      ((flags & 0x0080) != 0) pos += 8; // WE_HAVE_A_TWO_BY_TWO
-                    else if ((flags & 0x0040) != 0) pos += 4; // WE_HAVE_AN_X_AND_Y_SCALE
-                    else if ((flags & 0x0008) != 0) pos += 2; // WE_HAVE_A_SCALE
-                    if (needed.Add(compGid)) queue.Enqueue(compGid);
-                    if ((flags & 0x0020) == 0) break;         // MORE_COMPONENTS
-                }
+                if (!tables.TryGetValue("loca", out var locaEntry) ||
+                    !tables.TryGetValue("glyf", out var glyfEntry) ||
+                    !tables.TryGetValue("head", out var headEntry))
+                    return _data; // can't subset without these tables
+                SubsetGlyf(usedGlyphIds, locaEntry, glyfEntry, headEntry, out newGlyfData, out newLocaData, out newHead);
             }
-
-            // New loca (always long format to keep it simple). First it holds each needed glyph's length, then
-            // it is turned into running offsets in place; the glyphs are copied to those offsets.
-            byte[] newLocaData = new byte[(_numGlyphs + 1) * 4];
-            int totalGlyf = 0;
-            foreach (ushort gid in needed)
-            {
-                if (gid >= _numGlyphs) continue;
-                int srcLen = glyphOffsets[gid + 1] - glyphOffsets[gid];
-                if (srcLen <= 0) continue;
-                WriteU32(newLocaData, gid * 4, (uint)srcLen);
-                totalGlyf += srcLen;
-            }
-            byte[] newGlyfData = new byte[totalGlyf];
-            int running = 0;
-            for (int gid = 0; gid < _numGlyphs; gid++)
-            {
-                int len = (int)ReadU32(newLocaData, gid * 4);
-                WriteU32(newLocaData, gid * 4, (uint)running);
-                if (len > 0)
-                    Buffer.BlockCopy(_data, glyfEntry.offset + glyphOffsets[gid], newGlyfData, running, len);
-                running += len;
-            }
-            WriteU32(newLocaData, _numGlyphs * 4, (uint)running);
-
-            // Patch head.indexToLocFormat = 1 (long)
-            byte[] newHead = new byte[headEntry.length];
-            Buffer.BlockCopy(_data, headEntry.offset, newHead, 0, headEntry.length);
-            newHead[50] = 0; newHead[51] = 1;
 
             // Assemble the tables: replace glyf / loca / head, stub out post, drop the ones a PDF
             // consumer never reads. Dropping is by explicit list rather than keeping a fixed set,
@@ -553,9 +518,10 @@ namespace Majorsilence.Pdf
             for (int t = 0; t < nT; t++)
             {
                 string tag = tagList[t];
-                if      (tag == "glyf") srcArray[t] = newGlyfData;
-                else if (tag == "loca") srcArray[t] = newLocaData;
-                else if (tag == "head") srcArray[t] = newHead;
+                if      (tag == "glyf") srcArray[t] = newGlyfData!;
+                else if (tag == "loca") srcArray[t] = newLocaData!;
+                else if (tag == "head" && newHead != null) srcArray[t] = newHead;
+                else if (tag == "CFF " && newCff != null) srcArray[t] = newCff;
                 else if (tag == "post") srcArray[t] = PostVersion3;
                 else
                 {
@@ -617,6 +583,87 @@ namespace Majorsilence.Pdf
             WriteU32(output, headOutOff + 8, 0xB1B0AFBA - whole);
 
             return output;
+        }
+
+        // Copy only the used glyphs (and composite components) of a TrueType font's glyf table, as a long-format loca.
+        private void SubsetGlyf(HashSet<ushort> usedGlyphIds,
+            (int offset, int length) locaEntry, (int offset, int length) glyfEntry, (int offset, int length) headEntry,
+            out byte[] newGlyfData, out byte[] newLocaData, out byte[] newHead)
+        {
+            int locFormat = S16(_data, headEntry.offset + 50); // 0=short, 1=long
+
+            // Read loca once per font: the fonts are shared by every document, and the array is never changed
+            // after it is built, so two threads racing to build it publish equal contents.
+            int[]? glyphOffsets = _glyphOffsets;
+            if (glyphOffsets == null)
+            {
+                glyphOffsets = new int[_numGlyphs + 1];
+                if (locFormat == 0)
+                    for (int i = 0; i <= _numGlyphs; i++)
+                        glyphOffsets[i] = U16(_data, locaEntry.offset + i * 2) * 2;
+                else
+                    for (int i = 0; i <= _numGlyphs; i++)
+                        glyphOffsets[i] = (int)(uint)S32(_data, locaEntry.offset + i * 4);
+                _glyphOffsets = glyphOffsets;
+            }
+
+            // Expand to include glyph 0 and composite components
+            var needed = new HashSet<ushort>(usedGlyphIds) { 0 };
+            var queue = new Queue<ushort>(needed);
+            while (queue.Count > 0)
+            {
+                ushort gid = queue.Dequeue();
+                if (gid >= _numGlyphs) continue;
+                int gLen = glyphOffsets[gid + 1] - glyphOffsets[gid];
+                if (gLen < 10) continue;
+                int gOff = glyfEntry.offset + glyphOffsets[gid];
+                if (S16(_data, gOff) >= 0) continue; // simple glyph, no components
+
+                // Composite glyph — walk component records
+                int pos = gOff + 10;
+                while (pos + 4 <= _data.Length)
+                {
+                    ushort flags = U16(_data, pos);
+                    ushort compGid = U16(_data, pos + 2);
+                    pos += 4;
+                    pos += (flags & 0x0001) != 0 ? 4 : 2; // ARG_1_AND_2_ARE_WORDS
+                    if      ((flags & 0x0080) != 0) pos += 8; // WE_HAVE_A_TWO_BY_TWO
+                    else if ((flags & 0x0040) != 0) pos += 4; // WE_HAVE_AN_X_AND_Y_SCALE
+                    else if ((flags & 0x0008) != 0) pos += 2; // WE_HAVE_A_SCALE
+                    if (needed.Add(compGid)) queue.Enqueue(compGid);
+                    if ((flags & 0x0020) == 0) break;         // MORE_COMPONENTS
+                }
+            }
+
+            // New loca (always long format to keep it simple). First it holds each needed glyph's length, then
+            // it is turned into running offsets in place; the glyphs are copied to those offsets.
+            newLocaData = new byte[(_numGlyphs + 1) * 4];
+            int totalGlyf = 0;
+            foreach (ushort gid in needed)
+            {
+                if (gid >= _numGlyphs) continue;
+                int srcLen = glyphOffsets[gid + 1] - glyphOffsets[gid];
+                if (srcLen <= 0) continue;
+                WriteU32(newLocaData, gid * 4, (uint)srcLen);
+                totalGlyf += srcLen;
+            }
+            newGlyfData = new byte[totalGlyf];
+            int running = 0;
+            for (int gid = 0; gid < _numGlyphs; gid++)
+            {
+                int len = (int)ReadU32(newLocaData, gid * 4);
+                WriteU32(newLocaData, gid * 4, (uint)running);
+                if (len > 0)
+                    Buffer.BlockCopy(_data, glyfEntry.offset + glyphOffsets[gid], newGlyfData, running, len);
+                running += len;
+            }
+            WriteU32(newLocaData, _numGlyphs * 4, (uint)running);
+
+            // Patch head.indexToLocFormat = 1 (long)
+            newHead = new byte[headEntry.length];
+            Buffer.BlockCopy(_data, headEntry.offset, newHead, 0, headEntry.length);
+            newHead[50] = 0; newHead[51] = 1;
+
         }
 
         // ── binary write helpers ─────────────────────────────────────────────

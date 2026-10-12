@@ -19,9 +19,9 @@ namespace Majorsilence.Pdf
     /// folder of several hundred fonts is scanned quickly; the result is kept per folder for
     /// the life of the process.
     ///
-    /// Only fonts the embedder can use are returned: TrueType outlines, in a single-font file
-    /// or as any font of a collection (<c>.ttc</c>, where Microsoft YaHei, SimSun and the Yu
-    /// Gothic and Meiryo families live). A CFF-outline <c>.otf</c> is skipped.
+    /// Only fonts the embedder can use are returned: TrueType outlines or CFF outlines (version 1,
+    /// not CFF2), in a single-font file or as any font of a collection (<c>.ttc</c>, where
+    /// Microsoft YaHei, SimSun, the Yu Gothic and Meiryo families and Noto Sans CJK live).
     /// </summary>
     internal static class InstalledFontScanner
     {
@@ -117,16 +117,16 @@ namespace Majorsilence.Pdf
             if (head.Length != 12) return false;
 
             uint tag = ReadU32(head, 0);
-            // 0x00010000 is TrueType; 'true' is the old Apple spelling. 'OTTO' is CFF outlines,
-            // which the embedder does not handle.
-            if (tag != 0x00010000 && tag != 0x74727565) return false;
+            // 0x00010000 is TrueType; 'true' is the old Apple spelling. 'OTTO' is CFF outlines.
+            bool isOtto = tag == 0x4F54544F;
+            if (tag != 0x00010000 && tag != 0x74727565 && !isOtto) return false;
 
             int numTables = ReadU16(head, 4);
             var dir = ReadAt(fs, fontOffset + 12, numTables * 16);
             if (dir.Length != numTables * 16) return false;
 
             uint nameOff = 0, nameLen = 0, os2Off = 0, os2Len = 0, headOff = 0;
-            bool hasGlyf = false;
+            bool hasGlyf = false, hasCff = false;
             for (int i = 0; i < numTables; i++)
             {
                 string t = Encoding.ASCII.GetString(dir, i * 16, 4);
@@ -137,9 +137,10 @@ namespace Majorsilence.Pdf
                     case "OS/2": os2Off = off; os2Len = len; break;
                     case "head": headOff = off; break;
                     case "glyf": hasGlyf = true; break;
+                    case "CFF ": hasCff = true; break;
                 }
             }
-            if (!hasGlyf || nameOff == 0 || nameLen < 6) return false;
+            if (!(isOtto ? hasCff : hasGlyf) || nameOff == 0 || nameLen < 6) return false;
 
             string? family = ReadFamilyName(fs, nameOff, nameLen);
             if (string.IsNullOrWhiteSpace(family)) return false;
