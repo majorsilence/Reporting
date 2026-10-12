@@ -14,6 +14,7 @@ using System.Runtime.CompilerServices;
 using Majorsilence.Reporting.RdlEngine.Resources;
 using System.Threading.Tasks;
 using System.Data.Common;
+using Majorsilence.Reporting.Data;
 
 namespace Majorsilence.Reporting.Rdl
 {
@@ -160,6 +161,10 @@ namespace Majorsilence.Reporting.Rdl
             if (cmSQL is DbCommand dbCommand)
             {
                 dr = await dbCommand.ExecuteReaderAsync(behavior).ConfigureAwait(false);
+            }
+            else if (cmSQL is IAsyncDataCommand asyncCommand)
+            {
+                dr = await asyncCommand.ExecuteReaderAsync(behavior).ConfigureAwait(false);
             }
             else
             {

@@ -20,7 +20,8 @@ namespace Majorsilence.Reporting.Data
         TxtCommand _tcmd;
         System.Data.CommandBehavior _behavior;
 
-        StreamReader _sr;           // StreamReader for _Url
+        TextReader _sr;             // reader for _Url (or for prefetched text)
+        string _prefetched;         // text already downloaded by TxtCommand.ExecuteReaderAsync
                                     // column information
         object[] _Data;             // data values of the columns
         bool bFirstRow;             // indicates that _Data has been filled with data of the 1st row
@@ -28,7 +29,13 @@ namespace Majorsilence.Reporting.Data
         Type[] _Types;              // types of the columns
 
         public TxtDataReader(System.Data.CommandBehavior behavior, TxtConnection conn, TxtCommand cmd)
+            : this(behavior, conn, cmd, null)
         {
+        }
+
+        internal TxtDataReader(System.Data.CommandBehavior behavior, TxtConnection conn, TxtCommand cmd, string prefetched)
+        {
+            _prefetched = prefetched;
             bFirstRow = false;
             _tconn = conn;
             _tcmd = cmd;
@@ -166,8 +173,14 @@ namespace Majorsilence.Reporting.Data
 
         // IDataReader is synchronous, so the stream is opened synchronously (HttpClient.Send is a real
         // synchronous call): no thread-pool hop or blocked pool thread.
-        StreamReader GetStream()
+        TextReader GetStream()
         {
+            if (_prefetched != null)
+            {
+                _sr = new StringReader(_prefetched);
+                return _sr;
+            }
+
             string fname = _tcmd.Url;
             Stream strm = null;
 

@@ -1078,3 +1078,9 @@ project references `Majorsilence.Forms.WinFormsShims.Compat` any more (D11/D12 a
   keeps only the Windows Native AOT build (`build-release-aot-windows.ps1`) and its test run. The SBOM
   moved to `linux.yml`. The duplicate draft-release job in `windows.yml` was removed; `release.yml`
   creates the draft.
+- **New `IAsyncDataCommand` for data providers.** `JsonCommand` and `TxtCommand` implement it next to
+  `IDbCommand`; `ExecuteReaderAsync` downloads http(s) content with `HttpClient.SendAsync` and returns an
+  ordinary `IDataReader` over the fetched data. The report engine prefers it when a command is not a
+  `DbCommand`, so these providers no longer need a synchronous HTTP request (which browsers do not
+  allow). The synchronous `ExecuteReader` is unchanged. `WebServiceCommand` (WSDL), the Xml/Log/Gedcom
+  commands (`MultipleStreamReader`) and `iTunes` are still synchronous.
