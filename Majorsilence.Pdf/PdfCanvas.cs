@@ -715,51 +715,44 @@ namespace Majorsilence.Pdf
             float pad = table.CellPadding;
             float bw  = table.BorderColor.HasValue ? table.BorderWidth : 0f;
 
-            var rowHeights = ComputeRowHeights(table);
+            var placed = TableGrid.Place(table);
+            var rowHeights = ComputeRowHeights(table, placed);
 
-            // Render rows top-to-bottom.
-            var borderStyle = table.BorderColor.HasValue
-                ? StrokeStyle.Default.WithColor(table.BorderColor.Value).WithWidth(bw)
-                : null;
-            float curY = y;
+            // Column and row offsets.
+            var colX = new float[table.ColumnWidths.Length + 1];
+            for (int ci = 0; ci < table.ColumnWidths.Length; ci++) colX[ci + 1] = colX[ci] + table.ColumnWidths[ci];
+            var rowY = new float[rowHeights.Length + 1];
+            for (int ri = 0; ri < rowHeights.Length; ri++) rowY[ri + 1] = rowY[ri] + rowHeights[ri];
 
-            for (int ri = 0; ri < table.Rows.Count; ri++)
+            foreach (var p in placed)
             {
-                var   row      = table.Rows[ri];
-                bool  isHeader = ri == 0 && table.HeaderBackground.HasValue;
-                float rh       = rowHeights[ri];
-                float colX     = x;
+                var   row      = table.Rows[p.Row];
+                var   cell     = p.Cell;
+                bool  isHeader = p.Row == 0 && table.HeaderBackground.HasValue;
+                float cx = x + colX[p.Column], cy = y + rowY[p.Row];
+                float cw = colX[p.Column + p.ColumnSpan] - colX[p.Column];
+                float ch = rowY[p.Row + p.RowSpan] - rowY[p.Row];
 
-                for (int ci = 0; ci < table.ColumnWidths.Length; ci++)
-                {
-                    float cw   = table.ColumnWidths[ci];
-                    var   cell = ci < row.Cells.Count ? row.Cells[ci] : null;
+                // Cell background
+                PdfColor? bg = cell?.BackgroundColor
+                    ?? row.BackgroundColor
+                    ?? (isHeader ? table.HeaderBackground
+                        : (p.Row % 2 == 1 ? table.AlternateRowBackground : (PdfColor?)null));
 
-                    // Cell background
-                    PdfColor? bg = cell?.BackgroundColor
-                        ?? row.BackgroundColor
-                        ?? (isHeader ? table.HeaderBackground
-                            : (ri % 2 == 1 ? table.AlternateRowBackground : (PdfColor?)null));
+                if (bg.HasValue)
+                    DrawRectangle(cx, cy, cw, ch, ShapeStyle.Filled(bg.Value));
 
-                    if (bg.HasValue)
-                        DrawRectangle(colX, curY, cw, rh, ShapeStyle.Filled(bg.Value));
+                // Cell border
+                if (table.BorderColor.HasValue)
+                    DrawRectangle(cx, cy, cw, ch, ShapeStyle.Stroked(table.BorderColor.Value, bw));
 
-                    // Cell border
-                    if (borderStyle != null)
-                        DrawRectangle(colX, curY, cw, rh, ShapeStyle.Stroked(table.BorderColor!.Value, bw));
-
-                    // Cell text
-                    string txt  = cell?.Text ?? "";
-                    var    ts   = cell?.Style ?? (isHeader ? table.HeaderTextStyle : table.CellTextStyle);
-                    DrawTextBox(txt, colX + pad, curY + pad, cw - 2 * pad, rh - 2 * pad, ts);
-
-                    colX += cw;
-                }
-
-                curY += rh;
+                // Cell text
+                string txt = cell?.Text ?? "";
+                var    ts  = cell?.Style ?? (isHeader ? table.HeaderTextStyle : table.CellTextStyle);
+                DrawTextBox(txt, cx + pad, cy + pad, cw - 2 * pad, ch - 2 * pad, ts);
             }
 
-            tableHeight = curY - y;
+            tableHeight = rowY[rowHeights.Length];
             return this;
         }
 
@@ -781,34 +774,48 @@ namespace Majorsilence.Pdf
         {
             if (table == null) throw new ArgumentNullException(nameof(table));
             float total = 0f;
-            var rowHeights = ComputeRowHeights(table);
+            var rowHeights = ComputeRowHeights(table, TableGrid.Place(table));
             for (int i = 0; i < rowHeights.Length; i++)
                 total += rowHeights[i];
             return total;
         }
 
-        // Pre-compute row heights: max wrapped-text height across all cells in each row.
-        private float[] ComputeRowHeights(PdfTable table)
+        // Pre-compute row heights: the tallest wrapped text among the cells that sit in a single
+        // row, then grow the last row of any row-spanning cell that needs more than its rows give.
+        private float[] ComputeRowHeights(PdfTable table, List<PlacedCell> placed)
         {
             float pad = table.CellPadding;
             var rowHeights = new float[table.Rows.Count];
-            for (int ri = 0; ri < table.Rows.Count; ri++)
+            var needs = new float[placed.Count];
+
+            for (int i = 0; i < placed.Count; i++)
             {
-                var row  = table.Rows[ri];
-                bool isHeader = ri == 0 && table.HeaderBackground.HasValue;
-                float maxH = 0f;
-                for (int ci = 0; ci < table.ColumnWidths.Length; ci++)
+                var p = placed[i];
+                bool isHeader = p.Row == 0 && table.HeaderBackground.HasValue;
+                var style = p.Cell?.Style ?? (isHeader ? table.HeaderTextStyle : table.CellTextStyle);
+                float colW = -2 * pad;
+                for (int c = p.Column; c < p.Column + p.ColumnSpan; c++) colW += table.ColumnWidths[c];
+
+                float h = 0f;
+                if (colW > 0)
                 {
-                    var cell    = ci < row.Cells.Count ? row.Cells[ci] : null;
-                    string text = cell?.Text ?? "";
-                    var style   = cell?.Style ?? (isHeader ? table.HeaderTextStyle : table.CellTextStyle);
-                    float colW  = table.ColumnWidths[ci] - 2 * pad;
-                    if (colW <= 0) continue;
-                    float h = MeasureTextBoxHeight(text, colW, style);
+                    h = MeasureTextBoxHeight(p.Cell?.Text ?? "", colW, style);
                     if (h < style.FontSize) h = style.FontSize; // minimum one line height
-                    if (h > maxH) maxH = h;
                 }
-                rowHeights[ri] = maxH + 2 * pad;
+                needs[i] = h + 2 * pad;
+                if (p.RowSpan == 1 && needs[i] > rowHeights[p.Row]) rowHeights[p.Row] = needs[i];
+            }
+
+            // Spanning cells, shortest span first so nested spans settle in order.
+            var spanning = new List<int>();
+            for (int i = 0; i < placed.Count; i++) if (placed[i].RowSpan > 1) spanning.Add(i);
+            spanning.Sort((a, b) => placed[a].RowSpan.CompareTo(placed[b].RowSpan));
+            foreach (int i in spanning)
+            {
+                var p = placed[i];
+                float have = 0f;
+                for (int r = p.Row; r < p.Row + p.RowSpan; r++) have += rowHeights[r];
+                if (needs[i] > have) rowHeights[p.Row + p.RowSpan - 1] += needs[i] - have;
             }
             return rowHeights;
         }

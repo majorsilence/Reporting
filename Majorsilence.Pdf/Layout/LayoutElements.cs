@@ -136,29 +136,31 @@ namespace Majorsilence.Pdf.Layout
             if (full <= available + Epsilon) return Fit.Full(this, full);
 
             var rows = _table.Rows;
-            bool header = _table.HeaderBackground.HasValue;
-            int minRows = header ? 2 : 1;
+            var grid = TableGrid.Place(_table);
+            int headerRows = _table.HeaderBackground.HasValue ? TableGrid.HeaderRowCount(grid) : 0;
+            int minRows = headerRows + 1;
             if (rows.Count <= minRows) return Fit.Wrap;
 
             // Largest prefix of rows (at least the header plus one data row) that fits.
-            int lo = 0, hi = rows.Count - 1;
-            float bestHeight = 0f;
-            int best = 0;
+            int lo = minRows, hi = rows.Count - 1, best = 0;
             while (lo <= hi)
             {
                 int mid = (lo + hi) / 2;
-                if (mid < minRows) { lo = mid + 1; continue; }
                 float h = canvas.MeasureTableHeight(_table.WithRows(Slice(rows, 0, mid)));
-                if (h <= available + Epsilon) { best = mid; bestHeight = h; lo = mid + 1; }
+                if (h <= available + Epsilon) { best = mid; lo = mid + 1; }
                 else hi = mid - 1;
             }
-            if (best == 0) return Fit.Wrap;
+            // A row-spanning cell must not be cut in two: back up to a row boundary it does not cross.
+            while (best >= minRows && !TableGrid.CanSplitBefore(grid, best)) best--;
+            if (best < minRows) return Fit.Wrap;
 
-            var head = _table.WithRows(Slice(rows, 0, best));
+            var headRows = Slice(rows, 0, best);
+            var headTable = _table.WithRows(headRows);
             var tailRows = new List<PdfTableRow>();
-            if (header) tailRows.Add(rows[0]);
+            tailRows.AddRange(Slice(rows, 0, headerRows)); // the header repeats on the continuation
             tailRows.AddRange(Slice(rows, best, rows.Count));
-            return Fit.Partial(new TableElement(head), bestHeight, new TableElement(_table.WithRows(tailRows)));
+            return Fit.Partial(new TableElement(headTable), canvas.MeasureTableHeight(headTable),
+                new TableElement(_table.WithRows(tailRows)));
         }
 
         private static List<PdfTableRow> Slice(IReadOnlyList<PdfTableRow> rows, int start, int end)
