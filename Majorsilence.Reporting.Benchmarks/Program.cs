@@ -8,6 +8,7 @@ using System.Diagnostics;
 // Render every .rdl under a folder, list failures:  -- sweep ../Examples [text]
 // Print one workload's text output:  -- show GroupSortTest csv
 // Render every workload once and print size + hash:  -- smoke
+// Peak memory of reading a big json/xml document, one process per read:  -- peak gen <dir> <rows>;  -- peak read json|xml|jsonasync|xmlasync <dir>
 // Thread scaling (not a BDN benchmark):  dotnet run -c Release -f net10.0 -- scale [seconds] [threads...]
 if (args.Length > 0 && args[0] == "scale")
 {
@@ -23,6 +24,11 @@ if (args.Length > 0 && args[0] == "scale")
     }
 
     return 0;
+}
+
+if (args.Length > 0 && args[0] == "peak")
+{
+    return await PeakMemory.Run(args);
 }
 
 if (args.Length > 0 && args[0] == "gate")

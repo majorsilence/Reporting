@@ -21,6 +21,22 @@ namespace Majorsilence.Reporting.Data
             if (!IsHttp(url))
                 return null;
 
+            using var response = await GetAsync(client, url, auth, cancellationToken).ConfigureAwait(false);
+            return await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
+        }
+
+        /// <summary>As <see cref="TryReadTextAsync"/> but returns the raw bytes, so a parser can read them without a string in between.</summary>
+        public static async Task<byte[]> TryReadBytesAsync(HttpClient client, string url, string auth, CancellationToken cancellationToken)
+        {
+            if (!IsHttp(url))
+                return null;
+
+            using var response = await GetAsync(client, url, auth, cancellationToken).ConfigureAwait(false);
+            return await response.Content.ReadAsByteArrayAsync(cancellationToken).ConfigureAwait(false);
+        }
+
+        private static async Task<HttpResponseMessage> GetAsync(HttpClient client, string url, string auth, CancellationToken cancellationToken)
+        {
             client.AddMajorsilenceReportingUserAgent();
             using var request = new HttpRequestMessage(HttpMethod.Get, url);
             if (!string.IsNullOrWhiteSpace(auth))
@@ -29,9 +45,9 @@ namespace Majorsilence.Reporting.Data
                 request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue(parts[0], parts[1]);
             }
 
-            using var response = await client.SendAsync(request, cancellationToken).ConfigureAwait(false);
+            var response = await client.SendAsync(request, cancellationToken).ConfigureAwait(false);
             response.EnsureSuccessStatusCode();
-            return await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
+            return response;
         }
     }
 }

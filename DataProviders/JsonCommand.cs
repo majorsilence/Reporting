@@ -85,7 +85,7 @@ namespace Majorsilence.Reporting.Data
 		public async Task<IDataReader> ExecuteReaderAsync(System.Data.CommandBehavior behavior, CancellationToken cancellationToken = default)
 		{
 			CommandBehaviorSupport.Validate(behavior);
-			string json = await RemoteContent.TryReadTextAsync(_tc.Client, Url, _tc.Auth, cancellationToken).ConfigureAwait(false);
+			byte[] json = await RemoteContent.TryReadBytesAsync(_tc.Client, Url, _tc.Auth, cancellationToken).ConfigureAwait(false);
 			return new JsonDataReader(behavior, _tc, this, json);
 		}
 
