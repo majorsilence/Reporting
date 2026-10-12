@@ -55,6 +55,23 @@ namespace Majorsilence.Pdf.Tests
             Assert.That(Hex(ManagedAes.EncryptEcb(FromHex(key), plain)), Is.EqualTo(expected));
         }
 
+        // PDF 2.0 /Perms is one block of AES-256-ECB. The platform path does it as CBC with a zero IV, which must
+        // give the FIPS 197 result, as must the managed path.
+        [TestCase(false), TestCase(true)]
+        public void AesEcbEncrypt_SingleBlock_MatchesFips197(bool forceManaged)
+        {
+            byte[] key = FromHex("000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f");
+            byte[] plain = FromHex("00112233445566778899aabbccddeeff");
+
+            PlatformCrypto.ForceManaged = forceManaged;
+            try
+            {
+                Assert.That(Hex(PlatformCrypto.AesEcbEncrypt(key, plain)), Is.EqualTo("8ea2b7ca516745bfeafc49904b496089"));
+                Assert.Throws<ArgumentException>(() => PlatformCrypto.AesEcbEncrypt(key, new byte[32]));
+            }
+            finally { PlatformCrypto.ForceManaged = false; }
+        }
+
         [TestCase(16, 0), TestCase(16, 1), TestCase(16, 15), TestCase(16, 16), TestCase(16, 100)]
         [TestCase(32, 0), TestCase(32, 17), TestCase(32, 4096)]
         public void ManagedAesCbc_MatchesPlatform(int keyLen, int dataLen)

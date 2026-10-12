@@ -53,13 +53,17 @@ namespace Majorsilence.Pdf.Security.Internal
             return result;
         }
 
+        /// <summary>
+        /// AES-ECB over exactly one 16-byte block, which is what the PDF 2.0 /Perms entry specifies. Encrypting a
+        /// single block in ECB mode is the same operation as CBC with an all-zero IV, so the platform path uses
+        /// that: no block is chained to another, and no multi-block ECB code exists to misuse.
+        /// </summary>
         internal static byte[] AesEcbEncrypt(byte[] key, byte[] data)
         {
+            if (data.Length != 16)
+                throw new ArgumentException("AES-ECB is only used here for a single 16-byte block.", nameof(data));
             if (UseManaged) return ManagedAes.EncryptEcb(key, data);
-            using var aes = Aes.Create();
-            aes.Key = key; aes.Mode = CipherMode.ECB; aes.Padding = PaddingMode.None;
-            using var enc = aes.CreateEncryptor();
-            return enc.TransformFinalBlock(data, 0, data.Length);
+            return AesCbcEncrypt(key, new byte[16], data, pkcs7: false);
         }
     }
 }
