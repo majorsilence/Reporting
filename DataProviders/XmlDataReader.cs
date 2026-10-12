@@ -31,13 +31,22 @@ namespace Majorsilence.Reporting.Data
 		ArrayList _Types;				// types of the columns
 
 		public XmlDataReader(System.Data.CommandBehavior behavior, XmlConnection conn, XmlCommand cmd)
+			: this(behavior, conn, cmd, null)
+		{
+		}
+
+		/// <param name="prefetchedXml">The document when it has already been downloaded (see <see cref="IAsyncDataCommand"/>).</param>
+		internal XmlDataReader(System.Data.CommandBehavior behavior, XmlConnection conn, XmlCommand cmd, string prefetchedXml)
 		{
 			_xconn = conn;
 			_xcmd = cmd;
 			_behavior = behavior;
 
             // create an iterator to the selected rows
-            if (_xcmd.Url.Trim() == "") {
+            if (prefetchedXml != null) {
+                _xpd = new XPathDocument(new StringReader(prefetchedXml));
+            }
+            else if (_xcmd.Url.Trim() == "") {
                 //Use an empty XML to allow rendering from memory
                 _xpd = new XPathDocument(new StringReader("<empty/>"));
             }

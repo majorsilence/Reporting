@@ -4,7 +4,9 @@ using System.IO;
 using System.Collections;
 using System.Net;
 using System.Text;
+using System.Collections.Generic;
 using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Majorsilence.Reporting.Data
@@ -15,7 +17,8 @@ namespace Majorsilence.Reporting.Data
     public class MultipleStreamReader : TextReader
     {
         Queue _files;
-        StreamReader _sr = null;
+        TextReader _sr = null;
+        Dictionary<string, string> _prefetched;     // http(s) files downloaded by CreateAsync, by url
         // The user agent is set once here: DefaultRequestHeaders is not thread-safe, so adding it on every
         // fetch could corrupt the headers when readers run on several threads.
         static readonly HttpClient _httpClient = CreateHttpClient();
@@ -37,6 +40,31 @@ namespace Majorsilence.Reporting.Data
             GetFileList(pathlist);          // split the string into multiple files
 
             GetStream();             // get the first file
+        }
+
+        MultipleStreamReader(string pathlist, bool open)
+        {
+            GetFileList(pathlist);
+        }
+
+        /// <summary>
+        /// Like the constructor, but downloads the http(s) entries up front with SendAsync so that
+        /// reading lines never needs a synchronous HTTP request.
+        /// </summary>
+        internal static async Task<MultipleStreamReader> CreateAsync(string pathlist, CancellationToken cancellationToken)
+        {
+            var reader = new MultipleStreamReader(pathlist, false);
+            foreach (string file in reader._files)
+            {
+                if (!RemoteContent.IsHttp(file))
+                    continue;
+                reader._prefetched ??= new Dictionary<string, string>();
+                if (!reader._prefetched.ContainsKey(file))
+                    reader._prefetched[file] = await RemoteContent.TryReadTextAsync(_httpClient, file, null, cancellationToken).ConfigureAwait(false);
+            }
+
+            reader.GetStream();             // get the first file
+            return reader;
         }
 
         void GetFileList(string pathlist)
@@ -103,7 +131,7 @@ namespace Majorsilence.Reporting.Data
 
         // This class is a TextReader, whose ReadLine is synchronous, so the files are read synchronously
         // too (HttpClient.Send is a real synchronous call): no thread-pool hop or blocked pool thread.
-        StreamReader GetStream()
+        TextReader GetStream()
         {
             if (_sr != null)        // close out the previous file before getting another
             {
@@ -115,6 +143,12 @@ namespace Majorsilence.Reporting.Data
                 return null;
 
             string fname = _files.Dequeue() as string;
+            if (_prefetched != null && _prefetched.TryGetValue(fname, out string text))
+            {
+                _sr = new StringReader(text);
+                return _sr;
+            }
+
             Stream strm = null;
 
             if (fname.StartsWith("http:") ||

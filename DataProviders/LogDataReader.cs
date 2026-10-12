@@ -43,6 +43,11 @@ namespace Majorsilence.Reporting.Data
 
 
 		public LogDataReader(System.Data.CommandBehavior behavior, LogConnection conn, LogCommand cmd)
+			: this(behavior, conn, cmd, null)
+		{
+		}
+
+		internal LogDataReader(System.Data.CommandBehavior behavior, LogConnection conn, LogCommand cmd, MultipleStreamReader prefetched)
 		{
 			_lconn = conn;
 			_lcmd = cmd;
@@ -58,7 +63,7 @@ namespace Majorsilence.Reporting.Data
 				_IndexFile = "";
 
 			if (!CommandBehaviorSupport.IsSchemaOnly(behavior))
-				_sr = new MultipleStreamReader(_lcmd.Url);	// get the main stream
+				_sr = prefetched ?? new MultipleStreamReader(_lcmd.Url);	// get the main stream
 
 			_Data = new object[_Names.Length];			// allocate enough room for data
 		}

@@ -39,6 +39,11 @@ namespace Majorsilence.Reporting.Data
 
 
 		public GedcomDataReader(System.Data.CommandBehavior behavior, GedcomConnection conn, GedcomCommand cmd)
+			: this(behavior, conn, cmd, null)
+		{
+		}
+
+		internal GedcomDataReader(System.Data.CommandBehavior behavior, GedcomConnection conn, GedcomCommand cmd, MultipleStreamReader prefetched)
 		{
 			_lconn = conn;
 			_lcmd = cmd;
@@ -47,7 +52,7 @@ namespace Majorsilence.Reporting.Data
 			string fname = _lcmd.Url;
 
 			if (!CommandBehaviorSupport.IsSchemaOnly(behavior))
-				_sr = new MultipleStreamReader(_lcmd.Url);	// get the main stream
+				_sr = prefetched ?? new MultipleStreamReader(_lcmd.Url);	// get the main stream
 
 			_Data = new object[_Names.Length];			// allocate enough room for data
 		}

@@ -104,6 +104,79 @@ namespace ReportTests
             Assert.That(dr.GetName(0), Is.EqualTo("a"));
             Assert.That(server.Wait(5000), Is.True);
         }
+
+        private static (HttpListener listener, string prefix, Task server) Serve(params string[] bodies)
+        {
+            var l = new System.Net.Sockets.TcpListener(IPAddress.Loopback, 0);
+            l.Start();
+            int port = ((IPEndPoint)l.LocalEndpoint).Port;
+            l.Stop();
+            var listener = new HttpListener();
+            string prefix = $"http://localhost:{port}/";
+            listener.Prefixes.Add(prefix);
+            listener.Start();
+            var server = Task.Run(async () =>
+            {
+                foreach (string body in bodies)
+                {
+                    var ctx = await listener.GetContextAsync();
+                    await ctx.Response.OutputStream.WriteAsync(System.Text.Encoding.UTF8.GetBytes(body));
+                    ctx.Response.Close();
+                }
+            });
+            return (listener, prefix, server);
+        }
+
+        [Test]
+        public async Task XmlCommand_ExecuteReaderAsync_ReadsHttp()
+        {
+            var (listener, prefix, server) = Serve("<root><item><Name>Alice</Name></item><item><Name>Bob</Name></item></root>");
+            using var _ = listener;
+            using var cn = new XmlConnection("file=" + prefix);
+            cn.Open();
+            using var cmd = cn.CreateCommand();
+            cmd.CommandText = "Url=" + prefix + ";RowsXPath=/root/item";
+
+            using IDataReader dr = await ((IAsyncDataCommand)cmd).ExecuteReaderAsync(CommandBehavior.Default);
+            int rows = 0;
+            while (dr.Read()) rows++;
+            Assert.That(rows, Is.EqualTo(2));
+            Assert.That(server.Wait(5000), Is.True);
+        }
+
+        [Test]
+        public async Task LogCommand_ExecuteReaderAsync_ReadsSeveralHttpUrls()
+        {
+            const string line = "127.0.0.1 - bob [10/Oct/2000:13:55:36 -0700] \"GET /a.gif HTTP/1.0\" 200 2326\n";
+            var (listener, prefix, server) = Serve(line + line, line);
+            using var _ = listener;
+            using var cn = new LogConnection("file=" + prefix);
+            cn.Open();
+            using var cmd = cn.CreateCommand();
+            cmd.CommandText = $"Url={prefix}one {prefix}two";
+
+            using IDataReader dr = await ((IAsyncDataCommand)cmd).ExecuteReaderAsync(CommandBehavior.Default);
+            int rows = 0;
+            while (dr.Read()) rows++;
+            Assert.That(rows, Is.EqualTo(3));
+            Assert.That(server.Wait(5000), Is.True);
+        }
+
+        [Test]
+        public async Task GedcomCommand_ExecuteReaderAsync_FetchesHttpUpFront()
+        {
+            var (listener, prefix, server) = Serve("0 HEAD\n0 @I1@ INDI\n1 NAME John /Smith/\n0 TRLR\n");
+            using var _ = listener;
+            using var cn = new GedcomConnection("file=" + prefix);
+            cn.Open();
+            using var cmd = cn.CreateCommand();
+            cmd.CommandText = "Url=" + prefix;
+
+            using IDataReader dr = await ((IAsyncDataCommand)cmd).ExecuteReaderAsync(CommandBehavior.Default);
+            // the download happened in ExecuteReaderAsync, before any row was read
+            Assert.That(server.Wait(5000), Is.True);
+            Assert.DoesNotThrow(() => { while (dr.Read()) { } });
+        }
     }
 }
 #endif
