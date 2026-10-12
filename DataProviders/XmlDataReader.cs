@@ -23,6 +23,10 @@ namespace Majorsilence.Reporting.Data
 		XPathNavigator _xpn;		// the navigator
 		XPathNodeIterator _xpni;	// the main iterator
 		XmlNamespaceManager _nsmgr;	// name space manager
+		XmlRowStream _stream;		// when set the rows come from here and the xpath members above are not used
+		(bool Attribute, string Name)[] _streamColumns;
+		bool _streamPrimed;			// the first row was read to find the columns and has not been returned yet
+		XPathExpression[] _columnExpressions;
 		ListDictionary _NameSpaces;		// names spaces used in xml document
 
 		// column information
@@ -41,6 +45,9 @@ namespace Majorsilence.Reporting.Data
 			_xconn = conn;
 			_xcmd = cmd;
 			_behavior = behavior;
+
+            if (TryOpenStream(prefetchedXml))
+                return;
 
             // create an iterator to the selected rows
             if (prefetchedXml != null) {
@@ -92,6 +99,133 @@ namespace Majorsilence.Reporting.Data
 			}
 			else
 				_nsmgr = null;
+		}
+
+		// Streams the rows with an XmlReader when the row path and the columns are plain names, which is
+		// everything XPath would have answered the same way. Returns false, leaving this reader untouched,
+		// for anything else: other xpaths, namespace prefixes, a url that is not a local file, no rows.
+		bool TryOpenStream(string prefetchedXml)
+		{
+			string url = _xcmd.Url.Trim();
+			if (prefetchedXml == null && url == "")
+				return false;
+			if (_xcmd.ColumnsXPath != null)
+			{
+				foreach (string colxpath in _xcmd.ColumnsXPath)
+				{
+					if (!XmlRowStream.IsSimpleColumn(colxpath))
+						return false;
+				}
+			}
+
+			XmlRowStream stream = XmlRowStream.TryOpen(url, prefetchedXml, _xcmd.RowsXPath);
+			if (stream == null)
+				return false;
+
+			try
+			{
+				if (!stream.MoveNext())
+				{
+					stream.Dispose();
+					return false;			// no rows: the xpath code decides what that means
+				}
+
+				var names = new ArrayList();
+				var types = new ArrayList();
+				var xpaths = new ArrayList();
+				var columns = new System.Collections.Generic.List<(bool Attribute, string Name)>();
+
+				void AddName(string name)
+				{
+					int ci = 0;
+					string wname = name;
+					while (names.IndexOf(wname) >= 0)
+						wname = name + "_" + (++ci).ToString();
+					names.Add(wname);
+				}
+
+				if (_xcmd.ColumnsXPath != null)
+				{
+					foreach (string colxpath in _xcmd.ColumnsXPath)
+					{
+						bool attribute = colxpath[0] == '@';
+						string name = attribute ? colxpath.Substring(1) : colxpath;
+						var found = XmlRowStream.Find(attribute ? stream.Attributes : stream.Elements, name);
+						types.Add(typeof(string));
+						AddName(found == null ? colxpath : name);
+						xpaths.Add(colxpath);
+						columns.Add((attribute, name));
+					}
+				}
+				else
+				{
+					string type = _xcmd.Type;
+					if (type == "both" || type == "attributes")
+					{
+						foreach (var a in stream.Attributes)
+						{
+							if (a.Prefix.Length != 0)
+							{
+								stream.Dispose();
+								return false;		// qualified names need a namespace manager
+							}
+							types.Add(typeof(string));
+							AddName(a.Name);
+							xpaths.Add("@" + a.Name);
+							columns.Add((true, a.Name));
+						}
+					}
+					if (type == "both" || type == "elements")
+					{
+						foreach (var e in stream.Elements)
+						{
+							if (e.Prefix.Length != 0)
+							{
+								stream.Dispose();
+								return false;
+							}
+							types.Add(typeof(string));
+							AddName(e.Name);
+							xpaths.Add(e.Name);
+							columns.Add((false, e.Name));
+						}
+					}
+				}
+
+				_Names = names;
+				_Types = types;
+				if (_xcmd.ColumnsXPath == null)
+					_xcmd.ColumnsXPath = xpaths;		// as the xpath code does, so a second reader on this command sees them
+				_streamColumns = columns.ToArray();
+				_Data = new object[_Names.Count];
+				_NameSpaces = new ListDictionary();
+				_nsmgr = null;
+				_stream = stream;
+				_streamPrimed = true;
+
+				var elementNames = new System.Collections.Generic.List<string>();
+				var attributeNames = new System.Collections.Generic.List<string>();
+				foreach (var c in _streamColumns)
+					(c.Attribute ? attributeNames : elementNames).Add(c.Name);
+				// the first row has been read in full; from here on only the columns are kept
+				FillStreamRow();
+				stream.Restrict(elementNames, attributeNames);
+				return true;
+			}
+			catch
+			{
+				stream.Dispose();
+				throw;
+			}
+		}
+
+		void FillStreamRow()
+		{
+			for (int i = 0; i < _streamColumns.Length; i++)
+			{
+				var c = _streamColumns[i];
+				_Data[i] = XmlRowStream.Find(c.Attribute ? _stream.Attributes : _stream.Elements, c.Name);
+			}
 		}
 
 		void ColumnsAttributes()
@@ -190,6 +324,8 @@ namespace Majorsilence.Reporting.Data
 
 		public void Close()
 		{
+			_stream?.Dispose();
+			_stream = null;
 			_xpd = null;
 			_xpn = null;
 			_xpni = null;
@@ -201,24 +337,40 @@ namespace Majorsilence.Reporting.Data
 
 		public bool Read()
 		{
+			if (_streamColumns != null)
+			{
+				if (_streamPrimed)			// the row read to find the columns
+				{
+					_streamPrimed = false;
+					return true;
+				}
+				if (_stream == null || !_stream.MoveNext())
+					return false;
+				FillStreamRow();
+				return true;
+			}
+
 			if (!_xpni.MoveNext())
 				return false;
 
 			// obtain the data from each column
-			int ci=0;
-			foreach (string colxpath in _xcmd.ColumnsXPath ) 
-			{
-				XPathNodeIterator ni;
-				if (_nsmgr == null)
-					ni = _xpni.Current.Select(colxpath); 
-				else
+			if (_columnExpressions == null)
+			{	// compiled once: selecting with the xpath text parsed it again for every cell
+				_columnExpressions = new XPathExpression[_xcmd.ColumnsXPath.Count];
+				int xi = 0;
+				foreach (string colxpath in _xcmd.ColumnsXPath)
 				{
 					XPathExpression xp = _xpni.Current.Compile(colxpath);
-					xp.SetContext(_nsmgr);
-					ni = _xpni.Current.Select(xp); 
+					if (_nsmgr != null)
+						xp.SetContext(_nsmgr);
+					_columnExpressions[xi++] = xp;
 				}
-				ni.MoveNext ();
-				_Data[ci++] = ni.Count == 0? null: ni.Current.Value;
+			}
+
+			for (int ci = 0; ci < _columnExpressions.Length; ci++)
+			{
+				XPathNodeIterator ni = _xpni.Current.Select(_columnExpressions[ci]);
+				_Data[ci] = ni.MoveNext() ? ni.Current.Value : null;
 			}
 
 			return true;

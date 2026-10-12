@@ -28,14 +28,14 @@ namespace Majorsilence.Reporting.Data
 
         /// <param name="json">The already fetched JSON document (see <see cref="IAsyncDataCommand"/>);
         /// when null the document is read from the command's Url.</param>
-        internal JsonDataReader(System.Data.CommandBehavior behavior, JsonConnection conn, JsonCommand cmd, string json)
+        internal JsonDataReader(System.Data.CommandBehavior behavior, JsonConnection conn, JsonCommand cmd, byte[] json)
         {
             _behavior = behavior;
             _tcmd = cmd ?? throw new ArgumentNullException(nameof(cmd), "Command cannot be null.");
             _tconn = conn ?? throw new ArgumentNullException(nameof(conn), "Connection cannot be null.");
             _requestedColumns = cmd.Columns;
         
-            json ??= ReadAllJson();
+            json ??= ReadAllBytes();
 
             var extractor = new JsonTableExtractor();
             var allReaders = extractor.Extract(json);
@@ -126,10 +126,9 @@ namespace Majorsilence.Reporting.Data
 
         // The constructor of an IDataReader cannot be async, so the stream is opened synchronously
         // (HttpClient.Send is a real synchronous call): no thread-pool hop or blocked pool thread.
-        StreamReader GetStream()
+        byte[] ReadAllBytes()
         {
             string fname = _tcmd.Url;
-            Stream strm = null;
 
             if (fname.StartsWith("http:") || fname.StartsWith("https:"))
             {
@@ -148,26 +147,15 @@ namespace Majorsilence.Reporting.Data
                         new System.Net.Http.Headers.AuthenticationHeaderValue(authScheme, authParameters);
                 }
 
-                HttpResponseMessage response = _tconn.Client.SendSync(request);
+                using HttpResponseMessage response = _tconn.Client.SendSync(request);
                 response.EnsureSuccessStatusCode();
-                strm = response.Content.ReadAsStream();
-            }
-            else if (fname.StartsWith("file:"))
-            {
-                strm = new FileStream(fname.Substring(5), System.IO.FileMode.Open, FileAccess.Read);
-            }
-            else
-            {
-                strm = new FileStream(fname, System.IO.FileMode.Open, FileAccess.Read);
+                using var strm = response.Content.ReadAsStream();
+                using var ms = new MemoryStream();
+                strm.CopyTo(ms);
+                return ms.ToArray();
             }
 
-            return new StreamReader(strm);
-        }
-
-        private string ReadAllJson()
-        {
-            using var sr = GetStream();
-            return sr.ReadToEnd();
+            return File.ReadAllBytes(fname.StartsWith("file:") ? fname.Substring(5) : fname);
         }
     }
 }

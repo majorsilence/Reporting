@@ -8,10 +8,26 @@ namespace Majorsilence.Reporting.Data
 {
     public class DictionaryDataReader : IDataReader
     {
+        // Rows are held either as dictionaries (the public constructor) or, for the Json provider, as
+        // arrays indexed by column, which avoids a dictionary per row and a hash lookup per cell.
         private readonly List<Dictionary<string, object>> _data;
+        private readonly List<object[]> _arrayRows;
         private readonly string[] _fieldNames;
         private readonly Dictionary<string, int> _fieldIndexMap;
+        private readonly Type[] _fieldTypes;     // GetFieldType scans the rows, so each column is resolved once
         private int _currentRow = -1;
+
+        private int RowCount => _arrayRows != null ? _arrayRows.Count : _data.Count;
+
+        internal DictionaryDataReader(string[] fieldNames, List<object[]> rows)
+        {
+            _arrayRows = rows ?? throw new ArgumentNullException(nameof(rows));
+            _fieldNames = fieldNames ?? throw new ArgumentNullException(nameof(fieldNames));
+            _fieldTypes = new Type[_fieldNames.Length];
+            _fieldIndexMap = new Dictionary<string, int>(_fieldNames.Length, StringComparer.OrdinalIgnoreCase);
+            for (int i = 0; i < _fieldNames.Length; i++)
+                _fieldIndexMap[_fieldNames[i]] = i;
+        }
 
         public DictionaryDataReader(List<Dictionary<string, object>> data)
         {
@@ -33,6 +49,7 @@ namespace Majorsilence.Reporting.Data
                 _fieldNames = Array.Empty<string>();
                 _fieldIndexMap = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
             }
+            _fieldTypes = new Type[_fieldNames.Length];
         }
 
         public int GetOrdinal(string name)
@@ -43,14 +60,16 @@ namespace Majorsilence.Reporting.Data
             throw new ArgumentException($"Field '{name}' not found. Available fields: {string.Join(", ", _fieldNames)}");
         }
 
-        public bool Read() => ++_currentRow < _data.Count;
+        public bool Read() => ++_currentRow < RowCount;
         public int FieldCount => _fieldNames.Length;
         public string GetName(int i) => _fieldNames[i];
 
         public object GetValue(int i)
         {
-            if (_currentRow < 0 || _currentRow >= _data.Count || i < 0 || i >= _fieldNames.Length)
+            if (_currentRow < 0 || _currentRow >= RowCount || i < 0 || i >= _fieldNames.Length)
                 return DBNull.Value;
+            if (_arrayRows != null)
+                return _arrayRows[_currentRow][i] ?? DBNull.Value;
             return _data[_currentRow].TryGetValue(_fieldNames[i], out var val) ? val ?? DBNull.Value : DBNull.Value;
         }
 
@@ -81,6 +100,21 @@ namespace Majorsilence.Reporting.Data
         {
             if (i < 0 || i >= _fieldNames.Length)
                 return typeof(object);
+
+            return _fieldTypes[i] ??= FindFieldType(i);
+        }
+
+        private Type FindFieldType(int i)
+        {
+            if (_arrayRows != null)
+            {
+                foreach (var row in _arrayRows)
+                {
+                    if (row[i] != null)
+                        return row[i].GetType();
+                }
+                return typeof(object);
+            }
 
             string name = _fieldNames[i];
             foreach (var row in _data)

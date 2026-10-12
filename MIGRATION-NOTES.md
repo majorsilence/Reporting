@@ -1088,3 +1088,7 @@ project references `Majorsilence.Forms.WinFormsShims.Compat` any more (D11/D12 a
   `GedcomDataReader` implement it next to `IDataReader`; `ReadAsync` uses `ReadLineAsync`, and readers
   created by `ExecuteReaderAsync` open files for asynchronous I/O. The engine's row loops prefer it
   when present and use `Read()` otherwise, so readers over in-memory data do not need it.
+- **Json and Xml providers read with less memory.** Json parses from bytes and keeps rows as arrays; Xml streams
+  rows with an `XmlReader` when the row path and columns are plain names (see `docs/performance/dataprovider-read.md`).
+  A streamed Xml file stays open until the reader reaches the last row or is disposed (the `XPathDocument` path read
+  it all up front). `JsonTableExtractor` has a new `Extract(byte[])`; `Extract(string)` is unchanged.
