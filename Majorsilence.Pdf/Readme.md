@@ -14,7 +14,7 @@ Majorsilence.Pdf is tri licensed under Apache-2.0, MIT, or BSD-3-Clause. Pick yo
 | Capability | Package |
 |---|---|
 | Text, shapes, images, tables, links | `Majorsilence.Pdf` |
-| Fluent flow layout — rows, columns, auto-pagination (`PdfLayout`) | `Majorsilence.Pdf` |
+| Fluent flow layout — rows, columns, boxes, splitting text/tables, "Page X of Y" headers and footers (`PdfLayout`) | `Majorsilence.Pdf` |
 | PDF/A-1b, PDF/A-2b, PDF/A-3b conformance | `Majorsilence.Pdf` |
 | Multi-document merge | `Majorsilence.Pdf` |
 | AES-128 (R=4) / AES-256 (R=6) password protection | `Majorsilence.Pdf.Security` |

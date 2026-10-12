@@ -43,3 +43,59 @@ namespace Majorsilence.Pdf.Layout
         }
     }
 }
+
+namespace Majorsilence.Pdf.Layout
+{
+    /// <summary>
+    /// Padding, border, background and keep-together settings for a box created with
+    /// <see cref="PdfLayout.Box"/> or <see cref="LayoutColumn.Box"/>. Immutable; each
+    /// <c>With…</c> call returns a modified copy.
+    /// </summary>
+    public sealed class LayoutBoxStyle
+    {
+        public float PaddingLeft { get; private set; }
+        public float PaddingTop { get; private set; }
+        public float PaddingRight { get; private set; }
+        public float PaddingBottom { get; private set; }
+        public float BorderWidth { get; private set; }
+        public PdfColor? BorderColor { get; private set; }
+        public PdfColor? Background { get; private set; }
+
+        /// <summary>When true the box never splits across pages; it moves to the next page whole.</summary>
+        public bool IsKeepTogether { get; private set; }
+
+        public static LayoutBoxStyle Default { get; } = new LayoutBoxStyle();
+
+        public LayoutBoxStyle WithPadding(float all) => WithPadding(all, all, all, all);
+
+        public LayoutBoxStyle WithPadding(float left, float top, float right, float bottom)
+        {
+            var s = Clone();
+            s.PaddingLeft = left; s.PaddingTop = top; s.PaddingRight = right; s.PaddingBottom = bottom;
+            return s;
+        }
+
+        public LayoutBoxStyle WithBorder(PdfColor color, float width = 1f)
+        {
+            var s = Clone();
+            s.BorderColor = color; s.BorderWidth = width;
+            return s;
+        }
+
+        public LayoutBoxStyle WithBackground(PdfColor color)
+        {
+            var s = Clone();
+            s.Background = color;
+            return s;
+        }
+
+        public LayoutBoxStyle WithKeepTogether(bool keepTogether = true)
+        {
+            var s = Clone();
+            s.IsKeepTogether = keepTogether;
+            return s;
+        }
+
+        private LayoutBoxStyle Clone() => (LayoutBoxStyle)MemberwiseClone();
+    }
+}

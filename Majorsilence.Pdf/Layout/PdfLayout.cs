@@ -2,6 +2,7 @@
 // Copyright (C) 2026 Peter Gill <peter@majorsilence.com>
 
 using System;
+using System.Collections.Generic;
 
 namespace Majorsilence.Pdf.Layout
 {
@@ -35,29 +36,31 @@ namespace Majorsilence.Pdf.Layout
     /// </code>
     /// </example>
     /// <remarks>
-    /// <b>v1 scope:</b> rows are atomic — a row that does not fit in the remaining space on a
-    /// page moves entirely to the next page, and a row taller than a full page's content area
-    /// throws <see cref="InvalidOperationException"/>. <see cref="Text"/> is the only element
-    /// that splits across pages. There is no flexbox-style grow/shrink and no "keep together"
-    /// grouping beyond the row boundary.
+    /// Calls record an element tree; nothing is drawn until <see cref="End"/>, which paginates
+    /// the whole document first. That is what allows "Page X of Y" in headers and footers.
+    /// Text, tables (between rows, repeating the header row) and boxes split across pages;
+    /// rows, canvas regions and keep-together boxes are atomic and throw
+    /// <see cref="InvalidOperationException"/> if taller than a whole page's content area.
     /// </remarks>
     public sealed class PdfLayout
     {
         private readonly PdfDocument _doc;
         private readonly PdfPageSize _pageSize;
+        private readonly List<LayoutElement> _elements = new List<LayoutElement>();
 
         private float _marginLeft = 36f;
         private float _marginTop = 36f;
         private float _marginRight = 36f;
         private float _marginBottom = 36f;
 
-        private Action<PdfCanvas, int>? _footer;
+        private Action<PdfCanvas, int, int>? _header;
+        private float _headerHeight;
+        private Action<PdfCanvas, int, int>? _footer;
         private float _footerHeight;
 
-        private PdfCanvas? _canvas;
-        private float _cursorY;
-        private int _pageNumber;
+        private PdfCanvas? _firstCanvas;
         private bool _started;
+        private bool _ended;
 
         private PdfLayout(PdfDocument doc, PdfPageSize pageSize)
         {
@@ -77,20 +80,19 @@ namespace Majorsilence.Pdf.Layout
         /// <summary>The width of the content area: page width minus left and right margins.</summary>
         public float ContentWidth => _pageSize.Width - _marginLeft - _marginRight;
 
-        private float ContentTop => _marginTop;
+        private float ContentTop => _marginTop + _headerHeight;
         private float ContentBottom => _pageSize.Height - _marginBottom - _footerHeight;
         private float ContentHeight => ContentBottom - ContentTop;
 
         /// <summary>
-        /// The <see cref="PdfCanvas"/> for the current page, for extension methods (such as
+        /// The <see cref="PdfCanvas"/> of the first page, for extension methods (such as
         /// markdown rendering) that need font-metric access via
         /// <see cref="PdfCanvas.MeasureTextWidth"/> or <see cref="PdfCanvas.MeasureTextBoxHeight"/>
         /// to measure content before calling <see cref="Canvas"/>. Font metrics come from the
         /// document's <see cref="FontRegistry"/>, which is shared across all pages, so a
-        /// measurement taken here stays valid even if the content is ultimately drawn via
-        /// <see cref="Canvas"/> on a later page. Starts the layout's first page if needed.
+        /// measurement taken here stays valid on any page. Starts the layout's first page if needed.
         /// </summary>
-        public PdfCanvas CurrentCanvas { get { EnsureStarted(); return _canvas!; } }
+        public PdfCanvas CurrentCanvas { get { EnsureStarted(); return _firstCanvas!; } }
 
         /// <summary>Set equal margins on all four sides. Must be called before the first drawing call.</summary>
         public PdfLayout WithMargins(float all) => WithMargins(all, all, all, all);
@@ -113,10 +115,49 @@ namespace Majorsilence.Pdf.Layout
         /// </summary>
         public PdfLayout WithFooter(Action<PdfCanvas, int> draw, float height = 24f)
         {
+            if (draw == null) throw new ArgumentNullException(nameof(draw));
+            return WithFooter((canvas, page, _) => draw(canvas, page), height);
+        }
+
+        /// <summary>
+        /// Like <see cref="WithFooter(Action{PdfCanvas, int}, float)"/> but the callback also
+        /// receives the total page count (the second int), for "Page X of Y".
+        /// </summary>
+        public PdfLayout WithFooter(Action<PdfCanvas, int, int> draw, float height = 24f)
+        {
             ThrowIfStarted(nameof(WithFooter));
             _footer = draw ?? throw new ArgumentNullException(nameof(draw));
             _footerHeight = height;
             return this;
+        }
+
+        /// <summary>
+        /// Reserve <paramref name="height"/> points at the top of every page and invoke
+        /// <paramref name="draw"/> there, once per page, with the 1-based page number and the
+        /// total page count. Must be called before the first drawing call.
+        /// </summary>
+        public PdfLayout WithHeader(Action<PdfCanvas, int, int> draw, float height = 24f)
+        {
+            ThrowIfStarted(nameof(WithHeader));
+            _header = draw ?? throw new ArgumentNullException(nameof(draw));
+            _headerHeight = height;
+            return this;
+        }
+
+        /// <summary>
+        /// A footer that draws <paramref name="template"/> with <c>{page}</c> and <c>{pages}</c>
+        /// replaced by the current page number and the total page count, e.g. "Page {page} of {pages}".
+        /// </summary>
+        public PdfLayout WithFooterText(string template, TextStyle? style = null, float height = 24f)
+        {
+            if (template == null) throw new ArgumentNullException(nameof(template));
+            style ??= TextStyle.Default.WithSize(9).WithAlignment(TextAlignment.Center);
+            return WithFooter((canvas, page, pages) =>
+            {
+                string text = template.Replace("{page}", page.ToString()).Replace("{pages}", pages.ToString());
+                canvas.DrawTextBox(text, _marginLeft, _pageSize.Height - _marginBottom - height + 6f,
+                    ContentWidth, height, style);
+            }, height);
         }
 
         private void ThrowIfStarted(string memberName)
@@ -129,172 +170,163 @@ namespace Majorsilence.Pdf.Layout
         {
             if (_started) return;
             _started = true;
-            _pageNumber = 1;
-            _canvas = _doc.AddPage(_pageSize);
-            _cursorY = ContentTop;
+            _firstCanvas = _doc.AddPage(_pageSize);
         }
-
-        private void NewPage()
-        {
-            DrawFooterOnCurrentPage();
-            _pageNumber++;
-            _canvas = _doc.AddPage(_pageSize);
-            _cursorY = ContentTop;
-        }
-
-        private void DrawFooterOnCurrentPage() => _footer?.Invoke(_canvas!, _pageNumber);
 
         /// <summary>
-        /// Ensures <paramref name="neededHeight"/> points fit in the remaining space on the
-        /// current page, starting a new page first if necessary.
+        /// Records <paramref name="element"/>, failing fast if it can never fit on a page (even an
+        /// empty one) so a bad element is reported at the call that added it.
         /// </summary>
-        /// <exception cref="InvalidOperationException">
-        /// <paramref name="neededHeight"/> exceeds the full page content height — no page size
-        /// could ever fit it.
-        /// </exception>
-        private void EnsureFits(float neededHeight, string what)
+        private PdfLayout Add(LayoutElement element, string what)
         {
             EnsureStarted();
-            if (neededHeight > ContentHeight + 0.01f)
-                throw new InvalidOperationException(
-                    $"{what} of height {neededHeight:0.##}pt does not fit within the {ContentHeight:0.##}pt " +
-                    "page content area (page size minus margins and any footer). Reduce the content or use a larger page size.");
-            if (_cursorY + neededHeight > ContentBottom + 0.01f)
-                NewPage();
+            if (_ended) throw new InvalidOperationException("The layout has already been ended.");
+            if (element.Measure(_firstCanvas!, ContentWidth, ContentHeight).Kind == FitKind.Wrap)
+                throw TooTall(what);
+            _elements.Add(element);
+            return this;
         }
 
+        private InvalidOperationException TooTall(string what) =>
+            new InvalidOperationException(
+                $"{what} does not fit within the {ContentHeight:0.##}pt page content area " +
+                "(page size minus margins, header and footer). Reduce the content or use a larger page size.");
+
         /// <summary>
-        /// Draw word-wrapped text at the cursor. Unlike every other element, text that does not
-        /// fit in the remaining space on the current page spills onto as many subsequent pages
-        /// as needed, using <see cref="PdfCanvas.DrawTextBox"/>'s overflow index.
+        /// Add word-wrapped text. Text that does not fit in the remaining space on the current page
+        /// spills onto as many subsequent pages as needed.
         /// </summary>
         public PdfLayout Text(string text, TextStyle? style = null)
         {
             EnsureStarted();
-            style ??= TextStyle.Default;
             if (string.IsNullOrEmpty(text)) return this;
-
-            string remaining = text;
-            while (remaining.Length > 0)
-            {
-                float available = ContentBottom - _cursorY;
-                if (available < style.FontSize)
-                {
-                    NewPage();
-                    available = ContentBottom - _cursorY;
-                }
-
-                int overflow = _canvas!.DrawTextBox(remaining, ContentLeft, _cursorY, ContentWidth, available, style);
-                if (overflow <= 0)
-                {
-                    // Not even one line fit in the available space even on a fresh page
-                    // (e.g. a font size larger than the whole content height). Avoid looping
-                    // forever and surface the same "too tall" signal other elements use.
-                    throw new InvalidOperationException(
-                        $"Text does not fit within the {ContentHeight:0.##}pt page content area even on an empty page " +
-                        $"(style font size {style.FontSize:0.##}pt). Reduce the font size or use a larger page size.");
-                }
-
-                string drawn = remaining.Substring(0, overflow);
-                _cursorY += _canvas.MeasureTextBoxHeight(drawn, ContentWidth, style);
-
-                if (overflow >= remaining.Length)
-                {
-                    remaining = string.Empty;
-                }
-                else
-                {
-                    remaining = remaining.Substring(overflow);
-                    NewPage();
-                }
-            }
-            return this;
+            return Add(new TextElement(text, style ?? TextStyle.Default), "Text");
         }
 
-        /// <summary>Advance the cursor by <paramref name="height"/> points without drawing anything.</summary>
-        public PdfLayout Spacer(float height)
-        {
-            EnsureFits(height, "Spacer");
-            _cursorY += height;
-            return this;
-        }
+        /// <summary>Add <paramref name="height"/> points of empty space.</summary>
+        public PdfLayout Spacer(float height) => Add(new SpacerElement(height), "Spacer");
 
-        /// <summary>Draw a full-width horizontal rule at the cursor.</summary>
-        public PdfLayout Line(StrokeStyle? style = null, float gapAfter = 8f)
-        {
-            EnsureFits(gapAfter, "Line");
-            _canvas!.DrawLine(ContentLeft, _cursorY, ContentLeft + ContentWidth, _cursorY, style);
-            _cursorY += gapAfter;
-            return this;
-        }
+        /// <summary>Add a full-width horizontal rule followed by <paramref name="gapAfter"/> points of space.</summary>
+        public PdfLayout Line(StrokeStyle? style = null, float gapAfter = 8f) =>
+            Add(new LineElement(style, gapAfter), "Line");
 
         /// <summary>
-        /// Draw <paramref name="table"/> at the cursor. Atomic: if the table's full height does
-        /// not fit in the remaining space on the current page, the whole table moves to the next
-        /// page rather than splitting across pages.
+        /// Add <paramref name="table"/>. A table that does not fit splits between rows; when it has
+        /// a header row (a header background is set) the header repeats on each continuation page.
         /// </summary>
         public PdfLayout Table(PdfTable table)
         {
             if (table == null) throw new ArgumentNullException(nameof(table));
-            EnsureStarted();
-            float height = _canvas!.MeasureTableHeight(table);
-            EnsureFits(height, "Table");
-            _canvas.DrawTable(table, ContentLeft, _cursorY, out float actualHeight);
-            _cursorY += actualHeight;
-            return this;
+            return Add(new TableElement(table), "Table");
         }
 
         /// <summary>
-        /// Draw a row of columns at the cursor. Atomic: the row's height is the tallest column's
-        /// height; if that does not fit in the remaining space on the current page, the whole row
-        /// moves to the next page. <paramref name="configure"/> runs twice — once to measure each
-        /// column's height, once to render — so avoid side effects inside it.
+        /// Add a row of columns. Atomic: the row's height is the tallest column's height; if that
+        /// does not fit in the remaining space on a page, the whole row moves to the next page.
+        /// <paramref name="configure"/> runs once, at the time of the call.
         /// </summary>
-        public PdfLayout Row(Action<LayoutRow> configure)
-        {
-            if (configure == null) throw new ArgumentNullException(nameof(configure));
-            EnsureStarted();
+        public PdfLayout Row(Action<LayoutRow> configure) => Add(LayoutRow.Build(configure), "Row");
 
-            var measurePass = new LayoutRow(_canvas!, ContentWidth, measureOnly: true);
-            configure(measurePass);
-            float rowHeight = measurePass.MeasuredHeight;
+        /// <summary>
+        /// Add a box with padding, border and/or background around <paramref name="content"/>.
+        /// The box splits across pages with its content unless the style is keep-together.
+        /// </summary>
+        public PdfLayout Box(LayoutBoxStyle style, Action<LayoutColumn> content) =>
+            Add(LayoutColumn.BuildBox(style, content), "Box");
 
-            EnsureFits(rowHeight, "Row");
+        /// <summary>Keep the content together: it moves to the next page whole rather than splitting.</summary>
+        public PdfLayout KeepTogether(Action<LayoutColumn> content) =>
+            Box(LayoutBoxStyle.Default.WithKeepTogether(), content);
 
-            var renderPass = new LayoutRow(_canvas!, ContentWidth, measureOnly: false, ContentLeft, _cursorY);
-            configure(renderPass);
-
-            _cursorY += rowHeight;
-            return this;
-        }
-
-        /// <summary>Escape hatch for arbitrary drawing at the cursor, in a reserved region of the given height.</summary>
+        /// <summary>
+        /// Escape hatch for arbitrary drawing in a region of the given height. <paramref name="draw"/>
+        /// is invoked when the document is ended, on the page the region landed on.
+        /// </summary>
         public PdfLayout Canvas(Action<PdfCanvas, LayoutRect> draw, float height)
         {
             if (draw == null) throw new ArgumentNullException(nameof(draw));
-            EnsureFits(height, "Canvas region");
-            draw(_canvas!, new LayoutRect(ContentLeft, _cursorY, ContentWidth, height));
-            _cursorY += height;
-            return this;
+            return Add(new CanvasElement(draw, height), "Canvas region");
         }
 
         /// <summary>Force a new page regardless of remaining space on the current one.</summary>
         public PdfLayout PageBreak()
         {
             EnsureStarted();
-            NewPage();
+            _elements.Add(new PageBreakElement());
             return this;
         }
 
         /// <summary>
-        /// Finalize the layout: draws the footer (if configured) on the last page and returns
-        /// the underlying <see cref="PdfDocument"/> so you can call <c>Save</c>.
+        /// Finalize the layout: paginates all recorded content, draws every page (with header and
+        /// footer) and returns the underlying <see cref="PdfDocument"/> so you can call <c>Save</c>.
         /// </summary>
         public PdfDocument End()
         {
             EnsureStarted();
-            DrawFooterOnCurrentPage();
+            if (_ended) return _doc;
+            _ended = true;
+
+            var pages = Paginate();
+            for (int i = 0; i < pages.Count; i++)
+            {
+                var canvas = i == 0 ? _firstCanvas! : _doc.AddPage(_pageSize);
+                _header?.Invoke(canvas, i + 1, pages.Count);
+                foreach (var (element, y, height) in pages[i])
+                    element.Draw(canvas, ContentLeft, ContentTop + y, ContentWidth, height);
+                _footer?.Invoke(canvas, i + 1, pages.Count);
+            }
             return _doc;
+        }
+
+        private List<List<(LayoutElement Element, float Y, float Height)>> Paginate()
+        {
+            var pages = new List<List<(LayoutElement, float, float)>>();
+            var current = new List<(LayoutElement, float, float)>();
+            float y = 0f;
+
+            var pending = new LinkedList<LayoutElement>(_elements);
+            while (pending.First != null)
+            {
+                var element = pending.First.Value;
+                pending.RemoveFirst();
+
+                if (element is PageBreakElement)
+                {
+                    pages.Add(current);
+                    current = new List<(LayoutElement, float, float)>();
+                    y = 0f;
+                    continue;
+                }
+
+                bool pageIsEmpty = current.Count == 0;
+                var fit = element.Measure(_firstCanvas!, ContentWidth, ContentHeight - y);
+                switch (fit.Kind)
+                {
+                    case FitKind.Empty:
+                        break;
+                    case FitKind.Full:
+                        current.Add((fit.Head!, y, fit.Height));
+                        y += fit.Height;
+                        break;
+                    case FitKind.Partial:
+                        if (pageIsEmpty && fit.Height <= 0f) throw TooTall("Content");
+                        current.Add((fit.Head!, y, fit.Height));
+                        pending.AddFirst(fit.Tail!);
+                        pages.Add(current);
+                        current = new List<(LayoutElement, float, float)>();
+                        y = 0f;
+                        break;
+                    default: // Wrap
+                        if (pageIsEmpty) throw TooTall("Content");
+                        pages.Add(current);
+                        current = new List<(LayoutElement, float, float)>();
+                        y = 0f;
+                        pending.AddFirst(element);
+                        break;
+                }
+            }
+            pages.Add(current);
+            return pages;
         }
     }
 }

@@ -81,6 +81,16 @@ namespace Majorsilence.Pdf
             return t;
         }
 
+        // A copy of this table holding only the given rows; used by the layout engine to split
+        // a table across pages.
+        internal PdfTable WithRows(System.Collections.Generic.IEnumerable<PdfTableRow> rows)
+        {
+            var t = Clone();
+            t._rows.Clear();
+            foreach (var r in rows) t._rows.Add(r);
+            return t;
+        }
+
         public PdfTable WithHeaderBackground(PdfColor color)        { var t = Clone(); t.HeaderBackground       = color; return t; }
         public PdfTable WithAlternateRowBackground(PdfColor color)  { var t = Clone(); t.AlternateRowBackground = color; return t; }
         public PdfTable WithCellPadding(float padding)              { var t = Clone(); t.CellPadding            = padding; return t; }
