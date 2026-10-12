@@ -177,6 +177,97 @@ namespace ReportTests
             Assert.That(server.Wait(5000), Is.True);
             Assert.DoesNotThrow(() => { while (dr.Read()) { } });
         }
+
+        private string WriteTemp(string text)
+        {
+            string path = Path.Combine(Path.GetTempPath(), "rdl-async-" + Guid.NewGuid().ToString("N") + ".txt");
+            File.WriteAllText(path, text);
+            return path;
+        }
+
+        [Test]
+        public async Task TxtDataReader_ReadAsync_MatchesRead_ForAFile()
+        {
+            string path = WriteTemp("a,b\n1,2\n3,4\n5,6\n");
+            try
+            {
+                using var cn = new TxtConnection("file=" + path);
+                cn.Open();
+                using var cmd = cn.CreateCommand();
+                cmd.CommandText = "Url=" + path + ";Header=true;Separator=,";
+
+                var syncRows = new System.Collections.Generic.List<string>();
+                using (var dr = cmd.ExecuteReader())
+                    while (dr.Read()) syncRows.Add(dr.GetString(0) + "|" + dr.GetString(1));
+
+                var asyncRows = new System.Collections.Generic.List<string>();
+                using (var dr = (IAsyncDataReader)await ((IAsyncDataCommand)cmd).ExecuteReaderAsync(CommandBehavior.Default))
+                    while (await dr.ReadAsync()) asyncRows.Add(dr.GetString(0) + "|" + dr.GetString(1));
+
+                Assert.That(asyncRows, Is.EqualTo(new[] { "1|2", "3|4", "5|6" }));
+                Assert.That(asyncRows, Is.EqualTo(syncRows));
+            }
+            finally { File.Delete(path); }
+        }
+
+        [Test]
+        public async Task TxtDataReader_ReadAsync_ReadsPrefetchedHttp()
+        {
+            var (listener, prefix, server) = Serve("a,b\n1,2\n3,4\n");
+            using var _ = listener;
+            using var cn = new TxtConnection("file=" + prefix);
+            cn.Open();
+            using var cmd = cn.CreateCommand();
+            cmd.CommandText = "Url=" + prefix + ";Header=true;Separator=,";
+
+            using var dr = (IAsyncDataReader)await ((IAsyncDataCommand)cmd).ExecuteReaderAsync(CommandBehavior.Default);
+            int rows = 0;
+            while (await dr.ReadAsync()) rows++;
+            Assert.That(rows, Is.EqualTo(2));
+            Assert.That(await dr.ReadAsync(), Is.False);
+            Assert.That(server.Wait(5000), Is.True);
+        }
+
+        [Test]
+        public async Task LogDataReader_ReadAsync_ReadsSeveralFiles()
+        {
+            const string line = "127.0.0.1 - bob [10/Oct/2000:13:55:36 -0700] \"GET /a.gif HTTP/1.0\" 200 2326\n";
+            string one = WriteTemp(line + line);
+            string two = WriteTemp(line);
+            try
+            {
+                using var cn = new LogConnection("file=" + one);
+                cn.Open();
+                using var cmd = cn.CreateCommand();
+                cmd.CommandText = $"Url={one} {two}";
+
+                using var dr = (IAsyncDataReader)await ((IAsyncDataCommand)cmd).ExecuteReaderAsync(CommandBehavior.Default);
+                int rows = 0;
+                while (await dr.ReadAsync()) rows++;
+                Assert.That(rows, Is.EqualTo(3));
+            }
+            finally { File.Delete(one); File.Delete(two); }
+        }
+
+        [Test]
+        public async Task ReadAsync_HonoursCancellation()
+        {
+            string path = WriteTemp("a,b\n1,2\n");
+            try
+            {
+                using var cn = new TxtConnection("file=" + path);
+                cn.Open();
+                using var cmd = cn.CreateCommand();
+                cmd.CommandText = "Url=" + path + ";Header=true;Separator=,";
+                using var dr = (IAsyncDataReader)await ((IAsyncDataCommand)cmd).ExecuteReaderAsync(CommandBehavior.Default);
+                using var cts = new CancellationTokenSource();
+                cts.Cancel();
+                // the first row is already primed, so consume it; the next read must observe the token
+                Assert.That(await dr.ReadAsync(), Is.True);
+                Assert.CatchAsync<OperationCanceledException>(async () => await dr.ReadAsync(cts.Token));
+            }
+            finally { File.Delete(path); }
+        }
     }
 }
 #endif

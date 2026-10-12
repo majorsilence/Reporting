@@ -3,6 +3,8 @@ using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Data;
 using System.Collections;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Collections.Specialized;
 using System.IO;
 using System.Net;
@@ -12,7 +14,7 @@ namespace Majorsilence.Reporting.Data
 	/// <summary>
 	/// LogDataReader handles reading log files
 	/// </summary>
-	public class GedcomDataReader : IDataReader
+	public class GedcomDataReader : IAsyncDataReader
 	{
 		GedcomConnection _lconn;
 		GedcomCommand _lcmd;
@@ -95,8 +97,20 @@ namespace Majorsilence.Reporting.Data
 			if (this._sr == null)
 				return false;
 
-			// read a line of the log
-			string line = _sr.ReadLine();
+			return ProcessLine(_sr.ReadLine());
+		}
+
+		public async Task<bool> ReadAsync(CancellationToken cancellationToken = default)
+		{
+			if (this._sr == null)
+				return false;
+
+			return ProcessLine(await _sr.ReadLineAsync(cancellationToken).ConfigureAwait(false));
+		}
+
+		// fills the row from one line of the log; false at the end of the data
+		bool ProcessLine(string line)
+		{
 			if (line == null)
 				return false;
 

@@ -147,7 +147,7 @@ namespace Majorsilence.Reporting.Data
 			}
 			else
 				text = null;
-			return new TxtDataReader(behavior, _tc, this, text);
+			return new TxtDataReader(behavior, _tc, this, text, asyncIo: true);
 		}
 
 		IDataReader System.Data.IDbCommand.ExecuteReader()

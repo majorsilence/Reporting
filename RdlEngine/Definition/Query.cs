@@ -251,7 +251,8 @@ namespace Majorsilence.Reporting.Rdl
                         fromQuery.Add((fi, qcn[fi]));
                 }
 
-                while (dr.Read())
+                var asyncReader = dr as IAsyncDataReader;
+                while (asyncReader != null ? await asyncReader.ReadAsync().ConfigureAwait(false) : dr.Read())
                 {
                     Row or = new Row(_Data, fieldCount);
 
@@ -501,7 +502,8 @@ namespace Majorsilence.Reporting.Rdl
             int rowCount = 0;
             int maxRows = _RowLimit > 0 ? _RowLimit : int.MaxValue;
             
-            while (dr.Read())
+            var asyncReader = dr as IAsyncDataReader;
+            while (asyncReader != null ? await asyncReader.ReadAsync().ConfigureAwait(false) : dr.Read())
             {
                 Row or = new Row(rows, dr.FieldCount);
                 dr.GetValues(or.Data);

@@ -18,6 +18,7 @@ namespace Majorsilence.Reporting.Data
     {
         Queue _files;
         TextReader _sr = null;
+        bool _asyncIo;                              // open files for asynchronous I/O (CreateAsync)
         Dictionary<string, string> _prefetched;     // http(s) files downloaded by CreateAsync, by url
         // The user agent is set once here: DefaultRequestHeaders is not thread-safe, so adding it on every
         // fetch could corrupt the headers when readers run on several threads.
@@ -54,6 +55,7 @@ namespace Majorsilence.Reporting.Data
         internal static async Task<MultipleStreamReader> CreateAsync(string pathlist, CancellationToken cancellationToken)
         {
             var reader = new MultipleStreamReader(pathlist, false);
+            reader._asyncIo = true;
             foreach (string file in reader._files)
             {
                 if (!RemoteContent.IsHttp(file))
@@ -162,7 +164,7 @@ namespace Majorsilence.Reporting.Data
                 strm = response.Content.ReadAsStream();
             }
             else
-                strm = new FileStream(fname, System.IO.FileMode.Open, FileAccess.Read);
+                strm = new FileStream(fname, System.IO.FileMode.Open, FileAccess.Read, FileShare.Read, 4096, _asyncIo);
 
             _sr = new StreamReader(strm);
 
@@ -178,6 +180,28 @@ namespace Majorsilence.Reporting.Data
             }
 
             _files.Clear();
+        }
+
+        public override ValueTask<string> ReadLineAsync(CancellationToken cancellationToken)
+        {
+            return new ValueTask<string>(ReadLineCoreAsync(cancellationToken));
+        }
+
+        public override Task<string> ReadLineAsync() => ReadLineCoreAsync(CancellationToken.None);
+
+        // TextReader's default would run the synchronous ReadLine on the thread pool
+        async Task<string> ReadLineCoreAsync(CancellationToken cancellationToken)
+        {
+            while (_sr != null)
+            {
+                string rs = await _sr.ReadLineAsync(cancellationToken).ConfigureAwait(false);
+                if (rs != null)
+                    return rs;
+
+                GetStream();
+            }
+
+            return null;
         }
 
         public override string ReadLine()

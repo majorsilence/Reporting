@@ -1084,3 +1084,7 @@ project references `Majorsilence.Forms.WinFormsShims.Compat` any more (D11/D12 a
   `DbCommand`, so these providers no longer need a synchronous HTTP request (which browsers do not
   allow). The synchronous `ExecuteReader` is unchanged. Log and Gedcom download every http(s) url in
   their url list up front. `WebServiceCommand` (WSDL) and `iTunes` are still synchronous.
+- **New `IAsyncDataReader` for stream based data providers.** `TxtDataReader`, `LogDataReader` and
+  `GedcomDataReader` implement it next to `IDataReader`; `ReadAsync` uses `ReadLineAsync`, and readers
+  created by `ExecuteReaderAsync` open files for asynchronous I/O. The engine's row loops prefer it
+  when present and use `Read()` otherwise, so readers over in-memory data do not need it.

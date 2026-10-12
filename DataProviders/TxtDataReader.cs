@@ -7,6 +7,7 @@ using System.Collections.Specialized;
 using System.IO;
 using System.Net;
 using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Majorsilence.Reporting.Data
@@ -14,7 +15,7 @@ namespace Majorsilence.Reporting.Data
     /// <summary>
     /// TxtDataReader handles reading txt files
     /// </summary>
-    public class TxtDataReader : IDataReader
+    public class TxtDataReader : IAsyncDataReader
     {
         TxtConnection _tconn;
         TxtCommand _tcmd;
@@ -22,6 +23,7 @@ namespace Majorsilence.Reporting.Data
 
         TextReader _sr;             // reader for _Url (or for prefetched text)
         string _prefetched;         // text already downloaded by TxtCommand.ExecuteReaderAsync
+        bool _asyncIo;              // open files for asynchronous I/O so ReadAsync does not use the thread pool
                                     // column information
         object[] _Data;             // data values of the columns
         bool bFirstRow;             // indicates that _Data has been filled with data of the 1st row
@@ -33,9 +35,10 @@ namespace Majorsilence.Reporting.Data
         {
         }
 
-        internal TxtDataReader(System.Data.CommandBehavior behavior, TxtConnection conn, TxtCommand cmd, string prefetched)
+        internal TxtDataReader(System.Data.CommandBehavior behavior, TxtConnection conn, TxtCommand cmd, string prefetched, bool asyncIo = false)
         {
             _prefetched = prefetched;
+            _asyncIo = asyncIo;
             bFirstRow = false;
             _tconn = conn;
             _tcmd = cmd;
@@ -153,8 +156,11 @@ namespace Majorsilence.Reporting.Data
             if (_sr == null)
                 return null;
 
-            // read a line of the log
-            string line = _sr.ReadLine();
+            return LexLine(_sr.ReadLine());
+        }
+
+        LexTokenList LexLine(string line)
+        {
             if (line == null)
                 return null;
 
@@ -198,17 +204,20 @@ namespace Majorsilence.Reporting.Data
             }
             else if (fname.StartsWith("file:"))
             {
-                strm = new FileStream(fname.Substring(5), System.IO.FileMode.Open, FileAccess.Read);
+                strm = OpenFile(fname.Substring(5));
             }
             else
             {
-                strm = new FileStream(fname, System.IO.FileMode.Open, FileAccess.Read);
+                strm = OpenFile(fname);
             }
 
             _sr = new StreamReader(strm);
 
             return _sr;
         }
+
+        FileStream OpenFile(string path) =>
+            new FileStream(path, System.IO.FileMode.Open, FileAccess.Read, FileShare.Read, 4096, _asyncIo);
 
         #region IDataReader Members
 
@@ -263,6 +272,26 @@ namespace Majorsilence.Reporting.Data
                 return false;
 
             // take line and fill the data
+            this.FillData(ll);
+
+            return true;
+        }
+
+        public async Task<bool> ReadAsync(CancellationToken cancellationToken = default)
+        {
+            if (this._sr == null || _Data == null)
+                return false;
+
+            if (bFirstRow)
+            {
+                bFirstRow = false;
+                return true;
+            }
+
+            LexTokenList ll = LexLine(await _sr.ReadLineAsync(cancellationToken).ConfigureAwait(false));
+            if (ll == null)
+                return false;
+
             this.FillData(ll);
 
             return true;
