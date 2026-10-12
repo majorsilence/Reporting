@@ -126,7 +126,15 @@ namespace Majorsilence.Pdf
         /// them are gathered before any family is registered, so a family whose styles are in
         /// different folders is still one family. A folder that cannot be read is skipped.
         /// </summary>
-        public FontRegistry AddInstalledFonts(string directory, bool includeSubfolders)
+        public FontRegistry AddInstalledFonts(string directory, bool includeSubfolders) =>
+            AddInstalledFonts(directory, includeSubfolders, replaceExisting: false);
+
+        /// <summary>
+        /// As <see cref="AddInstalledFonts(string, bool)"/>, and with <paramref name="replaceExisting"/>
+        /// a family already registered under the same name is replaced by the one found in the
+        /// folder, rather than left as it is.
+        /// </summary>
+        public FontRegistry AddInstalledFonts(string directory, bool includeSubfolders, bool replaceExisting)
         {
             if (string.IsNullOrEmpty(directory) || !Directory.Exists(directory)) return this;
 
@@ -135,7 +143,7 @@ namespace Majorsilence.Pdf
                 StringComparer.OrdinalIgnoreCase);
             foreach (var face in folders.SelectMany(InstalledFontScanner.Scan))
             {
-                if (_families.ContainsKey(face.Family)) continue;
+                if (!replaceExisting && _families.ContainsKey(face.Family)) continue;
                 found.TryGetValue(face.Family, out var e);
                 var src = FontSource.FromPath(face.Path, face.FaceIndex);
                 if (face.Bold && face.Italic) e.bi ??= src;

@@ -50,6 +50,24 @@ namespace Majorsilence.Pdf.Tests
             Assert.That(reg.Resolve(family, false, false)?.Path, Is.EqualTo(copy));
         }
 
+        [Test]
+        public void AddInstalledFonts_ReplaceExisting_ReplacesAFamilyOfTheSameName_OtherwiseKeepsIt()
+        {
+            var regular = SystemSansRegular;
+            Assume.That(regular, Is.Not.Null, "no system sans font on this machine");
+            string family = DeclaredFamily(regular!);
+            string dir = NewFontDir();
+            string copy = Path.Combine(dir, "x.ttf");
+            File.Copy(regular!, copy);
+
+            var kept = new FontRegistry().AddFamily(family, regular: regular).AddInstalledFonts(dir);
+            Assert.That(kept.Resolve(family, false, false)?.Path, Is.EqualTo(regular));
+
+            var replaced = new FontRegistry().AddFamily(family, regular: regular)
+                .AddInstalledFonts(dir, includeSubfolders: false, replaceExisting: true);
+            Assert.That(replaced.Resolve(family, false, false)?.Path, Is.EqualTo(copy));
+        }
+
         // Linux keeps fonts a folder or more below /usr/share/fonts, a folder per package or
         // family, under any file name: Microsoft's core fonts install as
         // truetype/msttcorefonts/Arial.ttf. A search of the top folder alone found none of them.

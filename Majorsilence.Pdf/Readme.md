@@ -151,6 +151,8 @@ PdfDocument.Create()
     .Save("output.pdf");
 ```
 
+`AddInstalledFonts(directory, includeSubfolders)` registers every font in a folder under the family name it declares; add `replaceExisting: true` to replace families already registered. To add fonts to Majorsilence.Reporting's PDF export, see `PdfFonts` in the Reporting readme.
+
 Unicode shaping with multi-script support (Latin, Cyrillic, Greek, Arabic, CJK) is available when the appropriate NotoSans fonts are registered.
 
 ### Images
