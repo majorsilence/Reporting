@@ -658,6 +658,43 @@ namespace Majorsilence.Pdf
             return this;
         }
 
+        /// <summary>
+        /// Draw <paramref name="image"/> with top-left at (x,y) scaled to (width × height) points.
+        /// </summary>
+        public PdfCanvas DrawImage(PdfImage image, float x, float y, float width, float height)
+        {
+            if (image == null) throw new ArgumentNullException(nameof(image));
+            ImageResource res;
+            switch (image.Format)
+            {
+                case PdfImage.Kind.Jpeg:
+                    res = _ser.GetOrAddImage(image.Data, image.PixelWidth, image.PixelHeight, isJpeg: true, image.Components);
+                    break;
+                case PdfImage.Kind.Rgb24:
+                    res = _ser.GetOrAddImage(image.Data, image.PixelWidth, image.PixelHeight, isJpeg: false, 3);
+                    break;
+                default:
+                    res = _ser.GetOrAddRgbaImage(
+                        "rgba:" + image.PixelWidth + "x" + image.PixelHeight + ":" + image.Data.Length + ":" + ContentHash(image.Data),
+                        image.Data, image.PixelWidth, image.PixelHeight);
+                    break;
+            }
+            float pdfY = PdfY(y + height);
+            var sb = Content;
+            sb.Append("q\n");
+            sb.AppendNum(width).Append(" 0 0 ").AppendNum(height).Append(" ").AppendNum(x).Append(" ").AppendNum(pdfY).Append(" cm\n");
+            sb.Append($"/{res.PdfName} Do\n");
+            sb.Append("Q\n");
+            return this;
+        }
+
+        private static string ContentHash(byte[] data)
+        {
+            ulong h = 14695981039346656037UL; // FNV-1a
+            foreach (byte b in data) { h ^= b; h *= 1099511628211UL; }
+            return h.ToString("x");
+        }
+
         // ── table ─────────────────────────────────────────────────────────────
 
         /// <summary>

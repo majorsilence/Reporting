@@ -33,8 +33,9 @@ namespace Majorsilence.Pdf.Internal
         internal readonly int Width, Height;
         internal readonly bool IsJpeg;
         internal readonly bool IsRgba;
-        internal ImageResource(string pdfName, byte[] data, int w, int h, bool isJpeg, bool isRgba = false)
-        { PdfName = pdfName; Data = data; Width = w; Height = h; IsJpeg = isJpeg; IsRgba = isRgba; }
+        internal readonly int Components; // colour components of a JPEG: 1 = gray, 3 = RGB
+        internal ImageResource(string pdfName, byte[] data, int w, int h, bool isJpeg, bool isRgba = false, int components = 3)
+        { PdfName = pdfName; Data = data; Width = w; Height = h; IsJpeg = isJpeg; IsRgba = isRgba; Components = components; }
     }
 
     internal sealed class PageAnnotation
@@ -147,12 +148,26 @@ namespace Majorsilence.Pdf.Internal
 
         internal ImageResource GetOrAddImage(byte[] rawOrJpeg, int width, int height, bool isJpeg)
         {
-            string key = width + "x" + height + ":" + rawOrJpeg.Length;
+            return GetOrAddImage(rawOrJpeg, width, height, isJpeg, 3);
+        }
+
+        internal ImageResource GetOrAddImage(byte[] rawOrJpeg, int width, int height, bool isJpeg, int components)
+        {
+            // Dimensions and length alone would treat two different same-sized images as one, so
+            // the key includes a hash of the content.
+            string key = width + "x" + height + ":" + rawOrJpeg.Length + ":" + ContentHash(rawOrJpeg) + ":c" + components;
             if (_imageMap.TryGetValue(key, out var ir)) return ir;
             string pdfName = "Im" + (_images.Count + 1);
-            ir = new ImageResource(pdfName, rawOrJpeg, width, height, isJpeg);
+            ir = new ImageResource(pdfName, rawOrJpeg, width, height, isJpeg, isRgba: false, components);
             _images.Add(ir); _imageMap[key] = ir;
             return ir;
+        }
+
+        private static string ContentHash(byte[] data)
+        {
+            ulong h = 14695981039346656037UL; // FNV-1a
+            foreach (byte b in data) { h ^= b; h *= 1099511628211UL; }
+            return h.ToString("x");
         }
 
         internal ImageResource? FindImage(string key) =>
@@ -670,7 +685,7 @@ namespace Majorsilence.Pdf.Internal
             byte[] data   = _encryptor != null ? _encryptor.EncryptStream(objNum, 0, raw) : raw;
             string hdr =
                 $"<< /Type /XObject /Subtype /Image /Width {img.Width} /Height {img.Height} " +
-                $"/ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter {filter} /Length {data.Length} >>\nstream\n";
+                $"/ColorSpace {(img.IsJpeg && img.Components == 1 ? "/DeviceGray" : "/DeviceRGB")} /BitsPerComponent 8 /Filter {filter} /Length {data.Length} >>\nstream\n";
             return Concat(Latin1.GetBytes(hdr), data, Latin1.GetBytes("\nendstream"));
         }
 

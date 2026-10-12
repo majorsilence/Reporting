@@ -158,6 +158,13 @@ namespace Majorsilence.Pdf.Layout
             return this;
         }
 
+        /// <summary>Add an image. With only <paramref name="width"/> (or neither) the height follows the aspect ratio; with both, <paramref name="fit"/> decides how the image fills the box.</summary>
+        public LayoutColumn Image(PdfImage image, float? width = null, float? height = null, ImageFit fit = ImageFit.Contain, TextAlignment alignment = TextAlignment.Left)
+        {
+            _items.Add(LayoutBuilders.Image(image, width, height, fit, alignment));
+            return this;
+        }
+
         /// <summary>Escape hatch for arbitrary drawing in a region of the given height.</summary>
         public LayoutColumn Canvas(Action<PdfCanvas, LayoutRect> draw, float height)
         {

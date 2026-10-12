@@ -181,6 +181,14 @@ namespace Majorsilence.Pdf.Layout
             return Stack(component.Compose);
         }
 
+        public static LayoutElement Image(PdfImage image, float? width, float? height, ImageFit fit, TextAlignment alignment)
+        {
+            if (image == null) throw new ArgumentNullException(nameof(image));
+            if (width <= 0f) throw new ArgumentOutOfRangeException(nameof(width), "Width must be positive.");
+            if (height <= 0f) throw new ArgumentOutOfRangeException(nameof(height), "Height must be positive.");
+            return new ImageElement(image, width, height, fit, alignment);
+        }
+
         public static LayoutElement Marker(string marker, TextStyle? markerStyle, float indent, Action<LayoutColumn> content)
         {
             if (marker == null) throw new ArgumentNullException(nameof(marker));

@@ -340,6 +340,10 @@ namespace Majorsilence.Pdf.Layout
         public PdfLayout Bullet(string marker, float indent, Action<LayoutColumn> content, TextStyle? markerStyle = null) =>
             Add(LayoutBuilders.Marker(marker, markerStyle, indent, content), "Bullet");
 
+        /// <summary>Add an image. With only <paramref name="width"/> (or neither) the height follows the aspect ratio; with both, <paramref name="fit"/> decides how the image fills the box.</summary>
+        public PdfLayout Image(PdfImage image, float? width = null, float? height = null, ImageFit fit = ImageFit.Contain, TextAlignment alignment = TextAlignment.Left) =>
+            Add(LayoutBuilders.Image(image, width, height, fit, alignment), "Image");
+
         /// <summary>Add a bookmark (outline entry) at this position. <paramref name="level"/> 0 is top level.</summary>
         public PdfLayout Bookmark(string title, int level = 0)
         {
