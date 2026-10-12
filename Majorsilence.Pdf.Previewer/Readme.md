@@ -58,3 +58,13 @@ for i in 1 2 3 4 5; do echo x >> ./some.pdf; sleep 0.02; done
 ```
 
 Terminal 2 should print exactly one `data: reload` line per burst of writes, not five.
+
+## Previewing a `PdfLayout` document
+
+`PdfLayout` documents are ordinary PDFs once `End().Save(path)` runs, so the previewer needs no special support. Point `run` at a project that builds one (for example `Examples/PdfLayoutExample`) and watch the output:
+
+```bash
+mspdf-preview run Examples/PdfLayoutExample --pdf Examples/PdfLayoutExample/bin/Debug/net10.0/invoice.pdf
+```
+
+Every edit to the layout code rebuilds and re-renders, so changes to splitting, "Page X of Y" footers, boxes or tables show up in the browser as soon as you save. The browser's PDF viewer also shows the bookmarks pane for layouts that call `Bookmark(...)`, and clicking `Link`/`GoTo` spans works inside it.

@@ -275,5 +275,82 @@ namespace Majorsilence.Pdf.Tests
                     Assert.That(letter.GlyphRectangle.Top, Is.LessThanOrEqualTo(page.Height - Margin + 2f), "above the top margin");
                 }
         }
+
+        [Test]
+        public void Pagination_RandomNestedContent_NeverLosesDuplicatesOrOverflowsContent([Range(1, 12)] int seed)
+        {
+            var rng = new Random(1000 + seed);
+            var expected = new System.Collections.Generic.List<string>();
+            int id = 0;
+            string Marker() { var m = $"NM{seed:D2}{id++:D4}Z"; expected.Add(m); return m; }
+            string Filler(int words) => string.Join(" ", Enumerable.Repeat("ipsum", words));
+            var image = PdfImage.FromRgb24(new byte[4 * 4 * 3], 4, 4);
+
+            void Content(LayoutColumn c, int depth)
+            {
+                int n = rng.Next(1, 4);
+                for (int i = 0; i < n; i++)
+                {
+                    switch (rng.Next(depth > 1 ? 5 : 9))
+                    {
+                        case 0: c.Text(Marker() + " " + Filler(rng.Next(1, 300))); break;
+                        case 1: c.Spans(s => s.Span(Marker() + " ").Span(Filler(rng.Next(1, 300)), TextStyle.Default.WithBold())); break;
+                        case 2: c.Spacer(rng.Next(1, 80)); break;
+                        case 3: c.Image(image, rng.Next(10, 120)); break;
+                        case 4: c.Bullet("-", 14, b => b.Text(Marker() + " " + Filler(rng.Next(1, 200)))); break;
+                        case 5: c.Box(LayoutBoxStyle.Default.WithPadding(rng.Next(0, 10)).WithBorder(PdfColor.Black, 1), b => Content(b, depth + 1)); break;
+                        case 6: c.Layers(l => l.Behind(b => b.Spacer(5)).Primary(b => Content(b, depth + 1))); break;
+                        case 7: c.EnsureSpace(rng.Next(10, 200)); break;
+                        default: c.When(() => true, b => Content(b, depth + 1)); break;
+                    }
+                }
+            }
+
+            var bytes = Render(l =>
+            {
+                int count = rng.Next(4, 14);
+                for (int i = 0; i < count; i++)
+                {
+                    if (rng.Next(4) == 0)
+                        l.Decoration(h => h.Text("dh"), c => Content(c, 0), f => f.Text("df"));
+                    else
+                        l.Box(LayoutBoxStyle.Default, c => Content(c, 0));
+                }
+            });
+
+            using var pdf = PdfPig.Open(bytes);
+            var all = string.Join(" ", pdf.GetPages().Select(p => string.Join(" ", p.GetWords().Select(w => w.Text))));
+            foreach (var m in expected)
+                Assert.That(Regex.Matches(all, m).Count, Is.EqualTo(1), $"marker {m}");
+
+            foreach (var page in pdf.GetPages())
+                foreach (var letter in page.Letters)
+                {
+                    Assert.That(letter.GlyphRectangle.Bottom, Is.GreaterThanOrEqualTo(Margin - 2f));
+                    Assert.That(letter.GlyphRectangle.Top, Is.LessThanOrEqualTo(page.Height - Margin + 2f));
+                }
+        }
+
+        [Test]
+        public void LargeDocument_PaginatesInReasonableTime()
+        {
+            var sw = System.Diagnostics.Stopwatch.StartNew();
+            var table = new PdfTable(200, 200).WithHeaderBackground(PdfColor.LightGray);
+            table.AddRow("Name", "Value");
+            for (int i = 0; i < 5000; i++) table.AddRow($"row{i}", "v");
+            string prose = string.Join(" ", Enumerable.Range(0, 60000).Select(i => "word" + (i % 97)));
+
+            var bytes = Render(l =>
+            {
+                l.Table(table);
+                l.Text(prose);
+                l.Spans(s => s.Span(prose));
+            });
+            sw.Stop();
+
+            using var pdf = PdfPig.Open(bytes);
+            Assert.That(pdf.NumberOfPages, Is.GreaterThan(150));
+            Assert.That(sw.Elapsed.TotalSeconds, Is.LessThan(60), "pagination should scale roughly linearly");
+        }
     }
 }
