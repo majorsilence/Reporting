@@ -3,7 +3,7 @@ name: Release
 # Builds everything a Majorsilence Reporting release ships and collects it into a DRAFT
 # GitHub Release.
 #
-# - Tag push (v26.0.4 or version_26.0.4) -> builds the zips and NuGet packages on every
+# - Tag push (v26.0.4 or version_26.0.4) -> builds the zips, installers and NuGet packages on every
 #                                           platform, creates the draft release.
 # - workflow_dispatch                    -> same builds, artifacts only, no release; a dry run
 #                                           before tagging.
@@ -145,8 +145,90 @@ jobs:
           path: Release-Builds/build-output/*.zip
           if-no-files-found: error
 
+  # Installers for the two desktop apps. Windows gets an Inno Setup .exe, Linux gets .deb and
+  # .rpm (via nfpm), macOS gets a .dmg. The macOS apps are ad-hoc signed only, so Gatekeeper
+  # asks for approval on first launch until a Developer ID is wired in.
+  installers-windows:
+    needs: version
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        app: [ReportDesigner, RdlReader]
+        rid: [win-x64, win-arm64]
+    steps:
+      - uses: actions/checkout@v6
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 10.0.x
+      - name: Install Inno Setup
+        shell: pwsh
+        run: choco install innosetup --yes --no-progress
+      - name: Build installer
+        shell: pwsh
+        run: ./installers/windows/build-windows-installer.ps1 -App ${{ matrix.app }} -Rid ${{ matrix.rid }}
+      - uses: actions/upload-artifact@v6
+        with:
+          name: installer-${{ matrix.app }}-${{ matrix.rid }}
+          path: Release-Builds/build-output/installers/*
+          if-no-files-found: error
+
+  installers-linux:
+    needs: version
+    strategy:
+      fail-fast: false
+      matrix:
+        app: [ReportDesigner, RdlReader]
+        include:
+          - rid: linux-x64
+            os: ubuntu-latest
+          - rid: linux-arm64
+            os: ubuntu-24.04-arm
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v6
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 10.0.x
+      - name: Install nfpm and ImageMagick
+        run: |
+          echo 'deb [trusted=yes] https://repo.goreleaser.com/apt/ /' | sudo tee /etc/apt/sources.list.d/goreleaser.list
+          sudo apt-get update
+          sudo apt-get install -y nfpm imagemagick rpm
+      - name: Build .deb and .rpm
+        run: ./installers/linux/build-linux-packages.sh ${{ matrix.app }} ${{ matrix.rid }}
+      - uses: actions/upload-artifact@v6
+        with:
+          name: installer-${{ matrix.app }}-${{ matrix.rid }}
+          path: Release-Builds/build-output/installers/*
+          if-no-files-found: error
+
+  installers-macos:
+    needs: version
+    runs-on: macos-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        app: [ReportDesigner, RdlReader]
+        rid: [osx-arm64, osx-x64]
+    steps:
+      - uses: actions/checkout@v6
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 10.0.x
+      - name: Build .dmg
+        run: ./installers/macos/build-macos-dmg.sh ${{ matrix.app }} ${{ matrix.rid }}
+      - uses: actions/upload-artifact@v6
+        with:
+          name: installer-${{ matrix.app }}-${{ matrix.rid }}
+          path: Release-Builds/build-output/installers/*
+          if-no-files-found: error
+
   release:
-    needs: [version, packages, aot-windows, aot]
+    needs: [version, packages, aot-windows, aot, installers-windows, installers-linux, installers-macos]
     if: needs.version.outputs.is_release == 'true'
     runs-on: ubuntu-latest
     permissions:
@@ -161,7 +243,8 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p release
-          find artifacts -type f \( -name '*.zip' -o -name '*.nupkg' -o -name '*.snupkg' \) \
+          find artifacts -type f \( -name '*.zip' -o -name '*.nupkg' -o -name '*.snupkg' \
+            -o -name '*-setup.exe' -o -name '*.deb' -o -name '*.rpm' -o -name '*.dmg' \) \
             -exec cp {} release/ \;
           ls -lh release
 
