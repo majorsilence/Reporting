@@ -386,19 +386,25 @@ namespace Majorsilence.Pdf.Layout
             if (_ended) return _doc;
             _ended = true;
 
-            var pages = Paginate();
-            for (int i = 0; i < pages.Count; i++)
+            try
             {
-                var canvas = i == 0 ? _firstCanvas! : _doc.AddPage(_pageSize);
-                LayoutContext.SetPage(i + 1, pages.Count);
-                _background?.Invoke(canvas, i + 1, pages.Count);
-                _header?.Invoke(canvas, i + 1, pages.Count);
-                foreach (var (element, y, height) in pages[i])
-                    element.Draw(canvas, ContentLeft, ContentTop + y, ContentWidth, height);
-                _footer?.Invoke(canvas, i + 1, pages.Count);
-                _foreground?.Invoke(canvas, i + 1, pages.Count);
+                var pages = Paginate();
+                for (int i = 0; i < pages.Count; i++)
+                {
+                    var canvas = i == 0 ? _firstCanvas! : _doc.AddPage(_pageSize);
+                    LayoutContext.SetPage(i + 1, pages.Count);
+                    _background?.Invoke(canvas, i + 1, pages.Count);
+                    _header?.Invoke(canvas, i + 1, pages.Count);
+                    foreach (var (element, y, height) in pages[i])
+                        element.Draw(canvas, ContentLeft, ContentTop + y, ContentWidth, height);
+                    _footer?.Invoke(canvas, i + 1, pages.Count);
+                    _foreground?.Invoke(canvas, i + 1, pages.Count);
+                }
             }
-            LayoutContext.ClearPage();
+            finally
+            {
+                LayoutContext.ClearPage();
+            }
             return _doc;
         }
 
