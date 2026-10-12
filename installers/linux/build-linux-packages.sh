@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Builds .deb and .rpm packages for one desktop app on Linux.
 #
-#   installers/linux/build-linux-packages.sh <ReportDesigner|RdlReader> <linux-x64|linux-arm64>
+#   installers/linux/build-linux-packages.sh <ReportDesigner|RdlReader|RdlCmd> <linux-x64|linux-arm64>
 #
 # Needs: dotnet SDK, nfpm (https://nfpm.goreleaser.com), ImageMagick (icon conversion).
 # Output: Release-Builds/build-output/installers/*.deb and *.rpm
@@ -14,6 +14,7 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 case "$APP" in
   ReportDesigner) TITLE="Majorsilence Report Designer"; SUMMARY="Cross-platform RDL report designer" ;;
   RdlReader)      TITLE="Majorsilence Report Reader";   SUMMARY="Cross-platform RDL report viewer" ;;
+  RdlCmd)         TITLE="Majorsilence RdlCmd";          SUMMARY="Command line report renderer (PDF, HTML, Excel, CSV and more)" ;;
   *) echo "Unknown app: $APP" >&2; exit 1 ;;
 esac
 case "$RID" in
@@ -35,6 +36,8 @@ dotnet publish "$ROOT/$APP" -c Release -r "$RID" -f net10.0 --self-contained tru
   -p:GeneratePackageOnBuild=false -o "$WORK/publish"
 chmod 755 "$WORK/publish/$APP"
 
+GUI=true; [ "$APP" = RdlCmd ] && GUI=false
+if $GUI; then
 # Icon: the apps ship a .ico; desktop environments want a PNG.
 convert "$ROOT/RdlReader/App.ico[0]" -resize 256x256 "$WORK/$PKG.png"
 
@@ -48,6 +51,7 @@ Icon=$PKG
 Terminal=false
 Categories=Office;Development;
 DESKTOP
+fi
 
 # nfpm expands \${VAR} in the config from the environment.
 export NFPM_VERSION="$VERSION" NFPM_ARCH="$ARCH" NFPM_PKG="$PKG" NFPM_SUMMARY="$SUMMARY" \
@@ -70,10 +74,16 @@ contents:
   - src: ${NFPM_OPT}/${NFPM_APP}
     dst: /usr/bin/${NFPM_BIN}
     type: symlink
+YAML
+if $GUI; then
+cat >> "$WORK/nfpm.yaml" <<'YAML'
   - src: ${NFPM_WORK}/${NFPM_PKG}.desktop
     dst: /usr/share/applications/${NFPM_PKG}.desktop
   - src: ${NFPM_WORK}/${NFPM_PKG}.png
     dst: /usr/share/icons/hicolor/256x256/apps/${NFPM_PKG}.png
+YAML
+fi
+cat >> "$WORK/nfpm.yaml" <<'YAML'
 # The app is self-contained (.NET included); these are the native libraries Avalonia/Skia load.
 overrides:
   deb:

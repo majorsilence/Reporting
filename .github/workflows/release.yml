@@ -146,7 +146,7 @@ jobs:
           if-no-files-found: error
 
   # Installers for the two desktop apps. Windows gets an Inno Setup .exe, Linux gets .deb and
-  # .rpm (via nfpm), macOS gets a .dmg. The macOS apps are ad-hoc signed only, so Gatekeeper
+  # .rpm (via nfpm), Snap and Flatpak bundles are built too. macOS gets a .dmg (apps) or .pkg (RdlCmd). The macOS apps are ad-hoc signed only, so Gatekeeper
   # asks for approval on first launch until a Developer ID is wired in.
   installers-windows:
     needs: version
@@ -154,7 +154,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        app: [ReportDesigner, RdlReader]
+        app: [ReportDesigner, RdlReader, RdlCmd]
         rid: [win-x64, win-arm64]
     steps:
       - uses: actions/checkout@v6
@@ -179,7 +179,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        app: [ReportDesigner, RdlReader]
+        app: [ReportDesigner, RdlReader, RdlCmd]
         include:
           - rid: linux-x64
             os: ubuntu-latest
@@ -227,8 +227,85 @@ jobs:
           path: Release-Builds/build-output/installers/*
           if-no-files-found: error
 
+  installers-macos-cli:
+    needs: version
+    runs-on: macos-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        rid: [osx-arm64, osx-x64]
+    steps:
+      - uses: actions/checkout@v6
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 10.0.x
+      - name: Build .pkg
+        run: ./installers/macos/build-macos-pkg.sh ${{ matrix.rid }}
+      - uses: actions/upload-artifact@v6
+        with:
+          name: installer-RdlCmd-${{ matrix.rid }}
+          path: Release-Builds/build-output/installers/*
+          if-no-files-found: error
+
+  installers-snap:
+    needs: version
+    strategy:
+      fail-fast: false
+      matrix:
+        app: [ReportDesigner, RdlReader, RdlCmd]
+        include:
+          - rid: linux-x64
+            os: ubuntu-24.04
+          - rid: linux-arm64
+            os: ubuntu-24.04-arm
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v6
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 10.0.x
+      - name: Install snapcraft
+        run: sudo snap install snapcraft --classic
+      - name: Build .snap
+        run: ./installers/linux/build-snap.sh ${{ matrix.app }} ${{ matrix.rid }}
+      - uses: actions/upload-artifact@v6
+        with:
+          name: installer-snap-${{ matrix.app }}-${{ matrix.rid }}
+          path: Release-Builds/build-output/installers/*.snap
+          if-no-files-found: error
+
+  installers-flatpak:
+    needs: version
+    strategy:
+      fail-fast: false
+      matrix:
+        app: [ReportDesigner, RdlReader]
+        include:
+          - rid: linux-x64
+            os: ubuntu-24.04
+          - rid: linux-arm64
+            os: ubuntu-24.04-arm
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v6
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 10.0.x
+      - name: Install flatpak tooling
+        run: sudo apt-get update && sudo apt-get install -y flatpak flatpak-builder imagemagick
+      - name: Build .flatpak
+        run: ./installers/linux/build-flatpak.sh ${{ matrix.app }} ${{ matrix.rid }}
+      - uses: actions/upload-artifact@v6
+        with:
+          name: installer-flatpak-${{ matrix.app }}-${{ matrix.rid }}
+          path: Release-Builds/build-output/installers/*.flatpak
+          if-no-files-found: error
+
   release:
-    needs: [version, packages, aot-windows, aot, installers-windows, installers-linux, installers-macos]
+    needs: [version, packages, aot-windows, aot, installers-windows, installers-linux, installers-macos, installers-macos-cli, installers-snap, installers-flatpak]
     if: needs.version.outputs.is_release == 'true'
     runs-on: ubuntu-latest
     permissions:
@@ -244,7 +321,8 @@ jobs:
           set -euo pipefail
           mkdir -p release
           find artifacts -type f \( -name '*.zip' -o -name '*.nupkg' -o -name '*.snupkg' \
-            -o -name '*-setup.exe' -o -name '*.deb' -o -name '*.rpm' -o -name '*.dmg' \) \
+            -o -name '*-setup.exe' -o -name '*.deb' -o -name '*.rpm' -o -name '*.dmg' -o -name '*.pkg' \
+            -o -name '*.snap' -o -name '*.flatpak' \) \
             -exec cp {} release/ \;
           ls -lh release
 
