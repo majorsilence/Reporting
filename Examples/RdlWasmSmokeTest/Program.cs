@@ -151,7 +151,10 @@ await Scenario("XML data provider reading a file", async () =>
     Expect.Contains((await RunQuery(rdl)).Csv, "Chai", "Ikura", "3", "5");
 });
 
-await Scenario("HTTP data source fails with a clear message instead of hanging", async () =>
+// The engine fetches http(s) data through IAsyncDataCommand (HttpClient.SendAsync), which the browser allows, so
+// the request is really made. Nothing is reachable from the test, so it must fail with an HTTP error rather than
+// the old "synchronous HTTP" restriction, and it must fail rather than hang.
+await Scenario("HTTP data source is fetched asynchronously and an unreachable host fails instead of hanging", async () =>
 {
     var rdl = itemsRdl
         .Replace("<DataProvider>SQLite</DataProvider>", "<DataProvider>Json</DataProvider>")
@@ -160,8 +163,10 @@ await Scenario("HTTP data source fails with a clear message instead of hanging",
     string errors;
     try { errors = (await RunQuery(rdl)).Errors; }
     catch (Exception e) { errors = e.ToString(); }
-    if (!errors.Contains("synchronous HTTP"))
-        throw new InvalidOperationException("expected the browser HTTP restriction to be reported; got: " + errors);
+    if (errors.Contains("synchronous HTTP"))
+        throw new InvalidOperationException("the data source still used a synchronous request; got: " + errors);
+    if (!errors.Contains("HttpRequestException"))
+        throw new InvalidOperationException("expected the failed fetch to be reported as an HttpRequestException; got: " + errors);
 });
 
 Console.WriteLine($"{passed} passed, {failures.Count} failed");

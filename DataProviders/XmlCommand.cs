@@ -3,13 +3,15 @@ using System;
 using System.Xml;
 using System.Data;
 using System.Collections;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Majorsilence.Reporting.Data
 {
 	/// <summary>
 	/// Summary description for Class1.
 	/// </summary>
-	public class XmlCommand : IDbCommand
+	public class XmlCommand : IDbCommand, IAsyncDataCommand
 	{
 		XmlConnection _xc;			// connection we're running under
 		string _cmd;				// command to execute
@@ -100,6 +102,18 @@ namespace Majorsilence.Reporting.Data
 		{
 			CommandBehaviorSupport.Validate(behavior);
 			return new XmlDataReader(behavior, _xc, this);
+		}
+
+		public async Task<IDataReader> ExecuteReaderAsync(System.Data.CommandBehavior behavior, CancellationToken cancellationToken = default)
+		{
+			CommandBehaviorSupport.Validate(behavior);
+			string xml = null;
+			if (RemoteContent.IsHttp(Url.Trim()))
+			{
+				using var client = new System.Net.Http.HttpClient();
+				xml = await RemoteContent.TryReadTextAsync(client, Url.Trim(), null, cancellationToken).ConfigureAwait(false);
+			}
+			return new XmlDataReader(behavior, _xc, this, xml);
 		}
 
 		IDataReader System.Data.IDbCommand.ExecuteReader()

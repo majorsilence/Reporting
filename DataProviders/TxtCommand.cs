@@ -3,13 +3,16 @@ using System;
 using System.Xml;
 using System.Data;
 using System.Collections;
+using System.Net.Http;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Majorsilence.Reporting.Data
 {
 	/// <summary>
 	/// TxtCommand allows specifying the command for a text file.
 	/// </summary>
-	public class TxtCommand : IDbCommand
+	public class TxtCommand : IDbCommand, IAsyncDataCommand
 	{
 		TxtConnection _tc;			// connection we're running under
 		string _cmd;				// command to execute
@@ -131,6 +134,20 @@ namespace Majorsilence.Reporting.Data
 		{
 			CommandBehaviorSupport.Validate(behavior);
 			return new TxtDataReader(behavior, _tc, this);
+		}
+
+		public async Task<IDataReader> ExecuteReaderAsync(System.Data.CommandBehavior behavior, CancellationToken cancellationToken = default)
+		{
+			CommandBehaviorSupport.Validate(behavior);
+			string text;
+			if (RemoteContent.IsHttp(Url))
+			{
+				using var client = new HttpClient();
+				text = await RemoteContent.TryReadTextAsync(client, Url, null, cancellationToken).ConfigureAwait(false);
+			}
+			else
+				text = null;
+			return new TxtDataReader(behavior, _tc, this, text, asyncIo: true);
 		}
 
 		IDataReader System.Data.IDbCommand.ExecuteReader()

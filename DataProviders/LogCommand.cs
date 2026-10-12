@@ -3,13 +3,15 @@ using System;
 using System.Xml;
 using System.Data;
 using System.Collections;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Majorsilence.Reporting.Data
 {
 	/// <summary>
 	/// LogCommand allows specifying the command for the web log.
 	/// </summary>
-	public class LogCommand : IDbCommand
+	public class LogCommand : IDbCommand, IAsyncDataCommand
 	{
 		LogConnection _lc;			// connection we're running under
 		string _cmd;				// command to execute
@@ -102,6 +104,15 @@ namespace Majorsilence.Reporting.Data
 		{
 			CommandBehaviorSupport.Validate(behavior);
 			return new LogDataReader(behavior, _lc, this);
+		}
+
+		public async Task<IDataReader> ExecuteReaderAsync(System.Data.CommandBehavior behavior, CancellationToken cancellationToken = default)
+		{
+			CommandBehaviorSupport.Validate(behavior);
+			MultipleStreamReader prefetched = CommandBehaviorSupport.IsSchemaOnly(behavior)
+				? null
+				: await MultipleStreamReader.CreateAsync(Url, cancellationToken).ConfigureAwait(false);
+			return new LogDataReader(behavior, _lc, this, prefetched);
 		}
 
 		IDataReader System.Data.IDbCommand.ExecuteReader()

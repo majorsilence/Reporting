@@ -22,13 +22,20 @@ namespace Majorsilence.Reporting.Data
         private readonly string[] _requestedColumns;
 
         public JsonDataReader(System.Data.CommandBehavior behavior, JsonConnection conn, JsonCommand cmd)
+            : this(behavior, conn, cmd, null)
+        {
+        }
+
+        /// <param name="json">The already fetched JSON document (see <see cref="IAsyncDataCommand"/>);
+        /// when null the document is read from the command's Url.</param>
+        internal JsonDataReader(System.Data.CommandBehavior behavior, JsonConnection conn, JsonCommand cmd, string json)
         {
             _behavior = behavior;
             _tcmd = cmd ?? throw new ArgumentNullException(nameof(cmd), "Command cannot be null.");
             _tconn = conn ?? throw new ArgumentNullException(nameof(conn), "Connection cannot be null.");
             _requestedColumns = cmd.Columns;
         
-            string json = ReadAllJson();
+            json ??= ReadAllJson();
 
             var extractor = new JsonTableExtractor();
             var allReaders = extractor.Extract(json);
