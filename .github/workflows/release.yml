@@ -268,8 +268,14 @@ jobs:
         uses: actions/setup-dotnet@v5
         with:
           dotnet-version: 10.0.x
-      - name: Install snapcraft
-        run: sudo snap install snapcraft --classic
+      - name: Install snapcraft and LXD
+        run: |
+          sudo snap install snapcraft --classic
+          sudo snap install lxd || true
+          sudo lxd init --auto
+          sudo usermod -aG lxd "$USER"
+          # Docker's iptables rules on the runner otherwise block the LXD container's network.
+          sudo iptables -P FORWARD ACCEPT
       - name: Build .snap
         run: ./installers/linux/build-snap.sh ${{ matrix.app }} ${{ matrix.rid }}
       - uses: actions/upload-artifact@v6

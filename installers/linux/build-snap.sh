@@ -3,8 +3,9 @@
 #
 #   installers/linux/build-snap.sh <ReportDesigner|RdlReader|RdlCmd> <linux-x64|linux-arm64>
 #
-# Needs: dotnet SDK, snapcraft (sudo snap install snapcraft --classic). Builds with
-# --destructive-mode on the host, so no LXD is needed. Output: Release-Builds/build-output/installers/*.snap
+# Needs: dotnet SDK, snapcraft (sudo snap install snapcraft --classic) and, for the GUI apps,
+# an initialised LXD whose group the current user belongs to (RdlCmd builds with
+# --destructive-mode on the host). Output: Release-Builds/build-output/installers/*.snap
 set -euo pipefail
 
 APP="${1:?app name: ReportDesigner, RdlReader or RdlCmd}"
@@ -73,6 +74,12 @@ parts:
 YAML
 
 cd "$WORK"
-snapcraft pack --destructive-mode
+if $GUI; then
+  # The gnome extension needs build snaps (gnome-46-2404-sdk, gtk-common-themes) that cannot be
+  # installed with --destructive-mode, so GUI apps build in LXD (set up by the workflow).
+  sg lxd -c "snapcraft pack"
+else
+  snapcraft pack --destructive-mode
+fi
 cp ./*.snap "$OUT/"
 ls -lh "$OUT"
