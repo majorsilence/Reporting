@@ -157,6 +157,60 @@ namespace Majorsilence.Pdf.Tests
         }
 
         [Test]
+        public void Box_FixedWidth_RightAligned_PlacesTextNearRightEdge()
+        {
+            var style = LayoutBoxStyle.Default.WithWidth(100).WithAlignment(TextAlignment.Right);
+            var bytes = Render(l => l.Box(style, c => c.Text("RIGHTSIDE")));
+            using var pdf = PdfPig.Open(bytes);
+            var word = pdf.GetPage(1).GetWords().Single(w => w.Text == "RIGHTSIDE");
+            Assert.That(word.BoundingBox.Left, Is.GreaterThan(PageSizes.A4.Width - Margin - 100 - 1f));
+        }
+
+        [Test]
+        public void Box_MinHeight_ReservesSpace()
+        {
+            var style = LayoutBoxStyle.Default.WithMinHeight(300);
+            var bytes = Render(l => { l.Box(style, c => c.Text("SHORT")); l.Text("AFTER"); });
+            using var pdf = PdfPig.Open(bytes);
+            var words = pdf.GetPage(1).GetWords().ToList();
+            double shortY = words.Single(w => w.Text == "SHORT").BoundingBox.Bottom;
+            double afterY = words.Single(w => w.Text == "AFTER").BoundingBox.Bottom;
+            Assert.That(shortY - afterY, Is.GreaterThan(290f));
+        }
+
+        [Test]
+        public void EmptyBox_WithMinHeight_StillTakesSpace()
+        {
+            var style = LayoutBoxStyle.Default.WithMinHeight(PageSizes.A4.Height).WithBackground(PdfColor.LightGray);
+            // Taller than the content area: must be reported, not silently dropped.
+            var layout = PdfLayout.Begin(PdfDocument.Create(), PageSizes.A4).WithMargins(Margin);
+            Assert.Throws<InvalidOperationException>(() => layout.Box(style, _ => { }));
+        }
+
+        [Test]
+        public void When_IncludesContentOnlyIfConditionTrue()
+        {
+            var text = string.Join(" ", PageTexts(Render(l =>
+            {
+                l.When(() => true, c => c.Text("SHOWN"));
+                l.When(() => false, c => c.Text("HIDDEN"));
+            })));
+            Assert.That(text, Does.Contain("SHOWN"));
+            Assert.That(text, Does.Not.Contain("HIDDEN"));
+        }
+
+        [Test]
+        public void BackgroundAndForeground_DrawOnEveryPage()
+        {
+            var bytes = Render(l => { l.Text("a"); l.PageBreak(); l.Text("b"); },
+                l => l.WithBackground((c, p, n) => c.DrawText($"BG{p}of{n}", 100, 400, TextStyle.Default))
+                      .WithForeground((c, p, n) => c.DrawText($"FG{p}of{n}", 100, 500, TextStyle.Default)));
+            var pages = PageTexts(bytes);
+            Assert.That(pages[0], Does.Contain("BG1of2").And.Contain("FG1of2"));
+            Assert.That(pages[1], Does.Contain("BG2of2").And.Contain("FG2of2"));
+        }
+
+        [Test]
         public void End_CalledTwice_DoesNotAddPages()
         {
             var layout = PdfLayout.Begin(PdfDocument.Create(), PageSizes.A4);

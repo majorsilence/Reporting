@@ -64,7 +64,22 @@ namespace Majorsilence.Pdf.Layout
         /// <summary>When true the box never splits across pages; it moves to the next page whole.</summary>
         public bool IsKeepTogether { get; private set; }
 
+        /// <summary>Fixed box width in points, capped at the available width; null fills the available width.</summary>
+        public float? Width { get; private set; }
+
+        /// <summary>Minimum box height in points; the box is padded out to it.</summary>
+        public float MinHeight { get; private set; }
+
+        /// <summary>Where a box narrower than its container sits horizontally.</summary>
+        public TextAlignment Alignment { get; private set; } = TextAlignment.Left;
+
         public static LayoutBoxStyle Default { get; } = new LayoutBoxStyle();
+
+        public LayoutBoxStyle WithWidth(float width) { var s = Clone(); s.Width = width; return s; }
+
+        public LayoutBoxStyle WithMinHeight(float height) { var s = Clone(); s.MinHeight = height; return s; }
+
+        public LayoutBoxStyle WithAlignment(TextAlignment alignment) { var s = Clone(); s.Alignment = alignment; return s; }
 
         public LayoutBoxStyle WithPadding(float all) => WithPadding(all, all, all, all);
 

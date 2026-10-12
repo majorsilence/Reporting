@@ -299,16 +299,34 @@ namespace Majorsilence.Pdf.Layout
         private float Top => (_padTop ? _style.PaddingTop : 0f) + _style.BorderWidth;
         private float Bottom => (_padBottom ? _style.PaddingBottom : 0f) + _style.BorderWidth;
 
+        private float BoxWidth(float width) =>
+            _style.Width.HasValue ? Math.Min(width, _style.Width.Value) : width;
+
+        private float OffsetX(float width)
+        {
+            float free = width - BoxWidth(width);
+            return _style.Alignment == TextAlignment.Right ? free
+                 : _style.Alignment == TextAlignment.Center ? free / 2f
+                 : 0f;
+        }
+
         public override Fit Measure(PdfCanvas canvas, float width, float available)
         {
-            float innerWidth = Math.Max(0f, width - Left - Right);
+            float innerWidth = Math.Max(0f, BoxWidth(width) - Left - Right);
             var fit = _content.Measure(canvas, innerWidth, available - Top - Bottom);
             switch (fit.Kind)
             {
                 case FitKind.Empty:
+                    // An empty box still occupies its minimum height (e.g. a coloured bar).
+                    if (_style.MinHeight > 0f && _padBottom)
+                        return _style.MinHeight <= available + Epsilon
+                            ? Fit.Full(new BoxElement(_style, new StackElement(Array.Empty<LayoutElement>()), _padTop, _padBottom), _style.MinHeight)
+                            : Fit.Wrap;
                     return Fit.Empty;
                 case FitKind.Full:
-                    return Fit.Full(new BoxElement(_style, fit.Head!, _padTop, _padBottom), fit.Height + Top + Bottom);
+                    float full = Math.Max(fit.Height + Top + Bottom, _padBottom ? _style.MinHeight : 0f);
+                    if (full > available + Epsilon) return Fit.Wrap;
+                    return Fit.Full(new BoxElement(_style, fit.Head!, _padTop, _padBottom), full);
                 case FitKind.Partial when !_style.IsKeepTogether:
                     // The head loses the bottom padding, the tail the top padding.
                     float headHeight = fit.Height + Top + _style.BorderWidth;
@@ -323,6 +341,8 @@ namespace Majorsilence.Pdf.Layout
 
         public override void Draw(PdfCanvas canvas, float x, float y, float width, float height)
         {
+            x += OffsetX(width);
+            width = BoxWidth(width);
             if (_style.Background.HasValue || _style.BorderWidth > 0f)
             {
                 var shape = ShapeStyle.Empty;
@@ -335,5 +355,26 @@ namespace Majorsilence.Pdf.Layout
             float innerHeight = Math.Max(0f, height - Top - Bottom);
             _content.Draw(canvas, x + Left, y + Top, Math.Max(0f, width - Left - Right), innerHeight);
         }
+    }
+}
+
+namespace Majorsilence.Pdf.Layout
+{
+    /// <summary>Content included only when a condition, evaluated at pagination time, is true.</summary>
+    internal sealed class ConditionalElement : LayoutElement
+    {
+        private readonly Func<bool> _condition;
+        private readonly LayoutElement _content;
+
+        public ConditionalElement(Func<bool> condition, LayoutElement content)
+        {
+            _condition = condition; _content = content;
+        }
+
+        public override Fit Measure(PdfCanvas canvas, float width, float available) =>
+            _condition() ? _content.Measure(canvas, width, available) : Fit.Empty;
+
+        public override void Draw(PdfCanvas canvas, float x, float y, float width, float height) =>
+            _content.Draw(canvas, x, y, width, height);
     }
 }

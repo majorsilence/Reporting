@@ -58,6 +58,9 @@ namespace Majorsilence.Pdf.Layout
         private Action<PdfCanvas, int, int>? _footer;
         private float _footerHeight;
 
+        private Action<PdfCanvas, int, int>? _background;
+        private Action<PdfCanvas, int, int>? _foreground;
+
         private PdfCanvas? _firstCanvas;
         private bool _started;
         private bool _ended;
@@ -239,6 +242,36 @@ namespace Majorsilence.Pdf.Layout
             Box(LayoutBoxStyle.Default.WithKeepTogether(), content);
 
         /// <summary>
+        /// Include <paramref name="content"/> only when <paramref name="condition"/> returns true.
+        /// The condition is evaluated while the document is paginated (at <see cref="End"/>).
+        /// </summary>
+        public PdfLayout When(Func<bool> condition, Action<LayoutColumn> content) =>
+            Add(LayoutColumn.BuildConditional(condition, content), "Conditional content");
+
+        /// <summary>
+        /// Draw behind the content of every page (a watermark, a tinted page). The callback gets
+        /// the page canvas, the 1-based page number and the total page count. Must be called before
+        /// the first drawing call.
+        /// </summary>
+        public PdfLayout WithBackground(Action<PdfCanvas, int, int> draw)
+        {
+            ThrowIfStarted(nameof(WithBackground));
+            _background = draw ?? throw new ArgumentNullException(nameof(draw));
+            return this;
+        }
+
+        /// <summary>
+        /// Draw on top of the content of every page. Same arguments as <see cref="WithBackground"/>.
+        /// Must be called before the first drawing call.
+        /// </summary>
+        public PdfLayout WithForeground(Action<PdfCanvas, int, int> draw)
+        {
+            ThrowIfStarted(nameof(WithForeground));
+            _foreground = draw ?? throw new ArgumentNullException(nameof(draw));
+            return this;
+        }
+
+        /// <summary>
         /// Escape hatch for arbitrary drawing in a region of the given height. <paramref name="draw"/>
         /// is invoked when the document is ended, on the page the region landed on.
         /// </summary>
@@ -270,10 +303,12 @@ namespace Majorsilence.Pdf.Layout
             for (int i = 0; i < pages.Count; i++)
             {
                 var canvas = i == 0 ? _firstCanvas! : _doc.AddPage(_pageSize);
+                _background?.Invoke(canvas, i + 1, pages.Count);
                 _header?.Invoke(canvas, i + 1, pages.Count);
                 foreach (var (element, y, height) in pages[i])
                     element.Draw(canvas, ContentLeft, ContentTop + y, ContentWidth, height);
                 _footer?.Invoke(canvas, i + 1, pages.Count);
+                _foreground?.Invoke(canvas, i + 1, pages.Count);
             }
             return _doc;
         }

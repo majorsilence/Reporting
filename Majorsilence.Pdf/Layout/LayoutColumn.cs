@@ -69,12 +69,31 @@ namespace Majorsilence.Pdf.Layout
         public LayoutColumn KeepTogether(Action<LayoutColumn> content) =>
             Box(LayoutBoxStyle.Default.WithKeepTogether(), content);
 
+        /// <summary>
+        /// Include <paramref name="content"/> only when <paramref name="condition"/> returns true.
+        /// The condition is evaluated while the document is paginated (at <c>End</c>).
+        /// </summary>
+        public LayoutColumn When(Func<bool> condition, Action<LayoutColumn> content)
+        {
+            _items.Add(BuildConditional(condition, content));
+            return this;
+        }
+
         /// <summary>Escape hatch for arbitrary drawing in a region of the given height.</summary>
         public LayoutColumn Canvas(Action<PdfCanvas, LayoutRect> draw, float height)
         {
             if (draw == null) throw new ArgumentNullException(nameof(draw));
             _items.Add(new CanvasElement(draw, height));
             return this;
+        }
+
+        internal static LayoutElement BuildConditional(Func<bool> condition, Action<LayoutColumn> content)
+        {
+            if (condition == null) throw new ArgumentNullException(nameof(condition));
+            if (content == null) throw new ArgumentNullException(nameof(content));
+            var inner = new LayoutColumn();
+            content(inner);
+            return new ConditionalElement(condition, inner.ToElement());
         }
 
         internal static LayoutElement BuildBox(LayoutBoxStyle style, Action<LayoutColumn> content)
