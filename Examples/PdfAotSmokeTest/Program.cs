@@ -69,6 +69,33 @@ layout
 byte[] layoutBytes = layout.End().ToBytes();
 Check("PdfLayout Row/Column + flowing text renders", IsValidPdf(layoutBytes));
 
+// ── PdfLayout element tree: splitting table, spans, box, image, Page X of Y, bookmarks ─
+var treeDoc = PdfDocument.Create();
+var tree = PdfLayout.Begin(treeDoc, PageSizes.A4).WithMargins(36)
+    .WithFooterText("Page {page} of {pages}");
+var treeTable = new PdfTable(200, 200).WithHeaderBackground(PdfColor.LightGray);
+treeTable.AddRow("Name", "Value");
+for (int i = 0; i < 120; i++) treeTable.AddRow($"row {i}", "v");
+var treeImage = PdfImage.FromRgb24(new byte[8 * 8 * 3], 8, 8);
+tree.Bookmark("Start")
+    .Image(treeImage, width: 40)
+    .Spans(s => s.Span("Mixed ").Span("bold ", TextStyle.Default.WithBold()).Link("link", "https://example.com"))
+    .Box(LayoutBoxStyle.Default.WithPadding(6).WithBorder(PdfColor.Gray), b => b.Text("boxed"))
+    .Table(treeTable)
+    .Decoration(h => h.Text("hdr"), c => c.Text(string.Concat(Enumerable.Repeat("decorated ", 400))), f => f.Text("ftr"));
+byte[] treeBytes = tree.End().ToBytes();
+Check("PdfLayout element tree (split table, spans, image, bookmarks) renders", IsValidPdf(treeBytes));
+Check("PdfLayout paginates to several pages", System.Text.Encoding.Latin1.GetString(treeBytes).Split("/Type /Page ").Length > 3);
+
+// ── canvas primitives: clip, transforms, internal links ─────────────────
+var primDoc = PdfDocument.Create();
+var primPage = primDoc.AddPage(PageSizes.A4);
+primPage.SaveState().ClipRoundedRectangle(50, 50, 100, 60, 8).Rotate(10, 100, 80);
+primPage.DrawRectangle(40, 40, 200, 200, ShapeStyle.Filled(PdfColor.LightGray));
+primPage.RestoreState();
+primPage.AddDestination("here", 50, 50).AddInternalLink(50, 300, 80, 14, "here").AddBookmark("Primitives");
+Check("canvas clip/transform/link/bookmark render", IsValidPdf(primDoc.ToBytes()));
+
 // ── AES password protection ─────────────────────────────────────────────
 var security = PdfSecurity
     .Protect(userPassword: "user123", ownerPassword: "owner456")

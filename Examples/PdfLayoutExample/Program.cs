@@ -4,10 +4,12 @@
 // Output: invoice.pdf in the output directory
 //
 // Key patterns shown:
-//   - PdfLayout.Begin/WithMargins/WithFooter set up a flowing, auto-paginating document
-//   - Text/Row/Line/Table advance a shared cursor and start new pages automatically
+//   - PdfLayout records an element tree; End() paginates the whole document, then draws it
+//   - Because the page count is known up front, the footer can say "Page 2 of 3"
+//   - Text, Spans and Table split across pages (a long table repeats its header row)
+//   - Box adds padding / border / background; Spans mixes bold, colour and links in a paragraph
+//   - Bookmark adds an entry to the PDF outline; Image fits a picture into the flow
 //   - Row treats its columns as atomic: the taller column decides the row's height
-//   - A long terms-and-conditions paragraph spills across as many pages as it needs
 //   - layout.End() hands back the underlying PdfDocument for Save()
 
 using Majorsilence.Pdf;
@@ -37,13 +39,26 @@ var doc = PdfDocument.Create()
 
 var layout = PdfLayout.Begin(doc, PageSizes.A4)
     .WithMargins(72)
-    .WithFooter((canvas, page) =>
+    .WithFooter((canvas, page, pages) =>
     {
-        canvas.DrawText($"Page {page}", 486, 780, footerStyle.WithAlignment(TextAlignment.Right));
+        canvas.DrawText($"Page {page} of {pages}", 486, 780, footerStyle.WithAlignment(TextAlignment.Right));
         canvas.DrawText("ACME Corp — Thank you for your business.", 72, 780, footerStyle);
     }, height: 30f);
 
+// A small generated logo; in real code use PdfImage.FromBytes(File.ReadAllBytes("logo.png")).
+var logoPixels = new byte[64 * 64 * 3];
+for (int y = 0; y < 64; y++)
+    for (int x = 0; x < 64; x++)
+    {
+        int i = (y * 64 + x) * 3;
+        logoPixels[i] = (byte)(x * 4); logoPixels[i + 1] = (byte)(y * 4); logoPixels[i + 2] = 160;
+    }
+var logo = PdfImage.FromRgb24(logoPixels, 64, 64);
+
 layout
+    .Bookmark("Invoice")
+    .Image(logo, width: 48)
+    .Spacer(6)
     .Text("ACME Corp", titleStyle)
     .Spacer(4)
     .Text("123 Business Ave, Toronto, ON", bodyStyle)
@@ -86,7 +101,16 @@ layout
             .Text($"Total: {total:C}", boldStyle.WithAlignment(TextAlignment.Right)));
     })
     .Spacer(24)
+    .Bookmark("Terms and Conditions")
     .Text("Terms and Conditions", titleStyle.WithSize(14))
+    .Spacer(8)
+    .Box(LayoutBoxStyle.Default.WithPadding(8).WithBackground(PdfColor.FromRgb(245, 245, 245)).WithBorder(PdfColor.LightGray, 0.5f), box => box
+        .Spans(s => s
+            .Span("Questions about this invoice? ")
+            .Span("Email billing@acme.example", boldStyle)
+            .Span(" or visit ")
+            .Link("our support page", "https://example.com/support", bodyStyle.WithColor(PdfColor.Blue)))
+    )
     .Spacer(8)
     .Text(string.Join(" ", Enumerable.Repeat(
         "Payment is due within 14 days of the invoice date. Late payments are subject to a " +

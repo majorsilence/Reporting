@@ -14,7 +14,7 @@ Majorsilence.Pdf is tri licensed under Apache-2.0, MIT, or BSD-3-Clause. Pick yo
 | Capability | Package |
 |---|---|
 | Text, shapes, images, tables, links | `Majorsilence.Pdf` |
-| Fluent flow layout — rows, columns, auto-pagination (`PdfLayout`) | `Majorsilence.Pdf` |
+| Fluent flow layout — rows, columns, boxes, splitting text/tables, "Page X of Y" headers and footers (`PdfLayout`) | `Majorsilence.Pdf` |
 | PDF/A-1b, PDF/A-2b, PDF/A-3b conformance | `Majorsilence.Pdf` |
 | Multi-document merge | `Majorsilence.Pdf` |
 | AES-128 (R=4) / AES-256 (R=6) password protection | `Majorsilence.Pdf.Security` |
@@ -118,6 +118,23 @@ table.AddRow("Item B", "Second item", "2.50");
 canvas.DrawTable(table, x: 72, y: 120, out float tableBottom);
 ```
 
+### Flow layout (`PdfLayout`)
+
+`PdfLayout` builds a tree of elements and paginates the whole document before drawing, so content splits across pages correctly and headers and footers can say "Page 3 of 12". See [Layout.md](Layout.md) for the full guide.
+
+```csharp
+var layout = PdfLayout.Begin(doc, PageSizes.A4)
+    .WithMargins(54)
+    .WithFooterText("Page {page} of {pages}");
+
+layout.Bookmark("Summary")
+      .Text("Quarterly report", TextStyle.Default.WithSize(20).WithBold())
+      .Spans(s => s.Span("Revenue grew ").Span("12%", TextStyle.Default.WithBold()).Span(" — see ").Link("details", "https://example.com"))
+      .Table(salesTable)           // splits between rows and repeats the header
+      .Box(LayoutBoxStyle.Default.WithPadding(8).WithBackground(PdfColor.LightGray), b => b.Text(longNote));
+layout.End().Save("report.pdf");
+```
+
 ### PDF/A conformance
 
 ```csharp
@@ -158,9 +175,33 @@ Unicode shaping with multi-script support (Latin, Cyrillic, Greek, Arabic, CJK) 
 ### Images
 
 ```csharp
-byte[] imageBytes = File.ReadAllBytes("photo.jpg");
-canvas.DrawImage(imageBytes, x: 72, y: 200, width: 200, height: 150);
+// JPEG or PNG (decoded in the core library: grayscale, RGB, palette, alpha; non-interlaced 8-bit).
+var photo = PdfImage.FromBytes(File.ReadAllBytes("photo.jpg"));
+canvas.DrawImage(photo, x: 72, y: 200, width: 200, height: 150);
+
+// Or hand over pixels you decoded yourself.
+var raw = PdfImage.FromRgba(pixels, pixelWidth: 64, pixelHeight: 64);
 ```
+
+Identical images drawn on several pages are embedded once.
+
+### Clipping, transforms, bookmarks and internal links
+
+```csharp
+canvas.SaveState().ClipRoundedRectangle(72, 72, 200, 100, radius: 12);
+canvas.DrawImage(photo, 72, 72, 200, 100);        // clipped to the rounded rectangle
+canvas.RestoreState();
+
+canvas.SaveState().Rotate(-15, cx: 300, cy: 300);  // clockwise degrees about a point
+canvas.DrawText("DRAFT", 300, 300, TextStyle.Default.WithSize(48));
+canvas.RestoreState();
+
+canvas.AddBookmark("Chapter 1", y: 72);                          // outline entry
+canvas.AddDestination("totals", x: 72, y: 400);                  // named destination
+otherPage.AddInternalLink(72, 72, 100, 14, "totals");            // click to jump
+```
+
+`BreakLines` and `GetLineHeight` expose the wrapping `DrawTextBox` uses, for rich-text work.
 
 ### Links and tooltips
 

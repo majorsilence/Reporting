@@ -2,6 +2,7 @@
 // Copyright (C) 2026 Peter Gill <peter@majorsilence.com>
 
 using System;
+using System.Collections.Generic;
 
 namespace Majorsilence.Pdf.Layout
 {
@@ -12,23 +13,17 @@ namespace Majorsilence.Pdf.Layout
     /// </summary>
     public sealed class LayoutRow
     {
-        private readonly PdfCanvas _canvas;
-        private readonly float _totalWidth;
-        private readonly bool _measureOnly;
-        private readonly float _originY;
-        private float _cumulativeX;
-        private float _maxHeight;
+        private readonly List<(LayoutColumnWidth, StackElement)> _columns = new List<(LayoutColumnWidth, StackElement)>();
 
-        internal LayoutRow(PdfCanvas canvas, float totalWidth, bool measureOnly, float originX = 0f, float originY = 0f)
+        private LayoutRow() { }
+
+        internal static LayoutElement Build(Action<LayoutRow> configure)
         {
-            _canvas = canvas;
-            _totalWidth = totalWidth;
-            _measureOnly = measureOnly;
-            _cumulativeX = originX;
-            _originY = originY;
+            if (configure == null) throw new ArgumentNullException(nameof(configure));
+            var row = new LayoutRow();
+            configure(row);
+            return new RowElement(row._columns.ToArray());
         }
-
-        internal float MeasuredHeight => _maxHeight;
 
         /// <summary>Add a column occupying <paramref name="widthFraction"/> of the row's total width.</summary>
         /// <param name="widthFraction">A value in (0, 1]. Fractions across all columns in the row should sum to at most 1.</param>
@@ -37,23 +32,19 @@ namespace Majorsilence.Pdf.Layout
             if (widthFraction <= 0f || widthFraction > 1f)
                 throw new ArgumentOutOfRangeException(nameof(widthFraction),
                     "Column width fraction must be greater than 0 and no more than 1.");
-            return AddColumn(_totalWidth * widthFraction, configure);
+            return AddColumn(new LayoutColumnWidth(widthFraction, isFraction: true), configure);
         }
 
         /// <summary>Add a column with a fixed width. Use <see cref="LayoutColumn.Fixed"/> to build the width.</summary>
-        public LayoutRow Column(LayoutColumnWidth width, Action<LayoutColumn> configure)
-        {
-            float points = width.IsFraction ? _totalWidth * width.Value : width.Value;
-            return AddColumn(points, configure);
-        }
+        public LayoutRow Column(LayoutColumnWidth width, Action<LayoutColumn> configure) =>
+            AddColumn(width, configure);
 
-        private LayoutRow AddColumn(float widthPoints, Action<LayoutColumn> configure)
+        private LayoutRow AddColumn(LayoutColumnWidth width, Action<LayoutColumn> configure)
         {
             if (configure == null) throw new ArgumentNullException(nameof(configure));
-            var column = new LayoutColumn(_canvas, widthPoints, _measureOnly, _cumulativeX, _originY);
+            var column = new LayoutColumn();
             configure(column);
-            if (column.MeasuredHeight > _maxHeight) _maxHeight = column.MeasuredHeight;
-            _cumulativeX += widthPoints;
+            _columns.Add((width, column.ToElement()));
             return this;
         }
     }

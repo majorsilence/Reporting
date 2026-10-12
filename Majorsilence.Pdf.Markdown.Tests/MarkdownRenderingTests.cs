@@ -208,5 +208,90 @@ namespace Majorsilence.Pdf.Markdown.Tests
             var letter = doc.GetPage(1).Letters.First(l => l.Value == "B");
             Assert.That(letter.PointSize, Is.EqualTo(40f).Within(0.5f));
         }
+
+        private static string[] LayoutPages(string markdown, List<string>? warnings = null)
+        {
+            var doc = PdfDocument.Create();
+            var layout = PdfLayout.Begin(doc, PageSizes.A4).WithMargins(36);
+            layout.Markdown(markdown, warnings: warnings);
+            using var pdf = PdfPig.Open(layout.End().ToBytes());
+            return pdf.GetPages().Select(p => string.Join(" ", p.GetWords().Select(w => w.Text))).ToArray();
+        }
+
+        [Test]
+        public void LayoutMarkdown_ParagraphTallerThanAPage_SplitsInsteadOfThrowing()
+        {
+            string paragraph = string.Join(" ", Enumerable.Range(1, 4000).Select(i => $"w{i}x"));
+            var pages = LayoutPages(paragraph);
+            Assert.That(pages.Length, Is.GreaterThan(1));
+            var all = string.Join(" ", pages);
+            Assert.That(System.Text.RegularExpressions.Regex.Matches(all, @"w\d+x").Count, Is.EqualTo(4000));
+        }
+
+        [Test]
+        public void LayoutMarkdown_LongCodeBlock_SplitsBetweenLines()
+        {
+            string code = "```\n" + string.Join("\n", Enumerable.Range(1, 200).Select(i => $"code{i:D3}")) + "\n```";
+            var pages = LayoutPages(code);
+            Assert.That(pages.Length, Is.GreaterThan(1));
+            var all = string.Join(" ", pages);
+            for (int i = 1; i <= 200; i += 37)
+                Assert.That(all, Does.Contain($"code{i:D3}"));
+            Assert.That(pages[^1], Does.Contain("code200"));
+        }
+
+        [Test]
+        public void LayoutMarkdown_LongTable_SplitsAndRepeatsTheHeader()
+        {
+            var sb = new System.Text.StringBuilder("| Name | Value |\n|---|---|\n");
+            for (int i = 0; i < 150; i++) sb.Append($"| item{i:D3} | v{i} |\n");
+            var pages = LayoutPages(sb.ToString());
+            Assert.That(pages.Length, Is.GreaterThan(1));
+            foreach (var page in pages) Assert.That(page, Does.Contain("Name"));
+            Assert.That(string.Join(" ", pages), Does.Contain("item149"));
+        }
+
+        [Test]
+        public void LayoutMarkdown_LongList_SplitsBetweenItems()
+        {
+            var md = string.Join("\n", Enumerable.Range(1, 150).Select(i => $"- entry{i:D3} text"));
+            var pages = LayoutPages(md);
+            Assert.That(pages.Length, Is.GreaterThan(1));
+            var all = string.Join(" ", pages);
+            Assert.That(System.Text.RegularExpressions.Regex.Matches(all, @"entry\d{3}").Count, Is.EqualTo(150));
+        }
+
+        [Test]
+        public void LayoutMarkdown_Heading_IsNotStrandedAtTheFootOfAPage()
+        {
+            // Fill nearly the whole first page, leaving room for a heading but not the text after it.
+            var filler = string.Join("\n\n", Enumerable.Range(1, 38).Select(i => $"filler{i:D2} text"));
+            var pages = LayoutPages(filler + "\n\n# LATE HEADING\n\nfollow-up paragraph");
+            int headingPage = Array.FindIndex(pages, p => p.Contains("LATE"));
+            Assert.That(pages[headingPage], Does.Contain("follow-up"), "the heading shares a page with the text after it");
+        }
+
+        [Test]
+        public void LayoutMarkdown_InsideAColumn_Renders()
+        {
+            var doc = PdfDocument.Create();
+            var layout = PdfLayout.Begin(doc, PageSizes.A4).WithMargins(36);
+            layout.Row(r =>
+            {
+                r.Column(0.5f, c => c.Markdown("## Left\n\nleft text", 250));
+                r.Column(0.5f, c => c.Markdown("## Right\n\nright text", 250));
+            });
+            using var pdf = PdfPig.Open(layout.End().ToBytes());
+            var text = string.Join(" ", pdf.GetPage(1).GetWords().Select(w => w.Text));
+            Assert.That(text, Does.Contain("Left").And.Contain("right"));
+        }
+
+        [Test]
+        public void LayoutMarkdown_Link_AddsAnnotation()
+        {
+            var doc = PdfDocument.Create();
+            PdfLayout.Begin(doc, PageSizes.A4).Markdown("see [docs](https://example.com/x)").End();
+            Assert.That(System.Text.Encoding.Latin1.GetString(doc.ToBytes()), Does.Contain("https://example.com/x"));
+        }
     }
 }

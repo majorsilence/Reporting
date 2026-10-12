@@ -2,96 +2,193 @@
 // Copyright (C) 2026 Peter Gill <peter@majorsilence.com>
 
 using System;
+using System.Collections.Generic;
 
 namespace Majorsilence.Pdf.Layout
 {
     /// <summary>
-    /// Builds the content of a single column inside a <see cref="PdfLayout.Row"/>. Instances are
-    /// supplied to your configuration callback twice — once to measure the column's height and
-    /// once to actually draw it — so avoid side effects (mutating captured state) inside the
-    /// callback; only the calls you make on the <see cref="LayoutColumn"/> itself should matter.
+    /// Collects the content of a single column inside a <see cref="PdfLayout.Row"/>, or of a
+    /// <see cref="Box"/>. Calls only record elements into the layout tree; nothing is measured or
+    /// drawn until the document is paginated, so your configuration callback runs exactly once.
     /// </summary>
     public sealed class LayoutColumn
     {
-        private readonly PdfCanvas _canvas;
-        private readonly float _width;
-        private readonly bool _measureOnly;
-        private readonly float _originX;
-        private readonly float _originY;
-        private float _cursorY;
+        private readonly List<LayoutElement> _items = new List<LayoutElement>();
 
-        internal LayoutColumn(PdfCanvas canvas, float width, bool measureOnly, float originX, float originY)
-        {
-            _canvas = canvas;
-            _width = width;
-            _measureOnly = measureOnly;
-            _originX = originX;
-            _originY = originY;
-        }
+        internal LayoutColumn() { }
 
-        internal float MeasuredHeight => _cursorY;
+        internal StackElement ToElement() => new StackElement(_items.ToArray());
 
         /// <summary>A fixed column width in PDF points, for <see cref="LayoutRow.Column(LayoutColumnWidth, Action{LayoutColumn})"/>.</summary>
         public static LayoutColumnWidth Fixed(float points) => new LayoutColumnWidth(points, isFraction: false);
 
-        /// <summary>Draw word-wrapped text at the column's cursor, advancing it by the wrapped height.</summary>
+        /// <summary>Add word-wrapped text.</summary>
         public LayoutColumn Text(string text, TextStyle? style = null)
         {
-            style ??= TextStyle.Default;
-            if (string.IsNullOrEmpty(text)) return this;
-
-            float height = _canvas.MeasureTextBoxHeight(text, _width, style);
-            if (!_measureOnly)
-                _canvas.DrawTextBox(text, _originX, _originY + _cursorY, _width, height + 1f, style);
-            _cursorY += height;
+            if (!string.IsNullOrEmpty(text)) _items.Add(new TextElement(text, style ?? TextStyle.Default));
             return this;
         }
 
-        /// <summary>Advance the column's cursor by <paramref name="height"/> points without drawing anything.</summary>
+        /// <summary>Add <paramref name="height"/> points of empty space.</summary>
         public LayoutColumn Spacer(float height)
         {
-            _cursorY += height;
+            _items.Add(new SpacerElement(height));
             return this;
         }
 
-        /// <summary>Draw a full-width horizontal rule at the column's cursor.</summary>
+        /// <summary>Add a full-width horizontal rule followed by <paramref name="gapAfter"/> points of space.</summary>
         public LayoutColumn Line(StrokeStyle? style = null, float gapAfter = 8f)
         {
-            if (!_measureOnly)
-                _canvas.DrawLine(_originX, _originY + _cursorY, _originX + _width, _originY + _cursorY, style);
-            _cursorY += gapAfter;
+            _items.Add(new LineElement(style, gapAfter));
             return this;
         }
 
-        /// <summary>Draw <paramref name="table"/> at the column's cursor, advancing it by the table's height.</summary>
+        /// <summary>Add <paramref name="table"/>.</summary>
         public LayoutColumn Table(PdfTable table)
         {
             if (table == null) throw new ArgumentNullException(nameof(table));
-            float height = _canvas.MeasureTableHeight(table);
-            if (!_measureOnly)
-                _canvas.DrawTable(table, _originX, _originY + _cursorY, out _);
-            _cursorY += height;
+            _items.Add(new TableElement(table));
             return this;
         }
 
         /// <summary>Nest a row inside this column. The nested row's width is this column's width.</summary>
         public LayoutColumn Row(Action<LayoutRow> configure)
         {
-            if (configure == null) throw new ArgumentNullException(nameof(configure));
-            var nested = new LayoutRow(_canvas, _width, _measureOnly, _originX, _originY + _cursorY);
-            configure(nested);
-            _cursorY += nested.MeasuredHeight;
+            _items.Add(LayoutRow.Build(configure));
             return this;
         }
 
-        /// <summary>Escape hatch for arbitrary drawing at the column's current cursor position.</summary>
+        /// <summary>Wrap content in a box with padding, border and/or background.</summary>
+        public LayoutColumn Box(LayoutBoxStyle style, Action<LayoutColumn> content)
+        {
+            _items.Add(BuildBox(style, content));
+            return this;
+        }
+
+        /// <summary>Keep the content together: it moves to the next page whole rather than splitting.</summary>
+        public LayoutColumn KeepTogether(Action<LayoutColumn> content) =>
+            Box(LayoutBoxStyle.Default.WithKeepTogether(), content);
+
+        /// <summary>
+        /// Include <paramref name="content"/> only when <paramref name="condition"/> returns true.
+        /// The condition is evaluated while the document is paginated (at <c>End</c>).
+        /// </summary>
+        public LayoutColumn When(Func<bool> condition, Action<LayoutColumn> content)
+        {
+            _items.Add(BuildConditional(condition, content));
+            return this;
+        }
+
+        /// <summary>Add a bookmark (outline entry) at this position. <paramref name="level"/> 0 is top level.</summary>
+        public LayoutColumn Bookmark(string title, int level = 0)
+        {
+            if (title == null) throw new ArgumentNullException(nameof(title));
+            _items.Add(new AnchorElement(title, level, null));
+            return this;
+        }
+
+        /// <summary>Name this position so internal links can jump to it.</summary>
+        public LayoutColumn Destination(string name)
+        {
+            if (string.IsNullOrEmpty(name)) throw new ArgumentException("A destination needs a name.", nameof(name));
+            _items.Add(new AnchorElement(null, 0, name));
+            return this;
+        }
+
+        /// <summary>Add mixed-style text: runs with their own style, links and page-number placeholders.</summary>
+        public LayoutColumn Spans(Action<LayoutSpans> content, TextAlignment alignment = TextAlignment.Left, TextStyle? defaultStyle = null)
+        {
+            _items.Add(LayoutBuilders.Spans(content, alignment, defaultStyle));
+            return this;
+        }
+
+        /// <summary>Flow items left to right, wrapping onto a new line when the row is full.</summary>
+        public LayoutColumn Inlined(Action<LayoutInline> content, float horizontalSpacing = 4f, float verticalSpacing = 4f, TextAlignment alignment = TextAlignment.Left)
+        {
+            _items.Add(LayoutBuilders.Inlined(content, horizontalSpacing, verticalSpacing, alignment));
+            return this;
+        }
+
+        /// <summary>Add a header and footer around <paramref name="content"/> that repeat on every page the content spans. Use <c>ShowOnce</c> / <c>SkipOnce</c> inside them to vary that.</summary>
+        public LayoutColumn Decoration(Action<LayoutColumn>? header, Action<LayoutColumn> content, Action<LayoutColumn>? footer = null)
+        {
+            _items.Add(LayoutBuilders.Decoration(header, content, footer));
+            return this;
+        }
+
+        /// <summary>Stack layers in one rectangle: the primary layer sets the size, others draw behind or in front of it.</summary>
+        public LayoutColumn Layers(Action<LayoutLayers> content)
+        {
+            _items.Add(LayoutBuilders.Layers(content));
+            return this;
+        }
+
+        /// <summary>Content that appears only on the first page of a repeating container such as a <c>Decoration</c> header.</summary>
+        public LayoutColumn ShowOnce(Action<LayoutColumn> content)
+        {
+            _items.Add(LayoutBuilders.Once(content, skipFirst: false));
+            return this;
+        }
+
+        /// <summary>Content that appears on every page of a repeating container such as a <c>Decoration</c> header except the first.</summary>
+        public LayoutColumn SkipOnce(Action<LayoutColumn> content)
+        {
+            _items.Add(LayoutBuilders.Once(content, skipFirst: true));
+            return this;
+        }
+
+        /// <summary>Start a new page unless at least <paramref name="minimumHeight"/> points remain on the current one.</summary>
+        public LayoutColumn EnsureSpace(float minimumHeight)
+        {
+            _items.Add(new EnsureSpaceElement(minimumHeight));
+            return this;
+        }
+
+        /// <summary>Add a reusable <see cref="ILayoutComponent"/>.</summary>
+        public LayoutColumn Component(ILayoutComponent component)
+        {
+            _items.Add(LayoutBuilders.Component(component));
+            return this;
+        }
+
+        /// <summary>Indent <paramref name="content"/> by <paramref name="indent"/> points and draw <paramref name="marker"/> (a bullet or number) beside its first line.</summary>
+        public LayoutColumn Bullet(string marker, float indent, Action<LayoutColumn> content, TextStyle? markerStyle = null)
+        {
+            _items.Add(LayoutBuilders.Marker(marker, markerStyle, indent, content));
+            return this;
+        }
+
+        /// <summary>Add an image. With only <paramref name="width"/> (or neither) the height follows the aspect ratio; with both, <paramref name="fit"/> decides how the image fills the box.</summary>
+        public LayoutColumn Image(PdfImage image, float? width = null, float? height = null, ImageFit fit = ImageFit.Contain, TextAlignment alignment = TextAlignment.Left)
+        {
+            _items.Add(LayoutBuilders.Image(image, width, height, fit, alignment));
+            return this;
+        }
+
+        /// <summary>Escape hatch for arbitrary drawing in a region of the given height.</summary>
         public LayoutColumn Canvas(Action<PdfCanvas, LayoutRect> draw, float height)
         {
             if (draw == null) throw new ArgumentNullException(nameof(draw));
-            if (!_measureOnly)
-                draw(_canvas, new LayoutRect(_originX, _originY + _cursorY, _width, height));
-            _cursorY += height;
+            _items.Add(new CanvasElement(draw, height));
             return this;
+        }
+
+        internal static LayoutElement BuildConditional(Func<bool> condition, Action<LayoutColumn> content)
+        {
+            if (condition == null) throw new ArgumentNullException(nameof(condition));
+            if (content == null) throw new ArgumentNullException(nameof(content));
+            var inner = new LayoutColumn();
+            content(inner);
+            return new ConditionalElement(condition, inner.ToElement());
+        }
+
+        internal static LayoutElement BuildBox(LayoutBoxStyle style, Action<LayoutColumn> content)
+        {
+            if (style == null) throw new ArgumentNullException(nameof(style));
+            if (content == null) throw new ArgumentNullException(nameof(content));
+            var inner = new LayoutColumn();
+            content(inner);
+            return new BoxElement(style, inner.ToElement());
         }
     }
 }

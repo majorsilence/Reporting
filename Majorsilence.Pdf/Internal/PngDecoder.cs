@@ -9,8 +9,8 @@ using System.IO.Compression;
 namespace Majorsilence.Pdf.Internal
 {
     // Minimal PNG decoder that produces raw RGBA bytes.
-    // Supports 8-bit RGB (colorType 2), 8-bit indexed/palette (colorType 3),
-    // and 8-bit RGBA (colorType 6) — the formats used by color emoji fonts.
+    // Supports 8-bit grayscale (0), RGB (2), indexed/palette (3), grayscale+alpha (4) and
+    // RGBA (6) — the formats used by color emoji fonts and most application images.
     // Non-interlaced images only.
     internal static class PngDecoder
     {
@@ -30,7 +30,7 @@ namespace Majorsilence.Pdf.Internal
                 if (png[i] != PngSignature[i]) return false;
 
             // Parse chunks
-            int w = 0, h = 0, bitDepth = 0, colorType = 0;
+            int w = 0, h = 0, bitDepth = 0, colorType = 0, interlace = 0;
             byte[]? plte = null;   // PLTE palette (RGB triples)
             byte[]? trns = null;   // tRNS transparency data
             var idatChunks = new List<byte[]>();
@@ -53,6 +53,7 @@ namespace Majorsilence.Pdf.Internal
                         h         = ReadI32(png, dataOff + 4);
                         bitDepth  = png[dataOff + 8];
                         colorType = png[dataOff + 9];
+                        interlace = png[dataOff + 12];
                         break;
 
                     case "PLTE":
@@ -78,7 +79,8 @@ namespace Majorsilence.Pdf.Internal
             }
 
             if (w <= 0 || h <= 0 || bitDepth != 8) return false;
-            if (colorType != 2 && colorType != 3 && colorType != 6) return false;
+            if (colorType != 0 && colorType != 2 && colorType != 3 && colorType != 4 && colorType != 6) return false;
+            if (interlace != 0) return false;
 
             // Concatenate and decompress IDAT
             int total = 0;
@@ -101,7 +103,7 @@ namespace Majorsilence.Pdf.Internal
             catch { return false; }
 
             // Un-filter scanlines
-            int bpp = colorType == 3 ? 1 : (colorType == 6 ? 4 : 3);
+            int bpp = colorType == 0 || colorType == 3 ? 1 : colorType == 4 ? 2 : colorType == 6 ? 4 : 3;
             int stride = w * bpp;
             int expectedFiltered = h * (stride + 1);
             if (filtered.Length < expectedFiltered) return false;
@@ -138,6 +140,17 @@ namespace Majorsilence.Pdf.Internal
                 if (colorType == 6) // RGBA
                 {
                     Buffer.BlockCopy(curr, 0, rgba, dstBase, stride);
+                }
+                else if (colorType == 0 || colorType == 4) // grayscale (+ alpha)
+                {
+                    for (int i = 0; i < w; i++)
+                    {
+                        byte g = curr[i * bpp];
+                        rgba[dstBase + i * 4]     = g;
+                        rgba[dstBase + i * 4 + 1] = g;
+                        rgba[dstBase + i * 4 + 2] = g;
+                        rgba[dstBase + i * 4 + 3] = colorType == 4 ? curr[i * 2 + 1] : (byte)255;
+                    }
                 }
                 else if (colorType == 2) // RGB
                 {

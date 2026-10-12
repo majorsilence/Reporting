@@ -43,3 +43,98 @@ namespace Majorsilence.Pdf.Layout
         }
     }
 }
+
+namespace Majorsilence.Pdf.Layout
+{
+    /// <summary>
+    /// Padding, border, background and keep-together settings for a box created with
+    /// <see cref="PdfLayout.Box"/> or <see cref="LayoutColumn.Box"/>. Immutable; each
+    /// <c>With…</c> call returns a modified copy.
+    /// </summary>
+    public sealed class LayoutBoxStyle
+    {
+        public float PaddingLeft { get; private set; }
+        public float PaddingTop { get; private set; }
+        public float PaddingRight { get; private set; }
+        public float PaddingBottom { get; private set; }
+        public float BorderWidth { get; private set; }
+        public PdfColor? BorderColor { get; private set; }
+        public PdfColor? Background { get; private set; }
+
+        /// <summary>When true the box never splits across pages; it moves to the next page whole.</summary>
+        public bool IsKeepTogether { get; private set; }
+
+        /// <summary>Fixed box width in points, capped at the available width; null fills the available width.</summary>
+        public float? Width { get; private set; }
+
+        /// <summary>Minimum box height in points; the box is padded out to it.</summary>
+        public float MinHeight { get; private set; }
+
+        /// <summary>Maximum box height in points (0 = unlimited). Content beyond it continues on the next page.</summary>
+        public float MaxHeight { get; private set; }
+
+        /// <summary>Minimum box width in points (0 = none).</summary>
+        public float MinWidth { get; private set; }
+
+        /// <summary>Maximum box width in points (0 = none).</summary>
+        public float MaxWidth { get; private set; }
+
+        /// <summary>When true the box is only as wide as its content (up to the available width).</summary>
+        public bool IsShrink { get; private set; }
+
+        /// <summary>Where a box narrower than its container sits horizontally.</summary>
+        public TextAlignment Alignment { get; private set; } = TextAlignment.Left;
+
+        public static LayoutBoxStyle Default { get; } = new LayoutBoxStyle();
+
+        public LayoutBoxStyle WithWidth(float width) { var s = Clone(); s.Width = width; return s; }
+
+        public LayoutBoxStyle WithMinHeight(float height) { var s = Clone(); s.MinHeight = height; return s; }
+
+        public LayoutBoxStyle WithMaxHeight(float height) { var s = Clone(); s.MaxHeight = height; return s; }
+
+        /// <summary>A fixed height: sets both the minimum and the maximum.</summary>
+        public LayoutBoxStyle WithHeight(float height) { var s = Clone(); s.MinHeight = height; s.MaxHeight = height; return s; }
+
+        public LayoutBoxStyle WithMinWidth(float width) { var s = Clone(); s.MinWidth = width; return s; }
+
+        public LayoutBoxStyle WithMaxWidth(float width) { var s = Clone(); s.MaxWidth = width; return s; }
+
+        /// <summary>Size the box to its content's width instead of filling the available width.</summary>
+        public LayoutBoxStyle WithShrink(bool shrink = true) { var s = Clone(); s.IsShrink = shrink; return s; }
+
+        public LayoutBoxStyle WithAlignment(TextAlignment alignment) { var s = Clone(); s.Alignment = alignment; return s; }
+
+        public LayoutBoxStyle WithPadding(float all) => WithPadding(all, all, all, all);
+
+        public LayoutBoxStyle WithPadding(float left, float top, float right, float bottom)
+        {
+            var s = Clone();
+            s.PaddingLeft = left; s.PaddingTop = top; s.PaddingRight = right; s.PaddingBottom = bottom;
+            return s;
+        }
+
+        public LayoutBoxStyle WithBorder(PdfColor color, float width = 1f)
+        {
+            var s = Clone();
+            s.BorderColor = color; s.BorderWidth = width;
+            return s;
+        }
+
+        public LayoutBoxStyle WithBackground(PdfColor color)
+        {
+            var s = Clone();
+            s.Background = color;
+            return s;
+        }
+
+        public LayoutBoxStyle WithKeepTogether(bool keepTogether = true)
+        {
+            var s = Clone();
+            s.IsKeepTogether = keepTogether;
+            return s;
+        }
+
+        private LayoutBoxStyle Clone() => (LayoutBoxStyle)MemberwiseClone();
+    }
+}
