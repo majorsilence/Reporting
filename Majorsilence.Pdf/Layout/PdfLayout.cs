@@ -148,6 +148,37 @@ namespace Majorsilence.Pdf.Layout
         }
 
         /// <summary>
+        /// A header built from layout content (text, spans with <c>PageNumber()</c> /
+        /// <c>TotalPages()</c>, boxes…) instead of a drawing callback. The content must fit in
+        /// <paramref name="height"/>. Must be called before the first drawing call.
+        /// </summary>
+        public PdfLayout WithHeaderContent(Action<LayoutColumn> content, float height = 24f)
+        {
+            var element = LayoutBuilders.Stack(content);
+            return WithHeader((canvas, page, total) => DrawRegion(canvas, element, _marginLeft, _marginTop, height), height);
+        }
+
+        /// <summary>
+        /// A footer built from layout content instead of a drawing callback. The content must fit
+        /// in <paramref name="height"/>. Must be called before the first drawing call.
+        /// </summary>
+        public PdfLayout WithFooterContent(Action<LayoutColumn> content, float height = 24f)
+        {
+            var element = LayoutBuilders.Stack(content);
+            return WithFooter((canvas, page, total) =>
+                DrawRegion(canvas, element, _marginLeft, _pageSize.Height - _marginBottom - height, height), height);
+        }
+
+        private void DrawRegion(PdfCanvas canvas, LayoutElement element, float x, float y, float height)
+        {
+            var fit = element.Measure(canvas, ContentWidth, height);
+            if (fit.Kind == FitKind.Wrap || fit.Kind == FitKind.Partial)
+                throw new InvalidOperationException(
+                    $"Header/footer content does not fit in its {height:0.##}pt region. Increase the height or reduce the content.");
+            if (fit.Kind == FitKind.Full) fit.Head!.Draw(canvas, x, y, ContentWidth, fit.Height);
+        }
+
+        /// <summary>
         /// A footer that draws <paramref name="template"/> with <c>{page}</c> and <c>{pages}</c>
         /// replaced by the current page number and the total page count, e.g. "Page {page} of {pages}".
         /// </summary>
@@ -184,8 +215,10 @@ namespace Majorsilence.Pdf.Layout
         {
             EnsureStarted();
             if (_ended) throw new InvalidOperationException("The layout has already been ended.");
-            if (element.Measure(_firstCanvas!, ContentWidth, ContentHeight).Kind == FitKind.Wrap)
-                throw TooTall(what);
+            FitKind kind;
+            using (LayoutContext.Relax())
+                kind = element.Measure(_firstCanvas!, ContentWidth, ContentHeight).Kind;
+            if (kind == FitKind.Wrap) throw TooTall(what);
             _elements.Add(element);
             return this;
         }
@@ -271,6 +304,42 @@ namespace Majorsilence.Pdf.Layout
             return this;
         }
 
+        /// <summary>Add mixed-style text: runs with their own style, links and page-number placeholders.</summary>
+        public PdfLayout Spans(Action<LayoutSpans> content, TextAlignment alignment = TextAlignment.Left, TextStyle? defaultStyle = null) =>
+            Add(LayoutBuilders.Spans(content, alignment, defaultStyle), "Spans");
+
+        /// <summary>Flow items left to right, wrapping onto a new line when the row is full.</summary>
+        public PdfLayout Inlined(Action<LayoutInline> content, float horizontalSpacing = 4f, float verticalSpacing = 4f, TextAlignment alignment = TextAlignment.Left) =>
+            Add(LayoutBuilders.Inlined(content, horizontalSpacing, verticalSpacing, alignment), "Inlined");
+
+        /// <summary>Add a header and footer around <paramref name="content"/> that repeat on every page the content spans. Use <c>ShowOnce</c> / <c>SkipOnce</c> inside them to vary that.</summary>
+        public PdfLayout Decoration(Action<LayoutColumn>? header, Action<LayoutColumn> content, Action<LayoutColumn>? footer = null) =>
+            Add(LayoutBuilders.Decoration(header, content, footer), "Decoration");
+
+        /// <summary>Stack layers in one rectangle: the primary layer sets the size, others draw behind or in front of it.</summary>
+        public PdfLayout Layers(Action<LayoutLayers> content) =>
+            Add(LayoutBuilders.Layers(content), "Layers");
+
+        /// <summary>Content that appears only on the first page of a repeating container such as a <c>Decoration</c> header.</summary>
+        public PdfLayout ShowOnce(Action<LayoutColumn> content) =>
+            Add(LayoutBuilders.Once(content, skipFirst: false), "ShowOnce");
+
+        /// <summary>Content that appears on every page of a repeating container such as a <c>Decoration</c> header except the first.</summary>
+        public PdfLayout SkipOnce(Action<LayoutColumn> content) =>
+            Add(LayoutBuilders.Once(content, skipFirst: true), "SkipOnce");
+
+        /// <summary>Start a new page unless at least <paramref name="minimumHeight"/> points remain on the current one.</summary>
+        public PdfLayout EnsureSpace(float minimumHeight) =>
+            Add(new EnsureSpaceElement(minimumHeight), "EnsureSpace");
+
+        /// <summary>Add a reusable <see cref="ILayoutComponent"/>.</summary>
+        public PdfLayout Component(ILayoutComponent component) =>
+            Add(LayoutBuilders.Component(component), "Component");
+
+        /// <summary>Indent <paramref name="content"/> by <paramref name="indent"/> points and draw <paramref name="marker"/> (a bullet or number) beside its first line.</summary>
+        public PdfLayout Bullet(string marker, float indent, Action<LayoutColumn> content, TextStyle? markerStyle = null) =>
+            Add(LayoutBuilders.Marker(marker, markerStyle, indent, content), "Bullet");
+
         /// <summary>Add a bookmark (outline entry) at this position. <paramref name="level"/> 0 is top level.</summary>
         public PdfLayout Bookmark(string title, int level = 0)
         {
@@ -317,6 +386,7 @@ namespace Majorsilence.Pdf.Layout
             for (int i = 0; i < pages.Count; i++)
             {
                 var canvas = i == 0 ? _firstCanvas! : _doc.AddPage(_pageSize);
+                LayoutContext.SetPage(i + 1, pages.Count);
                 _background?.Invoke(canvas, i + 1, pages.Count);
                 _header?.Invoke(canvas, i + 1, pages.Count);
                 foreach (var (element, y, height) in pages[i])
@@ -324,6 +394,7 @@ namespace Majorsilence.Pdf.Layout
                 _footer?.Invoke(canvas, i + 1, pages.Count);
                 _foreground?.Invoke(canvas, i + 1, pages.Count);
             }
+            LayoutContext.ClearPage();
             return _doc;
         }
 
@@ -349,6 +420,12 @@ namespace Majorsilence.Pdf.Layout
 
                 bool pageIsEmpty = current.Count == 0;
                 var fit = element.Measure(_firstCanvas!, ContentWidth, ContentHeight - y);
+                if (fit.Kind == FitKind.Wrap && pageIsEmpty)
+                {
+                    // Nothing else can be moved aside: drop orphan/widow control and try once more.
+                    using (LayoutContext.Relax())
+                        fit = element.Measure(_firstCanvas!, ContentWidth, ContentHeight - y);
+                }
                 switch (fit.Kind)
                 {
                     case FitKind.Empty:

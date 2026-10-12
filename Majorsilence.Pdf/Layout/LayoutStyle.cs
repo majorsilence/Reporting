@@ -70,6 +70,18 @@ namespace Majorsilence.Pdf.Layout
         /// <summary>Minimum box height in points; the box is padded out to it.</summary>
         public float MinHeight { get; private set; }
 
+        /// <summary>Maximum box height in points (0 = unlimited). Content beyond it continues on the next page.</summary>
+        public float MaxHeight { get; private set; }
+
+        /// <summary>Minimum box width in points (0 = none).</summary>
+        public float MinWidth { get; private set; }
+
+        /// <summary>Maximum box width in points (0 = none).</summary>
+        public float MaxWidth { get; private set; }
+
+        /// <summary>When true the box is only as wide as its content (up to the available width).</summary>
+        public bool IsShrink { get; private set; }
+
         /// <summary>Where a box narrower than its container sits horizontally.</summary>
         public TextAlignment Alignment { get; private set; } = TextAlignment.Left;
 
@@ -78,6 +90,18 @@ namespace Majorsilence.Pdf.Layout
         public LayoutBoxStyle WithWidth(float width) { var s = Clone(); s.Width = width; return s; }
 
         public LayoutBoxStyle WithMinHeight(float height) { var s = Clone(); s.MinHeight = height; return s; }
+
+        public LayoutBoxStyle WithMaxHeight(float height) { var s = Clone(); s.MaxHeight = height; return s; }
+
+        /// <summary>A fixed height: sets both the minimum and the maximum.</summary>
+        public LayoutBoxStyle WithHeight(float height) { var s = Clone(); s.MinHeight = height; s.MaxHeight = height; return s; }
+
+        public LayoutBoxStyle WithMinWidth(float width) { var s = Clone(); s.MinWidth = width; return s; }
+
+        public LayoutBoxStyle WithMaxWidth(float width) { var s = Clone(); s.MaxWidth = width; return s; }
+
+        /// <summary>Size the box to its content's width instead of filling the available width.</summary>
+        public LayoutBoxStyle WithShrink(bool shrink = true) { var s = Clone(); s.IsShrink = shrink; return s; }
 
         public LayoutBoxStyle WithAlignment(TextAlignment alignment) { var s = Clone(); s.Alignment = alignment; return s; }
 

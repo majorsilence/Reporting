@@ -95,6 +95,69 @@ namespace Majorsilence.Pdf.Layout
             return this;
         }
 
+        /// <summary>Add mixed-style text: runs with their own style, links and page-number placeholders.</summary>
+        public LayoutColumn Spans(Action<LayoutSpans> content, TextAlignment alignment = TextAlignment.Left, TextStyle? defaultStyle = null)
+        {
+            _items.Add(LayoutBuilders.Spans(content, alignment, defaultStyle));
+            return this;
+        }
+
+        /// <summary>Flow items left to right, wrapping onto a new line when the row is full.</summary>
+        public LayoutColumn Inlined(Action<LayoutInline> content, float horizontalSpacing = 4f, float verticalSpacing = 4f, TextAlignment alignment = TextAlignment.Left)
+        {
+            _items.Add(LayoutBuilders.Inlined(content, horizontalSpacing, verticalSpacing, alignment));
+            return this;
+        }
+
+        /// <summary>Add a header and footer around <paramref name="content"/> that repeat on every page the content spans. Use <c>ShowOnce</c> / <c>SkipOnce</c> inside them to vary that.</summary>
+        public LayoutColumn Decoration(Action<LayoutColumn>? header, Action<LayoutColumn> content, Action<LayoutColumn>? footer = null)
+        {
+            _items.Add(LayoutBuilders.Decoration(header, content, footer));
+            return this;
+        }
+
+        /// <summary>Stack layers in one rectangle: the primary layer sets the size, others draw behind or in front of it.</summary>
+        public LayoutColumn Layers(Action<LayoutLayers> content)
+        {
+            _items.Add(LayoutBuilders.Layers(content));
+            return this;
+        }
+
+        /// <summary>Content that appears only on the first page of a repeating container such as a <c>Decoration</c> header.</summary>
+        public LayoutColumn ShowOnce(Action<LayoutColumn> content)
+        {
+            _items.Add(LayoutBuilders.Once(content, skipFirst: false));
+            return this;
+        }
+
+        /// <summary>Content that appears on every page of a repeating container such as a <c>Decoration</c> header except the first.</summary>
+        public LayoutColumn SkipOnce(Action<LayoutColumn> content)
+        {
+            _items.Add(LayoutBuilders.Once(content, skipFirst: true));
+            return this;
+        }
+
+        /// <summary>Start a new page unless at least <paramref name="minimumHeight"/> points remain on the current one.</summary>
+        public LayoutColumn EnsureSpace(float minimumHeight)
+        {
+            _items.Add(new EnsureSpaceElement(minimumHeight));
+            return this;
+        }
+
+        /// <summary>Add a reusable <see cref="ILayoutComponent"/>.</summary>
+        public LayoutColumn Component(ILayoutComponent component)
+        {
+            _items.Add(LayoutBuilders.Component(component));
+            return this;
+        }
+
+        /// <summary>Indent <paramref name="content"/> by <paramref name="indent"/> points and draw <paramref name="marker"/> (a bullet or number) beside its first line.</summary>
+        public LayoutColumn Bullet(string marker, float indent, Action<LayoutColumn> content, TextStyle? markerStyle = null)
+        {
+            _items.Add(LayoutBuilders.Marker(marker, markerStyle, indent, content));
+            return this;
+        }
+
         /// <summary>Escape hatch for arbitrary drawing in a region of the given height.</summary>
         public LayoutColumn Canvas(Action<PdfCanvas, LayoutRect> draw, float height)
         {

@@ -322,23 +322,6 @@ namespace Majorsilence.Pdf
             return lines == 0 ? 0 : style.FontSize + (lines - 1) * lineHeight;
         }
 
-        // Non-drawing twin of DrawTextBox: the index of the first character that would not fit
-        // in a box of the given width and height (text.Length when everything fits).
-        internal int FitTextBox(string text, float width, float height, TextStyle style,
-                                float lineSpacing = 1.2f)
-        {
-            float lineHeight = style.FontSize * lineSpacing;
-            float curY = style.FontSize;
-            int pos = 0;
-            while (pos < text.Length)
-            {
-                if (curY > height) break;
-                pos = BreakTextLine(text, pos, width, style);
-                curY += lineHeight;
-            }
-            return pos;
-        }
-
         // Returns the exclusive end index of the first line of text starting at `start`
         // that fits within `maxWidth` points.  Hard '\n' characters always terminate a line.
         private int BreakTextLine(string text, int start, float maxWidth, TextStyle style)

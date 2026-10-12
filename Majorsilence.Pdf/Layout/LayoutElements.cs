@@ -49,8 +49,26 @@ namespace Majorsilence.Pdf.Layout
     {
         internal const float Epsilon = 0.01f;
 
+        /// <summary>
+        /// Extra width given to shrink-to-fit text: line breaking sums per-character widths, so a line
+        /// measured as a whole string can differ by a fraction of a point and would otherwise re-wrap.
+        /// </summary>
+        internal const float WidthSlack = 0.5f;
+
         /// <summary>Measure at <paramref name="width"/> given <paramref name="available"/> points of height.</summary>
         public abstract Fit Measure(PdfCanvas canvas, float width, float available);
+
+        /// <summary>
+        /// The widest this element wants to be when laid out in <paramref name="width"/>; used by
+        /// shrink-to-fit boxes and inlined items. Defaults to the full width.
+        /// </summary>
+        public virtual float MaxContentWidth(PdfCanvas canvas, float width) => width;
+
+        /// <summary>
+        /// The element to use for the next fragment of a repeating container (a decoration's header
+        /// or footer): show-once content disappears, skip-once content appears. Defaults to itself.
+        /// </summary>
+        public virtual LayoutElement NextFragment() => this;
 
         /// <summary>Draw a head previously returned by <see cref="Measure"/> into the given box.</summary>
         public abstract void Draw(PdfCanvas canvas, float x, float y, float width, float height);
@@ -69,6 +87,8 @@ namespace Majorsilence.Pdf.Layout
 
         public override Fit Measure(PdfCanvas canvas, float width, float available) =>
             _height <= available + Epsilon ? Fit.Full(this, _height) : Fit.Wrap;
+
+        public override float MaxContentWidth(PdfCanvas canvas, float width) => 0f;
 
         public override void Draw(PdfCanvas canvas, float x, float y, float width, float height) { }
     }
@@ -99,33 +119,6 @@ namespace Majorsilence.Pdf.Layout
             _draw(canvas, new LayoutRect(x, y, width, _height));
     }
 
-    /// <summary>Word-wrapped text that splits between lines.</summary>
-    internal sealed class TextElement : LayoutElement
-    {
-        private readonly string _text;
-        private readonly TextStyle _style;
-
-        public TextElement(string text, TextStyle style) { _text = text; _style = style; }
-
-        public override Fit Measure(PdfCanvas canvas, float width, float available)
-        {
-            if (_text.Length == 0) return Fit.Empty;
-            float height = canvas.MeasureTextBoxHeight(_text, width, _style);
-            if (height <= available + Epsilon) return Fit.Full(this, height);
-
-            int count = canvas.FitTextBox(_text, width, available + Epsilon, _style);
-            if (count <= 0) return Fit.Wrap;
-            if (count >= _text.Length) return Fit.Full(this, height);
-
-            var head = new TextElement(_text.Substring(0, count), _style);
-            var tail = new TextElement(_text.Substring(count), _style);
-            return Fit.Partial(head, canvas.MeasureTextBoxHeight(head._text, width, _style), tail);
-        }
-
-        public override void Draw(PdfCanvas canvas, float x, float y, float width, float height) =>
-            canvas.DrawTextBox(_text, x, y, width, height + 1f, _style);
-    }
-
     /// <summary>
     /// A table that splits between rows. When the table has a header row (a header background is
     /// set) the header is repeated at the top of every continuation.
@@ -134,6 +127,8 @@ namespace Majorsilence.Pdf.Layout
     {
         private readonly PdfTable _table;
         public TableElement(PdfTable table) { _table = table; }
+
+        public override float MaxContentWidth(PdfCanvas canvas, float width) => Math.Min(width, _table.TotalWidth);
 
         public override Fit Measure(PdfCanvas canvas, float width, float available)
         {
@@ -227,6 +222,26 @@ namespace Majorsilence.Pdf.Layout
             return rest;
         }
 
+        public override float MaxContentWidth(PdfCanvas canvas, float width)
+        {
+            float max = 0f;
+            foreach (var child in _children)
+                max = Math.Max(max, child.MaxContentWidth(canvas, width));
+            return max;
+        }
+
+        public override LayoutElement NextFragment()
+        {
+            var next = new LayoutElement[_children.Count];
+            bool changed = false;
+            for (int i = 0; i < next.Length; i++)
+            {
+                next[i] = _children[i].NextFragment();
+                changed |= !ReferenceEquals(next[i], _children[i]);
+            }
+            return changed ? new StackElement(next) : this;
+        }
+
         public override void Draw(PdfCanvas canvas, float x, float y, float width, float height)
         {
             if (_placed == null) return;
@@ -269,6 +284,19 @@ namespace Majorsilence.Pdf.Layout
             return Fit.Full(new RowElement(placed), max);
         }
 
+        public override LayoutElement NextFragment()
+        {
+            var next = new (LayoutColumnWidth, StackElement)[_columns.Count];
+            bool changed = false;
+            for (int i = 0; i < next.Length; i++)
+            {
+                var content = (StackElement)_columns[i].Content.NextFragment();
+                next[i] = (_columns[i].Width, content);
+                changed |= !ReferenceEquals(content, _columns[i].Content);
+            }
+            return changed ? new RowElement(next) : this;
+        }
+
         public override void Draw(PdfCanvas canvas, float x, float y, float width, float height)
         {
             if (_placed == null) return;
@@ -288,10 +316,13 @@ namespace Majorsilence.Pdf.Layout
         private readonly LayoutElement _content;
         private readonly bool _padTop;
         private readonly bool _padBottom;
+        private readonly float _resolvedWidth = -1f; // set on measured heads so Draw does not re-measure
 
-        public BoxElement(LayoutBoxStyle style, LayoutElement content, bool padTop = true, bool padBottom = true)
+        public BoxElement(LayoutBoxStyle style, LayoutElement content, bool padTop = true, bool padBottom = true,
+            float resolvedWidth = -1f)
         {
             _style = style; _content = content; _padTop = padTop; _padBottom = padBottom;
+            _resolvedWidth = resolvedWidth;
         }
 
         private float Left => _style.PaddingLeft + _style.BorderWidth;
@@ -299,40 +330,57 @@ namespace Majorsilence.Pdf.Layout
         private float Top => (_padTop ? _style.PaddingTop : 0f) + _style.BorderWidth;
         private float Bottom => (_padBottom ? _style.PaddingBottom : 0f) + _style.BorderWidth;
 
-        private float BoxWidth(float width) =>
-            _style.Width.HasValue ? Math.Min(width, _style.Width.Value) : width;
+        private float InsetsX => Left + Right;
 
-        private float OffsetX(float width)
+        private float BoxWidth(PdfCanvas canvas, float width)
         {
-            float free = width - BoxWidth(width);
+            if (_resolvedWidth >= 0f) return Math.Min(_resolvedWidth, width);
+            float w = _style.Width ?? (_style.IsShrink
+                ? _content.MaxContentWidth(canvas, Math.Max(0f, width - InsetsX)) + InsetsX
+                : width);
+            if (_style.MinWidth > 0f) w = Math.Max(w, _style.MinWidth);
+            if (_style.MaxWidth > 0f) w = Math.Min(w, _style.MaxWidth);
+            return Math.Min(w, width);
+        }
+
+        private float OffsetX(float width, float boxWidth)
+        {
+            float free = width - boxWidth;
             return _style.Alignment == TextAlignment.Right ? free
                  : _style.Alignment == TextAlignment.Center ? free / 2f
                  : 0f;
         }
 
+        public override float MaxContentWidth(PdfCanvas canvas, float width) => BoxWidth(canvas, width);
+
+        public override LayoutElement NextFragment() => new BoxElement(_style, _content.NextFragment(), _padTop, _padBottom);
+
         public override Fit Measure(PdfCanvas canvas, float width, float available)
         {
-            float innerWidth = Math.Max(0f, BoxWidth(width) - Left - Right);
-            var fit = _content.Measure(canvas, innerWidth, available - Top - Bottom);
+            float boxWidth = BoxWidth(canvas, width);
+            float innerWidth = Math.Max(0f, boxWidth - InsetsX);
+            float limit = _style.MaxHeight > 0f ? Math.Min(available, _style.MaxHeight) : available;
+            float minHeight = _padBottom ? _style.MinHeight : 0f;
+            var fit = _content.Measure(canvas, innerWidth, limit - Top - Bottom);
             switch (fit.Kind)
             {
                 case FitKind.Empty:
                     // An empty box still occupies its minimum height (e.g. a coloured bar).
-                    if (_style.MinHeight > 0f && _padBottom)
-                        return _style.MinHeight <= available + Epsilon
-                            ? Fit.Full(new BoxElement(_style, new StackElement(Array.Empty<LayoutElement>()), _padTop, _padBottom), _style.MinHeight)
+                    if (minHeight > 0f)
+                        return minHeight <= limit + Epsilon
+                            ? Fit.Full(new BoxElement(_style, new StackElement(Array.Empty<LayoutElement>()), _padTop, _padBottom, boxWidth), minHeight)
                             : Fit.Wrap;
                     return Fit.Empty;
                 case FitKind.Full:
-                    float full = Math.Max(fit.Height + Top + Bottom, _padBottom ? _style.MinHeight : 0f);
-                    if (full > available + Epsilon) return Fit.Wrap;
-                    return Fit.Full(new BoxElement(_style, fit.Head!, _padTop, _padBottom), full);
+                    float full = Math.Max(fit.Height + Top + Bottom, minHeight);
+                    if (full > limit + Epsilon) return Fit.Wrap;
+                    return Fit.Full(new BoxElement(_style, fit.Head!, _padTop, _padBottom, boxWidth), full);
                 case FitKind.Partial when !_style.IsKeepTogether:
                     // The head loses the bottom padding, the tail the top padding.
                     float headHeight = fit.Height + Top + _style.BorderWidth;
-                    if (headHeight > available + Epsilon) return Fit.Wrap;
+                    if (headHeight > limit + Epsilon) return Fit.Wrap;
                     return Fit.Partial(
-                        new BoxElement(_style, fit.Head!, _padTop, padBottom: false), headHeight,
+                        new BoxElement(_style, fit.Head!, _padTop, padBottom: false, resolvedWidth: boxWidth), headHeight,
                         new BoxElement(_style, fit.Tail!, padTop: false, _padBottom));
                 default:
                     return Fit.Wrap;
@@ -341,8 +389,9 @@ namespace Majorsilence.Pdf.Layout
 
         public override void Draw(PdfCanvas canvas, float x, float y, float width, float height)
         {
-            x += OffsetX(width);
-            width = BoxWidth(width);
+            float boxWidth = BoxWidth(canvas, width);
+            x += OffsetX(width, boxWidth);
+            width = boxWidth;
             if (_style.Background.HasValue || _style.BorderWidth > 0f)
             {
                 var shape = ShapeStyle.Empty;
@@ -373,6 +422,11 @@ namespace Majorsilence.Pdf.Layout
 
         public override Fit Measure(PdfCanvas canvas, float width, float available) =>
             _condition() ? _content.Measure(canvas, width, available) : Fit.Empty;
+
+        public override float MaxContentWidth(PdfCanvas canvas, float width) =>
+            _condition() ? _content.MaxContentWidth(canvas, width) : 0f;
+
+        public override LayoutElement NextFragment() => new ConditionalElement(_condition, _content.NextFragment());
 
         public override void Draw(PdfCanvas canvas, float x, float y, float width, float height) =>
             _content.Draw(canvas, x, y, width, height);
