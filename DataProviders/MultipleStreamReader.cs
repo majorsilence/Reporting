@@ -131,6 +131,7 @@ namespace Majorsilence.Reporting.Data
 
         // This class is a TextReader, whose ReadLine is synchronous, so the files are read synchronously
         // too (HttpClient.Send is a real synchronous call): no thread-pool hop or blocked pool thread.
+        // Urls downloaded up front by CreateAsync are served from _prefetched instead.
         TextReader GetStream()
         {
             if (_sr != null)        // close out the previous file before getting another

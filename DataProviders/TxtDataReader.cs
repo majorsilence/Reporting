@@ -172,7 +172,8 @@ namespace Majorsilence.Reporting.Data
         }
 
         // IDataReader is synchronous, so the stream is opened synchronously (HttpClient.Send is a real
-        // synchronous call): no thread-pool hop or blocked pool thread.
+        // synchronous call): no thread-pool hop or blocked pool thread. TxtCommand.ExecuteReaderAsync
+        // downloads http(s) content itself and passes it in as _prefetched, which is used instead.
         TextReader GetStream()
         {
             if (_prefetched != null)
