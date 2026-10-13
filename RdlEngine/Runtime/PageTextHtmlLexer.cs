@@ -158,6 +158,7 @@ namespace Majorsilence.Reporting.Rdl
             char a = '\0';
             char b = '\0';
             char c = '\0';
+            int start = reader.Position;
             if (!reader.EndOfInput()) a = reader.GetNext();
             if (!reader.EndOfInput()) b = reader.GetNext();
             if (!reader.EndOfInput()) c = reader.GetNext();
@@ -167,11 +168,7 @@ namespace Majorsilence.Reporting.Rdl
             if (a == '!' && b == '-' && c == '-')
                 ret = true;
             else
-            {
-                reader.UnGet();
-                reader.UnGet();
-                reader.UnGet();
-            }
+                reader.Position = start;	// put back only what was read: near the end of the text that is fewer than three
             return ret;
         } 
 
