@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Library</OutputType>
+    <TargetFrameworks>net8.0;net10.0</TargetFrameworks>
+    <AssemblyTitle>Majorsilence Reporting Roslyn Code</AssemblyTitle>
+    <RootNamespace>Majorsilence.Reporting.RoslynCode</RootNamespace>
+    <PackageId>Majorsilence.Reporting.RoslynCode</PackageId>
+    <Description>Compiles a report's &lt;Code&gt; (VB) element at runtime on .NET 8 and later, where the engine's VBCodeProvider cannot. Call RoslynCodeCompiler.Register() once at startup. Not for Native AOT, which cannot compile at runtime; use Majorsilence.Reporting.AotCode there.</Description>
+    <PackageTags>rdl;reporting;vb;roslyn;code</PackageTags>
+    <IsPackable>true</IsPackable>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\RdlEngine\Majorsilence.Reporting.RdlEngine.csproj" />
+    <PackageReference Include="Microsoft.CodeAnalysis.VisualBasic" />
+  </ItemGroup>
+</Project>

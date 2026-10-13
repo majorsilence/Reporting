@@ -217,23 +217,14 @@ namespace Majorsilence.Reporting.Rdl
                         imf = ImageFormat.Png;
                         im.Save(ostrm, imf);
                         break;
-                    default: // from old code where all images convert to jpeg, i don't know why. May be need delete it and add all support formats.
-                        imf = ImageFormat.Jpeg;
-                        ImageCodecInfo[] info;
-                        info = ImageCodecInfo.GetImageEncoders();
-                        Draw2.Imaging.EncoderParameters encoderParameters;
-                        encoderParameters = new Draw2.Imaging.EncoderParameters(1);
-                        encoderParameters.Param[0] = new Draw2.Imaging.EncoderParameter(Draw2.Imaging.Encoder.Quality, ImageQualityManager.EmbeddedImageQuality);
-                        ImageCodecInfo codec = null;
-                        for (int i = 0; i < info.Length; i++)
-                        {
-                            if (info[i].FormatDescription == "JPEG")
-                            {
-                                codec = info[i];
-                                break;
-                            }
-                        }
-                        im.Save(ostrm, codec, encoderParameters);
+                    default:
+                        // Any other source (BMP, GIF, TIFF, ...) is lossless, and is kept so: as
+                        // PNG, which every renderer takes. It used to be re-encoded as JPEG, which
+                        // blurred sharp edges and smeared flat colour - a logo or line art came
+                        // out visibly softer than the image the report embeds, and the PDF
+                        // carried a lossy copy of a lossless picture.
+                        imf = ImageFormat.Png;
+                        im.Save(ostrm, imf);
                         break;
                 }
 

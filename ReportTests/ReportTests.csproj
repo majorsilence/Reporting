@@ -19,6 +19,7 @@
 		<ProjectReference Include="..\RdlCmd\RdlCmd.csproj" />
 		<ProjectReference Include="..\RdlCri\Majorsilence.Reporting.RdlCri.csproj" />
 		<ProjectReference Include="..\RdlEngine\Majorsilence.Reporting.RdlEngine.csproj" />
+		<ProjectReference Include="..\Majorsilence.Reporting.RoslynCode\Majorsilence.Reporting.RoslynCode.csproj" />
 	</ItemGroup>
 	<ItemGroup>
 		<!-- No dependencies, so it is compiled here instead of referencing the web project. -->
