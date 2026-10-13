@@ -254,7 +254,16 @@ namespace Majorsilence.Reporting.Rdl
 			SetPagePositionBegin(pgs);
 
 			if (!await AnyRowsPage(pgs, wc.Data).ConfigureAwait(false))		// if no rows return
-				return;                     //   nothing left to do
+			{
+				// With no NoRows message the table's layout stands in for one, as the RDL
+				// specification describes NoRows: "a message to display ... instead of the
+				// region layout". So the header and footer print over no rows, and there are
+				// no detail or group rows between them.
+				if (NoRows == null && (_Header != null || _Footer != null))
+					await RunPageWithNoRows(pgs, row).ConfigureAwait(false);
+				RemoveValue(r);
+				return;
+			}
 
             await RunPrep(r, row, wc).ConfigureAwait(false);
 
@@ -308,6 +317,30 @@ namespace Majorsilence.Reporting.Rdl
 			RemoveValue(r);
 			return;
 		}
+
+        // The header and footer bands of a table that has no rows. Their expressions see no
+        // row, so a field reads empty and an aggregate over the table's scope sees no values.
+        private async Task RunPageWithNoRows(Pages pgs, Row row)
+        {
+            Report r = pgs.Report;
+            RunPageRegionBegin(pgs);
+
+            Page p = pgs.CurrentPage;
+            p.YOffset += this.RelativeY(r);
+            await TableColumns.CalculateXPositions(r, GetOffsetCalc(r) + LeftCalc(r), row).ConfigureAwait(false);
+
+            if (_Header != null)
+                await _Header.RunPage(pgs, null).ConfigureAwait(false);
+            if (_Footer != null)
+            {
+                if (pgs.CurrentPage.YOffset + await _Footer.HeightOfRows(pgs, null).ConfigureAwait(false) > pgs.BottomOfPage)
+                    RunPageNew(pgs, pgs.CurrentPage);
+                await _Footer.RunPage(pgs, null).ConfigureAwait(false);
+            }
+
+            RunPageRegionEnd(pgs);
+            SetPagePositionEnd(pgs, pgs.CurrentPage.YOffset);
+        }
 
         internal bool IsGrid { get { return _IsGrid; } }
 

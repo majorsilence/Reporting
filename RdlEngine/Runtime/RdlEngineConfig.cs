@@ -886,6 +886,20 @@ namespace Majorsilence.Reporting.Rdl
         public static void RegisterCodeProvider(Func<Report, RdlCodeFunctions> factory)
             => _codeProviderFactory = factory;
 
+        static IRdlCodeCompiler? _codeCompiler;
+
+        /// <summary>
+        /// Registers the compiler a report's &lt;Code&gt; element is compiled with at runtime,
+        /// in place of <c>VBCodeProvider</c>, which only exists on .NET Framework. A precompiled
+        /// block (<see cref="RegisterPrecompiledCode"/>) and a registered code provider
+        /// (<see cref="RegisterCodeProvider"/>) still take precedence. Not used under Native AOT,
+        /// where nothing can be compiled at runtime. Pass null to remove it.
+        /// </summary>
+        public static void RegisterCodeCompiler(IRdlCodeCompiler? compiler)
+            => _codeCompiler = compiler;
+
+        internal static IRdlCodeCompiler? CodeCompiler => _codeCompiler;
+
         static readonly System.Collections.Concurrent.ConcurrentDictionary<string, Func<Report, RdlCodeFunctions>> _precompiledCode =
             new(StringComparer.Ordinal);
 

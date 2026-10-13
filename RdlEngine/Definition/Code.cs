@@ -64,7 +64,8 @@ namespace Majorsilence.Reporting.Rdl
 					OwnerReport.rl.LogError(8,
 						"The report's <Code> element requires VB.NET compilation, which is not " +
 						"supported on this platform (code hash " + RdlCodeHash.Compute(_Source) + "); precompile it with " +
-						"the RdlCodeGen build task, register a CodeProviderFactory, or remove the Code element.");
+						"the RdlCodeGen build task, register a CodeProviderFactory or a code compiler (RdlEngineConfig.RegisterCodeCompiler; " +
+						"the Majorsilence.Reporting.RoslynCode package supplies one), or remove the Code element.");
 				}
 			}
 		}
@@ -90,7 +91,6 @@ namespace Majorsilence.Reporting.Rdl
 			// Generate the proxy source code
             List<string> lines = new List<string>();		// hold lines in array in case of error
 
-			VBCodeProvider vbcp =  new VBCodeProvider();
 			StringBuilder sb = new StringBuilder();
 			//  Generate code with the following general form
 
@@ -126,6 +126,7 @@ namespace Majorsilence.Reporting.Rdl
             lines.Add("End Get");
             lines.Add("End Property");
 			// Read and write code as lines
+			int firstSourceLine = lines.Count + 1;		// the 1-based line the <Code> text starts on
 			StringReader tr = new StringReader(_Source);
 			while (tr.Peek() >= 0)
 			{
@@ -149,7 +150,13 @@ namespace Majorsilence.Reporting.Rdl
 //						tsw.Close();
 			// debug code !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!   
 
+			// A registered compiler (RdlEngineConfig.RegisterCodeCompiler) is the way to compile
+			// on .NET 5 and later, where VBCodeProvider cannot.
+			if (RdlEngineConfig.CodeCompiler is { } compiler)
+				return CompileWithRegistered(compiler, vbcode, firstSourceLine);
+
 			// Create Assembly
+			VBCodeProvider vbcp = new VBCodeProvider();
 			CompilerParameters cp = new CompilerParameters();
 			cp.ReferencedAssemblies.Add("System.dll");
             string re;
@@ -199,6 +206,55 @@ namespace Majorsilence.Reporting.Rdl
 
 			return Assembly.LoadFrom(cr.PathToAssembly);	// We need an assembly loaded from the file system
 			//   or instantiation of object complains
+		}
+
+		[RequiresDynamicCode("Compiles and loads VB source at runtime; not AOT-compatible")]
+		[UnconditionalSuppressMessage("Trimming", "IL2026",
+			Justification = "Loads CodeModule assemblies by path; inherently dynamic and unavailable under Native AOT.")]
+		private Assembly CompileWithRegistered(IRdlCodeCompiler compiler, string vbcode, int firstSourceLine)
+		{
+			var references = new List<Assembly> { typeof(Report).Assembly };
+			if (this.OwnerReport.CodeModules != null)
+			{
+				string engineDir = Path.GetDirectoryName(typeof(Report).Assembly.Location) ?? AppContext.BaseDirectory;
+				foreach (CodeModule cm in this.OwnerReport.CodeModules.Items)
+				{
+					try
+					{
+						references.Add(Assembly.LoadFrom(Path.Combine(engineDir, cm.CdModule)));
+					}
+					catch (Exception e)
+					{
+						this.OwnerReport.rl.LogError(4, string.Format("Code element: CodeModule {0} could not be loaded: {1}", cm.CdModule, e.Message));
+					}
+				}
+			}
+
+			var errors = new List<string>();
+			Assembly assembly = null;
+			try
+			{
+				assembly = compiler.Compile(vbcode, references, errors);
+			}
+			catch (Exception e)
+			{
+				errors.Add("0: " + e.Message);
+			}
+			if (assembly != null)
+				return assembly;
+
+			// Line numbers relative to the Code element, as the VBCodeProvider path reports them.
+			StringBuilder err = new StringBuilder(string.Format("Code element has {0} error(s).  Line numbers are relative to Code element.", Math.Max(1, errors.Count)));
+			foreach (string e in errors)
+			{
+				int colon = e.IndexOf(':');
+				if (colon > 0 && int.TryParse(e.Substring(0, colon), out int line))
+					err.AppendFormat("\r\nLine {0}: {1}", line - firstSourceLine + 1, e.Substring(colon + 1).Trim());
+				else
+					err.Append("\r\n").Append(e);
+			}
+			this.OwnerReport.rl.LogError(4, err.ToString());
+			return null;
 		}
 
 		[UnconditionalSuppressMessage("Trimming", "IL2058",
