@@ -454,16 +454,27 @@ namespace Majorsilence.Reporting.Rdl
 		{
 			var breaks = new List<(int, string, string)>();
 			var open = new List<(string name, string tag)>();
+			// The tags open at a break only change at a tag, so consecutive breaks share the strings.
+			string closers = "", openers = "";
+			bool openChanged = false;
+			StringBuilder sb = null;
 
 			void AddBreak(int pos)
 			{
-				var closers = new StringBuilder();
-				var openers = new StringBuilder();
-				for (int k = open.Count - 1; k >= 0; k--)
-					closers.Append("</").Append(open[k].name).Append('>');
-				foreach (var o in open)
-					openers.Append(o.tag);
-				breaks.Add((pos, closers.ToString(), openers.ToString()));
+				if (openChanged)
+				{
+					sb ??= new StringBuilder();
+					sb.Clear();
+					for (int k = open.Count - 1; k >= 0; k--)
+						sb.Append("</").Append(open[k].name).Append('>');
+					closers = sb.ToString();
+					sb.Clear();
+					foreach (var o in open)
+						sb.Append(o.tag);
+					openers = sb.ToString();
+					openChanged = false;
+				}
+				breaks.Add((pos, closers, openers));
 			}
 
 			int i = 0;
@@ -492,10 +503,16 @@ namespace Majorsilence.Reporting.Rdl
 					{
 						int k = open.FindLastIndex(o => o.name == name);
 						if (k >= 0)
+						{
 							open.RemoveRange(k, open.Count - k);
+							openChanged = true;
+						}
 					}
 					else if (!HtmlVoidTags.Contains(name) && !tag.EndsWith("/>"))
+					{
 						open.Add((name, tag));
+						openChanged = true;
+					}
 
 					// the end of a paragraph, list item or line is the best place to split
 					if (i < text.Length && (name == "br" || closing && HtmlBlockTags.Contains(name)))

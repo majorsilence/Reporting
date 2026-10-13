@@ -15,11 +15,15 @@ namespace Majorsilence.Reporting.Rdl
 	{
 		private List<string> tokens;
 		private CharReader reader;
+		private readonly string html;
+		private readonly StringBuilder lt = new StringBuilder();	// reused by ReadHtml / ReadWord
 		// we reserve some of the strings for control purposes
 		static internal string EOF = '\ufffe'.ToString();
 		static internal string WHITESPACE = '\ufffd'.ToString();
 		static internal char HTMLCMD = '\ufffc';
         static internal char NBSP = '\ufffb';
+		static internal readonly string NBSPString = NBSP.ToString();
+		static readonly string CommentToken = HTMLCMD + "<cmnt>";
 
 		/// <summary>
 		/// Initializes a new instance of the Lexer class with the specified
@@ -29,9 +33,10 @@ namespace Majorsilence.Reporting.Rdl
 		internal PageTextHtmlLexer(string html)
 		{
 			// token queue
-			tokens = new List<string>();
+			tokens = new List<string>(html.Length / 4 + 2);
 
 			// read the file contents
+			this.html = html;
 			reader = new CharReader(html);
 		}
 
@@ -47,7 +52,6 @@ namespace Majorsilence.Reporting.Rdl
 				if(token == null)
 				{
 					tokens.Add(EOF);	// add EOF token
-                    tokens.TrimExcess();
 					return tokens;
 				}
 				tokens.Add(token);
@@ -91,7 +95,7 @@ namespace Majorsilence.Reporting.Rdl
 		private string ReadHtml(char firstc, char ch)
 		{
 			char qChar = ch;
-			StringBuilder lt = new StringBuilder();
+			lt.Clear();
             if (IsHtmlComment())
             {       // HTML is a comment;   donated by jonh of the forum
                 char a;
@@ -109,32 +113,38 @@ namespace Majorsilence.Reporting.Rdl
                     a = reader.GetNext();
 
                 }
-                lt.Append(HTMLCMD.ToString());   // mark as HTML command 
-                lt.Append("<cmnt>"); //wont display or cause anything to happen. 
+                return CommentToken;
             }
-            else
-            {
-                lt.Append(HTMLCMD.ToString());	// mark as HTML command
-                lt.Append(firstc);
 
-                while (!reader.EndOfInput())
+            // Usual case: no entity before the closing character, so the token is the html command
+            // marker followed by that part of the source text, made without copying it twice.
+            int from = reader.Position;
+            int close = html.IndexOf(qChar, from);
+            if (close >= 0 && html.IndexOf('&', from, close - from) < 0)
+            {
+                reader.Position = close + 1;
+                ReadOnlySpan<char> rest = html.AsSpan(from, close - from + 1);
+                if (firstc == '<' && (rest.SequenceEqual("q>") || rest.SequenceEqual("/q>")))
+                    return "\"";
+                Span<char> head = stackalloc char[] { HTMLCMD, firstc };
+                return string.Concat(head, rest);
+            }
+
+            lt.Append(HTMLCMD);	// mark as HTML command
+            lt.Append(firstc);
+
+            while (!reader.EndOfInput())
+            {
+                ch = reader.GetNext();
+                if (ch == '&')
+                    ch = ReadSpecial();
+                lt.Append(ch);
+                if (ch == qChar)
                 {
-                    ch = reader.GetNext();
-                    if (ch == '&')
-                        ch = ReadSpecial();
-                    lt.Append(ch);
-                    if (ch == qChar)
-                    {
-                        string cmd = lt.ToString();
-                        switch (cmd.Substring(1))
-                        {
-                            case "<q>":
-                            case "</q>":
-                                return "\"";
-                            default:
-                                return lt.ToString();
-                        }
-                    }
+                    string cmd = lt.ToString();
+                    if (cmd.AsSpan(1).SequenceEqual("<q>") || cmd.AsSpan(1).SequenceEqual("</q>"))
+                        return "\"";
+                    return cmd;
                 }
             }
 			return lt.ToString();
@@ -168,7 +178,7 @@ namespace Majorsilence.Reporting.Rdl
 		// handles special characters; that is those beginning with &
 		private char ReadSpecial()
 		{
-			StringBuilder lt = new StringBuilder();
+			StringBuilder lt = new StringBuilder();	// not the shared one: called while that one is in use
             int MAXSPECIAL = 8;             // should be the size of the maximum escaped character
 			while(!reader.EndOfInput() && MAXSPECIAL-- > 0)
 			{
@@ -330,7 +340,25 @@ namespace Majorsilence.Reporting.Rdl
 		private string ReadWord(char firstc, char ch)
 		{
 			char qChar = ch;
-			StringBuilder lt = new StringBuilder();
+			int start = reader.Position - 1;
+			if (firstc != '&')
+			{	// usual case: no entity in the word, so it is a piece of the source text
+				int i = reader.Position;
+				while (i < html.Length)
+				{
+					char c = html[i];
+					if (Char.IsWhiteSpace(c) || c == qChar || c == '>' || c == '&')
+						break;
+					i++;
+				}
+				if (i >= html.Length || html[i] != '&')
+				{
+					reader.Position = i;
+					return html.Substring(start, i - start);
+				}
+			}
+
+			lt.Clear();
 			lt.Append(firstc=='&'? ReadSpecial(): firstc);
 
 			while(!reader.EndOfInput())
@@ -354,6 +382,12 @@ namespace Majorsilence.Reporting.Rdl
 		{
 			string file = null;
 			int    ptr  = 0;
+
+			internal int Position
+			{
+				get => ptr;
+				set => ptr = value;
+			}
 
 			/// <summary>
 			/// Initializes a new instance of the CharReader class.

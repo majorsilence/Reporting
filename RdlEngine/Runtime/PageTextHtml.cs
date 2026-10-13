@@ -117,6 +117,8 @@ namespace Majorsilence.Reporting.Rdl
 			List<PageItem> lineItems = new List<PageItem>();
             bool bIsOrderedList = false;
 			int? OlLiCount = null;	//Maintains number of OL items; zero indicates UL item (bullet)
+			// The style only changes at an html command, so the text runs between two commands share one copy.
+			StyleInfo runStyle = null;
 			foreach (string token in tokens)
 			{
 				if (token[0] == PageTextHtmlLexer.HTMLCMD)		// indicates an HTML command
@@ -131,11 +133,11 @@ namespace Majorsilence.Reporting.Rdl
 						pt.HyperLink = model.HyperLink;
 						pt.Tooltip = model.Tooltip;
 						pt.NoClip = true;
-						sb = new StringBuilder();
+						sb.Clear();
 						pt.X = this.X + lineXPos;
 						pt.Y = this.Y + yPos;
 						pt.CanGrow = false;
-						pt.SI = CurrentStyle(si).Clone() as StyleInfo;
+						pt.SI = runStyle ??= CurrentStyle(si).Clone() as StyleInfo;
 						_items.Add(pt);
 						lineItems.Add(pt);
 						ms = this.MeasureString(pt.Text, pt.SI, g, out descent);
@@ -147,6 +149,7 @@ namespace Majorsilence.Reporting.Rdl
 						lineXPos = xPos;
 					}
 					// Now reset the styleinfo
+					runStyle = null;
 					StyleInfo cs = CurrentStyle(si);
 					string ltoken = token.Substring(1,Math.Min(token.Length-1,10)).ToLower();
 					if (ltoken == "<b>" || ltoken == "<strong>")
@@ -331,7 +334,7 @@ namespace Majorsilence.Reporting.Rdl
 				if (token != PageTextHtmlLexer.EOF)
 				{
 					string ntoken;
-                    if (token == PageTextHtmlLexer.NBSP.ToString())
+                    if (token == PageTextHtmlLexer.NBSPString)
                         ntoken = bWhiteSpace ? "  " : " ";
                     else
                         ntoken = bWhiteSpace ? " " + token : token;
@@ -368,9 +371,9 @@ namespace Majorsilence.Reporting.Rdl
                 pt.NoClip = true;
 				pt.HyperLink = model.HyperLink;
 				pt.Tooltip = model.Tooltip;
-				sb = new StringBuilder();
+				sb.Clear();
 				sb.Append(token.Replace(PageTextHtmlLexer.NBSP, ' '));
-				pt.SI = CurrentStyle(si).Clone() as StyleInfo;
+				pt.SI = runStyle ??= CurrentStyle(si).Clone() as StyleInfo;
 				ms = this.MeasureString(pt.Text, pt.SI, g, out descent);
 				pt.X = this.X + lineXPos;
 				pt.Y = this.Y + yPos;
@@ -803,21 +806,7 @@ namespace Majorsilence.Reporting.Rdl
 
 				var cache = _measureCaches.GetValue(g, _ => new MeasureCache());
 				var key = (si.FontFamilyFull, si.FontSize, fs);
-				var cached = cache.GetFont(key, () =>
-				{
-					try
-					{
-						Draw.FontFamily ff = si.GetFontFamily();
-						Draw.Font f = new Draw.Font(ff, si.FontSize, fs);
-						// following algorithm comes from the C# Font Metrics documentation
-						float descentPixel = si.FontSize * ff.GetCellDescent(fs) / ff.GetEmHeight(fs);
-						return (f, RSize.PointsFromPixels(g, descentPixel));
-					}
-					catch
-					{
-						return (new Draw.Font("Arial", si.FontSize, fs), 0f);	// usually because font not found
-					}
-				});
+				var cached = cache.GetFont(key, si, g, CreateMeasureFont);
 				descent = cached.descent;
 
 				var sizeKey = (key.Item1, key.Item2, key.Item3, s);
@@ -838,6 +827,23 @@ namespace Majorsilence.Reporting.Rdl
 			}
 		}
 
+		private static (Draw.Font, float) CreateMeasureFont((string, float, Draw.FontStyle) key, StyleInfo si, Draw.Graphics g)
+		{
+			Draw.FontStyle fs = key.Item3;
+			try
+			{
+				Draw.FontFamily ff = si.GetFontFamily();
+				Draw.Font f = new Draw.Font(ff, si.FontSize, fs);
+				// following algorithm comes from the C# Font Metrics documentation
+				float descentPixel = si.FontSize * ff.GetCellDescent(fs) / ff.GetEmHeight(fs);
+				return (f, RSize.PointsFromPixels(g, descentPixel));
+			}
+			catch
+			{
+				return (new Draw.Font("Arial", si.FontSize, fs), 0f);	// usually because font not found
+			}
+		}
+
 		// What has been measured with one Graphics. Looking up a font and its metrics is slow, the
 		// same words are measured over and over, and a long text is laid out again for every page
 		// it is split over, so fonts and measurements are kept for as long as the Graphics lives.
@@ -849,12 +855,13 @@ namespace Majorsilence.Reporting.Rdl
 			readonly Dictionary<(string, float, Draw.FontStyle, string), System.Drawing.SizeF> _sizes =
 				new Dictionary<(string, float, Draw.FontStyle, string), System.Drawing.SizeF>();
 
-			public (Draw.Font font, float descent) GetFont((string, float, Draw.FontStyle) key, Func<(Draw.Font, float)> create)
+			public (Draw.Font font, float descent) GetFont((string, float, Draw.FontStyle) key, StyleInfo si, Draw.Graphics g,
+				Func<(string, float, Draw.FontStyle), StyleInfo, Draw.Graphics, (Draw.Font, float)> create)
 			{
 				lock (this)
 				{
 					if (!_fonts.TryGetValue(key, out var f))
-						_fonts[key] = f = create();
+						_fonts[key] = f = create(key, si, g);
 					return f;
 				}
 			}
