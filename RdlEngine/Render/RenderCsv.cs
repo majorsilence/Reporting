@@ -76,7 +76,17 @@ namespace Majorsilence.Reporting.Rdl
             if (pf.PrintOnLastPage || pf.PrintOnFirstPage) {tw.WriteLine();}
         }
 
-        public async Task Textbox(Textbox tb, string t, Row r)
+        public Task Textbox(Textbox tb, string t, Row r)
+        {
+            if (tb.TryEvaluate(report, r, out object value))     // the usual plain field: no Task per cell
+            {
+                tw.Write(value);
+                return Task.CompletedTask;
+            }
+            return TextboxAsync(tb, r);
+        }
+
+        private async Task TextboxAsync(Textbox tb, Row r)
         {
             object value = await tb.Evaluate(report, r).ConfigureAwait(false);
             tw.Write(value);
