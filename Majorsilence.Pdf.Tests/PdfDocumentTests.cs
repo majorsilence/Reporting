@@ -159,6 +159,31 @@ namespace Majorsilence.Pdf.Tests
             Assert.That(pig.NumberOfPages, Is.EqualTo(count));
         }
 
+        // A page's content is compressed once the next page is added (and when saving); drawing on
+        // it afterwards has to reopen it with everything drawn so far.
+        [Test]
+        public void DrawingOnEarlierPage_AfterLaterPagesAndSave_KeepsAllContent()
+        {
+            var doc = PdfDocument.Create();
+            var first = doc.AddPage(PageSizes.A4);
+            first.DrawText("Alpha", 50, 50);
+            var second = doc.AddPage(PageSizes.A4);
+            second.DrawText("Gamma", 50, 50);
+            first.DrawText("Beta", 50, 100);
+            doc.AddPage(PageSizes.A4).DrawText("Delta", 50, 50);
+            byte[] before = doc.ToBytes();
+            second.DrawText("Epsilon", 50, 100);
+            byte[] after = doc.ToBytes();
+
+            string[] PageTexts(byte[] pdf)
+            {
+                using var pig = PdfPig.Open(pdf);
+                return pig.GetPages().Select(p => string.Join(" ", p.GetWords().Select(w => w.Text))).ToArray();
+            }
+            Assert.That(PageTexts(before), Is.EqualTo(new[] { "Alpha Beta", "Gamma", "Delta" }));
+            Assert.That(PageTexts(after), Is.EqualTo(new[] { "Alpha Beta", "Gamma Epsilon", "Delta" }));
+        }
+
         [Test]
         public void IncrementalStyle_ProducesCorrectPageCount()
         {

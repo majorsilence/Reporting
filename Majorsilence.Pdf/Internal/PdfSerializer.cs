@@ -66,11 +66,48 @@ namespace Majorsilence.Pdf.Internal
     internal sealed class PageData
     {
         internal readonly float Width, Height;
-        internal readonly StringBuilder Content = new StringBuilder();
         internal readonly List<PageAnnotation> Annotations = new List<PageAnnotation>();
         internal readonly List<PageDestination> Destinations = new List<PageDestination>();
         internal readonly List<PageBookmark> Bookmarks = new List<PageBookmark>();
-        internal PageData(float width, float height) { Width = width; Height = height; }
+
+        // The content stream is text while the page is drawn on. Once the next page is added it is
+        // kept compressed, and its builder (already grown to a page's size) goes to the next page.
+        // Drawing on a page again after that reopens it from the compressed bytes.
+        private StringBuilder? _content;
+        private byte[]? _compressed;
+
+        internal PageData(float width, float height, StringBuilder? content = null)
+        {
+            Width = width; Height = height;
+            _content = content ?? PdfSerializer.RentContentBuilder();
+        }
+
+        internal StringBuilder Content
+        {
+            get
+            {
+                if (_content == null)
+                {
+                    _content = new StringBuilder(PdfSerializer.Decompress(_compressed!));
+                    _compressed = null;
+                }
+                return _content;
+            }
+        }
+
+        /// <summary>Compresses the content and returns the emptied builder for reuse.</summary>
+        internal StringBuilder? Seal()
+        {
+            if (_content == null)
+                return null;
+            _compressed = PdfSerializer.Compress(_content);
+            var sb = _content;
+            _content = null;
+            sb.Clear();
+            return sb;
+        }
+
+        internal byte[] CompressedContent() => _compressed ?? PdfSerializer.Compress(_content!);
     }
 
     // ── serializer ────────────────────────────────────────────────────────────
@@ -119,7 +156,8 @@ namespace Majorsilence.Pdf.Internal
 
         internal PageData CreatePage(float width, float height)
         {
-            var p = new PageData(width, height);
+            StringBuilder? reuse = _pages.Count > 0 ? _pages[_pages.Count - 1].Seal() : null;
+            var p = new PageData(width, height, reuse);
             _pages.Add(p);
             return p;
         }
@@ -196,8 +234,28 @@ namespace Majorsilence.Pdf.Internal
 
         // ── serialization ────────────────────────────────────────────────────
 
+        // One emptied content builder kept between documents: after the first page it holds a single
+        // array as big as a page's content, which would otherwise be allocated (on the large object heap
+        // for a busy page) by every document. One slot, so at most one builder is kept.
+        private static StringBuilder? s_spareContent;
+        private const int MaxSpareContentChars = 1 << 20;
+
+        internal static StringBuilder RentContentBuilder() =>
+            System.Threading.Interlocked.Exchange(ref s_spareContent, null) ?? new StringBuilder();
+
+        private static void ReturnContentBuilder(StringBuilder? sb)
+        {
+            if (sb != null && sb.Capacity <= MaxSpareContentChars)
+                System.Threading.Volatile.Write(ref s_spareContent, sb);
+        }
+
         internal void Write(Stream stream)
         {
+            // Compress the page still being drawn on, so its builder can serve the next document. Drawing
+            // on it after saving reopens it, as for any earlier page.
+            if (_pages.Count > 0)
+                ReturnContentBuilder(_pages[_pages.Count - 1].Seal());
+
             // Generate a random 16-byte file ID used in the /ID array and (when
             // encryption is active) in the key-derivation algorithm.
             byte[] fileId = new byte[16];
@@ -341,7 +399,7 @@ namespace Majorsilence.Pdf.Internal
 
                 pageContentIdx[pi] = objects.Count;
                 int contentObjNum  = objects.Count + 1;
-                byte[] compressed  = Compress(page.Content);
+                byte[] compressed  = page.CompressedContent();
                 byte[] streamData  = _encryptor != null
                     ? _encryptor.EncryptStream(contentObjNum, 0, compressed)
                     : compressed;
@@ -1178,7 +1236,7 @@ namespace Majorsilence.Pdf.Internal
         /// page is never copied into a string and a byte array first (both are large-object-heap
         /// allocations for a busy page). The bytes are the same as compressing the finished string.
         /// </summary>
-        private static byte[] Compress(StringBuilder content)
+        internal static byte[] Compress(StringBuilder content)
         {
 #if NET6_0_OR_GREATER
             byte[] buf = System.Buffers.ArrayPool<byte>.Shared.Rent(16 * 1024);
@@ -1207,6 +1265,19 @@ namespace Majorsilence.Pdf.Internal
 #else
             return Compress(Latin1.GetBytes(content.ToString()));
 #endif
+        }
+
+        /// <summary>Inflates a zlib stream made by <see cref="Compress(StringBuilder)"/> back to its Latin-1 text.</summary>
+        internal static string Decompress(byte[] zlib)
+        {
+            // 2-byte zlib header, raw deflate data, 4-byte Adler-32 trailer
+            using (var input = new MemoryStream(zlib, 2, zlib.Length - 6))
+            using (var ds = new DeflateStream(input, CompressionMode.Decompress))
+            using (var output = new MemoryStream())
+            {
+                ds.CopyTo(output);
+                return Latin1.GetString(output.GetBuffer(), 0, (int)output.Length);
+            }
         }
 
         private static byte[] Compress(byte[] data)
