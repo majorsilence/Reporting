@@ -270,8 +270,16 @@ namespace Majorsilence.Reporting.Rdl
             {
                 if (DataType.IsNumeric(this.Value.GetTypeCode() ))
                 {
-                    pt.SI = (StyleInfo) pt.SI.Clone();      // the style may be shared with other items
-                    pt.SI.TextAlign = TextAlignEnum.Right;
+                    if (ReferenceEquals(pt.SI, tbr.GeneralStyle))
+                        pt.SI = tbr.RightStyle;             // the shared constant style: its right aligned copy is shared too
+                    else
+                    {
+                        StyleInfo general = pt.SI;
+                        pt.SI = (StyleInfo) pt.SI.Clone();      // the style may be shared with other items
+                        pt.SI.TextAlign = TextAlignEnum.Right;
+                        tbr.GeneralStyle = general;
+                        tbr.RightStyle = pt.SI;
+                    }
                 }
             }
 
@@ -808,6 +816,8 @@ namespace Majorsilence.Reporting.Rdl
 		internal object LastObject=null;	// last object calculated
 		internal Row LastRow=null;			// the row LastValue is the textbox's value for
 		internal object LastValue=null;
+		internal StyleInfo GeneralStyle=null;	// a numeric cell's style with TextAlign General ...
+		internal StyleInfo RightStyle=null;		//   and its right aligned copy, reused while the style is the same instance
 
 		static internal TextboxRuntime GetTextboxRuntime(Report rpt, Textbox tb)
 		{

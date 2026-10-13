@@ -506,9 +506,6 @@ namespace Majorsilence.Reporting.Rdl
                 //  1) split the string into the forced line breaks (ie "\n and \r")
                 //  2) foreach of the forced line breaks; break these into words and recombine 
                 s = s.Replace("\r\n", "\n");	// don't want this to result in double lines
-                string[] flines = s.Split(LINEBREAK);
-                List<string> lines = new List<string>();
-                List<float> lineWidths = new List<float>();
                 // remove the size reserved for left and right padding
                 float ptWidth = pt.W - pt.SI.PaddingLeft - pt.SI.PaddingRight;
                 if (ptWidth <= 0)
@@ -527,6 +524,9 @@ namespace Majorsilence.Reporting.Rdl
                         return new string[] { single };
                     }
                 }
+                string[] flines = s.Split(LINEBREAK);
+                List<string> lines = new List<string>();
+                List<float> lineWidths = new List<float>();
                 foreach (string tfl in flines)
                 {
                     string fl;
