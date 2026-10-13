@@ -697,7 +697,8 @@ function findObject(id) {
 			else
 				ftw.WriteLine("<body><table>");
 
-			ftw.Write(tw.ToString());
+			foreach (ReadOnlyMemory<char> chunk in tw.GetStringBuilder().GetChunks())	// not copied into one (large object heap) string first
+				ftw.Write(chunk.Span);
 
 			if (this._Asp)
 				ftw.WriteLine(@"</table>");

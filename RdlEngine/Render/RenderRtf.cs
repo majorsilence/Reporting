@@ -106,7 +106,8 @@ namespace Majorsilence.Reporting.Rdl
             PutColorTable(ftw);
 
             // write out the body of the rtf file
-            ftw.Write(tw.ToString());
+            foreach (ReadOnlyMemory<char> chunk in tw.GetStringBuilder().GetChunks())	// not copied into one (large object heap) string first
+            	ftw.Write(chunk.Span);
             tw.Close();
             tw = null;
             
