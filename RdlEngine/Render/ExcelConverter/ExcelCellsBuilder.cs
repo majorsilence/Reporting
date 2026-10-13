@@ -224,14 +224,11 @@ namespace RdlEngine.Render.ExcelConverter
 
 		private async Task SetCellStyle(ExcelCell excelCell, ReportItem reportItem, Row row)
 		{
-			StyleInfo si = new StyleInfo();
+			StyleInfo si = null;
 			if(reportItem.Style != null) {
-				var itemStyleInfo = await reportItem.Style.GetStyleInfoShared(Report, row).ConfigureAwait(false);   // read only
-				if(itemStyleInfo != null) {
-					si = itemStyleInfo;
-				}
+				si = await reportItem.Style.GetStyleInfoShared(Report, row).ConfigureAwait(false);   // read only
 			}
-			excelCell.Style = si;
+			excelCell.Style = si ?? new StyleInfo();
 		}
 
 		public float GetCellAboveRelativePosition(float top)
