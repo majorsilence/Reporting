@@ -835,13 +835,29 @@ namespace Majorsilence.Reporting.Rdl
 				Draw.FontFamily ff = si.GetFontFamily();
 				Draw.Font f = new Draw.Font(ff, si.FontSize, fs);
 				// following algorithm comes from the C# Font Metrics documentation
-				float descentPixel = si.FontSize * ff.GetCellDescent(fs) / ff.GetEmHeight(fs);
+				var (cellDescent, emHeight) = CellMetrics(ff, fs);
+				float descentPixel = si.FontSize * cellDescent / emHeight;
 				return (f, RSize.PointsFromPixels(g, descentPixel));
 			}
 			catch
 			{
 				return (new Draw.Font("Arial", si.FontSize, fs), 0f);	// usually because font not found
 			}
+		}
+
+		// A family's cell descent and em height depend only on its typeface, but FontFamily looks the typeface
+		// up in the platform font manager on every call (fontconfig on Linux, several queries when the family
+		// is substituted), which was most of the time of a report with html text. Kept for the process, as
+		// the font registry is: fonts installed later are seen after a restart.
+		static readonly System.Collections.Concurrent.ConcurrentDictionary<(string, Draw.FontStyle), (int descent, int em)> _cellMetrics =
+			new System.Collections.Concurrent.ConcurrentDictionary<(string, Draw.FontStyle), (int, int)>();
+
+		private static (int descent, int em) CellMetrics(Draw.FontFamily ff, Draw.FontStyle fs)
+		{
+			var key = (ff.Name, fs);
+			if (!_cellMetrics.TryGetValue(key, out var m))
+				_cellMetrics[key] = m = (ff.GetCellDescent(fs), ff.GetEmHeight(fs));
+			return m;
 		}
 
 		// What has been measured with one Graphics. Looking up a font and its metrics is slow, the
