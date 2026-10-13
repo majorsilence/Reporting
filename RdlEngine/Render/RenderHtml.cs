@@ -335,7 +335,7 @@ function findObject(id) {
 		}
 
 		// handle the Action tag
-		private async Task<string> Action(Action a, Row r, string t, string tooltip)
+		private async ValueTask<string> Action(Action a, Row r, string t, string tooltip)	// ValueTask: no allocation when it completes at once (no action, table cells)
 		{
 			if (a == null)
 				return t;
@@ -451,16 +451,16 @@ function findObject(id) {
 				ftw.WriteLine("</style>");
 		}
 
-		private async Task<string> CssAdd(Style s, ReportLink rl, Row row)
+		private async ValueTask<string> CssAdd(Style s, ReportLink rl, Row row)
 		{
 			return await CssAdd(s, rl, row, false, float.MinValue, float.MinValue).ConfigureAwait(false);
 		}
 		
-		private async Task<string> CssAdd(Style s, ReportLink rl, Row row, bool bForceRelative)
+		private async ValueTask<string> CssAdd(Style s, ReportLink rl, Row row, bool bForceRelative)
 		{
 			return await CssAdd(s, rl, row, bForceRelative, float.MinValue, float.MinValue).ConfigureAwait(false);
 		}
-		private async Task<string> CssAdd(Style s, ReportLink rl, Row row, bool bForceRelative, float h, float w)
+		private async ValueTask<string> CssAdd(Style s, ReportLink rl, Row row, bool bForceRelative, float h, float w)
 		{
 			string css;
 			string prefix = CssPrefix(s, rl);
@@ -500,7 +500,7 @@ function findObject(id) {
 		// css class names of items with a constant style and no positioning; per render, so no locking
 		private readonly System.Collections.Generic.Dictionary<(Style, ReportLink), string> _constantCssNames = new System.Collections.Generic.Dictionary<(Style, ReportLink), string>();
 
-		private async Task<string> CssPosition(ReportLink rl,Row row, bool bForceRelative, float h, float w)
+		private async ValueTask<string> CssPosition(ReportLink rl,Row row, bool bForceRelative, float h, float w)
 		{
 			if (!(rl is ReportItem))		// if not a report item then no position
 				return "";
