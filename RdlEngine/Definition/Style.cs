@@ -1176,6 +1176,9 @@ namespace Majorsilence.Reporting.Rdl
 
 		// Apply a format string to a value using the given BCP 47 language tag for locale-sensitive
 		// formats (C, N, P, etc.). Falls back to CurrentCulture if the tag is absent or unrecognised.
+		// The culture of the last language string FormatValue was given (one report repeats one Language string).
+		private static Tuple<string, CultureInfo> _lastCulture;
+
 		static internal string FormatValue(object o, TypeCode tc, string format, string language)
 		{
 			if (string.IsNullOrEmpty(format))
@@ -1184,8 +1187,18 @@ namespace Majorsilence.Reporting.Rdl
 			CultureInfo ci = CultureInfo.CurrentCulture;
 			if (!string.IsNullOrEmpty(language))
 			{
-				try { ci = CultureInfo.GetCultureInfo(language); }
-				catch (CultureNotFoundException) { }
+				var last = _lastCulture;     // GetCultureInfo lower-cases the name and takes a lock on every call
+				if (last != null && string.Equals(last.Item1, language, StringComparison.Ordinal))
+					ci = last.Item2;
+				else
+				{
+					try
+					{
+						ci = CultureInfo.GetCultureInfo(language);
+						_lastCulture = Tuple.Create(language, ci);
+					}
+					catch (CultureNotFoundException) { }
+				}
 			}
 
 			// tc is what the definition DECLARED; o is what actually arrived. They disagree
