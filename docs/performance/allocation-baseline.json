@@ -1,12 +1,12 @@
 {
-  "ListPagingTest": 15429702,
-  "MatrixExample": 2086168,
-  "WorldFacts": 4978389,
-  "WorldFacts csv": 1500871,
-  "WorldFacts html": 2525433,
-  "WorldFacts rtf": 3878390,
-  "WorldFacts xlsx": 6217030,
-  "WorldFacts xml": 2685823,
-  "large:1000": 4463173,
-  "testdata": 609705
+  "ListPagingTest": 7015033,
+  "MatrixExample": 1833391,
+  "WorldFacts": 3168879,
+  "WorldFacts csv": 1353676,
+  "WorldFacts html": 1900454,
+  "WorldFacts rtf": 3113225,
+  "WorldFacts xlsx": 4210488,
+  "WorldFacts xml": 2661605,
+  "large:1000": 2464419,
+  "testdata": 457305
 }
