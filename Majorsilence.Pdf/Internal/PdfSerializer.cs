@@ -1241,24 +1241,39 @@ namespace Majorsilence.Pdf.Internal
         /// page is never copied into a string and a byte array first (both are large-object-heap
         /// allocations for a busy page). The bytes are the same as compressing the finished string.
         /// </summary>
+        private const int CompressBlock = 16 * 1024;
+
         internal static byte[] Compress(StringBuilder content)
         {
 #if NET6_0_OR_GREATER
-            byte[] buf = System.Buffers.ArrayPool<byte>.Shared.Rent(16 * 1024);
+            byte[] buf = System.Buffers.ArrayPool<byte>.Shared.Rent(CompressBlock);
             try
             {
                 using (var ms = new MemoryStream())
                 {
                     using (var zs = new ZLibStream(ms, CompressionLevel.Optimal, leaveOpen: true))
                     {
+                        // zlib gets whole blocks of a fixed size whatever the builder's chunks are: a reused
+                        // builder has different chunks from a new one, and the compressed bytes (zlib-ng, .NET 9+)
+                        // can depend on how the input is split into writes. Latin-1 is one byte per char.
+                        int filled = 0;
                         foreach (ReadOnlyMemory<char> chunk in content.GetChunks())
                         {
-                            for (int offset = 0; offset < chunk.Length; offset += buf.Length)
+                            ReadOnlySpan<char> rest = chunk.Span;
+                            while (rest.Length > 0)
                             {
-                                int n = Latin1.GetBytes(chunk.Span.Slice(offset, Math.Min(buf.Length, chunk.Length - offset)), buf);
-                                zs.Write(buf, 0, n);
+                                int take = Math.Min(rest.Length, CompressBlock - filled);
+                                filled += Latin1.GetBytes(rest.Slice(0, take), buf.AsSpan(filled, take));
+                                rest = rest.Slice(take);
+                                if (filled == CompressBlock)
+                                {
+                                    zs.Write(buf, 0, filled);
+                                    filled = 0;
+                                }
                             }
                         }
+                        if (filled > 0)
+                            zs.Write(buf, 0, filled);
                     }
                     return ms.ToArray();
                 }
