@@ -630,28 +630,35 @@ namespace Majorsilence.Reporting.Rdl
 			return t;
 		}
 
-		internal async Task<float> RunTextCalcHeight(Report rpt, Graphics g, Row row)
+		internal ValueTask<float> RunTextCalcHeight(Report rpt, Graphics g, Row row)
 		{
-			return await RunTextCalcHeight(rpt, g, row, null).ConfigureAwait(false);
+			return RunTextCalcHeight(rpt, g, row, null);
 		}
 		
-		internal async Task<float> RunTextCalcHeight(Report rpt, Graphics g, Row row, PageTextHtml pth)
+		// ValueTask, and the constant parts (style, padding, value, format) taken without a Task when they can be:
+		// a table of growing cells calls this for every cell of every row.
+		internal async ValueTask<float> RunTextCalcHeight(Report rpt, Graphics g, Row row, PageTextHtml pth)
 		{	// normally only called when CanGrow is true
 			Size s = Size.Empty;
 
 			if (await IsHidden(rpt, row).ConfigureAwait(false))
 				return 0;
 
-			object o = await Evaluate(rpt, row).ConfigureAwait(false);
+			object o = TryEvaluate(rpt, row, out object value) ? value : await Evaluate(rpt, row).ConfigureAwait(false);
 
 			TypeCode tc = _Value.GetTypeCode();
 			int width = this.WidthCalc(rpt, g);
 
+			Style.MeasureSetup setup = null;
 			if (this.Style != null)
 			{
-				width -= (await Style.EvalPaddingLeftPx(rpt, row).ConfigureAwait(false) + await Style.EvalPaddingRightPx(rpt, row).ConfigureAwait(false));
+				setup = Style.TryGetMeasureSetup(rpt) ?? await Style.GetMeasureSetup(rpt, row).ConfigureAwait(false);
+				if (setup != null)
+					width -= setup.PadLeftPx + setup.PadRightPx;
+				else
+					width -= (await Style.EvalPaddingLeftPx(rpt, row).ConfigureAwait(false) + await Style.EvalPaddingRightPx(rpt, row).ConfigureAwait(false));
 
-				if (await IsHtml(rpt, row).ConfigureAwait(false))
+				if (TryIsHtml(out bool isHtml) ? isHtml : await IsHtml(rpt, row).ConfigureAwait(false))
 				{
 					if (pth == null)
 					{
@@ -661,7 +668,7 @@ namespace Majorsilence.Reporting.Rdl
 					await pth.Build(g).ConfigureAwait(false);
 					s.Height = RSize.PixelsFromPoints(pth.TotalHeight);
 				}
-				else
+				else if (!Style.TryMeasureString(rpt, g, o, tc, width, out s))
 					s = await Style.MeasureString(rpt, g, o, tc, row, width).ConfigureAwait(false);
 			}
 			else	// call the class static method
@@ -670,7 +677,9 @@ namespace Majorsilence.Reporting.Rdl
 			TextboxRuntime tbr = TextboxRuntime.GetTextboxRuntime(rpt, this);
 			tbr.RunHeight = RSize.PointsFromPixels(g, s.Height);
 			if (Style != null)
-				tbr.RunHeight += (await Style.EvalPaddingBottom(rpt, row).ConfigureAwait(false) + await Style.EvalPaddingTop(rpt, row).ConfigureAwait(false));
+				tbr.RunHeight += setup != null
+					? setup.PadBottom + setup.PadTop
+					: (await Style.EvalPaddingBottom(rpt, row).ConfigureAwait(false) + await Style.EvalPaddingTop(rpt, row).ConfigureAwait(false));
 			return tbr.RunHeight;
 		}
 
