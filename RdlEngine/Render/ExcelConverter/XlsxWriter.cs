@@ -91,9 +91,14 @@ namespace RdlEngine.Render.ExcelConverter
         public void SetRowHeight(int rowIndex, double heightInPoints)
             => _rowHeights[rowIndex] = heightInPoints;
 
+        // The style index of each format instance passed to SetCell; a format is not changed after it is passed.
+        private readonly Dictionary<XlsxCellFormat, int> _styleIndexes = new Dictionary<XlsxCellFormat, int>(ReferenceEqualityComparer.Instance);
+
         public void SetCell(int rowIndex, int colIndex, string value, XlsxCellFormat format = null)
         {
-            int styleIndex = format != null ? GetOrAddCellStyle(format) : 0;
+            int styleIndex = 0;
+            if (format != null && !_styleIndexes.TryGetValue(format, out styleIndex))
+                _styleIndexes[format] = styleIndex = GetOrAddCellStyle(format);
             _cells.Add(new CellEntry(rowIndex, colIndex, value ?? "", styleIndex));
         }
 

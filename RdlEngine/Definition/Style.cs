@@ -977,12 +977,17 @@ namespace Majorsilence.Reporting.Rdl
 		/// one instance shared by every item that uses the style, so it must not be modified (clone it first,
 		/// as <see cref="GetStyleInfo"/> callers get); otherwise it is a fresh instance, as GetStyleInfo returns.
 		/// </summary>
-		internal async Task<StyleInfo> GetStyleInfoShared(Report rpt, Row r)
+		internal Task<StyleInfo> GetStyleInfoShared(Report rpt, Row r)
 		{
 			WorkClass wc = GetWC(rpt);
 			if (wc != null && wc.StyleInfo != null)
-				return wc.StyleInfo;
+				return wc.StyleInfoTask ??= Task.FromResult(wc.StyleInfo);	// one completed task, not one per item
 
+			return GetStyleInfoSharedAsync(rpt, r, wc);
+		}
+
+		private async Task<StyleInfo> GetStyleInfoSharedAsync(Report rpt, Row r, WorkClass wc)
+		{
 			StyleInfo si = await GetStyleInfo(rpt, r).ConfigureAwait(false);   // fills wc.StyleInfo when the style is constant
 			return wc?.StyleInfo ?? si;
 		}
@@ -1171,6 +1176,9 @@ namespace Majorsilence.Reporting.Rdl
 
 		// Apply a format string to a value using the given BCP 47 language tag for locale-sensitive
 		// formats (C, N, P, etc.). Falls back to CurrentCulture if the tag is absent or unrecognised.
+		// The culture of the last language string FormatValue was given (one report repeats one Language string).
+		private static Tuple<string, CultureInfo> _lastCulture;
+
 		static internal string FormatValue(object o, TypeCode tc, string format, string language)
 		{
 			if (string.IsNullOrEmpty(format))
@@ -1179,8 +1187,18 @@ namespace Majorsilence.Reporting.Rdl
 			CultureInfo ci = CultureInfo.CurrentCulture;
 			if (!string.IsNullOrEmpty(language))
 			{
-				try { ci = CultureInfo.GetCultureInfo(language); }
-				catch (CultureNotFoundException) { }
+				var last = _lastCulture;     // GetCultureInfo lower-cases the name and takes a lock on every call
+				if (last != null && string.Equals(last.Item1, language, StringComparison.Ordinal))
+					ci = last.Item2;
+				else
+				{
+					try
+					{
+						ci = CultureInfo.GetCultureInfo(language);
+						_lastCulture = Tuple.Create(language, ci);
+					}
+					catch (CultureNotFoundException) { }
+				}
 			}
 
 			// tc is what the definition DECLARED; o is what actually arrived. They disagree
@@ -1847,6 +1865,7 @@ namespace Majorsilence.Reporting.Rdl
 		{
 			internal string CssStyle;		// When ConstantStyle is true; this will hold cache of css
 			internal StyleInfo StyleInfo;	// When ConstantStyle is true; this will hold cache of StyleInfo
+			internal Task<StyleInfo> StyleInfoTask;	// StyleInfo as a completed task, for GetStyleInfoShared
 			internal WorkClass()
 			{
 				CssStyle = null;

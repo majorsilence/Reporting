@@ -66,11 +66,48 @@ namespace Majorsilence.Pdf.Internal
     internal sealed class PageData
     {
         internal readonly float Width, Height;
-        internal readonly StringBuilder Content = new StringBuilder();
         internal readonly List<PageAnnotation> Annotations = new List<PageAnnotation>();
         internal readonly List<PageDestination> Destinations = new List<PageDestination>();
         internal readonly List<PageBookmark> Bookmarks = new List<PageBookmark>();
-        internal PageData(float width, float height) { Width = width; Height = height; }
+
+        // The content stream is text while the page is drawn on. Once the next page is added it is
+        // kept compressed, and its builder (already grown to a page's size) goes to the next page.
+        // Drawing on a page again after that reopens it from the compressed bytes.
+        private StringBuilder? _content;
+        private byte[]? _compressed;
+
+        internal PageData(float width, float height, StringBuilder? content = null)
+        {
+            Width = width; Height = height;
+            _content = content ?? PdfSerializer.RentContentBuilder();
+        }
+
+        internal StringBuilder Content
+        {
+            get
+            {
+                if (_content == null)
+                {
+                    _content = new StringBuilder(PdfSerializer.Decompress(_compressed!));
+                    _compressed = null;
+                }
+                return _content;
+            }
+        }
+
+        /// <summary>Compresses the content and returns the emptied builder for reuse.</summary>
+        internal StringBuilder? Seal()
+        {
+            if (_content == null)
+                return null;
+            _compressed = PdfSerializer.Compress(_content);
+            var sb = _content;
+            _content = null;
+            sb.Clear();
+            return sb;
+        }
+
+        internal byte[] CompressedContent() => _compressed ?? PdfSerializer.Compress(_content!);
     }
 
     // ── serializer ────────────────────────────────────────────────────────────
@@ -119,7 +156,8 @@ namespace Majorsilence.Pdf.Internal
 
         internal PageData CreatePage(float width, float height)
         {
-            var p = new PageData(width, height);
+            StringBuilder? reuse = _pages.Count > 0 ? _pages[_pages.Count - 1].Seal() : null;
+            var p = new PageData(width, height, reuse);
             _pages.Add(p);
             return p;
         }
@@ -196,8 +234,28 @@ namespace Majorsilence.Pdf.Internal
 
         // ── serialization ────────────────────────────────────────────────────
 
+        // One emptied content builder kept between documents: after the first page it holds a single
+        // array as big as a page's content, which would otherwise be allocated (on the large object heap
+        // for a busy page) by every document. One slot, so at most one builder is kept.
+        private static StringBuilder? s_spareContent;
+        private const int MaxSpareContentChars = 1 << 20;
+
+        internal static StringBuilder RentContentBuilder() =>
+            System.Threading.Interlocked.Exchange(ref s_spareContent, null) ?? new StringBuilder();
+
+        private static void ReturnContentBuilder(StringBuilder? sb)
+        {
+            if (sb != null && sb.Capacity <= MaxSpareContentChars)
+                System.Threading.Volatile.Write(ref s_spareContent, sb);
+        }
+
         internal void Write(Stream stream)
         {
+            // Compress the page still being drawn on, so its builder can serve the next document. Drawing
+            // on it after saving reopens it, as for any earlier page.
+            if (_pages.Count > 0)
+                ReturnContentBuilder(_pages[_pages.Count - 1].Seal());
+
             // Generate a random 16-byte file ID used in the /ID array and (when
             // encryption is active) in the key-derivation algorithm.
             byte[] fileId = new byte[16];
@@ -216,8 +274,7 @@ namespace Majorsilence.Pdf.Internal
                 if (_sigHandler != null && sigPlaceholderBytes != null)
                     _sigHandler.Fixup(ms, sigPlaceholderBytes, sigBodyOffset);
 
-                ms.Position = 0;
-                ms.CopyTo(stream);
+                stream.Write(ms.GetBuffer(), 0, (int)ms.Length);   // one write: a MemoryStream destination grows once
             }
         }
 
@@ -245,7 +302,7 @@ namespace Majorsilence.Pdf.Internal
             w.WriteRaw(new byte[] { (byte)'%', 0xE2, 0xE3, 0xCF, 0xD3, (byte)'\n' });
 
             // Object numbering: list index i → PDF object number i+1.
-            var objects = new List<byte[]> { null!, null! }; // [0]=Catalog [1]=Pages
+            var objects = new List<PdfObj> { default, default }; // [0]=Catalog [1]=Pages
 
             // ── /Encrypt object ────────────────────────────────────────────────
             int encObjNum = -1;
@@ -341,12 +398,12 @@ namespace Majorsilence.Pdf.Internal
 
                 pageContentIdx[pi] = objects.Count;
                 int contentObjNum  = objects.Count + 1;
-                byte[] compressed  = Compress(page.Content);
+                byte[] compressed  = page.CompressedContent();
                 byte[] streamData  = _encryptor != null
                     ? _encryptor.EncryptStream(contentObjNum, 0, compressed)
                     : compressed;
                 string hdrStr = $"<< /Filter /FlateDecode /Length {streamData.Length} >>\nstream\n";
-                objects.Add(Concat(Latin1.GetBytes(hdrStr), streamData, Latin1.GetBytes("\nendstream")));
+                objects.Add(new PdfObj(Latin1.GetBytes(hdrStr), streamData, EndStream));
 
                 pageDictIdx[pi]   = objects.Count;
                 string extGStatePart = extGStateStr.Length > 0
@@ -435,12 +492,18 @@ namespace Majorsilence.Pdf.Internal
             // ── write objects ─────────────────────────────────────────────────
             int   totalObjs   = objects.Count;
             var   xrefOffsets = new long[totalObjs];
+            // Every object's size is known now: size the buffer once instead of doubling it.
+            long expected = ms.Position + 1024;
+            foreach (var o in objects)
+                expected += o.Length + 48;     // "n 0 obj", "endobj" and the xref line
+            if (expected < int.MaxValue && ms.Capacity < expected)
+                ms.Capacity = (int)expected;
             for (int i = 0; i < totalObjs; i++)
             {
                 xrefOffsets[i] = ms.Position;
                 w.WriteLine($"{i + 1} 0 obj");
                 if (i == sigObjIdx) sigBodyOffset = ms.Position;
-                w.WriteBytes(objects[i]);
+                objects[i].WriteTo(ms);
                 w.WriteLine("");
                 w.WriteLine("endobj");
             }
@@ -540,7 +603,7 @@ namespace Majorsilence.Pdf.Internal
                 $"<< /Type /Font /Subtype /Type1 /BaseFont /{font.StandardName} " +
                 $"/Encoding /WinAnsiEncoding >>");
 
-        private void BuildTtfFontObjs(FontResource font, List<byte[]> objects)
+        private void BuildTtfFontObjs(FontResource font, List<PdfObj> objects)
         {
             var    ttf       = font.Ttf!;
             string psName    = ttf.PostScriptName;
@@ -576,7 +639,7 @@ namespace Majorsilence.Pdf.Internal
             {
                 byte[] cmapData = _encryptor.EncryptStream(toUnicodeObjNum, 0, parts.ToUnicodeCompressed);
                 string cmapHdr  = $"<< /Filter /FlateDecode /Length {cmapData.Length} >>\nstream\n";
-                objects.Add(Concat(Latin1.GetBytes(cmapHdr), cmapData, Latin1.GetBytes("\nendstream")));
+                objects.Add(new PdfObj(Latin1.GetBytes(cmapHdr), cmapData, EndStream));
             }
 
             string wArray = parts.Widths;
@@ -604,7 +667,7 @@ namespace Majorsilence.Pdf.Internal
                 string ffHdr = ttf.IsCff
                     ? $"<< /Subtype /CIDFontType0C /Filter /FlateDecode /Length {fontStream.Length} >>\nstream\n"
                     : $"<< /Filter /FlateDecode /Length {fontStream.Length} /Length1 {parts.FontLength} >>\nstream\n";
-                objects.Add(Concat(Latin1.GetBytes(ffHdr), fontStream, Latin1.GetBytes("\nendstream")));
+                objects.Add(new PdfObj(Latin1.GetBytes(ffHdr), fontStream, EndStream));
             }
 
             // ── CIDFont ───────────────────────────────────────────────────────
@@ -661,13 +724,13 @@ namespace Majorsilence.Pdf.Internal
             else if (subsetting) fontData = ttf.Subset(used!);
             else fontData = ttf.Data;
             byte[] fontComp = Compress(fontData);
-            byte[] cmapObject = Concat(Latin1.GetBytes($"<< /Filter /FlateDecode /Length {cmapComp.Length} >>\nstream\n"),
-                cmapComp, Latin1.GetBytes("\nendstream"));
+            byte[] cmapObject = ConcatBytes(Latin1.GetBytes($"<< /Filter /FlateDecode /Length {cmapComp.Length} >>\nstream\n"),
+                cmapComp, EndStream);
             string fontHdr = ttf.IsCff
                 ? $"<< /Subtype /CIDFontType0C /Filter /FlateDecode /Length {fontComp.Length} >>\nstream\n"
                 : $"<< /Filter /FlateDecode /Length {fontComp.Length} /Length1 {fontData.Length} >>\nstream\n";
-            byte[] fontObject = Concat(Latin1.GetBytes(fontHdr),
-                fontComp, Latin1.GetBytes("\nendstream"));
+            byte[] fontObject = ConcatBytes(Latin1.GetBytes(fontHdr),
+                fontComp, EndStream);
             return new FontParts(cmapComp, wArray.ToString(), fontComp, fontData.Length, cmapObject, fontObject);
         }
 
@@ -678,7 +741,7 @@ namespace Majorsilence.Pdf.Internal
             return all;
         }
 
-        private byte[] BuildImageObj(ImageResource img, int objNum)
+        private PdfObj BuildImageObj(ImageResource img, int objNum)
         {
             string filter = img.IsJpeg ? "/DCTDecode" : "/FlateDecode";
             byte[] raw    = img.IsJpeg ? img.Data : Compress(img.Data);
@@ -686,10 +749,10 @@ namespace Majorsilence.Pdf.Internal
             string hdr =
                 $"<< /Type /XObject /Subtype /Image /Width {img.Width} /Height {img.Height} " +
                 $"/ColorSpace {(img.IsJpeg && img.Components == 1 ? "/DeviceGray" : "/DeviceRGB")} /BitsPerComponent 8 /Filter {filter} /Length {data.Length} >>\nstream\n";
-            return Concat(Latin1.GetBytes(hdr), data, Latin1.GetBytes("\nendstream"));
+            return new PdfObj(Latin1.GetBytes(hdr), data, EndStream);
         }
 
-        private byte[] BuildRgbaMainImageObj(ImageResource img, int sMaskPdfObjNum, int objNum)
+        private PdfObj BuildRgbaMainImageObj(ImageResource img, int sMaskPdfObjNum, int objNum)
         {
             byte[] rgba   = img.Data;
             int    pixels = img.Width * img.Height;
@@ -706,10 +769,10 @@ namespace Majorsilence.Pdf.Internal
                 $"<< /Type /XObject /Subtype /Image /Width {img.Width} /Height {img.Height} " +
                 $"/ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /FlateDecode " +
                 $"/SMask {sMaskPdfObjNum} 0 R /Length {data.Length} >>\nstream\n";
-            return Concat(Latin1.GetBytes(hdr), data, Latin1.GetBytes("\nendstream"));
+            return new PdfObj(Latin1.GetBytes(hdr), data, EndStream);
         }
 
-        private byte[] BuildAlphaMaskObj(ImageResource img, int objNum)
+        private PdfObj BuildAlphaMaskObj(ImageResource img, int objNum)
         {
             byte[] rgba   = img.Data;
             int    pixels = img.Width * img.Height;
@@ -720,10 +783,10 @@ namespace Majorsilence.Pdf.Internal
             string hdr =
                 $"<< /Type /XObject /Subtype /Image /Width {img.Width} /Height {img.Height} " +
                 $"/ColorSpace /DeviceGray /BitsPerComponent 8 /Filter /FlateDecode /Length {data.Length} >>\nstream\n";
-            return Concat(Latin1.GetBytes(hdr), data, Latin1.GetBytes("\nendstream"));
+            return new PdfObj(Latin1.GetBytes(hdr), data, EndStream);
         }
 
-        private byte[] BuildXmpMetadataObj(PdfConformance conformance = PdfConformance.None)
+        private PdfObj BuildXmpMetadataObj(PdfConformance conformance = PdfConformance.None)
         {
             var x = new StringBuilder();
             x.Append("<?xpacket begin=\"\xEF\xBB\xBF\" id=\"W5M0MpCehiHzreSzNTczkc9d\"?>\n");
@@ -774,7 +837,7 @@ namespace Majorsilence.Pdf.Internal
             // XMP is always unencrypted so external tools can read metadata.
             byte[] xmpUtf8 = System.Text.Encoding.UTF8.GetBytes(x.ToString());
             string hdr     = $"<< /Type /Metadata /Subtype /XML /Length {xmpUtf8.Length} >>\nstream\n";
-            return Concat(Latin1.GetBytes(hdr), xmpUtf8, Latin1.GetBytes("\nendstream"));
+            return new PdfObj(Latin1.GetBytes(hdr), xmpUtf8, EndStream);
         }
 
         // ── PDF/A ICC profile helpers ─────────────────────────────────────────
@@ -894,11 +957,11 @@ namespace Majorsilence.Pdf.Internal
         private static void IccWI16(byte[] buf, int off, int v)
         { buf[off]=(byte)(v>>8); buf[off+1]=(byte)v; }
 
-        private byte[] BuildIccProfileObj(int objNum)
+        private PdfObj BuildIccProfileObj(int objNum)
         {
             byte[] iccBytes = BuildMinimalSrgbIccProfile();
             string hdr = $"<< /N 3 /Alternate /DeviceRGB /Length {iccBytes.Length} >>\nstream\n";
-            return Concat(Latin1.GetBytes(hdr), iccBytes, Latin1.GetBytes("\nendstream"));
+            return new PdfObj(Latin1.GetBytes(hdr), iccBytes, EndStream);
         }
 
         private static byte[] BuildOutputIntentsObj(int objNum, int iccObjNum)
@@ -914,7 +977,7 @@ namespace Majorsilence.Pdf.Internal
 
         // Writes the outline tree for all bookmarks, in page order. Returns the root object number,
         // or -1 when there are no bookmarks.
-        private int BuildOutlines(List<byte[]> objects, int[] pageObjNums)
+        private int BuildOutlines(List<PdfObj> objects, int[] pageObjNums)
         {
             var flat = new List<(PageBookmark Mark, int Page)>();
             for (int pi = 0; pi < _pages.Count; pi++)
@@ -1039,7 +1102,7 @@ namespace Majorsilence.Pdf.Internal
                 $"/AP << /N {apObjNum} 0 R >> >>");
         }
 
-        private byte[] BuildSigAppearanceObj(
+        private PdfObj BuildSigAppearanceObj(
             int objNum,
             (float X, float Y, float Width, float Height, string? SignerName) app)
         {
@@ -1072,7 +1135,7 @@ namespace Majorsilence.Pdf.Internal
                 $"/BBox [0 0 {Fmt(w)} {Fmt(h)}] " +
                 $"/Resources {resources} " +
                 $"/Length {streamBytes.Length} >>\nstream\n";
-            return Concat(Latin1.GetBytes(hdr), streamBytes, Latin1.GetBytes("\nendstream"));
+            return new PdfObj(Latin1.GetBytes(hdr), streamBytes, EndStream);
         }
 
         private static string EscapePdfLiteral(string s) =>
@@ -1178,24 +1241,39 @@ namespace Majorsilence.Pdf.Internal
         /// page is never copied into a string and a byte array first (both are large-object-heap
         /// allocations for a busy page). The bytes are the same as compressing the finished string.
         /// </summary>
-        private static byte[] Compress(StringBuilder content)
+        private const int CompressBlock = 16 * 1024;
+
+        internal static byte[] Compress(StringBuilder content)
         {
 #if NET6_0_OR_GREATER
-            byte[] buf = System.Buffers.ArrayPool<byte>.Shared.Rent(16 * 1024);
+            byte[] buf = System.Buffers.ArrayPool<byte>.Shared.Rent(CompressBlock);
             try
             {
                 using (var ms = new MemoryStream())
                 {
                     using (var zs = new ZLibStream(ms, CompressionLevel.Optimal, leaveOpen: true))
                     {
+                        // zlib gets whole blocks of a fixed size whatever the builder's chunks are: a reused
+                        // builder has different chunks from a new one, and the compressed bytes (zlib-ng, .NET 9+)
+                        // can depend on how the input is split into writes. Latin-1 is one byte per char.
+                        int filled = 0;
                         foreach (ReadOnlyMemory<char> chunk in content.GetChunks())
                         {
-                            for (int offset = 0; offset < chunk.Length; offset += buf.Length)
+                            ReadOnlySpan<char> rest = chunk.Span;
+                            while (rest.Length > 0)
                             {
-                                int n = Latin1.GetBytes(chunk.Span.Slice(offset, Math.Min(buf.Length, chunk.Length - offset)), buf);
-                                zs.Write(buf, 0, n);
+                                int take = Math.Min(rest.Length, CompressBlock - filled);
+                                filled += Latin1.GetBytes(rest.Slice(0, take), buf.AsSpan(filled, take));
+                                rest = rest.Slice(take);
+                                if (filled == CompressBlock)
+                                {
+                                    zs.Write(buf, 0, filled);
+                                    filled = 0;
+                                }
                             }
                         }
+                        if (filled > 0)
+                            zs.Write(buf, 0, filled);
                     }
                     return ms.ToArray();
                 }
@@ -1207,6 +1285,19 @@ namespace Majorsilence.Pdf.Internal
 #else
             return Compress(Latin1.GetBytes(content.ToString()));
 #endif
+        }
+
+        /// <summary>Inflates a zlib stream made by <see cref="Compress(StringBuilder)"/> back to its Latin-1 text.</summary>
+        internal static string Decompress(byte[] zlib)
+        {
+            // 2-byte zlib header, raw deflate data, 4-byte Adler-32 trailer
+            using (var input = new MemoryStream(zlib, 2, zlib.Length - 6))
+            using (var ds = new DeflateStream(input, CompressionMode.Decompress))
+            using (var output = new MemoryStream())
+            {
+                ds.CopyTo(output);
+                return Latin1.GetString(output.GetBuffer(), 0, (int)output.Length);
+            }
         }
 
         private static byte[] Compress(byte[] data)
@@ -1241,7 +1332,7 @@ namespace Majorsilence.Pdf.Internal
         }
 #endif
 
-        private static byte[] Concat(byte[] a, byte[] b, byte[] c)
+        private static byte[] ConcatBytes(byte[] a, byte[] b, byte[] c)
         {
             var result = new byte[a.Length + b.Length + c.Length];
             Buffer.BlockCopy(a, 0, result, 0, a.Length);
@@ -1250,15 +1341,52 @@ namespace Majorsilence.Pdf.Internal
             return result;
         }
 
+        private static readonly byte[] EndStream = Latin1.GetBytes("\nendstream");
+
+        /// <summary>
+        /// An object's bytes. A stream object is kept as its dictionary, its (compressed) data and
+        /// "endstream" and written in three parts, so the data is not copied into one array first.
+        /// </summary>
+        private readonly struct PdfObj
+        {
+            private readonly byte[] _head;
+            private readonly byte[]? _body;
+            private readonly byte[]? _tail;
+
+            internal PdfObj(byte[] head, byte[]? body = null, byte[]? tail = null)
+            {
+                _head = head; _body = body; _tail = tail;
+            }
+
+            public static implicit operator PdfObj(byte[] bytes) => new PdfObj(bytes);
+
+            internal int Length => _head.Length + (_body?.Length ?? 0) + (_tail?.Length ?? 0);
+
+            internal void WriteTo(Stream s)
+            {
+                s.Write(_head, 0, _head.Length);
+                if (_body != null) s.Write(_body, 0, _body.Length);
+                if (_tail != null) s.Write(_tail, 0, _tail.Length);
+            }
+        }
+
         // ── inner writer ─────────────────────────────────────────────────────
 
         private sealed class PdfWriter
         {
             private readonly Stream _s;
             private static readonly Encoding Latin1 = Encoding.GetEncoding("iso-8859-1");
+            private byte[] _buf = new byte[128];   // lines are encoded here instead of into a new array each
             internal PdfWriter(Stream s) { _s = s; }
-            internal void Write(string s)      { var b = Latin1.GetBytes(s); _s.Write(b, 0, b.Length); }
-            internal void WriteLine(string s)  => Write(s + "\n");
+            internal void Write(string s)
+            {
+                int max = Latin1.GetMaxByteCount(s.Length);
+                if (max > _buf.Length)
+                    _buf = new byte[Math.Max(max, _buf.Length * 2)];
+                int n = Latin1.GetBytes(s, 0, s.Length, _buf, 0);
+                _s.Write(_buf, 0, n);
+            }
+            internal void WriteLine(string s)  { Write(s); _s.WriteByte((byte)'\n'); }
             internal void WriteBytes(byte[] b) => _s.Write(b, 0, b.Length);
             internal void WriteRaw(byte[] b)   => _s.Write(b, 0, b.Length);
         }

@@ -107,13 +107,60 @@ What is left is mostly the PDF content-stream builder's growth, `MeasureCharacte
 
 Shared-definition hazards fixed for this: `Report.Dispose` no longer disposes a definition it does not own; the report log is locked; a `.dsr` data source reference publishes its connection properties only once built; the data source password is fixed at compile time (setting it on a shared report throws `InvalidOperationException`; subreports no longer write it into their definition); the Textbox per-row cache lives in the per-run state (round 2). `Subreport.ContainerOffset` is still written during a run, with the same value every time. `CompiledReportTests` renders nine reports (two with subreports) in four formats from one shared definition on eight threads and compares with a fresh parse. RdlAsp.Mvc now caches a `CompiledReport` instead of a bare definition (which the first request's `Report.Dispose` could have emptied).
 
+## Round 4 (parse + data + render, per render)
+Same machine; `-- profile <workload> <format> 8`, `main` and this branch run alternately, so the timings share the
+machine's state (they still move by about 10% between runs; allocation is exact). Targets were picked from
+allocation stacks (`dotnet-trace --profile gc-verbose`) and thread-time samples, not guessed.
+
+| Workload | Before | After |
+|---|---:|---:|
+| ListPagingTest PDF (html text) | 40.8 ms, 13,886 KB | 12.4 ms, 6,847 KB |
+| WorldFacts PDF | 27.0 ms, 4,689 KB | 25.8 ms, 3,080 KB |
+| 1,000-row table PDF | 16.5 ms, 4,446 KB | 15.8 ms, 2,410 KB |
+| 10,000-row table PDF | 180 ms, 40.7 MB | 148 ms, 21.0 MB |
+| testdata PDF | 1.41 ms, 678 KB (gen1/gen2 42/42 per 1000) | 1.30 ms, 445 KB (0/0) |
+| MatrixExample PDF | 5.2 ms, 2,121 KB | 5.4 ms, 1,788 KB |
+| CanGrowSplitTest PDF | 0.89 ms, 436 KB | 0.86 ms, 346 KB |
+| WorldFacts Excel | 13.3 ms, 5,919 KB | 11.5 ms, 3,915 KB |
+| WorldFacts RTF | 5.7 ms, 3,788 KB (gen2 286) | 4.8 ms, 3,039 KB (gen2 154) |
+| WorldFacts HTML | 3.6 ms, 2,455 KB | 3.2 ms, 1,856 KB |
+| WorldFacts CSV | 2.4 ms, 1,463 KB | 2.3 ms, 1,321 KB |
+| WorldFacts XML | 2.7 ms, 2,621 KB | 2.6 ms, 2,598 KB |
+
+What changed (one commit each; output unchanged in every format by the normalised smoke hashes):
+1. **HTML text split over pages**: the lexer returns words and tags as pieces of the source, text runs between two
+   tags share one StyleInfo, the split points share their tag strings. Checked against the old lexer on 500,000
+   generated inputs.
+2. **Font cell metrics kept for the process**: `FontFamily.GetCellDescent` (Majorsilence.Forms 26.11.3) asks fontconfig
+   for the typeface on every call; it was 54% of ListPagingTest's time.
+3. **PDF content builder reused**: a page is compressed when the next is added and its builder serves the next page
+   (and, through one static slot, the next document). Pages are held compressed instead of as UTF-16 text.
+4. **PDF save**: stream objects written in parts, the buffer sized once, one write to the destination.
+5. **Table cells**: no line split for a cell that fits; a numeric General-aligned cell reuses one right-aligned style.
+6. **Constant style**: one completed `Task<StyleInfo>` instead of one per item.
+7. **Excel**: one cell format per shared style; style index kept per format.
+8. **CSV**: plain field values without a Task; **HTML**: `ValueTask` for the per-cell css/action helpers;
+   **HTML/RTF**: body written from the builder's chunks (no large-object-heap string); **formatting**: last culture kept.
+
+Also fixed: html text ending in `"><"` made the lexer produce tokens until memory ran out (`PageTextHtmlLexerTests`).
+
+Where the time goes now (WorldFacts PDF, thread-time samples): text measurement in Skia (`SKFont.MeasureText`) about
+44%, zlib about 28%, row heights 7%, data 5%. See below for what could move those.
+
 ## Remaining opportunities (not done)
-- **Async overhead in expression evaluation**: `Task<object>` / `Task<string>` per expression per row and ~3,700 thread-pool work items per WorldFacts render (`FunctionField.Evaluate`, `Expression.Evaluate`, `Rows.Compare`: 5-7% of allocation). A synchronous fast path for constant/field expressions is the next biggest item; it touches the `IExpr` surface.
-- **Text measurement** still costs ~20% of CPU (`MeasureCharacterRanges` per cell). A per-render cache keyed by (font, string) helps repeated values.
-- **`TrueTypeFont.Subset`** copies every kept table twice (14% of a tiny report's allocation).
-- **Parse**: `XmlDocument` DOM (0.2-1.7 ms per report); only worth it if reports are not cached.
-- **StyleInfo clones** per text item (`Style.GetStyleInfo`, ~5%).
-- **Measure lock** contention at 16 threads goes away once the `Majorsilence.Forms` fix is referenced.
+- **zlib level** (a size decision): on WorldFacts page content level 5 compresses in 6.5 ms instead of 9.9 ms for
+  2.3% larger streams; level 1 in 3.7 ms for 20% larger. 1,000-row table: level 5 is 5.0 vs 5.8 ms for 4.4% larger.
+  `ZLibCompressionOptions` (net9+) would allow levels other than Optimal/Fastest.
+- **Majorsilence.Forms**: its `main` caches `FontSubstitution.Resolve` (after 26.11.4), which would also cover the other
+  `FontFamily` metrics; the engine's own cache stays useful until then. Measuring a run (`MeasureRunWidth`) is now the
+  largest single cost of a table-heavy PDF.
+- **Data file**: `GetDataFile` reads the XML data into a string before `LoadXml` (about 10% of a CSV render).
+- **Async overhead**: the CanGrow height path (`Style.MeasureString` and its `GetFont`, `GetStringFormat`,
+  `EvalLineHeight`) still makes a Font, a StringFormat and several Tasks per cell.
+- **Async overhead in expression evaluation**: a `Task<object>` / `Task<double>` per non-trivial expression per row
+  (`FunctionField.Evaluate`, `Expression.EvaluateAsync`, aggregates). A synchronous path through `IExpr` is the
+  general fix; the plain-field cases already have one.
+- **Parse**: `XmlDocument` DOM (0.2-1.7 ms per report); only worth it if reports are not cached (`CompiledReport`).
 
 ## Allocation gate
 `-- gate` (run in `linux.yml` after the tests) renders five workloads and fails if any allocates more than 20% above `allocation-baseline.json`. After an intended change: `dotnet run -c Release -f net10.0 --project Majorsilence.Reporting.Benchmarks -- gate --update` and commit the file. The first CI run should confirm the 20% tolerance is enough for the runner's installed fonts.
