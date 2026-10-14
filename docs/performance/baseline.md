@@ -139,7 +139,10 @@ What changed (one commit each; output unchanged in every format by the normalise
 5. **Table cells**: no line split for a cell that fits; a numeric General-aligned cell reuses one right-aligned style.
 6. **Constant style**: one completed `Task<StyleInfo>` instead of one per item.
 7. **Excel**: one cell format per shared style; style index kept per format.
-8. **CSV**: plain field values without a Task; **HTML**: `ValueTask` for the per-cell css/action helpers;
+8. **Growing cells**: the font, string formats, line height and paddings of a constant style are made once per run
+   for measuring a CanGrow textbox (`Style.GetMeasureSetup`); WorldFacts PDF 3,080 -> 2,515 KB, Excel 3,915 -> 3,383 KB
+   and about 20% faster. `GrowHeightTests` checks it measures the same as the per-call path.
+9. **CSV**: plain field values without a Task; **HTML**: `ValueTask` for the per-cell css/action helpers;
    **HTML/RTF**: body written from the builder's chunks (no large-object-heap string); **formatting**: last culture kept.
 
 Also fixed: html text ending in `"><"` made the lexer produce tokens until memory ran out (`PageTextHtmlLexerTests`).
@@ -155,8 +158,6 @@ Where the time goes now (WorldFacts PDF, thread-time samples): text measurement 
   `FontFamily` metrics; the engine's own cache stays useful until then. Measuring a run (`MeasureRunWidth`) is now the
   largest single cost of a table-heavy PDF.
 - **Data file**: `GetDataFile` reads the XML data into a string before `LoadXml` (about 10% of a CSV render).
-- **Async overhead**: the CanGrow height path (`Style.MeasureString` and its `GetFont`, `GetStringFormat`,
-  `EvalLineHeight`) still makes a Font, a StringFormat and several Tasks per cell.
 - **Async overhead in expression evaluation**: a `Task<object>` / `Task<double>` per non-trivial expression per row
   (`FunctionField.Evaluate`, `Expression.EvaluateAsync`, aggregates). A synchronous path through `IExpr` is the
   general fix; the plain-field cases already have one.

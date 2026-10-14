@@ -636,10 +636,111 @@ namespace Majorsilence.Reporting.Rdl
 			}
 		}
 
+		/// <summary>
+		/// What measuring text needs from a constant style, made once per run instead of per cell: the font, the
+		/// string formats with and without wrapping, the line height and the paddings. They come from the same
+		/// calls the per-cell code makes, so the measurements are the same.
+		/// </summary>
+		internal sealed class MeasureSetup
+		{
+			internal Draw2.Font Font;
+			internal Draw2.StringFormat Wrap, NoWrap;
+			internal float LineHeight;
+			internal int PadLeftPx, PadRightPx;
+			internal float PadTop, PadBottom;
+			internal Draw2.Graphics OneLineG;	// the surface OneLine was measured on, per format
+			internal float OneLineWrap, OneLineNoWrap;
+		}
+
+		private static readonly MeasureSetup NoMeasureSetup = new MeasureSetup();	// the style is not constant enough
+
+		/// <summary>The measure setup when it has been made for this run already; null otherwise.</summary>
+		internal MeasureSetup TryGetMeasureSetup(Report rpt)
+		{
+			MeasureSetup m = GetWC(rpt)?.Measure;
+			return m == NoMeasureSetup ? null : m;
+		}
+
+		/// <summary>The measure setup of a constant style (made on first use in a run); null when the style is not constant.</summary>
+		internal async Task<MeasureSetup> GetMeasureSetup(Report rpt, Row r)
+		{
+			WorkClass wc = GetWC(rpt);
+			if (wc == null)
+				return null;
+			if (wc.Measure != null)
+				return wc.Measure == NoMeasureSetup ? null : wc.Measure;
+
+			// ConstantStyle does not cover these two, which the string format depends on
+			if ((this.Direction != null && !await this.Direction.IsConstant().ConfigureAwait(false)) ||
+				(this.WritingMode != null && !await this.WritingMode.IsConstant().ConfigureAwait(false)))
+			{
+				wc.Measure = NoMeasureSetup;
+				return null;
+			}
+
+			var m = new MeasureSetup();
+			m.Font = await GetFont(rpt, r).ConfigureAwait(false);
+			m.Wrap = await GetStringFormat(rpt, r).ConfigureAwait(false);
+			m.NoWrap = await GetStringFormat(rpt, r).ConfigureAwait(false);
+			m.NoWrap.FormatFlags |= Draw2.StringFormatFlags.NoWrap;
+			m.LineHeight = await EvalLineHeight(rpt, r).ConfigureAwait(false);
+			m.PadLeftPx = await EvalPaddingLeftPx(rpt, r).ConfigureAwait(false);
+			m.PadRightPx = await EvalPaddingRightPx(rpt, r).ConfigureAwait(false);
+			m.PadTop = await EvalPaddingTop(rpt, r).ConfigureAwait(false);
+			m.PadBottom = await EvalPaddingBottom(rpt, r).ConfigureAwait(false);
+			wc.Measure = m;
+			return m;
+		}
+
+		/// <summary>
+		/// <see cref="MeasureString"/> without a Task when the measure setup is made and the value formats
+		/// without one; false means MeasureString has to do it.
+		/// </summary>
+		internal bool TryMeasureString(Report rpt, Draw2.Graphics g, object o, TypeCode tc, int maxWidth, out System.Drawing.Size size)
+		{
+			size = System.Drawing.Size.Empty;
+			MeasureSetup m = TryGetMeasureSetup(rpt);
+			if (m == null || !TryGetFormatedString(rpt, this, o, tc, out string s))
+				return false;
+			size = MeasureWith(m, g, s, maxWidth);
+			return true;
+		}
+
+		private static System.Drawing.Size MeasureWith(MeasureSetup m, Draw2.Graphics g, string s, int maxWidth)
+		{
+			bool noWrap = maxWidth == int.MaxValue;
+			Draw2.StringFormat drawFormat = noWrap ? m.NoWrap : m.Wrap;
+
+			// 06122007AJM need to add w to make slightly bigger
+			System.Drawing.SizeF ms = g.MeasureString(s + "w", m.Font, maxWidth, drawFormat);
+			if (m.LineHeight > 0)
+			{
+				// an explicit line height replaces the font's own line pitch
+				if (m.OneLineG != g)
+				{
+					m.OneLineWrap = g.MeasureString("Xg", m.Font, int.MaxValue, m.Wrap).Height;
+					m.OneLineNoWrap = g.MeasureString("Xg", m.Font, int.MaxValue, m.NoWrap).Height;
+					m.OneLineG = g;
+				}
+				float oneLine = noWrap ? m.OneLineNoWrap : m.OneLineWrap;
+				if (oneLine > 0)
+				{
+					int lines = Math.Max(1, (int) Math.Round(ms.Height / oneLine));
+					ms = new System.Drawing.SizeF(ms.Width, lines * m.LineHeight * g.DpiY / 72f);
+				}
+			}
+			return new System.Drawing.Size((int) Math.Ceiling(ms.Width),
+				(int) Math.Ceiling(ms.Height));
+		}
+
 		// Calc size of a string with the specified graphics object using the current style
 		//  information
 		internal async Task<System.Drawing.Size> MeasureString(Report rpt, Draw2.Graphics g, object o, TypeCode tc, Row r, int maxWidth)
 		{
+			MeasureSetup setup = await GetMeasureSetup(rpt, r).ConfigureAwait(false);
+			if (setup != null)
+				return MeasureWith(setup, g, await GetFormatedString(rpt, this, r, o, tc).ConfigureAwait(false), maxWidth);
+
 			string s = await GetFormatedString(rpt, this, r, o, tc).ConfigureAwait(false); // the string to draw
 
 			using (Draw2.Font drawFont = await GetFont(rpt, r).ConfigureAwait(false)) // Font we'll draw with
@@ -1866,6 +1967,7 @@ namespace Majorsilence.Reporting.Rdl
 			internal string CssStyle;		// When ConstantStyle is true; this will hold cache of css
 			internal StyleInfo StyleInfo;	// When ConstantStyle is true; this will hold cache of StyleInfo
 			internal Task<StyleInfo> StyleInfoTask;	// StyleInfo as a completed task, for GetStyleInfoShared
+			internal MeasureSetup Measure;			// font, formats and paddings for measuring text; see GetMeasureSetup
 			internal WorkClass()
 			{
 				CssStyle = null;
