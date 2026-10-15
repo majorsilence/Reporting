@@ -132,7 +132,8 @@ What changed (one commit each; output unchanged in every format by the normalise
    tags share one StyleInfo, the split points share their tag strings. Checked against the old lexer on 500,000
    generated inputs.
 2. **Font cell metrics kept for the process**: `FontFamily.GetCellDescent` (Majorsilence.Forms 26.11.3) asks fontconfig
-   for the typeface on every call; it was 54% of ListPagingTest's time.
+   for the typeface on every call; it was 54% of ListPagingTest's time. Since Majorsilence.Forms 26.11.5 `FontFamily`
+   keeps the metrics itself and the engine's copy is gone.
 3. **PDF content builder reused**: a page is compressed when the next is added and its builder serves the next page
    (and, through one static slot, the next document). Pages are held compressed instead of as UTF-16 text.
 4. **PDF save**: stream objects written in parts, the buffer sized once, one write to the destination.
@@ -147,6 +148,10 @@ What changed (one commit each; output unchanged in every format by the normalise
 
 Also fixed: html text ending in `"><"` made the lexer produce tokens until memory ran out (`PageTextHtmlLexerTests`).
 
+Majorsilence.Forms 26.11.3 -> 26.11.5 (cached typeface resolution and font metrics, faster text measurement), PDF,
+same output: WorldFacts 25.4 -> 23.7 ms, ListPagingTest 13.9 -> 11.3 ms, CanGrowSplitTest 0.88 -> 0.48 ms
+(331 -> 290 KB); LargeTable and MatrixExample unchanged.
+
 Where the time goes now (WorldFacts PDF, thread-time samples): text measurement in Skia (`SKFont.MeasureText`) about
 44%, zlib about 28%, row heights 7%, data 5%. See below for what could move those.
 
@@ -154,9 +159,8 @@ Where the time goes now (WorldFacts PDF, thread-time samples): text measurement 
 - **zlib level** (a size decision): on WorldFacts page content level 5 compresses in 6.5 ms instead of 9.9 ms for
   2.3% larger streams; level 1 in 3.7 ms for 20% larger. 1,000-row table: level 5 is 5.0 vs 5.8 ms for 4.4% larger.
   `ZLibCompressionOptions` (net9+) would allow levels other than Optimal/Fastest.
-- **Majorsilence.Forms**: its `main` caches `FontSubstitution.Resolve` (after 26.11.4), which would also cover the other
-  `FontFamily` metrics; the engine's own cache stays useful until then. Measuring a run (`MeasureRunWidth`) is now the
-  largest single cost of a table-heavy PDF.
+- **Text measurement**: measuring a run (`MeasureRunWidth`) is the largest single cost of a table-heavy PDF; any
+  further gain is in Majorsilence.Forms / Skia.
 - **Data file**: `GetDataFile` reads the XML data into a string before `LoadXml` (about 10% of a CSV render).
 - **Async overhead in expression evaluation**: a `Task<object>` / `Task<double>` per non-trivial expression per row
   (`FunctionField.Evaluate`, `Expression.EvaluateAsync`, aggregates). A synchronous path through `IExpr` is the
