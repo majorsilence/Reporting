@@ -77,7 +77,11 @@ jobs:
           RDLNATIVE_LIB: ${{ github.workspace }}/RdlNative/bin/Release/net10.0/linux-x64-aot/publish/rdlnative.so
           REPORTING_REPO_ROOT: ${{ github.workspace }}
           PYTHONPATH: ${{ github.workspace }}/reporting-python/src
-        run: python3 -m unittest discover -s reporting-python/tests -p "test_report_native.py" -v
+        # SalesReport.rdl reads sqlitetestdb2.db from the working directory when no rows are supplied
+        # (the empty-dataset tests), as the SetDataFromCode example copies it next to its exe.
+        run: |
+          cp Examples/SqliteExamples/sqlitetestdb2.db .
+          python3 -m unittest discover -s reporting-python/tests -p "test_report_native.py" -v
       # The same end-to-end check for the Ruby, PHP and Rust wrappers. Each wrapper's own native
       # test suite renders reports through the published AOT library; the wrappers' default branches
       # are checked out, so a wrapper that stops working against the library fails this job.
@@ -97,7 +101,9 @@ jobs:
         env:
           RDLNATIVE_LIB: ${{ github.workspace }}/RdlNative/bin/Release/net10.0/linux-x64-aot/publish/rdlnative.so
           REPORTING_REPO_ROOT: ${{ github.workspace }}
-        run: bundle exec ruby -Ilib test/test_report_native.rb
+        run: |
+          cp ../Examples/SqliteExamples/sqlitetestdb2.db .
+          bundle exec ruby -Ilib test/test_report_native.rb
       - name: Check out the PHP wrapper
         uses: actions/checkout@v6
         with:
@@ -116,6 +122,7 @@ jobs:
           RDLNATIVE_LIB: ${{ github.workspace }}/RdlNative/bin/Release/net10.0/linux-x64-aot/publish/rdlnative.so
           REPORTING_REPO_ROOT: ${{ github.workspace }}
         run: |
+          cp ../Examples/SqliteExamples/sqlitetestdb2.db .
           composer install --no-interaction --prefer-dist
           ./vendor/bin/phpunit
       - name: Check out the Rust wrapper
