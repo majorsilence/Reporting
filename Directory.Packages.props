@@ -34,7 +34,7 @@
     <PackageVersion Include="Microsoft.Data.Edm" Version="5.8.5" />
     <PackageVersion Include="Microsoft.Data.OData" Version="5.8.4" />
     <PackageVersion Include="Microsoft.Data.Services.Client" Version="5.8.5" />
-    <PackageVersion Include="Microsoft.Data.Sqlite" Version="8.0.4" />
+    <PackageVersion Include="Microsoft.Data.Sqlite" Version="8.0.32" />
     <!-- Majorsilence.Reporting.Mcp (RdlMcp) — MCP server dotnet tool. -->
     <PackageVersion Include="ModelContextProtocol" Version="2.2.0" />
     <PackageVersion Include="Microsoft.Extensions.Hosting" Version="10.0.11" />
@@ -46,10 +46,10 @@
     <PackageVersion Include="NUnit" Version="4.6.1" />
     <PackageVersion Include="NUnit3TestAdapter" Version="5.1.0" />
     <PackageVersion Include="Oracle.ManagedDataAccess.Core" Version="23.26.300" />
-    <PackageVersion Include="Testcontainers.MsSql" Version="4.13.0" />
-    <PackageVersion Include="Testcontainers.MySql" Version="4.13.0" />
-    <PackageVersion Include="Testcontainers.Oracle" Version="4.13.0" />
-    <PackageVersion Include="Testcontainers.PostgreSql" Version="4.13.0" />
+    <PackageVersion Include="Testcontainers.MsSql" Version="4.16.0" />
+    <PackageVersion Include="Testcontainers.MySql" Version="4.16.0" />
+    <PackageVersion Include="Testcontainers.Oracle" Version="4.16.0" />
+    <PackageVersion Include="Testcontainers.PostgreSql" Version="4.16.0" />
     <PackageVersion Include="PdfPig" Version="0.1.11" />
     <PackageVersion Include="SharpZipLib" Version="1.4.2" />
     <PackageVersion Include="SkiaSharp" Version="3.119.4" />
@@ -69,8 +69,8 @@
     <PackageVersion Include="GtkSharp" Version="3.24.24.95" />
     <PackageVersion Include="Mono.Posix" Version="7.1.0-final.1.21458.1" />
     <PackageVersion Include="ZXing.Net.Bindings.SkiaSharp" Version="0.16.21" />
-    <PackageVersion Include="System.Security.Cryptography.Pkcs" Version="8.0.1" />
-    <PackageVersion Include="System.Security.Cryptography.Xml" Version="8.0.3" />
+    <PackageVersion Include="System.Security.Cryptography.Pkcs" Version="8.0.2" />
+    <PackageVersion Include="System.Security.Cryptography.Xml" Version="8.0.5" />
     <PackageVersion Include="jacobslusser.ScintillaNET" Version="3.6.3" />
     <PackageVersion Include="fernandreu.ScintillaNET" Version="4.2.0" />
     <PackageVersion Include="Microsoft.CodeAnalysis.VisualBasic" Version="5.6.0" />

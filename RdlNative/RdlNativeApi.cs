@@ -96,6 +96,7 @@ public static class RdlNativeApi
         RegisterSafe(resolver, typeof(RdlNativeApi).Assembly);
         RegisterSafe(resolver, typeof(RdlEngineConfig).Assembly);
         RegisterSafe(resolver, typeof(SkiaSharp.SKBitmap).Assembly);
+        RegisterSafe(resolver, typeof(HarfBuzzSharp.Buffer).Assembly);
         RegisterSafe(resolver, typeof(SQLitePCL.raw).Assembly);
         RegisterSafe(resolver, typeof(MySql.Data.MySqlClient.MySqlConnection).Assembly);
         RegisterSafe(resolver, typeof(Npgsql.NpgsqlConnection).Assembly);
