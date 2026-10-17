@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using Majorsilence.Forms;
 using SkiaSharp;
@@ -17,6 +19,55 @@ namespace Majorsilence.Reporting.RdlViewer
     /// </remarks>
     public static class ChromeColors
     {
+        /// <summary>
+        /// Every <c>--rdl-*</c> variable the viewer and designer read. A theme declaring one gets a
+        /// "declared but never used" warning from the CSS parser, which knows nothing of them;
+        /// <see cref="IsKnownVariableWarning"/> recognises those.
+        /// </summary>
+        public static IReadOnlySet<string> Variables { get; } = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+        {
+            "--rdl-area-background",
+            "--rdl-band-border",
+            "--rdl-band-color",
+            "--rdl-band-text",
+            "--rdl-decorator",
+            "--rdl-decorator-border",
+            "--rdl-expression-hover",
+            "--rdl-find-close-background",
+            "--rdl-find-status",
+            "--rdl-grid-dot",
+            "--rdl-handle",
+            "--rdl-highlight",
+            "--rdl-highlight-all",
+            "--rdl-hover-outline",
+            "--rdl-item-outline",
+            "--rdl-line-numbers",
+            "--rdl-margin-color",
+            "--rdl-out-of-page-color",
+            "--rdl-page-edge",
+            "--rdl-page-outline",
+            "--rdl-ruler-background",
+            "--rdl-ruler-gradient",
+            "--rdl-ruler-text",
+            "--rdl-selection-border",
+            "--rdl-text",
+            "--rdl-zoom-background",
+        };
+
+        /// <summary>
+        /// True for the parser's "declared but never used" warning about one of <see cref="Variables"/>,
+        /// which is not a problem here. A misspelt <c>--rdl-</c> name is not in the set and still warns.
+        /// </summary>
+        public static bool IsKnownVariableWarning(ThemeCssDiagnostic diagnostic)
+        {
+            if (diagnostic.Severity != ThemeCssSeverity.Warning || !diagnostic.Message.StartsWith("'--", StringComparison.Ordinal))
+                return false;
+            int end = diagnostic.Message.IndexOf('\'', 1);
+            return end > 1
+                && diagnostic.Message.IndexOf("never used", StringComparison.Ordinal) > 0
+                && Variables.Contains(diagnostic.Message.Substring(1, end - 1));
+        }
+
         /// <summary>True when the current theme's window background is dark.</summary>
         public static bool IsDarkTheme => Luminance(Theme.BackgroundColor) < 0.5f;
 
@@ -26,6 +77,7 @@ namespace Majorsilence.Reporting.RdlViewer
         /// </summary>
         public static Color Resolve(string variable, Color classic, Func<Color> dark = null)
         {
+            Debug.Assert(Variables.Contains(variable), $"{variable} is missing from ChromeColors.Variables");
             if (TryGetVariable(variable, out Color c))
                 return c;
             if (dark != null && IsDarkTheme)

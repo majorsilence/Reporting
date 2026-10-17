@@ -25,6 +25,9 @@ namespace Majorsilence.Reporting.RdlDesign
         /// <summary>Section bands (Body, PageHeader, PageFooter) and the ruler next to them.</summary>
         internal static Color Band => ChromeColors.Resolve("--rdl-band-color", Color.LightGray, () => Token(Theme.ControlMidHighColor));
 
+        /// <summary>The band's caption ("Page Header ↑").</summary>
+        internal static Color BandText => ChromeColors.Resolve("--rdl-band-text", Color.Black, () => Token(Theme.ForegroundColor));
+
         internal static Color BandBorder => ChromeColors.Resolve("--rdl-band-border", Color.DimGray, () => Token(Theme.BorderMidColor));
 
         /// <summary>The right-hand edge of the page.</summary>

@@ -1650,6 +1650,7 @@ namespace Majorsilence.Reporting.RdlDesign
             //Band and Text 
 			RectangleF bm = new RectangleF(_hScroll,yLoc+CurrentSectionheight, PointsX(Width)+_hScroll, BANDHEIGHT);
 			si.BackgroundColor = DesignerColors.Band;
+			si.Color = DesignerColors.BandText;
 			si.FontFamily = "Arial";
 			si.FontSize = 8;
 			si.FontWeight = FontWeightEnum.Bold;

@@ -40,6 +40,13 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!-- Example CSS themes listed in Tools > Options > Appearance (DesignerTheme.ThemesDirectory). -->
+    <Content Include="Themes\*.css">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
     <Content Include="..\schemas\reporting\2025\12\reportdefinition\ReportDefinition.xsd">
       <Link>ReportDefinition.xsd</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

@@ -1,0 +1,56 @@
+/* Graphite: a dark designer theme.
+
+   Copy this file to start your own and pick it in Tools > Options > Appearance > Custom CSS file.
+   The language is Majorsilence.Forms' CSS theme subset; its reference (every token, control and part)
+   is in Majorsilence.Forms docs/theming.md.
+
+   Besides the Forms tokens, the designer reads the --rdl-* variables below. Leave one out and the
+   designer derives it from the tokens (on a dark theme) or keeps its classic colour. The report page
+   itself always stays white so the canvas matches the output; the "on the page" colours are drawn on
+   that white paper, so keep them readable against white. */
+
+@theme "Graphite" extends Dark;
+
+:root {
+  --accent-color: #4a90d9;
+  --accent-color-2: #3b78b8;
+  --background-color: #232327;
+  --control-low-color: #1c1c1f;
+  --control-mid-color: #2c2c31;
+  --control-mid-high-color: #34343a;
+  --border-low-color: #3c3c43;
+  --foreground-color: #e4e4e8;
+  --foreground-color-on-accent: white;
+
+  /* ---- Designer: off the page ---- */
+  --rdl-area-background: #18181b;      /* behind the page */
+  --rdl-band-color: #34343a;           /* Body / PageHeader / PageFooter bands */
+  --rdl-band-text: #e4e4e8;
+  --rdl-band-border: #55555c;
+  --rdl-page-edge: #55555c;            /* right-hand edge of the page */
+  --rdl-ruler-background: #1c1c1f;
+  --rdl-ruler-gradient: rgba(74, 144, 217, 0.15);
+  --rdl-ruler-text: #c8c8ce;
+  --rdl-text: #e4e4e8;                 /* messages drawn on the surface */
+  --rdl-line-numbers: #8a8a92;         /* RDL text editor gutter */
+  --rdl-zoom-background: #1c1c1f;      /* toolbar zoom box */
+  --rdl-expression-hover: #3a3a41;     /* toolbar "fx" button, hovered */
+
+  /* ---- Designer: on the page (drawn on white paper) ---- */
+  --rdl-margin-color: #eef3f8;         /* page margins */
+  --rdl-out-of-page-color: salmon;     /* parts of items that fall off the paper */
+  --rdl-grid-dot: #a0a0a0;
+  --rdl-hover-outline: #4a90d9;
+  --rdl-selection-border: #4a4a4a;
+  --rdl-handle: #1f1f1f;               /* selection and resize handles */
+  --rdl-item-outline: #c8c8c8;         /* outline of borderless items */
+  --rdl-decorator: #d6e4f5;            /* table row/column selector */
+  --rdl-decorator-border: #4a90d9;
+
+  /* ---- Viewer ---- */
+  --rdl-page-outline: #0c0c0e;         /* page outline and drop shadow */
+  --rdl-highlight: aqua;               /* Find: current match */
+  --rdl-highlight-all: fuchsia;        /* Find: other matches */
+  --rdl-find-close-background: #c0504d;
+  --rdl-find-status: salmon;
+}

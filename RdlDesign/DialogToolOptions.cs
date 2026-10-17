@@ -92,7 +92,9 @@ namespace Majorsilence.Reporting.RdlDesign
 
             InitMaps();
 
-            bDesktop = bToolbar = bMaps = false;			// start with no changes
+            InitTheme();
+
+            bDesktop = bToolbar = bMaps = bTheme = false;	// start with no changes
         }
 
 		private void InitLanguages()
@@ -164,6 +166,12 @@ namespace Majorsilence.Reporting.RdlDesign
                         case "maxreadcacheentrysize":
                             break;
                         case "mimetypes":
+                            break;
+                        case "theme":
+                            _DesktopTheme = xNodeLoop;
+                            break;
+                        case "themecss":
+                            _DesktopThemeCss = xNodeLoop;
                             break;
                         case "units":
                             _DesktopUnits = xNodeLoop;
@@ -259,7 +267,9 @@ namespace Majorsilence.Reporting.RdlDesign
                         HandleDesktop();
                     if (bMaps)
                         HandleMaps();
-                    bToolbar = bDesktop = false;		// no changes now
+                    if (bTheme)
+                        HandleTheme();
+                    bToolbar = bDesktop = bTheme = false;		// no changes now
                     return true;
                 }
                 catch (Exception ex)
@@ -287,19 +297,7 @@ namespace Majorsilence.Reporting.RdlDesign
 
         private void HandleDesktop()
         {
-            if (_DesktopDocument == null)
-            {
-                _DesktopDocument = new XmlDocument();
-                XmlProcessingInstruction xPI;
-                xPI = _DesktopDocument.CreateProcessingInstruction("xml", "version='1.0' encoding='UTF-8'");
-                _DesktopDocument.AppendChild(xPI);
-            }
-
-			if (_DesktopConfig == null)
-			{
-				_DesktopConfig = _DesktopDocument.CreateElement("config");
-				_DesktopDocument.AppendChild(_DesktopConfig);
-			}
+            EnsureDesktopDocument();
 
             if (_DesktopPort == null)
             {
@@ -342,6 +340,24 @@ namespace Majorsilence.Reporting.RdlDesign
             Directory.CreateDirectory(Path.GetDirectoryName(optFileName)); //Create directory if not exist
             _DesktopDocument.Save(optFileName);
             this._RdlDesigner.menuToolsCloseProcess(false);		// close the server
+        }
+
+        // config.xml in memory: the loaded one, or a new empty <config> when there is none yet
+        private void EnsureDesktopDocument()
+        {
+            if (_DesktopDocument == null)
+            {
+                _DesktopDocument = new XmlDocument();
+                XmlProcessingInstruction xPI;
+                xPI = _DesktopDocument.CreateProcessingInstruction("xml", "version='1.0' encoding='UTF-8'");
+                _DesktopDocument.AppendChild(xPI);
+            }
+
+			if (_DesktopConfig == null)
+			{
+				_DesktopConfig = _DesktopDocument.CreateElement("config");
+				_DesktopDocument.AppendChild(_DesktopConfig);
+			}
         }
 
         private void HandleMaps()
@@ -552,6 +568,12 @@ namespace Majorsilence.Reporting.RdlDesign
                             case "units":
                                 dc.Units = xNodeLoop.InnerText;
                                 break;
+                            case "theme":
+                                dc.Theme = xNodeLoop.InnerText;
+                                break;
+                            case "themecss":
+                                dc.ThemeCss = xNodeLoop.InnerText;
+                                break;
                         }
                     }
                     return dc;
@@ -690,5 +712,9 @@ namespace Majorsilence.Reporting.RdlDesign
         public string Port;
         public string Language;
         public string Units;
+        /// <summary>A built-in theme name, or <see cref="DesignerTheme.Custom"/> for <see cref="ThemeCss"/>.</summary>
+        public string Theme;
+        /// <summary>The CSS theme file when <see cref="Theme"/> is Custom.</summary>
+        public string ThemeCss;
     }
 }
