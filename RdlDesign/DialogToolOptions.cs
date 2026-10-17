@@ -31,7 +31,8 @@ namespace Majorsilence.Reporting.RdlDesign
 	    private XmlNode _DesktopLanguage;
         private XmlNode _DesktopUnits;
 
-        static readonly string optFileName = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "MajorsilenceReporting", "config.xml");
+        // a property, not a static field: ReportingBranding.SettingsFolderName may be set after this type loads
+        static string optFileName => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), Majorsilence.Reporting.Rdl.Utility.Paths.ApplicationFolderName, "config.xml");
 
         public DialogToolOptions(RdlDesigner rdl)
         {

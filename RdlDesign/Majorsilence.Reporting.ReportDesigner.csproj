@@ -193,8 +193,6 @@
     <PackageReference Include="System.Data.SqlClient" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Remove="ChartCtl - Copy.cs" />
-    <Compile Remove="StaticSeriesCtl - Copy.cs" />
     <!-- Dead code: never referenced anywhere else in the codebase (a "sample PropertyTab" per
          its own comment). Derives from System.Windows.Forms.Design.PropertyTab, classic WinForms
          Designer/PropertyGrid tab-customization infrastructure with no Majorsilence.Forms

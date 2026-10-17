@@ -232,9 +232,9 @@ namespace Majorsilence.Reporting.RdlViewer
 
            
 
-            this.Items.Add(new ToolStripButton("Open", GetImage("fyiReporting.RdlViewer.Resources.document-open.png"), OpenClicked));
-            this.Items.Add(new ToolStripButton("Save As", GetImage("fyiReporting.RdlViewer.Resources.document-save.png"), SaveAsClicked));
-            this.Items.Add(new ToolStripButton("Print", GetImage("fyiReporting.RdlViewer.Resources.document-print.png"), PrintClicked));
+            this.Items.Add(new ToolStripButton("Open", GetImage("document-open.png"), OpenClicked));
+            this.Items.Add(new ToolStripButton("Save As", GetImage("document-save.png"), SaveAsClicked));
+            this.Items.Add(new ToolStripButton("Print", GetImage("document-print.png"), PrintClicked));
             this.Items.Add(new ToolStripButton("<<", (Image)null, FirstPageClicked));
             this.Items.Add(new ToolStripButton("<", (Image)null, PreviousPageClicked));
             this.Items.Add(new ToolStripButton(">", (Image)null, NextPageClicked));
@@ -251,12 +251,14 @@ namespace Majorsilence.Reporting.RdlViewer
             currentPage.Text = e.NewPage.ToString();
         }
 
-        private Bitmap GetImage(string resourceName)
+        // fileName is under Resources/. The manifest names follow the root namespace; they were looked up
+        // under the old fyiReporting.RdlViewer one, found nothing, and the buttons had no images.
+        private Bitmap GetImage(string fileName)
         {
 
             var assembly = Assembly.GetExecutingAssembly();
 
-            using (Stream stream = assembly.GetManifestResourceStream(resourceName))
+            using (Stream stream = assembly.GetManifestResourceStream(typeof(ViewerToolstrip).Namespace + ".Resources." + fileName))
             {
                 return new Bitmap(stream);
             }

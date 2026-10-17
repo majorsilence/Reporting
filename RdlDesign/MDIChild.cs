@@ -597,7 +597,7 @@ namespace Majorsilence.Reporting.RdlDesign
         {
             return MessageBox.Show(this, String.Format(Strings.MDIChild_ShowH_WantSaveChanges,
                     _SourceFile == null ? Strings.MDIChild_ShowH_Untitled : Path.GetFileName(_SourceFile.LocalPath)),
-                    Strings.MDIChild_ShowH_fyiReportingDesigner,
+                    ReportingBranding.Current.DesignerName ?? Strings.MDIChild_ShowH_fyiReportingDesigner,
                     MessageBoxButtons.YesNoCancel,
                     MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button3);
         }
