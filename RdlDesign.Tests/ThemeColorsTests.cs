@@ -106,10 +106,22 @@ namespace Majorsilence.Reporting.RdlDesign.Tests
         }
 
         [Test]
-        public void EveryColor_UsesAKnownVariable()
+        public void EveryVariableTheColorsRead_IsInChromeColorsVariables()
         {
-            // ChromeColors.Resolve asserts (Debug) that its variable is in ChromeColors.Variables, which
-            // is what keeps a theme's --rdl-* declarations from being reported as unused
+            // ChromeColors.Variables is what keeps a theme's --rdl-* declarations from being reported as
+            // unused, so every name the colour tables resolve must be in it. Read from the source so the
+            // check also runs in Release, where ChromeColors.Resolve's Debug.Assert is compiled out.
+            string root = FindRepoDirectory("RdlViewer");
+            var used = new System.Collections.Generic.HashSet<string>();
+            foreach (string file in new[] { Path.Combine(root, "RdlViewer", "ChromeColors.cs"), Path.Combine(root, "RdlDesign", "DesignerColors.cs") })
+                foreach (System.Text.RegularExpressions.Match m in System.Text.RegularExpressions.Regex.Matches(File.ReadAllText(file), "Resolve\\(\"(--rdl-[a-z-]+)\""))
+                    used.Add(m.Groups[1].Value);
+
+            Assert.That(used, Is.Not.Empty);
+            Assert.That(used, Is.SubsetOf(ChromeColors.Variables));
+            Assert.That(ChromeColors.Variables, Is.SubsetOf(used), "a listed variable nothing reads");
+
+            // and every colour resolves without throwing
             foreach (var type in new[] { typeof(ChromeColors), typeof(DesignerColors) })
                 foreach (var prop in type.GetProperties(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic))
                     if (prop.PropertyType == typeof(Color))
@@ -174,15 +186,15 @@ namespace Majorsilence.Reporting.RdlDesign.Tests
             }
         }
 
-        private static string FindShippedThemes()
+        private static string FindShippedThemes() => Path.Combine(FindRepoDirectory(Path.Combine("ReportDesigner", "Themes")), "ReportDesigner", "Themes");
+
+        // The checkout directory containing `relative`, found by walking up from the test binaries.
+        private static string FindRepoDirectory(string relative)
         {
             for (var d = new DirectoryInfo(TestContext.CurrentContext.TestDirectory); d != null; d = d.Parent)
-            {
-                string candidate = Path.Combine(d.FullName, "ReportDesigner", "Themes");
-                if (Directory.Exists(candidate))
-                    return candidate;
-            }
-            Assert.Fail("ReportDesigner/Themes not found above the test directory");
+                if (Directory.Exists(Path.Combine(d.FullName, relative)))
+                    return d.FullName;
+            Assert.Fail($"{relative} not found above the test directory");
             return null;
         }
 
