@@ -1289,7 +1289,6 @@ namespace Majorsilence.Reporting.RdlDesign
 			// 
 			// zoomControl
 			// 
-			this.zoomControl.BackColor = System.Drawing.Color.White;
 			resources.ApplyResources(this.zoomControl, "zoomControl");
 			this.zoomControl.Name = "zoomControl";
 			this.zoomControl.ZoomChanged += new System.EventHandler<Majorsilence.Reporting.RdlDesign.UserZoomControl.CambiaValori>(this.ZoomControl1_ValueChanged);

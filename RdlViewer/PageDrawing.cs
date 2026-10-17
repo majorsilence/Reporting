@@ -106,8 +106,8 @@ namespace Majorsilence.Reporting.RdlViewer
         string _HighlightText = null;
         bool _HighlightCaseSensitive = false;
         bool _HighlightAll = false;
-        Color _HighlightItemColor = Color.Aqua;
-        Color _HighlightAllColor = Color.Fuchsia;
+        Color? _HighlightItemColor;      // null: follow the theme (ChromeColors)
+        Color? _HighlightAllColor;
         Color _SelectItemColor = Color.DarkBlue;
 
         // Mouse handling
@@ -306,14 +306,14 @@ namespace Majorsilence.Reporting.RdlViewer
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         internal Color HighlightItemColor
         {
-            get { return _HighlightItemColor; }
+            get { return _HighlightItemColor ?? ChromeColors.Highlight; }
             set { _HighlightItemColor = value; }
         }
         
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         internal Color HighlightAllColor
         {
-            get { return _HighlightAllColor; }
+            get { return _HighlightAllColor ?? ChromeColors.HighlightAll; }
             set { _HighlightAllColor = value; }
         }
 
@@ -437,7 +437,8 @@ namespace Majorsilence.Reporting.RdlViewer
                 // Majorsilence.Forms.Drawing.Pen doesn't implement IDisposable (nothing to
                 // release -- it's a thin SkiaSharp-backed value wrapper), so no `using`.
                 {
-                    Pen pn = new Pen(Brushes.Black, 1);
+                    Color outline = ChromeColors.PageOutline;
+                    Pen pn = new Pen(outline, 1);
                     int z3 = Math.Min((int)(3f / zoom), 3);
                     if (z3 <= 0)
                         z3 = 1;
@@ -445,9 +446,10 @@ namespace Majorsilence.Reporting.RdlViewer
                     if (z4 <= 0)
                         z4 = 1;
                     g.DrawRectangle(pn, pr);					// outline of page
-                    g.FillRectangle(Brushes.Black,
+                    using var shadow = new SolidBrush(outline);
+                    g.FillRectangle(shadow,
                         pr.X + pr.Width, pr.Y + z3, z3, pr.Height);		// right side of page
-                    g.FillRectangle(Brushes.Black,
+                    g.FillRectangle(shadow,
                         pr.X + z3, pr.Y + pr.Height, pr.Width, z4);		// bottom of page
                 }
             }
@@ -1554,7 +1556,7 @@ namespace Majorsilence.Reporting.RdlViewer
                 int hlen = hlt.Length;
                 int len = text.Length;
                 int loc = text.IndexOf(hlt);
-                Color hl = bhighlightItem ? _HighlightItemColor : _HighlightAllColor;
+                Color hl = bhighlightItem ? HighlightItemColor : HighlightAllColor;
                 using var highlightBrush = new SolidBrush(Color.FromArgb(50, hl));
 
                 while (loc >= 0)

@@ -28,15 +28,11 @@ namespace Majorsilence.Reporting.RdlDesign
 	{
 		static internal readonly float POINTSIZED = 72.27f;
 		static internal readonly decimal POINTSIZEM = 72.27m;
-        readonly Color BANDBORDERCOLOR = Color.DimGray; //Josh: added for Band Border
         readonly BorderStyleEnum BANDBORDERSTYLE = BorderStyleEnum.Solid; //Josh: Band Border Style
         const float BANDBORDERWIDTH = 1f; //Josh: Band border width
-        readonly Color AREABACKCOLOR = Color.LightGray; //Josh: added for area background color (behind page)
-		readonly Color OUTWORKAREACOLOR = Color.Azure; //out work area background color (on page, but in margin)
-		readonly Color OUTITEMCOLOR = Color.Salmon; //color of out work area parts of item 
+        // Surface colours (behind the page, margins, bands, ...) follow the theme: see DesignerColors.
 
 		const float RADIUS = 2.5f;
-        readonly Color BANDCOLOR = Color.LightGray;
 		const int BANDHEIGHT = 12;              // height of band (e.g. body, pageheader, pagefooter) in pts
 		const float LEFTGAP = 0f; // keep a gap on the left size of the screen
         // Various page measurements that we keep
@@ -125,7 +121,7 @@ namespace Majorsilence.Reporting.RdlDesign
 
         internal Color SepColor
         {
-            get { return BANDCOLOR; }
+            get { return DesignerColors.Band; }
         }
 
         internal float SepHeight
@@ -209,8 +205,8 @@ namespace Majorsilence.Reporting.RdlDesign
         // ---- Table row/column/table selection decorator (issue #293) ----
 
         internal const float DecoratorSize = 8f;
-        internal static readonly Color DecoratorColor = Color.FromArgb(0xD6, 0xE4, 0xF5);
-        internal static readonly Color DecoratorBorderColor = Color.FromArgb(0x4A, 0x90, 0xD9);
+        internal static Color DecoratorColor => DesignerColors.Decorator;
+        internal static Color DecoratorBorderColor => DesignerColors.DecoratorBorder;
 
         private XmlNode _HoverTable;
 
@@ -616,11 +612,11 @@ namespace Majorsilence.Reporting.RdlDesign
         private void DrawTableResizeHandles(RectangleF r)
         {
             foreach (var h in TableResizeHandles(r))
-                DrawCircle(Color.Black, BorderStyleEnum.Solid, 1, h.Value.X - RADIUS, h.Value.Y - RADIUS, RADIUS * 2, true);
+                DrawCircle(DesignerColors.Handle, BorderStyleEnum.Solid, 1, h.Value.X - RADIUS, h.Value.Y - RADIUS, RADIUS * 2, true);
         }
 
-        internal static readonly Color HoverOutlineColor =Color.FromArgb(0x4A, 0x90, 0xD9);
-        internal static readonly Color GridDotColor = Color.FromArgb(0xA0, 0xA0, 0xA0);
+        internal static Color HoverOutlineColor => DesignerColors.HoverOutline;
+        internal static Color GridDotColor => DesignerColors.GridDot;
 
         /// <summary>
         /// Positions of the dots of the design-canvas grid inside <paramref name="area"/>, one every
@@ -1615,7 +1611,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			StyleInfo si = new StyleInfo();
 
 			// Entire Paper
-			si.BackgroundColor = OUTWORKAREACOLOR;
+			si.BackgroundColor = DesignerColors.Margin;
 			RectangleF b = new RectangleF(xLoc, yLoc + 1, /*PointsX(Width)*/(pWidth) /*+ _hScroll*/, /*height*/ ((CurrentSectionheight > TotalPageHeight /* - yLoc*/) ? TotalPageHeight/* - yLoc*/ : CurrentSectionheight));//displayHeight > 0 ? displayHeight : 0);
 			DrawBackground(b, si);
 
@@ -1641,7 +1637,7 @@ namespace Majorsilence.Reporting.RdlDesign
 
 
             //Edge of paper
-            DrawLine(Color.Gray, BorderStyleEnum.Solid, 1, pWidth, yLoc + 1, pWidth, yLoc + CurrentSectionheight);
+            DrawLine(DesignerColors.PageEdge, BorderStyleEnum.Solid, 1, pWidth, yLoc + 1, pWidth, yLoc + CurrentSectionheight);
             //End "Paper"
 
             // Josh:
@@ -1653,7 +1649,7 @@ namespace Majorsilence.Reporting.RdlDesign
 
             //Band and Text 
 			RectangleF bm = new RectangleF(_hScroll,yLoc+CurrentSectionheight, PointsX(Width)+_hScroll, BANDHEIGHT);
-			si.BackgroundColor = BANDCOLOR;
+			si.BackgroundColor = DesignerColors.Band;
 			si.FontFamily = "Arial";
 			si.FontSize = 8;
 			si.FontWeight = FontWeightEnum.Bold;
@@ -1663,7 +1659,7 @@ namespace Majorsilence.Reporting.RdlDesign
             //Added padding on the left side of the text too due to the border line
             si.BStyleBottom = si.BStyleLeft = si.BStyleRight = si.BStyleTop = BANDBORDERSTYLE;
             si.BWidthBottom = si.BWidthLeft = si.BWidthRight = si.BWidthTop = BANDBORDERWIDTH;
-            si.BColorBottom = si.BColorLeft = si.BColorRight = si.BColorTop = BANDBORDERCOLOR;
+            si.BColorBottom = si.BColorLeft = si.BColorRight = si.BColorTop = DesignerColors.BandBorder;
             si.PaddingLeft = BANDBORDERWIDTH + SCALAY*1f; 
 			DrawString(title, si, bm);
             //End Band and Text 
@@ -2493,18 +2489,18 @@ namespace Majorsilence.Reporting.RdlDesign
             si.BStyleBottom = si.BStyleLeft = si.BStyleTop = si.BStyleRight = BorderStyleEnum.Solid;
             si.BWidthBottom = si.BWidthLeft = si.BWidthRight = si.BWidthTop = 1;
             // Josh: Changed to DimGray (personal preference)
-            si.BColorBottom = si.BColorLeft = si.BColorRight = si.BColorTop = Color.DimGray; //Color.LightGray; 
+            si.BColorBottom = si.BColorLeft = si.BColorRight = si.BColorTop = DesignerColors.SelectionBorder;
 
 			if (!IsDataRegion(xNode) || xNode.Name == "List")
             {
                 DrawBorder(si, r);
-                DrawCircle(Color.Black, BorderStyleEnum.Solid, 1,
+                DrawCircle(DesignerColors.Handle, BorderStyleEnum.Solid, 1,
                     r.X - RADIUS, r.Y - RADIUS, RADIUS * 2, true);  // top left
-                DrawCircle(Color.Black, BorderStyleEnum.Solid, 1,
+                DrawCircle(DesignerColors.Handle, BorderStyleEnum.Solid, 1,
                     r.X + r.Width - RADIUS, r.Y - RADIUS, RADIUS * 2, true);  // top right
-                DrawCircle(Color.Black, BorderStyleEnum.Solid, 1,
+                DrawCircle(DesignerColors.Handle, BorderStyleEnum.Solid, 1,
                     r.X - RADIUS, r.Y + r.Height - RADIUS, RADIUS * 2, true);  // bottom left
-                DrawCircle(Color.Black, BorderStyleEnum.Solid, 1,
+                DrawCircle(DesignerColors.Handle, BorderStyleEnum.Solid, 1,
                     r.X + r.Width - RADIUS, r.Y + r.Height - RADIUS, RADIUS * 2, true);  // bottom right
             }
             else
@@ -2599,9 +2595,9 @@ namespace Majorsilence.Reporting.RdlDesign
 
 			this.GetLineEnds(xNode, r, out p1, out p2);
 
-			DrawCircle(Color.Black, BorderStyleEnum.Solid, 1,
+			DrawCircle(DesignerColors.Handle, BorderStyleEnum.Solid, 1,
 				p1.X - RADIUS, p1.Y - RADIUS, RADIUS*2, true);  
-			DrawCircle(Color.Black, BorderStyleEnum.Solid, 1,
+			DrawCircle(DesignerColors.Handle, BorderStyleEnum.Solid, 1,
 				p2.X + - RADIUS, p2.Y - RADIUS, RADIUS*2, true);
 		}
 
@@ -2610,7 +2606,7 @@ namespace Majorsilence.Reporting.RdlDesign
         {
             StyleInfo si = await GetStyleInfo(xNode);
             RectangleF ri = GetOutOfBoundsRightReportItemRect(xNode, r);
-			si.BackgroundColor = OUTITEMCOLOR;
+			si.BackgroundColor = DesignerColors.OutOfPage;
 
             if (ri.Right > r.Right)//(!r.Contains(ri))
             {
@@ -2932,7 +2928,7 @@ namespace Majorsilence.Reporting.RdlDesign
         private void DrawMargins(RectangleF behindPage)
         {
             StyleInfo si = new StyleInfo();
-            si.BackgroundColor = AREABACKCOLOR;
+            si.BackgroundColor = DesignerColors.AreaBackground;
             DrawBackground(behindPage, si);
         } 
 
@@ -2943,7 +2939,7 @@ namespace Majorsilence.Reporting.RdlDesign
         //    //RectangleF m = new RectangleF(0, 0, LEFTGAP, /*TotalPageHeight + LEFTGAP*/ lowerEdge); //Josh: Add a margin on bottom too. 
         //    StyleInfo si = new StyleInfo();
         //    si.BackgroundColor = Color.LightGray;
-        //    si.BackgroundColor = AREABACKCOLOR; //Josh: Changed to use variable to ease page customizing. 
+        //    si.BackgroundColor = DesignerColors.AreaBackground; //Josh: Changed to use variable to ease page customizing. 
 
         //    //Full Margin // right margin
         //    RectangleF m = new RectangleF(/*pWidth - rMargin*/0, 0, PointsX(Width), /*TotalPageHeight + LEFTGAP*/ lowerEdge); //Josh: Add a margin on bottom too. 
@@ -3655,7 +3651,10 @@ namespace Majorsilence.Reporting.RdlDesign
 						break;
 				}
 				if (bFill)
-					g.FillEllipse(Brushes.Black, x, y, d, d); 
+				{
+					using var fill = new SolidBrush(c);
+					g.FillEllipse(fill, x, y, d, d);
+				}
 				else
 					g.DrawEllipse(p, x, y, d, d);
 			}
@@ -3673,7 +3672,7 @@ namespace Majorsilence.Reporting.RdlDesign
             Color lc = c;
             if (this.ShowReportItemOutline)
             {   // force an outline
-                lc = (bs == BorderStyleEnum.None || c.IsEmpty)? Color.LightGray : c;
+                lc = (bs == BorderStyleEnum.None || c.IsEmpty)? DesignerColors.ItemOutline : c;
                 if (w <= 0)
                     w = 1;
             }

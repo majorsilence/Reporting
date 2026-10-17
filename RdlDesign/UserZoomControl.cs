@@ -30,10 +30,17 @@ namespace Majorsilence.Reporting.RdlDesign
         {
             Size s;
             InitializeComponent();
+            BackColor = DesignerColors.ZoomBackground;
             TxtZoomValue.Text=ValoreCorrente.ToString("0.0");
             s = this.Size;
             s.Width = BtnMinus.Size.Width+TxtZoomValue.Size.Width+BtnPlus.Size.Width+4;
       //      this.Size = s;  
+        }
+
+        protected override void OnThemeChanged(EventArgs e)
+        {
+            BackColor = DesignerColors.ZoomBackground;
+            base.OnThemeChanged(e);
         }
 
         /// <summary>

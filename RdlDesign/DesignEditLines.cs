@@ -83,10 +83,11 @@ namespace Majorsilence.Reporting.RdlDesign
                                         this.saveTbEditorLines;   // calc lines if not initialized
             Font eFont = editor.Font;
             float maxHeight = g.VisibleClipBounds.Y + g.VisibleClipBounds.Height;
+            using var numberBrush = new SolidBrush(DesignerColors.LineNumbers);
             while (y < maxHeight)
             {
                 string l = i.ToString();
-                g.DrawString(l, editor.Font, Brushes.DarkBlue,
+                g.DrawString(l, editor.Font, numberBrush,
                     this.Width - (g.MeasureString(l, eFont).Width + 4), y);
                 i += 1;
                 if (i > lCount)

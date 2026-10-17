@@ -25,10 +25,10 @@ namespace Majorsilence.Reporting.RdlDesign
         bool _IsMetric;
         int _Intervals;
 
-        // Background colors for gradient
-        static readonly Color BEGINCOLOR = Color.White;
-        static readonly Color ENDCOLOR = Color.FromArgb(30, Color.LightSkyBlue);
-        static readonly Color GAPCOLOR = Color.FromArgb(30, Color.LightSkyBlue);
+        // Background colors for gradient; they follow the theme (DesignerColors)
+        static Color BEGINCOLOR => DesignerColors.RulerBackground;
+        static Color ENDCOLOR => DesignerColors.RulerGradient;
+        static Color GAPCOLOR => DesignerColors.RulerGradient;
 
         internal DesignRuler()
             : base()
@@ -126,6 +126,8 @@ namespace Majorsilence.Reporting.RdlDesign
         private void Ruler_DrawHorz(Graphics g)
         {
             float xoff, yoff, xinc;
+            using var textBrush = new SolidBrush(DesignerColors.RulerText);
+            using var tickPen = new Pen(DesignerColors.RulerText);
 
             StringFormat drawFormat=null;
             Font f = null;
@@ -190,14 +192,14 @@ namespace Majorsilence.Reporting.RdlDesign
                             string l = string.Format("{0:0}", xoff / mod);
                             SizeF sz = g.MeasureString(l, f);
 
-                            g.DrawString(l, f, Brushes.Black,
+                            g.DrawString(l, f, textBrush,
                                 Offset + xoff - (sz.Width / 2) - scroll, yoff - (sz.Height / 2), drawFormat);
                         }
-                        g.DrawLine(Pens.Black, Offset + xoff - scroll, this.Height, Offset + xoff - scroll, this.Height - 2);
+                        g.DrawLine(tickPen, Offset + xoff - scroll, this.Height, Offset + xoff - scroll, this.Height - 2);
                     }
                     else
                     {
-                        g.DrawLine(Pens.Black, Offset + xoff - scroll, yoff, Offset + xoff - scroll, yoff + 2);
+                        g.DrawLine(tickPen, Offset + xoff - scroll, yoff, Offset + xoff - scroll, yoff + 2);
                     }
                     xoff += xinc;
                 }
@@ -323,6 +325,8 @@ namespace Majorsilence.Reporting.RdlDesign
         private void Ruler_DrawVertPart(Graphics g, Font f, StringFormat df, float offset, float height)
         {
             float xoff, yoff, yinc, sinc;
+            using var textBrush = new SolidBrush(DesignerColors.RulerText);
+            using var tickPen = new Pen(DesignerColors.RulerText);
             float mod;
 
             xoff = Design.PointsX(this.Width / 2 - 2);
@@ -366,14 +370,14 @@ namespace Majorsilence.Reporting.RdlDesign
                         string l = string.Format("{0:0}", yoff / mod);
                         SizeF sz = g.MeasureString(l, f);
 
-                        g.DrawString(l, f, Brushes.Black,
+                        g.DrawString(l, f, textBrush,
                             xoff - (sz.Width / 2), sinc+offset + yoff - (sz.Height / 2) - scroll, df);
                     }
-                    g.DrawLine(Pens.Black, width, sinc + offset + yoff - scroll, width - 2, sinc+offset + yoff - scroll);
+                    g.DrawLine(tickPen, width, sinc + offset + yoff - scroll, width - 2, sinc+offset + yoff - scroll);
                 }
                 else
                 {
-                    g.DrawLine(Pens.Black, xoff, sinc + offset + yoff - scroll, xoff + 2, sinc+offset + yoff - scroll);
+                    g.DrawLine(tickPen, xoff, sinc + offset + yoff - scroll, xoff + 2, sinc+offset + yoff - scroll);
                 }
                 yoff += yinc;
             }
