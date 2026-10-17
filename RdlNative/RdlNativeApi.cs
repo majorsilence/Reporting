@@ -96,6 +96,7 @@ public static class RdlNativeApi
         RegisterSafe(resolver, typeof(RdlEngineConfig).Assembly);
 #if DRAWINGCOMPAT
         RegisterSafe(resolver, typeof(SkiaSharp.SKBitmap).Assembly);
+        RegisterSafe(resolver, typeof(HarfBuzzSharp.Buffer).Assembly);
 #endif
         RegisterSafe(resolver, typeof(SQLitePCL.raw).Assembly);
         RegisterSafe(resolver, typeof(MySql.Data.MySqlClient.MySqlConnection).Assembly);
