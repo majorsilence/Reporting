@@ -1,5 +1,6 @@
 using Majorsilence.Forms;
 using Majorsilence.Reporting.RdlDesign;
+using Majorsilence.Reporting.RdlViewer;
 using System.Globalization;
 
 namespace ReportDesigner
@@ -15,10 +16,15 @@ namespace ReportDesigner
         {
             string version = (typeof(Program).Assembly.GetName().Version?.ToString() ?? "0").Replace(".", "");
 
-            string ipcChannelPortName = string.Format("RdlProject{0}", version);
+            // ReportingBranding.InstanceName keeps a white-labelled build (one that copies this Main) and the
+            // stock designer from finding each other; the stock names are unchanged.
+            string instance = ReportingBranding.Current.InstanceName;
+            string ipcChannelPortName = instance == "RdlDesigner"
+                ? string.Format("RdlProject{0}", version)
+                : string.Format("{0}Ipc{1}", instance, version);
             // Determine if an instance is already running?
             bool firstInstance;
-            string mName = string.Format("Local\\RdlDesigner{0}", version);
+            string mName = string.Format("Local\\{0}{1}", instance, version);
             //   can't use Assembly in this context
             System.Threading.Mutex mutex = new System.Threading.Mutex(false, mName, out firstInstance);
 

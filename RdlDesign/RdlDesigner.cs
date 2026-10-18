@@ -39,7 +39,8 @@ namespace Majorsilence.Reporting.RdlDesign
 		// The version should match what is set in program.cs
 		static readonly string IpcFileName = string.Format("\\fyiIpcData{0}.txt", typeof(RdlDesigner).Assembly.GetName().Version.ToString().Replace(".", ""));
 
-		static readonly string optFileName = Path.Combine(Majorsilence.Reporting.Rdl.Utility.Paths.MajorsilenceRoamingFolder(), "designerstate.xml");
+		// a property, not a static field: ReportingBranding.SettingsFolderName may be set after this type loads
+		static string optFileName => Path.Combine(Majorsilence.Reporting.Rdl.Utility.Paths.MajorsilenceRoamingFolder(), "designerstate.xml");
 		SortedList<DateTime, string> _RecentFiles = null;
 		List<Uri> _CurrentFiles = null;     // temporary variable for current files
 		List<string> _Toolbar = null;           // temporary variable for toolbar entries
@@ -49,8 +50,8 @@ namespace Majorsilence.Reporting.RdlDesign
 		private Rdl.NeedPassword _GetPassword;
 		private string _DataSourceReferencePassword = null;
 		private bool bGotPassword = false;
-		private readonly string DefaultHelpUrl = "https://github.com/majorsilence/Reporting/wiki/_pages";
-		private readonly string DefaultSupportUrl = "https://github.com/majorsilence/Reporting/discussions";
+		private static string DefaultHelpUrl => ReportingBranding.Current.EffectiveHelpUrl;
+		private static string DefaultSupportUrl => ReportingBranding.Current.EffectiveSupportUrl;
 		private string _HelpUrl;
 		private string _SupportUrl;
 		static private string[] _MapSubtypes = new string[] { "usa_map" };
@@ -174,6 +175,18 @@ namespace Majorsilence.Reporting.RdlDesign
 		{
             InitializeComponent();
             _openPreviousSession = openPreviousSession;
+            ApplyBranding();
+        }
+
+        // White-labelling: what ReportingBranding.Current overrides; unset values keep the built-in text.
+        private void ApplyBranding()
+        {
+            var branding = ReportingBranding.Current;
+            if (!string.IsNullOrWhiteSpace(branding.DesignerName))
+                Text = branding.DesignerName;
+            if (branding.Icon != null)
+                Icon = branding.Icon;
+            aboutToolStripMenuItem.Visible = branding.ShowAboutBox;
         }
         
         private async void RdlDesigner_Load(object sender, EventArgs e)
@@ -2135,6 +2148,8 @@ namespace Majorsilence.Reporting.RdlDesign
 
 		private void menuHelpAbout_Click(object sender, System.EventArgs ea)
 		{
+			if (!ReportingBranding.Current.ShowAboutBox)
+				return;
 			using (DialogAbout dlg = new DialogAbout())
 			{
 				dlg.ShowDialog();

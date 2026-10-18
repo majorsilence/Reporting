@@ -34,6 +34,21 @@ namespace Majorsilence.Reporting.RdlDesign
 
         public event RdlDesign.RdlDesignerSavedFileEventHandler SavedFileEvent;
 
+        /// <summary>
+        /// Gives this designer a theme of its own -- a built-in theme name (Default, Light, Dark, Classic,
+        /// Aero) or <see cref="DesignerTheme.Custom"/> with a CSS file -- leaving the rest of the host
+        /// application on its theme. Creates the control's <see cref="Control.ThemeScope"/> when it has none.
+        /// Never throws for a bad theme; see <see cref="DesignerTheme.Apply"/>.
+        /// </summary>
+        public DesignerThemeResult UseTheme(string theme, string cssPath = null)
+            => DesignerTheme.ApplyTo(EnsureThemeScope(), theme, cssPath);
+
+        /// <summary>As <see cref="UseTheme"/>, from CSS theme text (Majorsilence.Forms docs/theming.md, plus <c>--rdl-*</c> variables).</summary>
+        public DesignerThemeResult UseThemeCss(string css)
+            => DesignerTheme.ApplyCssTo(EnsureThemeScope(), css);
+
+        private ThemeScope EnsureThemeScope() => ThemeScope ??= new ThemeScope();
+
         public RdlUserControl()
         {
             InitializeComponent();

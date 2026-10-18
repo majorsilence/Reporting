@@ -1086,6 +1086,8 @@ namespace Majorsilence.Reporting.RdlViewer
 
         private async void DrawPanelPaint(object sender, Majorsilence.Forms.PaintEventArgs e)
         {
+            // the page render below awaits; carry this paint's ThemeScope into it
+            ChromeColors.SetRenderScope(ThemeScope.Current);
             try         // never want to die in here
             {
                 var key = CurrentRenderKey();
@@ -1394,7 +1396,7 @@ namespace Majorsilence.Reporting.RdlViewer
 	<PageHeader>
 		<Height>1 in</Height>
 		<ReportItems>
-			<Textbox><Top>.1in</Top><Value>Majorsilence Reporting</Value><Style><FontSize>18pt</FontSize><FontWeight>Bold</FontWeight></Style></Textbox>
+			<Textbox><Top>.1in</Top><Value>" + System.Security.SecurityElement.Escape(ReportingBranding.Current.EffectiveProductName) + @"</Value><Style><FontSize>18pt</FontSize><FontWeight>Bold</FontWeight></Style></Textbox>
 			<Textbox><Top>.1in</Top><Left>4.25in</Left><Value>=Globals!ExecutionTime</Value><Style><Format>dddd, MMMM dd, yyyy hh:mm:ss tt</Format><FontSize>12pt</FontSize><FontWeight>Bold</FontWeight></Style></Textbox>
 			<Textbox><Top>.5in</Top><Value>Errors processing report</Value><Style><FontSize>12pt</FontSize><FontWeight>Bold</FontWeight></Style></Textbox>
 		</ReportItems>
