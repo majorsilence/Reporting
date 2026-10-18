@@ -925,7 +925,19 @@ namespace Majorsilence.Reporting.RdlDesign
 
         public async Task SaveAs(string filename, OutputPresentationType type)
 		{
+			await SyncPreview();
 			await this.rdlPreview.SaveAs(filename, type);
+		}
+
+		/// <summary>
+		/// Gives the preview viewer the report as it is now. Otherwise it only gets it when the Preview
+		/// tab is shown, so exporting straight after loading or editing used the old report.
+		/// </summary>
+		private async Task SyncPreview()
+		{
+			string rdl = GetRdlText();
+			if (rdlPreview.SourceRdl != rdl)
+				await this.rdlPreview.SetSourceRdl(rdl);
 		}
 
 		public string GetRdlText()
@@ -936,6 +948,9 @@ namespace Majorsilence.Reporting.RdlDesign
 				return scintilla1.Text;
 		}
 
+		/// <summary>
+		/// Loads a report. Loading is not an edit: afterwards Modified is false and there is nothing to undo.
+		/// </summary>
 		public void SetRdlText(string text)
 		{
 			if (_CurrentTab == DesignTabs.Design)
@@ -944,19 +959,42 @@ namespace Majorsilence.Reporting.RdlDesign
 				{
 					dcDesign.ReportSource = text;
 					dcDesign.Refresh();
-					SetTextToScintilla(text);
+					LoadTextToScintilla(text);
 				}
 				catch (Exception e)
 				{
 					MessageBox.Show(e.Message, Strings.RdlEditPreview_Show_Report);
-					SetTextToScintilla(text);
+					LoadTextToScintilla(text);
 					tcEHP.SelectedIndex = (int)DesignTabs.Edit;	// Force current tab to edit syntax
 					_DesignChanged = DesignTabs.Edit;
 				}
 			}
 			else 
 			{
-				SetTextToScintilla(text);
+				LoadTextToScintilla(text);
+			}
+
+			// Let the preview (and so Viewer.SaveAs) have the report without waiting for the Preview
+			// tab; it renders when it is next needed.
+			rdlPreview.SourceRdlNoLoad = string.IsNullOrEmpty(text) ? null : text;
+			modified = false;
+		}
+
+		// SetTextToScintilla only resets the editor's save point and undo history on the first text it
+		// is given, so loading a second report (or the same one twice) left the editor Modified, with the
+		// previous report on its undo stack.
+		private void LoadTextToScintilla(string text)
+		{
+			noFireRDLTextChanged = true;
+			try
+			{
+				scintilla1.Text = text;
+				scintilla1.EmptyUndoBuffer();
+				scintilla1.SetSavePoint();
+			}
+			finally
+			{
+				noFireRDLTextChanged = false;
 			}
 		}
 

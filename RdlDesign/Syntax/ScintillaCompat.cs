@@ -42,6 +42,9 @@ namespace Majorsilence.Reporting.RdlDesign.Syntax
 
         private void OnScintillaTextChanged(object sender, EventArgs e)
         {
+            // Like Scintilla, any change (undo and redo included) moves the text away from the save
+            // point; SetSavePoint clears it. Without this, edits never made the report Modified.
+            Modified = true;
             if (_suppressUndoCapture) return;
             _undoStack.Add(_lastCapturedText);
             _redoStack.Clear();
