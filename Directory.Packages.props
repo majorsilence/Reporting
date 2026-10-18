@@ -10,18 +10,18 @@
     <PackageVersion Include="dotConnect.Express.for.PostgreSQL" Version="8.3.10" />
     <!-- Version history/why for the Majorsilence.Forms family: MIGRATION-NOTES.md's D2/D4/D5/D6 +
          runtime-parity sections (per-patch breakdown lives in ../Majorsilence.Forms's git log). -->
-    <PackageVersion Include="Majorsilence.Forms" Version="26.11.5" />
-    <PackageVersion Include="Majorsilence.Forms.Drawing.Common" Version="26.11.5" />
-    <PackageVersion Include="Majorsilence.Forms.Avalonia" Version="26.11.5" />
-    <PackageVersion Include="Majorsilence.Forms.Headless" Version="26.11.5" />
+    <PackageVersion Include="Majorsilence.Forms" Version="26.11.7" />
+    <PackageVersion Include="Majorsilence.Forms.Drawing.Common" Version="26.11.7" />
+    <PackageVersion Include="Majorsilence.Forms.Avalonia" Version="26.11.7" />
+    <PackageVersion Include="Majorsilence.Forms.Headless" Version="26.11.7" />
     <!-- Windows-only (net8.0-windows/net10.0-windows); only the legacy SampleDesignerControlWPF
          example references it, to host Majorsilence.Forms controls inside a real
          System.Windows.Forms container via ToWinFormsControl(). On nuget.org as of 26.0.52. -->
-    <PackageVersion Include="Majorsilence.Forms.WinForms" Version="26.11.5" />
-    <PackageVersion Include="Majorsilence.Forms.Wpf" Version="26.11.5" />
-    <PackageVersion Include="Majorsilence.Forms.Uno" Version="26.11.5" />
-    <PackageVersion Include="Majorsilence.Forms.Gtk4" Version="26.11.5" />
-    <PackageVersion Include="Majorsilence.Forms.Terminal" Version="26.11.5" />
+    <PackageVersion Include="Majorsilence.Forms.WinForms" Version="26.11.7" />
+    <PackageVersion Include="Majorsilence.Forms.Wpf" Version="26.11.7" />
+    <PackageVersion Include="Majorsilence.Forms.Uno" Version="26.11.7" />
+    <PackageVersion Include="Majorsilence.Forms.Gtk4" Version="26.11.7" />
+    <PackageVersion Include="Majorsilence.Forms.Terminal" Version="26.11.7" />
     <!-- Hosting examples (Examples/Hosting): the Uno and GTK 4 heads. -->
     <PackageVersion Include="Uno.WinUI" Version="6.5.237" />
     <PackageVersion Include="Uno.WinUI.Runtime.Skia.X11" Version="6.5.237" />

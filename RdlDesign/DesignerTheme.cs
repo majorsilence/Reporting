@@ -45,7 +45,20 @@ namespace Majorsilence.Reporting.RdlDesign
         /// <paramref name="cssPath"/>). Never throws for a bad theme: an unknown name, a missing file or a
         /// stylesheet with errors falls back to <see cref="BuiltInTheme.Default"/>.
         /// </summary>
-        public static DesignerThemeResult Apply(string theme, string cssPath)
+        public static DesignerThemeResult Apply(string theme, string cssPath) => ApplyCore(null, theme, cssPath);
+
+        /// <summary>
+        /// As <see cref="Apply"/>, but into <paramref name="scope"/> rather than the application theme --
+        /// for one designer or viewer among others (<c>control.ThemeScope = scope</c>).
+        /// </summary>
+        public static DesignerThemeResult ApplyTo(ThemeScope scope, string theme, string cssPath)
+        {
+            ArgumentNullException.ThrowIfNull(scope);
+            return ApplyCore(scope, theme, cssPath);
+        }
+
+        // scope null: the application theme
+        private static DesignerThemeResult ApplyCore(ThemeScope scope, string theme, string cssPath)
         {
             if (string.IsNullOrWhiteSpace(theme) || string.Equals(theme, Custom, StringComparison.OrdinalIgnoreCase) && string.IsNullOrWhiteSpace(cssPath))
                 theme = nameof(BuiltInTheme.Default);
@@ -53,8 +66,8 @@ namespace Majorsilence.Reporting.RdlDesign
             if (!string.Equals(theme, Custom, StringComparison.OrdinalIgnoreCase))
             {
                 if (!Enum.TryParse(theme, true, out BuiltInTheme builtIn))
-                    return FallBack(new List<string> { $"Unknown theme '{theme}'." });
-                Theme.SetBuiltInTheme(builtIn);
+                    return FallBack(scope, new List<string> { $"Unknown theme '{theme}'." });
+                SetBuiltIn(scope, builtIn);
                 return new DesignerThemeResult(Array.Empty<string>(), false);
             }
 
@@ -65,14 +78,23 @@ namespace Majorsilence.Reporting.RdlDesign
             }
             catch (Exception ex)
             {
-                return FallBack(new List<string> { $"{cssPath}: {ex.Message}" });
+                return FallBack(scope, new List<string> { $"{cssPath}: {ex.Message}" });
             }
 
-            return ApplyCss(css, cssPath);
+            return ApplyCssCore(scope, css, cssPath);
         }
 
         /// <summary>Applies CSS theme text; see <see cref="Apply"/> for the fallback.</summary>
-        public static DesignerThemeResult ApplyCss(string css, string sourceName = null)
+        public static DesignerThemeResult ApplyCss(string css, string sourceName = null) => ApplyCssCore(null, css, sourceName);
+
+        /// <summary>As <see cref="ApplyCss"/>, but into <paramref name="scope"/>; see <see cref="ApplyTo"/>.</summary>
+        public static DesignerThemeResult ApplyCssTo(ThemeScope scope, string css, string sourceName = null)
+        {
+            ArgumentNullException.ThrowIfNull(scope);
+            return ApplyCssCore(scope, css, sourceName);
+        }
+
+        private static DesignerThemeResult ApplyCssCore(ThemeScope scope, string css, string sourceName)
         {
             var sheet = ThemeStyleSheet.Parse(css ?? "");
             string prefix = string.IsNullOrEmpty(sourceName) ? "" : Path.GetFileName(sourceName) + " ";
@@ -81,26 +103,50 @@ namespace Majorsilence.Reporting.RdlDesign
                 .Select(d => prefix + d).ToList();
 
             if (sheet.HasErrors)
-                return FallBack(messages);
+                return FallBack(scope, messages);
 
             // a sheet without "extends" layers onto whatever is current; start it from Default so
             // re-applying the same file always gives the same result
-            Theme.BeginUpdate();
-            try
+            if (scope == null)
             {
-                Theme.SetBuiltInTheme(BuiltInTheme.Default);
-                Theme.ApplyStyleSheet(sheet);
+                Theme.BeginUpdate();
+                try
+                {
+                    Theme.SetBuiltInTheme(BuiltInTheme.Default);
+                    Theme.ApplyStyleSheet(sheet);
+                }
+                finally
+                {
+                    Theme.EndUpdate();
+                }
             }
-            finally
+            else
             {
-                Theme.EndUpdate();
+                scope.BeginUpdate();
+                try
+                {
+                    scope.SetBuiltInTheme(BuiltInTheme.Default);
+                    scope.ApplyStyleSheet(sheet);
+                }
+                finally
+                {
+                    scope.EndUpdate();
+                }
             }
             return new DesignerThemeResult(messages, false);
         }
 
-        private static DesignerThemeResult FallBack(List<string> messages)
+        private static void SetBuiltIn(ThemeScope scope, BuiltInTheme theme)
         {
-            Theme.SetBuiltInTheme(BuiltInTheme.Default);
+            if (scope == null)
+                Theme.SetBuiltInTheme(theme);
+            else
+                scope.SetBuiltInTheme(theme);
+        }
+
+        private static DesignerThemeResult FallBack(ThemeScope scope, List<string> messages)
+        {
+            SetBuiltIn(scope, BuiltInTheme.Default);
             messages.Add("Using the Default theme instead.");
             return new DesignerThemeResult(messages, true);
         }

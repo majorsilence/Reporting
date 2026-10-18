@@ -1112,8 +1112,14 @@ namespace Majorsilence.Reporting.RdlDesign
         // self-requested paint would kick off another render, which finishes and requests another
         // paint, forever, pegging a CPU core even completely idle.
         private bool _awaitingFollowUpPaint;
+
+        // The ThemeScope the surface last painted under, for the asynchronous render (see
+        // ChromeColors.SetRenderScope); also used by the follow-up renders a running one queues.
+        private ThemeScope _paintScope;
+
         private void DrawPanelPaint(object sender, Majorsilence.Forms.PaintEventArgs e)
         {
+            _paintScope = ThemeScope.Current;
             if (_buffer != null)
                 e.Graphics.DrawImage(_buffer, 0, 0);
 
@@ -1138,6 +1144,7 @@ namespace Majorsilence.Reporting.RdlDesign
 
         private async Task Internal_DrawPanelPaintAsync()
         {
+            Majorsilence.Reporting.RdlViewer.ChromeColors.SetRenderScope(_paintScope);
             // Only handle one paint at a time
             lock (this)
             {

@@ -29,6 +29,9 @@ namespace SampleDesignerControlWPF
         public MainWindow()
         {
             InitializeComponent();
+            // The designer's own theme, independent of the WPF application around it (issue #448): a
+            // built-in name, or DesignerTheme.Custom with a CSS file (see ReportDesigner/Themes/graphite.css).
+            reportDesigner.UseTheme("Dark");
             windowsFormsHost1.Child = reportDesigner.ToWinFormsControl();
         }
 

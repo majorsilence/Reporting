@@ -51,6 +51,14 @@ namespace Majorsilence.Reporting.RdlDesign.Properties {
         ///   resource lookups using this strongly typed resource class.
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
+        // Images go through Majorsilence.Forms' resource manager: the BCL one hands back the
+        // System.Drawing.Bitmap a resx file reference names, which is not a Majorsilence.Forms.Drawing.Bitmap
+        // (InvalidCastException in every image property, so RdlUserControl could not be created).
+        private static global::Majorsilence.Forms.ComponentResourceManager imageResources;
+
+        internal static global::Majorsilence.Forms.ComponentResourceManager ImageResources =>
+            imageResources ??= new global::Majorsilence.Forms.ComponentResourceManager("Majorsilence.Reporting.RdlDesign.Properties.Resources", typeof(Resources).Assembly);
+
         internal static global::System.Globalization.CultureInfo Culture {
             get {
                 return resourceCulture;
@@ -65,7 +73,7 @@ namespace Majorsilence.Reporting.RdlDesign.Properties {
         /// </summary>
         internal static Majorsilence.Forms.Drawing.Bitmap chart {
             get {
-                object obj = ResourceManager.GetObject("chart", resourceCulture);
+                object obj = ImageResources.GetObject("chart", resourceCulture);
                 return ((Majorsilence.Forms.Drawing.Bitmap)(obj));
             }
         }
@@ -75,7 +83,7 @@ namespace Majorsilence.Reporting.RdlDesign.Properties {
         /// </summary>
         internal static Majorsilence.Forms.Drawing.Bitmap csv {
             get {
-                object obj = ResourceManager.GetObject("csv", resourceCulture);
+                object obj = ImageResources.GetObject("csv", resourceCulture);
                 return ((Majorsilence.Forms.Drawing.Bitmap)(obj));
             }
         }
@@ -85,7 +93,7 @@ namespace Majorsilence.Reporting.RdlDesign.Properties {
         /// </summary>
         internal static Majorsilence.Forms.Drawing.Bitmap document_new {
             get {
-                object obj = ResourceManager.GetObject("document_new", resourceCulture);
+                object obj = ImageResources.GetObject("document_new", resourceCulture);
                 return ((Majorsilence.Forms.Drawing.Bitmap)(obj));
             }
         }
@@ -95,7 +103,7 @@ namespace Majorsilence.Reporting.RdlDesign.Properties {
         /// </summary>
         internal static Majorsilence.Forms.Drawing.Bitmap document_open {
             get {
-                object obj = ResourceManager.GetObject("document_open", resourceCulture);
+                object obj = ImageResources.GetObject("document_open", resourceCulture);
                 return ((Majorsilence.Forms.Drawing.Bitmap)(obj));
             }
         }
@@ -105,7 +113,7 @@ namespace Majorsilence.Reporting.RdlDesign.Properties {
         /// </summary>
         internal static Majorsilence.Forms.Drawing.Bitmap document_print {
             get {
-                object obj = ResourceManager.GetObject("document_print", resourceCulture);
+                object obj = ImageResources.GetObject("document_print", resourceCulture);
                 return ((Majorsilence.Forms.Drawing.Bitmap)(obj));
             }
         }
@@ -115,7 +123,7 @@ namespace Majorsilence.Reporting.RdlDesign.Properties {
         /// </summary>
         internal static Majorsilence.Forms.Drawing.Bitmap document_save {
             get {
-                object obj = ResourceManager.GetObject("document_save", resourceCulture);
+                object obj = ImageResources.GetObject("document_save", resourceCulture);
                 return ((Majorsilence.Forms.Drawing.Bitmap)(obj));
             }
         }
@@ -125,7 +133,7 @@ namespace Majorsilence.Reporting.RdlDesign.Properties {
         /// </summary>
         internal static Majorsilence.Forms.Drawing.Bitmap edit_copy {
             get {
-                object obj = ResourceManager.GetObject("edit_copy", resourceCulture);
+                object obj = ImageResources.GetObject("edit_copy", resourceCulture);
                 return ((Majorsilence.Forms.Drawing.Bitmap)(obj));
             }
         }
@@ -135,7 +143,7 @@ namespace Majorsilence.Reporting.RdlDesign.Properties {
         /// </summary>
         internal static Majorsilence.Forms.Drawing.Bitmap edit_cut {
             get {
-                object obj = ResourceManager.GetObject("edit_cut", resourceCulture);
+                object obj = ImageResources.GetObject("edit_cut", resourceCulture);
                 return ((Majorsilence.Forms.Drawing.Bitmap)(obj));
             }
         }
@@ -145,7 +153,7 @@ namespace Majorsilence.Reporting.RdlDesign.Properties {
         /// </summary>
         internal static Majorsilence.Forms.Drawing.Bitmap edit_paste {
             get {
-                object obj = ResourceManager.GetObject("edit_paste", resourceCulture);
+                object obj = ImageResources.GetObject("edit_paste", resourceCulture);
                 return ((Majorsilence.Forms.Drawing.Bitmap)(obj));
             }
         }
@@ -155,7 +163,7 @@ namespace Majorsilence.Reporting.RdlDesign.Properties {
         /// </summary>
         internal static Majorsilence.Forms.Drawing.Bitmap edit_undo {
             get {
-                object obj = ResourceManager.GetObject("edit_undo", resourceCulture);
+                object obj = ImageResources.GetObject("edit_undo", resourceCulture);
                 return ((Majorsilence.Forms.Drawing.Bitmap)(obj));
             }
         }
@@ -165,7 +173,7 @@ namespace Majorsilence.Reporting.RdlDesign.Properties {
         /// </summary>
         internal static Majorsilence.Forms.Drawing.Bitmap format_justify_center {
             get {
-                object obj = ResourceManager.GetObject("format_justify_center", resourceCulture);
+                object obj = ImageResources.GetObject("format_justify_center", resourceCulture);
                 return ((Majorsilence.Forms.Drawing.Bitmap)(obj));
             }
         }
@@ -175,7 +183,7 @@ namespace Majorsilence.Reporting.RdlDesign.Properties {
         /// </summary>
         internal static Majorsilence.Forms.Drawing.Bitmap format_justify_fill {
             get {
-                object obj = ResourceManager.GetObject("format_justify_fill", resourceCulture);
+                object obj = ImageResources.GetObject("format_justify_fill", resourceCulture);
                 return ((Majorsilence.Forms.Drawing.Bitmap)(obj));
             }
         }
@@ -185,7 +193,7 @@ namespace Majorsilence.Reporting.RdlDesign.Properties {
         /// </summary>
         internal static Majorsilence.Forms.Drawing.Bitmap format_justify_left {
             get {
-                object obj = ResourceManager.GetObject("format_justify_left", resourceCulture);
+                object obj = ImageResources.GetObject("format_justify_left", resourceCulture);
                 return ((Majorsilence.Forms.Drawing.Bitmap)(obj));
             }
         }
@@ -195,7 +203,7 @@ namespace Majorsilence.Reporting.RdlDesign.Properties {
         /// </summary>
         internal static Majorsilence.Forms.Drawing.Bitmap format_justify_right {
             get {
-                object obj = ResourceManager.GetObject("format_justify_right", resourceCulture);
+                object obj = ImageResources.GetObject("format_justify_right", resourceCulture);
                 return ((Majorsilence.Forms.Drawing.Bitmap)(obj));
             }
         }
@@ -205,7 +213,7 @@ namespace Majorsilence.Reporting.RdlDesign.Properties {
         /// </summary>
         internal static Majorsilence.Forms.Drawing.Bitmap format_text_bold {
             get {
-                object obj = ResourceManager.GetObject("format_text_bold", resourceCulture);
+                object obj = ImageResources.GetObject("format_text_bold", resourceCulture);
                 return ((Majorsilence.Forms.Drawing.Bitmap)(obj));
             }
         }
@@ -215,7 +223,7 @@ namespace Majorsilence.Reporting.RdlDesign.Properties {
         /// </summary>
         internal static Majorsilence.Forms.Drawing.Bitmap format_text_italic {
             get {
-                object obj = ResourceManager.GetObject("format_text_italic", resourceCulture);
+                object obj = ImageResources.GetObject("format_text_italic", resourceCulture);
                 return ((Majorsilence.Forms.Drawing.Bitmap)(obj));
             }
         }
@@ -225,7 +233,7 @@ namespace Majorsilence.Reporting.RdlDesign.Properties {
         /// </summary>
         internal static Majorsilence.Forms.Drawing.Bitmap format_text_underline {
             get {
-                object obj = ResourceManager.GetObject("format_text_underline", resourceCulture);
+                object obj = ImageResources.GetObject("format_text_underline", resourceCulture);
                 return ((Majorsilence.Forms.Drawing.Bitmap)(obj));
             }
         }
@@ -235,7 +243,7 @@ namespace Majorsilence.Reporting.RdlDesign.Properties {
         /// </summary>
         internal static Majorsilence.Forms.Drawing.Bitmap Image {
             get {
-                object obj = ResourceManager.GetObject("Image", resourceCulture);
+                object obj = ImageResources.GetObject("Image", resourceCulture);
                 return ((Majorsilence.Forms.Drawing.Bitmap)(obj));
             }
         }

@@ -1086,6 +1086,8 @@ namespace Majorsilence.Reporting.RdlViewer
 
         private async void DrawPanelPaint(object sender, Majorsilence.Forms.PaintEventArgs e)
         {
+            // the page render below awaits; carry this paint's ThemeScope into it
+            ChromeColors.SetRenderScope(ThemeScope.Current);
             try         // never want to die in here
             {
                 var key = CurrentRenderKey();

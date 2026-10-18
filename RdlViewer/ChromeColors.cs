@@ -13,9 +13,11 @@ namespace Majorsilence.Reporting.RdlViewer
     /// every call, so callers read them while painting and repaint on <see cref="Theme.ThemeChanged"/>.
     /// </summary>
     /// <remarks>
-    /// Each colour is, in order: the <c>--rdl-*</c> author variable of the applied CSS theme (a theme
+    /// <para>Each colour is, in order: the <c>--rdl-*</c> author variable of the applied CSS theme (a theme
     /// sets e.g. <c>:root { --rdl-area-background: #202020; }</c>); on a dark theme, a colour derived from
-    /// the Forms tokens; otherwise the classic colour, so the default look is unchanged.
+    /// the Forms tokens; otherwise the classic colour, so the default look is unchanged.</para>
+    /// <para>A designer or viewer given its own <see cref="ThemeScope"/> (<c>control.ThemeScope = scope</c>)
+    /// resolves against that scope -- its tokens and its stylesheet's variables -- while it paints.</para>
     /// </remarks>
     public static class ChromeColors
     {
@@ -68,8 +70,30 @@ namespace Majorsilence.Reporting.RdlViewer
                 && Variables.Contains(diagnostic.Message.Substring(1, end - 1));
         }
 
+        // The scope an asynchronous page render belongs to. ThemeScope.Current is per thread and is only
+        // set while Majorsilence.Forms itself paints; a render that awaits resumes without it, so the paint
+        // handler captures it and the render flows it here (an AsyncLocal does not leak to other work).
+        private static readonly System.Threading.AsyncLocal<ThemeScope> s_renderScope = new System.Threading.AsyncLocal<ThemeScope>();
+
+        /// <summary>
+        /// Makes the colours resolve against <paramref name="scope"/> for the rest of the calling async
+        /// method (and what it awaits). Call it first thing in an async render started from a paint
+        /// handler, passing the <see cref="ThemeScope.Current"/> the handler saw.
+        /// </summary>
+        public static void SetRenderScope(ThemeScope scope) => s_renderScope.Value = scope;
+
+        // Runs `read` with the render's scope current, when it has one that is not already current.
+        private static T InScope<T>(Func<T> read)
+        {
+            var scope = s_renderScope.Value;
+            if (scope == null || ReferenceEquals(scope, ThemeScope.Current))
+                return read();
+            using (scope.Enter())
+                return read();
+        }
+
         /// <summary>True when the current theme's window background is dark.</summary>
-        public static bool IsDarkTheme => Luminance(Theme.BackgroundColor) < 0.5f;
+        public static bool IsDarkTheme => InScope(() => Luminance(Theme.BackgroundColor) < 0.5f);
 
         /// <summary>
         /// The colour of the CSS variable <paramref name="variable"/> if the applied theme declares it;
@@ -78,19 +102,34 @@ namespace Majorsilence.Reporting.RdlViewer
         public static Color Resolve(string variable, Color classic, Func<Color> dark = null)
         {
             Debug.Assert(Variables.Contains(variable), $"{variable} is missing from ChromeColors.Variables");
-            if (TryGetVariable(variable, out Color c))
-                return c;
-            if (dark != null && IsDarkTheme)
-                return dark();
-            return classic;
+            return InScope(() =>
+            {
+                if (TryGetVariable(variable, out Color c))
+                    return c;
+                if (dark != null && Luminance(Theme.BackgroundColor) < 0.5f)
+                    return dark();
+                return classic;
+            });
         }
 
         /// <summary>Converts a Forms theme token to a System.Drawing colour.</summary>
         public static Color FromToken(SKColor c) => Color.FromArgb(c.Alpha, c.Red, c.Green, c.Blue);
 
+        // The stylesheets whose variables apply: the current scope's own; none when the scope has a full
+        // theme without a stylesheet (a built-in one); otherwise the application's, as for its tokens.
+        private static IReadOnlyList<ThemeStyleSheet> CurrentSheets()
+        {
+            var scope = ThemeScope.Current;
+            if (scope == null)
+                return Theme.CurrentStyleSheets;
+            if (scope.CurrentStyleSheets.Count > 0)
+                return scope.CurrentStyleSheets;
+            return scope.IsSet(nameof(Theme.BackgroundColor)) ? Array.Empty<ThemeStyleSheet>() : Theme.CurrentStyleSheets;
+        }
+
         private static bool TryGetVariable(string variable, out Color color)
         {
-            var sheets = Theme.CurrentStyleSheets;
+            var sheets = CurrentSheets();
             // the last sheet is the one applied; it wins over its bases
             for (int i = sheets.Count - 1; i >= 0; i--)
             {
