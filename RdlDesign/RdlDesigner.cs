@@ -611,7 +611,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			if (lbl == null)
 				return;
 			_SaveExprBackColor = lbl.BackColor;
-			lbl.BackColor = Color.LightGray;
+			lbl.BackColor = DesignerColors.ExpressionHover;
 
 			return;
 		}

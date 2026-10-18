@@ -1115,4 +1115,22 @@ the website https://github.com/majorsilence/Reporting.</value>
   <data name="ReportNames_DescriptionDuplicateNameError" xml:space="preserve">
     <value>NameError: duplicate name: {0}, name of the node: {1}</value>
   </data>
+  <data name="DialogToolOptions_Appearance" xml:space="preserve">
+    <value>Appearance</value>
+  </data>
+  <data name="DialogToolOptions_Theme" xml:space="preserve">
+    <value>Theme:</value>
+  </data>
+  <data name="DialogToolOptions_ThemeFile" xml:space="preserve">
+    <value>CSS file:</value>
+  </data>
+  <data name="DialogToolOptions_ThemeCustom" xml:space="preserve">
+    <value>Custom CSS file...</value>
+  </data>
+  <data name="DialogToolOptions_ThemeFilter" xml:space="preserve">
+    <value>CSS themes (*.css)|*.css|All files (*.*)|*.*</value>
+  </data>
+  <data name="DialogToolOptions_ThemeApplied" xml:space="preserve">
+    <value>Theme applied.</value>
+  </data>
 </root>

@@ -192,11 +192,7 @@ namespace Majorsilence.Reporting.RdlDesign
             resources.ApplyResources(this.dgFields, "dgFields");
             this.dgFields.AutoSizeColumnsMode = Majorsilence.Forms.DataGridViewAutoSizeColumnsMode.Fill;
             dataGridViewCellStyle1.Alignment = Majorsilence.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle1.BackColor = Majorsilence.Forms.SystemColors.ControlText;
             dataGridViewCellStyle1.Font = new Majorsilence.Forms.Drawing.Font("Microsoft Sans Serif", 8.25F, Majorsilence.Forms.Drawing.FontStyle.Regular, Majorsilence.Forms.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            dataGridViewCellStyle1.ForeColor = Majorsilence.Forms.SystemColors.WindowText;
-            dataGridViewCellStyle1.SelectionBackColor = Majorsilence.Forms.SystemColors.Highlight;
-            dataGridViewCellStyle1.SelectionForeColor = Majorsilence.Forms.SystemColors.HighlightText;
             dataGridViewCellStyle1.WrapMode = Majorsilence.Forms.DataGridViewTriState.True;
             this.dgFields.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
             this.dgFields.Columns.AddRange(new Majorsilence.Forms.DataGridViewColumn[] {

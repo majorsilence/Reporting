@@ -26,11 +26,20 @@ namespace ReportDesigner
             {// just start up the designer when we're first in line
                 var thread = System.Threading.Thread.CurrentThread;
 
+                DesktopConfig config = null;
                 try
                 {
-                    if (Majorsilence.Reporting.RdlDesign.DialogToolOptions.DesktopConfiguration.Language != null)
+                    config = DialogToolOptions.DesktopConfiguration;    // reads config.xml; throws when there is none
+                }
+                catch
+                {
+                }
+
+                try
+                {
+                    if (config?.Language != null)
                     {
-                        thread.CurrentCulture = new CultureInfo(DialogToolOptions.DesktopConfiguration.Language);
+                        thread.CurrentCulture = new CultureInfo(config.Language);
                     }
                     else
                     {
@@ -58,7 +67,17 @@ namespace ReportDesigner
                 // laid out against (AutoScaleBaseSize), as they do there.
                 Application.SetDefaultFont(SystemFonts.MessageBoxFont);
                 Application.DoEvents();
-                Application.Run(new RdlDesigner(ipcChannelPortName, true));
+
+                // before the first window exists, so nothing paints in the default theme first
+                var theme = DesignerTheme.Apply(config?.Theme, config?.ThemeCss);
+
+                var designer = new RdlDesigner(ipcChannelPortName, true);
+                if (theme.FellBack)
+                {   // a theme that was chosen but can't be used: say so once the window is up, don't block startup
+                    designer.Shown += (s, e) => MessageBox.Show(designer, string.Join(Environment.NewLine, theme.Messages), designer.Text,
+                        MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
+                Application.Run(designer);
                 return;
             }
 

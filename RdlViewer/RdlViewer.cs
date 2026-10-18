@@ -1136,8 +1136,16 @@ namespace Majorsilence.Reporting.RdlViewer
             catch (Exception ex)
             {   // don't want to kill process if we die
                 using (Font font = new Font("Arial", 8))
-                    e.Graphics.DrawString(ex.Message + "\r\n" + ex.StackTrace, font, Brushes.Black, 0, 0);
+                using (var brush = new SolidBrush(ChromeColors.Text))
+                    e.Graphics.DrawString(ex.Message + "\r\n" + ex.StackTrace, font, brush, 0, 0);
             }
+        }
+
+        protected override void OnThemeChanged(EventArgs e)
+        {
+            base.OnThemeChanged(e);
+            _bufferKey = null;                  // the cached frame was painted with the old theme's chrome
+            _DrawPanel.Invalidate();
         }
 
         private void DrawPanelResize(object sender, EventArgs e)

@@ -80,7 +80,6 @@ namespace Majorsilence.Reporting.RdlDesign
             this.AutoScaleMode = Majorsilence.Forms.AutoScaleMode.Font;
             this.AutoSize = true;
             this.AutoSizeMode = Majorsilence.Forms.AutoSizeMode.GrowAndShrink;
-            this.BackColor = System.Drawing.Color.White;
             this.BorderStyle = Majorsilence.Forms.BorderStyle.Fixed3D;
             this.Controls.Add(this.TxtZoomValue);
             this.Controls.Add(this.BtnMinus);

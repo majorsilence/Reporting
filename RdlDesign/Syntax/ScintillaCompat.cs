@@ -287,7 +287,7 @@ namespace Majorsilence.Reporting.RdlDesign.Syntax
                     continue;
 
                 var style = Styles[run.Style];
-                var color = style.ForeColor.IsEmpty ? System.Drawing.Color.Black : style.ForeColor;
+                var color = style.ForeColor.IsEmpty ? Majorsilence.Reporting.RdlViewer.ChromeColors.Text : style.ForeColor;
                 yield return new TextSpanStyle(run.Start, run.Length,
                     new SkiaSharp.SKColor(color.R, color.G, color.B, color.A),
                     style.Bold, style.Underline);

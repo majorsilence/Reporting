@@ -1152,6 +1152,60 @@ namespace Majorsilence.Reporting.RdlDesign.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Appearance.
+        /// </summary>
+        internal static string DialogToolOptions_Appearance {
+            get {
+                return ResourceManager.GetString("DialogToolOptions_Appearance", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Theme:.
+        /// </summary>
+        internal static string DialogToolOptions_Theme {
+            get {
+                return ResourceManager.GetString("DialogToolOptions_Theme", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to CSS file:.
+        /// </summary>
+        internal static string DialogToolOptions_ThemeFile {
+            get {
+                return ResourceManager.GetString("DialogToolOptions_ThemeFile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Custom CSS file....
+        /// </summary>
+        internal static string DialogToolOptions_ThemeCustom {
+            get {
+                return ResourceManager.GetString("DialogToolOptions_ThemeCustom", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to CSS themes (*.css)|*.css|All files (*.*)|*.*.
+        /// </summary>
+        internal static string DialogToolOptions_ThemeFilter {
+            get {
+                return ResourceManager.GetString("DialogToolOptions_ThemeFilter", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Theme applied..
+        /// </summary>
+        internal static string DialogToolOptions_ThemeApplied {
+            get {
+                return ResourceManager.GetString("DialogToolOptions_ThemeApplied", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Options.
         /// </summary>
         internal static string DialogToolOptions_Show_Options {

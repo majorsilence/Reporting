@@ -1093,6 +1093,13 @@ namespace Majorsilence.Reporting.RdlDesign
         }
 
         private Bitmap _buffer;
+
+        protected override void OnThemeChanged(EventArgs e)
+        {
+            base.OnThemeChanged(e);
+            _DrawPanel.Invalidate();        // re-render: the surface's colours come from the theme
+        }
+
         // PaintEventArgs.Graphics isn't valid past the synchronous portion of a paint call, so the
         // report is rendered asynchronously into an offscreen buffer and blitted on a later,
         // synchronous paint. Every paint call draws whatever buffer is currently available -- kept
@@ -1165,7 +1172,8 @@ namespace Majorsilence.Reporting.RdlDesign
                         StringFormat format = new StringFormat();
                         string msg = string.Format("Error drawing report. Likely error in syntax. Switch to syntax and correct report syntax.{0}{1}{0}{2}",
                             Environment.NewLine, ex.Message, ex.StackTrace);
-                        g.DrawString(msg, this.Font, Brushes.Black, new Rectangle(2, 2, this.Width, this.Height), format);
+                        using (var brush = new SolidBrush(DesignerColors.Text))
+                            g.DrawString(msg, this.Font, brush, new Rectangle(2, 2, this.Width, this.Height), format);
                     }
                 }
 

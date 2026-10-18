@@ -219,8 +219,6 @@ namespace Majorsilence.Reporting.RdlDesign
 			// label1
 			// 
 			resources.ApplyResources(this.label1, "label1");
-			this.label1.BackColor = Majorsilence.Forms.SystemColors.Control;
-			this.label1.ForeColor = Majorsilence.Forms.SystemColors.InfoText;
 			this.label1.Name = "label1";
 			// 
 			// pgSelected

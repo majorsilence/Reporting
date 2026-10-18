@@ -41,6 +41,7 @@ namespace Majorsilence.Reporting.RdlViewer
         public RdlViewerFind()
         {
             InitializeComponent();
+            ApplyThemeColors();
         }
 
         private void InitializeComponent()
@@ -60,7 +61,6 @@ namespace Majorsilence.Reporting.RdlViewer
 			// bClose
 			// 
 			resources.ApplyResources(this.bClose, "bClose");
-			this.bClose.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(192)))), ((int)(((byte)(192)))));
 			this.bClose.FlatAppearance.BorderSize = 0;
 			this.bClose.Name = "bClose";
 			this.bClose.UseVisualStyleBackColor = false;
@@ -108,7 +108,6 @@ namespace Majorsilence.Reporting.RdlViewer
 			// lStatus
 			// 
 			resources.ApplyResources(this.lStatus, "lStatus");
-			this.lStatus.ForeColor = System.Drawing.Color.Salmon;
 			this.lStatus.Name = "lStatus";
 			// 
 			// RdlViewerFind
@@ -127,6 +126,19 @@ namespace Majorsilence.Reporting.RdlViewer
 			this.ResumeLayout(false);
 			this.PerformLayout();
 
+        }
+
+        // Colours the designer file used to pin; resolved from the theme so they can follow it.
+        private void ApplyThemeColors()
+        {
+            bClose.BackColor = ChromeColors.FindCloseBackground;
+            lStatus.ForeColor = ChromeColors.FindStatusText;
+        }
+
+        protected override void OnThemeChanged(EventArgs e)
+        {
+            ApplyThemeColors();
+            base.OnThemeChanged(e);
         }
 
         private void bClose_Click(object sender, EventArgs e)
