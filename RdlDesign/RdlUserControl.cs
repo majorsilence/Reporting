@@ -33,6 +33,12 @@ namespace Majorsilence.Reporting.RdlDesign
 
         public event RdlDesign.RdlDesignerSavedFileEventHandler SavedFileEvent;
 
+        /// <summary>
+        /// Raised when the user changes the report. Loading a report (OpenFile, SourceFile, SourceRdl)
+        /// does not raise it; check Modified to see whether there are unsaved changes.
+        /// </summary>
+        public event RdlChangeHandler RdlChanged;
+
         public RdlUserControl()
         {
             InitializeComponent();
@@ -46,6 +52,7 @@ namespace Majorsilence.Reporting.RdlDesign
             rdlEditPreview1.OnOpenSubreport += OpenSubReportEvent;
             rdlEditPreview1.OnSelectionMoved += SelectionMoved;
             rdlEditPreview1.OnDesignTabChanged += DesignTabChanged;
+            rdlEditPreview1.OnRdlChanged += (sender, e) => RdlChanged?.Invoke(this, e);
             mainProperties.HidePropertiesClicked += delegate(object sender, EventArgs e)
             {
                 ShowProperties(!_ShowProperties);

@@ -283,8 +283,10 @@ namespace Majorsilence.Reporting.RdlViewer
         {
             get
             {
-                // HACK: async
-                Task.Run(async () => await LoadPageIfNeeded()).GetAwaiter().GetResult();
+                // Was: a blocking Task.Run(LoadPageIfNeeded).GetAwaiter().GetResult() to force the
+                // report to load. That rendered on a pool thread, touching controls off the UI thread,
+                // and could hang a host that read it. Return what is known now; the report loads on
+                // paint or via EnsureRendered.
                 return _ShowParameters;
             }
             set
@@ -406,8 +408,10 @@ namespace Majorsilence.Reporting.RdlViewer
         {
             get
             {
-                // HACK: async
-                Task.Run(async () => await LoadPageIfNeeded()).GetAwaiter().GetResult();
+                // Was: a blocking Task.Run(LoadPageIfNeeded).GetAwaiter().GetResult() to force the
+                // report to load. That rendered on a pool thread, touching controls off the UI thread,
+                // and could hang a host that read it. Return what is known now; the report loads on
+                // paint or via EnsureRendered.
                 if (_pgs == null)
                     return 0;
                 else
@@ -617,6 +621,17 @@ namespace Majorsilence.Reporting.RdlViewer
         }
 
         /// <summary>
+        /// Loads the report (if it is not loaded yet) and repaints, whether or not the control is
+        /// Visible. Await this before reading PageCount, PageHeight, PageWidth and the like, which
+        /// no longer load the report themselves.
+        /// </summary>
+        public async Task EnsureRendered()
+        {
+            await LoadPageIfNeeded();
+            _DrawPanel.Invalidate();
+        }
+
+        /// <summary>
         /// Do not force report loading 
         /// </summary>
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
@@ -722,8 +737,10 @@ namespace Majorsilence.Reporting.RdlViewer
         {
             get
             {
-                // HACK: async
-                Task.Run(async () => await LoadPageIfNeeded()).GetAwaiter().GetResult();
+                // Was: a blocking Task.Run(LoadPageIfNeeded).GetAwaiter().GetResult() to force the
+                // report to load. That rendered on a pool thread, touching controls off the UI thread,
+                // and could hang a host that read it. Return what is known now; the report loads on
+                // paint or via EnsureRendered.
                 return _PageHeight;
             }
         }
@@ -735,8 +752,10 @@ namespace Majorsilence.Reporting.RdlViewer
         {
             get
             {
-                // HACK: async
-                Task.Run(async () => await LoadPageIfNeeded()).GetAwaiter().GetResult();
+                // Was: a blocking Task.Run(LoadPageIfNeeded).GetAwaiter().GetResult() to force the
+                // report to load. That rendered on a pool thread, touching controls off the UI thread,
+                // and could hang a host that read it. Return what is known now; the report loads on
+                // paint or via EnsureRendered.
                 return _PageWidth;
             }
         }
@@ -748,8 +767,10 @@ namespace Majorsilence.Reporting.RdlViewer
         {
             get
             {
-                // HACK: async
-                Task.Run(async () => await LoadPageIfNeeded()).GetAwaiter().GetResult();
+                // Was: a blocking Task.Run(LoadPageIfNeeded).GetAwaiter().GetResult() to force the
+                // report to load. That rendered on a pool thread, touching controls off the UI thread,
+                // and could hang a host that read it. Return what is known now; the report loads on
+                // paint or via EnsureRendered.
                 return _ReportDescription;
             }
         }
@@ -761,8 +782,10 @@ namespace Majorsilence.Reporting.RdlViewer
         {
             get
             {
-                // HACK: async
-                Task.Run(async () => await LoadPageIfNeeded()).GetAwaiter().GetResult();
+                // Was: a blocking Task.Run(LoadPageIfNeeded).GetAwaiter().GetResult() to force the
+                // report to load. That rendered on a pool thread, touching controls off the UI thread,
+                // and could hang a host that read it. Return what is known now; the report loads on
+                // paint or via EnsureRendered.
                 return _ReportAuthor;
             }
         }

@@ -404,6 +404,8 @@ namespace Majorsilence.Reporting.RdlReader
 
             printChild = mc;
 
+            await mc.Viewer.EnsureRendered();       // PageCount etc. do not load the report themselves
+
             PrintDocument pd = new PrintDocument();
             pd.DocumentName = mc.SourceFile.LocalPath;
             pd.PrinterSettings.FromPage = 1;
