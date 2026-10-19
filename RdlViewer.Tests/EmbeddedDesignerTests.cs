@@ -121,6 +121,10 @@ namespace RdlViewer.Tests
                 designer.SourceRdl = Report("Second");
                 Assert.That(designer.Modified, Is.False, "second load");
                 Assert.That(changes, Is.EqualTo(0), "loading does not raise RdlChanged");
+
+                // In an embedded designer this showed a modal "unable to create RDL" box and returned "".
+                Step("GetRdlText");
+                Assert.That(designer.GetRdlText(), Does.Contain("Second"));
                 Step("dispose");
             }
         });
