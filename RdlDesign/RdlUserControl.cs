@@ -35,6 +35,12 @@ namespace Majorsilence.Reporting.RdlDesign
         public event RdlDesign.RdlDesignerSavedFileEventHandler SavedFileEvent;
 
         /// <summary>
+        /// Raised when the user changes the report. Loading a report (OpenFile, SourceFile, SourceRdl)
+        /// does not raise it; check Modified to see whether there are unsaved changes.
+        /// </summary>
+        public event RdlChangeHandler RdlChanged;
+
+        /// <summary>
         /// Gives this designer a theme of its own -- a built-in theme name (Default, Light, Dark, Classic,
         /// Aero) or <see cref="DesignerTheme.Custom"/> with a CSS file -- leaving the rest of the host
         /// application on its theme. Creates the control's <see cref="Control.ThemeScope"/> when it has none.
@@ -62,6 +68,7 @@ namespace Majorsilence.Reporting.RdlDesign
             rdlEditPreview1.OnOpenSubreport += OpenSubReportEvent;
             rdlEditPreview1.OnSelectionMoved += SelectionMoved;
             rdlEditPreview1.OnDesignTabChanged += DesignTabChanged;
+            rdlEditPreview1.OnRdlChanged += (sender, e) => RdlChanged?.Invoke(this, e);
             mainProperties.HidePropertiesClicked += delegate(object sender, EventArgs e)
             {
                 ShowProperties(!_ShowProperties);
