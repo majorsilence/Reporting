@@ -69,6 +69,8 @@ namespace Majorsilence.Reporting.RdlViewer
                 return;
             }
 
+            await Viewer.EnsureRendered();          // PageCount etc. do not load the report themselves
+
             PrintDocument pd = new PrintDocument();
             pd.DocumentName = Viewer.SourceFile.LocalPath;
             pd.PrinterSettings.FromPage = 1;

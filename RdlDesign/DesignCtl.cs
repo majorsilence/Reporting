@@ -205,7 +205,11 @@ namespace Majorsilence.Reporting.RdlDesign
 					StringWriter sw = new StringWriter();
                     var settings = new XmlWriterSettings
                     {
-                        NewLineChars = RdlDesigner.XmlNewLine == NewLineChar.Unix ? "\n" : "\r\n",
+                        // RdlDesigner is only set when this is hosted in the stand-alone designer; in an
+                        // embedded RdlUserControl it is null, and the NullReferenceException landed in the
+                        // catch below: GetRdlText returned "" behind a modal message box that a host such
+                        // as WPF can hide, so the call appeared to hang (#448).
+                        NewLineChars = RdlDesigner?.XmlNewLine == NewLineChar.Unix ? "\n" : "\r\n",
                         Indent = true,
                         IndentChars = "  "
                     };
@@ -219,7 +223,7 @@ namespace Majorsilence.Reporting.RdlDesign
 				}
 				catch (Exception ex)
 				{
-					MessageBox.Show(ex.Message, Strings.DesignCtl_Show_UnableCreateRDL);
+					MessageBox.Show(this, ex.Message, Strings.DesignCtl_Show_UnableCreateRDL);
 				}
 				return result;
 			}
