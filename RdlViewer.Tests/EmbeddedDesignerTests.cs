@@ -40,9 +40,29 @@ namespace RdlViewer.Tests
             thread.SetApartmentState(ApartmentState.STA);
             thread.Start();
             if (!thread.Join(TimeSpan.FromMinutes(2)))
-                Assert.Fail("did not finish; stuck at: " + _step);
+                Assert.Fail("did not finish; stuck at: " + _step + Environment.NewLine + StackOf(thread));
             if (failure != null)
                 System.Runtime.ExceptionServices.ExceptionDispatchInfo.Capture(failure).Throw();
+        }
+
+        private static string StackOf(Thread thread)
+        {
+#if NETFRAMEWORK
+#pragma warning disable 618     // Suspend/Resume and StackTrace(Thread) are obsolete, but the only way to see where it hangs
+            try
+            {
+                thread.Suspend();
+                try { return new StackTrace(thread, true).ToString(); }
+                finally { thread.Resume(); }
+            }
+            catch (Exception e)
+            {
+                return "(no stack: " + e.Message + ")";
+            }
+#pragma warning restore 618
+#else
+            return "(stack only reported on net48)";
+#endif
         }
 
         // Creating a WinForms control installs a WindowsFormsSynchronizationContext, so an awaited
@@ -68,8 +88,10 @@ namespace RdlViewer.Tests
             Step("new RdlViewer");
             using (var viewer = new Majorsilence.Reporting.RdlViewer.RdlViewer { ShowWaitDialog = false })
             {
-                Step("SetSourceRdl");
-                Pumped(() => viewer.SetSourceRdl(Report("Hello")));
+                // SetSourceRdl renders straight away when the control counts as Visible, which an
+                // unparented control does; SourceRdlNoLoad never renders.
+                Step("SourceRdlNoLoad");
+                viewer.SourceRdlNoLoad = Report("Hello");
 
                 // Reading PageCount used to render the report on a pool thread and block the caller.
                 Step("PageCount before render");
@@ -115,6 +137,8 @@ namespace RdlViewer.Tests
                     Step("load");
                     designer.SourceRdl = Report("First");
                     designer.SourceRdl = Report("Second");
+
+                    Assert.That(designer.Viewer.SourceRdl, Does.Contain("Second"), "loading primes the preview");
 
                     Step("SaveAsAsync");
                     Pumped(() => designer.SaveAsAsync(file, OutputPresentationType.HTML));
