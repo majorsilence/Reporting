@@ -10,26 +10,8 @@ namespace RdlViewer.Tests
 {
     // Issue #448: problems found embedding RdlUserControl in a host application.
     [TestFixture]
-    [Apartment(ApartmentState.STA)]
     public class EmbeddedDesignerTests
     {
-        // Creating a WinForms control installs a WindowsFormsSynchronizationContext, so an awaited
-        // continuation is posted to this thread's message queue. A test thread has no message loop,
-        // so an async test would wait forever; pump messages until the work finishes instead.
-        private static void RunPumped(Func<Task> work)
-        {
-            Task task = work();
-            var clock = Stopwatch.StartNew();
-            while (!task.IsCompleted)
-            {
-                if (clock.Elapsed > TimeSpan.FromSeconds(60))
-                    Assert.Fail("timed out");
-                System.Windows.Forms.Application.DoEvents();
-                Thread.Sleep(1);
-            }
-            task.GetAwaiter().GetResult();
-        }
-
         private static string Report(string text) =>
             "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
             "<Report xmlns=\"http://schemas.microsoft.com/sqlserver/reporting/2005/01/reportdefinition\">" +
@@ -39,50 +21,104 @@ namespace RdlViewer.Tests
             "<Top>0in</Top><Left>0in</Left><Width>3in</Width><Height>0.25in</Height></Textbox>" +
             "</ReportItems></Body></Report>";
 
-        [Test]
-        public void Viewer_PageCount_DoesNotRenderTheReport_EnsureRenderedDoes()
+        private static volatile string _step;
+
+        private static void Step(string step) => _step = step;
+
+        // Runs a test body on its own STA thread. If it does not finish (a modal dialog, a deadlock)
+        // the test fails naming the step it reached, rather than hanging the whole test run.
+        private static void RunOnSta(Action body)
         {
-            using (var viewer = new Majorsilence.Reporting.RdlViewer.RdlViewer { ShowWaitDialog = false })
+            Exception failure = null;
+            _step = "start";
+            var thread = new Thread(() =>
             {
-                RunPumped(() => viewer.SetSourceRdl(Report("Hello")));
+                try { body(); }
+                catch (Exception e) { failure = e; }
+            });
+            thread.IsBackground = true;
+            thread.SetApartmentState(ApartmentState.STA);
+            thread.Start();
+            if (!thread.Join(TimeSpan.FromMinutes(2)))
+                Assert.Fail("did not finish; stuck at: " + _step);
+            if (failure != null)
+                System.Runtime.ExceptionServices.ExceptionDispatchInfo.Capture(failure).Throw();
+        }
 
-                // Reading PageCount used to render the report on a pool thread and block the caller.
-                Assert.That(viewer.PageCount, Is.EqualTo(0));
-
-                RunPumped(() => viewer.EnsureRendered());
-                Assert.That(viewer.PageCount, Is.EqualTo(1));
+        // Creating a WinForms control installs a WindowsFormsSynchronizationContext, so an awaited
+        // continuation is posted to this thread's message queue. A test thread has no message loop,
+        // so pump messages until the work finishes.
+        private static void Pumped(Func<Task> work)
+        {
+            Task task = work();
+            var clock = Stopwatch.StartNew();
+            while (!task.IsCompleted)
+            {
+                if (clock.Elapsed > TimeSpan.FromSeconds(60))
+                    throw new TimeoutException("timed out at: " + _step);
+                System.Windows.Forms.Application.DoEvents();
+                Thread.Sleep(1);
             }
+            task.GetAwaiter().GetResult();
         }
 
         [Test]
-        public void LoadingAReport_IsNotAModification()
+        public void Viewer_PageCount_DoesNotRenderTheReport_EnsureRenderedDoes() => RunOnSta(() =>
         {
+            Step("new RdlViewer");
+            using (var viewer = new Majorsilence.Reporting.RdlViewer.RdlViewer { ShowWaitDialog = false })
+            {
+                Step("SetSourceRdl");
+                Pumped(() => viewer.SetSourceRdl(Report("Hello")));
+
+                // Reading PageCount used to render the report on a pool thread and block the caller.
+                Step("PageCount before render");
+                Assert.That(viewer.PageCount, Is.EqualTo(0));
+
+                Step("EnsureRendered");
+                Pumped(() => viewer.EnsureRendered());
+                Assert.That(viewer.PageCount, Is.EqualTo(1));
+                Step("dispose");
+            }
+        });
+
+        [Test]
+        public void LoadingAReport_IsNotAModification() => RunOnSta(() =>
+        {
+            Step("new RdlUserControl");
             using (var designer = new Majorsilence.Reporting.RdlDesign.RdlUserControl())
             {
                 int changes = 0;
                 designer.RdlChanged += (s, e) => changes++;
 
+                Step("first load");
                 designer.SourceRdl = Report("First");
                 Assert.That(designer.Modified, Is.False, "first load");
 
+                Step("second load");
                 designer.SourceRdl = Report("Second");
                 Assert.That(designer.Modified, Is.False, "second load");
                 Assert.That(changes, Is.EqualTo(0), "loading does not raise RdlChanged");
+                Step("dispose");
             }
-        }
+        });
 
         [Test]
-        public void Export_UsesTheLoadedReport_WithoutVisitingThePreviewTab()
+        public void Export_UsesTheLoadedReport_WithoutVisitingThePreviewTab() => RunOnSta(() =>
         {
             string file = Path.Combine(Path.GetTempPath(), "embedded-" + Guid.NewGuid().ToString("N") + ".html");
             try
             {
+                Step("new RdlUserControl");
                 using (var designer = new Majorsilence.Reporting.RdlDesign.RdlUserControl())
                 {
+                    Step("load");
                     designer.SourceRdl = Report("First");
                     designer.SourceRdl = Report("Second");
 
-                    RunPumped(() => designer.SaveAsAsync(file, OutputPresentationType.HTML));
+                    Step("SaveAsAsync");
+                    Pumped(() => designer.SaveAsAsync(file, OutputPresentationType.HTML));
+                    Step("dispose");
                 }
 
                 string html = File.ReadAllText(file);
@@ -94,6 +130,6 @@ namespace RdlViewer.Tests
                 if (File.Exists(file))
                     File.Delete(file);
             }
-        }
+        });
     }
 }
