@@ -206,7 +206,7 @@ namespace Majorsilence.Reporting.Rdl
 			int maxHeight=0;
 			for (int iRow=1; iRow <= CategoryCount; iRow++)
 			{
-				(object v, tc) = await GetCategoryValue(rpt, iRow).ConfigureAwait(false);
+				(object v, tc) = await GetCategoryLabel(rpt, iRow).ConfigureAwait(false);
 				System.Drawing.Size tSize;
 				if (s == null)
 					tSize = await Style.MeasureStringDefaults(rpt, g, v, tc, null, int.MaxValue).ConfigureAwait(false);
@@ -240,7 +240,7 @@ namespace Majorsilence.Reporting.Rdl
 			TypeCode tc;
 			for (int iRow=1; iRow <= CategoryCount; iRow++)
 			{
-				(object v, tc) = await GetCategoryValue(rpt, iRow).ConfigureAwait(false);
+				(object v, tc) = await GetCategoryLabel(rpt, iRow).ConfigureAwait(false);
 
 				int drawLoc=(int) (rect.Left + ((iRow-1) * ((double) rect.Width / CategoryCount)));
 

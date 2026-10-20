@@ -503,7 +503,7 @@ namespace Majorsilence.Reporting.Rdl
             int maxWidth = 0;
             for (int iRow = 1; iRow <= CategoryCount; iRow++)
             {
-                (object v, tc) = await GetCategoryValue(rpt, iRow).ConfigureAwait(false);
+                (object v, tc) = await GetCategoryLabel(rpt, iRow).ConfigureAwait(false);
                 System.Drawing.Size tSize;
                 if (s == null)
                     tSize = await Style.MeasureStringDefaults(rpt, g, v, tc, null, int.MaxValue).ConfigureAwait(false);
@@ -614,6 +614,8 @@ namespace Majorsilence.Reporting.Rdl
                     CurrentDate = (DateTime)v;
 
                 }
+                // The month scale above reads the value; the text under the column is the label.
+                (object label, TypeCode labelTc) = await GetCategoryLabel(rpt, iRow).ConfigureAwait(false);
                 int drawLoc = (int)(rect.Left + ((iRow - 1) * ((double)rect.Width / catCount)));
 
                 // Draw the category text
@@ -627,11 +629,11 @@ namespace Majorsilence.Reporting.Rdl
                     {	// Area chart - value is centered under the tick mark
                         if (s != null)
                         {
-                            size = await s.MeasureString(rpt, g, v, TypeCode.Double, null, int.MaxValue).ConfigureAwait(false);
+                            size = await s.MeasureString(rpt, g, label, TypeCode.Double, null, int.MaxValue).ConfigureAwait(false);
                         }
                         else
                         {
-                            size = await Style.MeasureStringDefaults(rpt, g, v, TypeCode.Double, null, int.MaxValue).ConfigureAwait(false);
+                            size = await Style.MeasureStringDefaults(rpt, g, label, TypeCode.Double, null, int.MaxValue).ConfigureAwait(false);
                         }
                     }
 
@@ -650,9 +652,9 @@ namespace Majorsilence.Reporting.Rdl
                     }
 
                     if (s == null)
-                        Style.DrawStringDefaults(g, v, drawRect);
+                        Style.DrawStringDefaults(g, label, drawRect);
                     else
-                        await s.DrawString(rpt, g, v, tc, null, drawRect).ConfigureAwait(false);
+                        await s.DrawString(rpt, g, label, labelTc, null, drawRect).ConfigureAwait(false);
                 }
 
                 //09052008WRP Draw major gridlines and place category labels for months scale 
