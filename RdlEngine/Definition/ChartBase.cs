@@ -755,6 +755,24 @@ namespace Majorsilence.Reporting.Rdl
             return (v, tc);
         }
 
+        /// <summary>
+        /// What a category prints as on its axis: the grouping's Label when it has one, as RDL
+        /// defines it ("a label for the category"), otherwise its value. A category grouped on
+        /// a date but labelled with its month printed the whole date-time under every column,
+        /// while the legend, which reads the series' Label the same way, showed the month.
+        /// </summary>
+        protected async Task<(object value, TypeCode tc)> GetCategoryLabel(Report rpt, int row)
+        {
+            MatrixCellEntry mce = _DataDefn[row, 0];
+            if (mce == null || ((ChartExpression)mce.DisplayItem).ChartLabel == null)
+                return await GetCategoryValue(rpt, row).ConfigureAwait(false);
+
+            this._ChartDefn.ChartMatrix.SetMyData(rpt, mce.Data);       // Must set this for evaluation
+            Row lrow = mce.Data.Data.Count > 0 ? mce.Data.Data[0] : null;
+            ChartExpression ce = (ChartExpression)mce.DisplayItem;
+            return (await ce.ChartLabel.EvaluateString(rpt, lrow).ConfigureAwait(false), TypeCode.String);
+        }
+
         protected async Task<double> GetDataValue(Report rpt, int row, int col)
         {
             return await GetDataValue(rpt, row, col, 0).ConfigureAwait(false);

@@ -1053,8 +1053,21 @@ namespace Majorsilence.Reporting.Rdl
             return count;
         }
 
+        // A grouping's Subtotal and where it goes: after the group's members unless its
+        // Position says Before. Every pass that lays out a column or row (headers, data cells)
+        // asks the same question, so the subtotal lands in the same place in all of them.
+        static Subtotal ColumnSubtotal(ColumnGrouping cg) => cg.DynamicColumns?.Subtotal;
+        static Subtotal RowSubtotal(RowGrouping rg) => rg.DynamicRows?.Subtotal;
+        static bool IsBefore(Subtotal st) => st != null && st.Position == SubtotalPositionEnum.Before;
+
         void RunColumnHeaders(Report rpt, WorkClass wc, MatrixEntry m, MatrixCellEntry[,] matrix, Rows _Data, int iRow, ref int iColumn, int level)
         {
+            ColumnGrouping cg = (ColumnGrouping)(_ColumnGroupings.Items[level]);
+            Subtotal subtotal = ColumnSubtotal(cg);
+
+            if (IsBefore(subtotal))
+                RunColumnSubtotalHeader(rpt, wc, cg, matrix, _Data, iRow, ref iColumn, level);
+
             foreach (MatrixEntry ame in m.GetSortedData(rpt))
             {
                 matrix[iRow, iColumn] = RunGetColumnHeader(rpt, ame, _Data);
@@ -1068,19 +1081,19 @@ namespace Majorsilence.Reporting.Rdl
                     iColumn++;
             }
 
-            ColumnGrouping cg = (ColumnGrouping)(_ColumnGroupings.Items[level]);
-
             // if we need subtotal on the group
-            if (cg.DynamicColumns != null &&
-                cg.DynamicColumns.Subtotal != null)
-            {
-                ReportItem ri = cg.DynamicColumns.Subtotal.ReportItems.Items[0];
-                matrix[iRow, iColumn] = new MatrixCellEntry(_Data, ri);
-                matrix[iRow, iColumn].Height = cg.Height.Points;
-                matrix[iRow, iColumn].Width = RunGetColumnWidth(matrix[iRow, iColumn]);
-                RunColumnStaticHeaders(rpt, wc, matrix, _Data, iRow, iColumn, level);
-                iColumn += this.CountMatrixCells;
-            }
+            if (subtotal != null && !IsBefore(subtotal))
+                RunColumnSubtotalHeader(rpt, wc, cg, matrix, _Data, iRow, ref iColumn, level);
+        }
+
+        void RunColumnSubtotalHeader(Report rpt, WorkClass wc, ColumnGrouping cg, MatrixCellEntry[,] matrix, Rows _Data, int iRow, ref int iColumn, int level)
+        {
+            ReportItem ri = cg.DynamicColumns.Subtotal.ReportItems.Items[0];
+            matrix[iRow, iColumn] = new MatrixCellEntry(_Data, ri);
+            matrix[iRow, iColumn].Height = cg.Height.Points;
+            matrix[iRow, iColumn].Width = RunGetColumnWidth(matrix[iRow, iColumn]);
+            RunColumnStaticHeaders(rpt, wc, matrix, _Data, iRow, iColumn, level);
+            iColumn += this.CountMatrixCells;
         }
 
         void RunColumnStaticHeaders(Report rpt, WorkClass wc, MatrixCellEntry[,] matrix, Rows _Data, int iRow, int iColumn, int level)
@@ -1225,6 +1238,11 @@ namespace Majorsilence.Reporting.Rdl
             BitArray andData;
             MatrixRow mr = this.MatrixRows.Items[rowcell] as MatrixRow;
             float height = mr.Height == null ? 0 : mr.Height.Points;
+            ColumnGrouping cg = (ColumnGrouping)(_ColumnGroupings.Items[level]);
+            Subtotal subtotal = ColumnSubtotal(cg);
+
+            if (IsBefore(subtotal))
+                RunColumnSubtotalCells(rpt, rm, cm, matrix, _Data, iRow, ref iColumn, rowcell, height);
 
             foreach (MatrixEntry ame in cm.GetSortedData(rpt))
             {
@@ -1246,23 +1264,24 @@ namespace Majorsilence.Reporting.Rdl
                 iColumn++;
             }
             // do we need to subtotal this?
-            ColumnGrouping cg = (ColumnGrouping)(_ColumnGroupings.Items[level]);
-            if (cg.DynamicColumns != null &&
-                cg.DynamicColumns.Subtotal != null)
+            if (subtotal != null && !IsBefore(subtotal))
+                RunColumnSubtotalCells(rpt, rm, cm, matrix, _Data, iRow, ref iColumn, rowcell, height);
+        }
+
+        void RunColumnSubtotalCells(Report rpt, MatrixEntry rm, MatrixEntry cm, MatrixCellEntry[,] matrix, Rows _Data, int iRow, ref int iColumn, int rowcell, float height)
+        {
+            BitArray andData = new BitArray(cm.Rows);    // copy the data
+            andData.And(rm.Rows);                        //  because And is destructive
+            for (int i = 0; i < this.CountMatrixCells; i++)
             {
-                andData = new BitArray(cm.Rows);    // copy the data
-                andData.And(rm.Rows);               //  because And is destructive
-                for (int i = 0; i < this.CountMatrixCells; i++)
-                {
-                    matrix[iRow, iColumn] = RunGetMatrixCell(rpt, cm, rowcell, i, _Data, andData,
-                        Math.Max(rm.FirstRow, cm.FirstRow),
-                        Math.Min(rm.LastRow, cm.LastRow));
-                    matrix[iRow, iColumn].Height = height;
-                    matrix[iRow, iColumn].Width = RunGetColumnWidth(matrix[iRow, iColumn]);
-                    matrix[iRow, iColumn].ColumnME = cm;
-                    matrix[iRow, iColumn].RowME = rm;
-                    iColumn++;
-                }
+                matrix[iRow, iColumn] = RunGetMatrixCell(rpt, cm, rowcell, i, _Data, andData,
+                    Math.Max(rm.FirstRow, cm.FirstRow),
+                    Math.Min(rm.LastRow, cm.LastRow));
+                matrix[iRow, iColumn].Height = height;
+                matrix[iRow, iColumn].Width = RunGetColumnWidth(matrix[iRow, iColumn]);
+                matrix[iRow, iColumn].ColumnME = cm;
+                matrix[iRow, iColumn].RowME = rm;
+                iColumn++;
             }
         }
 
@@ -1271,6 +1290,12 @@ namespace Majorsilence.Reporting.Rdl
             int saveColumn;
             int headerRows = _ColumnGroupings.Items.Count;  // number of column headers we have
             int rgsCount = this.RowGroupings.StaticCount;   // count of static row groups
+            RowGrouping rg = (RowGrouping)(_RowGroupings.Items[level]);
+            Subtotal subtotal = RowSubtotal(rg);
+
+            if (IsBefore(subtotal))
+                RunRowSubtotalData(rpt, wc, rm, cm, matrix, _Data, ref iRow, iColumn);
+
             foreach (MatrixEntry ame in rm.GetSortedData(rpt))
             {
                 if (ame.RowGroup != LastRg)
@@ -1284,21 +1309,28 @@ namespace Majorsilence.Reporting.Rdl
                 iRow++;
             }
             // do we need to subtotal this?
-            RowGrouping rg = (RowGrouping)(_RowGroupings.Items[level]);
-            if (rg.DynamicRows != null &&
-                rg.DynamicRows.Subtotal != null)
+            if (subtotal != null && !IsBefore(subtotal))
+                RunRowSubtotalData(rpt, wc, rm, cm, matrix, _Data, ref iRow, iColumn);
+        }
+
+        void RunRowSubtotalData(Report rpt, WorkClass wc, MatrixEntry rm, MatrixEntry cm, MatrixCellEntry[,] matrix, Rows _Data, ref int iRow, int iColumn)
+        {
+            for (int i = 0; i < this.CountMatrixRows; i++)
             {
-                for (int i = 0; i < this.CountMatrixRows; i++)
-                {
-                    saveColumn = iColumn;
-                    RunDataColumn(rpt, wc, rm, cm, matrix, _Data, iRow, ref saveColumn, 0, i);
-                    iRow++;
-                }
+                int saveColumn = iColumn;
+                RunDataColumn(rpt, wc, rm, cm, matrix, _Data, iRow, ref saveColumn, 0, i);
+                iRow++;
             }
         }
 
         void RunRowHeaders(Report rpt, WorkClass wc, MatrixEntry m, MatrixCellEntry[,] matrix, Rows _Data, ref int iRow, int iColumn, int level)
         {
+            RowGrouping rg = (RowGrouping)(_RowGroupings.Items[level]);
+            Subtotal subtotal = RowSubtotal(rg);
+
+            if (IsBefore(subtotal))
+                RunRowSubtotalHeader(rpt, wc, rg, matrix, _Data, ref iRow, iColumn, level);
+
             foreach (MatrixEntry ame in m.GetSortedData(rpt))
             {
                 matrix[iRow, iColumn] = RunGetRowHeader(rpt, ame, _Data);
@@ -1312,18 +1344,19 @@ namespace Majorsilence.Reporting.Rdl
                     iRow++;
             }
 
-            RowGrouping rg = (RowGrouping)(_RowGroupings.Items[level]);
             // do we need to subtotal this
-            if (rg.DynamicRows != null &&
-                rg.DynamicRows.Subtotal != null)
-            {                      // TODO need to loop thru static??
-                ReportItem ri = rg.DynamicRows.Subtotal.ReportItems.Items[0];
-                matrix[iRow, iColumn] = new MatrixCellEntry(_Data, ri);
-                matrix[iRow, iColumn].Width = rg.Width.Points;
-                matrix[iRow, iColumn].Height = RunRowHeight(iRow);
-                RunRowStaticHeaders(rpt, wc, matrix, _Data, iRow, level);
-                iRow += Math.Max(1, this.RowGroupings.StaticCount);
-            }
+            if (subtotal != null && !IsBefore(subtotal))
+                RunRowSubtotalHeader(rpt, wc, rg, matrix, _Data, ref iRow, iColumn, level);
+        }
+
+        void RunRowSubtotalHeader(Report rpt, WorkClass wc, RowGrouping rg, MatrixCellEntry[,] matrix, Rows _Data, ref int iRow, int iColumn, int level)
+        {                      // TODO need to loop thru static??
+            ReportItem ri = rg.DynamicRows.Subtotal.ReportItems.Items[0];
+            matrix[iRow, iColumn] = new MatrixCellEntry(_Data, ri);
+            matrix[iRow, iColumn].Width = rg.Width.Points;
+            matrix[iRow, iColumn].Height = RunRowHeight(iRow);
+            RunRowStaticHeaders(rpt, wc, matrix, _Data, iRow, level);
+            iRow += Math.Max(1, this.RowGroupings.StaticCount);
         }
 
         float RunRowHeight(int iRow)
