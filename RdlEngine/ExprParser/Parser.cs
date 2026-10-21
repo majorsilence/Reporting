@@ -934,8 +934,7 @@ namespace Majorsilence.Reporting.Rdl
 					break;
 				case "rownumber":
 					(scope, bSimple) = await ResolveAggrScope(args, 1).ConfigureAwait(false);
-					IExpr texpr = new ConstantDouble("0");
-					result = new FunctionAggrRvCount(_DataCache, texpr, scope);
+					result = new FunctionAggrRowNumber(_DataCache, scope);
 					break;
 				case "runningvalue":
 					if (args.Length < 2 || args.Length > 3)
