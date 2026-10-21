@@ -64,5 +64,51 @@ namespace Majorsilence.Reporting.RdlViewer.Tests
                 File.Delete(tempRdlPath);
             }
         }
+
+        // Regression for https://github.com/majorsilence/Reporting/issues/448: a host (e.g. the
+        // designer's Preview tab handler) can call EnsureRendered while an earlier EnsureRendered
+        // call -- against the same source -- is still in flight (the native Preview tab starts one,
+        // the host calls another straight after). The earlier code tracked "a load is running"
+        // with a bool and let the later caller's await return instantly instead of joining the
+        // load, so it saw zero pages even though the report had already been requested. Firing
+        // several concurrent EnsureRendered calls must leave every one of them, once awaited,
+        // observing the same fully-loaded report.
+        [Test]
+        public async Task EnsureRendered_CalledConcurrently_AllCallsSeeTheFullyLoadedReport()
+        {
+            string rdlPath = Directory.GetFiles(Path.Combine(TemplatesRoot, "invoice"), "*.rdl").Single();
+            using var viewer = new Majorsilence.Reporting.RdlViewer.RdlViewer { ShowWaitDialog = false };
+            await viewer.SetSourceFile(new System.Uri(rdlPath));
+
+            var calls = Enumerable.Range(0, 5).Select(_ => viewer.EnsureRendered()).ToArray();
+            await Task.WhenAll(calls).WaitAsync(System.TimeSpan.FromSeconds(30));
+
+            Assert.That(viewer.PageCount, Is.GreaterThan(0),
+                "a concurrent EnsureRendered call returned before the in-flight load produced pages");
+        }
+
+        // Regression for the same issue's A -> B -> A sequence: the source changes while a load
+        // from the previous source is still running. The stale load must not win the race and
+        // leave the viewer showing a report that is no longer selected.
+        [Test]
+        public async Task EnsureRendered_AfterSourceChangesMidLoad_EndsOnTheNewSource()
+        {
+            string invoicePath = Directory.GetFiles(Path.Combine(TemplatesRoot, "invoice"), "*.rdl").Single();
+            string packingSlipPath = Directory.GetFiles(Path.Combine(TemplatesRoot, "packing-slip"), "*.rdl").Single();
+            using var viewer = new Majorsilence.Reporting.RdlViewer.RdlViewer { ShowWaitDialog = false };
+
+            await viewer.SetSourceFile(new System.Uri(invoicePath));
+            Task staleLoad = viewer.EnsureRendered();        // load of "invoice" begins
+
+            await viewer.SetSourceFile(new System.Uri(packingSlipPath));   // source changes mid-load
+            await viewer.EnsureRendered().WaitAsync(System.TimeSpan.FromSeconds(30));
+            await staleLoad.WaitAsync(System.TimeSpan.FromSeconds(30));
+
+            Assert.That(viewer.PageCount, Is.GreaterThan(0),
+                "the stale invoice load must not leave the viewer without pages for packing-slip");
+            var report = await viewer.Report();
+            Assert.That(report.Name, Is.EqualTo("packing-slip"),
+                "the stale invoice load overwrote the packing-slip report that is now selected");
+        }
     }
 }
