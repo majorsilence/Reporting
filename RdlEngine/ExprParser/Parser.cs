@@ -692,9 +692,13 @@ namespace Majorsilence.Reporting.Rdl
 					if (scopeToken.Type == TokenTypes.QUOTE)
 					{
 						// A quoted scope names a DataSet; capture it so field references inside
-						// the aggregate resolve against that DataSet.
+						// the aggregate resolve against that DataSet. It may also name a grouping
+						// or a data region, as RDL allows -- Sum(Fields!Amount.Value, "Country") in a
+						// city's footer is the country's total -- and then the fields resolve as they
+						// would with no scope; ResolveAggrScope finds the grouping. Only a name that
+						// is none of these is an error.
 						inAggregateDataSet = this.idLookup.ScopeDataSet(scopeToken.Value);
-						if (inAggregateDataSet == null && !isRunningValue)
+						if (inAggregateDataSet == null && !isRunningValue && this.idLookup.LookupScope(scopeToken.Value) == null)
 							throw new ParserException(string.Format(Strings.Parser_ErrorP_ScopeNotKnownDataSet, scopeToken.Value));
 					}
 					else if (!isRunningValue)
