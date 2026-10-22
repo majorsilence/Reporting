@@ -76,7 +76,16 @@ namespace Majorsilence.Reporting.RdlViewer
         /// The pages of the report to view
         /// </summary>
         private Pages _pgs;
-        private bool _loadingPages = false;
+        /// <summary>
+        /// The load in flight, if any. Callers that need pages while it runs await it rather than
+        /// returning early with none.
+        /// </summary>
+        private Task _loadTask;
+        /// <summary>
+        /// Bumped whenever the source changes, so a load that started on the old source is
+        /// discarded instead of showing the old report's pages.
+        /// </summary>
+        private int _sourceVersion;
         /// <summary>
         /// Last load of report failed
         /// </summary>
@@ -585,6 +594,7 @@ namespace Majorsilence.Reporting.RdlViewer
             if (value != null)
                 _SourceRdl = null;
             _vScroll.Value = _hScroll.Value = 0;
+            _sourceVersion++;
             _pgs = null;                // reset pages, only if SourceRdl is also unavailable
             _DrawPanel.Pgs = null;
             _loadFailed = false;            // attempt to load the report
@@ -609,6 +619,7 @@ namespace Majorsilence.Reporting.RdlViewer
             _SourceRdl = value;
             if (value != null)
                 _SourceFileName = null;
+            _sourceVersion++;
             _pgs = null;                // reset pages
             _DrawPanel.Pgs = null;
             _loadFailed = false;            // attempt to load the report	
@@ -643,6 +654,7 @@ namespace Majorsilence.Reporting.RdlViewer
                 _SourceRdl = value;
                 if (value != null)
                     _SourceFileName = null;
+                _sourceVersion++;
                 _pgs = null;                // reset pages
                 _DrawPanel.Pgs = null;
                 _loadFailed = false;            // attempt to load the report	
@@ -1629,36 +1641,53 @@ namespace Majorsilence.Reporting.RdlViewer
         /// Call LoadPageIfNeeded when a routine requires the report to be loaded in order
         /// to fulfill the request.
         /// </summary>
-        private async Task LoadPageIfNeeded()
+        private Task LoadPageIfNeeded()
         {
-            if (_pgs == null && !_loadingPages)
-            {
-                _loadingPages = true;
-                Cursor savec = null;
-                try
-                {
-                    // 15052008 AJM - Updating Render notification window - This could be improved to show current action in the future
-                    if (_ShowWaitDialog)
-                    {
-                        showWait();
-                    }
+            if (_pgs != null)
+                return Task.CompletedTask;
+            // A load already running (e.g. the one the designer's Preview tab started) is joined,
+            // not skipped: returning before it finishes left callers with no pages.
+            if (_loadTask == null || _loadTask.IsCompleted)
+                _loadTask = LoadPages();
+            return _loadTask;
+        }
 
-                    savec = this.Cursor;                // this could take a while so put up wait cursor
-                    this.Cursor = Cursors.WaitCursor;
-                    _pgs = await GetPages();
-                    _DrawPanel.Pgs = _pgs;
-                    CalcZoom();                         // this could affect zoom
-                    _DrawPanel.Invalidate();
-                }
-                finally
+        private async Task LoadPages()
+        {
+            Cursor savec = null;
+            try
+            {
+                // 15052008 AJM - Updating Render notification window - This could be improved to show current action in the future
+                if (_ShowWaitDialog)
                 {
-                    _loadingPages = false;
-                    this.HideWaiter();
-                    if (savec != null)
-                        this.Cursor = savec;
+                    showWait();
                 }
-                RdlViewer_Layout(this, null);               // re layout based on new report
+
+                savec = this.Cursor;                // this could take a while so put up wait cursor
+                this.Cursor = Cursors.WaitCursor;
+
+                // The source can change while GetPages awaits; those pages belong to the old
+                // report, so load again until a load finishes on the current source.
+                Pages pgs;
+                int version;
+                do
+                {
+                    version = _sourceVersion;
+                    pgs = await GetPages();
+                } while (version != _sourceVersion);
+
+                _pgs = pgs;
+                _DrawPanel.Pgs = _pgs;
+                CalcZoom();                         // this could affect zoom
+                _DrawPanel.Invalidate();
             }
+            finally
+            {
+                this.HideWaiter();
+                if (savec != null)
+                    this.Cursor = savec;
+            }
+            RdlViewer_Layout(this, null);               // re layout based on new report
         }
 
         private void ParametersBuild(Report r)

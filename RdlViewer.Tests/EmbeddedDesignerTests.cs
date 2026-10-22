@@ -129,6 +129,81 @@ namespace RdlViewer.Tests
             }
         });
 
+        // Regression for the #448 Preview-rendering report: EnsureRendered could return before
+        // the report it's waiting on had actually finished loading. The designer's Preview tab
+        // starts a load on tab-select; a host that then awaits EnsureRendered() right after could
+        // see the call complete in 0ms with PageCount still 0, because the old code tracked "a
+        // load is running" with a bool and let a later caller bail out instead of joining it.
+        [Test]
+        public void EnsureRendered_JoinsAnAlreadyInFlightLoad_InsteadOfReturningEarly() => RunOnSta(() =>
+        {
+            Step("new RdlViewer");
+            using (var viewer = new Majorsilence.Reporting.RdlViewer.RdlViewer { ShowWaitDialog = false })
+            {
+                Step("SourceRdlNoLoad");
+                viewer.SourceRdlNoLoad = Report("Hello");
+
+                Step("first EnsureRendered (not awaited)");
+                Task first = viewer.EnsureRendered();     // starts the load; suspended at its first await
+                Step("second EnsureRendered (not awaited)");
+                Task second = viewer.EnsureRendered();    // must join the same in-flight load, not skip it
+
+                // Nothing has pumped the STA thread's message queue since the two calls above, so
+                // this is the real race: the bug made "second" a synchronously-completed task with
+                // PageCount still 0, exactly as the reporter observed (0ms, zero pages).
+                Step("check for the early return");
+                Assert.That(second.IsCompleted && viewer.PageCount == 0, Is.False,
+                    "second EnsureRendered call returned synchronously while the first call's load was still in flight");
+
+                Step("pump to completion");
+                Pumped(() => Task.WhenAll(first, second));
+                Assert.That(viewer.PageCount, Is.EqualTo(1));
+                Step("dispose");
+            }
+        });
+
+        // Regression for the same report's A -> B -> A sequence: the source can change while a
+        // load from the previous source is still running. The stale load must not win the race
+        // and overwrite the pages of the report that is now selected.
+        [Test]
+        public void EnsureRendered_AfterSourceChangesMidLoad_EndsOnTheNewSource() => RunOnSta(() =>
+        {
+            Step("new RdlViewer");
+            using (var viewer = new Majorsilence.Reporting.RdlViewer.RdlViewer { ShowWaitDialog = false })
+            {
+                Step("load First");
+                viewer.SourceRdlNoLoad = Report("First");
+                Task staleLoad = viewer.EnsureRendered();     // "First" load starts, suspended
+
+                Step("switch to Second mid-load");
+                viewer.SourceRdlNoLoad = Report("Second");     // source changes before staleLoad finishes
+                Task freshLoad = viewer.EnsureRendered();      // "Second" load starts
+
+                Step("pump to completion");
+                Pumped(() => Task.WhenAll(staleLoad, freshLoad));
+
+                Assert.That(viewer.PageCount, Is.EqualTo(1),
+                    "the stale First load must not leave the viewer without pages for Second");
+
+                string file = Path.Combine(Path.GetTempPath(), "embedded-ensure-rendered-" + Guid.NewGuid().ToString("N") + ".html");
+                try
+                {
+                    Step("SaveAs HTML");
+                    Pumped(() => viewer.SaveAs(file, OutputPresentationType.HTML));
+                    string html = File.ReadAllText(file);
+                    Assert.That(html, Does.Contain("Second"));
+                    Assert.That(html, Does.Not.Contain("First"),
+                        "the stale First load overwrote the Second report that is now selected");
+                }
+                finally
+                {
+                    if (File.Exists(file))
+                        File.Delete(file);
+                }
+                Step("dispose");
+            }
+        });
+
         [Test]
         public void Export_UsesTheLoadedReport_WithoutVisitingThePreviewTab() => RunOnSta(() =>
         {
