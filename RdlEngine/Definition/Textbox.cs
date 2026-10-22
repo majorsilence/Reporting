@@ -1,4 +1,4 @@
-
+﻿
 
 using System;
 using System.Xml;
@@ -251,7 +251,10 @@ namespace Majorsilence.Reporting.Rdl
 			}
 			PageText pt;
 			PageTextHtml pth=null;
-			if (TryIsHtml(out bool pageIsHtml) ? pageIsHtml : await IsHtml(r, row).ConfigureAwait(false))
+			bool html = TryIsHtml(out bool pageIsHtml) ? pageIsHtml : await IsHtml(r, row).ConfigureAwait(false);
+			if (!html && t != null && t.IndexOf('\t') >= 0)
+				t = await ExpandTabs(r, pgs.G, row, t).ConfigureAwait(false);
+			if (html)
 				pt = pth = new PageTextHtml(t);
 			else
 				pt = new PageText(t);
@@ -540,6 +543,73 @@ namespace Majorsilence.Reporting.Rdl
 			chunk.Text = text;
 			if (chunk is PageTextHtml pth)
 				pth.Reset();		// the layout built for the previous text no longer applies
+		}
+
+		// Tab stops every half inch from where the text starts, the default in Word and in
+		// Crystal Reports. RDL has no tab stops, and a tab was drawn as whatever the font makes of
+		// the character, usually nothing, so "Printed Date: 1/2/2026<tab><tab>Last modified: ..."
+		// ran together.
+		internal const float TabStopPoints = 36f;
+
+		/// <summary>
+		/// The text with each tab replaced by the spaces that bring what follows it to the next
+		/// tab stop, measured in this textbox's own font: as close as a whole number of spaces
+		/// gets, and at least one.
+		/// </summary>
+		/// <remarks>
+		/// The measure is in whole pixels and carries a constant beyond the text (MeasureString
+		/// adds a "w", and the padding GDI+ puts either side), so a width is the text's measure
+		/// less an empty string's, and a space's width is taken from sixteen of them. Taken
+		/// one at a time, each stop came out a few points early ("A" measured 13.5pt) and a
+		/// space anywhere from 2.25 to 3pt against its 2.78.
+		/// </remarks>
+		internal async Task<string> ExpandTabs(Report rpt, Graphics g, Row row, string text)
+		{
+			const int SpaceSample = 16;
+			float empty = await TextWidthPoints(rpt, g, row, "").ConfigureAwait(false);
+			var result = new StringBuilder(text.Length + 16);
+			string[] lines = text.Split('\n');
+			for (int l = 0; l < lines.Length; l++)
+			{
+				if (l > 0)
+					result.Append('\n');
+				string[] parts = lines[l].Split('\t');
+				var line = new StringBuilder(lines[l].Length + 16);
+				for (int p = 0; p < parts.Length; p++)
+				{
+					line.Append(parts[p]);
+					if (p == parts.Length - 1)
+						break;
+					string sofar = line.ToString();
+					float measured = await TextWidthPoints(rpt, g, row, sofar).ConfigureAwait(false);
+					float width = Math.Max(0, measured - empty);
+					float space = (await TextWidthPoints(rpt, g, row, sofar + new string(' ', SpaceSample)).ConfigureAwait(false) - measured)
+						/ SpaceSample;
+					float stop = ((int) Math.Floor(width / TabStopPoints) + 1) * TabStopPoints;
+					int spaces = space > 0 ? (int) Math.Round((stop - width) / space) : 1;
+					line.Append(' ', Math.Max(1, spaces));
+				}
+				result.Append(line);
+			}
+			return result.ToString();
+		}
+
+		// Measured at ten times the font's size and scaled back: on the page's 96 dpi surface each
+		// glyph's advance is a whole pixel, which made a 10pt Arial space 2.5pt against the 2.78
+		// it is drawn at, and a tab after a dozen of them several points past its stop.
+		private const float TabMeasureScale = 10f;
+
+		private async Task<float> TextWidthPoints(Report rpt, Graphics g, Row row, string text)
+		{
+			Font font = this.Style != null
+				? await Style.GetFont(rpt, row).ConfigureAwait(false)
+				: new Font("Arial", 10);
+			using (font)
+			using (var big = new Font(font.Name, font.SizeInPoints * TabMeasureScale, font.Style))
+			{
+				System.Drawing.SizeF s = g.MeasureString(text + "w", big, int.MaxValue, StringFormat.GenericTypographic);
+				return RSize.PointsFromPixels(g, s.Width) / TabMeasureScale;
+			}
 		}
 
 		private async Task<float> MeasureTextHeightPoints(Report rpt, Graphics g, string text, Row row, int widthPx, bool html)
