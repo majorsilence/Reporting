@@ -67,6 +67,19 @@ namespace ReportTests
         }
 
         /// <summary>
+        /// A colour expression that evaluates to nothing (one whose argument cannot be
+        /// converted, say) hands this a null. Before the British spelling repair that fell
+        /// back to the default; the repair's IndexOf threw instead, and the whole report
+        /// failed to render.
+        /// </summary>
+        [TestCase (null)]
+        [TestCase ("")]
+        public void NoColourAtAll_FallsBack (string sc)
+        {
+            Assert.That (XmlUtil.ColorFromHtml (sc, Fallback).ToArgb (), Is.EqualTo (Fallback.ToArgb ()));
+        }
+
+        /// <summary>
         /// A deliberately transparent hex colour has the same alpha-zero signature as a failed
         /// name, and must be taken at its word rather than replaced.
         /// </summary>

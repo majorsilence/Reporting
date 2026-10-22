@@ -98,6 +98,9 @@ namespace Majorsilence.Reporting.Rdl
 		/// <summary>The same name with the British spelling swapped, or null if it has none.</summary>
 		private static string GrayForGrey(string sc)
 		{
+			// A colour expression that evaluates to nothing arrives here as null.
+			if (sc == null)
+				return null;
 			int i = sc.IndexOf("grey", StringComparison.OrdinalIgnoreCase);
 			return i < 0 ? null : sc.Substring(0, i) + "gray" + sc.Substring(i + 4);
 		}
