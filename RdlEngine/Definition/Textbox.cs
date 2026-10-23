@@ -252,6 +252,8 @@ namespace Majorsilence.Reporting.Rdl
 			PageText pt;
 			PageTextHtml pth=null;
 			bool html = TryIsHtml(out bool pageIsHtml) ? pageIsHtml : await IsHtml(r, row).ConfigureAwait(false);
+			if (!html && t != null)
+				t = LineBreaksAsLineFeeds(t);
 			if (!html && t != null && t.IndexOf('\t') >= 0)
 				t = await ExpandTabs(r, pgs.G, row, t).ConfigureAwait(false);
 			if (html)
@@ -545,6 +547,15 @@ namespace Majorsilence.Reporting.Rdl
 				pth.Reset();		// the layout built for the previous text no longer applies
 		}
 
+		// The text with every line break a line feed. A carriage return on its own ends a line in
+		// Crystal Reports and in Windows text controls, and a report converted from Crystal builds
+		// its lines with Chr(13) alone; the engine broke lines only at a line feed, and ran such
+		// lines together. A carriage return and a line feed together are one break.
+		internal static string LineBreaksAsLineFeeds(string text) =>
+			text.IndexOf('\r') < 0 ? text : text.Replace("\r\n", "\n").Replace('\r', '\n');
+
+		private static object AsLineFeeds(object value) => value is string text ? LineBreaksAsLineFeeds(text) : value;
+
 		// Tab stops every half inch from where the text starts, the default in Word and in
 		// Crystal Reports. RDL has no tab stops, and a tab was drawn as whatever the font makes of
 		// the character, usually nothing, so "Printed Date: 1/2/2026<tab><tab>Last modified: ..."
@@ -738,11 +749,11 @@ namespace Majorsilence.Reporting.Rdl
 					await pth.Build(g).ConfigureAwait(false);
 					s.Height = RSize.PixelsFromPoints(pth.TotalHeight);
 				}
-				else if (!Style.TryMeasureString(rpt, g, o, tc, width, out s))
+				else if (!Style.TryMeasureString(rpt, g, o = AsLineFeeds(o), tc, width, out s))
 					s = await Style.MeasureString(rpt, g, o, tc, row, width).ConfigureAwait(false);
 			}
 			else	// call the class static method
-				s = await Style.MeasureStringDefaults(rpt, g, o, tc, row, width).ConfigureAwait(false);
+				s = await Style.MeasureStringDefaults(rpt, g, AsLineFeeds(o), tc, row, width).ConfigureAwait(false);
 
 			TextboxRuntime tbr = TextboxRuntime.GetTextboxRuntime(rpt, this);
 			tbr.RunHeight = RSize.PointsFromPixels(g, s.Height);

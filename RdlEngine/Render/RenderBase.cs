@@ -505,7 +505,7 @@ namespace Majorsilence.Reporting.Rdl
                 // handle multiple lines;
                 //  1) split the string into the forced line breaks (ie "\n and \r")
                 //  2) foreach of the forced line breaks; break these into words and recombine 
-                s = s.Replace("\r\n", "\n");	// don't want this to result in double lines
+                s = Majorsilence.Reporting.Rdl.Textbox.LineBreaksAsLineFeeds(s);	// a CR LF is one break, and a CR alone is one too
                 // remove the size reserved for left and right padding
                 float ptWidth = pt.W - pt.SI.PaddingLeft - pt.SI.PaddingRight;
                 if (ptWidth <= 0)
