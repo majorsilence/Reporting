@@ -24,6 +24,7 @@ namespace Majorsilence.Reporting.Rdl
 		List<PageItem> _items=null;
 		Stack _StyleStack;				// work variable when processing styles
 		float _TotalHeight=0;
+		float _textWidth;				// the width inside the padding, which each line is aligned in
 		public PageTextHtml(string t) : base(t)
 		{
 		}
@@ -94,7 +95,11 @@ namespace Majorsilence.Reporting.Rdl
 			PageTextHtmlLexer hl = new PageTextHtmlLexer(this.Text);
 			List<string> tokens = hl.Lex();
 
-			float textWidth = this.W - pt.SI.PaddingLeft - pt.SI.PaddingRight;
+			// The text sits inside the box's own padding, as plain text does. The first item's
+			// padding is zeroed above, so measuring against it put the text against the border.
+			float padLeft = this.SI.PaddingLeft, padTop = this.SI.PaddingTop;
+			float textWidth = this.W - padLeft - this.SI.PaddingRight;
+			_textWidth = textWidth;
 			// Now set the default style for the rest of the members
 			StyleInfo si = this.SI.Clone() as StyleInfo;
 			si.BStyleBottom = si.BStyleLeft = si.BStyleRight = si.BStyleTop = BorderStyleEnum.None;
@@ -123,6 +128,21 @@ namespace Majorsilence.Reporting.Rdl
 			{
 				if (token[0] == PageTextHtmlLexer.HTMLCMD)		// indicates an HTML command
 				{
+					// A space before a change of style belongs to the text before it. Held
+					// for the next word, it went into the new style: "NOT <u>PAID</u>"
+					// underlined the space as well as the word.
+					if (bWhiteSpace && sb.Length != 0)
+					{
+						StyleInfo before = CurrentStyle(si);
+						float spaced = this.MeasureString(" x", before, g, out descent).Width;
+						float bare = this.MeasureString("x", before, g, out descent).Width;
+						if (xPos + spaced - bare < textWidth)
+						{
+							sb.Append(' ');
+							xPos += spaced - bare;
+							bWhiteSpace = false;
+						}
+					}
 					// we need to create a PageText since the styleinfo is changing
 					if (sb.Length != 0)
 					{
@@ -134,8 +154,8 @@ namespace Majorsilence.Reporting.Rdl
 						pt.Tooltip = model.Tooltip;
 						pt.NoClip = true;
 						sb.Clear();
-						pt.X = this.X + lineXPos;
-						pt.Y = this.Y + yPos;
+						pt.X = this.X + padLeft + lineXPos;
+						pt.Y = this.Y + padTop + yPos;
 						pt.CanGrow = false;
 						pt.SI = runStyle ??= CurrentStyle(si).Clone() as StyleInfo;
 						_items.Add(pt);
@@ -218,9 +238,16 @@ namespace Majorsilence.Reporting.Rdl
 						float h = this.SI.FontSize * inc;
 						cs.FontSize = h;
 					}
+					else if (ltoken.StartsWith("<tab"))
+					{	// to the next stop, every TabStopPoints from the line's start, as a tab in plain text goes
+						float stop = ((int)Math.Floor(xPos / Textbox.TabStopPoints) + 1) * Textbox.TabStopPoints;
+						xPos = lineXPos = stop;
+						bFirstInLine = false;
+						bWhiteSpace = false;
+					}
 					else if (ltoken.StartsWith("<br"))
 					{
-						yPos += maxLineHeight;
+						yPos += LinePitch(maxLineHeight);
 						NormalizeLineHeight(lineItems, maxLineHeight, maxDescent);
 						xPos = lineXPos = maxDescent = 0;
 						bFirstInLine = true;
@@ -229,7 +256,7 @@ namespace Majorsilence.Reporting.Rdl
                     else if (ltoken.StartsWith("<hr"))
                     {   // Add a line
                         // Process existing line if any
-                        yPos += maxLineHeight;
+                        yPos += LinePitch(maxLineHeight);
                         NormalizeLineHeight(lineItems, maxLineHeight, maxDescent);
                         maxLineHeight = xPos = lineXPos = maxDescent = 0;
                         bFirstInLine = true;
@@ -296,7 +323,7 @@ namespace Majorsilence.Reporting.Rdl
                     }
                     else if (ltoken.StartsWith("<ol") || ltoken.StartsWith("<ul"))
                     {
-                        yPos += maxLineHeight;
+                        yPos += LinePitch(maxLineHeight);
                         NormalizeLineHeight(lineItems, maxLineHeight, maxDescent);
                         maxLineHeight = xPos = lineXPos = maxDescent = 0;
                         bFirstInLine = true;
@@ -306,7 +333,7 @@ namespace Majorsilence.Reporting.Rdl
                     }
                     else if (ltoken.StartsWith("<li"))
                     {
-                        yPos += maxLineHeight;
+                        yPos += LinePitch(maxLineHeight);
                         NormalizeLineHeight(lineItems, maxLineHeight, maxDescent);
                         maxLineHeight = xPos = lineXPos = maxDescent = 0;
                         bFirstInLine = true;
@@ -375,8 +402,8 @@ namespace Majorsilence.Reporting.Rdl
 				sb.Append(token.Replace(PageTextHtmlLexer.NBSP, ' '));
 				pt.SI = runStyle ??= CurrentStyle(si).Clone() as StyleInfo;
 				ms = this.MeasureString(pt.Text, pt.SI, g, out descent);
-				pt.X = this.X + lineXPos;
-				pt.Y = this.Y + yPos;
+				pt.X = this.X + padLeft + lineXPos;
+				pt.Y = this.Y + padTop + yPos;
 				pt.H = ms.Height;
 				pt.W = ms.Width; 
 				pt.Descent = descent;
@@ -385,7 +412,7 @@ namespace Majorsilence.Reporting.Rdl
 				lineItems.Add(pt);
 				maxDescent = Math.Max(maxDescent, descent);
 				maxLineHeight = Math.Max(maxLineHeight, ms.Height);
-				yPos += maxLineHeight;	// Increment y position
+				yPos += LinePitch(maxLineHeight);	// Increment y position
 				NormalizeLineHeight(lineItems, maxLineHeight, maxDescent);
 				lineXPos = maxLineHeight = maxDescent = 0;	// start line height over
 
@@ -560,8 +587,20 @@ namespace Majorsilence.Reporting.Rdl
 						HandleStyleFontSize(si, tval);
 						break;
 					case "font-style":
+						// "normal" too, so a run can be upright in an italic box.
 						if (tval == "italic")
 							si.FontStyle = FontStyleEnum.Italic;
+						else if (tval == "normal")
+							si.FontStyle = FontStyleEnum.Normal;
+						break;
+					case "text-decoration":
+						switch (tval)
+						{
+							case "underline": si.TextDecoration = TextDecorationEnum.Underline; break;
+							case "overline": si.TextDecoration = TextDecorationEnum.Overline; break;
+							case "line-through": si.TextDecoration = TextDecorationEnum.LineThrough; break;
+							case "none": si.TextDecoration = TextDecorationEnum.None; break;
+						}
 						break;
 					case "font-weight":
 						HandleStyleFontWeight(si, tval);
@@ -723,10 +762,37 @@ namespace Majorsilence.Reporting.Rdl
 				_StyleStack.Pop();
 		}
 
+		// The distance to the next line: the style's LineHeight when one is set, as plain text
+		// is drawn, unless the line holds something taller. An unset LineHeight is NaN.
+		private float LinePitch(float maxLineHeight)
+		{
+			return this.SI.LineHeight > maxLineHeight ? this.SI.LineHeight : maxLineHeight;
+		}
+
 		private void NormalizeLineHeight(List<PageItem> lineItems, float maxLineHeight, float maxDescent)
 		{
+			// Each line is aligned on its own, as plain text is. Every line used to start at
+			// the left edge whatever the box's TextAlign, so centred or right-aligned rich
+			// text printed flush left.
+			float shift = 0;
+			if (this.SI.TextAlign == TextAlignEnum.Center || this.SI.TextAlign == TextAlignEnum.Right)
+			{
+				float left = float.MaxValue, right = float.MinValue;
+				foreach (PageItem pi in lineItems)
+				{
+					left = Math.Min(left, pi.X);
+					right = Math.Max(right, pi.X + pi.W);
+				}
+				if (right > left)
+				{
+					float spare = _textWidth - (right - left);
+					shift = this.SI.TextAlign == TextAlignEnum.Center ? spare / 2 : spare;
+				}
+			}
+
 			foreach (PageItem pi in lineItems)
 			{
+				pi.X += shift;
 				if (pi is PageText)
 				{	// force the text to line up
 					PageText pt = (PageText) pi;
