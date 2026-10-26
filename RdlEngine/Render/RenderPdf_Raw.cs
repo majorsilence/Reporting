@@ -205,8 +205,15 @@ namespace Majorsilence.Reporting.Rdl
             // thickness, not its available length, so wrapping against it here would split one
             // rotated line into several that then get drawn on top of each other.
             float availableW = width - si.PaddingLeft - si.PaddingRight;
+            // Which lines end a paragraph, for justified text: every line but those is spread
+            // to the full width. Known only where the lines are wrapped here.
+            List<bool> paragraphEnds = null;
             if (!bNoClip && availableW > 0 && si.WritingMode != WritingModeEnum.tb_rl && si.WritingMode != WritingModeEnum.tb_lr)
-                sa = RewrapLines(RejoinSoftWraps(sa), baseStyle, availableW);
+            {
+                if (si.TextAlign == TextAlignEnum.Justified)
+                    paragraphEnds = new List<bool>();
+                sa = RewrapLines(RejoinSoftWraps(sa), baseStyle, availableW, paragraphEnds);
+            }
 
             // A textbox that may not grow may not draw outside its own rectangle either.
             // bWrap is the item's CanGrow: when it is false the box keeps the height the
@@ -225,7 +232,12 @@ namespace Majorsilence.Reporting.Rdl
             if (!bWrap && !bNoClip && height > 0 && sa.Length > 1 && pitch > 0)
             {
                 float availableH = height - si.PaddingTop - si.PaddingBottom;
-                int maxLines = Math.Max(1, (int)Math.Floor(availableH / pitch));
+                // The last line needs its letters' height, an em, not a whole pitch: the space
+                // a LineHeight leaves below a line belongs to the line after it. Asking a full
+                // pitch of the last line too dropped the third line of a box three lines of
+                // 14.25pt high that its letters fit, below 41.25pt. With no LineHeight the pitch
+                // is the em, and this is the whole lines that fit, as before.
+                int maxLines = Math.Max(1, (int)Math.Floor((availableH - si.FontSize) / pitch) + 1);
                 if (sa.Length > maxLines)
                     sa = sa.Take(maxLines).ToArray();
             }
@@ -305,11 +317,15 @@ namespace Majorsilence.Reporting.Rdl
                         continue;
                     }
 
-                    _currentPage.DrawText(text, startX, startY + si.FontSize, baseStyle);
-
                     float maxX = width > 0
                         ? Math.Min(x + width, startX + textwidth)
                         : startX + textwidth;
+
+                    if (paragraphEnds != null && i < paragraphEnds.Count && !paragraphEnds[i]
+                        && DrawJustified(text, startX, startY + si.FontSize, availableW, baseStyle))
+                        maxX = startX + availableW;
+                    else
+                        _currentPage.DrawText(text, startX, startY + si.FontSize, baseStyle);
 
                     switch (si.TextDecoration)
                     {
@@ -408,7 +424,10 @@ namespace Majorsilence.Reporting.Rdl
 
         // RenderBase wraps text with System.Drawing metrics; we re-check each
         // line against the actual PDF font metrics and split further if needed.
-        private string[] RewrapLines(string[] lines, TextStyle style, float maxWidth)
+        // paragraphEnds, when given, is filled with one entry per line returned: whether that
+        // line ends its paragraph, as opposed to being wrapped onto the next. A line that
+        // RenderBase wrapped and RejoinSoftWraps left alone still ends in its space.
+        private string[] RewrapLines(string[] lines, TextStyle style, float maxWidth, List<bool> paragraphEnds = null)
         {
             List<string> result = null;     // made only when a line has to be split
             for (int i = 0; i < lines.Length; i++)
@@ -417,6 +436,7 @@ namespace Majorsilence.Reporting.Rdl
                 if (string.IsNullOrEmpty(line) || _currentPage.MeasureTextWidth(line, style) <= maxWidth)
                 {
                     result?.Add(line);
+                    paragraphEnds?.Add(string.IsNullOrEmpty(line) || line[line.Length - 1] != ' ');
                     continue;
                 }
 
@@ -426,9 +446,35 @@ namespace Majorsilence.Reporting.Rdl
                     for (int j = 0; j < i; j++)
                         result.Add(lines[j]);
                 }
+                int before = result.Count;
                 WrapLine(line, style, maxWidth, result);
+                if (paragraphEnds != null)
+                    for (int k = before; k < result.Count; k++)
+                        paragraphEnds.Add(k == result.Count - 1);
             }
             return result == null ? lines : result.ToArray();
+        }
+
+        // A line spread to the full width, the space between its words shared out evenly, as
+        // a justified paragraph's lines are but its last. False, having drawn nothing, for a
+        // line of one word or one that would have to be squeezed to fit.
+        private bool DrawJustified(string text, float startX, float baseline, float width, TextStyle style)
+        {
+            string[] words = text.Trim().Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+            if (words.Length < 2) return false;
+            float[] widths = new float[words.Length];
+            float total = 0;
+            for (int w = 0; w < words.Length; w++)
+                total += widths[w] = _currentPage.MeasureTextWidth(words[w], style);
+            float gap = (width - total) / (words.Length - 1);
+            if (gap < _currentPage.MeasureTextWidth(" ", style)) return false;
+            float wx = startX;
+            for (int w = 0; w < words.Length; w++)
+            {
+                _currentPage.DrawText(words[w], wx, baseline, style);
+                wx += widths[w] + gap;
+            }
+            return true;
         }
 
         private void WrapLine(string text, TextStyle style, float maxWidth, List<string> output)
