@@ -122,10 +122,9 @@ namespace Majorsilence.Reporting.Rdl
 			else
 				r.ParentConnections = null;
 
-            r.SubreportDataRetrievalTriggerEvent();
-
 			if (_Parameters == null)
 			{	// When no parameters we only retrieve data once
+                r.SubreportDataRetrievalTriggerEvent();
 				if (r.Cache.Get(this, "report") == null)
 				{
                     await r.RunGetData(null).ConfigureAwait(false);
@@ -136,6 +135,7 @@ namespace Majorsilence.Reporting.Rdl
 			else
 			{
                 await SetSubreportParameters(r, row).ConfigureAwait(false);
+                r.SubreportDataRetrievalTriggerEvent();     // after the parameters: data set now is filtered with them
                 await r.RunGetData(null).ConfigureAwait(false);
 			}
 
@@ -170,11 +170,10 @@ namespace Majorsilence.Reporting.Rdl
 			else
 			    r.ParentConnections = null;
 
-            r.SubreportDataRetrievalTriggerEvent();
-
             bool bRows = true;
 			if (_Parameters == null)
 			{	// When no parameters we only retrieve data once
+                r.SubreportDataRetrievalTriggerEvent();
                 SubreportWorkClass wc = r.Cache.Get(this, "report") as SubreportWorkClass;
 
 				if (wc == null)
@@ -189,6 +188,9 @@ namespace Majorsilence.Reporting.Rdl
 			else
 			{
                 await SetSubreportParameters(r, row).ConfigureAwait(false);		// apply the parameters
+                // The event follows the parameters: SetData filters the rows it is given at once,
+                // so data set in it before them was filtered with the previous instance's values.
+                r.SubreportDataRetrievalTriggerEvent();
 				bRows = await r.RunGetData(null).ConfigureAwait(false);
 			}
 
