@@ -127,7 +127,8 @@ namespace Majorsilence.Reporting.Rdl
 
         // Event for Subreport data retrieval
         /// <summary>
-        /// Event invoked just prior to obtaining data for the subreport.  Setting DataSet 
+        /// Event invoked just prior to obtaining data for the subreport, after its parameters
+        /// are set, so data set now is filtered with this instance's values.  Setting DataSet 
         /// and DataConnection information during this event affects only this instance
         /// of the Subreport.
         /// </summary>
