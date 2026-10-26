@@ -14,7 +14,7 @@ namespace ReportTests
         [SetUp]
         public void Prepare() => RdlEngineConfig.RdlEngineConfigInit();
 
-        private static async Task<double[]> LineBaselines(string name, string lineHeightXml)
+        private static async Task<double[]> LineBaselines(string name, string lineHeightXml, string boxHeight = "1.5in")
         {
             var outputFolder = GeneralUtils.OutputTestsFolder();
             Directory.CreateDirectory(outputFolder.LocalPath);
@@ -28,7 +28,7 @@ namespace ReportTests
   <Width>7.5in</Width>
   <Body><Height>2in</Height><ReportItems>
     <Textbox Name=""T"">
-      <Top>0in</Top><Left>0in</Left><Width>3in</Width><Height>1.5in</Height>
+      <Top>0in</Top><Left>0in</Left><Width>3in</Width><Height>{boxHeight}</Height>
       <CanGrow>false</CanGrow>
       <Value>First{{0}}Second{{0}}Third</Value>
       <Style><FontFamily>Arial</FontFamily><FontSize>10pt</FontSize>{lineHeightXml}
@@ -62,6 +62,23 @@ namespace ReportTests
             Assert.That(baselines.Length, Is.EqualTo(3));
             Assert.That(baselines[0] - baselines[1], Is.EqualTo(24.0).Within(0.2));
             Assert.That(baselines[1] - baselines[2], Is.EqualTo(24.0).Within(0.2));
+        }
+
+        // A box that may not grow keeps every line whose letters fit in it: the last needs an
+        // em, not a whole pitch. Three lines of 14.25pt in 42pt fit, the third's letters
+        // ending at 38.5pt, and the third was dropped for want of a full 42.75pt.
+        [Test]
+        public async Task LineHeight_KeepsALastLineWhoseLettersFit()
+        {
+            var baselines = await LineBaselines("LineHeight_lastline", "<LineHeight>14.25pt</LineHeight>", "42pt");
+            Assert.That(baselines.Length, Is.EqualTo(3));
+        }
+
+        [Test]
+        public async Task LineHeight_StillClipsALineThatDoesNotFit()
+        {
+            var baselines = await LineBaselines("LineHeight_clipped", "<LineHeight>14.25pt</LineHeight>", "36pt");
+            Assert.That(baselines.Length, Is.EqualTo(2));
         }
 
         [Test]
