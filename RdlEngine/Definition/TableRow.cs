@@ -108,11 +108,44 @@ namespace Majorsilence.Reporting.Rdl
 			if (this.Visibility != null && await Visibility.IsHidden(pgs.Report, row).ConfigureAwait(false))
 				return;
 
+			// A Rectangle or Subreport in a cell grows with what it holds, which HeightOfRow
+			// does not measure ahead of drawing it: a growing textbox or a subreport's rows
+			// inside one were drawn past the row's bottom and over the rows after it. So the
+			// row takes the height its items actually reached, where that is more. A row that
+			// moved to another page while it drew keeps its measured height, as before. Only
+			// text and images count: a line or a box drawn past the row's bottom is drawn so on
+			// purpose, over the rows after it.
+			Page page = pgs.CurrentPage;
+			float top = page.YOffset;
+			HashSet<PageItem> before = HoldsContainers()
+				? new HashSet<PageItem>(System.Linq.Enumerable.Cast<PageItem>(page), ReferenceEqualityComparer.Instance)
+				: null;
+
             await _TableCells.RunPage(pgs, row).ConfigureAwait(false);
 
 			WorkClass wc = GetWC(pgs.Report);
-			pgs.CurrentPage.YOffset += wc.CalcHeight;
+			float height = wc.CalcHeight;
+			if (before != null && pgs.CurrentPage == page)
+			{
+				float reached = height;
+				foreach (PageItem pi in page)
+					if (!before.Contains(pi) && (pi is PageText || pi is PageImage))
+						reached = Math.Max(reached, pi.Y + pi.H - top);
+				// Past rounding at the band's edge only, which must not move every row down.
+				if (reached > height + 0.5f)
+					height = reached;
+			}
+			pgs.CurrentPage.YOffset += height;
 			return ;
+		}
+
+		private bool HoldsContainers()
+		{
+			foreach (TableCell tc in _TableCells.Items)
+				if (tc.ReportItems != null && tc.ReportItems.Items.Count > 0
+					&& (tc.ReportItems.Items[0] is Majorsilence.Reporting.Rdl.Rectangle || tc.ReportItems.Items[0] is Subreport))
+					return true;
+			return false;
 		}
 
 		internal TableCells TableCells
