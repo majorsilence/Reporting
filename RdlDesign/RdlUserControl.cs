@@ -747,6 +747,7 @@ namespace Majorsilence.Reporting.RdlDesign
 				case OutputPresentationType.Word:
 					sfd.Filter = Strings.MDIChild_Export_DOC;
 					break;
+				case OutputPresentationType.Excel2007:
 				case OutputPresentationType.ExcelTableOnly:
 					sfd.Filter = Strings.MDIChild_Export_Excel;
 					break;
