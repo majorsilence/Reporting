@@ -74,8 +74,8 @@ The viewer and designer are Majorsilence.Forms controls, so they follow its
   - The expression editor dialog — select a cell with a `=Fields!...` value and open its `Value` property's
     "..." button in the PropertyGrid.
 
-  Not yet reachable from this sample, because `RdlUserControl` doesn't expose them (tracked separately): the
-  Data Sources and Dataset dialogs — see #469.
+  The Data Sources and Dataset dialogs (below) follow the theme too, once a host wires up a button to open them —
+  `RdlUserControl` has no built-in toolbar/menu entry for either, unlike the stand-alone shell.
 - **Designer colours:** besides the Forms tokens, a theme can set the designer's own colours with `--rdl-*` variables
   (the area behind the page, bands, rulers, selection handles, ...).
   [`ReportDesigner/Themes/graphite.css`](../../ReportDesigner/Themes/graphite.css) lists every variable.
@@ -122,3 +122,36 @@ designer.IconProvider = new DarkIcons();
 
 Returning `null` for a name keeps the built-in raster icon, so a host can override as few or as many icons as
 it wants. No provider (the default) is identical to before this property existed.
+
+## Data Sources and Dataset dialogs on the embeddable designer (issue #469/#470)
+
+Unlike the stand-alone `RdlDesigner` MDI shell, `RdlUserControl` has no built-in toolbar button or menu for
+managing data sources or datasets — a host wires its own UI to call these:
+
+```csharp
+// Host-provided "Data Sources..." button:
+designer.ShowDataSourcesDialog();
+
+// Host-provided "Datasets" menu, built from the report's current datasets:
+foreach (string name in designer.GetDataSetNames())
+    AddMenuItem(name, () => designer.ShowDataSetDialog(name));
+AddMenuItem("New...", () => designer.ShowDataSetDialog());   // no name -- creates a new dataset
+```
+
+Both raise a cancellable event first — `DataSourcesPropertiesRequested` / `DataSetPropertiesRequested` — so a
+host can show its own UI instead of the native dialog, the same pattern as "Overriding toolbar/menu actions"
+above but on `RdlUserControl` rather than `RdlDesigner`:
+
+```csharp
+designer.DataSetPropertiesRequested += (s, e) =>
+{
+    if (e.DataSetName == "Orders")
+    {
+        MyOwnDatasetEditor.Show(e.DataSetName);
+        e.Handled = true;      // skip the native dataset-properties dialog
+    }
+    // otherwise fall through to the native dialog for every other dataset
+};
+```
+
+No subscribers (the default) runs the native dialog exactly as calling these methods always has.
