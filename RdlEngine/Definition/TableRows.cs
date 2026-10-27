@@ -92,6 +92,7 @@ namespace Majorsilence.Reporting.Rdl
 					float height = p.YOffset + hrows;
 					if (height > pgs.BottomOfPage)
 					{
+                        await OwnerTable.RunPageBottomRows(pgs, row, false).ConfigureAwait(false);
 						p = OwnerTable.RunPageNew(pgs, p);
                         await OwnerTable.RunPageHeader(pgs, row, false, null).ConfigureAwait(false);
 					}
