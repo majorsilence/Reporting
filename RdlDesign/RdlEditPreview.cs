@@ -906,7 +906,7 @@ namespace Majorsilence.Reporting.RdlDesign
 					}
 					catch (Exception ge)
 					{
-						MessageBox.Show(ge.Message, Strings.RdlEditPreview_Show_Report);
+						MessageBox.Show(this, ge.Message, Strings.RdlEditPreview_Show_Report);
 						tc.SelectedIndex = 1;	// Force current tab to edit syntax
 						return;
 					}
@@ -963,7 +963,7 @@ namespace Majorsilence.Reporting.RdlDesign
 				}
 				catch (Exception e)
 				{
-					MessageBox.Show(e.Message, Strings.RdlEditPreview_Show_Report);
+					MessageBox.Show(this, e.Message, Strings.RdlEditPreview_Show_Report);
 					LoadTextToScintilla(text);
 					tcEHP.SelectedIndex = (int)DesignTabs.Edit;	// Force current tab to edit syntax
 					_DesignChanged = DesignTabs.Edit;

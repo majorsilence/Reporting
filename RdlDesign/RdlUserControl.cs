@@ -261,7 +261,7 @@ namespace Majorsilence.Reporting.RdlDesign
             catch (Exception ae)
             {
                 bOK = false;
-                MessageBox.Show(ae.Message + "\r\n" + ae.StackTrace);
+                MessageBox.Show(this, ae.Message + "\r\n" + ae.StackTrace);
                 //				statusBar.Text = "Save of file '" + curFileName + "' failed";
             }
             finally
@@ -337,13 +337,13 @@ namespace Majorsilence.Reporting.RdlDesign
                 ShowEditLines(true);
                 ShowReportItemOutline = false;
                 ShowPreviewWaitDialog(true);
-        
-   
-       
+
+
+
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message);
+                MessageBox.Show(this, ex.Message);
             }
 
        
@@ -934,12 +934,12 @@ namespace Majorsilence.Reporting.RdlDesign
                 ShowEditLines(true);
                 ShowReportItemOutline = this.ShowReportItemOutline;
                 ShowPreviewWaitDialog(false);
-           
-                
+
+
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message);
+                MessageBox.Show(this, ex.Message);
             }
 
 
@@ -1168,7 +1168,7 @@ namespace Majorsilence.Reporting.RdlDesign
 
             if (isPrinting == true)			// already printing
             {
-                MessageBox.Show(Strings.RdlUserControl_Show_PrintOneFile, Strings.RdlUserControl_Show_RDLDesign);
+                MessageBox.Show(this, Strings.RdlUserControl_Show_PrintOneFile, Strings.RdlUserControl_Show_RDLDesign);
                 return;
             }
 
@@ -1187,7 +1187,7 @@ namespace Majorsilence.Reporting.RdlDesign
             }
             catch (Exception ex)
             {
-                MessageBox.Show(Strings.RdlUserControl_Show_PrintError + ex.Message, Strings.RdlUserControl_Show_RDLDesign);
+                MessageBox.Show(this, Strings.RdlUserControl_Show_PrintError + ex.Message, Strings.RdlUserControl_Show_RDLDesign);
             }
             finally
             {
@@ -1219,7 +1219,7 @@ namespace Majorsilence.Reporting.RdlDesign
                     }
                     catch (Exception ex)
                     {
-                        MessageBox.Show(ex.Message, Strings.RdlUserControl_Show_ZoomValueInvalid);
+                        MessageBox.Show(this, ex.Message, Strings.RdlUserControl_Show_ZoomValueInvalid);
                     }
                     break;
             }
