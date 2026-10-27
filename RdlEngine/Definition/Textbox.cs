@@ -269,6 +269,11 @@ namespace Majorsilence.Reporting.Rdl
 			if (pt.SI.BackgroundImage != null)
 				pt.SI.BackgroundImage.H = pt.H;		//   and in the background image
 			pt.CanGrow = this.CanGrow;
+			// A box that may not grow keeps its text to its own width. Not a table or matrix
+			// cell: its width is its column's rather than one chosen for the text, and a table
+			// laid out in narrow columns relies on a cell's text running on over the empty cells
+			// beside it - cut to the column, such a cell would print nothing at all.
+			pt.ClipSides = !this.CanGrow && !this.IsTableOrMatrixCell(r);
 
             // check TextAlign: if General then correct based on data type
             if (pt.SI.TextAlign == TextAlignEnum.General)

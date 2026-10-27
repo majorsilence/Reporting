@@ -191,7 +191,7 @@ namespace Majorsilence.Reporting.Rdl
         // ── text ──────────────────────────────────────────────────────────────
 
         protected internal override void AddText(float x, float y, float height, float width,
-            string[] sa, StyleInfo si, float[] tw, bool bWrap, string url, bool bNoClip, string tooltip)
+            string[] sa, StyleInfo si, float[] tw, bool bWrap, string url, bool bNoClip, string tooltip, bool bClipSides)
         {
             if (sa == null || sa.Length == 0) return;
 
@@ -244,6 +244,20 @@ namespace Majorsilence.Reporting.Rdl
 
             if (!si.BackgroundColor.IsEmpty && height > 0 && width > 0)
                 iAddFillRect(x, y, width, height, si.BackgroundColor);
+
+            // Nor may a line that is wider than the box run out of its sides, where the textbox
+            // asks for that (bClipSides: it may not grow and is not a table cell - see
+            // Textbox.RunPage). Wrapping leaves such a line only where it has no space to break
+            // at - a number, a date, a long word - and it used to be drawn whole, over whatever is
+            // beside the box (to the left, for right-aligned text). Clipped, an amount too wide
+            // for its box keeps the part that lies inside it, as the other renderers' layout
+            // rectangle keeps it.
+            // The clip is the box inside its padding, where the text is laid out, and is opened
+            // only once a line is found to overflow, so a box whose text fits draws as before.
+            // It is horizontal only: the lines the box keeps are already settled above.
+            bool clipSides = bClipSides && !bNoClip && width > 0 && availableW > 0
+                             && si.WritingMode == WritingModeEnum.lr_tb;
+            bool clipped = false;
 
             for (int i = 0; i < sa.Length; i++)
             {
@@ -317,6 +331,16 @@ namespace Majorsilence.Reporting.Rdl
                         continue;
                     }
 
+                    if (clipSides && !clipped && textwidth > availableW)
+                    {
+                        // Reaches well past the box above and below: only the sides are cut.
+                        float reach = (sa.Length + 1) * Math.Max(pitch, si.FontSize);
+                        _currentPage.SaveState();
+                        _currentPage.ClipRectangle(x + si.PaddingLeft, y - reach,
+                            availableW, Math.Max(height, 0) + 2 * reach);
+                        clipped = true;
+                    }
+
                     float maxX = width > 0
                         ? Math.Min(x + width, startX + textwidth)
                         : startX + textwidth;
@@ -376,6 +400,8 @@ namespace Majorsilence.Reporting.Rdl
                     }
                 }
             }
+            if (clipped)
+                _currentPage.RestoreState();
 
             AddAnnotations(x, y, height, width, url, tooltip);
             iAddBorder(si, x, y, height, width);

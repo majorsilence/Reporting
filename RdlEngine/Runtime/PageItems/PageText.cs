@@ -8,6 +8,7 @@ namespace Majorsilence.Reporting.Rdl
 		float descent;          // in some cases the Font descent will be recorded; 0 otherwise
 		bool bGrow;
 		bool _NoClip = false;		// on drawing disallow clipping
+		bool _ClipSides = false;	// on drawing cut a line too wide for the box at its sides
 		PageTextHtml _HtmlParent = null;
 
 		public PageText(string t)
@@ -38,6 +39,12 @@ namespace Majorsilence.Reporting.Rdl
 		{
 			get { return _NoClip; }
 			set { _NoClip = value; }
+		}
+
+		internal bool ClipSides
+		{
+			get { return _ClipSides; }
+			set { _ClipSides = value; }
 		}
 
 		public bool CanGrow
