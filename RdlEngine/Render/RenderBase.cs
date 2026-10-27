@@ -136,7 +136,7 @@ namespace Majorsilence.Reporting.Rdl
         /// </summary>
         /// <returns></returns>
         internal abstract protected void AddText(float x, float y, float height, float width, string[] sa,
-            StyleInfo si, float[] tw, bool bWrap, string url, bool bNoClip, string tooltip);
+            StyleInfo si, float[] tw, bool bWrap, string url, bool bNoClip, string tooltip, bool bClipSides);
 
         #endregion
 
@@ -321,7 +321,7 @@ namespace Majorsilence.Reporting.Rdl
                     string[] sa = MeasureString(pt, pgs.G, out textwidth);
 
 
-                    AddText(pt.X, pt.Y, pt.H, pt.W, sa, pt.SI, textwidth, pt.CanGrow, pt.HyperLink, pt.NoClip, pt.Tooltip);
+                    AddText(pt.X, pt.Y, pt.H, pt.W, sa, pt.SI, textwidth, pt.CanGrow, pt.HyperLink, pt.NoClip, pt.Tooltip, pt.ClipSides);
 
                     if (pt.Bookmark != null)
                     {
