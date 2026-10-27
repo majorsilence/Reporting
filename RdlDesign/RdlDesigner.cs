@@ -878,6 +878,7 @@ namespace Majorsilence.Reporting.RdlDesign
 					mc.OnSelectionChanged += new MDIChild.RdlChangeHandler(SelectionChanged);
 					mc.OnSelectionMoved += new MDIChild.RdlChangeHandler(SelectionMoved);
 					mc.OnReportItemInserted += new MDIChild.RdlChangeHandler(ReportItemInserted);
+				mc.OnInsertCancelled += new MDIChild.RdlChangeHandler(ReportItemInserted);
 					mc.OnDesignTabChanged += new MDIChild.RdlChangeHandler(DesignTabChanged);
 					mc.OnOpenSubreport += new DesignCtl.OpenSubreportEventHandler(OpenSubReportEvent);
 					mc.OnHeightChanged += new DesignCtl.HeightEventHandler(HeightChanged);

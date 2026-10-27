@@ -34,6 +34,7 @@ TabPage _Tab;
 			this.rdlDesigner.OnSelectionChanged += new Majorsilence.Reporting.RdlDesign.RdlEditPreview.RdlChangeHandler(this.rdlDesigner_SelectionChanged);
 			this.rdlDesigner.OnSelectionMoved += new Majorsilence.Reporting.RdlDesign.RdlEditPreview.RdlChangeHandler(this.rdlDesigner_SelectionMoved);
 			this.rdlDesigner.OnReportItemInserted += new Majorsilence.Reporting.RdlDesign.RdlEditPreview.RdlChangeHandler(this.rdlDesigner_ReportItemInserted);
+			this.rdlDesigner.OnInsertCancelled += new Majorsilence.Reporting.RdlDesign.RdlEditPreview.RdlChangeHandler(this.rdlDesigner_InsertCancelled);
 			this.rdlDesigner.OnDesignTabChanged += new Majorsilence.Reporting.RdlDesign.RdlEditPreview.RdlChangeHandler(this.rdlDesigner_DesignTabChanged);
 			this.rdlDesigner.OnOpenSubreport += new Majorsilence.Reporting.RdlDesign.DesignCtl.OpenSubreportEventHandler(this.rdlDesigner_OpenSubreport);
             this.rdlDesigner.SaveRequested += new Majorsilence.Reporting.RdlDesign.RdlEditPreview.RdlChangeHandler(this.rdlDesigner_SaveRequested);

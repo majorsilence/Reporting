@@ -49,6 +49,7 @@ namespace Majorsilence.Reporting.RdlDesign
 
             rdlEditPreview1.OnSelectionChanged += SelectionChanged;
             rdlEditPreview1.OnReportItemInserted += ReportItemInserted;
+            rdlEditPreview1.OnInsertCancelled += ReportItemInserted;
             rdlEditPreview1.OnOpenSubreport += OpenSubReportEvent;
             rdlEditPreview1.OnSelectionMoved += SelectionMoved;
             rdlEditPreview1.OnDesignTabChanged += DesignTabChanged;
