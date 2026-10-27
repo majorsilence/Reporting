@@ -236,7 +236,7 @@ namespace Majorsilence.Reporting.RdlDesign
 				}
 				catch (Exception ex)
 				{
-					MessageBox.Show(ex.Message, Strings.DesignCtl_Show_UnableCreateRDL);
+					MessageBox.Show(this, ex.Message, Strings.DesignCtl_Show_UnableCreateRDL);
 				}
 				return result;
 			}
