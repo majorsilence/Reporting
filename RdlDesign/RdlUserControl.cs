@@ -41,6 +41,23 @@ namespace Majorsilence.Reporting.RdlDesign
         public event RdlChangeHandler RdlChanged;
 
         /// <summary>
+        /// Raised by <see cref="ShowDataSourcesDialog"/> before the built-in "Manage Data Sources" dialog
+        /// opens (issue #469). A host that sets <see cref="DesignerCommandEventArgs.Handled"/> to <c>true</c>
+        /// can show its own UI instead; the native dialog is skipped entirely. No subscribers means identical
+        /// behavior to before this event existed.
+        /// </summary>
+        public event EventHandler<DesignerCommandEventArgs> DataSourcesPropertiesRequested;
+
+        /// <summary>
+        /// Raised by <see cref="ShowDataSetDialog"/> before the built-in dataset-properties dialog opens
+        /// (issue #469), naming the dataset involved. A host that sets
+        /// <see cref="DesignerCommandEventArgs.Handled"/> to <c>true</c> can show its own UI instead; the
+        /// native dialog, and the undo/XML bookkeeping around it, is skipped entirely. No subscribers means
+        /// identical behavior to before this event existed.
+        /// </summary>
+        public event EventHandler<DesignerDataSetCommandEventArgs> DataSetPropertiesRequested;
+
+        /// <summary>
         /// Gives this designer a theme of its own -- a built-in theme name (Default, Light, Dark, Classic,
         /// Aero) or <see cref="DesignerTheme.Custom"/> with a CSS file -- leaving the rest of the host
         /// application on its theme. Creates the control's <see cref="Control.ThemeScope"/> when it has none.
@@ -993,6 +1010,174 @@ namespace Majorsilence.Reporting.RdlDesign
                 sfd.Dispose();
             }
             return false;
+        }
+
+        /// <summary>
+        /// Opens the built-in "Manage Data Sources" dialog for the loaded report (issue #469/#470). Unlike
+        /// the stand-alone <c>RdlDesigner</c> shell, <see cref="RdlUserControl"/> has no menu or toolbar
+        /// button of its own for this -- a host wires its own UI to call this method.
+        /// Raises <see cref="DataSourcesPropertiesRequested"/> first; if the host sets
+        /// <c>Handled = true</c> there, the native dialog is skipped.
+        /// </summary>
+        public void ShowDataSourcesDialog()
+        {
+            var cmdArgs = new DesignerCommandEventArgs();
+            DataSourcesPropertiesRequested?.Invoke(this, cmdArgs);
+            if (cmdArgs.Handled)
+                return;
+
+            rdlEditPreview1.StartUndoGroup(Strings.RdlDesigner_Undo_DataSourcesDialog);
+            using (DialogDataSources dlgDS = new DialogDataSources(SourceFile, rdlEditPreview1.DrawCtl))
+            {
+                dlgDS.StartPosition = FormStartPosition.CenterParent;
+                DialogResult dr = dlgDS.ShowDialog(this);
+                rdlEditPreview1.EndUndoGroup(dr == DialogResult.OK);
+                if (dr == DialogResult.OK)
+                    Modified = true;
+            }
+        }
+
+        /// <summary>
+        /// The names of every DataSet currently defined on the loaded report, in document order -- lets a
+        /// host build its own "manage dataset" menu/list to call <see cref="ShowDataSetDialog"/> with
+        /// (mirroring what <c>RdlDesigner</c>'s own Data &gt; Datasets submenu lists).
+        /// </summary>
+        public string[] GetDataSetNames()
+        {
+            DesignXmlDraw draw = rdlEditPreview1.DrawCtl;
+            if (draw == null || rdlEditPreview1.ReportDocument == null)
+                return Array.Empty<string>();
+
+            XmlNode rNode = draw.GetReportNode();
+            XmlNode dsNode = draw.GetNamedChildNode(rNode, "DataSets");
+            if (dsNode == null)
+                return Array.Empty<string>();
+
+            List<string> names = new List<string>();
+            foreach (XmlNode dNode in dsNode)
+            {
+                if (dNode.Name != "DataSet")
+                    continue;
+                XmlAttribute nAttr = dNode.Attributes["Name"];
+                if (nAttr == null)
+                    continue;
+                names.Add(nAttr.Value);
+            }
+            return names.ToArray();
+        }
+
+        /// <summary>
+        /// Opens the built-in dataset-properties dialog for the loaded report (issue #469/#470), the same
+        /// dialog <c>RdlDesigner</c>'s Data &gt; Datasets submenu opens. Pass the name of an existing
+        /// DataSet (see <see cref="GetDataSetNames"/>) to edit it, or <c>null</c>/empty to create a new one.
+        /// Raises <see cref="DataSetPropertiesRequested"/> first, naming the dataset involved; if the host
+        /// sets <c>Handled = true</c> there, the native dialog (and the undo/XML bookkeeping around it) is
+        /// skipped entirely.
+        /// </summary>
+        public void ShowDataSetDialog(string dataSetName = null)
+        {
+            DesignXmlDraw draw = rdlEditPreview1.DrawCtl;
+            if (draw == null || rdlEditPreview1.ReportDocument == null)
+                return;
+
+            string label = string.IsNullOrEmpty(dataSetName) ? Strings.RdlDesigner_menuData_Popup_New : dataSetName;
+
+            var cmdArgs = new DesignerDataSetCommandEventArgs(label);
+            DataSetPropertiesRequested?.Invoke(this, cmdArgs);
+            if (cmdArgs.Handled)
+                return;
+
+            rdlEditPreview1.StartUndoGroup(Strings.RdlDesigner_Undo_DataSetDialog);
+
+            List<XmlNode> ds = new List<XmlNode>();
+            XmlNode rNode = draw.GetReportNode();
+            XmlNode dsNode = draw.GetCreateNamedChildNode(rNode, "DataSets");
+            XmlNode dataset = null;
+
+            // find the requested dataset: its name equals the label passed in
+            int dsCount = 0;        // count of the datasets
+            string onlyOneDsname = null;
+            foreach (XmlNode dNode in dsNode)
+            {
+                if (dNode.Name != "DataSet")
+                    continue;
+                XmlAttribute nAttr = dNode.Attributes["Name"];
+                if (nAttr == null)  // shouldn't really happen
+                    continue;
+                if (dsCount == 0)
+                    onlyOneDsname = nAttr.Value;        // we keep track of 1st name;
+
+                dsCount++;
+                if (nAttr.Value == label)
+                    dataset = dNode;
+            }
+
+            bool bNew = false;
+            if (dataset == null)    // no match -- this must be a new dataset
+            {
+                dataset = draw.CreateElement(dsNode, "DataSet", null);  // create empty node
+                bNew = true;
+            }
+            ds.Add(dataset);
+
+            using (PropertyDialog pd = new PropertyDialog(draw, ds, PropertyTypeEnum.DataSets))
+            {
+                DialogResult dr = pd.ShowDialog(this);
+                if (pd.Changed || dr == DialogResult.OK)
+                {
+                    if (dsCount == 1)
+                    // if we used to just have one DataSet we may need to fix up DataRegions
+                    //	that were defaulting to that name
+                    {
+                        dsCount = 0;
+                        bool bUseName = false;
+                        foreach (XmlNode dNode in dsNode)
+                        {
+                            if (dNode.Name != "DataSet")
+                                continue;
+                            XmlAttribute nAttr = dNode.Attributes["Name"];
+                            if (nAttr == null)  // shouldn't really happen
+                                continue;
+
+                            dsCount++;
+                            if (onlyOneDsname == nAttr.Value)
+                                bUseName = true;
+                        }
+                        if (bUseName && dsCount > 1)
+                        {
+                            foreach (XmlNode drNode in draw.ReportNames.ReportItems)
+                            {
+                                switch (drNode.Name)
+                                {
+                                    // If a DataRegion doesn't have a dataset name specified use previous one
+                                    case "Table":
+                                    case "List":
+                                    case "Matrix":
+                                    case "Chart":
+                                        XmlNode aNode = draw.GetNamedChildNode(drNode, "DataSetName");
+                                        if (aNode == null)
+                                            draw.CreateElement(drNode, "DataSetName", onlyOneDsname);
+                                        break;
+                                    default:
+                                        break;
+                                }
+                            }
+                        }
+                    }
+                    Modified = true;
+                }
+                else if (bNew)  // if canceled and new DataSet get rid of temp node
+                {
+                    dsNode.RemoveChild(dataset);
+                }
+                if (pd.Delete)  // user must have hit a delete button for this to get set
+                    dsNode.RemoveChild(dataset);
+
+                if (!dsNode.HasChildNodes)      // If no dataset exists we remove DataSets
+                    draw.RemoveElement(rNode, "DataSets");
+
+                rdlEditPreview1.EndUndoGroup(pd.Changed || dr == DialogResult.OK);
+            }
         }
 
         private void saveToolStripButton1_Click(object sender, EventArgs e)

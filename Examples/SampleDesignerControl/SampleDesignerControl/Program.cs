@@ -28,8 +28,12 @@ namespace SampleApp2_SetData
             // can be compared in both themes from the sample's own UI. See Examples/Hosting/Readme.md's
             // "Theming and white-labelling" section for what still has to be reached through the designer's
             // own UI (e.g. selecting a Value expression's "..." button for the expression editor) rather
-            // than a button here, and what isn't exposed on the embeddable control at all yet (the Data
-            // Sources / Dataset dialogs -- see #469).
+            // than a button here.
+            //
+            // issue #469/#470: RdlUserControl has no built-in toolbar/menu entry for the Data Sources and
+            // Dataset dialogs (only the stand-alone RdlDesigner shell does), so this sample adds its own
+            // "Data Sources..." and "Datasets..." buttons calling the designer's ShowDataSourcesDialog()
+            // and ShowDataSetDialog() directly.
             string report = System.IO.Path.Combine(AppContext.BaseDirectory, "SampleApp2-TestReport.rdl");
             string startupTheme = args.Length > 0 ? args[0] : "Dark";
 
@@ -39,8 +43,12 @@ namespace SampleApp2_SetData
 
             var leftPanel = new Panel { Dock = DockStyle.Fill };
             var rightPanel = new Panel { Dock = DockStyle.Fill };
+            leftPanel.Controls.Add(DatasetsButton(left));
+            leftPanel.Controls.Add(DataSourcesButton(left));
             leftPanel.Controls.Add(ToggleThemeButton(left));
             leftPanel.Controls.Add(left);
+            rightPanel.Controls.Add(DatasetsButton(right));
+            rightPanel.Controls.Add(DataSourcesButton(right));
             rightPanel.Controls.Add(ToggleThemeButton(right, startWithDark: true));
             rightPanel.Controls.Add(right);
 
@@ -67,6 +75,31 @@ namespace SampleApp2_SetData
                 : designer.UseTheme(theme);
             foreach (string message in result.Messages)
                 Console.Error.WriteLine(message);
+        }
+
+        private static Button DataSourcesButton(Majorsilence.Reporting.RdlDesign.RdlUserControl designer)
+        {
+            var button = new Button { Text = "Data Sources...", Dock = DockStyle.Top, Height = 28 };
+            button.Click += (s, e) => designer.ShowDataSourcesDialog();
+            return button;
+        }
+
+        private static Button DatasetsButton(Majorsilence.Reporting.RdlDesign.RdlUserControl designer)
+        {
+            var button = new Button { Text = "Datasets...", Dock = DockStyle.Top, Height = 28 };
+            var menu = new ContextMenuStrip();
+            button.Click += (s, e) =>
+            {
+                menu.Items.Clear();
+                foreach (string name in designer.GetDataSetNames())
+                {
+                    string dataSetName = name;
+                    menu.Items.Add(name, null, (ms, me) => designer.ShowDataSetDialog(dataSetName));
+                }
+                menu.Items.Add("New...", null, (ms, me) => designer.ShowDataSetDialog());
+                menu.Show(button, new System.Drawing.Point(0, button.Height));
+            };
+            return button;
         }
 
         private static Button ToggleThemeButton(Majorsilence.Reporting.RdlDesign.RdlUserControl designer, bool startWithDark = false)
