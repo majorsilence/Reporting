@@ -58,9 +58,9 @@ namespace Majorsilence.Reporting.Rdl
 			else
 			{
 				object v = GetValue(rpt);
-				if (current_value == null)
+				if (IsNullValue(current_value))
 					return v;
-				else if (v == null)
+				else if (IsNullValue(v))
 				{}	// use the current_value
 				else if (Filter.ApplyCompare(_tc, v, current_value) < 0)
 				{}	// use the current_value

@@ -50,7 +50,7 @@ namespace Majorsilence.Reporting.Rdl
 				{
 					HashSet<object> set = s as HashSet<object> ?? new HashSet<object>();
 					object v = await _Expr.Evaluate(rpt, r).ConfigureAwait(false);
-					if (v != null && v is not DBNull)
+					if (!IsNullValue(v))
 						set.Add(v);
 					return (object)set;
 				}).ConfigureAwait(false);

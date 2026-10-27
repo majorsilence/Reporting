@@ -58,9 +58,9 @@ namespace Majorsilence.Reporting.Rdl
 			{}
 			else
 			{
-				if (current_value == null)
+				if (IsNullValue(current_value))
 					return v;
-				else if (v == null)
+				else if (IsNullValue(v))
 				{}
 				else if (Filter.ApplyCompare(_tc, v, current_value) > 0)
 				{}

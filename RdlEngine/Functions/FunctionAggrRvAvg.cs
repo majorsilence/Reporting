@@ -45,7 +45,7 @@ namespace Majorsilence.Reporting.Rdl
 		// Evaluate is for interpretation  (and is relatively slow)
 		public async Task<object> Evaluate(Report rpt, Row row)
 		{
-			return _tc==TypeCode.Decimal? (object)await EvaluateDecimal(rpt, row).ConfigureAwait(false) : (object)await EvaluateDouble(rpt, row).ConfigureAwait(false);
+			return _tc==TypeCode.Decimal? NullIfNoValue(await EvaluateDecimal(rpt, row).ConfigureAwait(false)) : (object)await EvaluateDouble(rpt, row).ConfigureAwait(false);
 		}
 		
 		public async Task<double> EvaluateDouble(Report rpt, Row row)
@@ -57,9 +57,10 @@ namespace Majorsilence.Reporting.Rdl
 			var (sum, count) = ((double, int)) await RunningState(rpt, _key + "d", row, re, async (r, s) =>
 			{
 				var (sumSoFar, countSoFar) = s is ValueTuple<double, int> t ? t : (0d, 0);
-				return (object)(sumSoFar + await _Expr.EvaluateDouble(rpt, r).ConfigureAwait(false), countSoFar + 1);
+				double v = await _Expr.EvaluateDouble(rpt, r).ConfigureAwait(false);
+				return double.IsNaN(v) ? (object)(sumSoFar, countSoFar) : (object)(sumSoFar + v, countSoFar + 1);	// NaN is a null value
 			}).ConfigureAwait(false);
-			return sum / count;
+			return count > 0 ? sum / count : double.NaN;
 		}
 		
 		public async Task<decimal> EvaluateDecimal(Report rpt, Row row)
@@ -71,9 +72,10 @@ namespace Majorsilence.Reporting.Rdl
 			var (sum, count) = ((decimal, int)) await RunningState(rpt, _key + "m", row, re, async (r, s) =>
 			{
 				var (sumSoFar, countSoFar) = s is ValueTuple<decimal, int> t ? t : (0m, 0);
-				return (object)(sumSoFar + await _Expr.EvaluateDecimal(rpt, r).ConfigureAwait(false), countSoFar + 1);
+				decimal v = await _Expr.EvaluateDecimal(rpt, r).ConfigureAwait(false);
+				return v == decimal.MinValue ? (object)(sumSoFar, countSoFar) : (object)(sumSoFar + v, countSoFar + 1);	// MinValue is a null value
 			}).ConfigureAwait(false);
-			return sum / count;
+			return count > 0 ? sum / count : decimal.MinValue;
 		}
 
         public async Task<int> EvaluateInt32(Report rpt, Row row)

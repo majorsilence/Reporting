@@ -1328,14 +1328,38 @@ namespace Majorsilence.Reporting.Rdl
 				case TypeCode.Decimal when o is decimal dec:
 					return dec.ToString(format, ci);
 				case TypeCode.Single when o is float single:
-					return single.ToString(format, ci);
+					return UnsignedZero(single.ToString(format, ci), float.IsNegative(single), format, ci);
 				case TypeCode.Double when o is double dbl:
-					return dbl.ToString(format, ci);
+					return UnsignedZero(dbl.ToString(format, ci), double.IsNegative(dbl), format, ci);
 				default:
+					if (o is double d)
+						return UnsignedZero(d.ToString(format, ci), double.IsNegative(d), format, ci);
+					if (o is float f)
+						return UnsignedZero(f.ToString(format, ci), float.IsNegative(f), format, ci);
 					return (o is IFormattable fmt)
 						? fmt.ToString(format, ci)
 						: o.ToString();
 			}
+		}
+
+		private static readonly char[] Digits = "0123456789".ToCharArray();
+
+		// A negative double that is zero at the format's precision (-0.0, or a remainder like -1E-13)
+		// keeps its minus sign in .NET ("-0.00", "-$0.00"); it prints as the format's zero, as Excel and
+		// SSRS print it, and a format with a zero section uses that section.
+		private static string UnsignedZero(string text, bool negative, string format, CultureInfo ci)
+		{
+			if (!negative)
+				return text;
+			string sign = ci.NumberFormat.NegativeSign;
+			int i = text.IndexOf(sign, StringComparison.Ordinal);
+			if (i < 0)
+				return text;
+			string zero = 0d.ToString(format, ci);
+			// a format with no digits ("Cr") says nothing of the value's size
+			if (zero.IndexOfAny(Digits) < 0 || !string.Equals(text.Remove(i, sign.Length), zero, StringComparison.Ordinal))
+				return text;
+			return zero;
 		}
 
 		private async Task<bool> IsConstant()
