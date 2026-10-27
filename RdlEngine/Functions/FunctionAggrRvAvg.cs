@@ -50,63 +50,30 @@ namespace Majorsilence.Reporting.Rdl
 		
 		public async Task<double> EvaluateDouble(Report rpt, Row row)
 		{
-			bool bSave=true;
-			IEnumerable re = this.GetDataScope(rpt, row, out bSave);
+			RowEnumerable re = this.GetDataScope(rpt, row, out bool bSave);
 			if (re == null)
 				return double.NaN;
 
-			Row startrow=null;
-			foreach (Row r in re)
+			var (sum, count) = ((double, int)) await RunningState(rpt, _key + "d", row, re, async (r, s) =>
 			{
-				startrow = r;			// We just want the first row
-				break;
-			}
-			double currentValue = await _Expr.EvaluateDouble(rpt, row).ConfigureAwait(false);
-			WorkClass wc = GetValue(rpt);
-			if (row == startrow)
-			{
-				// must be the start of a new group
-				wc.Value = currentValue;
-				wc.Count = 1;
-			}
-			else
-			{
-				wc.Value = ((double) wc.Value + currentValue);
-				wc.Count++;
-			}
-
-			return (double) wc.Value / wc.Count;
+				var (sumSoFar, countSoFar) = s is ValueTuple<double, int> t ? t : (0d, 0);
+				return (object)(sumSoFar + await _Expr.EvaluateDouble(rpt, r).ConfigureAwait(false), countSoFar + 1);
+			}).ConfigureAwait(false);
+			return sum / count;
 		}
 		
 		public async Task<decimal> EvaluateDecimal(Report rpt, Row row)
 		{
-			bool bSave;
-			IEnumerable re = this.GetDataScope(rpt, row, out bSave);
+			RowEnumerable re = this.GetDataScope(rpt, row, out bool bSave);
 			if (re == null)
 				return decimal.MinValue;
 
-			Row startrow=null;
-			foreach (Row r in re)
+			var (sum, count) = ((decimal, int)) await RunningState(rpt, _key + "m", row, re, async (r, s) =>
 			{
-				startrow = r;			// We just want the first row
-				break;
-			}
-
-			decimal currentValue = await _Expr.EvaluateDecimal(rpt, row).ConfigureAwait(false);
-			WorkClass wc = GetValue(rpt);
-			if (row == startrow)
-			{
-				// must be the start of a new group
-				wc.Value = currentValue;
-				wc.Count = 1;
-			}
-			else
-			{
-				wc.Value = ((decimal) wc.Value + currentValue);
-				wc.Count++;
-			}
-
-			return (decimal) wc.Value / wc.Count;
+				var (sumSoFar, countSoFar) = s is ValueTuple<decimal, int> t ? t : (0m, 0);
+				return (object)(sumSoFar + await _Expr.EvaluateDecimal(rpt, r).ConfigureAwait(false), countSoFar + 1);
+			}).ConfigureAwait(false);
+			return sum / count;
 		}
 
         public async Task<int> EvaluateInt32(Report rpt, Row row)
@@ -126,39 +93,15 @@ namespace Majorsilence.Reporting.Rdl
 			return Convert.ToDateTime(result);
 		}
 
-		private WorkClass GetValue(Report rpt)
-		{
-			WorkClass wc = rpt.Cache.Get(_key) as WorkClass;
-			if (wc == null)
-			{
-				wc = new WorkClass();
-				rpt.Cache.Add(_key, wc);
-			}
-			return wc;
-		}
-
-		private void SetValue(Report rpt, WorkClass w)
-		{
-			rpt.Cache.AddReplace(_key, w);
-		}
 		#region ICacheData Members
 
 		public void ClearCache(Report rpt)
 		{
-			rpt.Cache.Remove(_key);
+			rpt.Cache.Remove(_key + "d");
+			rpt.Cache.Remove(_key + "m");
 		}
 
 		#endregion
-		class WorkClass
-		{
-			internal object Value;		
-			internal int Count;			
-			internal WorkClass()
-			{
-				Value = null;
-				Count = 0;
-			}
-		}
 	}
 
 }

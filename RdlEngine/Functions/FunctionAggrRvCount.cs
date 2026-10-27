@@ -44,34 +44,13 @@ namespace Majorsilence.Reporting.Rdl
 		
 		public async Task<int> EvaluateInt32(Report rpt, Row row)
 		{
-			bool bSave=true;
-			IEnumerable re = this.GetDataScope(rpt, row, out bSave);
+			RowEnumerable re = this.GetDataScope(rpt, row, out bool bSave);
 			if (re == null)
 				return int.MinValue;
 
-			Row startrow=null;
-			foreach (Row r in re)
-			{
-				startrow = r;			// We just want the first row
-				break;
-			}
-
-			int count;
-
-			object currentValue = await _Expr.Evaluate(rpt, row).ConfigureAwait(false);
-			int incr = currentValue == null? 0: 1;
-			if (row == startrow)
-			{
-				// must be the start of a new group
-				count = incr;
-			}
-			else
-			{
-				count = GetValue(rpt) + incr;
-			}
-
-			SetValue(rpt, count);
-			return count;
+			object count = await RunningState(rpt, _key, row, re,
+				async (r, s) => (object)((s is int c ? c : 0) + (await _Expr.Evaluate(rpt, r).ConfigureAwait(false) == null ? 0 : 1))).ConfigureAwait(false);
+			return (int) count;
 		}
 
         public async Task<double> EvaluateDouble(Report rpt, Row row)
@@ -94,16 +73,6 @@ namespace Majorsilence.Reporting.Rdl
 		{
 			object result = await Evaluate(rpt, row).ConfigureAwait(false);
 			return Convert.ToDateTime(result);
-		}
-		private int GetValue(Report rpt)
-		{
-			OInt oi = rpt.Cache.Get(_key) as OInt;
-			return oi == null? 0: oi.i;
-		}
-
-		private void SetValue(Report rpt, int i)
-		{
-			rpt.Cache.AddReplace(_key, new OInt(i));
 		}
 
 		#region ICacheData Members
