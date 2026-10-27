@@ -65,7 +65,17 @@ The viewer and designer are Majorsilence.Forms controls, so they follow its
   - `rdlUserControl.UseTheme (DesignerTheme.Custom, "theme.css")` or `UseThemeCss (css)` takes a CSS theme.
   - Any viewer or designer control also accepts `control.ThemeScope = scope` with a Majorsilence.Forms `ThemeScope`.
 
-  Its dialogs follow it. `Examples/SampleDesignerControl` shows two designers in one window, each with its own theme.
+  Its dialogs follow it. `Examples/SampleDesignerControl` shows two designers in one window, each with its own
+  theme, with a "Toggle theme" button above each one so you can flip between Light and Dark without restarting
+  (issue #471). Surfaces you can compare across both themes in that one running sample:
+  - Toolbar, menus, PropertyGrid, canvas, bands and selection handles — visible as soon as the report loads;
+    select the Table or a cell to see selection handles and the PropertyGrid follow the theme.
+  - The Edit tab's SQL/XML syntax highlighting — click the designer's **Edit** tab.
+  - The expression editor dialog — select a cell with a `=Fields!...` value and open its `Value` property's
+    "..." button in the PropertyGrid.
+
+  Not yet reachable from this sample, because `RdlUserControl` doesn't expose them (tracked separately): the
+  Data Sources and Dataset dialogs — see #469.
 - **Designer colours:** besides the Forms tokens, a theme can set the designer's own colours with `--rdl-*` variables
   (the area behind the page, bands, rulers, selection handles, ...).
   [`ReportDesigner/Themes/graphite.css`](../../ReportDesigner/Themes/graphite.css) lists every variable.
