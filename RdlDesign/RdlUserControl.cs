@@ -65,6 +65,7 @@ namespace Majorsilence.Reporting.RdlDesign
 
             rdlEditPreview1.OnSelectionChanged += SelectionChanged;
             rdlEditPreview1.OnReportItemInserted += ReportItemInserted;
+            rdlEditPreview1.OnInsertCancelled += ReportItemInserted;
             rdlEditPreview1.OnOpenSubreport += OpenSubReportEvent;
             rdlEditPreview1.OnSelectionMoved += SelectionMoved;
             rdlEditPreview1.OnDesignTabChanged += DesignTabChanged;
@@ -782,6 +783,7 @@ namespace Majorsilence.Reporting.RdlDesign
 					sfd.Filter = Strings.MDIChild_Export_DOC;
 					break;
 				case OutputPresentationType.ExcelTableOnly:
+				case OutputPresentationType.Excel2007:
 					sfd.Filter = Strings.MDIChild_Export_Excel;
 					break;
 				case OutputPresentationType.HTML:
