@@ -72,7 +72,7 @@ namespace Majorsilence.Reporting.Rdl
 			foreach (Row r in re)
 			{
 				temp = await _Expr.Evaluate(rpt, r).ConfigureAwait(false);
-				if (temp != null)
+				if (!IsNullValue(temp))
 				{
 					if (sum != null)
 						sum = AddObjects(sum, temp);

@@ -67,6 +67,18 @@ namespace Majorsilence.Reporting.Rdl
 			set { _LevelCheck = value; }
 		}
 
+		// A null value, which the aggregates skip. A null numeric field reads as double.NaN.
+		protected static bool IsNullValue(object v)
+		{
+			return v == null || v is DBNull || (v is double d && double.IsNaN(d));
+		}
+
+		// A decimal aggregate of no values is decimal.MinValue; as a value it is Nothing.
+		protected static object NullIfNoValue(decimal d)
+		{
+			return d == decimal.MinValue ? null : (object)d;
+		}
+
 		// A running aggregate's state at row: what add makes of the scope's rows from its first up
 		// to row, row included. The row after the one last asked for adds just itself to the state
 		// kept for that one, so a running value read down a table's rows costs one row each. Any

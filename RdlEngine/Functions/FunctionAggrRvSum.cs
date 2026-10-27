@@ -55,7 +55,12 @@ namespace Majorsilence.Reporting.Rdl
 				return double.NaN;
 
 			object sum = await RunningState(rpt, _key + "d", row, re,
-				async (r, s) => (object)((s is double d ? d : 0d) + await _Expr.EvaluateDouble(rpt, r).ConfigureAwait(false))).ConfigureAwait(false);
+				async (r, s) =>
+				{
+					double sumSoFar = s is double d ? d : 0d;
+					double v = await _Expr.EvaluateDouble(rpt, r).ConfigureAwait(false);
+					return (object)(double.IsNaN(v) ? sumSoFar : sumSoFar + v);	// NaN is a null value
+				}).ConfigureAwait(false);
 			return (double) sum;
 		}
 		
@@ -66,7 +71,12 @@ namespace Majorsilence.Reporting.Rdl
 				return decimal.MinValue;
 
 			object sum = await RunningState(rpt, _key + "m", row, re,
-				async (r, s) => (object)((s is decimal d ? d : 0m) + await _Expr.EvaluateDecimal(rpt, r).ConfigureAwait(false))).ConfigureAwait(false);
+				async (r, s) =>
+				{
+					decimal sumSoFar = s is decimal d ? d : 0m;
+					decimal v = await _Expr.EvaluateDecimal(rpt, r).ConfigureAwait(false);
+					return (object)(v == decimal.MinValue ? sumSoFar : sumSoFar + v);	// MinValue is a null value
+				}).ConfigureAwait(false);
 			return (decimal) sum;
 		}
 

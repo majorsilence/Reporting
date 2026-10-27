@@ -49,7 +49,7 @@ namespace Majorsilence.Reporting.Rdl
 				return int.MinValue;
 
 			object count = await RunningState(rpt, _key, row, re,
-				async (r, s) => (object)((s is int c ? c : 0) + (await _Expr.Evaluate(rpt, r).ConfigureAwait(false) == null ? 0 : 1))).ConfigureAwait(false);
+				async (r, s) => (object)((s is int c ? c : 0) + (IsNullValue(await _Expr.Evaluate(rpt, r).ConfigureAwait(false)) ? 0 : 1))).ConfigureAwait(false);
 			return (int) count;
 		}
 
