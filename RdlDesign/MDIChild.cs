@@ -28,6 +28,7 @@ namespace Majorsilence.Reporting.RdlDesign
         public event RdlChangeHandler OnSelectionChanged;
         public event RdlChangeHandler OnSelectionMoved;
         public event RdlChangeHandler OnReportItemInserted;
+        public event RdlChangeHandler OnInsertCancelled;
         public event RdlChangeHandler OnDesignTabChanged;
         public event DesignCtl.OpenSubreportEventHandler OnOpenSubreport;
         public event DesignCtl.HeightEventHandler OnHeightChanged;
@@ -659,6 +660,12 @@ namespace Majorsilence.Reporting.RdlDesign
         {
             if (OnReportItemInserted != null)
                 OnReportItemInserted(this, e);
+        }
+
+        private void rdlDesigner_InsertCancelled(object sender, System.EventArgs e)
+        {
+            if (OnInsertCancelled != null)
+                OnInsertCancelled(this, e);
         }
 
         private void rdlDesigner_SelectionMoved(object sender, System.EventArgs e)

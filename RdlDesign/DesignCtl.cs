@@ -30,6 +30,7 @@ namespace Majorsilence.Reporting.RdlDesign
         public event System.EventHandler SelectionChanged;
 		public event System.EventHandler SelectionMoved;
 		public event System.EventHandler ReportItemInserted;
+		public event System.EventHandler InsertCancelled;
         public event System.EventHandler VerticalScrollChanged;
         public event System.EventHandler HorizontalScrollChanged;
         public event OpenSubreportEventHandler OpenSubreport;
@@ -235,7 +236,7 @@ namespace Majorsilence.Reporting.RdlDesign
 				}
 				catch (Exception ex)
 				{
-					MessageBox.Show(ex.Message, Strings.DesignCtl_Show_UnableCreateRDL);
+					MessageBox.Show(this, ex.Message, Strings.DesignCtl_Show_UnableCreateRDL);
 				}
 				return result;
 			}
@@ -2323,6 +2324,8 @@ namespace Majorsilence.Reporting.RdlDesign
                 if (dr != DialogResult.OK)
                 {
                     _Undo.EndUndoGroup(false);
+                    _CurrentInsert = null;
+                    InsertCancelled?.Invoke(this, EventArgs.Empty);
                     return;
                 }
             }
@@ -2677,6 +2680,8 @@ namespace Majorsilence.Reporting.RdlDesign
                 if (dr != DialogResult.OK)
                 {
                     _Undo.EndUndoGroup(false);
+                    _CurrentInsert = null;
+                    InsertCancelled?.Invoke(this, EventArgs.Empty);
                     return;
                 }
             }
@@ -2801,6 +2806,8 @@ namespace Majorsilence.Reporting.RdlDesign
                 if (dr != DialogResult.OK)
                 {
                     _Undo.EndUndoGroup(false);
+                    _CurrentInsert = null;
+                    InsertCancelled?.Invoke(this, EventArgs.Empty);
                     return;
                 }
             }

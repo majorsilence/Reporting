@@ -21,20 +21,32 @@ namespace SampleApp2_SetData
             // a ThemeScope, so it is themed independently of the rest of the host application; the left one
             // keeps the application theme. Pass a theme name (Default, Light, Dark, Classic, Aero) or the
             // path of a CSS theme file to use instead of Dark, e.g. ReportDesigner/Themes/graphite.css.
+            //
+            // issue #471: a "Toggle theme" button on each side flips that designer's own ThemeScope
+            // between Light and Dark without restarting, so every surface it draws -- toolbar, menus,
+            // PropertyGrid, canvas, bands, selection handles, the Edit tab's SQL/XML syntax highlighting --
+            // can be compared in both themes from the sample's own UI. See Examples/Hosting/Readme.md's
+            // "Theming and white-labelling" section for what still has to be reached through the designer's
+            // own UI (e.g. selecting a Value expression's "..." button for the expression editor) rather
+            // than a button here, and what isn't exposed on the embeddable control at all yet (the Data
+            // Sources / Dataset dialogs -- see #469).
             string report = System.IO.Path.Combine(AppContext.BaseDirectory, "SampleApp2-TestReport.rdl");
-            string theme = args.Length > 0 ? args[0] : "Dark";
+            string startupTheme = args.Length > 0 ? args[0] : "Dark";
 
             var left = new Majorsilence.Reporting.RdlDesign.RdlUserControl { Dock = DockStyle.Fill };
             var right = new Majorsilence.Reporting.RdlDesign.RdlUserControl { Dock = DockStyle.Fill };
-            var result = theme.EndsWith(".css", StringComparison.OrdinalIgnoreCase)
-                ? right.UseTheme(Majorsilence.Reporting.RdlDesign.DesignerTheme.Custom, theme)
-                : right.UseTheme(theme);
-            foreach (string message in result.Messages)
-                Console.Error.WriteLine(message);
+            ApplyTheme(right, startupTheme);
+
+            var leftPanel = new Panel { Dock = DockStyle.Fill };
+            var rightPanel = new Panel { Dock = DockStyle.Fill };
+            leftPanel.Controls.Add(ToggleThemeButton(left));
+            leftPanel.Controls.Add(left);
+            rightPanel.Controls.Add(ToggleThemeButton(right, startWithDark: true));
+            rightPanel.Controls.Add(right);
 
             var split = new SplitContainer { Dock = DockStyle.Fill };
-            split.Panel1.Controls.Add(left);
-            split.Panel2.Controls.Add(right);
+            split.Panel1.Controls.Add(leftPanel);
+            split.Panel2.Controls.Add(rightPanel);
 
             Form frm = new Form { Text = "Two designers, two themes", Width = 1600, Height = 900 };
             frm.Controls.Add(split);
@@ -46,6 +58,28 @@ namespace SampleApp2_SetData
             };
 
             Application.Run(frm);
+        }
+
+        private static void ApplyTheme(Majorsilence.Reporting.RdlDesign.RdlUserControl designer, string theme)
+        {
+            var result = theme.EndsWith(".css", StringComparison.OrdinalIgnoreCase)
+                ? designer.UseTheme(Majorsilence.Reporting.RdlDesign.DesignerTheme.Custom, theme)
+                : designer.UseTheme(theme);
+            foreach (string message in result.Messages)
+                Console.Error.WriteLine(message);
+        }
+
+        private static Button ToggleThemeButton(Majorsilence.Reporting.RdlDesign.RdlUserControl designer, bool startWithDark = false)
+        {
+            bool dark = startWithDark;
+            var button = new Button { Text = dark ? "Theme: Dark (click for Light)" : "Theme: Light (click for Dark)", Dock = DockStyle.Top, Height = 28 };
+            button.Click += (s, e) =>
+            {
+                dark = !dark;
+                ApplyTheme(designer, dark ? "Dark" : "Light");
+                button.Text = dark ? "Theme: Dark (click for Light)" : "Theme: Light (click for Dark)";
+            };
+            return button;
         }
     }
 }

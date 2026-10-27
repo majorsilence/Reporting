@@ -38,6 +38,7 @@ namespace Majorsilence.Reporting.RdlDesign
         public event RdlChangeHandler OnSelectionChanged;
         public event RdlChangeHandler OnSelectionMoved;
 		public event RdlChangeHandler OnReportItemInserted;
+		public event RdlChangeHandler OnInsertCancelled;
 		public event RdlChangeHandler OnDesignTabChanged;
         public event RdlChangeHandler SaveRequested;
 		public event DesignCtl.OpenSubreportEventHandler OnOpenSubreport; 
@@ -101,6 +102,7 @@ namespace Majorsilence.Reporting.RdlDesign
             dcDesign.SelectionChanged += dcDesign_SelectionChanged;
 			dcDesign.SelectionMoved += dcDesign_SelectionMoved;
 			dcDesign.ReportItemInserted += dcDesign_ReportItemInserted;
+			dcDesign.InsertCancelled += dcDesign_InsertCancelled;
 			dcDesign.OpenSubreport += dcDesign_OpenSubreport;
 
             //Majorsilence.Reporting.RdlDesign.Syntax Init
@@ -843,6 +845,14 @@ namespace Majorsilence.Reporting.RdlDesign
 			}
 		}
 
+		private void dcDesign_InsertCancelled(object sender, System.EventArgs e)
+		{
+			if (OnInsertCancelled != null)
+			{
+				OnInsertCancelled(this, e);
+			}
+		}
+
 		private void dcDesign_OpenSubreport(object sender, SubReportEventArgs e)
 		{
 			if (OnOpenSubreport != null)
@@ -906,7 +916,7 @@ namespace Majorsilence.Reporting.RdlDesign
 					}
 					catch (Exception ge)
 					{
-						MessageBox.Show(ge.Message, Strings.RdlEditPreview_Show_Report);
+						MessageBox.Show(this, ge.Message, Strings.RdlEditPreview_Show_Report);
 						tc.SelectedIndex = 1;	// Force current tab to edit syntax
 						return;
 					}
@@ -963,7 +973,7 @@ namespace Majorsilence.Reporting.RdlDesign
 				}
 				catch (Exception e)
 				{
-					MessageBox.Show(e.Message, Strings.RdlEditPreview_Show_Report);
+					MessageBox.Show(this, e.Message, Strings.RdlEditPreview_Show_Report);
 					LoadTextToScintilla(text);
 					tcEHP.SelectedIndex = (int)DesignTabs.Edit;	// Force current tab to edit syntax
 					_DesignChanged = DesignTabs.Edit;

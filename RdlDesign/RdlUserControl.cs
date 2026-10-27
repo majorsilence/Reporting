@@ -65,6 +65,7 @@ namespace Majorsilence.Reporting.RdlDesign
 
             rdlEditPreview1.OnSelectionChanged += SelectionChanged;
             rdlEditPreview1.OnReportItemInserted += ReportItemInserted;
+            rdlEditPreview1.OnInsertCancelled += ReportItemInserted;
             rdlEditPreview1.OnOpenSubreport += OpenSubReportEvent;
             rdlEditPreview1.OnSelectionMoved += SelectionMoved;
             rdlEditPreview1.OnDesignTabChanged += DesignTabChanged;
@@ -172,6 +173,24 @@ namespace Majorsilence.Reporting.RdlDesign
             }
         }
 
+        private IDesignerIconProvider _IconProvider;
+
+        /// <summary>
+        /// Lets a host application override individual toolbar/menu icons on this designer instance,
+        /// keeping the built-in defaults for any icon it doesn't override (issue #468). No provider (the
+        /// default) means identical behavior to before this property existed.
+        /// </summary>
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public IDesignerIconProvider IconProvider
+        {
+            get { return _IconProvider; }
+            set
+            {
+                _IconProvider = value;
+                DesignerIconResolver.Apply(value, mainTB, toolStrip1);
+            }
+        }
+
         internal string GetPassword()
         {
             if (bGotPassword)
@@ -261,7 +280,7 @@ namespace Majorsilence.Reporting.RdlDesign
             catch (Exception ae)
             {
                 bOK = false;
-                MessageBox.Show(ae.Message + "\r\n" + ae.StackTrace);
+                MessageBox.Show(this, ae.Message + "\r\n" + ae.StackTrace);
                 //				statusBar.Text = "Save of file '" + curFileName + "' failed";
             }
             finally
@@ -337,13 +356,13 @@ namespace Majorsilence.Reporting.RdlDesign
                 ShowEditLines(true);
                 ShowReportItemOutline = false;
                 ShowPreviewWaitDialog(true);
-        
-   
-       
+
+
+
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message);
+                MessageBox.Show(this, ex.Message);
             }
 
        
@@ -782,6 +801,7 @@ namespace Majorsilence.Reporting.RdlDesign
 					sfd.Filter = Strings.MDIChild_Export_DOC;
 					break;
 				case OutputPresentationType.ExcelTableOnly:
+				case OutputPresentationType.Excel2007:
 					sfd.Filter = Strings.MDIChild_Export_Excel;
 					break;
 				case OutputPresentationType.HTML:
@@ -934,12 +954,12 @@ namespace Majorsilence.Reporting.RdlDesign
                 ShowEditLines(true);
                 ShowReportItemOutline = this.ShowReportItemOutline;
                 ShowPreviewWaitDialog(false);
-           
-                
+
+
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message);
+                MessageBox.Show(this, ex.Message);
             }
 
 
@@ -1168,7 +1188,7 @@ namespace Majorsilence.Reporting.RdlDesign
 
             if (isPrinting == true)			// already printing
             {
-                MessageBox.Show(Strings.RdlUserControl_Show_PrintOneFile, Strings.RdlUserControl_Show_RDLDesign);
+                MessageBox.Show(this, Strings.RdlUserControl_Show_PrintOneFile, Strings.RdlUserControl_Show_RDLDesign);
                 return;
             }
 
@@ -1187,7 +1207,7 @@ namespace Majorsilence.Reporting.RdlDesign
             }
             catch (Exception ex)
             {
-                MessageBox.Show(Strings.RdlUserControl_Show_PrintError + ex.Message, Strings.RdlUserControl_Show_RDLDesign);
+                MessageBox.Show(this, Strings.RdlUserControl_Show_PrintError + ex.Message, Strings.RdlUserControl_Show_RDLDesign);
             }
             finally
             {
@@ -1219,7 +1239,7 @@ namespace Majorsilence.Reporting.RdlDesign
                     }
                     catch (Exception ex)
                     {
-                        MessageBox.Show(ex.Message, Strings.RdlUserControl_Show_ZoomValueInvalid);
+                        MessageBox.Show(this, ex.Message, Strings.RdlUserControl_Show_ZoomValueInvalid);
                     }
                     break;
             }

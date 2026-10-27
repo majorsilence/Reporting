@@ -91,6 +91,23 @@ namespace Majorsilence.Reporting.RdlDesign
 		/// </summary>
 		public event EventHandler<DesignerDataSetCommandEventArgs> DataSetPropertiesRequested;
 
+		private IDesignerIconProvider _IconProvider;
+
+		/// <summary>
+		/// Lets a host application override individual toolbar/menu icons, keeping the built-in defaults
+		/// for any icon it doesn't override (issue #468). No provider (the default) means identical
+		/// behavior to before this property existed.
+		/// </summary>
+		public IDesignerIconProvider IconProvider
+		{
+			get { return _IconProvider; }
+			set
+			{
+				_IconProvider = value;
+				DesignerIconResolver.Apply(value, mainTB, toolStrip1, menuStrip1, ContextMenuTB);
+			}
+		}
+
 		private RdlDesigner()
 		{
 		}
@@ -902,6 +919,7 @@ namespace Majorsilence.Reporting.RdlDesign
 					mc.OnSelectionChanged += new MDIChild.RdlChangeHandler(SelectionChanged);
 					mc.OnSelectionMoved += new MDIChild.RdlChangeHandler(SelectionMoved);
 					mc.OnReportItemInserted += new MDIChild.RdlChangeHandler(ReportItemInserted);
+					mc.OnInsertCancelled += new MDIChild.RdlChangeHandler(ReportItemInserted);
 					mc.OnDesignTabChanged += new MDIChild.RdlChangeHandler(DesignTabChanged);
 					mc.OnOpenSubreport += OpenSubReportEvent;
 					mc.OnHeightChanged += HeightChanged;
