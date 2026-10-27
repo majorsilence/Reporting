@@ -75,6 +75,22 @@ namespace Majorsilence.Reporting.RdlDesign
 		private ToolStripMenuItem ctlMenuInsertCurrent = null;
 		static string _MeasureUnits;
 
+		/// <summary>
+		/// Raised before the built-in "Manage Data Sources" dialog opens (issue #469). A host that sets
+		/// <see cref="DesignerCommandEventArgs.Handled"/> to <c>true</c> can show its own UI instead; the
+		/// native dialog is skipped entirely. No subscribers means identical behavior to before this
+		/// event existed.
+		/// </summary>
+		public event EventHandler<DesignerCommandEventArgs> DataSourcesPropertiesRequested;
+
+		/// <summary>
+		/// Raised before the built-in dataset-properties dialog opens (issue #469), naming the dataset
+		/// involved. A host that sets <see cref="DesignerCommandEventArgs.Handled"/> to <c>true</c> can
+		/// show its own UI instead; the native dialog, and the undo/XML bookkeeping around it, is
+		/// skipped entirely. No subscribers means identical behavior to before this event existed.
+		/// </summary>
+		public event EventHandler<DesignerDataSetCommandEventArgs> DataSetPropertiesRequested;
+
 		private IDesignerIconProvider _IconProvider;
 
 		/// <summary>
@@ -1464,6 +1480,11 @@ namespace Majorsilence.Reporting.RdlDesign
 			if (mc == null)
 				return;
 
+			var cmdArgs = new DesignerCommandEventArgs();
+			DataSourcesPropertiesRequested?.Invoke(this, cmdArgs);
+			if (cmdArgs.Handled)
+				return;
+
 			mc.Editor.StartUndoGroup(Strings.RdlDesigner_Undo_DataSourcesDialog);
 			using (DialogDataSources dlgDS = new DialogDataSources(mc.SourceFile, mc.DrawCtl))
 			{
@@ -1484,9 +1505,14 @@ namespace Majorsilence.Reporting.RdlDesign
 			ToolStripMenuItem menu = sender as ToolStripMenuItem;
 			if (menu == null)
 				return;
-			mc.Editor.StartUndoGroup(Strings.RdlDesigner_Undo_DataSetDialog);
 
 			string dsname = menu.Text;
+			var cmdArgs = new DesignerDataSetCommandEventArgs(dsname);
+			DataSetPropertiesRequested?.Invoke(this, cmdArgs);
+			if (cmdArgs.Handled)
+				return;
+
+			mc.Editor.StartUndoGroup(Strings.RdlDesigner_Undo_DataSetDialog);
 
 			// Find the dataset we need
 			List<XmlNode> ds = new List<XmlNode>();
