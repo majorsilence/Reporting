@@ -50,56 +50,24 @@ namespace Majorsilence.Reporting.Rdl
 		
 		public async Task<double> EvaluateDouble(Report rpt, Row row)
 		{
-			bool bSave=true;
-			IEnumerable re = this.GetDataScope(rpt, row, out bSave);
+			RowEnumerable re = this.GetDataScope(rpt, row, out bool bSave);
 			if (re == null)
 				return double.NaN;
 
-			Row startrow=null;
-			foreach (Row r in re)
-			{
-				startrow = r;			// We just want the first row
-				break;
-			}
-
-			double currentValue = await _Expr.EvaluateDouble(rpt, row).ConfigureAwait(false);
-			WorkClass wc = GetValue(rpt);
-			if (row == startrow)
-			{
-				// must be the start of a new group
-				wc.Value = currentValue;
-			}
-			else
-				wc.Value = ((double) wc.Value + currentValue);
-
-			return (double) wc.Value;
+			object sum = await RunningState(rpt, _key + "d", row, re,
+				async (r, s) => (object)((s is double d ? d : 0d) + await _Expr.EvaluateDouble(rpt, r).ConfigureAwait(false))).ConfigureAwait(false);
+			return (double) sum;
 		}
 		
 		public async Task<decimal> EvaluateDecimal(Report rpt, Row row)
 		{
-			bool bSave;
-			IEnumerable re = this.GetDataScope(rpt, row, out bSave);
+			RowEnumerable re = this.GetDataScope(rpt, row, out bool bSave);
 			if (re == null)
 				return decimal.MinValue;
 
-			Row startrow=null;
-			foreach (Row r in re)
-			{
-				startrow = r;			// We just want the first row
-				break;
-			}
-
-			WorkClass wc = GetValue(rpt);
-			decimal currentValue = await _Expr.EvaluateDecimal(rpt, row).ConfigureAwait(false);
-			if (row == startrow)
-			{
-				// must be the start of a new group
-				wc.Value = currentValue;
-			}
-			else
-				wc.Value = ((decimal) wc.Value + currentValue);
-
-			return (decimal) wc.Value;
+			object sum = await RunningState(rpt, _key + "m", row, re,
+				async (r, s) => (object)((s is decimal d ? d : 0m) + await _Expr.EvaluateDecimal(rpt, r).ConfigureAwait(false))).ConfigureAwait(false);
+			return (decimal) sum;
 		}
 
         public async Task<int> EvaluateInt32(Report rpt, Row row)
@@ -119,36 +87,15 @@ namespace Majorsilence.Reporting.Rdl
 			object result = await Evaluate(rpt, row).ConfigureAwait(false);
 			return Convert.ToDateTime(result);
 		}
-		private WorkClass GetValue(Report rpt)
-		{
-			WorkClass wc = rpt.Cache.Get(_key) as WorkClass;
-			if (wc == null)
-			{
-				wc = new WorkClass();
-				rpt.Cache.Add(_key, wc);
-			}
-			return wc;
-		}
 
-		private void SetValue(Report rpt, WorkClass w)
-		{
-			rpt.Cache.AddReplace(_key, w);
-		}
 		#region ICacheData Members
 
 		public void ClearCache(Report rpt)
 		{
-			rpt.Cache.Remove(_key);
+			rpt.Cache.Remove(_key + "d");
+			rpt.Cache.Remove(_key + "m");
 		}
 
 		#endregion
-		class WorkClass
-		{
-			internal object Value;		
-			internal WorkClass()
-			{
-				Value = null;
-			}
-		}
 	}
 }

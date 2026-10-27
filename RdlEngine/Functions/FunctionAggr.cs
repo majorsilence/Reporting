@@ -67,6 +67,44 @@ namespace Majorsilence.Reporting.Rdl
 			set { _LevelCheck = value; }
 		}
 
+		// A running aggregate's state at row: what add makes of the scope's rows from its first up
+		// to row, row included. The row after the one last asked for adds just itself to the state
+		// kept for that one, so a running value read down a table's rows costs one row each. Any
+		// other row is worked out from the scope's start: a group's footer that reads its last row
+		// where the detail rows never read the value, or a second read of a row, gets the value
+		// at that row, not the last value plus the row again. key is the aggregate's own.
+		protected static async Task<object> RunningState(Report rpt, string key, Row row, RowEnumerable re,
+			Func<Row, object, Task<object>> add)
+		{
+			List<Row> data = re.Data;
+			RunningAt last = rpt.Cache.Get(key) as RunningAt;
+			bool sameScope = last != null && ReferenceEquals(last.Data, data) && last.First == re.FirstRow;
+			if (sameScope && ReferenceEquals(last.Row, row))
+				return last.State;
+
+			object state = null;
+			int index = -1;
+			if (sameScope && !re.LevelCheck && last.Index + 1 <= re.LastRow && ReferenceEquals(data[last.Index + 1], row))
+			{
+				state = await add(row, last.State).ConfigureAwait(false);
+				index = last.Index + 1;
+			}
+			else
+			{
+				foreach (Row r in re)
+				{
+					state = await add(r, state).ConfigureAwait(false);
+					if (ReferenceEquals(r, row))
+						break;
+				}
+				index = data.IndexOf(row);
+			}
+			rpt.Cache.AddReplace(key, new RunningAt(row, data, re.FirstRow, index, state));
+			return state;
+		}
+
+		private sealed record RunningAt(Row Row, List<Row> Data, int First, int Index, object State);
+
 		// return an IEnumerable that represents the scope of the data
 		protected RowEnumerable GetDataScope(Report rpt, Row row, out bool bSave)
 			{
