@@ -98,6 +98,8 @@ namespace Majorsilence.Reporting.Rdl
 				OwnerReport.rl.LogError(8, "TableColumns element must be specified for a "+xNode.Name+".");
 				return;
 			}
+			if (_Footer != null && _Footer.TableRows != null && Custom != null)
+				_Footer.BottomRows = FooterRowsAtBottomOfPage(Custom, _Footer.TableRows.Items.Count);
 
             // Verify Grid restrictions
             if (_IsGrid)
@@ -108,6 +110,21 @@ namespace Majorsilence.Reporting.Rdl
 
 			if (OwnerReport.rl.MaxSeverity < 8)
 				VerifyCC();			// Verify column count
+		}
+
+		// <Custom><FooterRowsAtBottomOfPage>n</FooterRowsAtBottomOfPage></Custom> makes the last n
+		// rows of the table's Footer a footer for every page the table is on: they print at the foot
+		// of each page, and the rows of the table stop above them. The Footer's other rows still
+		// print once, after the last row.
+		private static int FooterRowsAtBottomOfPage(Custom custom, int rowCount)
+		{
+			foreach (XmlNode xNode in custom.CustomXmlNode.ChildNodes)
+			{
+				if (xNode.Name == "FooterRowsAtBottomOfPage" &&
+					int.TryParse(xNode.InnerText.Trim(), NumberStyles.Integer, CultureInfo.InvariantCulture, out int rows))
+					return Math.Max(0, Math.Min(rows, rowCount));
+			}
+			return 0;
 		}
 
 		private void VerifyCC()
@@ -271,6 +288,7 @@ namespace Majorsilence.Reporting.Rdl
 
 			Page p = pgs.CurrentPage;
 			p.YOffset += this.RelativeY(r);
+            await BeginBottomRows(pgs, wc, wc.Data.Data[0]).ConfigureAwait(false);
 
             // Calculate the xpositions of the columns
             await TableColumns.CalculateXPositions(r, GetOffsetCalc(r) + LeftCalc(r), row).ConfigureAwait(false);
@@ -310,6 +328,7 @@ namespace Majorsilence.Reporting.Rdl
             //    }
             //    _Footer.RunPage(pgs, lrow);
             //}
+            EndBottomRows(pgs, wc);
 
 			RunPageRegionEnd(pgs);
 
@@ -328,15 +347,22 @@ namespace Majorsilence.Reporting.Rdl
             Page p = pgs.CurrentPage;
             p.YOffset += this.RelativeY(r);
             await TableColumns.CalculateXPositions(r, GetOffsetCalc(r) + LeftCalc(r), row).ConfigureAwait(false);
+            TableWorkClass wc = GetValue(r);
+            await BeginBottomRows(pgs, wc, null).ConfigureAwait(false);
 
             if (_Header != null)
                 await _Header.RunPage(pgs, null).ConfigureAwait(false);
             if (_Footer != null)
             {
                 if (pgs.CurrentPage.YOffset + await _Footer.HeightOfRows(pgs, null).ConfigureAwait(false) > pgs.BottomOfPage)
+                {
+                    await RunPageBottomRows(pgs, null, false).ConfigureAwait(false);
                     RunPageNew(pgs, pgs.CurrentPage);
+                }
                 await _Footer.RunPage(pgs, null).ConfigureAwait(false);
             }
+            await RunPageBottomRows(pgs, null, true).ConfigureAwait(false);
+            EndBottomRows(pgs, wc);
 
             RunPageRegionEnd(pgs);
             SetPagePositionEnd(pgs, pgs.CurrentPage.YOffset);
@@ -351,11 +377,57 @@ namespace Majorsilence.Reporting.Rdl
                 Page p = pgs.CurrentPage;
                 if (p.YOffset + await _Footer.HeightOfRows(pgs, row).ConfigureAwait(false) > pgs.BottomOfPage)
                 {
+                    await RunPageBottomRows(pgs, row, false).ConfigureAwait(false);
                     p = RunPageNew(pgs, p);
                     await RunPageHeader(pgs, row, false, null).ConfigureAwait(false);
                 }
                 await _Footer.RunPage(pgs, row).ConfigureAwait(false);                
             }
+            await RunPageBottomRows(pgs, row, bLast).ConfigureAwait(false);
+        }
+
+        // While the table runs, the page ends above the Footer's bottom rows, so every check of
+        // what fits on a page keeps their room free. Not when they would leave no room at all.
+        private async Task BeginBottomRows(Pages pgs, TableWorkClass wc, Row row)
+        {
+            if (_Footer == null || _Footer.BottomRows == 0)
+                return;
+            float height = await _Footer.HeightOfBottomRows(pgs, row).ConfigureAwait(false);
+            if (pgs.BottomOfPage - height <= OwnerReport.TopOfPage)
+                return;
+            wc.PageBottom = pgs.BottomOfPage;
+            wc.BottomRowsPage = null;
+            pgs.BottomOfPage -= height;
+        }
+
+        private void EndBottomRows(Pages pgs, TableWorkClass wc)
+        {
+            if (wc.PageBottom > 0)
+                pgs.BottomOfPage = wc.PageBottom;
+            wc.PageBottom = 0;
+        }
+
+        // Prints the Footer's bottom rows at the foot of the current page, before the table leaves
+        // it or, last, where the table ends. Once a page; and not on a page the table has drawn
+        // nothing on, since the table does not leave that one.
+        internal async Task RunPageBottomRows(Pages pgs, Row row, bool bLast)
+        {
+            if (_Footer == null || _Footer.BottomRows == 0)
+                return;
+            TableWorkClass wc = GetValue(pgs.Report);
+            Page p = pgs.CurrentPage;
+            if (wc.PageBottom == 0 || (wc.BottomRowsPage == p && wc.BottomRowsXOffset == p.XOffset) || (!bLast && p.IsEmpty()))
+                return;
+
+            float bottom = pgs.BottomOfPage;
+            pgs.BottomOfPage = wc.PageBottom;
+            float top = wc.PageBottom - await _Footer.HeightOfBottomRows(pgs, row).ConfigureAwait(false);
+            if (p.YOffset < top)
+                p.YOffset = top;
+            await _Footer.RunPageBottomRows(pgs, row).ConfigureAwait(false);
+            pgs.BottomOfPage = bottom;
+            wc.BottomRowsPage = p;
+            wc.BottomRowsXOffset = p.XOffset;
         }
 
         internal async Task<float> GetPageFooterHeight(Pages pgs, Row row)
@@ -834,6 +906,7 @@ namespace Majorsilence.Reporting.Rdl
 					 // Add check PageBreakCondition not only PageBreakAtStart
                     if (ge.Group.PageBreakAtStart && await ge.Group.PageBreakCondition(rpt, wc.Data.Data[ge.StartRow], ge.Group.PageBreakAtStart).ConfigureAwait(false) && !pgs.CurrentPage.IsEmpty())
                     {
+                        await RunPageBottomRows(pgs, wc.Data.Data[ge.StartRow], false).ConfigureAwait(false);
 						RunPageNew(pgs, pgs.CurrentPage);
                         await RunPageHeader(pgs, wc.Data.Data[ge.StartRow], false, tg).ConfigureAwait(false);
 					}
@@ -879,6 +952,7 @@ namespace Majorsilence.Reporting.Rdl
 					Page p = pgs.CurrentPage;
 					if (p.YOffset + footerHeight > pgs.BottomOfPage) //	Do we need new page to fit footer?
 					{
+                        await RunPageBottomRows(pgs, wc.Data.Data[ge.EndRow], false).ConfigureAwait(false);
 						p = RunPageNew(pgs, p);
                         await RunPageHeader(pgs, wc.Data.Data[ge.EndRow], false, null).ConfigureAwait(false);
 					}
@@ -893,6 +967,7 @@ namespace Majorsilence.Reporting.Rdl
 
 					if (ge.Group.PageBreakAtEnd && !pgs.CurrentPage.IsEmpty())
 					{
+                        await RunPageBottomRows(pgs, wc.Data.Data[ge.EndRow], false).ConfigureAwait(false);
 						RunPageNew(pgs, pgs.CurrentPage);
                         await RunPageHeader(pgs, wc.Data.Data[ge.StartRow], false, tg).ConfigureAwait(false);
 					}
@@ -1023,6 +1098,7 @@ namespace Majorsilence.Reporting.Rdl
 						float height = p.YOffset + await header.HeightOfRows(pgs, r).ConfigureAwait(false);
 						if (height > pgs.BottomOfPage)
 						{
+                            await RunPageBottomRows(pgs, r, false).ConfigureAwait(false);
 							p = RunPageNew(pgs, p);
                             await RunPageHeader(pgs, r, false, null).ConfigureAwait(false);
 							if (!header.RepeatOnNewPage)
@@ -1194,6 +1270,9 @@ namespace Majorsilence.Reporting.Rdl
 		internal int GroupNestCount;	// Runtime: calculated on fly for # of table rows that are part of a group
 		//    used to handle toggling of a group 
 		internal Grouping RecursiveGroup;	// Runtime: set with a recursive; currently on support a single recursive group
+		internal float PageBottom;		// Runtime: the page's bottom, where the Footer's bottom rows end; 0 without them
+		internal Page BottomRowsPage;	// Runtime: the page (and column) the bottom rows last printed on
+		internal float BottomRowsXOffset;
 		internal TableWorkClass()
 		{
 			Data = null;

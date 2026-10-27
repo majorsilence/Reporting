@@ -16,6 +16,8 @@ namespace Majorsilence.Reporting.Rdl
 		TableRows _TableRows;	// The footer rows for the table or group
 		bool _RepeatOnNewPage;	// Indicates this footer should be displayed on
 								// each page that the table (or group) is displayed		
+		int _BottomRows;		// The last rows of a table's footer that print at the foot of
+								// every page the table is on (see Table.FooterRowsAtBottomOfPage)
 	
 		internal Footer(ReportDefn r, ReportLink p, XmlNode xNode) : base(r, p)
 		{
@@ -63,12 +65,32 @@ namespace Majorsilence.Reporting.Rdl
 			Page p = pgs.CurrentPage;
 			if (p.YOffset + await HeightOfRows(pgs, row).ConfigureAwait(false) > pgs.BottomOfPage)
 			{
+                await OwnerTable.RunPageBottomRows(pgs, row, false).ConfigureAwait(false);
 				p = OwnerTable.RunPageNew(pgs, p);
                 await OwnerTable.RunPageHeader(pgs, row, false, null).ConfigureAwait(false);
 			}
-            await _TableRows.RunPage(pgs, row).ConfigureAwait(false);
+			if (_BottomRows == 0)
+                await _TableRows.RunPage(pgs, row).ConfigureAwait(false);
+			else
+                await RunPageRows(pgs, row, 0, _TableRows.Items.Count - _BottomRows).ConfigureAwait(false);
 
 			return;
+		}
+
+		// The bottom rows, which the table prints at the foot of each page itself.
+		internal async Task RunPageBottomRows(Pages pgs, Row row)
+		{
+            await RunPageRows(pgs, row, _TableRows.Items.Count - _BottomRows, _TableRows.Items.Count).ConfigureAwait(false);
+		}
+
+		private async Task RunPageRows(Pages pgs, Row row, int start, int end)
+		{
+			for (int i = start; i < end; i++)
+			{
+				TableRow tr = _TableRows.Items[i];
+                await tr.HeightOfRow(pgs, row).ConfigureAwait(false);	// sets the height the row is drawn at
+                await tr.RunPage(pgs, row).ConfigureAwait(false);
+			}
 		}
 
 		internal TableRows TableRows
@@ -77,9 +99,32 @@ namespace Majorsilence.Reporting.Rdl
 			set {  _TableRows = value; }
 		}
 
+		// With bottom rows, the height of the rows above them: the rows that print once, after
+		// the table's last row.
 		internal async Task<float> HeightOfRows(Pages pgs, Row r)
 		{
+			if (_BottomRows > 0)
+				return await HeightOfRows(pgs, r, 0, _TableRows.Items.Count - _BottomRows).ConfigureAwait(false);
 			return await _TableRows.HeightOfRows(pgs, r).ConfigureAwait(false);
+		}
+
+		internal async Task<float> HeightOfBottomRows(Pages pgs, Row r)
+		{
+			return await HeightOfRows(pgs, r, _TableRows.Items.Count - _BottomRows, _TableRows.Items.Count).ConfigureAwait(false);
+		}
+
+		private async Task<float> HeightOfRows(Pages pgs, Row r, int start, int end)
+		{
+			float height = 0;
+			for (int i = start; i < end; i++)
+				height += await _TableRows.Items[i].HeightOfRow(pgs, r).ConfigureAwait(false);
+			return height;
+		}
+
+		internal int BottomRows
+		{
+			get { return _BottomRows; }
+			set { _BottomRows = value; }
 		}
 
 		internal bool RepeatOnNewPage
