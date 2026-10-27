@@ -58,3 +58,29 @@ ReportingBranding.Current = new ReportingBranding {
 - Anything left unset keeps the built-in text.
 - `ShowAboutBox = false` hides Help > About.
 - The About box always keeps the fyiReporting licence notice, which the licence requires. `AboutText` is shown above it.
+
+## Overriding toolbar/menu actions
+
+`RdlDesigner` raises a cancellable event just before it opens a couple of its built-in dialogs, so a host
+can show its own UI instead without replacing the whole toolbar or menu (issue #469):
+
+```csharp
+designer.DataSourcesPropertiesRequested += (s, e) =>
+{
+    MyOwnDataSourceEditor.Show();
+    e.Handled = true;          // skip the native "Manage Data Sources" dialog
+};
+
+designer.DataSetPropertiesRequested += (s, e) =>
+{
+    if (e.DataSetName == "Orders")
+    {
+        MyOwnDatasetEditor.Show(e.DataSetName);
+        e.Handled = true;      // skip the native dataset-properties dialog
+    }
+    // otherwise fall through to the native dialog for every other dataset
+};
+```
+
+Leaving `Handled` `false` (the default, and the behavior with no subscribers at all) runs the designer's
+own dialog exactly as before these events existed.
