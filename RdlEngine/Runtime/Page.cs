@@ -160,6 +160,44 @@ namespace Majorsilence.Reporting.Rdl
 			_PageExprReferences = null;     // clear it out; not needed once page header/footer are processed
 		}
 
+		// What the page holds at a point, so that what is added after it can be taken off again
+		// and run on another page: its items, and the rows they recorded for page header and
+		// footer expressions.
+		internal sealed class Contents
+		{
+			internal int Items;
+			internal Dictionary<string, int> ExpressionRows;
+		}
+
+		internal Contents MarkContents()
+		{
+			Contents c = new Contents { Items = _items.Count };
+			if (_PageExprReferences != null)
+			{
+				c.ExpressionRows = new Dictionary<string, int>();
+				foreach (KeyValuePair<string, Rows> kv in _PageExprReferences)
+					c.ExpressionRows.Add(kv.Key, kv.Value.Data.Count);
+			}
+			return c;
+		}
+
+		internal void RemoveContentsAfter(Contents c)
+		{
+			_items.RemoveRange(c.Items, _items.Count - c.Items);
+			if (_PageExprReferences == null)
+				return;
+			List<string> added = new List<string>();
+			foreach (KeyValuePair<string, Rows> kv in _PageExprReferences)
+			{
+				if (c.ExpressionRows != null && c.ExpressionRows.TryGetValue(kv.Key, out int count))
+					kv.Value.Data.RemoveRange(count, kv.Value.Data.Count - count);
+				else
+					added.Add(kv.Key);
+			}
+			foreach (string name in added)
+				_PageExprReferences.Remove(name);
+		}
+
 		#region IEnumerable Members
 
 		public IEnumerator GetEnumerator()      // just loop thru the pages
