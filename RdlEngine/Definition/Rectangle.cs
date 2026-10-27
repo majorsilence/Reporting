@@ -15,6 +15,7 @@ namespace Majorsilence.Reporting.Rdl
 		ReportItems _ReportItems;	// Report items contained within the bounds of the rectangle.
 		bool _PageBreakAtStart;		// Indicates the report should page break at the start of the rectangle.
 		bool _PageBreakAtEnd;		// Indicates the report should page break at the end of the rectangle.		
+		bool _KeepTogether;			// Indicates the rectangle should be kept on one page if it can be.
 
 		// constructor that doesn't process syntax
 		internal Rectangle(ReportDefn r, ReportLink p, XmlNode xNode, bool bNoLoop):base(r,p,xNode)
@@ -45,6 +46,9 @@ namespace Majorsilence.Reporting.Rdl
 						break;
 					case "pagebreakatend":
 						_PageBreakAtEnd = XmlUtil.Boolean(xNodeLoop.InnerText, OwnerReport.rl);
+						break;
+					case "keeptogether":
+						_KeepTogether = XmlUtil.Boolean(xNodeLoop.InnerText, OwnerReport.rl);
 						break;
 					default:	
 						if (ReportItemElement(xNodeLoop))	// try at ReportItem level
@@ -175,6 +179,13 @@ namespace Majorsilence.Reporting.Rdl
 		{
 			get { return  _PageBreakAtEnd; }
 			set {  _PageBreakAtEnd = value; }
+		}
+
+		// Only a Rectangle that fills a table row acts on this: see TableRow.RunPage.
+		internal bool KeepTogether
+		{
+			get { return  _KeepTogether; }
+			set {  _KeepTogether = value; }
 		}
 	}
 }

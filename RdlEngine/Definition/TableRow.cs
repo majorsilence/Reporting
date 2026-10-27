@@ -108,6 +108,69 @@ namespace Majorsilence.Reporting.Rdl
 			if (this.Visibility != null && await Visibility.IsHidden(pgs.Report, row).ConfigureAwait(false))
 				return;
 
+			// A Rectangle that fills the row's only cell stands for the whole row, so its page
+			// breaks, which it does not act on itself in a table cell, break the table before or
+			// after the row. A header repeated on each new page runs again on the page a break
+			// starts, so its rows neither break the page nor move to another.
+			bool repeated = this.Parent?.Parent is Header h && h.RepeatOnNewPage;
+			Rectangle band = repeated ? null : BandRectangle();
+			if (band != null && (band.PageBreakAtStart || band.PageBreakAtEnd)
+				&& await band.IsHidden(pgs.Report, row).ConfigureAwait(false))
+				band = null;
+
+			if (band != null && band.PageBreakAtStart && !pgs.CurrentPage.IsEmpty())
+				await RunPageNew(pgs, row).ConfigureAwait(false);
+
+			if (!repeated && KeepTogether() && !pgs.CurrentPage.IsEmpty())
+				await RunPageKeptTogether(pgs, row).ConfigureAwait(false);
+			else
+				await RunPageRow(pgs, row).ConfigureAwait(false);
+
+			if (band != null && band.PageBreakAtEnd && !pgs.CurrentPage.IsEmpty())
+				await RunPageNew(pgs, row).ConfigureAwait(false);
+		}
+
+		// A row whose Rectangle is to be kept together, and which ran past the bottom of a page
+		// that already held something, is taken off that page and run again at the top of the
+		// next, as a row whose measured height does not fit is. Its height is not known until
+		// it has run: what a Rectangle or Subreport holds grows. A row that does not fit on a
+		// page of its own runs across the break from the top of the next page.
+		private async Task RunPageKeptTogether(Pages pgs, Row row)
+		{
+			Page page = pgs.CurrentPage;
+			bool lastPage = page == pgs.LastPage;
+			float x = page.XOffset;
+			float y = page.YOffset;
+			Page.Contents before = page.MarkContents();
+
+			await RunPageRow(pgs, row).ConfigureAwait(false);
+
+			bool overflowed = pgs.CurrentPage == page
+				? page.XOffset == x && page.YOffset > pgs.BottomOfPage
+				: lastPage && OwnerReport.Body.Columns <= 1;	// only pages the row itself started
+			if (!overflowed)
+				return;
+
+			while (pgs.LastPage != page)
+				pgs.RemoveLastPage();
+			pgs.CurrentPage = page;
+			page.RemoveContentsAfter(before);
+			page.XOffset = x;
+			page.YOffset = y;
+
+			await RunPageNew(pgs, row).ConfigureAwait(false);
+			await RunPageRow(pgs, row).ConfigureAwait(false);
+		}
+
+		private async Task RunPageNew(Pages pgs, Row row)
+		{
+			Table t = this.Table;
+			t.RunPageNew(pgs, pgs.CurrentPage);
+			await t.RunPageHeader(pgs, row, false, null).ConfigureAwait(false);
+		}
+
+		private async Task RunPageRow(Pages pgs, Row row)
+		{
 			// A Rectangle or Subreport in a cell grows with what it holds, which HeightOfRow
 			// does not measure ahead of drawing it: a growing textbox or a subreport's rows
 			// inside one were drawn past the row's bottom and over the rows after it. So the
@@ -136,7 +199,6 @@ namespace Majorsilence.Reporting.Rdl
 					height = reached;
 			}
 			pgs.CurrentPage.YOffset += height;
-			return ;
 		}
 
 		private bool HoldsContainers()
@@ -144,6 +206,26 @@ namespace Majorsilence.Reporting.Rdl
 			foreach (TableCell tc in _TableCells.Items)
 				if (tc.ReportItems != null && tc.ReportItems.Items.Count > 0
 					&& (tc.ReportItems.Items[0] is Majorsilence.Reporting.Rdl.Rectangle || tc.ReportItems.Items[0] is Subreport))
+					return true;
+			return false;
+		}
+
+		// The Rectangle in the row's only cell, if that is what the row holds.
+		private Rectangle BandRectangle()
+		{
+			if (_TableCells.Items.Count != 1)
+				return null;
+			TableCell tc = _TableCells.Items[0];
+			if (tc.ReportItems == null || tc.ReportItems.Items.Count != 1)
+				return null;
+			return tc.ReportItems.Items[0] as Rectangle;
+		}
+
+		private bool KeepTogether()
+		{
+			foreach (TableCell tc in _TableCells.Items)
+				if (tc.ReportItems != null && tc.ReportItems.Items.Count > 0
+					&& tc.ReportItems.Items[0] is Rectangle rect && rect.KeepTogether)
 					return true;
 			return false;
 		}
