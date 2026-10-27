@@ -58,3 +58,26 @@ ReportingBranding.Current = new ReportingBranding {
 - Anything left unset keeps the built-in text.
 - `ShowAboutBox = false` hides Help > About.
 - The About box always keeps the fyiReporting licence notice, which the licence requires. `AboutText` is shown above it.
+
+## Host-supplied toolbar/menu icons
+
+`RdlUserControl.IconProvider` (and `RdlDesigner.IconProvider` for the stand-alone shell) lets a host override
+individual toolbar/menu icons, keyed by a stable name (the icon's resource name in
+`RdlDesign/Properties/Resources.resx`, e.g. `"document_new"`, `"edit_cut"`, `"format_justify_left"`):
+
+```csharp
+class DarkIcons : IDesignerIconProvider
+{
+    public Image GetIcon(string name) => name switch
+    {
+        "document_new" => MyDarkIcons.New,
+        "edit_cut" => MyDarkIcons.Cut,
+        _ => null,          // keep the built-in icon for everything else
+    };
+}
+
+designer.IconProvider = new DarkIcons();
+```
+
+Returning `null` for a name keeps the built-in raster icon, so a host can override as few or as many icons as
+it wants. No provider (the default) is identical to before this property existed.

@@ -75,6 +75,23 @@ namespace Majorsilence.Reporting.RdlDesign
 		private ToolStripMenuItem ctlMenuInsertCurrent = null;
 		static string _MeasureUnits;
 
+		private IDesignerIconProvider _IconProvider;
+
+		/// <summary>
+		/// Lets a host application override individual toolbar/menu icons, keeping the built-in defaults
+		/// for any icon it doesn't override (issue #468). No provider (the default) means identical
+		/// behavior to before this property existed.
+		/// </summary>
+		public IDesignerIconProvider IconProvider
+		{
+			get { return _IconProvider; }
+			set
+			{
+				_IconProvider = value;
+				DesignerIconResolver.Apply(value, mainTB, toolStrip1, menuStrip1, ContextMenuTB);
+			}
+		}
+
 		private RdlDesigner()
 		{
 		}
