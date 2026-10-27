@@ -958,6 +958,9 @@ namespace Majorsilence.Reporting.Rdl
 						case "count":
 							result = new FunctionAggrRvCount(_DataCache, args[0], scope);
 							break;
+						case "countdistinct":
+							result = new FunctionAggrRvCountDistinct(_DataCache, args[0], scope);
+							break;
 						case "max":
 							result = new FunctionAggrRvMax(_DataCache, args[0], scope);
 							break;
