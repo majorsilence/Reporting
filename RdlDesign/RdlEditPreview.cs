@@ -39,6 +39,7 @@ namespace Majorsilence.Reporting.RdlDesign
         public event RdlChangeHandler OnSelectionChanged;
         public event RdlChangeHandler OnSelectionMoved;
 		public event RdlChangeHandler OnReportItemInserted;
+		public event RdlChangeHandler OnInsertCancelled;
 		public event RdlChangeHandler OnDesignTabChanged;
         public event RdlChangeHandler SaveRequested;
 		public event DesignCtl.OpenSubreportEventHandler OnOpenSubreport; 
@@ -102,6 +103,7 @@ namespace Majorsilence.Reporting.RdlDesign
             dcDesign.SelectionChanged += new System.EventHandler(dcDesign_SelectionChanged);
 			dcDesign.SelectionMoved += new System.EventHandler(dcDesign_SelectionMoved);
 			dcDesign.ReportItemInserted += new System.EventHandler(dcDesign_ReportItemInserted);
+			dcDesign.InsertCancelled += new System.EventHandler(dcDesign_InsertCancelled);
 			dcDesign.OpenSubreport += new DesignCtl.OpenSubreportEventHandler(dcDesign_OpenSubreport);
 
             //ScintillaNET Init
@@ -828,6 +830,14 @@ namespace Majorsilence.Reporting.RdlDesign
 			if (OnReportItemInserted != null)
 			{
 				OnReportItemInserted(this, e);
+			}
+		}
+
+		private void dcDesign_InsertCancelled(object sender, System.EventArgs e)
+		{
+			if (OnInsertCancelled != null)
+			{
+				OnInsertCancelled(this, e);
 			}
 		}
 
