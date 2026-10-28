@@ -4070,7 +4070,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			}
 			catch (Exception e)
 			{
-				MessageBox.Show(e.Message, Strings.DesignXmlDraw_Show_XMLInvalid);
+				MessageBox.Show(this, e.Message, Strings.DesignXmlDraw_Show_XMLInvalid);
 				return null;
 			}
 

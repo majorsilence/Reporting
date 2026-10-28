@@ -87,7 +87,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			}
 			catch (Exception ex)
 			{
-				MessageBox.Show(ex.Message, Strings.DialogDataSourceRef_bOK_Click_UnableCreateDSR);
+				MessageBox.Show(this, ex.Message, Strings.DialogDataSourceRef_bOK_Click_UnableCreateDSR);
 				return;
 			}
 
@@ -96,8 +96,8 @@ namespace Majorsilence.Reporting.RdlDesign
 
 		private void bTestConnection_Click(object sender, System.EventArgs e)
 		{
-			if (DesignerUtility.TestConnection(this.cbDataProvider.Text, tbConnection.Text))
-				MessageBox.Show(Strings.DialogDatabase_Show_ConnectionSuccessful, Strings.DesignerUtility_Show_TestConnection);
+			if (DesignerUtility.TestConnection(this.cbDataProvider.Text, tbConnection.Text, this))
+				MessageBox.Show(this, Strings.DialogDatabase_Show_ConnectionSuccessful, Strings.DesignerUtility_Show_TestConnection);
 
 		}
 

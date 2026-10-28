@@ -269,18 +269,18 @@ namespace Majorsilence.Reporting.RdlDesign
             string ctype = cbChartType.Text.ToLowerInvariant();
             if (cbChartData.Text.Length == 0 && lbChartSeries.Items.Count == 0) //Added second condition 05122007GJL
             {
-                MessageBox.Show(Strings.DialogNewChart_ShowC_FillExpression);
+                MessageBox.Show(this, Strings.DialogNewChart_ShowC_FillExpression);
                 bFail = true;
             }
             else if (ctype == "scatter" && cbChartData2.Text.Length == 0 && lbChartSeries.Items.Count == 0)
             {
-                MessageBox.Show(Strings.DialogNewChart_ShowC_FillYExpression);
+                MessageBox.Show(this, Strings.DialogNewChart_ShowC_FillYExpression);
                 bFail = true;
 
             }
             else if (ctype == "bubble" && (cbChartData2.Text.Length == 0 || cbChartData3.Text.Length == 0))
             {
-                MessageBox.Show(Strings.DialogNewChart_ShowC_FillYAndBubbleExpressions);
+                MessageBox.Show(this, Strings.DialogNewChart_ShowC_FillYAndBubbleExpressions);
                 bFail = true;
             }
             if (bFail)

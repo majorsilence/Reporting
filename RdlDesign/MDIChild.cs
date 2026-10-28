@@ -220,7 +220,7 @@ namespace Majorsilence.Reporting.RdlDesign
                 }
                 catch (Exception)
                 {
-                    MessageBox.Show(Properties.Resources.MDIChild_doPossibleEncryption_Unable_to_encrypt_file_);
+                    MessageBox.Show(this, Properties.Resources.MDIChild_doPossibleEncryption_Unable_to_encrypt_file_);
                 }
                 
             }
@@ -246,7 +246,7 @@ namespace Majorsilence.Reporting.RdlDesign
             catch (Exception ae)
             {
                 bOK = false;
-                MessageBox.Show(ae.Message + "\r\n" + ae.StackTrace);
+                MessageBox.Show(this, ae.Message + "\r\n" + ae.StackTrace);
                 //				statusBar.Text = "Save of file '" + curFileName + "' failed";
             }
             if (bOK)
@@ -421,7 +421,7 @@ namespace Majorsilence.Reporting.RdlDesign
                 }
                 catch (Exception)
                 {
-                    MessageBox.Show(Properties.Resources.MDIChild_doPossibleDecryption_Incorrect_passkey_entered_);
+                    MessageBox.Show(this, Properties.Resources.MDIChild_doPossibleDecryption_Incorrect_passkey_entered_);
                 }
             }
 

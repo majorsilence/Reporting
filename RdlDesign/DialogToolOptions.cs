@@ -190,7 +190,7 @@ namespace Majorsilence.Reporting.RdlDesign
             }
             catch (Exception ex)
             {		// Didn't sucessfully get the startup state: use defaults
-                MessageBox.Show(string.Format(Strings.DialogToolOptions_Show_ConfigError, ex.Message), Strings.DialogToolOptions_Show_Options);
+                MessageBox.Show(this, string.Format(Strings.DialogToolOptions_Show_ConfigError, ex.Message), Strings.DialogToolOptions_Show_Options);
                 SetDesktopDefaults();
             }
 
@@ -235,7 +235,7 @@ namespace Majorsilence.Reporting.RdlDesign
             }
             catch
             {
-                MessageBox.Show(Strings.DialogToolOptions_Show_RecentFilesMax, Strings.DialogToolOptions_Show_Options);
+                MessageBox.Show(this, Strings.DialogToolOptions_Show_RecentFilesMax, Strings.DialogToolOptions_Show_Options);
                 return false;
             }
         }
@@ -275,7 +275,7 @@ namespace Majorsilence.Reporting.RdlDesign
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show(ex.Message, Strings.DialogToolOptions_Show_Options);
+                    MessageBox.Show(this, ex.Message, Strings.DialogToolOptions_Show_Options);
                     return false;
                 }
             }

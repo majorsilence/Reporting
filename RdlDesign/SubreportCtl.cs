@@ -185,7 +185,7 @@ namespace Majorsilence.Reporting.RdlDesign
 		{
 			if (tbReportFile.Text.Length > 0)
 				return true;
-			MessageBox.Show(Strings.SubreportCtl_Show_SubreportMustSpecified, Strings.SubreportCtl_Show_Subreport);
+			MessageBox.Show(this, Strings.SubreportCtl_Show_SubreportMustSpecified, Strings.SubreportCtl_Show_Subreport);
 			return false;
 		}
 
@@ -287,7 +287,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			catch(Exception e)
 			{
 				prog = null;
-				MessageBox.Show(e.Message, Strings.SubreportCtl_Show_ErrorReading);
+				MessageBox.Show(this, e.Message, Strings.SubreportCtl_Show_ErrorReading);
 			}
 			finally
 			{
@@ -313,14 +313,14 @@ namespace Majorsilence.Reporting.RdlDesign
 				r = await rdlp.Parse();
 				if (r.ErrorMaxSeverity > 4) 
 				{
-					MessageBox.Show(Strings.DrillParametersDialog_ShowC_ReportHasErrors);
+					MessageBox.Show(this, Strings.DrillParametersDialog_ShowC_ReportHasErrors);
 					r = null;			// don't return when severe errors
 				}
 			}
 			catch(Exception e)
 			{
 				r = null;
-				MessageBox.Show(e.Message, Strings.SubreportCtl_Show_ReportLoadFailed);
+				MessageBox.Show(this, e.Message, Strings.SubreportCtl_Show_ReportLoadFailed);
 			}
 			return r;
 		}

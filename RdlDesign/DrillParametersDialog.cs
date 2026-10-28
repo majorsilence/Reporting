@@ -182,7 +182,7 @@ namespace Majorsilence.Reporting.RdlDesign
             catch (Exception e)
             {
                 prog = null;
-                MessageBox.Show(e.Message, Strings.DrillParametersDialog_Show_ErrorReading);
+                MessageBox.Show(this, e.Message, Strings.DrillParametersDialog_Show_ErrorReading);
             }
             finally
             {
@@ -210,14 +210,14 @@ namespace Majorsilence.Reporting.RdlDesign
                 r = await rdlp.Parse();
                 if (r.ErrorMaxSeverity > 4)
                 {
-                    MessageBox.Show(Strings.DrillParametersDialog_ShowC_ReportHasErrors);
+                    MessageBox.Show(this, Strings.DrillParametersDialog_ShowC_ReportHasErrors);
                     r = null;			// don't return when severe errors
                 }
             }
             catch (Exception e)
             {
                 r = null;
-                MessageBox.Show(e.Message, Strings.DrillParametersDialog_Show_ReportLoadFailed);
+                MessageBox.Show(this, e.Message, Strings.DrillParametersDialog_Show_ReportLoadFailed);
             }
             return r;
         }
@@ -240,7 +240,7 @@ namespace Majorsilence.Reporting.RdlDesign
             }
             if (e.Cancel)
             {
-                MessageBox.Show(Strings.DrillParametersDialog_Show_ValueMustSpecified, Text);
+                MessageBox.Show(this, Strings.DrillParametersDialog_Show_ValueMustSpecified, Text);
             }
         }
 

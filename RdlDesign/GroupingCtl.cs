@@ -380,7 +380,7 @@ namespace Majorsilence.Reporting.RdlDesign
 					_GroupingParent.Name == "List")
 					return true;
 
-				MessageBox.Show(Strings.GroupingCtl_Show_GroupMustDefined, Strings.GroupingCtl_Show_Grouping);
+				MessageBox.Show(this, Strings.GroupingCtl_Show_GroupMustDefined, Strings.GroupingCtl_Show_Grouping);
 				return false;
 			}
 
@@ -389,13 +389,13 @@ namespace Majorsilence.Reporting.RdlDesign
 			string nerr = _Draw.GroupingNameCheck(grouping, this.tbName.Text);
 			if (nerr != null)
 			{
-				MessageBox.Show(nerr, Strings.GroupingCtl_Show_GroupNameError);
+				MessageBox.Show(this, nerr, Strings.GroupingCtl_Show_GroupNameError);
 				return false;
 			}
 
 			if (!bRows)
 			{
-				MessageBox.Show(Strings.GroupingCtl_Show_NoExpressionsForGroup, Strings.GroupingCtl_Show_Group);
+				MessageBox.Show(this, Strings.GroupingCtl_Show_NoExpressionsForGroup, Strings.GroupingCtl_Show_Group);
 				return false;
 			}
 
@@ -405,7 +405,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			if (this.cbLabelExpr.Text.Length > 0)
 				return true;
 
-			MessageBox.Show(Strings.GroupingCtl_Show_ChartSeriesMustHaveLabelForLegend, Strings.GroupingCtl_Show_Chart);
+			MessageBox.Show(this, Strings.GroupingCtl_Show_ChartSeriesMustHaveLabelForLegend, Strings.GroupingCtl_Show_Chart);
 
 			return false;
 		}
@@ -616,7 +616,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			if (!ReportNames.IsNameValid(tbName.Text))
 			{
 				e.Cancel = true;
-				MessageBox.Show(string.Format(Strings.GroupingCtl_Show_InvalidName, tbName.Text), Strings.GroupingCtl_Show_Name);
+				MessageBox.Show(this, string.Format(Strings.GroupingCtl_Show_InvalidName, tbName.Text), Strings.GroupingCtl_Show_Name);
 			}
 		}
 

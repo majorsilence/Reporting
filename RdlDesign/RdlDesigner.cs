@@ -507,7 +507,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			}
 			catch (Exception ex)
 			{
-				MessageBox.Show(string.Format(Strings.DesignCtl_ShowB_CustomReportItemError, ex.Message), Strings.DesignCtl_Show_Insert, MessageBoxButtons.OK);
+				MessageBox.Show(this, string.Format(Strings.DesignCtl_ShowB_CustomReportItemError, ex.Message), Strings.DesignCtl_Show_Insert, MessageBoxButtons.OK);
 			}
 		}
 
@@ -963,7 +963,7 @@ namespace Majorsilence.Reporting.RdlDesign
 				}
 				catch (Exception ex)
 				{
-					MessageBox.Show(ex.Message);
+					MessageBox.Show(this, ex.Message);
 					if (mc != null)
 						mc.Close();
 					return null;
@@ -1273,7 +1273,7 @@ namespace Majorsilence.Reporting.RdlDesign
 					}
 					catch (Exception ex)
 					{
-						MessageBox.Show(ex.Message, Strings.RdlDesigner_Show_ZoomValueInvalid);
+						MessageBox.Show(this, ex.Message, Strings.RdlDesigner_Show_ZoomValueInvalid);
 					}
 					break;
 			}
@@ -1708,7 +1708,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			}
 			if (printChild != null)         // already printing
 			{
-				MessageBox.Show(Strings.RdlDesigner_Show_PrintOneFile, Strings.RdlDesigner_Show_RDLDesign);
+				MessageBox.Show(this, Strings.RdlDesigner_Show_PrintOneFile, Strings.RdlDesigner_Show_RDLDesign);
 				return;
 			}
 
@@ -1727,7 +1727,7 @@ namespace Majorsilence.Reporting.RdlDesign
 				}
 				catch (Exception ex)
 				{
-					MessageBox.Show(Strings.RdlDesigner_Show_PrintError + ex.Message, Strings.RdlDesigner_Show_RDLDesign);
+					MessageBox.Show(this, Strings.RdlDesigner_Show_PrintError + ex.Message, Strings.RdlDesigner_Show_RDLDesign);
 				}
 			}
 			printChild = null;
@@ -2155,7 +2155,7 @@ namespace Majorsilence.Reporting.RdlDesign
 				}
 				catch (Exception ex)
 				{
-					MessageBox.Show(ex.Message, Strings.RdlDesigner_Showl_FormatXML);
+					MessageBox.Show(this, ex.Message, Strings.RdlDesigner_Showl_FormatXML);
 				}
 			}
 		}
@@ -2208,7 +2208,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			}
 			catch (Exception ex)
 			{
-				MessageBox.Show(ex.Message + "\n\n" + Strings.RdlDesigner_Show_ResettingHelpURL, Strings.RdlDesigner_Show_HelpURLInvalid);
+				MessageBox.Show(this, ex.Message + "\n\n" + Strings.RdlDesigner_Show_ResettingHelpURL, Strings.RdlDesigner_Show_HelpURLInvalid);
 				_HelpUrl = DefaultHelpUrl;
 			}
 		}
@@ -2230,7 +2230,7 @@ namespace Majorsilence.Reporting.RdlDesign
             }
 			catch (Exception ex)
 			{
-				MessageBox.Show(ex.Message + "\n\n" + Strings.RdlDesigner_Show_ResettingSupportURL, Strings.RdlDesigner_Show_SupportURLInvalid);
+				MessageBox.Show(this, ex.Message + "\n\n" + Strings.RdlDesigner_Show_ResettingSupportURL, Strings.RdlDesigner_Show_SupportURLInvalid);
 				_SupportUrl = DefaultSupportUrl;
 			}
 		}
@@ -2285,7 +2285,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			catch (Exception ex)
 			{
 				if (bMsg)
-					MessageBox.Show(ex.Message, Strings.RdlDesigner_Show_UnableStartDesktop);
+					MessageBox.Show(this, ex.Message, Strings.RdlDesigner_Show_UnableStartDesktop);
 			}
 
 			return;
@@ -2304,7 +2304,7 @@ namespace Majorsilence.Reporting.RdlDesign
 				catch (Exception ex)
 				{
 					if (bMsg)
-						MessageBox.Show(ex.Message, Strings.RdlDesigner_Show_ErrorStopProcess);
+						MessageBox.Show(this, ex.Message, Strings.RdlDesigner_Show_ErrorStopProcess);
 				}
 			}
 			_ServerProcess = null;
@@ -2856,6 +2856,9 @@ namespace Majorsilence.Reporting.RdlDesign
 			}
 			catch (Exception e)
 			{
+				// Static helper called from several UserControls with no window reference to pass
+				// through (BackgroundCtl, ChartAxisCtl, FontCtl, StyleBorderCtl, StyleCtl, StyleTextCtl) --
+				// no owner is available here without changing all of those call sites.
 				MessageBox.Show(e.Message, Strings.RdlDesigner_Show_CustomColorSaveFailed);
 			}
 			return;
@@ -3037,7 +3040,7 @@ namespace Majorsilence.Reporting.RdlDesign
 					}
 					catch (Exception ex)
 					{
-						MessageBox.Show(ex.Message, Strings.RdlDesigner_Show_ZoomValueInvalid);
+						MessageBox.Show(this, ex.Message, Strings.RdlDesigner_Show_ZoomValueInvalid);
 					}
 					break;
 			}
@@ -3520,7 +3523,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			}
 			catch (Exception ex)
 			{
-				MessageBox.Show(ex.Message, Strings.RdlDesigner_Show_UnableShowReport);
+				MessageBox.Show(this, ex.Message, Strings.RdlDesigner_Show_UnableShowReport);
 			}
 
 		}
@@ -3850,7 +3853,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			}
 			catch (Exception ex)
 			{
-				MessageBox.Show(ex.Message, Strings.RdlDesigner_ShowD_Error, MessageBoxButtons.OK, MessageBoxIcon.Error);
+				MessageBox.Show(this, ex.Message, Strings.RdlDesigner_ShowD_Error, MessageBoxButtons.OK, MessageBoxIcon.Error);
 			}
 		}
 

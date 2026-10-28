@@ -1089,7 +1089,7 @@ namespace Majorsilence.Reporting.RdlDesign
             }
             catch (Exception ex)
             {
-                MessageBox.Show(string.Format(Strings.DesignCtl_ShowB_CustomReportItemError, ex.Message), Strings.DesignCtl_Show_Insert, MessageBoxButtons.OK);
+                MessageBox.Show(this, string.Format(Strings.DesignCtl_ShowB_CustomReportItemError, ex.Message), Strings.DesignCtl_Show_Insert, MessageBoxButtons.OK);
             }   
         }
 
@@ -1873,7 +1873,7 @@ namespace Majorsilence.Reporting.RdlDesign
 						hl.HitContainer == null || (!(hl.HitContainer.Name == "Table" || hl.HitContainer.Name=="fyi:Grid")))
 				   return false;
 				
-				if (MessageBox.Show(Strings.DesignCtl_ShowB_WantReplaceCell, Strings.DesignCtl_Show_Insert, MessageBoxButtons.YesNo) != DialogResult.Yes)
+				if (MessageBox.Show(this, Strings.DesignCtl_ShowB_WantReplaceCell, Strings.DesignCtl_Show_Insert, MessageBoxButtons.YesNo) != DialogResult.Yes)
 					return false;
 			}
 			switch (_CurrentInsert)
@@ -2186,7 +2186,7 @@ namespace Majorsilence.Reporting.RdlDesign
                 }
                 if (bTorM)
                 {   // all selected items are in the same table or matrix
-                    if (MessageBox.Show(string.Format(Strings.DesignCtl_ShowB_WantSelect, tn.Name),
+                    if (MessageBox.Show(this, string.Format(Strings.DesignCtl_ShowB_WantSelect, tn.Name),
                         Strings.DesignCtl_ShowB_Copy, MessageBoxButtons.YesNo) == DialogResult.Yes)
                     {
                         StringBuilder tb = new StringBuilder();
@@ -2227,7 +2227,7 @@ namespace Majorsilence.Reporting.RdlDesign
 				if (hl.HitContainer != null && (hl.HitContainer.Name == "Table" || hl.HitContainer.Name == "fyi:Grid"))
 				{
 				//	When table we need to replace the tablecell contents; ask first
-					if (MessageBox.Show(Strings.DesignCtl_ShowB_WantReplaceCell, Strings.DesignCtl_Show_Paste, MessageBoxButtons.YesNo) != DialogResult.Yes)
+					if (MessageBox.Show(this, Strings.DesignCtl_ShowB_WantReplaceCell, Strings.DesignCtl_Show_Paste, MessageBoxButtons.YesNo) != DialogResult.Yes)
 						return;
 
 					XmlNode repItems = lNode.ParentNode;
@@ -2280,7 +2280,7 @@ namespace Majorsilence.Reporting.RdlDesign
 				}
 				catch (Exception e)
 				{
-					MessageBox.Show(e.Message, Strings.DesignCtl_Show_Paste);
+					MessageBox.Show(this, e.Message, Strings.DesignCtl_Show_Paste);
 				}
 			}
 			else
@@ -2312,7 +2312,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			// Charts aren't allowed in PageHeader or PageFooter
 			if (_DrawPanel.InPageHeaderOrFooter(hl.HitContainer))
 			{
-				MessageBox.Show(Strings.DesignCtl_Show_ChartsInsert, Strings.DesignCtl_Show_Insert);
+				MessageBox.Show(this, Strings.DesignCtl_Show_ChartsInsert, Strings.DesignCtl_Show_Insert);
 				return;
 			}
 
@@ -2389,7 +2389,7 @@ namespace Majorsilence.Reporting.RdlDesign
 				if (!(criXml.StartsWith("<CustomReportItem>") && criXml.EndsWith("</CustomReportItem>")))
 				{
 					MessageBox.Show(
-						string.Format(Strings.DesignCtl_Show_CustomReportItem, customName, criXml), Strings.DesignCtl_Show_Insert);
+						this, string.Format(Strings.DesignCtl_Show_CustomReportItem, customName, criXml), Strings.DesignCtl_Show_Insert);
 					return;
 				}
 
@@ -2399,7 +2399,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			}
 			catch (Exception ex)
 			{
-				MessageBox.Show(string.Format(Strings.DesignCtl_Show_CustomReportItemException, ex.Message), Strings.DesignCtl_Show_Insert);
+				MessageBox.Show(this, string.Format(Strings.DesignCtl_Show_CustomReportItemException, ex.Message), Strings.DesignCtl_Show_Insert);
 				return;
 			}
 			finally
@@ -2646,7 +2646,7 @@ namespace Majorsilence.Reporting.RdlDesign
 				return;
 			if (_DrawPanel.InPageHeaderOrFooter(hl.HitContainer))
 			{
-				MessageBox.Show(Strings.DesignCtl_Show_ListsInBody, Strings.DesignCtl_Show_Insert);
+				MessageBox.Show(this, Strings.DesignCtl_Show_ListsInBody, Strings.DesignCtl_Show_Insert);
 				return;
 			}
 			menuInsertReportItem(hl, ri);
@@ -2668,7 +2668,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			// Matrixs aren't allowed in PageHeader or PageFooter
 			if (_DrawPanel.InPageHeaderOrFooter(hl.HitContainer))
 			{
-				MessageBox.Show(Strings.DesignCtl_Show_MatrixsInBody, Strings.DesignCtl_Show_Insert);
+				MessageBox.Show(this, Strings.DesignCtl_Show_MatrixsInBody, Strings.DesignCtl_Show_Insert);
 				return;
 			}
 
@@ -2750,7 +2750,7 @@ namespace Majorsilence.Reporting.RdlDesign
             }
             catch (Exception ex)
             {
-                MessageBox.Show(Strings.DesignCtl_ShowC_IllegalInsertSyntax + Environment.NewLine + 
+                MessageBox.Show(this, Strings.DesignCtl_ShowC_IllegalInsertSyntax + Environment.NewLine + 
                     reportItem + Environment.NewLine + ex.Message);
                 return;
             }
@@ -2776,7 +2776,7 @@ namespace Majorsilence.Reporting.RdlDesign
 				return;
 			if (_DrawPanel.InPageHeaderOrFooter(hl.HitContainer))
 			{
-				MessageBox.Show(Strings.DesignCtl_Show_SubreportsInBody, Strings.DesignCtl_Show_Insert);
+				MessageBox.Show(this, Strings.DesignCtl_Show_SubreportsInBody, Strings.DesignCtl_Show_Insert);
 				return;
 			}
 
@@ -2794,7 +2794,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			// Tables aren't allowed in PageHeader or PageFooter
 			if (_DrawPanel.InPageHeaderOrFooter(hl.HitContainer))
 			{
-				MessageBox.Show(Strings.DesignCtl_Show_TablesInBody, Strings.DesignCtl_Show_Insert);
+				MessageBox.Show(this, Strings.DesignCtl_Show_TablesInBody, Strings.DesignCtl_Show_Insert);
 				return;
 			}
 

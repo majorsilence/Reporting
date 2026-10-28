@@ -428,7 +428,7 @@ namespace Majorsilence.Reporting.RdlDesign
             tvTablesColumns.BeginUpdate();
 
             // Get the schema information
-            List<SqlSchemaInfo> si = DesignerUtility.GetSchemaInfo(GetDataProvider(), GetDataConnection());
+            List<SqlSchemaInfo> si = DesignerUtility.GetSchemaInfo(GetDataProvider(), GetDataConnection(), this);
             TreeNode ndRoot = new TreeNode("Tables");
             tvTablesColumns.Nodes.Add(ndRoot);
             bool bView = false;
@@ -478,7 +478,7 @@ namespace Majorsilence.Reporting.RdlDesign
             if (!rbEmpty.Checked)
             {
                 if (_ColumnList == null)
-                    _ColumnList = DesignerUtility.GetSqlColumns(GetDataProvider(), GetDataConnection(), tbSQL.Text, reportParameterCtl1.lbParameters.Items);
+                    _ColumnList = DesignerUtility.GetSqlColumns(GetDataProvider(), GetDataConnection(), tbSQL.Text, reportParameterCtl1.lbParameters.Items, this);
 
                 foreach (SqlColumn sq in _ColumnList)
                 {
@@ -513,7 +513,7 @@ namespace Majorsilence.Reporting.RdlDesign
             if (!rbEmpty.Checked)
             {
                 if (_ColumnList == null)
-                    _ColumnList = DesignerUtility.GetSqlColumns(GetDataProvider(), GetDataConnection(), tbSQL.Text, reportParameterCtl1.lbParameters.Items);
+                    _ColumnList = DesignerUtility.GetSqlColumns(GetDataProvider(), GetDataConnection(), tbSQL.Text, reportParameterCtl1.lbParameters.Items, this);
 
                 if (_ColumnList.Count == 0)     // can only happen by an error
                     return false;
@@ -829,7 +829,7 @@ namespace Majorsilence.Reporting.RdlDesign
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, Strings.DialogDatabase_Show_InternalError);
+                MessageBox.Show(this, ex.Message, Strings.DialogDatabase_Show_InternalError);
                 tbReportSyntax.Text = sb.ToString();
             }
             return true;
@@ -1014,7 +1014,7 @@ namespace Majorsilence.Reporting.RdlDesign
             tvTablesColumns.BeginUpdate();
 
             string sql = "SELECT * FROM " + DesignerUtility.NormalizeSqlName(tNode.Text);
-            List<SqlColumn> tColumns = DesignerUtility.GetSqlColumns(GetDataProvider(), GetDataConnection(), sql, null);
+            List<SqlColumn> tColumns = DesignerUtility.GetSqlColumns(GetDataProvider(), GetDataConnection(), sql, null, this);
             bool bFirstTime = true;
             foreach (SqlColumn sc in tColumns)
             {
@@ -1452,7 +1452,7 @@ namespace Majorsilence.Reporting.RdlDesign
         {
             if (string.IsNullOrEmpty(tbConnection.Text))
             {
-                MessageBox.Show(Strings.DialogDatabase_ShowD_SelectDataProvider, Strings.DesignerUtility_Show_TestConnection, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(this, Strings.DialogDatabase_ShowD_SelectDataProvider, Strings.DesignerUtility_Show_TestConnection, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
 
@@ -1461,13 +1461,13 @@ namespace Majorsilence.Reporting.RdlDesign
             if (cType == null)
                 return;
 
-            if (DesignerUtility.TestConnection(cType, GetDataConnection()))
-                MessageBox.Show(Strings.DialogDatabase_Show_ConnectionSuccessful, Strings.DesignerUtility_Show_TestConnection);
+            if (DesignerUtility.TestConnection(cType, GetDataConnection(), this))
+                MessageBox.Show(this, Strings.DialogDatabase_Show_ConnectionSuccessful, Strings.DesignerUtility_Show_TestConnection);
         }
 
         private void DBConnection_Validating(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            if (!DesignerUtility.TestConnection(this.GetDataConnection(), GetDataConnection()))
+            if (!DesignerUtility.TestConnection(this.GetDataConnection(), GetDataConnection(), this))
                 e.Cancel = true;
         }
 
@@ -1539,7 +1539,7 @@ namespace Majorsilence.Reporting.RdlDesign
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, Strings.DialogDatabase_ShowD_Error, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(this, ex.Message, Strings.DialogDatabase_ShowD_Error, MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -1567,7 +1567,7 @@ namespace Majorsilence.Reporting.RdlDesign
             }
             catch(Exception ex)
             {
-				MessageBox.Show(ex.Message, Strings.DialogDatabase_ShowD_Error, MessageBoxButtons.OK, MessageBoxIcon.Error);
+				MessageBox.Show(this, ex.Message, Strings.DialogDatabase_ShowD_Error, MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -1598,7 +1598,7 @@ namespace Majorsilence.Reporting.RdlDesign
             }
             catch (Exception ex)
             {
-				MessageBox.Show(ex.Message, Strings.DialogDatabase_ShowD_Error, MessageBoxButtons.OK, MessageBoxIcon.Error);
+				MessageBox.Show(this, ex.Message, Strings.DialogDatabase_ShowD_Error, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
             finally
@@ -1622,7 +1622,7 @@ namespace Majorsilence.Reporting.RdlDesign
             }
             catch (Exception ex)
             {
-				MessageBox.Show(ex.Message, Strings.DialogDatabase_ShowD_Error, MessageBoxButtons.OK, MessageBoxIcon.Error);
+				MessageBox.Show(this, ex.Message, Strings.DialogDatabase_ShowD_Error, MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 

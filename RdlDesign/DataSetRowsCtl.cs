@@ -129,7 +129,7 @@ namespace Majorsilence.Reporting.RdlDesign
                         {
                             if (!bSkipMsg)
                             {
-                                if (MessageBox.Show(string.Format(Strings.DataSetRowsCtl_ShowB_UnableConvert,
+                                if (MessageBox.Show(this, string.Format(Strings.DataSetRowsCtl_ShowB_UnableConvert,
                                         dc.DataType, dNode.InnerText, e.Message) + Environment.NewLine + Strings.DataSetRowsCtl_ShowB_WantSeeErrors,
                                         Strings.DataSetRowsCtl_ShowB_ErrorReadingDataRows, MessageBoxButtons.YesNo) == DialogResult.No)
                                     bSkipMsg = true;
@@ -148,7 +148,7 @@ namespace Majorsilence.Reporting.RdlDesign
 		{
 			if (chkRowsFile.Checked && tbRowsFile.Text.Length == 0)
 			{
-				MessageBox.Show(Strings.DataSetRowsCtl_ShowC_FileNameRequired);
+				MessageBox.Show(this, Strings.DataSetRowsCtl_ShowC_FileNameRequired);
 				return false;
 			}
 			return true;
@@ -363,7 +363,7 @@ namespace Majorsilence.Reporting.RdlDesign
 				}
 				if (datasource == null)
 				{
-					MessageBox.Show(string.Format(Strings.DataSetRowsCtl_Show_DatasourceNotFound, _dsv.DataSourceName), Strings.DataSetRowsCtl_Show_LoadFailed);
+					MessageBox.Show(this, string.Format(Strings.DataSetRowsCtl_Show_DatasourceNotFound, _dsv.DataSourceName), Strings.DataSetRowsCtl_Show_LoadFailed);
 					return;
 				}
                 // get the connection information
@@ -380,7 +380,7 @@ namespace Majorsilence.Reporting.RdlDesign
                     RdlDesigner rd = mc?.MdiParent as RdlDesigner;
                     if (rd == null || mc == null || mc.SourceFile == null)
                     {
-                        MessageBox.Show(Strings.DataSetRowsCtl_ShowC_UnableLocateDSR);
+                        MessageBox.Show(this, Strings.DataSetRowsCtl_ShowC_UnableLocateDSR);
                         return;
                     }
                     Uri filename = new Uri(Path.GetDirectoryName(mc.SourceFile.LocalPath) + Path.DirectorySeparatorChar + dataSourceReference);
@@ -402,7 +402,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			}
 			catch (Exception ex)
 			{
-				MessageBox.Show(ex.Message, Strings.DataSetRowsCtl_Show_LoadFailed);
+				MessageBox.Show(this, ex.Message, Strings.DataSetRowsCtl_Show_LoadFailed);
 			}
 		}
 	}

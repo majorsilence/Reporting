@@ -570,7 +570,7 @@ namespace Majorsilence.Reporting.RdlDesign
 				}
 				catch (Exception e)
 				{
-					MessageBox.Show(e.Message, Strings.FontCtl_Show_InvalidFontSize);
+					MessageBox.Show(this, e.Message, Strings.FontCtl_Show_InvalidFontSize);
 					return false;
 				}
 

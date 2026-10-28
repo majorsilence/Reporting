@@ -433,7 +433,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			}
 			catch (Exception ex)
 			{
-				MessageBox.Show(ex.Message, string.Format(Strings.StyleCtl_Show_PaddingInvalid, name));
+				MessageBox.Show(this, ex.Message, string.Format(Strings.StyleCtl_Show_PaddingInvalid, name));
 				return false;
 			}
 			return true;
