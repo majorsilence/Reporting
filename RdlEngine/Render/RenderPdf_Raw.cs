@@ -191,7 +191,7 @@ namespace Majorsilence.Reporting.Rdl
         // ── text ──────────────────────────────────────────────────────────────
 
         protected internal override void AddText(float x, float y, float height, float width,
-            string[] sa, StyleInfo si, float[] tw, bool bWrap, string url, bool bNoClip, string tooltip, bool bClipSides)
+            string[] sa, StyleInfo si, float[] tw, bool bWrap, string url, bool bNoClip, string tooltip, bool bClipSides, bool bNoWrap)
         {
             if (sa == null || sa.Length == 0) return;
 
@@ -208,7 +208,8 @@ namespace Majorsilence.Reporting.Rdl
             // Which lines end a paragraph, for justified text: every line but those is spread
             // to the full width. Known only where the lines are wrapped here.
             List<bool> paragraphEnds = null;
-            if (!bNoClip && availableW > 0 && si.WritingMode != WritingModeEnum.tb_rl && si.WritingMode != WritingModeEnum.tb_lr)
+            // bNoWrap: the box asked for its lines whole (Textbox.NoWrapOf); they are cut at its sides below.
+            if (!bNoClip && !bNoWrap && availableW > 0 && si.WritingMode != WritingModeEnum.tb_rl && si.WritingMode != WritingModeEnum.tb_lr)
             {
                 if (si.TextAlign == TextAlignEnum.Justified)
                     paragraphEnds = new List<bool>();
