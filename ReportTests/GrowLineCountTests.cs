@@ -18,8 +18,16 @@ namespace ReportTests
     {
         private const string Text = "Priority one of three";
 
+        // The width of the text in the font the PDF draws it in, which a growing box is measured in.
+        // The graphics library's width is not always that one: on Linux, where Arial is drawn in
+        // Liberation Sans, it measured this text 1.8pt narrower than the PDF draws it, so a box
+        // 1pt wider than its measure was drawn on two lines.
         private static float TextWidthPoints()
         {
+            var drawn = RenderPdf_Raw.DrawnFont("Arial", false, false);
+            if (drawn != null)
+                return drawn.GetWidthPoint(Text, 10);
+
             using var bitmap = new Draw.Bitmap(10, 10);
             using var g = Draw.Graphics.FromImage(bitmap);
             using var font = new Draw.Font("Arial", 10);
