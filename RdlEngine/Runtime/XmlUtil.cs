@@ -65,6 +65,14 @@ namespace Majorsilence.Reporting.Rdl
 		/// </summary>
 		private static bool TryColorFromHtml(string sc, out Color c)
 		{
+			// No string is no colour. Both translators hand back Color.Empty for one rather
+			// than throwing, which would otherwise be taken for a transparent colour.
+			if (string.IsNullOrWhiteSpace(sc))
+			{
+				c = Color.Empty;
+				return false;
+			}
+
 			try
 			{
 				c = ColorTranslator.FromHtml(sc);
