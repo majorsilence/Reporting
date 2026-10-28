@@ -52,6 +52,7 @@ namespace Majorsilence.Reporting.Rdl
 								// Auto uses the setting on the Report element.
 		bool _IsToggle;		// Textbox is used to toggle a detail row
 		bool _NoWrap;		// a box that may not grow prints each line whole, unwrapped; see NoWrapOf
+		bool _TotalPagesLater;	// a body box reading Globals!TotalPages: run again once the page count is known
 		List<string> _ExprReferences;	// array of names of expressions that reference this Textbox;
 								//  only needed for page header/footer references 
 
@@ -141,6 +142,8 @@ namespace Majorsilence.Reporting.Rdl
             await base.FinalPass().ConfigureAwait(false);
             await _Value.FinalPass().ConfigureAwait(false);
             ValueIsConstant = await _Value.IsConstant().ConfigureAwait(false);   // read by DataElementOutput
+			_TotalPagesLater = !InPageHeaderOrFooter() && _Value.Source != null &&
+				_Value.Source.IndexOf("Globals!TotalPages", StringComparison.OrdinalIgnoreCase) >= 0;
 
 			if (this.DataElementName == null && this.Name == null)
 			{
@@ -338,7 +341,11 @@ namespace Majorsilence.Reporting.Rdl
                     p = pgs.CurrentPage;
                 }
                 else
+                {
                     p.AddObject(pt);
+                    if (_TotalPagesLater && !bDup && !html)
+                        pgs.AddTotalPagesText(this, pt, row);
+                }
                 if (!bDup)
                 {
                     tbr.PreviousText = t;	// previous text displayed
