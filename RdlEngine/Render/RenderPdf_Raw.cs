@@ -209,14 +209,22 @@ namespace Majorsilence.Reporting.Rdl
             // drawing path hands the string to a layout rectangle and the graphics library
             // clips it. This renderer places each line itself, so it has to say so.
             //
-            // The pitch is si.FontSize because that is the pitch the loop below draws at,
-            // and never fewer than one line: a single line of text is routinely taller than
-            // the cell the report sizes for it, and dropping it would blank the report
+            // The actual TrueType font's own ascent/descent/lineGap, scaled to si.FontSize, rather
+            // than treating the font size itself as the glyphs' height: a 10pt Arial's ascent and
+            // descent together run taller than 10pt, which is why native GDI rendering spaces
+            // multiline text more generously than si.FontSize alone would.
+            (float ascent, float descent, float lineGap) metrics = _currentPage.GetFontMetrics(baseStyle);
+            float emHeight = metrics.ascent + metrics.descent;
+            float pitch = emHeight + metrics.lineGap;
+
+            // The pitch is the font's own measured line height because that is the pitch the loop
+            // below draws at, and never fewer than one line: a single line of text is routinely
+            // taller than the cell the report sizes for it, and dropping it would blank the report
             // rather than clip it.
-            if (!bWrap && !bNoClip && height > 0 && sa.Length > 1 && si.FontSize > 0)
+            if (!bWrap && !bNoClip && height > 0 && sa.Length > 1 && pitch > 0)
             {
                 float availableH = height - si.PaddingTop - si.PaddingBottom;
-                int maxLines = Math.Max(1, (int)Math.Floor(availableH / si.FontSize));
+                int maxLines = Math.Max(1, (int)Math.Floor(availableH / pitch));
                 if (sa.Length > maxLines)
                     sa = sa.Take(maxLines).ToArray();
             }
@@ -231,7 +239,7 @@ namespace Majorsilence.Reporting.Rdl
 
                 float textwidth = _currentPage.MeasureTextWidth(text, baseStyle);
                 float startX = x + si.PaddingLeft;
-                float startY = y + si.PaddingTop + i * si.FontSize;
+                float startY = y + si.PaddingTop + i * pitch;
 
                 if (si.WritingMode == WritingModeEnum.lr_tb)
                 {
@@ -256,20 +264,20 @@ namespace Majorsilence.Reporting.Rdl
                             {
                                 startY = y + si.PaddingTop
                                        + (height - si.PaddingTop - si.PaddingBottom) / 2f
-                                       - si.FontSize / 2f;
+                                       - emHeight / 2f;
                                 if (sa.Length > 1)
                                     startY += sa.Length % 2 == 0
-                                        ? -(((sa.Length / 2) - i) * si.FontSize) + si.FontSize / 2f
-                                        : -(((sa.Length / 2) - i) * si.FontSize);
+                                        ? -(((sa.Length / 2) - i) * pitch) + pitch / 2f
+                                        : -(((sa.Length / 2) - i) * pitch);
                             }
                             break;
                         case VerticalAlignEnum.Bottom:
                             if (height > 0)
-                                startY = y + height - si.PaddingBottom - si.FontSize * (sa.Length - i);
+                                startY = y + height - si.PaddingBottom - pitch * (sa.Length - i - 1) - emHeight;
                             break;
                     }
 
-                    _currentPage.DrawText(text, startX, startY + si.FontSize, baseStyle);
+                    _currentPage.DrawText(text, startX, startY + metrics.ascent, baseStyle);
 
                     float maxX = width > 0
                         ? Math.Min(x + width, startX + textwidth)
@@ -278,13 +286,13 @@ namespace Majorsilence.Reporting.Rdl
                     switch (si.TextDecoration)
                     {
                         case TextDecorationEnum.Underline:
-                            AddLine(startX, startY + si.FontSize + 1,
-                                    maxX,   startY + si.FontSize + 1,
+                            AddLine(startX, startY + metrics.ascent + 1,
+                                    maxX,   startY + metrics.ascent + 1,
                                     1, si.Color, BorderStyleEnum.Solid);
                             break;
                         case TextDecorationEnum.LineThrough:
-                            AddLine(startX, startY + si.FontSize / 2f + 1,
-                                    maxX,   startY + si.FontSize / 2f + 1,
+                            AddLine(startX, startY + emHeight / 2f + 1,
+                                    maxX,   startY + emHeight / 2f + 1,
                                     1, si.Color, BorderStyleEnum.Solid);
                             break;
                         case TextDecorationEnum.Overline:

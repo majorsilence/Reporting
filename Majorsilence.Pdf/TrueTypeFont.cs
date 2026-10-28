@@ -20,6 +20,7 @@ namespace Majorsilence.Pdf
         private int _unitsPerEm;
         private short _ascender;
         private short _descender;
+        private short _lineGap;
         private int _numGlyphs;
         private int _numberOfHMetrics;
         private ushort[]? _advanceWidths;
@@ -37,6 +38,7 @@ namespace Majorsilence.Pdf
         public int UnitsPerEm => _unitsPerEm;
         public short Ascender => _ascender;
         public short Descender => _descender;
+        public short LineGap => _lineGap;
         public int NumGlyphs => _numGlyphs;
         public string PostScriptName => _postScriptName ?? "UnknownFont";
         public short XMin => _xMin;
@@ -137,6 +139,7 @@ namespace Majorsilence.Pdf
             int o = e.offset;
             _ascender         = S16(_data, o + 4);
             _descender        = S16(_data, o + 6);
+            _lineGap          = S16(_data, o + 8);
             _numberOfHMetrics = U16(_data, o + 34);
         }
 
