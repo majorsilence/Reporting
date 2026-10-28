@@ -475,7 +475,7 @@ namespace Majorsilence.Reporting.Rdl
 		
 		internal async Task<float> RunTextCalcHeight(Report rpt, Graphics g, Row row, PageTextHtml pth)
 		{	// normally only called when CanGrow is true
-			Size s = Size.Empty;
+			float height;
 
 			if (await IsHidden(rpt, row))
 				return 0;
@@ -483,11 +483,11 @@ namespace Majorsilence.Reporting.Rdl
 			object o = await Evaluate(rpt, row);
 
 			TypeCode tc = _Value.GetTypeCode();
-			int width = this.WidthCalc(rpt, g);
+			float wrapPoints = this.WidthPoints(rpt);		// the width between the paddings the text is drawn in
 
 			if (this.Style != null)
 			{
-				width -= (await Style.EvalPaddingLeftPx(rpt, row) + await Style.EvalPaddingRightPx(rpt, row));
+				wrapPoints -= await Style.EvalPaddingLeft(rpt, row) + await Style.EvalPaddingRight(rpt, row);
 
 				if (await this.IsHtml(rpt, row))
 				{
@@ -497,16 +497,16 @@ namespace Majorsilence.Reporting.Rdl
 						await SetPagePositionAndStyle(rpt, pth, row);
 					}
 					await pth.Build(g);
-					s.Height = RSize.PixelsFromPoints(pth.TotalHeight);
+					height = RSize.PointsFromPixels(g, RSize.PixelsFromPoints(pth.TotalHeight));
 				}
 				else
-					s = await Style.MeasureString(rpt, g, o, tc, row, width);
+					height = await Style.MeasureHeight(rpt, g, o, tc, row, wrapPoints);
 			}
 			else	// call the class static method
-				s = await Style.MeasureStringDefaults(rpt, g, o, tc, row, width);
+				height = await Style.MeasureHeightDefaults(rpt, g, o, tc, row, wrapPoints);
 
 			TextboxRuntime tbr = TextboxRuntime.GetTextboxRuntime(rpt, this);
-			tbr.RunHeight = RSize.PointsFromPixels(g, s.Height);
+			tbr.RunHeight = height;
 			if (Style != null)
 				tbr.RunHeight += (await Style.EvalPaddingBottom(rpt, row) + await Style.EvalPaddingTop(rpt, row));
 			return tbr.RunHeight;
