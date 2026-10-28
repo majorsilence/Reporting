@@ -77,7 +77,7 @@ namespace Majorsilence.Reporting.RdlDesign
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Exception when try get paper sizes: {ex}");
+                MessageBox.Show(this, $"Exception when try get paper sizes: {ex}");
             }
         }
 
@@ -145,7 +145,7 @@ namespace Majorsilence.Reporting.RdlDesign
             catch (Exception ex)
             {
                 e.Cancel = true;
-                MessageBox.Show(string.Format(Strings.ReportCtl_Show_SizeInvalid, tb.Text, ex.Message), tb.Tag + " " + Strings.ReportCtl_Show_Field_Invalid);
+                MessageBox.Show(this, string.Format(Strings.ReportCtl_Show_SizeInvalid, tb.Text, ex.Message), tb.Tag + " " + Strings.ReportCtl_Show_Field_Invalid);
             }
         }
 

@@ -199,7 +199,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			}
 			catch (Exception ex)
 			{
-				MessageBox.Show(ex.Message, Strings.TableColumnCtl_Show_WidthInvalid);
+				MessageBox.Show(this, ex.Message, Strings.TableColumnCtl_Show_WidthInvalid);
 				return false;
 			}
 
@@ -219,7 +219,7 @@ namespace Majorsilence.Reporting.RdlDesign
 							case "false":
 								break;
 							default:
-								MessageBox.Show(String.Format(Strings.TableColumnCtl_Show_ExpressionTrueFalse, tbHidden.Text), Strings.TableColumnCtl_Show_HiddenInvalid);
+								MessageBox.Show(this, String.Format(Strings.TableColumnCtl_Show_ExpressionTrueFalse, tbHidden.Text), Strings.TableColumnCtl_Show_HiddenInvalid);
 								return false;
 						}
 					}

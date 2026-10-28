@@ -220,7 +220,7 @@ namespace Majorsilence.Reporting.RdlDesign
         {
             if (string.IsNullOrEmpty(this.cbDataProvider.Text))
             {
-                MessageBox.Show(Strings.DialogDatabase_ShowD_SelectDataProvider, Strings.DesignerUtility_Show_TestConnection, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(this, Strings.DialogDatabase_ShowD_SelectDataProvider, Strings.DesignerUtility_Show_TestConnection, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
 
@@ -230,8 +230,8 @@ namespace Majorsilence.Reporting.RdlDesign
                 connectionString = _Draw.GetReportParameterDefaultValue(tbConnection.Text);
             }
 
-            if (DesignerUtility.TestConnection(this.cbDataProvider.Text, connectionString))
-                MessageBox.Show(Strings.DialogDatabase_Show_ConnectionSuccessful, Strings.DesignerUtility_Show_TestConnection);
+            if (DesignerUtility.TestConnection(this.cbDataProvider.Text, connectionString, this))
+                MessageBox.Show(this, Strings.DialogDatabase_Show_ConnectionSuccessful, Strings.DesignerUtility_Show_TestConnection);
         }
 
         private void tbDSName_TextChanged(object sender, System.EventArgs e)

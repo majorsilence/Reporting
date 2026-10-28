@@ -263,7 +263,7 @@ namespace Majorsilence.Reporting.RdlDesign
                 }
             }
             else
-                MessageBox.Show(Resources.Strings.CodeCtl_Show_NoErrors, Resources.Strings.CodeCtl_Show_CodeVerification);
+                MessageBox.Show(this, Resources.Strings.CodeCtl_Show_NoErrors, Resources.Strings.CodeCtl_Show_CodeVerification);
 
             return ;
         }

@@ -391,7 +391,7 @@ namespace Majorsilence.Reporting.RdlDesign
 				string nerr = _Draw.NameError(ri, this.tbName.Text);
 				if (nerr != null)
 				{
-					MessageBox.Show(nerr, Strings.PositionCtl_Show_Name);
+					MessageBox.Show(this, nerr, Strings.PositionCtl_Show_Name);
 					return false;
 				}
 			}
@@ -422,7 +422,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			}
 			catch (Exception ex)
 			{
-				MessageBox.Show(ex.Message, name + " " + Strings.PositionCtl_Show_SizeInvalid);
+				MessageBox.Show(this, ex.Message, name + " " + Strings.PositionCtl_Show_SizeInvalid);
 				return false;
 			}
 
@@ -546,7 +546,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			if (err != null)
 			{
 				e.Cancel = true;
-				MessageBox.Show(string.Format(Strings.PositionCtl_Show_Invalid, tbName.Text, err), Strings.PositionCtl_Show_Name);
+				MessageBox.Show(this, string.Format(Strings.PositionCtl_Show_Invalid, tbName.Text, err), Strings.PositionCtl_Show_Name);
 				return;
 			}
 		}

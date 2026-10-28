@@ -40,7 +40,7 @@ namespace Majorsilence.Reporting.RdlDesign
             MDIChild mc = _RdlDesigner.ActiveMdiChild as MDIChild;
             if (mc == null || mc.DesignTab != DesignTabs.Edit)
             {
-                MessageBox.Show(Strings.DialogValidateRdl_ShowC_SelectRDLTab);
+                MessageBox.Show(this, Strings.DialogValidateRdl_ShowC_SelectRDLTab);
                 return;
             }
 
@@ -137,7 +137,7 @@ namespace Majorsilence.Reporting.RdlDesign
 #if DEBUG
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message); // developer might care about this error??
+                MessageBox.Show(this, ex.Message); // developer might care about this error??
             }
 #else
 			catch 

@@ -189,7 +189,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			if (this.chkDetails.Checked || this.chkFooterRows.Checked || this.chkHeaderRows.Checked)
 				return true;
 
-			MessageBox.Show(Strings.GridCtl_Show_GridRegionsMustDefined, Strings.GridCtl_Show_Grid);
+			MessageBox.Show(this, Strings.GridCtl_Show_GridRegionsMustDefined, Strings.GridCtl_Show_Grid);
 
 			return false;
 		}

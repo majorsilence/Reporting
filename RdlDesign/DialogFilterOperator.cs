@@ -42,7 +42,7 @@ namespace Majorsilence.Reporting.RdlDesign
                 if (op == cbOperator.Text)
                     return;
             }
-            MessageBox.Show(string.Format(Strings.DialogFilterOperator_Show_OperatorInList, cbOperator.Text), Strings.DialogFilterOperator_Show_PickFilterOperator);
+            MessageBox.Show(this, string.Format(Strings.DialogFilterOperator_Show_OperatorInList, cbOperator.Text), Strings.DialogFilterOperator_Show_PickFilterOperator);
             e.Cancel = true;
         }
 

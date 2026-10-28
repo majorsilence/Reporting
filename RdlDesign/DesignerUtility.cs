@@ -125,7 +125,7 @@ namespace Majorsilence.Reporting.RdlDesign
             }
             catch
             {
-                MessageBox.Show(Strings.DesignerUtility_Show_SharedConnectionError, Strings.DesignerUtility_Show_TestConnection);
+                MessageBox.Show(dsr, Strings.DesignerUtility_Show_SharedConnectionError, Strings.DesignerUtility_Show_TestConnection);
                 dsr.ResetPassword();			// make sure to prompt again for the password
                 return false;
             }
@@ -169,7 +169,7 @@ namespace Majorsilence.Reporting.RdlDesign
             }
             catch
             {
-                MessageBox.Show(Strings.DesignerUtility_Show_SharedConnectionError, Strings.DesignerUtility_Show_TestConnection);
+                MessageBox.Show(dsr, Strings.DesignerUtility_Show_SharedConnectionError, Strings.DesignerUtility_Show_TestConnection);
                 dsr.ResetPassword();			// make sure to prompt again for the password
                 return false;
             }
@@ -265,7 +265,7 @@ namespace Majorsilence.Reporting.RdlDesign
                 RdlDesigner rd = mc?.MdiParent as RdlDesigner;
                 if (rd == null || mc == null || mc.SourceFile == null)
                 {
-                    MessageBox.Show(Strings.DataSetRowsCtl_ShowC_UnableLocateDSR);
+                    MessageBox.Show(mc, Strings.DataSetRowsCtl_ShowC_UnableLocateDSR);
                     return false;
                 }
                 Uri filename = new Uri(Path.GetDirectoryName(mc.SourceFile.LocalPath) + Path.DirectorySeparatorChar + dataSourceReference);
@@ -315,7 +315,7 @@ namespace Majorsilence.Reporting.RdlDesign
 
             IList parameters=null;
 
-			return GetSqlColumns(dataProvider, connection, sql, parameters);
+			return GetSqlColumns(dataProvider, connection, sql, parameters, d);
 		}
 
 		static internal List<SqlColumn> GetSqlColumns(DesignXmlDraw d, string ds, string sql, DataTable parameters)
@@ -354,17 +354,17 @@ namespace Majorsilence.Reporting.RdlDesign
 			}
 			catch (SqlException sqle)
 			{
-				MessageBox.Show(sqle.Message, Strings.DesignerUtility_Show_SQLError);
+				MessageBox.Show(d, sqle.Message, Strings.DesignerUtility_Show_SQLError);
 			}
 			catch (Exception e)
 			{
-				MessageBox.Show(e.InnerException == null? e.Message:e.InnerException.Message, Strings.DesignerUtility_Show_Error);
+				MessageBox.Show(d, e.InnerException == null? e.Message:e.InnerException.Message, Strings.DesignerUtility_Show_Error);
 			}
 
 			return cols;
 		}
 
-        static internal List<SqlColumn> GetSqlColumns(string dataProvider, string connection, string sql, IList parameters)
+        static internal List<SqlColumn> GetSqlColumns(string dataProvider, string connection, string sql, IList parameters, IWin32Window owner = null)
 		{
             List<SqlColumn> cols = new List<SqlColumn>();
 			IDbConnection cnSQL=null;
@@ -394,11 +394,11 @@ namespace Majorsilence.Reporting.RdlDesign
 			}
 			catch (SqlException sqle)
 			{
-				MessageBox.Show(sqle.Message, Strings.DesignerUtility_Show_SQLError);
+				MessageBox.Show(owner, sqle.Message, Strings.DesignerUtility_Show_SQLError);
 			}
 			catch (Exception e)
 			{
-				MessageBox.Show(e.InnerException == null? e.Message:e.InnerException.Message, Strings.DesignerUtility_Show_Error);
+				MessageBox.Show(owner, e.InnerException == null? e.Message:e.InnerException.Message, Strings.DesignerUtility_Show_Error);
 			}
 			finally
 			{
@@ -426,10 +426,10 @@ namespace Majorsilence.Reporting.RdlDesign
             if (!GetConnnectionInfo(d, ds, out dataProvider, out connection))
                 return null;
             
-            return GetSchemaInfo(dataProvider, connection);
+            return GetSchemaInfo(dataProvider, connection, d);
 		}
 
-        static internal List<SqlSchemaInfo> GetSchemaInfo(string dataProvider, string connection)
+        static internal List<SqlSchemaInfo> GetSchemaInfo(string dataProvider, string connection, IWin32Window owner = null)
 		{
             List<SqlSchemaInfo> schemaList = new List<SqlSchemaInfo>();
 			IDbConnection cnSQL = null;
@@ -448,7 +448,7 @@ namespace Majorsilence.Reporting.RdlDesign
 				cnSQL = RdlEngineConfig.GetConnection(dataProvider, connection);
 				if (cnSQL == null)
 				{
-					MessageBox.Show(string.Format(Strings.DesignerUtility_Show_ConnectDataProviderError,dataProvider), Strings.DesignerUtility_Show_SQLError);
+					MessageBox.Show(owner, string.Format(Strings.DesignerUtility_Show_ConnectDataProviderError,dataProvider), Strings.DesignerUtility_Show_SQLError);
 					return schemaList;
 				}
 				cnSQL.Open();
@@ -488,11 +488,11 @@ namespace Majorsilence.Reporting.RdlDesign
 			}
 			catch (SqlException sqle)
 			{
-				MessageBox.Show(sqle.Message, Strings.DesignerUtility_Show_SQLError);
+				MessageBox.Show(owner, sqle.Message, Strings.DesignerUtility_Show_SQLError);
 			}
 			catch (Exception e)
 			{
-				MessageBox.Show(e.InnerException == null? e.Message: e.InnerException.Message, Strings.DesignerUtility_Show_Error);
+				MessageBox.Show(owner, e.InnerException == null? e.Message: e.InnerException.Message, Strings.DesignerUtility_Show_Error);
 			}
 			finally
 			{
@@ -642,7 +642,7 @@ namespace Majorsilence.Reporting.RdlDesign
             return schema + "." + name;
         }
 
-		static internal bool TestConnection(string dataProvider, string connection)
+		static internal bool TestConnection(string dataProvider, string connection, IWin32Window owner = null)
 		{
 			IDbConnection cnSQL=null;
 			bool bResult = false;
@@ -654,7 +654,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			}
 			catch (Exception e)
 			{
-				MessageBox.Show(e.InnerException == null? e.Message: e.InnerException.Message, Strings.DesignerUtility_Show_OpenConnectionError);
+				MessageBox.Show(owner, e.InnerException == null? e.Message: e.InnerException.Message, Strings.DesignerUtility_Show_OpenConnectionError);
 			}
 			finally
 			{

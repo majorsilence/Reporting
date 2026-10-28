@@ -628,7 +628,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			}
 			catch (Exception ex)
 			{
-				MessageBox.Show(ex.Message, name + " " + Strings.StyleBorderCtl_Show_SizeInvalid);
+				MessageBox.Show(this, ex.Message, name + " " + Strings.StyleBorderCtl_Show_SizeInvalid);
 				return false;
 			}
 

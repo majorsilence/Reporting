@@ -293,7 +293,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			if (chkDetails.Checked || chkFooterRows.Checked || chkHeaderRows.Checked)
 				return true;
 
-			MessageBox.Show(Strings.TableCtl_Show_TableMustHaveRegions, Strings.TableCtl_Show_Table);
+			MessageBox.Show(this, Strings.TableCtl_Show_TableMustHaveRegions, Strings.TableCtl_Show_Table);
 
 			return false;
 		}
