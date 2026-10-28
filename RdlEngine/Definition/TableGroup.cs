@@ -19,6 +19,7 @@ namespace Majorsilence.Reporting.Rdl
 		Visibility _Visibility;	// Indicates if the group (and all groups embedded
 								// within it) should be hidden.		
 		Textbox _ToggleTextbox;	//  resolved TextBox for toggling visibility
+		bool _KeepTogether;		// Indicates the group should be kept on one page if it can be.
 	
 		internal TableGroup(ReportDefn r, ReportLink p, XmlNode xNode) : base(r, p)
 		{
@@ -50,6 +51,9 @@ namespace Majorsilence.Reporting.Rdl
 						break;
 					case "Visibility":
 						_Visibility = new Visibility(r, this, xNodeLoop);
+						break;
+					case "KeepTogether":
+						_KeepTogether = XmlUtil.Boolean(xNodeLoop.InnerText, OwnerReport.rl);
 						break;
 					default:	
 						// don't know this element - log it
@@ -151,6 +155,13 @@ namespace Majorsilence.Reporting.Rdl
 		internal Textbox ToggleTextbox
 		{
 			get { return  _ToggleTextbox; }
+		}
+
+		// See Table.RunGroupKeptTogether.
+		internal bool KeepTogether
+		{
+			get { return  _KeepTogether; }
+			set {  _KeepTogether = value; }
 		}
 	}
 }
