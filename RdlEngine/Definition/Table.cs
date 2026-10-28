@@ -1289,7 +1289,7 @@ namespace Majorsilence.Reporting.Rdl
 			int width=0;
 			foreach (TableColumn tc in this.TableColumns.Items)
 			{
-                if (tc.Visibility == null || !await tc.Visibility.Hidden.EvaluateBoolean(rpt, row).ConfigureAwait(false))
+                if (!await tc.IsHidden(rpt, row).ConfigureAwait(false))
 					width += tc.Width.PixelsX;
 			}
 			return width;
@@ -1308,6 +1308,14 @@ namespace Majorsilence.Reporting.Rdl
 				}
 				return width;
 			}
+		}
+
+		// The row the columns' Hidden expressions see while the table runs: its first, the row
+		// its header sees. Before the table has data, the row the caller has.
+		internal Row ColumnVisibilityRow(Report rpt, Row row)
+		{
+			TableWorkClass wc = rpt.Cache.Get(this, "wc") as TableWorkClass;
+			return wc?.Data?.Data != null && wc.Data.Data.Count > 0 ? wc.Data.Data[0] : row;
 		}
 
 		private TableWorkClass GetValue(Report rpt)
