@@ -3066,10 +3066,17 @@ namespace Majorsilence.Reporting.RdlDesign
 						si.FontStyle = StyleInfo.GetFontStyle(xNodeLoop.InnerText, FontStyleEnum.Normal);
 						break;
 					case "FontFamily":
-						si.FontFamily = xNodeLoop.InnerText[0] == '='? "Arial": xNodeLoop.InnerText;
+						{
+							string fontFamilyText = xNodeLoop.InnerText;
+							si.FontFamily = string.IsNullOrEmpty(fontFamilyText) || fontFamilyText[0] == '=' ? "Arial" : fontFamilyText;
+						}
 						break;
 					case "FontSize":
-						si.FontSize = xNodeLoop.InnerText[0] == '='? 10: GetSize(xNodeLoop.InnerText);
+						{
+							string fontSizeText = xNodeLoop.InnerText;
+							float fontSize = string.IsNullOrEmpty(fontSizeText) || fontSizeText[0] == '=' ? 10 : GetSize(fontSizeText);
+							si.FontSize = fontSize > 0 ? fontSize : 10;
+						}
 						break;
 					case "FontWeight":
 						si.FontWeight = StyleInfo.GetFontWeight(xNodeLoop.InnerText, FontWeightEnum.Normal);

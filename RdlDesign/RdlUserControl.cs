@@ -473,46 +473,47 @@ namespace Majorsilence.Reporting.RdlDesign
             }
 
             bSuppressChange = true;			// don't process changes in status bar
-
-            SetStatusNameAndPosition();
-            this.EnableEditTextBox();	// handling enabling/disabling of textbox
-
-            StyleInfo si = await rdlEditPreview1.GetSelectedStyleAsync();
-            if (si == null)
-               {
-                bSuppressChange = false;   // the early exit used to leave it set
-                return;
-               }
-
-            if (centerAlignToolStripButton2 != null)
-                centerAlignToolStripButton2.Checked = si.TextAlign == TextAlignEnum.Center ? true : false;
-            if (leftAlignToolStripButton2 != null)
-                leftAlignToolStripButton2.Checked = si.TextAlign == TextAlignEnum.Left ? true : false;
-            if (rightAlignToolStripButton3 != null)
-                rightAlignToolStripButton3.Checked = si.TextAlign == TextAlignEnum.Right ? true : false;
-            if (boldToolStripButton1 != null)
-                boldToolStripButton1.Checked = si.IsFontBold() ? true : false;
-            if (italiacToolStripButton1 != null)
-                italiacToolStripButton1.Checked = si.FontStyle == FontStyleEnum.Italic ? true : false;
-            if (underlineToolStripButton2 != null)
-                underlineToolStripButton2.Checked = si.TextDecoration == TextDecorationEnum.Underline ? true : false;
-            if (fontToolStripComboBox1 != null)
-                fontToolStripComboBox1.Text = si.FontFamily;
-            if (fontSizeToolStripComboBox1 != null)
+            try
             {
-                string rs = string.Format(NumberFormatInfo.InvariantInfo, "{0:0.#}", si.FontSize);
-                fontSizeToolStripComboBox1.Text = rs;
-            }
-            if (foreColorPicker1 != null)
-            {
-                foreColorPicker1.Text = si.Color.IsEmpty ? si.ColorText : Majorsilence.Forms.ColorTranslator.ToHtml(si.Color);
-            }
-            if (backColorPicker1 != null)
-            {
-                backColorPicker1.Text = si.BackgroundColor.IsEmpty ? si.BackgroundColorText : Majorsilence.Forms.ColorTranslator.ToHtml(si.BackgroundColor);
-            }
+                SetStatusNameAndPosition();
+                this.EnableEditTextBox();	// handling enabling/disabling of textbox
 
-            bSuppressChange = false;
+                StyleInfo si = await rdlEditPreview1.GetSelectedStyleAsync();
+                if (si == null)
+                    return;
+
+                if (centerAlignToolStripButton2 != null)
+                    centerAlignToolStripButton2.Checked = si.TextAlign == TextAlignEnum.Center ? true : false;
+                if (leftAlignToolStripButton2 != null)
+                    leftAlignToolStripButton2.Checked = si.TextAlign == TextAlignEnum.Left ? true : false;
+                if (rightAlignToolStripButton3 != null)
+                    rightAlignToolStripButton3.Checked = si.TextAlign == TextAlignEnum.Right ? true : false;
+                if (boldToolStripButton1 != null)
+                    boldToolStripButton1.Checked = si.IsFontBold() ? true : false;
+                if (italiacToolStripButton1 != null)
+                    italiacToolStripButton1.Checked = si.FontStyle == FontStyleEnum.Italic ? true : false;
+                if (underlineToolStripButton2 != null)
+                    underlineToolStripButton2.Checked = si.TextDecoration == TextDecorationEnum.Underline ? true : false;
+                if (fontToolStripComboBox1 != null)
+                    fontToolStripComboBox1.Text = si.FontFamily;
+                if (fontSizeToolStripComboBox1 != null)
+                {
+                    string rs = string.Format(NumberFormatInfo.InvariantInfo, "{0:0.#}", si.FontSize);
+                    fontSizeToolStripComboBox1.Text = rs;
+                }
+                if (foreColorPicker1 != null)
+                {
+                    foreColorPicker1.Text = si.Color.IsEmpty ? si.ColorText : Majorsilence.Forms.ColorTranslator.ToHtml(si.Color);
+                }
+                if (backColorPicker1 != null)
+                {
+                    backColorPicker1.Text = si.BackgroundColor.IsEmpty ? si.BackgroundColorText : Majorsilence.Forms.ColorTranslator.ToHtml(si.BackgroundColor);
+                }
+            }
+            finally
+            {
+                bSuppressChange = false;
+            }
         }
 
         private void DesignTabChanged(object sender, System.EventArgs e)
@@ -1329,7 +1330,7 @@ namespace Majorsilence.Reporting.RdlDesign
 
         private void fontToolStripComboBox1_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (!bSuppressChange)
+            if (!bSuppressChange && !string.IsNullOrWhiteSpace(fontToolStripComboBox1.Text))
             {
                 ApplyStyleToSelected("FontFamily", fontToolStripComboBox1.Text);
                 SetProperties();
@@ -1338,7 +1339,7 @@ namespace Majorsilence.Reporting.RdlDesign
 
         private void fontToolStripComboBox1_Validated(object sender, EventArgs e)
         {
-            if (!bSuppressChange)
+            if (!bSuppressChange && !string.IsNullOrWhiteSpace(fontToolStripComboBox1.Text))
             {
                 ApplyStyleToSelected("FontFamily", fontToolStripComboBox1.Text);
                 SetProperties();
@@ -1347,7 +1348,7 @@ namespace Majorsilence.Reporting.RdlDesign
 
         private void fontSizeToolStripComboBox1_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (!bSuppressChange)
+            if (!bSuppressChange && IsValidFontSizeText(fontSizeToolStripComboBox1.Text))
             {
                 ApplyStyleToSelected("FontSize", fontSizeToolStripComboBox1.Text + "pt");
                 SetProperties();
@@ -1356,11 +1357,18 @@ namespace Majorsilence.Reporting.RdlDesign
 
         private void fontSizeToolStripComboBox1_Validated(object sender, EventArgs e)
         {
-            if (!bSuppressChange)
+            if (!bSuppressChange && IsValidFontSizeText(fontSizeToolStripComboBox1.Text))
             {
                 ApplyStyleToSelected("FontSize", fontSizeToolStripComboBox1.Text + "pt");
                 SetProperties();
             }
+        }
+
+        private static bool IsValidFontSizeText(string text)
+        {
+            return !string.IsNullOrWhiteSpace(text) &&
+                float.TryParse(text, System.Globalization.NumberStyles.Float, NumberFormatInfo.InvariantInfo, out float size) &&
+                size > 0;
         }
 
 
