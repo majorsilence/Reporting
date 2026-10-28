@@ -87,6 +87,11 @@ namespace Majorsilence.Reporting.Rdl
 		{
 			if (_Visibility == null)
 				return false;
+			// Decided once per table, against its first row, so the column positions and the
+			// cells of every row agree on which columns show.
+			Table t = Parent?.Parent as Table;
+			if (t != null && rpt != null)
+				r = t.ColumnVisibilityRow(rpt, r);
 			return await _Visibility.IsHidden(rpt, r).ConfigureAwait(false);
 		}
 

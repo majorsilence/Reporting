@@ -94,11 +94,10 @@ namespace Majorsilence.Reporting.Rdl
 
 		internal async Task Run(IPresent ip, Row row)
 		{
-			// todo: visibility on the column should really only be evaluated once at the beginning
-			//   of the table processing;  also this doesn't account for the affect of colspan correctly
+			// todo: this doesn't account for the affect of colspan correctly
 			//   where if any of the spanned columns are visible the value would show??
 			TableColumn tc = _OwnerTable.TableColumns[_ColIndex];
-			if (tc.Visibility != null && await tc.Visibility.IsHidden(ip.Report(), row).ConfigureAwait(false))	// column visible?
+			if (await tc.IsHidden(ip.Report(), row).ConfigureAwait(false))	// column visible?
 				return;													//  no nothing to do
 
 			await ip.TableCellStart(this, row).ConfigureAwait(false);
@@ -111,11 +110,10 @@ namespace Majorsilence.Reporting.Rdl
 
 		internal async Task RunPage(Pages pgs, Row row)
 		{
-			// todo: visibility on the column should really only be evaluated once at the beginning
-			//   of the table processing;  also this doesn't account for the affect of colspan correctly
+			// todo: this doesn't account for the affect of colspan correctly
 			//   where if any of the spanned columns are visible the value would show??
 			TableColumn tc = _OwnerTable.TableColumns[_ColIndex];
-			if (tc.Visibility != null && await tc.Visibility.IsHidden(pgs.Report, row).ConfigureAwait(false))	// column visible?
+			if (await tc.IsHidden(pgs.Report, row).ConfigureAwait(false))	// column visible?
 				return;                                                 //  no nothing to do
 
             await _ReportItems.Items[0].RunPage(pgs, row).ConfigureAwait(false);
