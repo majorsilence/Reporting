@@ -81,12 +81,15 @@ namespace ReportTests
             Assert.That(baselines.Length, Is.EqualTo(2));
         }
 
+        // With no explicit LineHeight, the pitch comes from Arial's own hhea metrics
+        // (ascent + descent + lineGap scaled to 10pt), not the bare 10pt font size -- that bare
+        // font size produced text visibly more compressed than native GDI rendering. See issue #491.
         [Test]
-        public async Task NoLineHeight_KeepsTheFontSizeSpacing()
+        public async Task NoLineHeight_UsesTheFontsOwnMetrics()
         {
             var baselines = await LineBaselines("LineHeight_none", "");
             Assert.That(baselines.Length, Is.EqualTo(3));
-            Assert.That(baselines[0] - baselines[1], Is.EqualTo(10.0).Within(0.2));
+            Assert.That(baselines[0] - baselines[1], Is.EqualTo(11.5).Within(0.2));
         }
     }
 }

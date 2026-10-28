@@ -228,7 +228,13 @@ namespace Majorsilence.Reporting.Rdl
             // and never fewer than one line: a single line of text is routinely taller than
             // the cell the report sizes for it, and dropping it would blank the report
             // rather than clip it.
-            float pitch = LinePitch(si);
+            // The actual TrueType font's own ascent/descent/lineGap, scaled to si.FontSize, rather
+            // than treating the font size itself as the glyphs' height: a 10pt Arial's ascent and
+            // descent together run taller than 10pt, which is why native GDI rendering spaces
+            // multiline text more generously than si.FontSize alone would.
+            (float ascent, float descent, float lineGap) metrics = _currentPage.GetFontMetrics(baseStyle);
+            float emHeight = metrics.ascent + metrics.descent;
+            float pitch = LinePitch(si, emHeight, metrics.lineGap);
             if (!bWrap && !bNoClip && height > 0 && sa.Length > 1 && pitch > 0)
             {
                 float availableH = height - si.PaddingTop - si.PaddingBottom;
@@ -237,7 +243,7 @@ namespace Majorsilence.Reporting.Rdl
                 // pitch of the last line too dropped the third line of a box three lines of
                 // 14.25pt high that its letters fit, below 41.25pt. With no LineHeight the pitch
                 // is the em, and this is the whole lines that fit, as before.
-                int maxLines = Math.Max(1, (int)Math.Floor((availableH - si.FontSize) / pitch) + 1);
+                int maxLines = Math.Max(1, (int)Math.Floor((availableH - emHeight) / pitch) + 1);
                 if (sa.Length > maxLines)
                     sa = sa.Take(maxLines).ToArray();
             }
@@ -291,7 +297,7 @@ namespace Majorsilence.Reporting.Rdl
                             {
                                 startY = y + si.PaddingTop
                                        + (height - si.PaddingTop - si.PaddingBottom) / 2f
-                                       - si.FontSize / 2f;
+                                       - emHeight / 2f;
                                 if (sa.Length > 1)
                                     startY += sa.Length % 2 == 0
                                         ? -(((sa.Length / 2) - i) * pitch) + pitch / 2f
@@ -300,7 +306,7 @@ namespace Majorsilence.Reporting.Rdl
                             break;
                         case VerticalAlignEnum.Bottom:
                             if (height > 0)
-                                startY = y + height - si.PaddingBottom - pitch * (sa.Length - i - 1) - si.FontSize;
+                                startY = y + height - si.PaddingBottom - pitch * (sa.Length - i - 1) - emHeight;
                             break;
                     }
 
@@ -310,7 +316,7 @@ namespace Majorsilence.Reporting.Rdl
                         // the centre of the box: the line's start lands on the opposite corner and the
                         // text runs back along it, upside down. Alignment and line order flip with it.
                         float cx = x + width / 2f, cy = y + height / 2f;
-                        float rx = 2 * cx - startX, ry = 2 * cy - (startY + si.FontSize);
+                        float rx = 2 * cx - startX, ry = 2 * cy - (startY + metrics.ascent);
                         float rEndX = 2 * cx - (startX + textwidth);
                         _currentPage.DrawText(text, rx, ry, baseStyle.WithUpsideDown());
                         switch (si.TextDecoration)
@@ -320,7 +326,7 @@ namespace Majorsilence.Reporting.Rdl
                                 break;
                             case TextDecorationEnum.LineThrough:
                                 {
-                                    float ly = 2 * cy - (startY + si.FontSize / 2f + 1);
+                                    float ly = 2 * cy - (startY + emHeight / 2f + 1);
                                     AddLine(rEndX, ly, rx, ly, 1, si.Color, BorderStyleEnum.Solid);
                                 }
                                 break;
@@ -334,7 +340,7 @@ namespace Majorsilence.Reporting.Rdl
                     if (clipSides && !clipped && textwidth > availableW)
                     {
                         // Reaches well past the box above and below: only the sides are cut.
-                        float reach = (sa.Length + 1) * Math.Max(pitch, si.FontSize);
+                        float reach = (sa.Length + 1) * Math.Max(pitch, emHeight);
                         _currentPage.SaveState();
                         _currentPage.ClipRectangle(x + si.PaddingLeft, y - reach,
                             availableW, Math.Max(height, 0) + 2 * reach);
@@ -346,21 +352,21 @@ namespace Majorsilence.Reporting.Rdl
                         : startX + textwidth;
 
                     if (paragraphEnds != null && i < paragraphEnds.Count && !paragraphEnds[i]
-                        && DrawJustified(text, startX, startY + si.FontSize, availableW, baseStyle))
+                        && DrawJustified(text, startX, startY + metrics.ascent, availableW, baseStyle))
                         maxX = startX + availableW;
                     else
-                        _currentPage.DrawText(text, startX, startY + si.FontSize, baseStyle);
+                        _currentPage.DrawText(text, startX, startY + metrics.ascent, baseStyle);
 
                     switch (si.TextDecoration)
                     {
                         case TextDecorationEnum.Underline:
-                            AddLine(startX, startY + si.FontSize + 1,
-                                    maxX,   startY + si.FontSize + 1,
+                            AddLine(startX, startY + metrics.ascent + 1,
+                                    maxX,   startY + metrics.ascent + 1,
                                     1, si.Color, BorderStyleEnum.Solid);
                             break;
                         case TextDecorationEnum.LineThrough:
-                            AddLine(startX, startY + si.FontSize / 2f + 1,
-                                    maxX,   startY + si.FontSize / 2f + 1,
+                            AddLine(startX, startY + emHeight / 2f + 1,
+                                    maxX,   startY + emHeight / 2f + 1,
                                     1, si.Color, BorderStyleEnum.Solid);
                             break;
                         case TextDecorationEnum.Overline:
@@ -407,11 +413,11 @@ namespace Majorsilence.Reporting.Rdl
             iAddBorder(si, x, y, height, width);
         }
 
-        // Distance between successive baselines: the style's LineHeight when one is set,
-        // otherwise the font size.
-        private static float LinePitch(StyleInfo si)
+        // Distance between successive baselines: the style's explicit LineHeight when one is
+        // set, otherwise the font's own measured line height (ascent + descent + lineGap).
+        private static float LinePitch(StyleInfo si, float emHeight, float lineGap)
         {
-            return si.LineHeight > 0 ? si.LineHeight : si.FontSize;
+            return si.LineHeight > 0 ? si.LineHeight : emHeight + lineGap;
         }
 
         // ── PDF-accurate text re-wrapping ─────────────────────────────────────
