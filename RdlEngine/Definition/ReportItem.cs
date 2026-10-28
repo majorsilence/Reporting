@@ -610,6 +610,23 @@ namespace Majorsilence.Reporting.Rdl
 			return OwnerReport.Width.Points - xloc;
 		}
 
+		// The width in points the item is laid out at, as SetPagePositionAndStyle sets it.
+		internal float WidthPoints(Report rpt)
+		{
+			if (this._TC != null)
+			{	// part of a table: its columns' width
+				Table t = _TC.OwnerTable;
+				float width = 0;
+				for (int ci = _TC.ColIndex; ci < _TC.ColIndex + _TC.ColSpan; ci++)
+					width += ((TableColumn) t.TableColumns.Items[ci]).Width.Points;
+				return width;
+			}
+			WorkClass wc = GetWC(rpt);
+			if (wc.MC != null)
+				return wc.MC.Width;
+			return Width != null ? Width.Points : WidthOrOwnerWidth(rpt);
+		}
+
 		internal int WidthCalc(Report rpt, Graphics g)
 		{
 			WorkClass wc = GetWC(rpt);
@@ -725,6 +742,16 @@ namespace Majorsilence.Reporting.Rdl
 			WorkClass wc = GetWC(pgs.Report);
 			wc.CurrentPage = pgs.CurrentPage;
 			wc.BottomPosition = pos;
+		}
+
+		// A hidden item keeps its place: the items below it are placed from the bottom it would
+		// have had. Its position is relative to the page's offset, which only adding an item to
+		// the page applies, so the offset is added here. Without it the items placed below a
+		// hidden one lost the offset - the page's top margin, or the top of the rectangle or list
+		// row holding them - and printed that much too high.
+		internal void SetPagePositionEndHidden(Pages pgs, float pos)
+		{
+			SetPagePositionEnd(pgs, pgs.CurrentPage.YOffset + pos);
 		}
 
 		/// <summary>

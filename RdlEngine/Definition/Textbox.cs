@@ -325,7 +325,10 @@ namespace Majorsilence.Reporting.Rdl
                 }
             }
 
-			SetPagePositionEnd(pgs, pt.Y+pt.H);
+			if (bHidden)
+				SetPagePositionEndHidden(pgs, pt.Y + pt.H);
+			else
+				SetPagePositionEnd(pgs, pt.Y+pt.H);
 			if (pth != null)
 				pth.Reset();
 			if (this.CanGrow && !await Value.IsConstant().ConfigureAwait(false))
@@ -342,15 +345,15 @@ namespace Majorsilence.Reporting.Rdl
 		private async Task<PageText> RunPageSplitOverflow(Report rpt, Pages pgs, PageText pt, Row row)
 		{
 			Graphics g = pgs.G;
-			int widthPx = this.WidthCalc(rpt, g);
+			float wrapPoints = this.WidthPoints(rpt);
 			float padV = 0;
 			if (this.Style != null)
 			{
-				widthPx -= (await Style.EvalPaddingLeftPx(rpt, row).ConfigureAwait(false) + await Style.EvalPaddingRightPx(rpt, row).ConfigureAwait(false));
+				wrapPoints -= await Style.EvalPaddingLeft(rpt, row).ConfigureAwait(false) + await Style.EvalPaddingRight(rpt, row).ConfigureAwait(false);
 				padV = await Style.EvalPaddingTop(rpt, row).ConfigureAwait(false) + await Style.EvalPaddingBottom(rpt, row).ConfigureAwait(false);
 			}
 			bool html = pt is PageTextHtml;
-			float lineH = await MeasureTextHeightPoints(rpt, g, "Xg", row, widthPx, html).ConfigureAwait(false);
+			float lineH = await MeasureTextHeightPoints(rpt, g, "Xg", row, wrapPoints, html).ConfigureAwait(false);
 
 			PageText chunk = pt;
 			string remaining = pt.Text;
@@ -359,7 +362,7 @@ namespace Majorsilence.Reporting.Rdl
 			{
 				Page p = pgs.CurrentPage;
 				float availText = pgs.BottomOfPage - (p.YOffset + chunk.Y) - padV;
-				float textH = await MeasureTextHeightPoints(rpt, g, remaining, row, widthPx, html).ConfigureAwait(false);
+				float textH = await MeasureTextHeightPoints(rpt, g, remaining, row, wrapPoints, html).ConfigureAwait(false);
 				bool freshPage = chunk.Y == 0 && p.YOffset <= OwnerReport.TopOfPage;
 
 				if (textH <= availText)
@@ -379,18 +382,18 @@ namespace Majorsilence.Reporting.Rdl
 					continue;
 				}
 
-				(string head, string tail) = await SplitTextToFit(rpt, g, remaining, row, widthPx, availText, html).ConfigureAwait(false);
+				(string head, string tail) = await SplitTextToFit(rpt, g, remaining, row, wrapPoints, availText, html).ConfigureAwait(false);
 				if (tail.Length == 0)
 				{	// couldn't split (single unbreakable run); emit as-is
 					SetChunkText(chunk, head);
-					chunk.H = await MeasureTextHeightPoints(rpt, g, head, row, widthPx, html).ConfigureAwait(false) + padV;
+					chunk.H = await MeasureTextHeightPoints(rpt, g, head, row, wrapPoints, html).ConfigureAwait(false) + padV;
 					p.AddObject(chunk);
 					return chunk;
 				}
 
 				PageText next = (PageText)chunk.Clone();	// clone BEFORE AddObject adjusts coordinates
 				SetChunkText(chunk, head);
-				chunk.H = await MeasureTextHeightPoints(rpt, g, head, row, widthPx, html).ConfigureAwait(false) + padV;
+				chunk.H = await MeasureTextHeightPoints(rpt, g, head, row, wrapPoints, html).ConfigureAwait(false) + padV;
 				p.AddObject(chunk);
 
 				pgs.NextOrNew();
@@ -410,7 +413,7 @@ namespace Majorsilence.Reporting.Rdl
 		// Returns the whole text as head (empty tail) when no split point exists.
 		// Html text is split only outside of tags; tags still open at the split are closed
 		// at the end of the head and opened again at the start of the tail.
-		private async Task<(string head, string tail)> SplitTextToFit(Report rpt, Graphics g, string text, Row row, int widthPx, float availPts, bool html)
+		private async Task<(string head, string tail)> SplitTextToFit(Report rpt, Graphics g, string text, Row row, float wrapPoints, float availPts, bool html)
 		{
 			// Plain text keeps only the positions (a long text has one per word); html needs the tags open at each.
 			List<(int pos, string closers, string openers)> htmlBreaks = html ? HtmlSplitPoints(text) : null;
@@ -426,7 +429,7 @@ namespace Majorsilence.Reporting.Rdl
 			{
 				int mid = (lo + hi) / 2;
 				var probe = BreakAt(mid);
-				float h = await MeasureTextHeightPoints(rpt, g, text.Substring(0, probe.pos) + probe.closers, row, widthPx, html).ConfigureAwait(false);
+				float h = await MeasureTextHeightPoints(rpt, g, text.Substring(0, probe.pos) + probe.closers, row, wrapPoints, html).ConfigureAwait(false);
 				if (h <= availPts)
 				{
 					best = mid;
@@ -628,7 +631,7 @@ namespace Majorsilence.Reporting.Rdl
 			}
 		}
 
-		private async Task<float> MeasureTextHeightPoints(Report rpt, Graphics g, string text, Row row, int widthPx, bool html)
+		private async Task<float> MeasureTextHeightPoints(Report rpt, Graphics g, string text, Row row, float wrapPoints, bool html)
 		{
 			if (html)
 			{
@@ -637,15 +640,9 @@ namespace Majorsilence.Reporting.Rdl
 				await pth.Build(g).ConfigureAwait(false);
 				return pth.TotalHeight;
 			}
-			return await MeasureTextHeightPoints(rpt, g, text, row, widthPx).ConfigureAwait(false);
-		}
-
-		private async Task<float> MeasureTextHeightPoints(Report rpt, Graphics g, string text, Row row, int widthPx)
-		{
-			Size s = this.Style != null
-				? await Style.MeasureString(rpt, g, text, TypeCode.String, row, widthPx).ConfigureAwait(false)
-                : await Style.MeasureStringDefaults(rpt, g, text, TypeCode.String, row, widthPx).ConfigureAwait(false);
-			return RSize.PointsFromPixels(g, s.Height);
+			return this.Style != null
+				? await Style.MeasureHeight(rpt, g, text, TypeCode.String, row, wrapPoints).ConfigureAwait(false)
+				: await Style.MeasureHeightDefaults(rpt, g, text, TypeCode.String, row, wrapPoints).ConfigureAwait(false);
 		}
 
 		// routine to determine if text is considered to be a duplicate;
@@ -725,7 +722,7 @@ namespace Majorsilence.Reporting.Rdl
 		// a table of growing cells calls this for every cell of every row.
 		internal async ValueTask<float> RunTextCalcHeight(Report rpt, Graphics g, Row row, PageTextHtml pth)
 		{	// normally only called when CanGrow is true
-			Size s = Size.Empty;
+			float height;
 
 			if (await IsHidden(rpt, row).ConfigureAwait(false))
 				return 0;
@@ -733,16 +730,16 @@ namespace Majorsilence.Reporting.Rdl
 			object o = TryEvaluate(rpt, row, out object value) ? value : await Evaluate(rpt, row).ConfigureAwait(false);
 
 			TypeCode tc = _Value.GetTypeCode();
-			int width = this.WidthCalc(rpt, g);
+			float wrapPoints = this.WidthPoints(rpt);		// the width between the paddings the text is drawn in
 
 			Style.MeasureSetup setup = null;
 			if (this.Style != null)
 			{
 				setup = Style.TryGetMeasureSetup(rpt) ?? await Style.GetMeasureSetup(rpt, row).ConfigureAwait(false);
 				if (setup != null)
-					width -= setup.PadLeftPx + setup.PadRightPx;
+					wrapPoints -= setup.PadLeft + setup.PadRight;
 				else
-					width -= (await Style.EvalPaddingLeftPx(rpt, row).ConfigureAwait(false) + await Style.EvalPaddingRightPx(rpt, row).ConfigureAwait(false));
+					wrapPoints -= await Style.EvalPaddingLeft(rpt, row).ConfigureAwait(false) + await Style.EvalPaddingRight(rpt, row).ConfigureAwait(false);
 
 				if (TryIsHtml(out bool isHtml) ? isHtml : await IsHtml(rpt, row).ConfigureAwait(false))
 				{
@@ -752,16 +749,16 @@ namespace Majorsilence.Reporting.Rdl
 						await SetPagePositionAndStyle(rpt, pth, row).ConfigureAwait(false);
 					}
 					await pth.Build(g).ConfigureAwait(false);
-					s.Height = RSize.PixelsFromPoints(pth.TotalHeight);
+					height = RSize.PointsFromPixels(g, RSize.PixelsFromPoints(pth.TotalHeight));
 				}
-				else if (!Style.TryMeasureString(rpt, g, o = AsLineFeeds(o), tc, width, out s))
-					s = await Style.MeasureString(rpt, g, o, tc, row, width).ConfigureAwait(false);
+				else if (!Style.TryMeasureHeight(rpt, g, o = AsLineFeeds(o), tc, wrapPoints, out height))
+					height = await Style.MeasureHeight(rpt, g, o, tc, row, wrapPoints).ConfigureAwait(false);
 			}
 			else	// call the class static method
-				s = await Style.MeasureStringDefaults(rpt, g, AsLineFeeds(o), tc, row, width).ConfigureAwait(false);
+				height = await Style.MeasureHeightDefaults(rpt, g, AsLineFeeds(o), tc, row, wrapPoints).ConfigureAwait(false);
 
 			TextboxRuntime tbr = TextboxRuntime.GetTextboxRuntime(rpt, this);
-			tbr.RunHeight = RSize.PointsFromPixels(g, s.Height);
+			tbr.RunHeight = height;
 			if (Style != null)
 				tbr.RunHeight += setup != null
 					? setup.PadBottom + setup.PadTop

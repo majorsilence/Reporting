@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Xml;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Majorsilence.Reporting.Rdl
@@ -95,7 +96,14 @@ namespace Majorsilence.Reporting.Rdl
 			{		
 				await ri.FinalPass().ConfigureAwait(false); 
 			}
-			_Items.Sort();				// sort on ZIndex; y, x (see ReportItem compare routine)
+			// Sort on y, x (see ReportItem compare routine). OrderBy is stable where List.Sort is not:
+			// items at the same top and left keep the report's order, which decides the one the items
+			// below them are placed from and the one drawn over the other. List.Sort ordered them
+			// by chance once there were more than 16 items, and adding or removing an unrelated item
+			// could swap them.
+			List<ReportItem> sorted = _Items.OrderBy(ri => ri).ToList();
+			_Items.Clear();
+			_Items.AddRange(sorted);
 
             for (int i = 0; i < _Items.Count; i++)
             {

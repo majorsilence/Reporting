@@ -646,8 +646,7 @@ namespace Majorsilence.Reporting.Rdl
 			internal Draw2.Font Font;
 			internal Draw2.StringFormat Wrap, NoWrap;
 			internal float LineHeight;
-			internal int PadLeftPx, PadRightPx;
-			internal float PadTop, PadBottom;
+			internal float PadLeft, PadRight, PadTop, PadBottom;
 			internal Draw2.Graphics OneLineG;	// the surface OneLine was measured on, per format
 			internal float OneLineWrap, OneLineNoWrap;
 		}
@@ -684,26 +683,12 @@ namespace Majorsilence.Reporting.Rdl
 			m.NoWrap = await GetStringFormat(rpt, r).ConfigureAwait(false);
 			m.NoWrap.FormatFlags |= Draw2.StringFormatFlags.NoWrap;
 			m.LineHeight = await EvalLineHeight(rpt, r).ConfigureAwait(false);
-			m.PadLeftPx = await EvalPaddingLeftPx(rpt, r).ConfigureAwait(false);
-			m.PadRightPx = await EvalPaddingRightPx(rpt, r).ConfigureAwait(false);
+			m.PadLeft = await EvalPaddingLeft(rpt, r).ConfigureAwait(false);
+			m.PadRight = await EvalPaddingRight(rpt, r).ConfigureAwait(false);
 			m.PadTop = await EvalPaddingTop(rpt, r).ConfigureAwait(false);
 			m.PadBottom = await EvalPaddingBottom(rpt, r).ConfigureAwait(false);
 			wc.Measure = m;
 			return m;
-		}
-
-		/// <summary>
-		/// <see cref="MeasureString"/> without a Task when the measure setup is made and the value formats
-		/// without one; false means MeasureString has to do it.
-		/// </summary>
-		internal bool TryMeasureString(Report rpt, Draw2.Graphics g, object o, TypeCode tc, int maxWidth, out System.Drawing.Size size)
-		{
-			size = System.Drawing.Size.Empty;
-			MeasureSetup m = TryGetMeasureSetup(rpt);
-			if (m == null || !TryGetFormatedString(rpt, this, o, tc, out string s))
-				return false;
-			size = MeasureWith(m, g, s, maxWidth);
-			return true;
 		}
 
 		private static System.Drawing.Size MeasureWith(MeasureSetup m, Draw2.Graphics g, string s, int maxWidth)
@@ -731,6 +716,74 @@ namespace Majorsilence.Reporting.Rdl
 			}
 			return new System.Drawing.Size((int) Math.Ceiling(ms.Width),
 				(int) Math.Ceiling(ms.Height));
+		}
+
+		/// <summary>
+		/// <see cref="MeasureHeight"/> without a Task when the measure setup is made and the value formats
+		/// without one; false means MeasureHeight has to do it.
+		/// </summary>
+		internal bool TryMeasureHeight(Report rpt, Draw2.Graphics g, object o, TypeCode tc, float wrapPoints, out float height)
+		{
+			height = 0;
+			MeasureSetup m = TryGetMeasureSetup(rpt);
+			if (m == null || !TryGetFormatedString(rpt, this, o, tc, out string s))
+				return false;
+			height = HeightWith(m, g, s, wrapPoints);
+			return true;
+		}
+
+		private static float HeightWith(MeasureSetup m, Draw2.Graphics g, string s, float wrapPoints)
+		{
+			if (m.OneLineG != g)
+			{
+				m.OneLineWrap = g.MeasureString("Xg", m.Font, int.MaxValue, m.Wrap).Height;
+				m.OneLineNoWrap = g.MeasureString("Xg", m.Font, int.MaxValue, m.NoWrap).Height;
+				m.OneLineG = g;
+			}
+			return WrappedHeight(g, m.Font, s, wrapPoints, m.LineHeight, m.OneLineWrap);
+		}
+
+		/// <summary>
+		/// The height in points of the text of a growing box, wrapped to <paramref name="wrapPoints"/>, the width
+		/// between its paddings: the lines it is drawn in (see <see cref="TextWrap"/>) at the line height, or at the
+		/// font's own pitch.
+		/// </summary>
+		internal async Task<float> MeasureHeight(Report rpt, Draw2.Graphics g, object o, TypeCode tc, Row r, float wrapPoints)
+		{
+			MeasureSetup setup = await GetMeasureSetup(rpt, r).ConfigureAwait(false);
+			if (setup != null)
+				return HeightWith(setup, g, await GetFormatedString(rpt, this, r, o, tc).ConfigureAwait(false), wrapPoints);
+
+			string s = await GetFormatedString(rpt, this, r, o, tc).ConfigureAwait(false); // the string to draw
+			using (Draw2.Font drawFont = await GetFont(rpt, r).ConfigureAwait(false))
+			using (Draw2.StringFormat drawFormat = await GetStringFormat(rpt, r).ConfigureAwait(false))
+			{
+				return WrappedHeight(g, drawFont, s, wrapPoints, await EvalLineHeight(rpt, r).ConfigureAwait(false),
+					g.MeasureString("Xg", drawFont, int.MaxValue, drawFormat).Height);
+			}
+		}
+
+		/// <summary><see cref="MeasureHeight"/> for a box with no Style: the default font, no line height.</summary>
+		static internal async Task<float> MeasureHeightDefaults(Report rpt, Draw2.Graphics g, object o, TypeCode tc, Row r, float wrapPoints)
+		{
+			string s = await GetFormatedString(rpt, null, r, o, tc).ConfigureAwait(false); // the string to draw
+			using (Draw2.Font drawFont = new Draw2.Font("Arial", 10))
+			using (Draw2.StringFormat drawFormat = new Draw2.StringFormat())
+			{
+				drawFormat.Alignment = Draw2.StringAlignment.Near;
+				return WrappedHeight(g, drawFont, s, wrapPoints, 0, g.MeasureString("Xg", drawFont, int.MaxValue, drawFormat).Height);
+			}
+		}
+
+		// The box was measured by the graphics library wrapping the text with a "w" added to make room. It broke
+		// lines differently from the drawing - inside a word, and a "w" sooner - so a box whose text fits grew by
+		// a line it never drew. The height is still taken in whole pixels, as it was.
+		private static float WrappedHeight(Draw2.Graphics g, Draw2.Font font, string s, float wrapPoints, float lineHeight, float oneLinePx)
+		{
+			float pointsPerPixel = 72f / g.DpiX;
+			int lines = TextWrap.LineCount(s, Math.Max(wrapPoints, 1), line => g.MeasureRunWidth(line, font) * pointsPerPixel);
+			float pitchPx = lineHeight > 0 ? lineHeight * g.DpiY / 72f : oneLinePx;
+			return RSize.PointsFromPixels(g, (int) Math.Ceiling(lines * pitchPx));
 		}
 
 		// Calc size of a string with the specified graphics object using the current style

@@ -128,7 +128,10 @@ namespace Majorsilence.Reporting.Rdl
                 }
             }
 //			SetPagePositionEnd(pgs, pgs.CurrentPage.YOffset);
-            SetPagePositionEnd(pgs, pr.Y + pr.H);
+            if (bHidden)
+                SetPagePositionEndHidden(pgs, pr.Y + pr.H);
+            else
+                SetPagePositionEnd(pgs, pr.Y + pr.H);
 
 			return;
         }

@@ -42,9 +42,15 @@ namespace Majorsilence.Reporting.Rdl
 			SetPagePositionBegin(pgs);
 			PageLine pl = new PageLine();
             await SetPagePositionAndStyle(r, pl, row).ConfigureAwait(false);
-            if (!bHidden)
+            // The items below are placed from the line's end, its top and height (see Gap): its
+            // start, which a vertical line's is, put them its height too high.
+            if (bHidden)
+			    SetPagePositionEndHidden(pgs, pl.Y2);
+			else
+			{
 			    pgs.CurrentPage.AddObject(pl);
-			SetPagePositionEnd(pgs, pl.Y);
+			    SetPagePositionEnd(pgs, pl.Y2);
+			}
 		}
 
 		internal float GetX2(Report rpt)
