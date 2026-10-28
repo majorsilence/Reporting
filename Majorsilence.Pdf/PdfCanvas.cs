@@ -713,6 +713,40 @@ namespace Majorsilence.Pdf
             return this;
         }
 
+        /// <summary>
+        /// The ascent, descent and line gap (in points, scaled to <paramref name="style"/>'s font
+        /// size) of the TrueType font that actually renders <paramref name="style"/>'s text, read
+        /// from the font's own <c>hhea</c> table. Falls back to a FontSize-based estimate when no
+        /// embeddable TrueType font is resolved (e.g. a built-in standard PDF font).
+        /// </summary>
+        public (float ascent, float descent, float lineGap) GetFontMetrics(TextStyle? style = null)
+        {
+            style ??= TextStyle.Default;
+            TrueTypeFont? ttf = ResolvePrimaryFont(style);
+            if (ttf == null || ttf.UnitsPerEm <= 0)
+                return (style.FontSize * 0.905f, style.FontSize * 0.212f, 0f);
+
+            float scale = style.FontSize / ttf.UnitsPerEm;
+            return (ttf.Ascender * scale, -ttf.Descender * scale, ttf.LineGap * scale);
+        }
+
+        // The TrueType font that will draw most of a run in `style`, ignoring any per-character
+        // fallback substitution: enough to answer whole-line questions like ascent and line gap.
+        private TrueTypeFont? ResolvePrimaryFont(TextStyle style)
+        {
+            if (style.FontFilePath != null)
+                return _fontCache.GetOrLoad(style.FontFilePath);
+
+            if (_registry != null)
+            {
+                var src = _registry.Resolve(style.FontFamily, style.IsBold, style.IsItalic);
+                if (src != null)
+                    return _fontCache.GetOrLoad(src);
+            }
+
+            return null;
+        }
+
         // ── measurement ──────────────────────────────────────────────────────
 
         /// <summary>Returns the width of <paramref name="text"/> in points when rendered with <paramref name="style"/>.</summary>
