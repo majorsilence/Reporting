@@ -899,9 +899,9 @@ namespace Majorsilence.Reporting.Rdl
 					RunGroupsSetGroups(rpt, wc, ge.NestedGroup);
 
 				// Handle the group header
+				TableGroup tg = ge.Group?.Parent as TableGroup;	// detail groups will result in null
 				if (ge.Group != null)
 				{
-					TableGroup tg = ge.Group.Parent as TableGroup;
                      //   if (ge.Group.PageBreakAtStart && !pgs.CurrentPage.IsEmpty())
 					 // Add check PageBreakCondition not only PageBreakAtStart
                     if (ge.Group.PageBreakAtStart && await ge.Group.PageBreakCondition(rpt, wc.Data.Data[ge.StartRow], ge.Group.PageBreakAtStart).ConfigureAwait(false) && !pgs.CurrentPage.IsEmpty())
@@ -910,61 +910,15 @@ namespace Majorsilence.Reporting.Rdl
 						RunPageNew(pgs, pgs.CurrentPage);
                         await RunPageHeader(pgs, wc.Data.Data[ge.StartRow], false, tg).ConfigureAwait(false);
 					}
-
-					if (tg != null && tg.Header != null)
-					{
-						// Calculate the number of table rows below this group; header, footer, details count
-						if (ge.NestedGroup.Count > 0)
-							wc.GroupNestCount = RunGroupsCount(ge.NestedGroup, 0);
-						else
-							wc.GroupNestCount = (ge.EndRow - ge.StartRow + 1) * DetailsCount;
-
-                        await tg.Header.RunPage(pgs, wc.Data.Data[ge.StartRow]).ConfigureAwait(false);
-						wc.GroupNestCount = 0;
-					}
-				}
-				float footerHeight = await RunGroupsFooterHeight(pgs, wc, ge).ConfigureAwait(false);
-
-
-                if (ge.EndRow == endRow && (  Footer != null ? !Footer.RepeatOnNewPage: true))
-                {
-                    footerHeight += groupHeight;
-                    }        
-      
-				// Handle the nested groups if any
-				if (ge.NestedGroup.Count > 0)
-                    await RunGroupsPage(pgs, wc, ge.NestedGroup, ge.EndRow, footerHeight).ConfigureAwait(false);
-				// If no nested groups then handle the detail rows for the group
-				else if (_Details != null)
-				{
-					if (ge.Group != null &&
-						ge.Group.Parent as TableGroup == null)
-					{   // Group defined on table; means that Detail rows only put out once per group
-                        await _Details.RunPage(pgs, wc.Data, ge.StartRow, ge.StartRow, footerHeight).ConfigureAwait(false);
-					}
-					else
-					{
-                        await _Details.RunPage(pgs, wc.Data, ge.StartRow, ge.EndRow, footerHeight).ConfigureAwait(false);
-					}
-				}
-				else	// When no details we need to figure out whether any more fits on a page
-				{
-					Page p = pgs.CurrentPage;
-					if (p.YOffset + footerHeight > pgs.BottomOfPage) //	Do we need new page to fit footer?
-					{
-                        await RunPageBottomRows(pgs, wc.Data.Data[ge.EndRow], false).ConfigureAwait(false);
-						p = RunPageNew(pgs, p);
-                        await RunPageHeader(pgs, wc.Data.Data[ge.EndRow], false, null).ConfigureAwait(false);
-					}
 				}
 
-				// Do the group footer
+				if (tg != null && tg.KeepTogether && !pgs.CurrentPage.IsEmpty() && !BreaksPageWithin(tg))
+					await RunGroupKeptTogether(pgs, wc, ge, tg, endRow, groupHeight).ConfigureAwait(false);
+				else
+					await RunGroupPage(pgs, wc, ge, tg, endRow, groupHeight).ConfigureAwait(false);
+
 				if (ge.Group != null && ge.Group.Parent != null)
 				{
-					TableGroup tg = ge.Group.Parent as TableGroup;	// detail groups will result in null
-					if (tg != null && tg.Footer != null)
-                        await tg.Footer.RunPage(pgs, wc.Data.Data[ge.EndRow]).ConfigureAwait(false);
-
 					if (ge.Group.PageBreakAtEnd && !pgs.CurrentPage.IsEmpty())
 					{
                         await RunPageBottomRows(pgs, wc.Data.Data[ge.EndRow], false).ConfigureAwait(false);
@@ -974,6 +928,115 @@ namespace Majorsilence.Reporting.Rdl
 				}
 
 			}
+		}
+
+		// A group's header, the groups or detail rows it holds, and its footer.
+		private async Task RunGroupPage(Pages pgs, TableWorkClass wc, GroupEntry ge, TableGroup tg, int endRow, float groupHeight)
+		{
+			if (tg != null && tg.Header != null)
+			{
+				// Calculate the number of table rows below this group; header, footer, details count
+				if (ge.NestedGroup.Count > 0)
+					wc.GroupNestCount = RunGroupsCount(ge.NestedGroup, 0);
+				else
+					wc.GroupNestCount = (ge.EndRow - ge.StartRow + 1) * DetailsCount;
+
+				await tg.Header.RunPage(pgs, wc.Data.Data[ge.StartRow]).ConfigureAwait(false);
+				wc.GroupNestCount = 0;
+			}
+			float footerHeight = await RunGroupsFooterHeight(pgs, wc, ge).ConfigureAwait(false);
+
+
+            if (ge.EndRow == endRow && (  Footer != null ? !Footer.RepeatOnNewPage: true))
+            {
+                footerHeight += groupHeight;
+                }
+
+			// Handle the nested groups if any
+			if (ge.NestedGroup.Count > 0)
+                await RunGroupsPage(pgs, wc, ge.NestedGroup, ge.EndRow, footerHeight).ConfigureAwait(false);
+			// If no nested groups then handle the detail rows for the group
+			else if (_Details != null)
+			{
+				if (ge.Group != null &&
+					ge.Group.Parent as TableGroup == null)
+				{   // Group defined on table; means that Detail rows only put out once per group
+                    await _Details.RunPage(pgs, wc.Data, ge.StartRow, ge.StartRow, footerHeight).ConfigureAwait(false);
+				}
+				else
+				{
+                    await _Details.RunPage(pgs, wc.Data, ge.StartRow, ge.EndRow, footerHeight).ConfigureAwait(false);
+				}
+			}
+			else	// When no details we need to figure out whether any more fits on a page
+			{
+				Page p = pgs.CurrentPage;
+				if (p.YOffset + footerHeight > pgs.BottomOfPage) //	Do we need new page to fit footer?
+				{
+                    await RunPageBottomRows(pgs, wc.Data.Data[ge.EndRow], false).ConfigureAwait(false);
+					p = RunPageNew(pgs, p);
+                    await RunPageHeader(pgs, wc.Data.Data[ge.EndRow], false, null).ConfigureAwait(false);
+				}
+			}
+
+			// Do the group footer
+			if (tg != null && tg.Footer != null)
+                await tg.Footer.RunPage(pgs, wc.Data.Data[ge.EndRow]).ConfigureAwait(false);
+		}
+
+		// A group kept together that ran past the bottom of a page already holding something is
+		// taken off that page and run again from the top of the next, as a row kept together is
+		// (TableRow.RunPage): its height is not known until it has run, since its rows grow and a
+		// group within it may move on itself. One that does not fit on a page of its own runs
+		// across the break from the top of the next page.
+		private async Task RunGroupKeptTogether(Pages pgs, TableWorkClass wc, GroupEntry ge, TableGroup tg, int endRow, float groupHeight)
+		{
+			Page page = pgs.CurrentPage;
+			bool lastPage = page == pgs.LastPage;
+			float x = page.XOffset;
+			float y = page.YOffset;
+			Page bottomRowsPage = wc.BottomRowsPage;
+			float bottomRowsXOffset = wc.BottomRowsXOffset;
+			Page.Contents before = page.MarkContents();
+
+			await RunGroupPage(pgs, wc, ge, tg, endRow, groupHeight).ConfigureAwait(false);
+
+			bool overflowed = pgs.CurrentPage == page
+				? page.XOffset == x && page.YOffset > pgs.BottomOfPage
+				: lastPage && OwnerReport.Body.Columns <= 1;	// only pages the group itself started
+			if (!overflowed)
+				return;
+
+			while (pgs.LastPage != page)
+				pgs.RemoveLastPage();
+			pgs.CurrentPage = page;
+			page.RemoveContentsAfter(before);
+			page.XOffset = x;
+			page.YOffset = y;
+			wc.BottomRowsPage = bottomRowsPage;			// the bottom rows it printed were taken off too
+			wc.BottomRowsXOffset = bottomRowsXOffset;
+			ge.Group.ResetHideDuplicates(pgs.Report);
+
+			Row first = wc.Data.Data[ge.StartRow];
+			await RunPageBottomRows(pgs, first, false).ConfigureAwait(false);
+			RunPageNew(pgs, page);
+			await RunPageHeader(pgs, first, false, tg).ConfigureAwait(false);
+			await RunGroupPage(pgs, wc, ge, tg, endRow, groupHeight).ConfigureAwait(false);
+		}
+
+		// Whether a page is broken on purpose inside the group, by a group within it or by its
+		// detail rows: the group then spans pages by design, and is not moved for it.
+		private bool BreaksPageWithin(TableGroup tg)
+		{
+			List<TableGroup> groups = _TableGroups.Items;
+			for (int i = groups.IndexOf(tg) + 1; i < groups.Count; i++)
+			{
+				Grouping g = groups[i].Grouping;
+				if (g != null && (g.PageBreakAtStart || g.PageBreakAtEnd))
+					return true;
+			}
+			Grouping dg = _Details?.Grouping;
+			return dg != null && (dg.PageBreakAtStart || dg.PageBreakAtEnd);
 		}
 
 		private async Task<float> RunGroupsFooterHeight(Pages pgs, TableWorkClass wc, GroupEntry ge)
