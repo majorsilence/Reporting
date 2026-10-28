@@ -609,6 +609,23 @@ namespace Majorsilence.Reporting.Rdl
 			return OwnerReport.Width.Points - xloc;
 		}
 
+		// The width in points the item is laid out at, as SetPagePositionAndStyle sets it.
+		internal float WidthPoints(Report rpt)
+		{
+			if (this._TC != null)
+			{	// part of a table: its columns' width
+				Table t = _TC.OwnerTable;
+				float width = 0;
+				for (int ci = _TC.ColIndex; ci < _TC.ColIndex + _TC.ColSpan; ci++)
+					width += ((TableColumn) t.TableColumns.Items[ci]).Width.Points;
+				return width;
+			}
+			WorkClass wc = GetWC(rpt);
+			if (wc.MC != null)
+				return wc.MC.Width;
+			return Width != null ? Width.Points : WidthOrOwnerWidth(rpt);
+		}
+
 		internal int WidthCalc(Report rpt, Graphics g)
 		{
 			WorkClass wc = GetWC(rpt);

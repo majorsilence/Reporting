@@ -641,6 +641,71 @@ namespace Majorsilence.Reporting.Rdl
 			}
 		}
 
+		/// <summary>
+		/// The height in points of the text of a growing box, wrapped to <paramref name="wrapPoints"/>, the width
+		/// between its paddings: the lines it is drawn in (see <see cref="TextWrap"/>) at the font's own pitch.
+		/// </summary>
+		internal async Task<float> MeasureHeight(Report rpt, Draw2.Graphics g, object o, TypeCode tc, Row r, float wrapPoints)
+		{
+			string s = await Style.GetFormatedString(rpt, this, r, o, tc); // the string to draw
+			using (Draw2.Font drawFont = await GetFont(rpt, r))
+			using (Draw2.StringFormat drawFormat = await GetStringFormat(rpt, r))
+			{
+				var drawnFont = RenderPdf_Raw.DrawnFont(await EvalFontFamily(rpt, r), drawFont.Bold, drawFont.Italic);
+				return WrappedHeight(g, drawFont, drawnFont, s, wrapPoints, g.MeasureString("Xg", drawFont, int.MaxValue, drawFormat).Height);
+			}
+		}
+
+		/// <summary><see cref="MeasureHeight"/> for a box with no Style: the default font.</summary>
+		static internal async Task<float> MeasureHeightDefaults(Report rpt, Draw2.Graphics g, object o, TypeCode tc, Row r, float wrapPoints)
+		{
+			string s = await Style.GetFormatedString(rpt, null, r, o, tc); // the string to draw
+			using (Draw2.Font drawFont = new Draw2.Font("Arial", 10))
+			using (Draw2.StringFormat drawFormat = new Draw2.StringFormat())
+			{
+				drawFormat.Alignment = Draw2.StringAlignment.Near;
+				return WrappedHeight(g, drawFont, RenderPdf_Raw.DrawnFont("Arial", false, false), s, wrapPoints,
+					g.MeasureString("Xg", drawFont, int.MaxValue, drawFormat).Height);
+			}
+		}
+
+		// The box was measured by the graphics library wrapping the text with a "w" added to make room. It broke
+		// lines differently from the drawing - inside a word, and a "w" sooner - so a box whose text fits grew by
+		// a line it never drew. The height is still taken in whole pixels, as it was.
+		// The widths are those of drawnFont, the font the PDF draws the text in, at its real size, when it has
+		// every character of the text: the graphics library measures at a whole number of pixels, and a family
+		// the machine lacks in the system's fallback font. Text with characters the font lacks, which the PDF
+		// draws in fallback fonts, is measured by the graphics library.
+		private static float WrappedHeight(Draw2.Graphics g, Draw2.Font font, Majorsilence.Pdf.TrueTypeFont drawnFont, string s,
+			float wrapPoints, float oneLinePx)
+		{
+			float pointsPerPixel = 72f / g.DpiX;
+			float size = font.SizeInPoints;
+			Func<string, float> width = drawnFont != null && HasEveryCharacter(drawnFont, s)
+				? line => drawnFont.GetWidthPoint(line, size)
+				: line => g.MeasureString(line, font).Width * pointsPerPixel;
+			int lines = TextWrap.LineCount(s, Math.Max(wrapPoints, 1), width);
+			return RSize.PointsFromPixels(g, (int) Math.Ceiling(lines * oneLinePx));
+		}
+
+		private static bool HasEveryCharacter(Majorsilence.Pdf.TrueTypeFont font, string s)
+		{
+			if (s == null)
+				return true;
+			for (int i = 0; i < s.Length; i++)
+			{
+				char c = s[i];
+				if (char.IsControl(c) || c == ' ')
+					continue;
+				int cp = c;
+				if (char.IsHighSurrogate(c) && i + 1 < s.Length && char.IsLowSurrogate(s[i + 1]))
+					cp = char.ConvertToUtf32(c, s[++i]);
+				if (font.GetGlyphId(cp) == 0)
+					return false;
+			}
+			return true;
+		}
+
 		// Calc size of a string with the specified graphics object using the current style
 		//  information
 		internal async Task<System.Drawing.Size> MeasureString(Report rpt, Draw2.Graphics g, object o, TypeCode tc, Row r, int maxWidth)

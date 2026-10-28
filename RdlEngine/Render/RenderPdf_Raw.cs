@@ -45,9 +45,9 @@ namespace Majorsilence.Reporting.Rdl
         private readonly PdfSecurity? _security;
         private readonly PdfSignatureOptions? _signature;
 
-        private readonly int _osPlatform = (int)Environment.OSVersion.Platform;
-        private bool _dejavuFonts;
-        private bool _liberationFonts;
+        private static readonly int _osPlatform = (int)Environment.OSVersion.Platform;
+        private static bool _dejavuFonts;
+        private static bool _liberationFonts;
 
         // RDL face names that map to a metric-compatible bundled family
         private static readonly Dictionary<string, string> _embeddedFontMap =
@@ -372,40 +372,15 @@ namespace Majorsilence.Reporting.Rdl
             return result.ToArray();
         }
 
+        // As a growing box is measured (Style.MeasureHeight), so that it grows by the lines drawn here.
         private void WrapLine(string text, TextStyle style, float maxWidth, List<string> output)
         {
-            string[] words = text.Split(' ');
-            var current = new System.Text.StringBuilder();
-
-            foreach (string word in words)
-            {
-                if (current.Length == 0)
-                {
-                    current.Append(word);
-                }
-                else
-                {
-                    string candidate = current + " " + word;
-                    if (_currentPage.MeasureTextWidth(candidate, style) <= maxWidth)
-                    {
-                        current.Clear();
-                        current.Append(candidate);
-                    }
-                    else
-                    {
-                        output.Add(current.ToString());
-                        current.Clear();
-                        current.Append(word);
-                    }
-                }
-            }
-            if (current.Length > 0)
-                output.Add(current.ToString());
+            TextWrap.WrapParagraph(text, maxWidth, line => _currentPage.MeasureTextWidth(line, style), output);
         }
 
         // ── font registry construction ────────────────────────────────────────
 
-        private FontRegistry BuildFontRegistry()
+        private static FontRegistry BuildFontRegistry()
         {
             // FontFolder sets _liberationFonts / _dejavuFonts as a side-effect
             string sysFolder = FontFolder;
@@ -552,7 +527,7 @@ namespace Majorsilence.Reporting.Rdl
             "/Library/Fonts",
         };
 
-        private void AddCjkFallbacks(FontRegistry reg)
+        private static void AddCjkFallbacks(FontRegistry reg)
         {
             // Windows fonts were all registered above; elsewhere the CJK fonts live in
             // folders that are not otherwise scanned.
@@ -603,7 +578,7 @@ namespace Majorsilence.Reporting.Rdl
         }
 
         // Where Linux and macOS keep installed fonts, system-wide and per user.
-        private IEnumerable<string> InstalledFontRoots()
+        private static IEnumerable<string> InstalledFontRoots()
         {
             string home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
             if (IsOSX)
@@ -624,20 +599,20 @@ namespace Majorsilence.Reporting.Rdl
             }
         }
 
-        private string MapFaceToRegistryFamily(string face)
+        private static string MapFaceToRegistryFamily(FontRegistry registry, string face)
         {
             switch (face)
             {
                 // The font itself when it is installed, as for every other family below; the
                 // metric-compatible Liberation font only when it is not.
                 case "Times New Roman":
-                    if (_fontRegistry.Contains("Times New Roman"))  return "Times New Roman";
-                    if (_fontRegistry.Contains("LiberationSerif"))  return "LiberationSerif";
+                    if (registry.Contains("Times New Roman"))  return "Times New Roman";
+                    if (registry.Contains("LiberationSerif"))  return "LiberationSerif";
                     return null;
 
                 case "Courier New":
-                    if (_fontRegistry.Contains("Courier New"))      return "Courier New";
-                    if (_fontRegistry.Contains("LiberationMono"))   return "LiberationMono";
+                    if (registry.Contains("Courier New"))      return "Courier New";
+                    if (registry.Contains("LiberationMono"))   return "LiberationMono";
                     return null;
 
                 case "Symbol":
@@ -649,17 +624,53 @@ namespace Majorsilence.Reporting.Rdl
                     // when it is not: with every installed font registered, a machine that has
                     // both Calibri and Carlito (LibreOffice installs the latter) would otherwise
                     // draw a report's Calibri in Carlito.
-                    if (_fontRegistry.Contains(face)) return face;
+                    if (registry.Contains(face)) return face;
 
                     // Metric-compatible substitution table (Calibri→Carlito etc.)
                     if (_embeddedFontMap.TryGetValue(face, out string mapped)
-                        && _fontRegistry.Contains(mapped))
+                        && registry.Contains(mapped))
                         return mapped;
 
                     // Helvetica/Arial treated as sans-serif default
-                    if (_fontRegistry.Contains("LiberationSans")) return "LiberationSans";
-                    if (_fontRegistry.Contains("Arial"))          return "Arial";
+                    if (registry.Contains("LiberationSans")) return "LiberationSans";
+                    if (registry.Contains("Arial"))          return "Arial";
                     return null;
+            }
+        }
+
+        // The registry DrawnFont chooses from: a render builds its own, and scanning the font
+        // folders for every measured box would be the same work each time. Fonts installed after
+        // the first measure are not seen until the process restarts.
+        private static readonly Lazy<FontRegistry> _measureRegistry = new Lazy<FontRegistry>(BuildFontRegistry);
+
+        // The fonts DrawnFont has read, one per font of that registry.
+        private static readonly System.Runtime.CompilerServices.ConditionalWeakTable<FontSource, TrueTypeFont> _drawnFonts =
+            new System.Runtime.CompilerServices.ConditionalWeakTable<FontSource, TrueTypeFont>();
+
+        /// <summary>
+        /// The font text in <paramref name="family"/> is drawn in here, chosen as ResolveFont
+        /// chooses it; null when it is drawn in a standard Type-1 font or the font cannot be read.
+        /// A growing box is measured in it (Style), so that it grows by the lines drawn here: the
+        /// graphics library measures at a whole number of pixels, and a family the machine lacks
+        /// in the system's fallback, while this renderer draws at the font's real size, in the
+        /// font itself or in its substitute.
+        /// </summary>
+        internal static TrueTypeFont DrawnFont(string family, bool bold, bool italic)
+        {
+            try
+            {
+                FontRegistry registry = _measureRegistry.Value;
+                string face = MapFaceToRegistryFamily(registry, NormalizeFace(family));
+                FontSource src = face == null ? null : registry.Resolve(face, bold, italic);
+                if (src == null)
+                    return null;
+                return _drawnFonts.GetValue(src, f => f.Data != null
+                    ? new TrueTypeFont(f.Data)
+                    : f.FaceIndex == 0 ? new TrueTypeFont(f.Path) : new TrueTypeFont(File.ReadAllBytes(f.Path), f.FaceIndex));
+            }
+            catch (Exception)
+            {
+                return null;    // drawing it fails as well; the box is measured by the graphics library
             }
         }
 
@@ -676,7 +687,7 @@ namespace Majorsilence.Reporting.Rdl
                 .WithItalic(italic);
 
             // Try the registry first — handles embedding, variants, and fallback automatically
-            string registryFamily = MapFaceToRegistryFamily(face);
+            string registryFamily = MapFaceToRegistryFamily(_fontRegistry, face);
             if (registryFamily != null)
                 return baseStyle.WithFamily(registryFamily);
 
@@ -748,10 +759,10 @@ namespace Majorsilence.Reporting.Rdl
 
         // ── OS helpers ────────────────────────────────────────────────────────
 
-        private bool IsOSX => System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(
+        private static bool IsOSX => System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(
             System.Runtime.InteropServices.OSPlatform.OSX);
 
-        private string FontFolder
+        private static string FontFolder
         {
             get
             {
