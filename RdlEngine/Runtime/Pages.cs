@@ -4,6 +4,7 @@ using Majorsilence.Reporting.RdlEngine.Resources;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Majorsilence.Forms.Drawing;
 using System.Drawing;  // value types (Color, Point, Size, Rectangle, ...) come from System.Drawing.Primitives
 
@@ -84,6 +85,43 @@ namespace Majorsilence.Reporting.Rdl
                 _bm.Dispose();
                 _bm = null;
             }
+        }
+
+        // Body textboxes that read Globals!TotalPages, with the row each was run for. The count is
+        // only known once the body is laid out; until then it is 1.
+        List<(Textbox Textbox, PageText Text, Row Row)> _totalPagesTexts;
+
+        internal void AddTotalPagesText(Textbox tb, PageText pt, Row row)
+        {
+            if (_totalPagesTexts == null)
+                _totalPagesTexts = new List<(Textbox, PageText, Row)>();
+            _totalPagesTexts.Add((tb, pt, row));
+        }
+
+        /// <summary>
+        /// Works out again, with the page count, each body textbox that reads Globals!TotalPages
+        /// (a "Page N of M" box in a table header repeated on every page, say), with the number
+        /// of the page it is on. A box taken off its page again, as when rows are moved to the
+        /// next page, is left alone.
+        /// </summary>
+        internal async Task RunTotalPagesTexts()
+        {
+            if (_totalPagesTexts == null)
+                return;
+            var placed = new HashSet<PageItem>();
+            foreach (Page p in _pages)
+                foreach (PageItem pi in p)
+                    placed.Add(pi);
+            Report.TotalPages = PageCount;
+            foreach (var (tb, pt, row) in _totalPagesTexts)
+            {
+                if (!placed.Contains(pt))
+                    continue;
+                Report.PageNumber = pt.Page.PageNumber;
+                string t = await tb.RunText(Report, row).ConfigureAwait(false);
+                pt.Text = t == null ? t : Textbox.LineBreaksAsLineFeeds(t);
+            }
+            _totalPagesTexts = null;
         }
 
         public void SortPageItems()

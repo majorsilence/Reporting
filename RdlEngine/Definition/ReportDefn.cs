@@ -431,6 +431,7 @@ namespace Majorsilence.Reporting.Rdl
 
  				if (pgs.LastPage.IsEmpty()&& pgs.PageCount > 1)	// get rid of extraneous pages which
 					pgs.RemoveLastPage();			//   can be caused by region page break at end
+				await pgs.RunTotalPagesTexts().ConfigureAwait(false);	// the page count is known now
 
 				// Now create the headers and footers for all the pages (as needed)
 				if (_PageHeader != null)
