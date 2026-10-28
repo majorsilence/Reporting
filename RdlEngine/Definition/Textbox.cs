@@ -51,6 +51,7 @@ namespace Majorsilence.Reporting.Rdl
 								// should render as an element or attribute: Auto (Default)
 								// Auto uses the setting on the Report element.
 		bool _IsToggle;		// Textbox is used to toggle a detail row
+		bool _NoWrap;		// a box that may not grow prints each line whole, unwrapped; see NoWrapOf
 		List<string> _ExprReferences;	// array of names of expressions that reference this Textbox;
 								//  only needed for page header/footer references 
 
@@ -100,6 +101,8 @@ namespace Majorsilence.Reporting.Rdl
 				}
 			}
 			
+			_NoWrap = NoWrapOf(Custom);
+
 			if (_Value == null)
 				OwnerReport.rl.LogError(8, "Textbox value not specified for " + (this.Name == null? "'name not specified'": this.Name.Nm));
 
@@ -114,6 +117,22 @@ namespace Majorsilence.Reporting.Rdl
 					OwnerReport.rl.LogError(4, "Duplicate Textbox name '" + this.Name.Nm + "' ignored.");
 				}
 			}
+		}
+
+		// <Custom><NoWrap>true</NoWrap></Custom> asks that a box that may not grow print its value
+		// without wrapping it: each line - the value splits only at its own line breaks - is drawn
+		// whole on one line and cut at the box's sides, and lines below the box's height are cut
+		// as before, so a one line box shows the first line. A box that may grow wraps as usual.
+		private static bool NoWrapOf(Custom custom)
+		{
+			if (custom == null)
+				return false;
+			foreach (XmlNode xNode in custom.CustomXmlNode.ChildNodes)
+			{
+				if (xNode.Name == "NoWrap")
+					return string.Equals(xNode.InnerText.Trim(), "true", StringComparison.OrdinalIgnoreCase);
+			}
+			return false;
 		}
 
 		// Handle parsing of function in final pass
@@ -273,7 +292,9 @@ namespace Majorsilence.Reporting.Rdl
 			// cell: its width is its column's rather than one chosen for the text, and a table
 			// laid out in narrow columns relies on a cell's text running on over the empty cells
 			// beside it - cut to the column, such a cell would print nothing at all.
-			pt.ClipSides = !this.CanGrow && !this.IsTableOrMatrixCell(r);
+			// A box asked not to wrap is cut at its sides wherever it is: it has asked for that.
+			pt.NoWrap = _NoWrap && !this.CanGrow;
+			pt.ClipSides = !this.CanGrow && (pt.NoWrap || !this.IsTableOrMatrixCell(r));
 
             // check TextAlign: if General then correct based on data type
             if (pt.SI.TextAlign == TextAlignEnum.General)

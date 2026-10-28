@@ -9,6 +9,7 @@ namespace Majorsilence.Reporting.Rdl
 		bool bGrow;
 		bool _NoClip = false;		// on drawing disallow clipping
 		bool _ClipSides = false;	// on drawing cut a line too wide for the box at its sides
+		bool _NoWrap = false;		// break the text only at its own line breaks, never to fit the width
 		PageTextHtml _HtmlParent = null;
 
 		public PageText(string t)
@@ -45,6 +46,12 @@ namespace Majorsilence.Reporting.Rdl
 		{
 			get { return _ClipSides; }
 			set { _ClipSides = value; }
+		}
+
+		internal bool NoWrap
+		{
+			get { return _NoWrap; }
+			set { _NoWrap = value; }
 		}
 
 		public bool CanGrow

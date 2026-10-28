@@ -136,7 +136,7 @@ namespace Majorsilence.Reporting.Rdl
         /// </summary>
         /// <returns></returns>
         internal abstract protected void AddText(float x, float y, float height, float width, string[] sa,
-            StyleInfo si, float[] tw, bool bWrap, string url, bool bNoClip, string tooltip, bool bClipSides);
+            StyleInfo si, float[] tw, bool bWrap, string url, bool bNoClip, string tooltip, bool bClipSides, bool bNoWrap);
 
         #endregion
 
@@ -321,7 +321,7 @@ namespace Majorsilence.Reporting.Rdl
                     string[] sa = MeasureString(pt, pgs.G, out textwidth);
 
 
-                    AddText(pt.X, pt.Y, pt.H, pt.W, sa, pt.SI, textwidth, pt.CanGrow, pt.HyperLink, pt.NoClip, pt.Tooltip, pt.ClipSides);
+                    AddText(pt.X, pt.Y, pt.H, pt.W, sa, pt.SI, textwidth, pt.CanGrow, pt.HyperLink, pt.NoClip, pt.Tooltip, pt.ClipSides, pt.NoWrap);
 
                     if (pt.Bookmark != null)
                     {
@@ -510,6 +510,21 @@ namespace Majorsilence.Reporting.Rdl
                 float ptWidth = pt.W - pt.SI.PaddingLeft - pt.SI.PaddingRight;
                 if (ptWidth <= 0)
                     ptWidth = 1;
+
+                // A box asked not to wrap keeps each of its lines whole, however wide; the renderer
+                // cuts it at the box's sides.
+                if (pt.NoWrap)
+                {
+                    sa = s.Split(LINEBREAK);
+                    width = new float[sa.Length];
+                    for (int i = 0; i < sa.Length; i++)
+                    {
+                        sa[i] = sa[i].TrimEnd(' ');
+                        ms = MeasureString(sa[i], g, drawFont, drawFormat);
+                        width[i] = Measurement.PointsFromPixels(ms.Width, g.DpiX);
+                    }
+                    return sa;
+                }
 
                 // The usual table cell: one line that fits. No line breaks to split on and no lists to build.
                 // (A line that does not fit goes on to the general code below, whose measurement is a cache hit.)
