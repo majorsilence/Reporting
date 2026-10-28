@@ -919,7 +919,10 @@ namespace Majorsilence.Reporting.Rdl
 
 				if (ge.Group != null && ge.Group.Parent != null)
 				{
-					if (ge.Group.PageBreakAtEnd && !pgs.CurrentPage.IsEmpty())
+					// PageBreakCondition gates the break at the end as it does the one at the start,
+					// tested on the instance's last row, the one the break comes after.
+					if (ge.Group.PageBreakAtEnd && !pgs.CurrentPage.IsEmpty()
+						&& await ge.Group.PageBreakCondition(rpt, wc.Data.Data[ge.EndRow], true).ConfigureAwait(false))
 					{
                         await RunPageBottomRows(pgs, wc.Data.Data[ge.EndRow], false).ConfigureAwait(false);
 						RunPageNew(pgs, pgs.CurrentPage);
