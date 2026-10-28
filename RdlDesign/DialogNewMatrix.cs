@@ -59,7 +59,7 @@ namespace Majorsilence.Reporting.RdlDesign
                 matrix.Append("<NoRows>Query returned no rows!</NoRows><Style>" +
                     "<BorderStyle><Default>Solid</Default></BorderStyle></Style>");
 
-                matrix.Append("<Corner><ReportItems><Textbox Name=\"Corner\"><Value>Corner</Value>" +
+                matrix.Append("<Corner><ReportItems><Textbox Name=\"Corner\"><Value></Value>" +
               "<Style><BorderStyle><Default>Solid</Default></BorderStyle><BorderWidth>" +
                   "<Left>1pt</Left><Right>1pt</Right><Top>1pt</Top><Bottom>1pt</Bottom>" +
                 "</BorderWidth><FontWeight>bold</FontWeight></Style>" +
