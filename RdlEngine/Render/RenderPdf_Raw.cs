@@ -503,33 +503,10 @@ namespace Majorsilence.Reporting.Rdl
             return true;
         }
 
+        // As a growing box is measured (Style.MeasureString), so that it grows by the lines drawn here.
         private void WrapLine(string text, TextStyle style, float maxWidth, List<string> output)
         {
-            string[] words = text.Split(' ');
-            string current = null;      // the line being built; the candidate (line + " " + word) is the only string made per word
-
-            foreach (string word in words)
-            {
-                if (string.IsNullOrEmpty(current))
-                {
-                    current = word;
-                }
-                else
-                {
-                    string candidate = current + " " + word;
-                    if (_currentPage.MeasureTextWidth(candidate, style) <= maxWidth)
-                    {
-                        current = candidate;
-                    }
-                    else
-                    {
-                        output.Add(current);
-                        current = word;
-                    }
-                }
-            }
-            if (!string.IsNullOrEmpty(current))
-                output.Add(current);
+            TextWrap.WrapParagraph(text, maxWidth, line => _currentPage.MeasureTextWidth(line, style), output);
         }
 
         // ── font registry construction ────────────────────────────────────────

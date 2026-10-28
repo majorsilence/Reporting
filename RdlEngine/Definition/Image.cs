@@ -173,7 +173,7 @@ namespace Majorsilence.Reporting.Rdl
             {
                 PageImage pi = new PageImage(ImageFormat.Jpeg, (byte[])null, 0, 0);
                 await SetPagePositionAndStyle(r, pi, row).ConfigureAwait(false);
-                SetPagePositionEnd(pgs, pi.Y + pi.H);
+                SetPagePositionEndHidden(pgs, pi.Y + pi.H);
                 return;
             }
 
