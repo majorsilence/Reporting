@@ -444,6 +444,7 @@ namespace Majorsilence.Reporting.Rdl
                 var found = FindDescendants (root, kind);
                 var replaced = 0;
                 var approximated = 0;
+                var mapFeatures = new HashSet<string> ();
 
                 foreach (var item in found) {
                     // Only report items: a Map or Indicator name can also be an unrelated child
@@ -461,6 +462,9 @@ namespace Majorsilence.Reporting.Rdl
                             continue;
                         }
                     }
+
+                    if (kind == "Map")
+                        mapFeatures.UnionWith (DescribeMap (item));
 
                     var doc = item.OwnerDocument;
                     var rectangle = doc.CreateElement ("Rectangle", item.NamespaceURI);
@@ -482,9 +486,88 @@ namespace Majorsilence.Reporting.Rdl
                 }
 
                 if (replaced > 0) {
+                    var detail = mapFeatures.Count > 0 ? $" It has {string.Join (", ", mapFeatures)}." : string.Empty;
                     rl?.LogError (4, $"The report contains {replaced} {kind} item(s), which are not supported " +
-                        "yet; each is replaced by an empty placeholder of the same size.");
+                        $"yet; each is replaced by an empty placeholder of the same size.{detail}");
                 }
+            }
+        }
+
+        /// <summary>
+        /// Names what a Map report item actually uses (layer kinds, where their geometry comes
+        /// from, which appearance rules they carry), so the one warning for all Map items says
+        /// what is being dropped instead of just that something was. Best-effort: an element the
+        /// schema does not expect, or one <c>FindChild</c> cannot see because of namespace quirks,
+        /// is simply left out of the description.
+        /// </summary>
+        private static IEnumerable<string> DescribeMap (XmlElement map)
+        {
+            var features = new List<string> ();
+            var layers = FindChild (map, "MapLayers");
+            if (layers != null) {
+                foreach (var layer in Children (layers)) {
+                    switch (layer.LocalName) {
+                        case "MapTileLayer":
+                            features.Add ("a tile layer of online map images");
+                            break;
+                        case "MapPolygonLayer":
+                            features.Add ("a polygon layer" + Source (layer) + Rules (layer, "MapPolygonRules"));
+                            break;
+                        case "MapPointLayer":
+                            features.Add ("a point layer" + Source (layer) + Rules (layer, "MapPointRules"));
+                            break;
+                        case "MapLineLayer":
+                            features.Add ("a line layer" + Source (layer) + Rules (layer, "MapLineRules"));
+                            break;
+                    }
+                }
+            }
+
+            if (FindChild (map, "MapColorScale") != null)
+                features.Add ("a colour scale");
+            if (FindChild (map, "MapDistanceScale") != null)
+                features.Add ("a distance scale");
+
+            return features;
+
+            static string Source (XmlElement layer)
+            {
+                if (FindChild (layer, "MapShapefile") != null)
+                    return " bound to a shapefile";
+                if (FindChild (layer, "MapSpatialDataSet") != null)
+                    return " bound to a dataset's spatial field";
+                if (FindChild (layer, "MapSpatialDataRegion") != null)
+                    return " bound to an embedded spatial data region";
+                return string.Empty;
+            }
+
+            static string Rules (XmlElement layer, string rulesElementName)
+            {
+                var rules = FindChild (layer, rulesElementName);
+                if (rules == null)
+                    return string.Empty;
+
+                var names = new List<string> ();
+                foreach (var rule in Children (rules)) {
+                    switch (rule.LocalName) {
+                        case "MapColorRangeRule":
+                            names.Add ("a colour-range rule");
+                            break;
+                        case "MapColorPaletteRule":
+                            names.Add ("a colour-palette rule");
+                            break;
+                        case "MapCustomColorRule":
+                            names.Add ("custom colours");
+                            break;
+                        case "MapSizeRule":
+                            names.Add ("a size rule");
+                            break;
+                        case "MapMarkerRule":
+                            names.Add ("a marker rule");
+                            break;
+                    }
+                }
+                return names.Count > 0 ? " with " + string.Join (" and ", names) : string.Empty;
             }
         }
 
