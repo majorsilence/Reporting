@@ -798,8 +798,11 @@ namespace Majorsilence.Reporting.Rdl
 
 			foreach (ReportItem ri in this._YParents)
 			{
-				if(ri.ZIndex > this.ZIndex)
-					continue;
+				// ZIndex is drawing (paint) order only -- it says nothing about vertical layout,
+				// so an item with a higher ZIndex than this one can still sit above it and push
+				// it down when it grows. Filtering candidates by ZIndex here used to leave a
+				// grower's follower at its design-time Top whenever the grower's ZIndex happened
+				// to be the larger of the two.
 				WorkClass wc = ri.GetWC(rpt);
 				if (wc.BottomPosition.CompareTo(float.NaN) == 0 ||
 					wc.CurrentPage == null ||
