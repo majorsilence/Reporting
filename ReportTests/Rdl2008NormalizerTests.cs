@@ -239,6 +239,33 @@ namespace ReportTests
             Assert.That (html, Does.Contain ("Widget"), "expression run lost");
         }
 
+        // Issue #519: several Paragraphs (not several TextRuns in one Paragraph) used to be
+        // joined with a literal "\n" into a single Value. That is fine when every paragraph is
+        // a literal, but once a paragraph is itself an expression the parser reads the
+        // newline-then-"=" as an equality operator and the whole textbox renders empty.
+        [Test]
+        public async Task MultipleParagraphs_WhereOneIsAnExpression_AreCombinedIntoOneExpression ()
+        {
+            var multiParagraph = @"<Textbox Name=""Multi"">
+                <Paragraphs>
+                  <Paragraph><TextRuns><TextRun><Value>=""Hdr: "" &amp; Fields!Name.Value</Value><Style /></TextRun></TextRuns></Paragraph>
+                  <Paragraph><TextRuns><TextRun><Value>=Fields!Amount.Value</Value><Style /></TextRun></TextRuns></Paragraph>
+                  <Paragraph><TextRuns><TextRun><Value>a trailing literal line</Value><Style /></TextRun></TextRuns></Paragraph>
+                </Paragraphs>
+                <Style /></Textbox>";
+
+            var rdl = TablixReport (HeaderThenDetail,
+                Row ("0.25in", Cell (Textbox ("H1", "Name")), Cell (Textbox ("H2", "Amount"))) +
+                Row ("0.25in", Cell (multiParagraph), Cell (Textbox ("D2", "=Fields!Amount.Value"))));
+
+            var html = await RenderHtml (rdl);
+
+            // All three paragraphs must survive: the textbox used to render completely empty.
+            Assert.That (html, Does.Contain ("Hdr: Widget"), "first (expression) paragraph lost");
+            Assert.That (html, Does.Contain ("10.00"), "second (expression) paragraph lost");
+            Assert.That (html, Does.Contain ("a trailing literal line"), "third (literal) paragraph lost");
+        }
+
         [Test]
         public async Task Rdl2016Namespace_IsAlsoNormalized ()
         {

@@ -307,6 +307,7 @@ namespace Majorsilence.Reporting.Rdl
             XmlElement firstParagraphStyle = null;
             XmlElement firstRunStyle = null;
             var droppedRuns = false;
+            var anyParagraphIsExpression = false;
 
             foreach (var paragraph in ChildrenNamed (paragraphs, "Paragraph")) {
                 firstParagraphStyle ??= FindChild (paragraph, "Style");
@@ -334,12 +335,17 @@ namespace Majorsilence.Reporting.Rdl
                 // A 2005 Textbox has one Value, so several runs have to become one string. Plain
                 // literals just concatenate; once any run is an expression the whole thing has to
                 // become a single expression, with the literals quoted and joined by '&'.
+                string paragraphText;
                 if (runValues.Count > 1) {
                     droppedRuns = true;
-                    texts.Add (runIsExpression ? CombineAsExpression (runValues) : string.Concat (runValues));
+                    paragraphText = runIsExpression ? CombineAsExpression (runValues) : string.Concat (runValues);
                 } else {
-                    texts.Add (runValues[0]);
+                    paragraphText = runValues[0];
                 }
+
+                if (paragraphText.StartsWith ("=", StringComparison.Ordinal))
+                    anyParagraphIsExpression = true;
+                texts.Add (paragraphText);
             }
 
             if (droppedRuns) {
@@ -353,7 +359,17 @@ namespace Majorsilence.Reporting.Rdl
 
             var doc = textbox.OwnerDocument;
             var valueElement = doc.CreateElement ("Value", textbox.NamespaceURI);
-            valueElement.InnerText = string.Join ("\n", texts);
+
+            // A plain "\n".Join of the paragraphs' texts worked only while none of them was an
+            // expression: once one is, the parser reads the literal newline before an "="
+            // as part of the previous line and the "=" that follows as an equality operator,
+            // e.g. '"x"\n=Foo' becomes the single (invalid) comparison '"x" = Foo'. Multiple
+            // expression-bearing paragraphs must become one expression, joined by "Chr(10)" so
+            // the line break comes from the evaluated data instead of from markup the parser
+            // would otherwise choke on.
+            valueElement.InnerText = texts.Count > 1 && anyParagraphIsExpression
+                ? CombineAsExpression (texts, " & Chr(10) & ")
+                : string.Join ("\n", texts);
             textbox.AppendChild (valueElement);
 
             // Least specific first: the box's own style is the base, the paragraph overrides it
@@ -367,13 +383,13 @@ namespace Majorsilence.Reporting.Rdl
         /// Joins mixed literal/expression runs into one RDL expression, e.g. ["Total: ",
         /// "=Fields!X.Value"] becomes ="Total: " &amp; Fields!X.Value.
         /// </summary>
-        private static string CombineAsExpression (List<string> runValues)
+        private static string CombineAsExpression (List<string> runValues, string separator = " & ")
         {
             var sb = new StringBuilder ("=");
 
             for (var i = 0; i < runValues.Count; i++) {
                 if (i > 0)
-                    sb.Append (" & ");
+                    sb.Append (separator);
 
                 var value = runValues[i];
                 if (value.StartsWith ("=", StringComparison.Ordinal))
