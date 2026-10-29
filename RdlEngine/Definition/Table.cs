@@ -228,7 +228,7 @@ namespace Majorsilence.Reporting.Rdl
 			if (_Header != null)
 			{
 				ip.TableHeaderStart(_Header, row);
-				Row frow = wc.Data.Data.Count > 0?  wc.Data.Data[0]: null;
+				Row frow = wc.Data.Data.Count > 0?  FirstGroupsRow(r, wc): null;
                 await _Header.Run(ip, frow).ConfigureAwait(false);
 				ip.TableHeaderEnd(_Header, row);
 			}
@@ -293,7 +293,7 @@ namespace Majorsilence.Reporting.Rdl
             // Calculate the xpositions of the columns
             await TableColumns.CalculateXPositions(r, GetOffsetCalc(r) + LeftCalc(r), row).ConfigureAwait(false);
 
-            await RunPageHeader(pgs, wc.Data.Data[0], true, null).ConfigureAwait(false);
+            await RunPageHeader(pgs, FirstGroupsRow(r, wc), true, null).ConfigureAwait(false);
 
             if (wc.RecursiveGroup != null)
             {
@@ -882,8 +882,9 @@ namespace Majorsilence.Reporting.Rdl
         private async Task RunGroupsPage(Pages pgs, TableWorkClass wc, List<GroupEntry> groupEntries, int endRow, float groupHeight)
 		{
 			Report rpt = pgs.Report;
-			foreach (GroupEntry ge in groupEntries)
+			for (int i = 0; i < groupEntries.Count; i++)
 			{
+				GroupEntry ge = groupEntries[i];
 				// set the group entry value
 				int index;
 				if (ge.Group != null)	// groups?
@@ -926,7 +927,9 @@ namespace Majorsilence.Reporting.Rdl
 					{
                         await RunPageBottomRows(pgs, wc.Data.Data[ge.EndRow], false).ConfigureAwait(false);
 						RunPageNew(pgs, pgs.CurrentPage);
-                        await RunPageHeader(pgs, wc.Data.Data[ge.StartRow], false, tg).ConfigureAwait(false);
+						// The new page starts with the next group, so its header is that group's.
+						Row next = i + 1 < groupEntries.Count ? FirstGroupsRow(rpt, wc, groupEntries[i + 1]) : wc.Data.Data[ge.StartRow];
+                        await RunPageHeader(pgs, next, false, tg).ConfigureAwait(false);
 					}
 				}
 
@@ -1072,6 +1075,29 @@ namespace Majorsilence.Reporting.Rdl
 					count += (ge.EndRow - ge.StartRow + 1) * DetailsCount;
 			}
 			return count;
+		}
+
+		// The table's header runs before any group has started. Its aggregates scoped to a group
+		// take the first instance at each level, the groups of the first row the table prints,
+		// as a header repeated on a later page takes the groups of the first row on that page.
+		// Returns that row.
+		private Row FirstGroupsRow(Report rpt, TableWorkClass wc)
+		{
+			if (wc.RecursiveGroup != null || wc.Groups == null || wc.Groups.Count == 0)
+				return wc.Data.Data[0];
+			return FirstGroupsRow(rpt, wc, wc.Groups[0]);
+		}
+
+		// Makes a group instance, and the first instance within it at each level below, the
+		// current ones before it has run, and returns its first row.
+		private Row FirstGroupsRow(Report rpt, TableWorkClass wc, GroupEntry ge)
+		{
+			wc.Data.CurrentGroups[ge.Group == null ? 0 : ge.Group.GetIndex(rpt)] = ge;
+			if (ge.NestedGroup.Count > 0)
+				RunGroupsSetGroups(rpt, wc, ge.NestedGroup);
+			while (ge.NestedGroup.Count > 0)
+				ge = ge.NestedGroup[0];
+			return wc.Data.Data[ge.StartRow];
 		}
 
         internal void RunGroupsSetGroups(Report rpt, TableWorkClass wc, List<GroupEntry> groupEntries)
