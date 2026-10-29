@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Report xmlns="http://schemas.microsoft.com/sqlserver/reporting/2005/01/reportdefinition" xmlns:rd="http://schemas.microsoft.com/SQLServer/reporting/reportdesigner">
+  <DataSources>
+    <DataSource Name="HeaderSource">
+      <ConnectionProperties><DataProvider>Json</DataProvider><ConnectString>file=training-certificate1-a4-data.json;table=root</ConnectString></ConnectionProperties>
+    </DataSource>
+  </DataSources>
+  <DataSets>
+    <DataSet Name="HeaderData">
+      <Query>
+        <DataSourceName>HeaderSource</DataSourceName>
+        <CommandText>columns=OrganizationName,OrganizationAddress,CertificateTitle,RecipientName,CourseName,CourseCode,CourseDescription,Duration,CompletionDate,InstructorName,InstructorTitle,CertificateNumber,ValidUntil,Score,IssuedBy,IssueDate</CommandText>
+      </Query>
+      <Fields>
+        <Field Name="OrganizationName"><DataField>OrganizationName</DataField><rd:TypeName>System.String</rd:TypeName></Field>
+        <Field Name="OrganizationAddress"><DataField>OrganizationAddress</DataField><rd:TypeName>System.String</rd:TypeName></Field>
+        <Field Name="CertificateTitle"><DataField>CertificateTitle</DataField><rd:TypeName>System.String</rd:TypeName></Field>
+        <Field Name="RecipientName"><DataField>RecipientName</DataField><rd:TypeName>System.String</rd:TypeName></Field>
+        <Field Name="CourseName"><DataField>CourseName</DataField><rd:TypeName>System.String</rd:TypeName></Field>
+        <Field Name="CourseCode"><DataField>CourseCode</DataField><rd:TypeName>System.String</rd:TypeName></Field>
+        <Field Name="CourseDescription"><DataField>CourseDescription</DataField><rd:TypeName>System.String</rd:TypeName></Field>
+        <Field Name="Duration"><DataField>Duration</DataField><rd:TypeName>System.String</rd:TypeName></Field>
+        <Field Name="CompletionDate"><DataField>CompletionDate</DataField><rd:TypeName>System.String</rd:TypeName></Field>
+        <Field Name="InstructorName"><DataField>InstructorName</DataField><rd:TypeName>System.String</rd:TypeName></Field>
+        <Field Name="InstructorTitle"><DataField>InstructorTitle</DataField><rd:TypeName>System.String</rd:TypeName></Field>
+        <Field Name="CertificateNumber"><DataField>CertificateNumber</DataField><rd:TypeName>System.String</rd:TypeName></Field>
+        <Field Name="ValidUntil"><DataField>ValidUntil</DataField><rd:TypeName>System.String</rd:TypeName></Field>
+        <Field Name="Score"><DataField>Score</DataField><rd:TypeName>System.String</rd:TypeName></Field>
+        <Field Name="IssuedBy"><DataField>IssuedBy</DataField><rd:TypeName>System.String</rd:TypeName></Field>
+        <Field Name="IssueDate"><DataField>IssueDate</DataField><rd:TypeName>System.String</rd:TypeName></Field>
+      </Fields>
+    </DataSet>
+  </DataSets>
+  <Body>
+    <ReportItems>
+      <Textbox Name="CertBorder">
+        <Top>0.1594in</Top><Left>0.2919in</Left><Height>7.9705in</Height><Width>7.6862in</Width>
+        <Value></Value>
+        <Style><BackgroundColor>White</BackgroundColor><BorderStyle><Default>Solid</Default></BorderStyle><BorderWidth><Default>4pt</Default></BorderWidth><BorderColor><Default>#8A3324</Default></BorderColor></Style>
+      </Textbox>
+      <Textbox Name="CertOrgName">
+        <Top>0.5314in</Top><Left>0.4865in</Left><Height>0.4251in</Height><Width>7.2971in</Width>
+        <Value>=First(Fields!OrganizationName.Value, "HeaderData")</Value>
+        <Style><FontSize>16pt</FontSize><FontWeight>Bold</FontWeight><TextAlign>Center</TextAlign><Color>#8A3324</Color></Style>
+      </Textbox>
+      <Textbox Name="CertOrgAddress">
+        <Top>1.0096in</Top><Left>0.4865in</Left><Height>0.2338in</Height><Width>7.2971in</Width>
+        <Value>=First(Fields!OrganizationAddress.Value, "HeaderData")</Value>
+        <Style><FontSize>12pt</FontSize><TextAlign>Center</TextAlign><Color>Gray</Color></Style>
+      </Textbox>
+      <Textbox Name="CertDivider1">
+        <Top>1.3815in</Top><Left>0.6811in</Left><Height>0.0425in</Height><Width>6.9079in</Width>
+        <Value></Value>
+        <Style><BackgroundColor>#8A3324</BackgroundColor></Style>
+      </Textbox>
+      <Textbox Name="CertTitle">
+        <Top>1.5941in</Top><Left>0.4865in</Left><Height>0.5845in</Height><Width>7.2971in</Width>
+        <Value>=First(Fields!CertificateTitle.Value, "HeaderData")</Value>
+        <Style><FontSize>28pt</FontSize><FontWeight>Bold</FontWeight><TextAlign>Center</TextAlign><Color>#8A3324</Color></Style>
+      </Textbox>
+      <Textbox Name="CertAwardedTo">
+        <Top>2.338in</Top><Left>0.4865in</Left><Height>0.2976in</Height><Width>7.2971in</Width>
+        <Value>This certifies that</Value>
+        <Style><FontSize>12pt</FontSize><TextAlign>Center</TextAlign><FontStyle>Italic</FontStyle></Style>
+      </Textbox>
+      <Textbox Name="CertRecipient">
+        <Top>2.71in</Top><Left>0.4865in</Left><Height>0.5845in</Height><Width>7.2971in</Width>
+        <Value>=First(Fields!RecipientName.Value, "HeaderData")</Value>
+        <Style><FontSize>26pt</FontSize><FontWeight>Bold</FontWeight><TextAlign>Center</TextAlign></Style>
+      </Textbox>
+      <Textbox Name="CertHasCompleted">
+        <Top>3.4007in</Top><Left>0.4865in</Left><Height>0.2976in</Height><Width>7.2971in</Width>
+        <Value>has successfully completed</Value>
+        <Style><FontSize>12pt</FontSize><TextAlign>Center</TextAlign><FontStyle>Italic</FontStyle></Style>
+      </Textbox>
+      <Textbox Name="CertCourseName">
+        <Top>3.7727in</Top><Left>0.4865in</Left><Height>0.4782in</Height><Width>7.2971in</Width>
+        <Value>=First(Fields!CourseName.Value, "HeaderData") &amp; "  (" &amp; First(Fields!CourseCode.Value, "HeaderData") &amp; ")"</Value>
+        <Style><FontSize>18pt</FontSize><FontWeight>Bold</FontWeight><TextAlign>Center</TextAlign></Style>
+      </Textbox>
+      <Textbox Name="CertDescription">
+        <Top>4.3572in</Top><Left>0.9729in</Left><Height>0.5314in</Height><Width>6.3241in</Width>
+        <Value>=First(Fields!CourseDescription.Value, "HeaderData")</Value>
+        <Style><FontSize>12pt</FontSize><TextAlign>Center</TextAlign><Color>Gray</Color></Style>
+      </Textbox>
+      <Textbox Name="CertDetails">
+        <Top>5.048in</Top><Left>0.4865in</Left><Height>0.4251in</Height><Width>7.2971in</Width>
+        <Value>="Duration: " &amp; First(Fields!Duration.Value, "HeaderData") &amp;
+                    "   |   Score: " &amp; First(Fields!Score.Value, "HeaderData") &amp;
+                    "   |   Completed: " &amp; First(Fields!CompletionDate.Value, "HeaderData")</Value>
+        <Style><FontSize>12pt</FontSize><TextAlign>Center</TextAlign></Style>
+      </Textbox>
+      <Textbox Name="CertDivider2">
+        <Top>5.6325in</Top><Left>0.6811in</Left><Height>0.0425in</Height><Width>6.9079in</Width>
+        <Value></Value>
+        <Style><BackgroundColor>LightGray</BackgroundColor></Style>
+      </Textbox>
+      <Textbox Name="CertInstructorSign">
+        <Top>5.845in</Top><Left>0.6811in</Left><Height>0.3188in</Height><Width>2.4324in</Width>
+        <Value>______________________________</Value>
+        <Style><FontSize>12pt</FontSize><TextAlign>Center</TextAlign></Style>
+      </Textbox>
+      <Textbox Name="CertInstructorName">
+        <Top>6.217in</Top><Left>0.6811in</Left><Height>0.4251in</Height><Width>2.4324in</Width>
+        <Value>=First(Fields!InstructorName.Value, "HeaderData") &amp; vbcrlf() &amp; First(Fields!InstructorTitle.Value, "HeaderData")</Value>
+        <Style><FontSize>12pt</FontSize><TextAlign>Center</TextAlign></Style>
+      </Textbox>
+      <Textbox Name="CertCertNum">
+        <Top>5.845in</Top><Left>2.9188in</Left><Height>0.797in</Height><Width>2.4324in</Width>
+        <Value>="Cert #: " &amp; First(Fields!CertificateNumber.Value, "HeaderData") &amp; vbcrlf() &amp;
+                    "Issued: " &amp; First(Fields!IssueDate.Value, "HeaderData") &amp; vbcrlf() &amp;
+                    "Valid Until: " &amp; First(Fields!ValidUntil.Value, "HeaderData")</Value>
+        <Style><FontSize>12pt</FontSize><TextAlign>Center</TextAlign></Style>
+      </Textbox>
+      <Textbox Name="CertIssuedBySign">
+        <Top>5.845in</Top><Left>5.1566in</Left><Height>0.3188in</Height><Width>2.3351in</Width>
+        <Value>______________________________</Value>
+        <Style><FontSize>12pt</FontSize><TextAlign>Center</TextAlign></Style>
+      </Textbox>
+      <Textbox Name="CertIssuedByName">
+        <Top>6.217in</Top><Left>5.1566in</Left><Height>0.4251in</Height><Width>2.3351in</Width>
+        <Value>=First(Fields!IssuedBy.Value, "HeaderData")</Value>
+        <Style><FontSize>12pt</FontSize><TextAlign>Center</TextAlign></Style>
+      </Textbox>
+    </ReportItems>
+    <Height>8.2893in</Height>
+    <Columns>1</Columns>
+  </Body>
+  <PageHeader><Height>0in</Height><PrintOnFirstPage>true</PrintOnFirstPage><PrintOnLastPage>true</PrintOnLastPage></PageHeader>
+  <PageFooter><Height>0in</Height><PrintOnFirstPage>true</PrintOnFirstPage><PrintOnLastPage>true</PrintOnLastPage></PageFooter>
+  <Width>8.27in</Width><Author></Author><Description></Description>
+  <PageWidth>8.27in</PageWidth><PageHeight>11.69in</PageHeight>
+  <DataElementName>Report</DataElementName><DataElementStyle>AttributeNormal</DataElementStyle>
+  <Language>=Parameters!Language.Value</Language>
+  <ReportParameters>
+    <ReportParameter Name="Language">
+      <DataType>String</DataType>
+      <DefaultValue><Values><Value>en-US</Value></Values></DefaultValue>
+      <Nullable>true</Nullable><AllowBlank>true</AllowBlank><MultiValue>false</MultiValue><Prompt></Prompt>
+    </ReportParameter>
+  </ReportParameters>
+</Report>

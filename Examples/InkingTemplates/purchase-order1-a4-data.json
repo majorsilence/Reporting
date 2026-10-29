@@ -1,0 +1,63 @@
+{
+  "Language": "en-US",
+  "CompanyName": "Northfield Manufacturing Ltd.",
+  "CompanyAddress": "100 Industrial Pkwy, Suite 400\nToronto, ON  M5V 3A8",
+  "CompanyPhone": "(416) 555-0192",
+  "CompanyEmail": "purchasing@northfield.example.com",
+  "PONumber": "PO-2026-00847",
+  "PODate": "2026-06-07",
+  "RequiredDate": "2026-06-28",
+  "SupplierName": "Precision Parts Co.",
+  "SupplierAddress": "22 Warehouse Rd\nHamilton, ON  L8E 2W4",
+  "SupplierContact": "sales@precisionparts.example.com",
+  "ShipToName": "Northfield Manufacturing Ltd. — Receiving",
+  "ShipToAddress": "100 Industrial Pkwy, Dock 3\nToronto, ON  M5V 3A8",
+  "PaymentTerms": "Net 30",
+  "ShipVia": "FedEx Ground",
+  "Subtotal": 4250.0,
+  "Tax": 552.5,
+  "Total": 4802.5,
+  "Notes": "Please include packing list and certificate of conformance with shipment. Reference PO number on all correspondence and carton labels.",
+  "LineItems": [
+    {
+      "PartNumber": "PP-0441-A",
+      "Description": "Steel hex bolt M8 × 25 mm, grade 8.8",
+      "Quantity": 500,
+      "Unit": "ea",
+      "UnitPrice": 0.45,
+      "LineTotal": 225.0
+    },
+    {
+      "PartNumber": "PP-0441-B",
+      "Description": "Steel hex bolt M8 × 40 mm, grade 8.8",
+      "Quantity": 500,
+      "Unit": "ea",
+      "UnitPrice": 0.5,
+      "LineTotal": 250.0
+    },
+    {
+      "PartNumber": "PP-0812-C",
+      "Description": "Stainless flange nut M8, 316 SS",
+      "Quantity": 1000,
+      "Unit": "ea",
+      "UnitPrice": 0.3,
+      "LineTotal": 300.0
+    },
+    {
+      "PartNumber": "PP-2200-X",
+      "Description": "Precision shaft 50 mm OD × 300 mm, ground finish",
+      "Quantity": 20,
+      "Unit": "ea",
+      "UnitPrice": 124.0,
+      "LineTotal": 2480.0
+    },
+    {
+      "PartNumber": "PP-3301-K",
+      "Description": "Deep groove ball bearing 6210 ZZ",
+      "Quantity": 50,
+      "Unit": "ea",
+      "UnitPrice": 19.9,
+      "LineTotal": 995.0
+    }
+  ]
+}
