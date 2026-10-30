@@ -272,10 +272,15 @@ namespace Majorsilence.Reporting.Rdl
             {
                 // The declared/static field type (e.g. from a DataReader schema or <rd:TypeName>) isn't known
                 // for an in-memory DataTable pushed with no declared type, so prefer the actual runtime value's
-                // type. TryEvaluate is already cached from the RunText above, so this costs nothing extra.
+                // type. Evaluate() already cached the value for this row from the RunText above, so this costs
+                // nothing extra.
                 TypeCode rtc = this.Value.GetTypeCode();
-                if (!bHidden && TryEvaluate(r, row, out object alignVal) && alignVal != null)
-                    rtc = Type.GetTypeCode(alignVal.GetType());
+                if (!bHidden)
+                {
+                    object alignVal = await Evaluate(r, row);
+                    if (alignVal != null)
+                        rtc = Type.GetTypeCode(alignVal.GetType());
+                }
 
                 if (DataType.IsNumeric(rtc) || rtc == TypeCode.DateTime)
                     pt.SI.TextAlign = TextAlignEnum.Right;
