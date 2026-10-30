@@ -1,0 +1,31 @@
+{
+  "Language": "en-US",
+  "VendorName": "ABC Design Studios",
+  "VendorAddress": "456 Business Ave\nSuite 200\nSt. John's, NL A1B 2C3",
+  "VendorPhone": "(709) 555-0123",
+  "VendorEmail": "example@example.com",
+  "ReceiptNumber": "RCPT-67890",
+  "ReceiptDate": "2025-07-16",
+  "CustomerName": "Jane Smith",
+  "CustomerAddress": "123 Main St\nGander, NL A1A 1A1",
+  "Subtotal": 90.0,
+  "Tax": 13.5,
+  "Total": 103.5,
+  "BarcodeData": "ABC-abc-1234",
+  "LineItems": [
+    {
+      "Description": "Website Design",
+      "Quantity": 1,
+      "UnitPrice": 50.0,
+      "LineTotal": 50.0
+    },
+    {
+      "Description": "Logo Design",
+      "Quantity": 2,
+      "UnitPrice": 20.0,
+      "LineTotal": 40.0
+    }
+  ],
+  "PaymentMethod": "Credit Card",
+  "Paid": true
+}
