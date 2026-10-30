@@ -1,0 +1,448 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Report xmlns="http://schemas.microsoft.com/sqlserver/reporting/2005/01/reportdefinition" xmlns:rd="http://schemas.microsoft.com/SQLServer/reporting/reportdesigner">
+  <DataSources>
+    <DataSource Name="HeaderSource">
+      <ConnectionProperties>
+        <DataProvider>Json</DataProvider>
+        <ConnectString>file=receipt1-a4-data.json;table=root</ConnectString>
+      </ConnectionProperties>
+    </DataSource>
+    <DataSource Name="LineItemsSource">
+      <ConnectionProperties>
+        <DataProvider>JSON</DataProvider>
+        <ConnectString>file=receipt1-a4-data.json;table=root_LineItems</ConnectString>
+      </ConnectionProperties>
+    </DataSource>
+  </DataSources>
+  <DataSets>
+    <DataSet Name="MainDataSet">
+      <Query>
+        <DataSourceName>HeaderSource</DataSourceName>
+        <CommandText>columns=ReceiptNumber,ReceiptDate,CustomerName,CustomerAddress,Subtotal,Tax,Total,PaymentMethod,Paid,BarcodeData,VendorName,VendorAddress,VendorPhone,VendorEmail</CommandText>
+      </Query>
+      <Fields>
+        <Field Name="ReceiptNumber">
+          <DataField>ReceiptNumber</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="ReceiptDate">
+          <DataField>ReceiptDate</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="CustomerName">
+          <DataField>CustomerName</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="CustomerAddress">
+          <DataField>CustomerAddress</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="Subtotal">
+          <DataField>Subtotal</DataField>
+          <rd:TypeName>System.Decimal</rd:TypeName>
+        </Field>
+        <Field Name="Tax">
+          <DataField>Tax</DataField>
+          <rd:TypeName>System.Decimal</rd:TypeName>
+        </Field>
+        <Field Name="Total">
+          <DataField>Total</DataField>
+          <rd:TypeName>System.Decimal</rd:TypeName>
+        </Field>
+        <Field Name="PaymentMethod">
+          <DataField>PaymentMethod</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="Paid">
+          <DataField>Paid</DataField>
+          <rd:TypeName>System.Boolean</rd:TypeName>
+        </Field>
+        <Field Name="BarcodeData">
+          <DataField>BarcodeData</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="VendorName">
+          <DataField>VendorName</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="VendorAddress">
+          <DataField>VendorAddress</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="VendorPhone">
+          <DataField>VendorPhone</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="VendorEmail">
+          <DataField>VendorEmail</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+      </Fields>
+    </DataSet>
+    <DataSet Name="LineItems">
+      <Query>
+        <DataSourceName>LineItemsSource</DataSourceName>
+        <CommandText>columns=Description,Quantity,UnitPrice,LineTotal</CommandText>
+      </Query>
+      <Fields>
+        <Field Name="Description">
+          <DataField>Description</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="Quantity">
+          <DataField>Quantity</DataField>
+          <rd:TypeName>System.Int32</rd:TypeName>
+        </Field>
+        <Field Name="UnitPrice">
+          <DataField>UnitPrice</DataField>
+          <rd:TypeName>System.Decimal</rd:TypeName>
+        </Field>
+        <Field Name="LineTotal">
+          <DataField>LineTotal</DataField>
+          <rd:TypeName>System.Decimal</rd:TypeName>
+        </Field>
+      </Fields>
+    </DataSet>
+  </DataSets>
+  <Body>
+    <ReportItems>
+      <Textbox Name="VendorInfo">
+        <Top>64.08pt</Top>
+        <Left>32.79pt</Left>
+        <Height>101.37pt</Height>
+        <Width>245.31pt</Width>
+        <Value>=First(Fields!VendorName.Value, "MainDataSet") &amp; vbcrlf() &amp; First(Fields!VendorAddress.Value, "MainDataSet") &amp; vbcrlf() &amp; First(Fields!VendorPhone.Value, "MainDataSet")&amp; vbcrlf() &amp; First(Fields!VendorEmail.Value, "MainDataSet")</Value>
+        <Style>
+          <FontSize>12pt</FontSize>
+        </Style>
+      </Textbox>
+      <Textbox Name="ReceiptHeader">
+        <Top>0.2125in</Top>
+        <Left>4.3782in</Left>
+        <Height>0.3188in</Height>
+        <Width>2.9188in</Width>
+        <Style>
+          <FontSize>20pt</FontSize>
+          <FontWeight>Bold</FontWeight>
+          <TextAlign>Right</TextAlign>
+        </Style>
+        <Value>RECEIPT</Value>
+      </Textbox>
+      <Textbox Name="ReceiptMeta">
+        <Top>43.57pt</Top>
+        <Left>323.41pt</Left>
+        <Height>46.08pt</Height>
+        <Width>210.94pt</Width>
+        <Value>="Receipt #: " &amp; First(Fields!ReceiptNumber.Value, "MainDataSet") &amp; vbcrlf() &amp; "Date: " &amp; First(Fields!ReceiptDate.Value, "MainDataSet")</Value>
+        <Style>
+          <TextAlign>Right</TextAlign>
+          <FontSize>12pt</FontSize>
+        </Style>
+      </Textbox>
+      <Textbox Name="CustomerInfo">
+        <Top>90.65pt</Top>
+        <Left>407.47pt</Left>
+        <Height>66.24pt</Height>
+        <Width>166.32pt</Width>
+        <Value>=First(Fields!CustomerName.Value, "MainDataSet") &amp; vbcrlf() &amp; First(Fields!CustomerAddress.Value, "MainDataSet")</Value>
+        <Style>
+          <FontSize>12pt</FontSize>
+          <TextAlign>Left</TextAlign>
+        </Style>
+      </Textbox>
+      <Table Name="LineItemsTable">
+        <DataSetName>LineItems</DataSetName>
+        <Top>2.338in</Top>
+        <Left>0.4865in</Left>
+        <Width>7.2971in</Width>
+        <TableColumns>
+          <TableColumn>
+            <Width>3.8918in</Width>
+          </TableColumn>
+          <TableColumn>
+            <Width>0.9729in</Width>
+          </TableColumn>
+          <TableColumn>
+            <Width>1.2162in</Width>
+          </TableColumn>
+          <TableColumn>
+            <Width>1.2162in</Width>
+          </TableColumn>
+        </TableColumns>
+        <Header>
+          <TableRows>
+            <TableRow>
+              <TableCells>
+                <TableCell>
+                  <ReportItems>
+                    <Textbox Name="HeaderDesc">
+                      <Value>Description</Value>
+                      <Style>
+                        <FontWeight>Bold</FontWeight>
+                        <BackgroundColor>LightGray</BackgroundColor>
+                      </Style>
+                    </Textbox>
+                  </ReportItems>
+                </TableCell>
+                <TableCell>
+                  <ReportItems>
+                    <Textbox Name="HeaderQty">
+                      <Value>Qty</Value>
+                      <Style>
+                        <FontWeight>Bold</FontWeight>
+                        <BackgroundColor>LightGray</BackgroundColor>
+                        <TextAlign>Center</TextAlign>
+                      </Style>
+                    </Textbox>
+                  </ReportItems>
+                </TableCell>
+                <TableCell>
+                  <ReportItems>
+                    <Textbox Name="HeaderUnit">
+                      <Value>Unit Price</Value>
+                      <Style>
+                        <FontWeight>Bold</FontWeight>
+                        <BackgroundColor>LightGray</BackgroundColor>
+                        <TextAlign>Right</TextAlign>
+                      </Style>
+                    </Textbox>
+                  </ReportItems>
+                </TableCell>
+                <TableCell>
+                  <ReportItems>
+                    <Textbox Name="HeaderTotal">
+                      <Value>Line Total</Value>
+                      <Style>
+                        <FontWeight>Bold</FontWeight>
+                        <BackgroundColor>LightGray</BackgroundColor>
+                        <TextAlign>Right</TextAlign>
+                      </Style>
+                    </Textbox>
+                  </ReportItems>
+                </TableCell>
+              </TableCells>
+              <Height>0.2657in</Height>
+            </TableRow>
+          </TableRows>
+        </Header>
+        <Details>
+          <TableRows>
+            <TableRow>
+              <TableCells>
+                <TableCell>
+                  <ReportItems>
+                    <Textbox Name="ItemDesc">
+                      <Value>=Fields!Description.Value</Value><CanGrow>true</CanGrow>
+                    </Textbox>
+                  </ReportItems>
+                </TableCell>
+                <TableCell>
+                  <ReportItems>
+                    <Textbox Name="ItemQty">
+                      <Value>=Fields!Quantity.Value</Value>
+                      <Style>
+                        <TextAlign>Center</TextAlign>
+                      </Style>
+                    </Textbox>
+                  </ReportItems>
+                </TableCell>
+                <TableCell>
+                  <ReportItems>
+                    <Textbox Name="ItemUnit">
+                      <Value>=Fields!UnitPrice.Value</Value>
+                      <Style>
+                        <TextAlign>Right</TextAlign>
+                        <Format>C2</Format>
+                      </Style>
+                    </Textbox>
+                  </ReportItems>
+                </TableCell>
+                <TableCell>
+                  <ReportItems>
+                    <Textbox Name="ItemTotal">
+                      <Value>=Fields!LineTotal.Value</Value>
+                      <Style>
+                        <TextAlign>Right</TextAlign>
+                        <Format>C2</Format>
+                      </Style>
+                    </Textbox>
+                  </ReportItems>
+                </TableCell>
+              </TableCells>
+              <Height>0.2125in</Height>
+            </TableRow>
+          </TableRows>
+        </Details>
+      </Table>
+      <Textbox Name="SubtotalBox">
+        <Top>4.9948in</Top>
+        <Left>5.3512in</Left>
+        <Height>0.2125in</Height>
+        <Width>1.9459in</Width>
+        <Value>="Subtotal: " &amp; Format(First(Fields!Subtotal.Value, "MainDataSet"), "C2")</Value>
+        <Style>
+          <TextAlign>Right</TextAlign>
+        </Style>
+      </Textbox>
+      <Textbox Name="TaxBox">
+        <Top>5.2074in</Top>
+        <Left>5.3512in</Left>
+        <Height>0.2125in</Height>
+        <Width>1.9459in</Width>
+        <Value>="Tax: " &amp; Format(First(Fields!Tax.Value, "MainDataSet"), "C2")</Value>
+        <Style>
+          <TextAlign>Right</TextAlign>
+        </Style>
+      </Textbox>
+      <Textbox Name="TotalBox">
+        <Top>5.4199in</Top>
+        <Left>5.3512in</Left>
+        <Height>0.2657in</Height>
+        <Width>1.9459in</Width>
+        <Value>="Total: " &amp; Format(First(Fields!Total.Value, "MainDataSet"), "C2")</Value>
+        <Style>
+          <TextAlign>Right</TextAlign>
+          <FontWeight>Bold</FontWeight>
+        </Style>
+      </Textbox>
+      <Textbox Name="PaymentMethodBox">
+        <Top>5.7387in</Top>
+        <Left>0.4865in</Left>
+        <Height>0.2125in</Height>
+        <Width>2.9188in</Width>
+        <Value>="Payment Method: " &amp; First(Fields!PaymentMethod.Value, "MainDataSet")</Value><CanGrow>true</CanGrow>
+        <Style>
+          <FontSize>12pt</FontSize>
+        </Style>
+      </Textbox>
+      <Textbox Name="PaidBox">
+        <Top>5.9513in</Top>
+        <Left>0.4865in</Left>
+        <Height>0.2125in</Height>
+        <Width>2.9188in</Width>
+        <Value>=IIf(First(Fields!Paid.Value, "MainDataSet"), "Paid", "Unpaid")</Value><CanGrow>true</CanGrow>
+        <Style>
+          <FontSize>12pt</FontSize>
+          <FontWeight>Bold</FontWeight>
+        </Style>
+      </Textbox>
+      <Image Name="ImageLogo">
+        <Height>120.81pt</Height>
+        <Width>137pt</Width>
+        <Left>169.39pt</Left>
+        <Top>4.78pt</Top>
+        <Style>
+          <BorderStyle />
+          <BorderColor />
+          <BorderWidth />
+        </Style>
+        <Source>Embedded</Source>
+        <Value>=Convert.FromBase64String({?Logo})</Value>
+        <Visibility></Visibility>
+        <MIMEType>image/png</MIMEType>
+      </Image>
+      <CustomReportItem Name="CustomReportItem1" xmlns="http://schemas.microsoft.com/sqlserver/reporting/2005/01/reportdefinition">
+        <Type>={?BarcodeType}</Type>
+        <Height>105.24pt</Height>
+        <Width>249.08pt</Width>
+        <CustomProperties>
+          <CustomProperty>
+            <Name>Code</Name>
+            <Value>=First(Fields!BarcodeData.Value, "MainDataSet")</Value>
+          </CustomProperty>
+        </CustomProperties>
+        <Left>27.63pt</Left>
+        <Top>295.23pt</Top>
+        <Source>Embedded</Source>
+      </CustomReportItem>
+    </ReportItems>
+    <Height>6.9077in</Height>
+    <Columns>1</Columns>
+  </Body>
+  <PageHeader>
+    <Height>0in</Height>
+    <PrintOnFirstPage>true</PrintOnFirstPage>
+    <PrintOnLastPage>true</PrintOnLastPage>
+  </PageHeader>
+  <PageFooter>
+    <Height>0in</Height>
+    <PrintOnFirstPage>true</PrintOnFirstPage>
+    <PrintOnLastPage>true</PrintOnLastPage>
+  </PageFooter>
+  <Width>7.7835in</Width>
+  <Author></Author>
+  <Description></Description>
+  <PageWidth>8.27in</PageWidth>
+  <PageHeight>11.69in</PageHeight>
+  <DataElementName>Report</DataElementName>
+  <DataElementStyle>AttributeNormal</DataElementStyle>
+  <ReportParameters>
+    <ReportParameter Name="Language">
+      <DataType>String</DataType>
+      <DefaultValue><Values><Value>en-US</Value></Values></DefaultValue>
+      <Nullable>true</Nullable><AllowBlank>true</AllowBlank><MultiValue>false</MultiValue><Prompt></Prompt>
+    </ReportParameter>
+    <ReportParameter Name="BarcodeType">
+      <DataType>String</DataType>
+      <DefaultValue>
+        <Values>
+          <Value>QRCode</Value>
+        </Values>
+      </DefaultValue>
+      <Nullable>true</Nullable>
+      <AllowBlank>true</AllowBlank>
+      <MultiValue>false</MultiValue>
+      <Prompt></Prompt>
+      <ValidValues>
+        <ParameterValues>
+          <ParameterValue>
+            <Value>BarCode EAN-13</Value>
+          </ParameterValue>
+          <ParameterValue>
+            <Value>BarCode Bookland</Value>
+          </ParameterValue>
+          <ParameterValue>
+            <Value>QR Code</Value>
+          </ParameterValue>
+          <ParameterValue>
+            <Value>QRCode</Value>
+          </ParameterValue>
+          <ParameterValue>
+            <Value>ITF-14</Value>
+          </ParameterValue>
+          <ParameterValue>
+            <Value>AztecCode</Value>
+          </ParameterValue>
+          <ParameterValue>
+            <Value>BarCode39</Value>
+          </ParameterValue>
+          <ParameterValue>
+            <Value>BarCode128</Value>
+          </ParameterValue>
+          <ParameterValue>
+            <Value>BarCodeEAN8</Value>
+          </ParameterValue>
+          <ParameterValue>
+            <Value>Pdf417</Value>
+          </ParameterValue>
+          <ParameterValue>
+            <Value>DataMatrix</Value>
+          </ParameterValue>
+        </ParameterValues>
+      </ValidValues>
+    </ReportParameter>
+    <ReportParameter Name="Logo">
+      <DataType>String</DataType>
+      <DefaultValue>
+        <Values>
+          <Value>iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==</Value>
+        </Values>
+      </DefaultValue>
+      <Nullable>true</Nullable>
+      <AllowBlank>true</AllowBlank>
+      <MultiValue>false</MultiValue>
+      <Prompt></Prompt>
+    </ReportParameter>
+  </ReportParameters>
+  <Language>=Parameters!Language.Value</Language>
+</Report>

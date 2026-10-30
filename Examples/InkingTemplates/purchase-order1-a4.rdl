@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Report xmlns="http://schemas.microsoft.com/sqlserver/reporting/2005/01/reportdefinition" xmlns:rd="http://schemas.microsoft.com/SQLServer/reporting/reportdesigner">
+  <DataSources>
+    <DataSource Name="HeaderSource">
+      <ConnectionProperties>
+        <DataProvider>Json</DataProvider>
+        <ConnectString>file=purchase-order1-a4-data.json;table=root</ConnectString>
+      </ConnectionProperties>
+    </DataSource>
+    <DataSource Name="LineItemsSource">
+      <ConnectionProperties>
+        <DataProvider>JSON</DataProvider>
+        <ConnectString>file=purchase-order1-a4-data.json;table=root_LineItems</ConnectString>
+      </ConnectionProperties>
+    </DataSource>
+  </DataSources>
+  <DataSets>
+    <DataSet Name="HeaderData">
+      <Query>
+        <DataSourceName>HeaderSource</DataSourceName>
+        <CommandText>columns=CompanyName,CompanyAddress,CompanyPhone,CompanyEmail,PONumber,PODate,RequiredDate,SupplierName,SupplierAddress,SupplierContact,ShipToName,ShipToAddress,PaymentTerms,ShipVia,Subtotal,Tax,Total,Notes</CommandText>
+      </Query>
+      <Fields>
+        <Field Name="CompanyName"><DataField>CompanyName</DataField><rd:TypeName>System.String</rd:TypeName></Field>
+        <Field Name="CompanyAddress"><DataField>CompanyAddress</DataField><rd:TypeName>System.String</rd:TypeName></Field>
+        <Field Name="CompanyPhone"><DataField>CompanyPhone</DataField><rd:TypeName>System.String</rd:TypeName></Field>
+        <Field Name="CompanyEmail"><DataField>CompanyEmail</DataField><rd:TypeName>System.String</rd:TypeName></Field>
+        <Field Name="PONumber"><DataField>PONumber</DataField><rd:TypeName>System.String</rd:TypeName></Field>
+        <Field Name="PODate"><DataField>PODate</DataField><rd:TypeName>System.String</rd:TypeName></Field>
+        <Field Name="RequiredDate"><DataField>RequiredDate</DataField><rd:TypeName>System.String</rd:TypeName></Field>
+        <Field Name="SupplierName"><DataField>SupplierName</DataField><rd:TypeName>System.String</rd:TypeName></Field>
+        <Field Name="SupplierAddress"><DataField>SupplierAddress</DataField><rd:TypeName>System.String</rd:TypeName></Field>
+        <Field Name="SupplierContact"><DataField>SupplierContact</DataField><rd:TypeName>System.String</rd:TypeName></Field>
+        <Field Name="ShipToName"><DataField>ShipToName</DataField><rd:TypeName>System.String</rd:TypeName></Field>
+        <Field Name="ShipToAddress"><DataField>ShipToAddress</DataField><rd:TypeName>System.String</rd:TypeName></Field>
+        <Field Name="PaymentTerms"><DataField>PaymentTerms</DataField><rd:TypeName>System.String</rd:TypeName></Field>
+        <Field Name="ShipVia"><DataField>ShipVia</DataField><rd:TypeName>System.String</rd:TypeName></Field>
+        <Field Name="Subtotal"><DataField>Subtotal</DataField><rd:TypeName>System.Decimal</rd:TypeName></Field>
+        <Field Name="Tax"><DataField>Tax</DataField><rd:TypeName>System.Decimal</rd:TypeName></Field>
+        <Field Name="Total"><DataField>Total</DataField><rd:TypeName>System.Decimal</rd:TypeName></Field>
+        <Field Name="Notes"><DataField>Notes</DataField><rd:TypeName>System.String</rd:TypeName></Field>
+      </Fields>
+    </DataSet>
+    <DataSet Name="LineItems">
+      <Query>
+        <DataSourceName>LineItemsSource</DataSourceName>
+        <CommandText>columns=PartNumber,Description,Quantity,Unit,UnitPrice,LineTotal</CommandText>
+      </Query>
+      <Fields>
+        <Field Name="PartNumber"><DataField>PartNumber</DataField><rd:TypeName>System.String</rd:TypeName></Field>
+        <Field Name="Description"><DataField>Description</DataField><rd:TypeName>System.String</rd:TypeName></Field>
+        <Field Name="Quantity"><DataField>Quantity</DataField><rd:TypeName>System.Decimal</rd:TypeName></Field>
+        <Field Name="Unit"><DataField>Unit</DataField><rd:TypeName>System.String</rd:TypeName></Field>
+        <Field Name="UnitPrice"><DataField>UnitPrice</DataField><rd:TypeName>System.Decimal</rd:TypeName></Field>
+        <Field Name="LineTotal"><DataField>LineTotal</DataField><rd:TypeName>System.Decimal</rd:TypeName></Field>
+      </Fields>
+    </DataSet>
+  </DataSets>
+  <Body>
+    <ReportItems>
+      <Textbox Name="BuyerInfo">
+        <Top>0.2125in</Top><Left>0.4865in</Left><Height>1.3815in</Height><Width>3.4053in</Width>
+        <Value>=First(Fields!CompanyName.Value, "HeaderData") &amp; vbcrlf() &amp;
+                    First(Fields!CompanyAddress.Value, "HeaderData") &amp; vbcrlf() &amp;
+                    First(Fields!CompanyPhone.Value, "HeaderData") &amp; vbcrlf() &amp;
+                    First(Fields!CompanyEmail.Value, "HeaderData")</Value>
+        <Style><FontSize>12pt</FontSize></Style>
+      </Textbox>
+      <Textbox Name="POTitle">
+        <Top>0.2125in</Top><Left>4.3782in</Left><Height>0.372in</Height><Width>3.4053in</Width>
+        <Value>PURCHASE ORDER</Value>
+        <Style><FontSize>20pt</FontSize><FontWeight>Bold</FontWeight><TextAlign>Right</TextAlign><Color>#8A3324</Color></Style>
+      </Textbox>
+      <Textbox Name="POMeta">
+        <Top>0.6908in</Top><Left>4.3782in</Left><Height>1.0627in</Height><Width>3.4053in</Width>
+        <Value>="PO #: " &amp; First(Fields!PONumber.Value, "HeaderData") &amp; vbcrlf() &amp;
+                    "Date: " &amp; First(Fields!PODate.Value, "HeaderData") &amp; vbcrlf() &amp;
+                    "Required By: " &amp; First(Fields!RequiredDate.Value, "HeaderData")</Value>
+        <Style><TextAlign>Right</TextAlign><FontSize>12pt</FontSize></Style>
+      </Textbox>
+      <Textbox Name="VendorLabel">
+        <Top>1.8066in</Top><Left>0.4865in</Left><Height>0.2338in</Height><Width>1.4594in</Width>
+        <Value>Vendor:</Value>
+        <Style><FontWeight>Bold</FontWeight><FontSize>12pt</FontSize></Style>
+      </Textbox>
+      <Textbox Name="SupplierInfo">
+        <Top>2.0723in</Top><Left>0.4865in</Left><Height>0.9565in</Height><Width>2.9188in</Width>
+        <Value>=First(Fields!SupplierName.Value, "HeaderData") &amp; vbcrlf() &amp;
+                    First(Fields!SupplierAddress.Value, "HeaderData") &amp; vbcrlf() &amp;
+                    First(Fields!SupplierContact.Value, "HeaderData")</Value>
+        <Style><FontSize>12pt</FontSize></Style>
+      </Textbox>
+      <Textbox Name="ShipToLabel">
+        <Top>1.8066in</Top><Left>4.3782in</Left><Height>0.2338in</Height><Width>3.4053in</Width>
+        <Value>Ship To:</Value>
+        <Style><FontWeight>Bold</FontWeight><FontSize>12pt</FontSize></Style>
+      </Textbox>
+      <Textbox Name="ShipToInfo">
+        <Top>2.0723in</Top><Left>4.3782in</Left><Height>0.9565in</Height><Width>3.4053in</Width>
+        <Value>=First(Fields!ShipToName.Value, "HeaderData") &amp; vbcrlf() &amp;
+                    First(Fields!ShipToAddress.Value, "HeaderData")</Value>
+        <Style><FontSize>12pt</FontSize></Style>
+      </Textbox>
+      <Textbox Name="TermsRow">
+        <Top>3.135in</Top><Left>0.4865in</Left><Height>0.2338in</Height><Width>7.2971in</Width>
+        <Value>="Payment Terms: " &amp; First(Fields!PaymentTerms.Value, "HeaderData") &amp;
+                    "   |   Ship Via: " &amp; First(Fields!ShipVia.Value, "HeaderData")</Value>
+        <Style><FontSize>12pt</FontSize><BackgroundColor>#f0f0f0</BackgroundColor></Style>
+      </Textbox>
+      <Table Name="POLineItems">
+        <DataSetName>LineItems</DataSetName>
+        <Top>3.4539in</Top><Left>0.4865in</Left><Width>7.2971in</Width>
+        <TableColumns>
+          <TableColumn><Width>0.9729in</Width></TableColumn>
+          <TableColumn><Width>3.1621in</Width></TableColumn>
+          <TableColumn><Width>0.7297in</Width></TableColumn>
+          <TableColumn><Width>0.7297in</Width></TableColumn>
+          <TableColumn><Width>0.8513in</Width></TableColumn>
+          <TableColumn><Width>0.8513in</Width></TableColumn>
+        </TableColumns>
+        <Header>
+          <TableRows>
+            <TableRow>
+              <Height>0.2657in</Height>
+              <TableCells>
+                <TableCell><ReportItems><Textbox Name="HdrPart"><Value>ITEM</Value><Style><FontSize>7.5pt</FontSize><FontWeight>Bold</FontWeight><Color>#8A3324</Color><PaddingBottom>4pt</PaddingBottom><BorderStyle><Bottom>Solid</Bottom></BorderStyle><BorderColor><Bottom>#8A3324</Bottom></BorderColor><BorderWidth><Bottom>2pt</Bottom></BorderWidth></Style></Textbox></ReportItems></TableCell>
+                <TableCell><ReportItems><Textbox Name="HdrDesc"><Value>DESCRIPTION</Value><Style><FontSize>7.5pt</FontSize><FontWeight>Bold</FontWeight><Color>#8A3324</Color><PaddingBottom>4pt</PaddingBottom><BorderStyle><Bottom>Solid</Bottom></BorderStyle><BorderColor><Bottom>#8A3324</Bottom></BorderColor><BorderWidth><Bottom>2pt</Bottom></BorderWidth></Style></Textbox></ReportItems></TableCell>
+                <TableCell><ReportItems><Textbox Name="HdrQty"><Value>QTY</Value><Style><FontSize>7.5pt</FontSize><FontWeight>Bold</FontWeight><Color>#8A3324</Color><TextAlign>Right</TextAlign><PaddingBottom>4pt</PaddingBottom><BorderStyle><Bottom>Solid</Bottom></BorderStyle><BorderColor><Bottom>#8A3324</Bottom></BorderColor><BorderWidth><Bottom>2pt</Bottom></BorderWidth></Style></Textbox></ReportItems></TableCell>
+                <TableCell><ReportItems><Textbox Name="HdrUnit"><Value>UNIT</Value><Style><FontSize>7.5pt</FontSize><FontWeight>Bold</FontWeight><Color>#8A3324</Color><TextAlign>Right</TextAlign><PaddingBottom>4pt</PaddingBottom><BorderStyle><Bottom>Solid</Bottom></BorderStyle><BorderColor><Bottom>#8A3324</Bottom></BorderColor><BorderWidth><Bottom>2pt</Bottom></BorderWidth></Style></Textbox></ReportItems></TableCell>
+                <TableCell><ReportItems><Textbox Name="HdrUnitPrice"><Value>UNIT PRICE</Value><Style><FontSize>7.5pt</FontSize><FontWeight>Bold</FontWeight><Color>#8A3324</Color><TextAlign>Right</TextAlign><PaddingBottom>4pt</PaddingBottom><BorderStyle><Bottom>Solid</Bottom></BorderStyle><BorderColor><Bottom>#8A3324</Bottom></BorderColor><BorderWidth><Bottom>2pt</Bottom></BorderWidth></Style></Textbox></ReportItems></TableCell>
+                <TableCell><ReportItems><Textbox Name="HdrLineTotal"><Value>EXTENDED</Value><Style><FontSize>7.5pt</FontSize><FontWeight>Bold</FontWeight><Color>#8A3324</Color><TextAlign>Right</TextAlign><PaddingBottom>4pt</PaddingBottom><BorderStyle><Bottom>Solid</Bottom></BorderStyle><BorderColor><Bottom>#8A3324</Bottom></BorderColor><BorderWidth><Bottom>2pt</Bottom></BorderWidth></Style></Textbox></ReportItems></TableCell>
+              </TableCells>
+            </TableRow>
+          </TableRows>
+        </Header>
+        <Details>
+          <TableRows>
+            <TableRow>
+              <Height>0.2125in</Height>
+              <TableCells>
+                <TableCell><ReportItems><Textbox Name="ItemPart"><Value>=Fields!PartNumber.Value</Value></Textbox></ReportItems></TableCell>
+                <TableCell><ReportItems><Textbox Name="ItemDesc"><Value>=Fields!Description.Value</Value><CanGrow>true</CanGrow></Textbox></ReportItems></TableCell>
+                <TableCell><ReportItems><Textbox Name="ItemQty"><Value>=Fields!Quantity.Value</Value><Style><TextAlign>Right</TextAlign></Style></Textbox></ReportItems></TableCell>
+                <TableCell><ReportItems><Textbox Name="ItemUnit"><Value>=Fields!Unit.Value</Value><Style><TextAlign>Right</TextAlign></Style></Textbox></ReportItems></TableCell>
+                <TableCell><ReportItems><Textbox Name="ItemUnitPrice"><Value>=Fields!UnitPrice.Value</Value><Style><TextAlign>Right</TextAlign><Format>C2</Format></Style></Textbox></ReportItems></TableCell>
+                <TableCell><ReportItems><Textbox Name="ItemLineTotal"><Value>=Fields!LineTotal.Value</Value><Style><TextAlign>Right</TextAlign><Format>C2</Format></Style></Textbox></ReportItems></TableCell>
+              </TableCells>
+            </TableRow>
+          </TableRows>
+        </Details>
+      </Table>
+      <Textbox Name="SubtotalBox">
+        <Top>5.845in</Top><Left>5.1079in</Left><Height>0.2338in</Height><Width>2.6756in</Width>
+        <Value>="Subtotal: " &amp; Format(First(Fields!Subtotal.Value, "HeaderData"), "C2")</Value>
+        <Style><TextAlign>Right</TextAlign><FontSize>12pt</FontSize></Style>
+      </Textbox>
+      <Textbox Name="TaxBox">
+        <Top>6.1107in</Top><Left>5.1079in</Left><Height>0.2338in</Height><Width>2.6756in</Width>
+        <Value>="Tax: " &amp; Format(First(Fields!Tax.Value, "HeaderData"), "C2")</Value>
+        <Style><TextAlign>Right</TextAlign><FontSize>12pt</FontSize></Style>
+      </Textbox>
+      <Textbox Name="TotalBox">
+        <Top>6.3764in</Top><Left>5.1079in</Left><Height>0.3188in</Height><Width>2.6756in</Width>
+        <Value>="ORDER TOTAL  " &amp; Format(First(Fields!Total.Value, "HeaderData"), "C2")</Value>
+        <Style><TextAlign>Right</TextAlign><FontWeight>Bold</FontWeight><FontFamily>Courier New</FontFamily><FontSize>13pt</FontSize><Color>#8A3324</Color>
+          <BorderStyle><Top>Solid</Top></BorderStyle>
+          <BorderColor><Top>#1F1C1A</Top></BorderColor>
+          <BorderWidth><Top>2.13pt</Top></BorderWidth>
+          <PaddingTop>5pt</PaddingTop>
+        </Style>
+      </Textbox>
+      <Textbox Name="NotesLabel">
+        <Top>6.8546in</Top><Left>0.4865in</Left><Height>0.2338in</Height><Width>1.4594in</Width>
+        <Value>Notes:</Value>
+        <Style><FontWeight>Bold</FontWeight><FontSize>12pt</FontSize></Style>
+      </Textbox>
+      <Textbox Name="NotesText">
+        <Top>7.1203in</Top><Left>0.4865in</Left><Height>0.5314in</Height><Width>7.2971in</Width>
+        <Value>=First(Fields!Notes.Value, "HeaderData")</Value>
+        <Style><FontSize>12pt</FontSize></Style>
+      </Textbox>
+    </ReportItems>
+    <Height>7.8642in</Height>
+    <Columns>1</Columns>
+  </Body>
+  <PageHeader>
+    <Height>0in</Height>
+    <PrintOnFirstPage>true</PrintOnFirstPage>
+    <PrintOnLastPage>true</PrintOnLastPage>
+  </PageHeader>
+  <PageFooter>
+    <Height>0in</Height>
+    <PrintOnFirstPage>true</PrintOnFirstPage>
+    <PrintOnLastPage>true</PrintOnLastPage>
+  </PageFooter>
+  <Width>7.7835in</Width>
+  <Author></Author>
+  <Description></Description>
+  <PageWidth>8.27in</PageWidth>
+  <PageHeight>11.69in</PageHeight>
+  <DataElementName>Report</DataElementName>
+  <DataElementStyle>AttributeNormal</DataElementStyle>
+  <Language>=Parameters!Language.Value</Language>
+  <ReportParameters>
+    <ReportParameter Name="Language">
+      <DataType>String</DataType>
+      <DefaultValue><Values><Value>en-US</Value></Values></DefaultValue>
+      <Nullable>true</Nullable><AllowBlank>true</AllowBlank><MultiValue>false</MultiValue><Prompt></Prompt>
+    </ReportParameter>
+  </ReportParameters>
+</Report>
