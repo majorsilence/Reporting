@@ -1,0 +1,19 @@
+{
+  "Language": "en-US",
+  "OrganizationName": "Acme Industries Ltd.",
+  "OrganizationAddress": "100 Industrial Pkwy, Toronto, ON  M5V 2T6",
+  "CertificateTitle": "Certificate of Completion",
+  "RecipientName": "Marcus Reeves",
+  "CourseName": "Advanced Steel Fabrication Safety",
+  "CourseCode": "SFT-204",
+  "CourseDescription": "A comprehensive course covering safe handling, cutting, welding, and lifting of structural steel in industrial environments.",
+  "Duration": "16 hours (2 days)",
+  "CompletionDate": "2025-11-14",
+  "InstructorName": "R. Singh",
+  "InstructorTitle": "Senior Safety Officer",
+  "CertificateNumber": "CERT-2025-SFT204-0041",
+  "ValidUntil": "2027-11-14",
+  "Score": "94%",
+  "IssuedBy": "Acme Training & Development",
+  "IssueDate": "2025-11-15"
+}

@@ -149,6 +149,42 @@
 			<Link>Reports\northwindEF.db</Link>
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</None>
+		<None Include="..\Examples\InkingTemplates\invoice1-a4.rdl">
+		  <Link>Reports\invoice1-a4.rdl</Link>
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Include="..\Examples\InkingTemplates\invoice1-a4-data.json">
+		  <Link>Reports\invoice1-a4-data.json</Link>
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Include="..\Examples\InkingTemplates\receipt1-a4.rdl">
+		  <Link>Reports\receipt1-a4.rdl</Link>
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Include="..\Examples\InkingTemplates\receipt1-a4-data.json">
+		  <Link>Reports\receipt1-a4-data.json</Link>
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Include="..\Examples\InkingTemplates\purchase-order1-a4.rdl">
+		  <Link>Reports\purchase-order1-a4.rdl</Link>
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Include="..\Examples\InkingTemplates\purchase-order1-a4-data.json">
+		  <Link>Reports\purchase-order1-a4-data.json</Link>
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Include="..\Examples\InkingTemplates\training-certificate1-a4.rdl">
+		  <Link>Reports\training-certificate1-a4.rdl</Link>
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Include="..\Examples\InkingTemplates\training-certificate1-a4-data.json">
+		  <Link>Reports\training-certificate1-a4-data.json</Link>
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Include="InkingBaselines\**\*.png">
+		  <Link>Reports\InkingBaselines\%(RecursiveDir)%(Filename)%(Extension)</Link>
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
         <None Include="..\Examples\SqliteExamples\sqlitetestdb2.db">
             <Link>Reports\sqlitetestdb2.db</Link>
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
@@ -202,5 +238,10 @@
 		</PackageReference>
 		<PackageReference Include="PdfPig" />
 		<PackageReference Include="SharpZipLib" />
+		<!-- Test-only, decodes only our own render output (never untrusted input), so the
+		     published advisories for malicious-image parsing (NU1902/NU1903) don't apply here.
+		     SixLabors.ImageSharp 4.x requires a paid license for Release builds; staying on the
+		     freely-licensed 3.1.x line avoids that for this repo's Release/CI builds. -->
+		<PackageReference Include="SixLabors.ImageSharp" NoWarn="NU1902;NU1903" />
 	</ItemGroup>
 </Project>
