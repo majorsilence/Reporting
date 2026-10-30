@@ -282,6 +282,33 @@ namespace ReportTests
             Assert.That (Messages (report).Count (e => e.Contains ("secondary axes")), Is.EqualTo (1));
         }
 
+        [TestCase ("<ChartThreeDProperties><Enable3D>True</Enable3D></ChartThreeDProperties>", "3D properties")]
+        [TestCase ("<ChartCustomPaletteColors><ChartCustomPaletteColor>Red</ChartCustomPaletteColor></ChartCustomPaletteColors>", "custom palette colours")]
+        [TestCase ("<ChartBorderSkin><FrameStyle>Emboss</FrameStyle></ChartBorderSkin>", "a border skin")]
+        public async Task ChartLevelStylingWithNoEngineCounterpart_IsReported (string addedElement, string mentioned)
+        {
+            var xml = Chart2008.Replace ("<Palette>Pastel</Palette>", addedElement + "<Palette>Pastel</Palette>");
+            var parser = new RDLParser (ReportWith (Rdl2008, xml)) { SkipDatabaseSchemaValidation = true };
+            using var report = await parser.Parse ();
+
+            var warnings = Messages (report).Where (e => e.Contains ("Chart 'Revenue'")).ToList ();
+            Assert.That (warnings, Has.Count.EqualTo (1));
+            Assert.That (warnings[0], Does.Contain (mentioned));
+        }
+
+        [TestCase ("<ChartEmptyPoints><Style /></ChartEmptyPoints>", "empty-point styling")]
+        [TestCase ("<ChartSmartLabel><CalloutLineColor>Black</CalloutLineColor></ChartSmartLabel>", "smart labels")]
+        public async Task SeriesLevelStylingWithNoEngineCounterpart_IsReported (string addedElement, string mentioned)
+        {
+            var xml = Chart2008.Replace ("<Type>Column</Type><Subtype>Plain</Subtype>", "<Type>Column</Type><Subtype>Plain</Subtype>" + addedElement);
+            var parser = new RDLParser (ReportWith (Rdl2008, xml)) { SkipDatabaseSchemaValidation = true };
+            using var report = await parser.Parse ();
+
+            var warnings = Messages (report).Where (e => e.Contains ("Chart 'Revenue'")).ToList ();
+            Assert.That (warnings, Has.Count.EqualTo (1));
+            Assert.That (warnings[0], Does.Contain (mentioned));
+        }
+
         /// <summary>
         /// Report Builder stores a sparkline as a Chart with its axes hidden, sitting in a Tablix cell.
         /// It is converted like any other chart, lands in the table cell, and renders there.

@@ -21,7 +21,8 @@ namespace Majorsilence.Reporting.Rdl
         {
             "ChartCategoryHierarchy", "ChartSeriesHierarchy", "ChartData", "ChartAreas", "ChartLegends",
             "ChartTitles", "DynamicHeight", "DynamicWidth", "ChartCustomPaletteColors", "PaletteHatchBehavior",
-            "ChartBorderSkin", "DataElementName", "DataElementOutput", "DataElementStyle", "PageName", "ChartConsumedByLegend",
+            "ChartBorderSkin", "ChartThreeDProperties", "DataElementName", "DataElementOutput", "DataElementStyle",
+            "PageName", "ChartConsumedByLegend",
         };
 
         #region Detection
@@ -63,6 +64,14 @@ namespace Majorsilence.Reporting.Rdl
                 result.AppendChild (e.CloneNode (true));
             }
 
+            // Dropped silently until now: chart-level styling the engine has no model for.
+            if (Child (chart, "ChartThreeDProperties") != null)
+                unsupported.Add ("3D properties");
+            if (Child (chart, "ChartCustomPaletteColors") != null)
+                unsupported.Add ("custom palette colours");
+            if (Child (chart, "ChartBorderSkin") != null)
+                unsupported.Add ("a border skin");
+
             var series = Kids (Child (Child (chart, "ChartData"), "ChartSeriesCollection"), "ChartSeries");
 
             var (type, subtype) = ("Column", "Plain");
@@ -76,6 +85,12 @@ namespace Majorsilence.Reporting.Rdl
                     }
                 }
             }
+
+            // Per-series styling dropped silently in SeriesToEngine: name it once, not per series.
+            if (series.Exists (s => Child (s, "ChartEmptyPoints") != null))
+                unsupported.Add ("empty-point styling");
+            if (series.Exists (s => Child (s, "ChartSmartLabel") != null))
+                unsupported.Add ("smart labels");
             result.AppendChild (El (doc, ns, "Type", type));
             result.AppendChild (El (doc, ns, "Subtype", subtype));
 
