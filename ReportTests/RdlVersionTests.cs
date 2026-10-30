@@ -92,6 +92,28 @@ namespace ReportTests
         }
 
         [Test]
+        public async Task Map_WarningNamesItsLayersAndRules ()
+        {
+            RdlEngineConfig.RdlEngineConfigInit ();
+            var rdl = ReportWithItem (@"<Map Name=""Map1""><Top>0.5in</Top><Left>0in</Left><Height>1in</Height><Width>2in</Width>
+                <MapLayers>
+                  <MapPolygonLayer Name=""Layer1"">
+                    <MapSpatialDataSet><DataSetName>Data</DataSetName><SpatialField>Shape</SpatialField></MapSpatialDataSet>
+                    <MapPolygonRules><MapColorRangeRule><DataValue>=Sum(Fields!Name.Value)</DataValue></MapColorRangeRule></MapPolygonRules>
+                  </MapPolygonLayer>
+                </MapLayers>
+              </Map>");
+
+            var parser = new RDLParser (rdl) { SkipDatabaseSchemaValidation = true };
+            using var report = await parser.Parse ();
+
+            var warning = report.ErrorItems.Cast<string> ().First (e => e.Contains ("Map"));
+            Assert.That (warning, Does.Contain ("polygon layer"));
+            Assert.That (warning, Does.Contain ("dataset's spatial field"));
+            Assert.That (warning, Does.Contain ("colour-range rule"));
+        }
+
+        [Test]
         public async Task SeveralUnsupportedItemsOfOneKind_GiveOneWarning ()
         {
             RdlEngineConfig.RdlEngineConfigInit ();
