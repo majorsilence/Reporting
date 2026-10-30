@@ -7,6 +7,7 @@ using SixLabors.ImageSharp.PixelFormats;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using SixImage = SixLabors.ImageSharp.Image;
 
@@ -43,6 +44,16 @@ namespace ReportTests
         [SetUp]
         public void SetUp()
         {
+            // Font substitution and antialiasing differ enough between Windows, Linux and macOS
+            // that the same RDL rasterizes to meaningfully different pixels on each (observed:
+            // 0.08%-2.6% of pixels across the fixed report set, versus <0.01% render-to-render
+            // noise on one machine). The baselines here were captured on Windows, so only run the
+            // comparison there; other platforms would need their own baseline set.
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                Assert.Ignore("Inking baselines were captured on Windows; font rendering differs too much on other platforms to compare against them.");
+            }
+
             _reportFolder = GeneralUtils.ReportsFolder();
             _baselineFolder = Path.Combine(_reportFolder.LocalPath, "InkingBaselines");
             RdlEngineConfig.RdlEngineConfigInit();
