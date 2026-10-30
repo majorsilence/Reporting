@@ -270,7 +270,19 @@ namespace Majorsilence.Reporting.Rdl
             // check TextAlign: if General then correct based on data type
             if (pt.SI.TextAlign == TextAlignEnum.General)
             {
-                if (DataType.IsNumeric(this.Value.GetTypeCode() ))
+                // The declared/static field type (e.g. from a DataReader schema or <rd:TypeName>) isn't known
+                // for an in-memory DataTable pushed with no declared type, so prefer the actual runtime value's
+                // type. Evaluate() already cached the value for this row from the RunText above, so this costs
+                // nothing extra.
+                TypeCode rtc = this.Value.GetTypeCode();
+                if (!bHidden)
+                {
+                    object alignVal = await Evaluate(r, row);
+                    if (alignVal != null)
+                        rtc = Type.GetTypeCode(alignVal.GetType());
+                }
+
+                if (DataType.IsNumeric(rtc) || rtc == TypeCode.DateTime)
                     pt.SI.TextAlign = TextAlignEnum.Right;
             }
 
