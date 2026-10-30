@@ -12,8 +12,8 @@
          tests. Six Labors Split License v1 - free for OSI-licensed open source projects (this
          repo is Apache-2.0) and small businesses; never shipped in a published package. -->
     <PackageVersion Include="SixLabors.ImageSharp" Version="3.1.12" />
-    <PackageVersion Include="Majorsilence.Forms" Version="26.4.0" />
-    <PackageVersion Include="Majorsilence.Forms.Drawing.Common" Version="26.4.0" />
+    <PackageVersion Include="Majorsilence.Forms" Version="26.11.10" />
+    <PackageVersion Include="Majorsilence.Forms.Drawing.Common" Version="26.11.10" />
     <PackageVersion Include="Majorsilence.Reporting.RdlViewer" Version="5.0.18" />
     <PackageVersion Include="Majorsilence.Reporting.RdlEngine" Version="5.0.18" />
     <PackageVersion Include="Majorsilence.Reporting.RdlCri" Version="5.0.18" />
