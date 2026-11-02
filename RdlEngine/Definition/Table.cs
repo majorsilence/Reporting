@@ -304,7 +304,7 @@ namespace Majorsilence.Reporting.Rdl
                 float groupHeight = 0;
                 if (wc.Data.Data.Count > 0 && _Footer != null)
                     groupHeight = await _Footer.HeightOfRows(pgs, wc.Data.Data[0]).ConfigureAwait(false);
-                await RunGroupsPage(pgs, wc, wc.Groups, wc.Data.Data.Count - 1, groupHeight).ConfigureAwait(false);
+                await RunGroupsPage(pgs, wc, wc.Groups, wc.Data.Data.Count - 1, groupHeight, null).ConfigureAwait(false);
             }
 
 		    // Footer
@@ -879,12 +879,16 @@ namespace Majorsilence.Reporting.Rdl
 				ip.GroupingEnd(fge.Group);
 		}
 
-        private async Task RunGroupsPage(Pages pgs, TableWorkClass wc, List<GroupEntry> groupEntries, int endRow, float groupHeight)
+        // after is the group instance that prints next once the last of groupEntries has, an
+        // instance of an enclosing group; null when an enclosing group's footer comes first, or
+        // nothing does.
+        private async Task RunGroupsPage(Pages pgs, TableWorkClass wc, List<GroupEntry> groupEntries, int endRow, float groupHeight, GroupEntry after)
 		{
 			Report rpt = pgs.Report;
 			for (int i = 0; i < groupEntries.Count; i++)
 			{
 				GroupEntry ge = groupEntries[i];
+				GroupEntry next = i + 1 < groupEntries.Count ? groupEntries[i + 1] : after;
 				// set the group entry value
 				int index;
 				if (ge.Group != null)	// groups?
@@ -914,9 +918,9 @@ namespace Majorsilence.Reporting.Rdl
 				}
 
 				if (tg != null && tg.KeepTogether && !pgs.CurrentPage.IsEmpty() && !BreaksPageWithin(tg))
-					await RunGroupKeptTogether(pgs, wc, ge, tg, endRow, groupHeight).ConfigureAwait(false);
+					await RunGroupKeptTogether(pgs, wc, ge, tg, endRow, groupHeight, next).ConfigureAwait(false);
 				else
-					await RunGroupPage(pgs, wc, ge, tg, endRow, groupHeight).ConfigureAwait(false);
+					await RunGroupPage(pgs, wc, ge, tg, endRow, groupHeight, next).ConfigureAwait(false);
 
 				if (ge.Group != null && ge.Group.Parent != null)
 				{
@@ -927,9 +931,15 @@ namespace Majorsilence.Reporting.Rdl
 					{
                         await RunPageBottomRows(pgs, wc.Data.Data[ge.EndRow], false).ConfigureAwait(false);
 						RunPageNew(pgs, pgs.CurrentPage);
-						// The new page starts with the next group, so its header is that group's.
-						Row next = i + 1 < groupEntries.Count ? FirstGroupsRow(rpt, wc, groupEntries[i + 1]) : wc.Data.Data[ge.StartRow];
-                        await RunPageHeader(pgs, next, false, tg).ConfigureAwait(false);
+						// The new page starts with the next group, at this level or an enclosing one, so its
+						// header is that group's, with the first instance within it at each level, and the
+						// group headers repeated are those of the groups around it. The groups just finished
+						// are put back for what is left of them. With an enclosing group's footer to come
+						// first, the page starts in the groups just finished.
+						GroupEntry[] finished = (GroupEntry[]) wc.Data.CurrentGroups.Clone();
+						Row first = next != null ? FirstGroupsRow(rpt, wc, next) : wc.Data.Data[ge.StartRow];
+                        await RunPageHeader(pgs, first, false, next != null ? next.Group.Parent as TableGroup : tg).ConfigureAwait(false);
+						Array.Copy(finished, wc.Data.CurrentGroups, finished.Length);
 					}
 				}
 
@@ -937,7 +947,7 @@ namespace Majorsilence.Reporting.Rdl
 		}
 
 		// A group's header, the groups or detail rows it holds, and its footer.
-		private async Task RunGroupPage(Pages pgs, TableWorkClass wc, GroupEntry ge, TableGroup tg, int endRow, float groupHeight)
+		private async Task RunGroupPage(Pages pgs, TableWorkClass wc, GroupEntry ge, TableGroup tg, int endRow, float groupHeight, GroupEntry next)
 		{
 			if (tg != null && tg.Header != null)
 			{
@@ -958,9 +968,13 @@ namespace Majorsilence.Reporting.Rdl
                 footerHeight += groupHeight;
                 }
 
-			// Handle the nested groups if any
+			// Handle the nested groups if any; after the last of them comes this group's footer, or
+			// the group after it when the footer prints nothing
 			if (ge.NestedGroup.Count > 0)
-                await RunGroupsPage(pgs, wc, ge.NestedGroup, ge.EndRow, footerHeight).ConfigureAwait(false);
+			{
+				bool footer = tg?.Footer != null && await PrintsAt(pgs.Report, tg.Footer, wc.Data.Data[ge.EndRow]).ConfigureAwait(false);
+                await RunGroupsPage(pgs, wc, ge.NestedGroup, ge.EndRow, footerHeight, footer ? null : next).ConfigureAwait(false);
+			}
 			// If no nested groups then handle the detail rows for the group
 			else if (_Details != null)
 			{
@@ -995,7 +1009,7 @@ namespace Majorsilence.Reporting.Rdl
 		// (TableRow.RunPage): its height is not known until it has run, since its rows grow and a
 		// group within it may move on itself. One that does not fit on a page of its own runs
 		// across the break from the top of the next page.
-		private async Task RunGroupKeptTogether(Pages pgs, TableWorkClass wc, GroupEntry ge, TableGroup tg, int endRow, float groupHeight)
+		private async Task RunGroupKeptTogether(Pages pgs, TableWorkClass wc, GroupEntry ge, TableGroup tg, int endRow, float groupHeight, GroupEntry next)
 		{
 			Page page = pgs.CurrentPage;
 			bool lastPage = page == pgs.LastPage;
@@ -1005,7 +1019,7 @@ namespace Majorsilence.Reporting.Rdl
 			float bottomRowsXOffset = wc.BottomRowsXOffset;
 			Page.Contents before = page.MarkContents();
 
-			await RunGroupPage(pgs, wc, ge, tg, endRow, groupHeight).ConfigureAwait(false);
+			await RunGroupPage(pgs, wc, ge, tg, endRow, groupHeight, next).ConfigureAwait(false);
 
 			bool overflowed = pgs.CurrentPage == page
 				? page.XOffset == x && page.YOffset > pgs.BottomOfPage
@@ -1027,7 +1041,17 @@ namespace Majorsilence.Reporting.Rdl
 			await RunPageBottomRows(pgs, first, false).ConfigureAwait(false);
 			RunPageNew(pgs, page);
 			await RunPageHeader(pgs, first, false, tg).ConfigureAwait(false);
-			await RunGroupPage(pgs, wc, ge, tg, endRow, groupHeight).ConfigureAwait(false);
+			await RunGroupPage(pgs, wc, ge, tg, endRow, groupHeight, next).ConfigureAwait(false);
+		}
+
+		// Whether a group's footer prints a row for the instance ending at row: not all of its
+		// rows are hidden, as a suppressed one's are.
+		private static async Task<bool> PrintsAt(Report rpt, Footer footer, Row row)
+		{
+			foreach (TableRow tr in footer.TableRows.Items)
+				if (tr.Visibility == null || !await tr.Visibility.IsHidden(rpt, row).ConfigureAwait(false))
+					return true;
+			return false;
 		}
 
 		// Whether a page is broken on purpose inside the group, by a group within it or by its
