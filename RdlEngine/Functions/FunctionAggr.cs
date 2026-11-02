@@ -79,6 +79,25 @@ namespace Majorsilence.Reporting.Rdl
 			return d == decimal.MinValue ? null : (object)d;
 		}
 
+		// A double aggregate of no values is double.NaN; as a value it is Nothing.
+		protected static object NullIfNoValue(double d)
+		{
+			return double.IsNaN(d) ? null : (object)d;
+		}
+
+		// Whether the aggregate's scope holds no rows: no group instance is current, as in the
+		// header of a table with no rows, or the scope's data is empty. As SSRS gives it, an
+		// aggregate of no rows is Nothing, and a count of them is 0.
+		protected bool HasNoRows(Report rpt, Row row)
+		{
+			return NoRows(GetDataScope(rpt, row, out _));
+		}
+
+		protected static bool NoRows(RowEnumerable re)
+		{
+			return re == null || re.LastRow < re.FirstRow;
+		}
+
 		// A running aggregate's state at row: what add makes of the scope's rows from its first up
 		// to row, row included. The row after the one last asked for adds just itself to the state
 		// kept for that one, so a running value read down a table's rows costs one row each. Any

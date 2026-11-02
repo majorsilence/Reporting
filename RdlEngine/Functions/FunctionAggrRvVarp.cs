@@ -37,13 +37,13 @@ namespace Majorsilence.Reporting.Rdl
 
 		public async Task<object> Evaluate(Report rpt, Row row)
 		{
-			return (object)await EvaluateDouble(rpt, row).ConfigureAwait(false);
+			return NullIfNoValue(await EvaluateDouble(rpt, row).ConfigureAwait(false));
 		}
 		
 		public async Task<double> EvaluateDouble(Report rpt, Row row)
 		{
 			RowEnumerable re = this.GetDataScope(rpt, row, out bool bSave);
-			if (re == null)
+			if (NoRows(re))
 				return double.NaN;
 
 			var (sum, sum2, count) = ((double, double, int)) await RunningState(rpt, _key, row, re, async (r, s) =>

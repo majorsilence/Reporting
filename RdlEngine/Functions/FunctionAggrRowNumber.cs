@@ -47,7 +47,7 @@ namespace Majorsilence.Reporting.Rdl
 			bool bSave = true;
 			IEnumerable re = this.GetDataScope(rpt, row, out bSave);
 			if (re == null)
-				return Task.FromResult(int.MinValue);
+				return Task.FromResult(0);
 
 			Row startrow = null;
 			foreach (Row r in re)
@@ -67,7 +67,7 @@ namespace Majorsilence.Reporting.Rdl
 				rpt.Cache.AddReplace(_key, numbering);
 			}
 
-			return Task.FromResult(numbering.Positions.TryGetValue(row, out int position) ? position : 0);
+			return Task.FromResult(row != null && numbering.Positions.TryGetValue(row, out int position) ? position : 0);
 		}
 
 		public async Task<double> EvaluateDouble(Report rpt, Row row)

@@ -45,13 +45,13 @@ namespace Majorsilence.Reporting.Rdl
 		// Evaluate is for interpretation  (and is relatively slow)
 		public async Task<object> Evaluate(Report rpt, Row row)
 		{
-			return _tc==TypeCode.Decimal? NullIfNoValue(await EvaluateDecimal(rpt, row).ConfigureAwait(false)) : (object)await EvaluateDouble(rpt, row).ConfigureAwait(false);
+			return _tc==TypeCode.Decimal? NullIfNoValue(await EvaluateDecimal(rpt, row).ConfigureAwait(false)) : NullIfNoValue(await EvaluateDouble(rpt, row).ConfigureAwait(false));
 		}
 		
 		public async Task<double> EvaluateDouble(Report rpt, Row row)
 		{
 			RowEnumerable re = this.GetDataScope(rpt, row, out bool bSave);
-			if (re == null)
+			if (NoRows(re))
 				return double.NaN;
 
 			var (sum, count) = ((double, int)) await RunningState(rpt, _key + "d", row, re, async (r, s) =>
@@ -66,7 +66,7 @@ namespace Majorsilence.Reporting.Rdl
 		public async Task<decimal> EvaluateDecimal(Report rpt, Row row)
 		{
 			RowEnumerable re = this.GetDataScope(rpt, row, out bool bSave);
-			if (re == null)
+			if (NoRows(re))
 				return decimal.MinValue;
 
 			var (sum, count) = ((decimal, int)) await RunningState(rpt, _key + "m", row, re, async (r, s) =>
