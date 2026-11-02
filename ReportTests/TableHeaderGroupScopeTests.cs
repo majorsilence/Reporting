@@ -113,6 +113,75 @@ namespace ReportTests
             Assert.That(headers, Is.EqualTo(new[] { "a 3", "b 70" }));
         }
 
+        // The outer group with a header repeated on each page, or a footer.
+        private static string TwoGroupsAround(string outerRows) => $@"<TableGroup>
+        <Grouping Name=""G""><GroupExpressions><GroupExpression>=Fields!K.Value</GroupExpression></GroupExpressions></Grouping>
+        {outerRows}
+      </TableGroup>
+      <TableGroup>
+        <Grouping Name=""H""><GroupExpressions><GroupExpression>=Fields!J.Value</GroupExpression></GroupExpressions><BREAK>true</BREAK></Grouping>
+      </TableGroup>";
+
+        private static string OuterRows(string band, string value, bool repeat = false, bool hidden = false) => $@"<{band}>{(repeat ? "<RepeatOnNewPage>true</RepeatOnNewPage>" : "")}<TableRows><TableRow><Height>14pt</Height>{(hidden ? "<Visibility><Hidden>true</Hidden></Visibility>" : "")}<TableCells><TableCell><ReportItems>
+          <Textbox Name=""Outer{band}""><Value>{value}</Value></Textbox>
+        </ReportItems></TableCell></TableCells></TableRow></TableRows></{band}>";
+
+        private const string BothTotals = "=\"H \" &amp; CStr(Sum(Fields!V.Value, \"G\")) &amp; \" \" &amp; CStr(Sum(Fields!V.Value, \"H\"))";
+
+        // Every line on each page, top to bottom.
+        private static async Task<string[][]> Pages(string rdl)
+        {
+            using var report = await Parse(rdl, true);
+            var pages = await report.BuildPages();
+            return pages.Cast<Page>()
+                .Select(p => p.Cast<PageItem>().OfType<PageText>().OrderBy(t => t.Y).Select(t => t.Text).ToArray())
+                .ToArray();
+        }
+
+        // A break at the end of a group that is the last within its enclosing group starts the
+        // page with the enclosing group's next instance, so the header is that one's.
+        [Test]
+        public async Task AfterABreakAtTheEndOfTheLastInnerGroup_TheHeaderHasTheNextOuterGroupsTotals()
+        {
+            var headers = await Headers(Rdl(BothTotals, TwoGroups, "PageBreakAtEnd"));
+
+            // a/x, a/y, b/x, b/y: the break after a/y, the last in a, starts the page with b/x.
+            Assert.That(headers, Is.EqualTo(new[] { "H 3 1", "H 3 2", "H 70 30", "H 70 40" }));
+        }
+
+        // The enclosing group's header, repeated on each page, is printed once on that page, for
+        // the instance the page starts with.
+        [Test]
+        public async Task AfterABreakAtTheEndOfTheLastInnerGroup_TheOuterHeaderIsTheNextOnesOnce()
+        {
+            var pages = await Pages(Rdl(BothTotals,
+                TwoGroupsAround(OuterRows("Header", "=\"G \" &amp; Fields!K.Value", repeat: true)), "PageBreakAtEnd"));
+
+            Assert.That(pages[2], Is.EqualTo(new[] { "H 70 30", "G b", "D 10", "D 20" }));
+        }
+
+        // Control: with the enclosing group's footer still to print, the page starts in the
+        // groups just finished.
+        [Test]
+        public async Task AfterABreakAtTheEndOfTheLastInnerGroup_WithTheOuterFooterToCome_TheHeaderIsTheFinishedGroups()
+        {
+            var pages = await Pages(Rdl(BothTotals,
+                TwoGroupsAround(OuterRows("Footer", "=\"F \" &amp; CStr(Sum(Fields!V.Value, \"G\"))")), "PageBreakAtEnd"));
+
+            Assert.That(pages[2], Is.EqualTo(new[] { "H 3 2", "F 3", "D 10", "D 20" }));
+        }
+
+        // An enclosing group's footer that is hidden prints nothing, so the page starts with the
+        // next group as it does with no footer.
+        [Test]
+        public async Task AfterABreakAtTheEndOfTheLastInnerGroup_WithTheOuterFooterHidden_TheHeaderIsTheNextGroups()
+        {
+            var pages = await Pages(Rdl(BothTotals,
+                TwoGroupsAround(OuterRows("Footer", "=\"F \" &amp; CStr(Sum(Fields!V.Value, \"G\"))", hidden: true)), "PageBreakAtEnd"));
+
+            Assert.That(pages[2], Is.EqualTo(new[] { "H 70 30", "D 10", "D 20" }));
+        }
+
         [Test]
         public async Task WithNestedGroups_TheHeaderHasTheTotalsOfTheFirstGroupAtEachLevel()
         {
