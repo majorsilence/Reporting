@@ -110,9 +110,10 @@ namespace ReportTests
             // Detail cells share one style class and the five total cells another, and only the latter is bold.
             var cells = Regex.Matches (html, "<td id='(css\\d+)'[^>]*>(\\d+)\\s*<").Cast<Match> ().Select (m => (Class: m.Groups[1].Value, Text: m.Groups[2].Value)).ToList ();
             Assert.That (cells.Select (c => c.Class).Distinct ().Count (), Is.EqualTo (2), "two styles among the data cells");
-            var detail = cells.GroupBy (c => c.Class).OrderBy (g => g.Count ()).First ();   // 4 detail cells
+            // Gadget has no Y2021 row: that detail cell sums to Nothing and has no number.
+            var detail = cells.GroupBy (c => c.Class).OrderBy (g => g.Count ()).First ();   // 3 detail cells with a number
             var totals = cells.GroupBy (c => c.Class).OrderBy (g => g.Count ()).Last ();    // 5 total cells
-            Assert.That (new[] { detail.Count (), totals.Count () }, Is.EqualTo (new[] { 4, 5 }));
+            Assert.That (new[] { detail.Count (), totals.Count () }, Is.EqualTo (new[] { 3, 5 }));
             Assert.That (Regex.IsMatch (html, @"#" + totals.Key + @"\s*\{[^}]*font-weight:\s*bold", RegexOptions.IgnoreCase)
                 || Regex.IsMatch (html, @"\." + totals.Key + @"\s*\{[^}]*font-weight:\s*bold", RegexOptions.IgnoreCase), Is.True, "the totals' class is bold");
             Assert.That (Regex.IsMatch (html, @"[#.]" + detail.Key + @"\s*\{[^}]*font-weight:\s*bold", RegexOptions.IgnoreCase), Is.False, "the detail class is not");

@@ -43,6 +43,8 @@ namespace Majorsilence.Reporting.Rdl
 		// Evaluate is for interpretation  (and is relatively slow)
 		public async Task<object> Evaluate(Report rpt, Row row)
 		{
+			if (HasNoRows(rpt, row))
+				return null;
 			switch (_tc)
 			{
 				case TypeCode.Decimal:
@@ -92,7 +94,7 @@ namespace Majorsilence.Reporting.Rdl
 			bool bSave=true;
 			IEnumerable re = this.GetDataScope(rpt, row, out bSave);
 			if (re == null)
-				return double.NaN;
+				return 0;		// a sum of no rows is Nothing, which as a number is 0
 
 			ODouble v = GetValueDouble(rpt);
 			if (v != null)
@@ -123,7 +125,7 @@ namespace Majorsilence.Reporting.Rdl
 			bool bSave;
 			IEnumerable re = this.GetDataScope(rpt, row, out bSave);
 			if (re == null)
-				return decimal.MinValue;
+				return 0;		// a sum of no rows is Nothing, which as a number is 0
 
 			ODecimal od = GetValueDecimal(rpt);
 			if (od != null)

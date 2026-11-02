@@ -115,8 +115,9 @@ namespace ReportTests
             Assert.That (Regex.Matches (widget, @"\d+(\.\d+)?").Select (m => double.Parse (m.Value)).ToArray (),
                 Is.EqualTo (new[] { 10.0, 20.0, 10.0, 20.0 }), widget);
             var gadget = rows.First (r => r.StartsWith ("Gadget"));
+            // Gadget has no rows in Y2021 or North: those cells sum to Nothing and are empty.
             Assert.That (Regex.Matches (gadget, @"\d+(\.\d+)?").Select (m => double.Parse (m.Value)).ToArray (),
-                Is.EqualTo (new[] { 30.0, 0.0, 0.0, 30.0 }), gadget);
+                Is.EqualTo (new[] { 30.0, 30.0 }), gadget);
         }
 
         [Test]
@@ -205,8 +206,9 @@ namespace ReportTests
             var cells = Cells (html);
             var northCells = cells.First (r => r.Contains ("North"));
             // Two row-header columns in the first set, one in the second: the region label sits in the
-            // right-hand one, next to the data, with a blank cell to its left.
-            Assert.That (northCells, Is.EqualTo (new[] { "", "North", "10", "0" }), string.Join (" | ", northCells));
+            // right-hand one, next to the data, with a blank cell to its left. North has no rows in
+            // the second year, so that cell is empty.
+            Assert.That (northCells, Is.EqualTo (new[] { "", "North", "10", "" }), string.Join (" | ", northCells));
             var widgetCells = cells.First (r => r.Contains ("Widget"));
             Assert.That (widgetCells.Take (2), Is.EqualTo (new[] { "Widget", "Q1" }));
             Assert.That (northCells.Length, Is.EqualTo (widgetCells.Length), "every row has the same number of columns");

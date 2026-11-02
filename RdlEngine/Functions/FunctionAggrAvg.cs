@@ -45,7 +45,7 @@ namespace Majorsilence.Reporting.Rdl
 		// Evaluate is for interpretation  (and is relatively slow)
 		public async Task<object> Evaluate(Report rpt, Row row)
 		{
-			return _tc==TypeCode.Decimal? NullIfNoValue(await EvaluateDecimal(rpt, row).ConfigureAwait(false)) : (object) await EvaluateDouble(rpt, row).ConfigureAwait(false);
+			return _tc==TypeCode.Decimal? NullIfNoValue(await EvaluateDecimal(rpt, row).ConfigureAwait(false)) : NullIfNoValue(await EvaluateDouble(rpt, row).ConfigureAwait(false));
 		}
 		
 		public async Task<double> EvaluateDouble(Report rpt, Row row)
@@ -85,9 +85,8 @@ namespace Majorsilence.Reporting.Rdl
         
         public async Task<int> EvaluateInt32(Report rpt, Row row)
         {
-            if (row == null)
-                return int.MinValue;
-            return Convert.ToInt32(await EvaluateDouble(rpt, row).ConfigureAwait(false));
+            double d = await EvaluateDouble(rpt, row).ConfigureAwait(false);
+            return double.IsNaN(d) ? int.MinValue : Convert.ToInt32(d);
         }		
 		public async Task<decimal> EvaluateDecimal(Report rpt, Row row)
 		{

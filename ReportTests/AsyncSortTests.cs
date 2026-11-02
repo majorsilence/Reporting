@@ -80,14 +80,15 @@ namespace ReportTests
             // The columns have a plain sort expression and are reordered. The rows sort on Sum(), which the
             // matrix evaluates against the entry's first row, so they stay in the order first met. That is
             // how the engine has always behaved; this pins it so the sort rewrite cannot change it.
+            // A cell with no rows sums to Nothing and is empty.
             Assert.That(lines, Is.EqualTo(new[]
             {
                 "\"Q4\",\"Q3\",\"Q2\",\"Q1\"",
-                "\"North\",0,0,5,10",
-                "\"South\",0,1,0,50",
-                "\"East\",0,0,30,40",
-                "\"West\",20,0,0,25",
-                "\"Central\",0,99,1,0",
+                "\"North\",\"\",\"\",5,10",
+                "\"South\",\"\",1,\"\",50",
+                "\"East\",\"\",\"\",30,40",
+                "\"West\",20,\"\",\"\",25",
+                "\"Central\",\"\",99,1,\"\"",
             }));
         }
 

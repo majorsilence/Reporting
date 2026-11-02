@@ -45,8 +45,8 @@ namespace Majorsilence.Reporting.Rdl
 		public async Task<int> EvaluateInt32(Report rpt, Row row)
 		{
 			RowEnumerable re = this.GetDataScope(rpt, row, out bool bSave);
-			if (re == null)
-				return int.MinValue;
+			if (NoRows(re))
+				return 0;
 
 			object count = await RunningState(rpt, _key, row, re,
 				async (r, s) => (object)((s is int c ? c : 0) + (IsNullValue(await _Expr.Evaluate(rpt, r).ConfigureAwait(false)) ? 0 : 1))).ConfigureAwait(false);
