@@ -84,6 +84,52 @@ namespace RdlDoctor.Tests
         }
 
         [Test]
+        public async Task QueryWhoseSchemaPassFails_IsRelayedAsAWarning()
+        {
+            // The parse logs a query it can't read the columns of as a severity-4 warning rather
+            // than throwing (#540), so the checker has to relay it or a broken query goes unreported.
+            string folder = Path.Combine(Path.GetTempPath(), $"rdldoctor-{System.Guid.NewGuid():N}");
+            Directory.CreateDirectory(folder);
+            try
+            {
+                string db = Path.Combine(folder, "empty.db");
+                string rdlPath = Path.Combine(folder, "broken-query.rdl");
+                File.WriteAllText(rdlPath, $"""
+                    <?xml version="1.0" encoding="utf-8"?>
+                    <Report xmlns="http://schemas.microsoft.com/sqlserver/reporting/2005/01/reportdefinition">
+                      <DataSources><DataSource Name="Db"><ConnectionProperties>
+                        <DataProvider>Microsoft.Data.Sqlite</DataProvider>
+                        <ConnectString>Data Source={db};Pooling=False</ConnectString>
+                      </ConnectionProperties></DataSource></DataSources>
+                      <DataSets><DataSet Name="Numbers">
+                        <Query><DataSourceName>Db</DataSourceName><CommandText>SELECT N FROM NoSuchTable</CommandText></Query>
+                        <Fields><Field Name="N"><DataField>N</DataField></Field></Fields>
+                      </DataSet></DataSets>
+                      <Width>6in</Width>
+                      <Body><Height>1in</Height><ReportItems>
+                        <Textbox Name="T"><Top>0in</Top><Left>0in</Left><Width>6in</Width><Height>0.25in</Height><Value>=Count(Fields!N.Value, "Numbers")</Value></Textbox>
+                      </ReportItems></Body>
+                    </Report>
+                    """);
+
+                var findings = await CompatibilityChecker.CheckAsync(rdlPath);
+
+                var queryFindings = findings.Where(f => f.Id == "DOC004" && f.Message.Contains("could not be read from its query while parsing")).ToList();
+                Assert.That(queryFindings, Has.Count.EqualTo(1));
+                Assert.That(queryFindings[0].Severity, Is.EqualTo(FindingSeverity.Warning));
+                Assert.That(queryFindings[0].Message, Does.Contain("NoSuchTable"));
+                Assert.That(queryFindings[0].Message, Does.Contain("DataSet \"Numbers\""));
+                Assert.That(findings.Any(f => f.Severity == FindingSeverity.Error), Is.False,
+                    "A schema-pass failure is a warning: the report still loads");
+            }
+            finally
+            {
+                Microsoft.Data.Sqlite.SqliteConnection.ClearAllPools();
+                try { Directory.Delete(folder, recursive: true); } catch (IOException) { }
+            }
+        }
+
+        [Test]
         public void MalformedXml_ThrowsRatherThanReturningAFinding()
         {
             // Program.cs relies on this throwing so it can distinguish "not even XML" (exit 2)
