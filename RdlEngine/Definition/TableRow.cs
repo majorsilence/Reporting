@@ -178,6 +178,13 @@ namespace Majorsilence.Reporting.Rdl
 			// moved to another page while it drew keeps its measured height, as before. Only
 			// text and images count: a line or a box drawn past the row's bottom is drawn so on
 			// purpose, over the rows after it.
+			//
+			// Nor does what a Rectangle drawn beneath draws (Rectangle.DrawBeneathOf): like a
+			// watermark it takes no room, and the rows after it print over it. A row whose
+			// Rectangle is drawn so takes only its own height, which may be none. The group
+			// header, detail record or footer the row is in still ends below the Rectangle's
+			// Height and what it drew (see Table.HoldBeneath), so a group's footer and the next
+			// record or group print below it.
 			Page page = pgs.CurrentPage;
 			float top = page.YOffset;
 			HashSet<PageItem> before = HoldsContainers()
@@ -191,12 +198,22 @@ namespace Majorsilence.Reporting.Rdl
 			if (before != null && pgs.CurrentPage == page)
 			{
 				float reached = height;
+				float beneath = 0;
 				foreach (PageItem pi in page)
-					if (!before.Contains(pi) && (pi is PageText || pi is PageImage))
+				{
+					if (before.Contains(pi) || !(pi is PageText || pi is PageImage))
+						continue;
+					if (page.IsBeneath(pi))
+						beneath = Math.Max(beneath, pi.Y + pi.H - top);
+					else
 						reached = Math.Max(reached, pi.Y + pi.H - top);
+				}
 				// Past rounding at the band's edge only, which must not move every row down.
 				if (reached > height + 0.5f)
 					height = reached;
+				Rectangle band = BandRectangle();
+				if (band != null && band.DrawBeneath)
+					Table.HoldBeneath(pgs.Report, page, top + Math.Max(beneath, band.Height == null ? 0 : band.Height.Points));
 			}
 			pgs.CurrentPage.YOffset += height;
 		}

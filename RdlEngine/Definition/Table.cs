@@ -372,6 +372,13 @@ namespace Majorsilence.Reporting.Rdl
 
         internal async Task RunPageFooter(Pages pgs, Row row, bool bLast)
         {
+            BeginBeneath(pgs.Report);
+            await RunPageFooterRows(pgs, row, bLast).ConfigureAwait(false);
+            EndBeneath(pgs, false);
+        }
+
+        private async Task RunPageFooterRows(Pages pgs, Row row, bool bLast)
+        {
             if (_Footer != null && (_Footer.RepeatOnNewPage || bLast))
             {
                 Page p = pgs.CurrentPage;
@@ -442,7 +449,16 @@ namespace Majorsilence.Reporting.Rdl
             return FooterHeight;
         }
 
+		// A header or footer printed on each page holds back nothing it draws beneath: the
+		// group, record or footer it breaks into goes on over it (see HoldBeneath).
 		internal async Task RunPageHeader(Pages pgs, Row frow, bool bFirst, TableGroup stoptg)
+		{
+			BeginBeneath(pgs.Report);
+			await RunPageHeaderRows(pgs, frow, bFirst, stoptg).ConfigureAwait(false);
+			EndBeneath(pgs, false);
+		}
+
+		private async Task RunPageHeaderRows(Pages pgs, Row frow, bool bFirst, TableGroup stoptg)
 		{
 			// Do the table headers
 			bool isEmpty = pgs.CurrentPage.IsEmpty();
@@ -949,6 +965,9 @@ namespace Majorsilence.Reporting.Rdl
 		// A group's header, the groups or detail rows it holds, and its footer.
 		private async Task RunGroupPage(Pages pgs, TableWorkClass wc, GroupEntry ge, TableGroup tg, int endRow, float groupHeight, GroupEntry next)
 		{
+			// What the header draws beneath, the groups or detail rows within it print over; its
+			// footer prints below it.
+			BeginBeneath(pgs.Report);
 			if (tg != null && tg.Header != null)
 			{
 				// Calculate the number of table rows below this group; header, footer, details count
@@ -999,9 +1018,15 @@ namespace Majorsilence.Reporting.Rdl
 				}
 			}
 
+			EndBeneath(pgs);
+
 			// Do the group footer
 			if (tg != null && tg.Footer != null)
+			{
+				BeginBeneath(pgs.Report);
                 await tg.Footer.RunPage(pgs, wc.Data.Data[ge.EndRow]).ConfigureAwait(false);
+				EndBeneath(pgs);
+			}
 		}
 
 		// A group kept together that ran past the bottom of a page already holding something is
@@ -1371,6 +1396,42 @@ namespace Majorsilence.Reporting.Rdl
 			return wc?.Data?.Data != null && wc.Data.Data.Count > 0 ? wc.Data.Data[0] : row;
 		}
 
+		// A row whose Rectangle is drawn beneath (Rectangle.DrawBeneathOf) takes no room, and the
+		// rows after it print over it (see TableRow.RunPageRow). The group header, the detail record or the footer it is in still
+		// ends no higher than its bottom, as a group's backdrop should: each of those runs between
+		// BeginBeneath and EndBeneath, and the page goes on below the lowest bottom that a row
+		// drawn beneath reached on it.
+		internal void BeginBeneath(Report rpt)
+		{
+			GetValue(rpt).Beneath.Add(new BeneathBottom());
+		}
+
+		internal void HoldBeneath(Report rpt, Page page, float bottom)
+		{
+			List<BeneathBottom> held = GetValue(rpt).Beneath;
+			if (held.Count == 0)
+				return;
+			BeneathBottom b = held[held.Count - 1];
+			if (b.Page != page)
+			{
+				b.Page = page;
+				b.Bottom = bottom;
+			}
+			else
+				b.Bottom = Math.Max(b.Bottom, bottom);
+		}
+
+		internal void EndBeneath(Pages pgs, bool apply = true)
+		{
+			List<BeneathBottom> held = GetValue(pgs.Report).Beneath;
+			if (held.Count == 0)
+				return;
+			BeneathBottom b = held[held.Count - 1];
+			held.RemoveAt(held.Count - 1);
+			if (apply && b.Page != null && b.Page == pgs.CurrentPage && pgs.CurrentPage.YOffset < b.Bottom)
+				pgs.CurrentPage.YOffset = b.Bottom;
+		}
+
 		private TableWorkClass GetValue(Report rpt)
 		{
 			TableWorkClass wc = rpt.Cache.Get(this, "wc") as TableWorkClass;
@@ -1400,6 +1461,7 @@ namespace Majorsilence.Reporting.Rdl
 		internal float PageBottom;		// Runtime: the page's bottom, where the Footer's bottom rows end; 0 without them
 		internal Page BottomRowsPage;	// Runtime: the page (and column) the bottom rows last printed on
 		internal float BottomRowsXOffset;
+		internal List<BeneathBottom> Beneath = new List<BeneathBottom>();	// Runtime: see Table.HoldBeneath, innermost last
 		internal TableWorkClass()
 		{
 			Data = null;
@@ -1407,6 +1469,13 @@ namespace Majorsilence.Reporting.Rdl
 			GroupNestCount = 0;
 			RecursiveGroup = null;
 		}
+	}
+
+	// How far down the page the rows drawn beneath in a group header, record or footer reached.
+	class BeneathBottom
+	{
+		internal Page Page;
+		internal float Bottom;
 	}
 
 	class RecursiveCompare
