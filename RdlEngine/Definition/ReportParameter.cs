@@ -14,6 +14,11 @@ namespace Majorsilence.Reporting.Rdl
 	[Serializable]
 	internal class ReportParameter : ReportLink
 	{
+		// The keys of a parameter's value, and of a multi-value parameter's values, in the
+		// report's run cache. They outlast a render: see RCache.TransferRunDataTo.
+		internal const string RuntimeValueKey = "runtimevalue";
+		internal const string RuntimeValuesKey = "rtvs";
+
 		Name _Name;			// Name of the parameter 
 		// Note: Parameter names need only be
 		// unique within the containing Parameters collection
@@ -136,7 +141,7 @@ namespace Majorsilence.Reporting.Rdl
 		internal async Task<object> GetRuntimeValue(Report rpt)
 		{
 			object rtv = rpt == null? null:
-				rpt.Cache.Get(this, "runtimevalue");
+				rpt.Cache.Get(this, RuntimeValueKey);
 
 			if (rtv != null)
 				return rtv; 
@@ -152,7 +157,7 @@ namespace Majorsilence.Reporting.Rdl
 
 			rtv = Convert.ChangeType(v, _dt);
 			if (rpt != null)
-				rpt.Cache.Add(this, "runtimevalue", rtv);
+				rpt.Cache.Add(this, RuntimeValueKey, rtv);
 
 			return rtv;
 		}
@@ -160,7 +165,7 @@ namespace Majorsilence.Reporting.Rdl
         internal async Task <ArrayList> GetRuntimeValues(Report rpt)
         {
             ArrayList rtv = rpt == null ? null :
-                (ArrayList) rpt.Cache.Get(this, "rtvs");
+                (ArrayList) rpt.Cache.Get(this, RuntimeValuesKey);
 
             if (rtv != null)
                 return rtv;
@@ -183,7 +188,7 @@ namespace Majorsilence.Reporting.Rdl
             }
 
             if (rpt != null)
-                rpt.Cache.Add(this, "rtvs", ar);
+                rpt.Cache.Add(this, RuntimeValuesKey, ar);
 
             return ar;
         }
@@ -220,7 +225,7 @@ namespace Majorsilence.Reporting.Rdl
 			// empty.
 			if (v == null && _Nullable)
 			{
-				rpt.Cache.AddReplace(this, "runtimevalue", null);
+				rpt.Cache.AddReplace(this, RuntimeValueKey, null);
 				return;
 			}
 
@@ -256,7 +261,7 @@ namespace Majorsilence.Reporting.Rdl
 
 				if (!AllowBlank || _dt != TypeCode.String)
 				{
-					rpt.Cache.AddReplace(this, "runtimevalue", null);
+					rpt.Cache.AddReplace(this, RuntimeValueKey, null);
 					return;
 				}
 			}
@@ -279,7 +284,7 @@ namespace Majorsilence.Reporting.Rdl
                     rpt.rl.LogError(4, err);
 				throw new ArgumentException(string.Format("Unable to convert '{0}' to {1} for {2}", v ?? "(null)", _dt, Name.Nm),e);
 			}
-			rpt.Cache.AddReplace(this, "runtimevalue", rtv);
+			rpt.Cache.AddReplace(this, RuntimeValueKey, rtv);
 		}
 
         internal void SetRuntimeValues(Report rpt, ArrayList vs)
@@ -325,7 +330,7 @@ namespace Majorsilence.Reporting.Rdl
                     throw new ArgumentException(string.Format("Unable to convert '{0}' to {1} for {2}", v, _dt, Name.Nm), e);
                 }
             }
-            rpt.Cache.AddReplace(this, "rtvs", ar);
+            rpt.Cache.AddReplace(this, RuntimeValuesKey, ar);
         }
 
 		private object ConvertStringToNumber(string newv)
