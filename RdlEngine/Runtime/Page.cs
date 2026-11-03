@@ -14,6 +14,7 @@ namespace Majorsilence.Reporting.Rdl
 		int _emptyItems;				// # of items which constitute empty
 		bool _needSort;                 // need sort
 		int _lastZIndex;                // last ZIndex
+		HashSet<PageItem> _beneath;     // drawn by a rectangle drawn beneath, taking no room; see Rectangle.DrawBeneathOf
 		System.Collections.Generic.Dictionary<string, Rows> _PageExprReferences;    // needed to save page header/footer expressions
 
 		public Page(int page)
@@ -87,6 +88,32 @@ namespace Majorsilence.Reporting.Rdl
 		public bool IsEmpty()
 		{
 			return _items.Count > _emptyItems ? false : true;
+		}
+
+		// Marks an item as drawn by a rectangle drawn beneath, which takes no room.
+		internal void DrawBeneath(PageItem pi)
+		{
+			_beneath ??= new HashSet<PageItem>(ReferenceEqualityComparer.Instance);
+			_beneath.Add(pi);
+		}
+
+		// Marks the items from index on so, and draws them at zindex, those not drawn further
+		// beneath already.
+		internal void DrawBeneath(int index, int zindex)
+		{
+			for (int i = index; i < _items.Count; i++)
+			{
+				DrawBeneath(_items[i]);
+				if (_items[i].ZIndex <= zindex)
+					continue;
+				_items[i].ZIndex = zindex;
+				_needSort = true;
+			}
+		}
+
+		internal bool IsBeneath(PageItem pi)
+		{
+			return _beneath != null && _beneath.Contains(pi);
 		}
 
 		public void SortPageItems()

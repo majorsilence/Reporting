@@ -121,10 +121,17 @@ namespace Majorsilence.Reporting.Rdl
                     await OwnerTable.RunPageFooter(pgs, row, false).ConfigureAwait(false);
 					p = OwnerTable.RunPageNew(pgs, p);
                     await OwnerTable.RunPageHeader(pgs, row, false, null).ConfigureAwait(false);
+					OwnerTable.BeginBeneath(pgs.Report);
                     await _TableRows.RunPage(pgs, row, true).ConfigureAwait(false);   // force checking since header + hrows might be > BottomOfPage
                 }
                 else
+				{
+					OwnerTable.BeginBeneath(pgs.Report);
                     await _TableRows.RunPage(pgs, row, hrows > pgs.BottomOfPage).ConfigureAwait(false);
+				}
+				// A record's rows print over what one of them draws beneath; the next record
+				// prints below it (see Table.HoldBeneath).
+				OwnerTable.EndBeneath(pgs);
 			}
 			return;
 		}

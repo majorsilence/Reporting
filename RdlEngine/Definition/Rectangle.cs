@@ -16,6 +16,7 @@ namespace Majorsilence.Reporting.Rdl
 		bool _PageBreakAtStart;		// Indicates the report should page break at the start of the rectangle.
 		bool _PageBreakAtEnd;		// Indicates the report should page break at the end of the rectangle.		
 		bool _KeepTogether;			// Indicates the rectangle should be kept on one page if it can be.
+		bool _DrawBeneath;			// drawn beneath what follows it, taking no room; see DrawBeneathOf
 
 		// constructor that doesn't process syntax
 		internal Rectangle(ReportDefn r, ReportLink p, XmlNode xNode, bool bNoLoop):base(r,p,xNode)
@@ -58,8 +59,28 @@ namespace Majorsilence.Reporting.Rdl
 						break;
 				}
 			}
+
+			_DrawBeneath = DrawBeneathOf(Custom);
 		}
- 
+
+		// <Custom><DrawBeneath>true</DrawBeneath></Custom> asks that a rectangle be drawn beneath
+		// what follows it, as a backdrop or a watermark is, and take no room: neither it nor what
+		// it holds makes its container or its table row taller, and what it holds is drawn at its
+		// ZIndex, a subreport's rows included. In a table row of its own, the rows after it print
+		// over it, and its group header, detail record or footer still ends below its Height (see
+		// TableRow.RunPageRow and Table.HoldBeneath).
+		private static bool DrawBeneathOf(Custom custom)
+		{
+			if (custom == null)
+				return false;
+			foreach (XmlNode xNode in custom.CustomXmlNode.ChildNodes)
+			{
+				if (xNode.Name == "DrawBeneath")
+					return string.Equals(xNode.InnerText.Trim(), "true", StringComparison.OrdinalIgnoreCase);
+			}
+			return false;
+		}
+
 		async override internal Task FinalPass()
 		{
             await base.FinalPass().ConfigureAwait(false);
@@ -107,6 +128,8 @@ namespace Majorsilence.Reporting.Rdl
             {
                 Page p = pgs.CurrentPage;
                 p.AddObject(pr);
+                if (_DrawBeneath)
+                    p.DrawBeneath(pr);
 
                 if (_ReportItems != null)
                 {
@@ -117,7 +140,12 @@ namespace Majorsilence.Reporting.Rdl
                     await _ReportItems.RunPage(pgs, row, GetOffsetCalc(pgs.Report) + LeftCalc(r)).ConfigureAwait(false);
                     p.YOffset = saveY;
                     if (pgs.CurrentPage == p)
+                    {
+                        // What a rectangle drawn beneath holds is drawn beneath with it.
+                        if (_DrawBeneath)
+                            p.DrawBeneath(firstContained, ZIndex);
                         GrowToContents(p, firstContained, pr);
+                    }
                 }
 
                 // Handle page breaking at end
@@ -138,13 +166,16 @@ namespace Majorsilence.Reporting.Rdl
 
         // A rectangle grows with what it holds, as in SSRS: a subreport or a growing text box
         // can print past its designed bottom, and the border, the background and the items
-        // placed below the rectangle follow it down. Only on the rectangle's own page.
+        // placed below the rectangle follow it down. Only on the rectangle's own page. What a
+        // rectangle drawn beneath draws takes no room, and the rectangle does not grow to hold it.
         private static void GrowToContents(Page p, int firstContained, PageRectangle pr)
         {
             float bottom = pr.Y + pr.H;
             for (int i = firstContained; i < p.Count; i++)
             {
                 PageItem pi = p[i];
+                if (p.IsBeneath(pi))
+                    continue;
                 float itemBottom = pi is PageLine pl ? Math.Max(pl.Y, pl.Y2) : pi.Y + pi.H;
                 bottom = Math.Max(bottom, itemBottom);
             }
@@ -189,6 +220,11 @@ namespace Majorsilence.Reporting.Rdl
 		{
 			get { return  _KeepTogether; }
 			set {  _KeepTogether = value; }
+		}
+
+		internal bool DrawBeneath
+		{
+			get { return  _DrawBeneath; }
 		}
 	}
 }
