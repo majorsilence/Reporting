@@ -34,6 +34,12 @@ public static class CompatibilityChecker
         @"^Severity:\s*\d+\s*-\s*Unknown (?<context>\w+) element '(?<name>[^']+)' ignored\.$",
         RegexOptions.Compiled);
 
+    // Query.FinalPass logs this, at severity 4, when a query's columns can't be read at parse
+    // time. The first line carries the database's own message.
+    private static readonly Regex SchemaPassFailureMessage = new(
+        @"^Severity:\s*\d+\s*-\s*SQL Exception during report compilation:\s*(?<message>[^\r\n]*)",
+        RegexOptions.Compiled);
+
     private static readonly (string Uri, string Label)[] KnownNamespaces =
     {
         ("http://schemas.microsoft.com/sqlserver/reporting/2005/01/reportdefinition", "2005"),
@@ -150,9 +156,26 @@ public static class CompatibilityChecker
             var report = await parser.Parse();
 
             var seen = new HashSet<(string Context, string Name)>();
+            var seenQueryFailures = new HashSet<string>();
             foreach (var itemObj in report.ErrorItems)
             {
                 string item = itemObj?.ToString() ?? "";
+
+                // The parse no longer throws when a query's schema pass fails (some queries, such
+                // as a SQL Server batch that fills and reads a temp table, can't be described
+                // without running them), so relay the warning rather than losing a broken query.
+                var queryFailure = SchemaPassFailureMessage.Match(item);
+                if (queryFailure.Success)
+                {
+                    string message = queryFailure.Groups["message"].Value.Trim();
+                    if (seenQueryFailures.Add(message))
+                    {
+                        findings.Add(new Finding("DOC004", FindingSeverity.Warning,
+                            $"A query's columns could not be read while parsing: {message} The report still loads and its fields are taken as declared. If the query itself is broken, the report fails when it runs; if it fills and reads a temp table, this is expected."));
+                    }
+                    continue;
+                }
+
                 var match = UnknownElementMessage.Match(item);
                 if (!match.Success) continue;
 
