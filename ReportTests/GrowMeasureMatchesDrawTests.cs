@@ -111,11 +111,11 @@ namespace ReportTests
         public Task AWordThatFitsWithLittleToSpare_GrowsByOneLine()
             => AssertGrowsByTheLinesDrawn("Total", "Arial", 10, column: 22.5f, padLeft: 0, lines: 1);
 
-        // A word with no break in it was broken between its letters, one line for each. It is a
-        // little wider than the column, and the PDF draws it on one line all the same.
+        // A word with no break in it, a little wider than the column, is broken between its
+        // letters, one line for each, and the box grows by those two lines and no more.
         [Test]
-        public Task TwoLettersInANarrowColumn_GrowByOneLine()
-            => AssertGrowsByTheLinesDrawn("Nº", "Arial", 10, column: 38, padLeft: 28.79f, lines: 1);
+        public Task TwoLettersInANarrowColumn_GrowByTheTwoLinesDrawn()
+            => AssertGrowsByTheLinesDrawn("Nº", "Arial", 10, column: 38, padLeft: 28.79f, lines: 2);
 
         // A family the machine does not have is drawn in the PDF's substitute for it, as wide as
         // Arial, in which these fit with about 3pt to spare; in the system's fallback (Segoe UI,

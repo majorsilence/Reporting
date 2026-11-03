@@ -5,17 +5,21 @@ namespace Majorsilence.Reporting.Rdl
 {
     /// <summary>
     /// How a text box's text is broken into lines: at its line breaks, and each paragraph that does
-    /// not fit wrapped at its spaces. The PDF renderer draws the lines this way, and a growing box is
-    /// measured this way, so that it grows by the lines it draws and no others.
+    /// not fit wrapped at its spaces, a word wider than the line broken between its letters. The PDF
+    /// renderer draws the lines this way, and a growing box is measured this way, so that it grows by
+    /// the lines it draws and no others.
     /// </summary>
     internal static class TextWrap
     {
         /// <summary>
         /// Wraps one paragraph at its spaces to <paramref name="maxWidth"/>: a word goes on the line
-        /// when the line with it, measured without the space after it, still fits, and a word wider
-        /// than <paramref name="maxWidth"/> has a line of its own.
+        /// when the line with it, measured without the space after it, still fits. A word wider than
+        /// <paramref name="maxWidth"/> starts a line and is broken after the last letter that fits,
+        /// its rest carried to the next line, where the words after it follow it as usual; with
+        /// <paramref name="breakWords"/> false it has a line of its own, whole.
         /// </summary>
-        internal static void WrapParagraph(string text, float maxWidth, Func<string, float> width, List<string> output)
+        internal static void WrapParagraph(string text, float maxWidth, Func<string, float> width, List<string> output,
+            bool breakWords = true)
         {
             string[] words = text.Split(' ');
             string current = null;      // the line being built; the candidate (line + " " + word) is the only string made per word
@@ -24,7 +28,7 @@ namespace Majorsilence.Reporting.Rdl
             {
                 if (string.IsNullOrEmpty(current))
                 {
-                    current = word;
+                    current = breakWords ? BreakWord(word, maxWidth, width, output) : word;
                 }
                 else
                 {
@@ -36,12 +40,51 @@ namespace Majorsilence.Reporting.Rdl
                     else
                     {
                         output.Add(current);
-                        current = word;
+                        current = breakWords ? BreakWord(word, maxWidth, width, output) : word;
                     }
                 }
             }
             if (!string.IsNullOrEmpty(current))
                 output.Add(current);
+        }
+
+        // A word that starts a line, as it goes on it: whole when it fits, and otherwise, as Crystal
+        // and SSRS print one wider than the line, the most of it that fits on each line in turn,
+        // those lines added to output and what is left of it returned.
+        private static string BreakWord(string word, float maxWidth, Func<string, float> width, List<string> output)
+        {
+            while (word.Length > 1 && width(word) > maxWidth)
+            {
+                int fit = FittingPrefix(word, maxWidth, width);
+                if (fit >= word.Length)
+                    break;
+                output.Add(word.Substring(0, fit));
+                word = word.Substring(fit);
+            }
+            return word;
+        }
+
+        /// <summary>
+        /// The length of the longest start of <paramref name="word"/>, itself wider than
+        /// <paramref name="maxWidth"/>, that fits it, and at least one character, so that a line too
+        /// narrow for a single letter still holds one. A pair of surrogates is never parted.
+        /// </summary>
+        internal static int FittingPrefix(string word, float maxWidth, Func<string, float> width)
+        {
+            // A start of the word is never narrower than a shorter one, so the longest that fits is
+            // found by halving: low fits (or is the one character every line takes), high does not.
+            int low = 1, high = word.Length;
+            while (high - low > 1)
+            {
+                int mid = low + (high - low) / 2;
+                if (width(word.Substring(0, mid)) <= maxWidth)
+                    low = mid;
+                else
+                    high = mid;
+            }
+            if (low < word.Length && char.IsHighSurrogate(word[low - 1]) && char.IsLowSurrogate(word[low]))
+                low = low > 1 ? low - 1 : low + 1;
+            return low;
         }
 
         /// <summary>

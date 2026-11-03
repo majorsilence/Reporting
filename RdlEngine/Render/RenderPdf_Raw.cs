@@ -191,7 +191,8 @@ namespace Majorsilence.Reporting.Rdl
         // ── text ──────────────────────────────────────────────────────────────
 
         protected internal override void AddText(float x, float y, float height, float width,
-            string[] sa, StyleInfo si, float[] tw, bool bWrap, string url, bool bNoClip, string tooltip, bool bClipSides, bool bNoWrap)
+            string[] sa, StyleInfo si, float[] tw, bool bWrap, string url, bool bNoClip, string tooltip, bool bClipSides, bool bNoWrap,
+            bool[] wordBroken)
         {
             if (sa == null || sa.Length == 0) return;
 
@@ -208,12 +209,27 @@ namespace Majorsilence.Reporting.Rdl
             // Which lines end a paragraph, for justified text: every line but those is spread
             // to the full width. Known only where the lines are wrapped here.
             List<bool> paragraphEnds = null;
+
+            // The actual TrueType font's own ascent/descent/lineGap, scaled to si.FontSize, rather
+            // than treating the font size itself as the glyphs' height: a 10pt Arial's ascent and
+            // descent together run taller than 10pt, which is why native GDI rendering spaces
+            // multiline text more generously than si.FontSize alone would.
+            (float ascent, float descent, float lineGap) metrics = _currentPage.GetFontMetrics(baseStyle);
+            float emHeight = metrics.ascent + metrics.descent;
+            float pitch = LinePitch(si, emHeight, metrics.lineGap);
+            int maxLines = MaxLines(height, si, bWrap, bNoClip, emHeight, pitch);
+
             // bNoWrap: the box asked for its lines whole (Textbox.NoWrapOf); they are cut at its sides below.
             if (!bNoClip && !bNoWrap && availableW > 0 && si.WritingMode != WritingModeEnum.tb_rl && si.WritingMode != WritingModeEnum.tb_lr)
             {
                 if (si.TextAlign == TextAlignEnum.Justified)
                     paragraphEnds = new List<bool>();
-                sa = RewrapLines(RejoinSoftWraps(sa), baseStyle, availableW, paragraphEnds);
+                // A word wider than the box is broken between its letters, but not in a box that
+                // may not grow and has room for one line only: Crystal sets a word on that line
+                // whole and cuts it at the box's edge, so its last letter that fits shows in part,
+                // where breaking it would leave that letter off.
+                sa = RewrapLines(RejoinSoftWraps(sa, wordBroken), baseStyle, availableW, paragraphEnds,
+                    breakWords: maxLines != 1);
             }
 
             // A textbox that may not grow may not draw outside its own rectangle either.
@@ -229,35 +245,19 @@ namespace Majorsilence.Reporting.Rdl
             // and never fewer than one line: a single line of text is routinely taller than
             // the cell the report sizes for it, and dropping it would blank the report
             // rather than clip it.
-            // The actual TrueType font's own ascent/descent/lineGap, scaled to si.FontSize, rather
-            // than treating the font size itself as the glyphs' height: a 10pt Arial's ascent and
-            // descent together run taller than 10pt, which is why native GDI rendering spaces
-            // multiline text more generously than si.FontSize alone would.
-            (float ascent, float descent, float lineGap) metrics = _currentPage.GetFontMetrics(baseStyle);
-            float emHeight = metrics.ascent + metrics.descent;
-            float pitch = LinePitch(si, emHeight, metrics.lineGap);
-            if (!bWrap && !bNoClip && height > 0 && sa.Length > 1 && pitch > 0)
-            {
-                float availableH = height - si.PaddingTop - si.PaddingBottom;
-                // The last line needs its letters' height, an em, not a whole pitch: the space
-                // a LineHeight leaves below a line belongs to the line after it. Asking a full
-                // pitch of the last line too dropped the third line of a box three lines of
-                // 14.25pt high that its letters fit, below 41.25pt. With no LineHeight the pitch
-                // is the em, and this is the whole lines that fit, as before.
-                int maxLines = Math.Max(1, (int)Math.Floor((availableH - emHeight) / pitch) + 1);
-                if (sa.Length > maxLines)
-                    sa = sa.Take(maxLines).ToArray();
-            }
+            if (maxLines > 0 && sa.Length > maxLines)
+                sa = sa.Take(maxLines).ToArray();
 
             if (!si.BackgroundColor.IsEmpty && height > 0 && width > 0)
                 iAddFillRect(x, y, width, height, si.BackgroundColor);
 
             // Nor may a line that is wider than the box run out of its sides, where the textbox
             // asks for that (bClipSides: it may not grow and is not a table cell - see
-            // Textbox.RunPage). Wrapping leaves such a line only where it has no space to break
-            // at - a number, a date, a long word - and it used to be drawn whole, over whatever is
-            // beside the box (to the left, for right-aligned text). Clipped, an amount too wide
-            // for its box keeps the part that lies inside it, as the other renderers' layout
+            // Textbox.RunPage). Wrapping leaves such a line only where a word is not broken, in a
+            // box one line tall or asked not to wrap - a number, a date, a long word - and it used
+            // to be drawn whole, over whatever is beside the box (to the left, for right-aligned
+            // text). Clipped, an amount too wide for its box keeps the part that lies inside it,
+            // as the other renderers' layout
             // rectangle keeps it.
             // The clip is the box inside its padding, where the text is laid out, and is opened
             // only once a line is found to overflow, so a box whose text fits draws as before.
@@ -421,6 +421,21 @@ namespace Majorsilence.Reporting.Rdl
             return si.LineHeight > 0 ? si.LineHeight : emHeight + lineGap;
         }
 
+        // The lines a box that may not grow (bWrap false) shows, never fewer than one; 0, no
+        // limit, for any other box.
+        private static int MaxLines(float height, StyleInfo si, bool bWrap, bool bNoClip, float emHeight, float pitch)
+        {
+            if (bWrap || bNoClip || height <= 0 || pitch <= 0)
+                return 0;
+            float availableH = height - si.PaddingTop - si.PaddingBottom;
+            // The last line needs its letters' height, an em, not a whole pitch: the space
+            // a LineHeight leaves below a line belongs to the line after it. Asking a full
+            // pitch of the last line too dropped the third line of a box three lines of
+            // 14.25pt high that its letters fit, below 41.25pt. With no LineHeight the pitch
+            // is the em, and this is the whole lines that fit, as before.
+            return Math.Max(1, (int)Math.Floor((availableH - emHeight) / pitch) + 1);
+        }
+
         // ── PDF-accurate text re-wrapping ─────────────────────────────────────
 
         // RenderBase breaks a long line after the space that ends a word and keeps that space,
@@ -429,10 +444,12 @@ namespace Majorsilence.Reporting.Rdl
         // for the box, not because the PDF font does. Rejoining those lets RewrapLines break
         // them against the metrics that are actually drawn. Without it, a line measured a
         // fraction too wide lost its last word once the box clipped the second line.
-        internal static string[] RejoinSoftWraps(string[] lines)
+        // A word too wide for the line, which RenderBase broke between its letters (wordBroken),
+        // is joined up again in the same way, so that it is broken where the PDF font says.
+        internal static string[] RejoinSoftWraps(string[] lines, bool[] wordBroken = null)
         {
             // Nothing to rejoin unless a line ends in a space (the common case is one short line).
-            bool anySoftWrap = false;
+            bool anySoftWrap = wordBroken != null;
             foreach (string line in lines)
             {
                 if (!string.IsNullOrEmpty(line) && line[line.Length - 1] == ' ') { anySoftWrap = true; break; }
@@ -442,10 +459,13 @@ namespace Majorsilence.Reporting.Rdl
 
             var joined = new List<string>(lines.Length);
             var current = new System.Text.StringBuilder();
-            foreach (string line in lines)
+            for (int i = 0; i < lines.Length; i++)
             {
+                string line = lines[i];
                 current.Append(line);
                 if (!string.IsNullOrEmpty(line) && line[line.Length - 1] == ' ')
+                    continue;
+                if (wordBroken != null && i < wordBroken.Length && wordBroken[i])
                     continue;
                 joined.Add(current.ToString());
                 current.Clear();
@@ -460,7 +480,9 @@ namespace Majorsilence.Reporting.Rdl
         // paragraphEnds, when given, is filled with one entry per line returned: whether that
         // line ends its paragraph, as opposed to being wrapped onto the next. A line that
         // RenderBase wrapped and RejoinSoftWraps left alone still ends in its space.
-        private string[] RewrapLines(string[] lines, TextStyle style, float maxWidth, List<bool> paragraphEnds = null)
+        // breakWords false leaves a word wider than the line whole.
+        private string[] RewrapLines(string[] lines, TextStyle style, float maxWidth, List<bool> paragraphEnds = null,
+            bool breakWords = true)
         {
             List<string> result = null;     // made only when a line has to be split
             for (int i = 0; i < lines.Length; i++)
@@ -480,7 +502,7 @@ namespace Majorsilence.Reporting.Rdl
                         result.Add(lines[j]);
                 }
                 int before = result.Count;
-                WrapLine(line, style, maxWidth, result);
+                WrapLine(line, style, maxWidth, result, breakWords);
                 if (paragraphEnds != null)
                     for (int k = before; k < result.Count; k++)
                         paragraphEnds.Add(k == result.Count - 1);
@@ -511,9 +533,9 @@ namespace Majorsilence.Reporting.Rdl
         }
 
         // As a growing box is measured (Style.MeasureString), so that it grows by the lines drawn here.
-        private void WrapLine(string text, TextStyle style, float maxWidth, List<string> output)
+        private void WrapLine(string text, TextStyle style, float maxWidth, List<string> output, bool breakWords)
         {
-            TextWrap.WrapParagraph(text, maxWidth, line => _currentPage.MeasureTextWidth(line, style), output);
+            TextWrap.WrapParagraph(text, maxWidth, line => _currentPage.MeasureTextWidth(line, style), output, breakWords);
         }
 
         // ── font registry construction ────────────────────────────────────────
