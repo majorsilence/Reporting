@@ -65,8 +65,8 @@ namespace RdlEngine.Render.ExcelConverter
 		public void AddImage(ReportItem image, byte[] data)
 		{
 			var img = new ExcelImage(image, data);
-			float top = image.Top.Points;
-			float left = image.Left.Points;
+			float top = image.Top?.Points ?? 0;
+			float left = image.Left?.Points ?? 0;
 			FillAbsolutePosition(image, ref top, ref left);
 
 			top = GetCellAboveRelativePosition(top);
@@ -79,15 +79,15 @@ namespace RdlEngine.Render.ExcelConverter
 		public void AddLine(Majorsilence.Reporting.Rdl.Line line, float borderWidth)
 		{
 			var l = new ExcelLine(line);
-			float top = line.Top.Points;
+			float top = line.Top?.Points ?? 0;
 			float right = line.GetX2(Report);
 			float bottom = line.Y2;
-			float left = line.Left.Points;
+			float left = line.Left?.Points ?? 0;
 			FillAbsolutePosition(line, ref top, ref left);
 			FillAbsolutePosition(line, ref bottom, ref right);
 
 			top = GetCellAboveRelativePosition(top);
-			bottom = top + line.Height.Points;
+			bottom = top + (line.Height?.Points ?? 0);
 
 			l.AbsoluteTop = top;
 			l.AbsoluteLeft = left;
@@ -193,14 +193,14 @@ namespace RdlEngine.Render.ExcelConverter
 			}
 
 			if(reportItem.IsTableOrMatrixCell(Report) || 
-			   reportItem.Top == null || reportItem.Left == null || 
 			   reportItem.Height == null || reportItem.Width == null) {
 				return;
 			}
 
-
-			float topPosition = reportItem.Top.Points;
-			float leftPosition = reportItem.Left.Points;
+			// A missing Top or Left is 0, as RDL has it: designers leave them out for an item at the
+			// top or left of its container, and such a textbox is in the sheet like any other.
+			float topPosition = reportItem.Top?.Points ?? 0;
+			float leftPosition = reportItem.Left?.Points ?? 0;
 			float height = reportItem.CanGrow ? await reportItem.RunTextCalcHeight(Report, g, row).ConfigureAwait(false) : reportItem.Height.Points;
 			float width = reportItem.Width.Points;
 
