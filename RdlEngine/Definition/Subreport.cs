@@ -218,8 +218,13 @@ namespace Majorsilence.Reporting.Rdl
                 //
                 // Run the subreport -- this is the major effort in creating the display objects in the page
                 //
+                Page startPage = pgs.CurrentPage;
+                int firstItem = startPage.Count;
+                float designedBottom = startPage.YOffset + (Height == null ? 0 : Height.Points);
                 await r.ReportDefinition.Body.RunPage(pgs).ConfigureAwait(false);		// create a the subreport items
                 yOffset = pgs.CurrentPage.YOffset;
+                if (pgs.CurrentPage == startPage)
+                    yOffset = Math.Max(yOffset, BottomOfItems(startPage, firstItem, designedBottom));
             }
             else
             {   // Handle NoRows message 
@@ -250,6 +255,23 @@ namespace Majorsilence.Reporting.Rdl
 
 			SetPagePositionEnd(pgs, yOffset);
 		}
+
+        // Where a subreport ends on its own page: at the lowest bottom of what it drew there, and
+        // no higher than its designed bottom. A table, list or matrix moves the page's offset on
+        // past its rows, but a textbox, image, line or rectangle does not, so a subreport of
+        // free-standing items ended where it started, and the items below it were drawn over its
+        // content, or moved up into its designed space when the content fitted it.
+        private static float BottomOfItems(Page p, int firstItem, float designedBottom)
+        {
+            float bottom = designedBottom;
+            for (int i = firstItem; i < p.Count; i++)
+            {
+                PageItem pi = p[i];
+                float itemBottom = pi is PageLine pl ? Math.Max(pl.Y, pl.Y2) : pi.Y + pi.H;
+                bottom = Math.Max(bottom, itemBottom);
+            }
+            return bottom;
+        }
 
         // Whether any item here, or inside a Rectangle here, is a data region. A nested
         // Subreport is not one: it decides for itself whether it has rows.
