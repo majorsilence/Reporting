@@ -155,10 +155,13 @@ namespace Majorsilence.Reporting.Rdl
                 // the fields are taken as declared in the report, and the data pass runs the query and
                 // reports any error it really has.
                 _Columns = null;
-                OwnerReport.rl.LogError(4, "SQL Exception during report compilation: " + e.Message + "\r\nSQL: " + sql +
-                    "\r\nThe query's fields are taken as declared in the report.");
+                OwnerReport.rl.LogError(4, "SQL Exception during report compilation of DataSet '" + DataSetName + "': " +
+                    e.Message + "\r\nSQL: " + sql + "\r\nThe query's fields are taken as declared in the report.");
             }
         }
+
+        // For messages: the name of the DataSet this query belongs to.
+        private string DataSetName => (Parent as DataSetDefn)?.Name?.Nm ?? "";
 
         private static async Task<IDataReader> CreateDataReader(IDbCommand cmSQL, CommandBehavior behavior)
         {
@@ -199,6 +202,15 @@ namespace Majorsilence.Reporting.Rdl
             IDbConnection cnSQL = ds.SqlConnect(rpt);
             if (cnSQL == null)
             {
+                // SkipDatabaseSchemaValidation keeps the data pass from connecting, for reports whose
+                // data is all pushed with SetData. A query with no data pushed is then never run, and
+                // without this the report renders empty with nothing to say why.
+                if (OwnerReport.SkipDatabaseSchemaValidation)
+                {
+                    rpt.rl.LogError(4, "DataSet '" + DataSetName + "' has a query but no data was supplied with SetData, " +
+                        "and SkipDatabaseSchemaValidation is set, so the query was not run and the DataSet is empty. " +
+                        "Supply its data with SetData, or clear SkipDatabaseSchemaValidation to run the query.");
+                }
                 this.SetMyData(rpt, null);
                 return false;
             }

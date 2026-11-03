@@ -37,7 +37,7 @@ public static class CompatibilityChecker
     // Query.FinalPass logs this, at severity 4, when a query's columns can't be read at parse
     // time. The first line carries the database's own message.
     private static readonly Regex SchemaPassFailureMessage = new(
-        @"^Severity:\s*\d+\s*-\s*SQL Exception during report compilation:\s*(?<message>[^\r\n]*)",
+        @"^Severity:\s*\d+\s*-\s*SQL Exception during report compilation of DataSet '(?<dataset>[^']*)':\s*(?<message>[^\r\n]*)",
         RegexOptions.Compiled);
 
     private static readonly (string Uri, string Label)[] KnownNamespaces =
@@ -156,7 +156,7 @@ public static class CompatibilityChecker
             var report = await parser.Parse();
 
             var seen = new HashSet<(string Context, string Name)>();
-            var seenQueryFailures = new HashSet<string>();
+            var seenQueryFailures = new HashSet<(string DataSet, string Message)>();
             foreach (var itemObj in report.ErrorItems)
             {
                 string item = itemObj?.ToString() ?? "";
@@ -167,11 +167,12 @@ public static class CompatibilityChecker
                 var queryFailure = SchemaPassFailureMessage.Match(item);
                 if (queryFailure.Success)
                 {
+                    string dataSet = queryFailure.Groups["dataset"].Value;
                     string message = queryFailure.Groups["message"].Value.Trim();
-                    if (seenQueryFailures.Add(message))
+                    if (seenQueryFailures.Add((dataSet, message)))
                     {
                         findings.Add(new Finding("DOC004", FindingSeverity.Warning,
-                            $"A query's columns could not be read while parsing: {message} The report still loads and its fields are taken as declared. If the query itself is broken, the report fails when it runs; if it fills and reads a temp table, this is expected."));
+                            $"The columns of DataSet \"{dataSet}\" could not be read from its query while parsing: {message} The report still loads and its fields are taken as declared. If the query itself is broken, the report fails when it runs; if it fills and reads a temp table, this is expected."));
                     }
                     continue;
                 }

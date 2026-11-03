@@ -160,8 +160,8 @@ namespace ReportTests.Containers.Fixtures
         {
             var result = await ParseAndRenderAsync(BuildRdl(_connectionString, new DataSetSpec("A", TempTableBatch)));
 
-            Assert.That(result.ParseMessages, Has.Some.Contains("Invalid object name '#T'"),
-                "The schema pass's failure should be logged as a warning");
+            Assert.That(result.ParseMessages, Has.Some.Contains("DataSet 'A'").And.Contains("Invalid object name '#T'"),
+                "The schema pass's failure should be logged as a warning naming its DataSet");
             Assert.That(result.Html, Does.Contain("A: 3/600"));
         }
 
@@ -245,6 +245,24 @@ namespace ReportTests.Containers.Fixtures
 
             Assert.That(async () => await report.RunGetData(null), Throws.InstanceOf<SqlException>());
             Assert.That(report.ErrorMaxSeverity, Is.GreaterThan(4));
+        }
+
+        // With SkipDatabaseSchemaValidation the data pass doesn't connect, so a query whose data
+        // isn't pushed with SetData is never run. The report is empty, but a warning says why.
+        [Test]
+        public async Task SkipDatabaseSchemaValidation_QueryWithoutPushedData_WarnsThatItWasNotRun()
+        {
+            using Report report = await new RDLParser(BuildRdl(_connectionString, new DataSetSpec("A", TempTableBatch)))
+            {
+                SkipDatabaseSchemaValidation = true
+            }.Parse();
+            await report.RunGetData(null);
+            using var ms = new MemoryStreamGen();
+            await report.RunRender(ms, OutputPresentationType.HTML);
+
+            Assert.That(ms.GetText(), Does.Contain("A: 0/"));
+            Assert.That(report.ErrorMaxSeverity, Is.LessThanOrEqualTo(4), string.Join("; ", Messages(report)));
+            Assert.That(Messages(report), Has.Exactly(1).Contains("DataSet 'A' has a query but no data was supplied with SetData"));
         }
 
         [Test]

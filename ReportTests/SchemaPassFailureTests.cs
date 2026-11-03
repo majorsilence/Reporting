@@ -90,8 +90,8 @@ namespace ReportTests
             using var report = await new RDLParser(rdl) { Folder = _folder }.Parse();
 
             Assert.That(report.ErrorMaxSeverity, Is.LessThanOrEqualTo(4), string.Join("; ", Messages(report)));
-            Assert.That(Messages(report), Has.Some.Contains("SQL Exception during report compilation"),
-                "The schema pass's failure should be logged as a warning");
+            Assert.That(Messages(report), Has.Some.Contains("SQL Exception during report compilation of DataSet 'Numbers'"),
+                "The schema pass's failure should be logged as a warning naming its DataSet");
 
             await report.RunGetData(null);
             using var sg = new MemoryStreamGen();
@@ -189,6 +189,30 @@ namespace ReportTests
             Assert.That(report.ErrorMaxSeverity, Is.LessThanOrEqualTo(4), string.Join("; ", Messages(report)));
             Assert.That(Messages(report), Has.None.Contains("connect").IgnoreCase);
             Assert.That(Messages(report), Has.None.Contains("SQL Exception"));
+            Assert.That(Messages(report), Has.None.Contains("no data was supplied with SetData"));
+        }
+
+        // The flag keeps the data pass from connecting, so a query whose data isn't pushed is never
+        // run. The DataSet is empty, as before, but a warning now names it and says why (#540).
+        [Test]
+        public async Task SkipDatabaseSchemaValidation_QueryWithoutPushedData_WarnsThatItWasNotRun()
+        {
+            using (var cn = new SqliteConnection($"Data Source={_dbPath};Pooling=False"))
+            {
+                cn.Open();
+                using var cmd = cn.CreateCommand();
+                cmd.CommandText = "CREATE TABLE Numbers (N INTEGER); INSERT INTO Numbers VALUES (1), (2);";
+                cmd.ExecuteNonQuery();
+            }
+
+            using var report = await new RDLParser(QueryRdl("SELECT N FROM Numbers")) { Folder = _folder, SkipDatabaseSchemaValidation = true }.Parse();
+            await report.RunGetData(null);
+            using var sg = new MemoryStreamGen();
+            await report.RunRender(sg, OutputPresentationType.HTML);
+
+            Assert.That(sg.GetText(), Does.Contain("Rows: 0"));
+            Assert.That(report.ErrorMaxSeverity, Is.LessThanOrEqualTo(4), string.Join("; ", Messages(report)));
+            Assert.That(Messages(report), Has.Exactly(1).Contains("DataSet 'Numbers' has a query but no data was supplied with SetData"));
         }
     }
 }

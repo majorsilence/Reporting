@@ -114,10 +114,11 @@ namespace RdlDoctor.Tests
 
                 var findings = await CompatibilityChecker.CheckAsync(rdlPath);
 
-                var queryFindings = findings.Where(f => f.Id == "DOC004" && f.Message.Contains("could not be read while parsing")).ToList();
+                var queryFindings = findings.Where(f => f.Id == "DOC004" && f.Message.Contains("could not be read from its query while parsing")).ToList();
                 Assert.That(queryFindings, Has.Count.EqualTo(1));
                 Assert.That(queryFindings[0].Severity, Is.EqualTo(FindingSeverity.Warning));
                 Assert.That(queryFindings[0].Message, Does.Contain("NoSuchTable"));
+                Assert.That(queryFindings[0].Message, Does.Contain("DataSet \"Numbers\""));
                 Assert.That(findings.Any(f => f.Severity == FindingSeverity.Error), Is.False,
                     "A schema-pass failure is a warning: the report still loads");
             }
