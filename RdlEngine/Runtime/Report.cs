@@ -854,7 +854,7 @@ namespace Majorsilence.Reporting.Rdl
 		{
 			var old = _Cache;
 			_Cache = new RCache();
-			old.TransferRowsTo(_Cache);
+			old.TransferRunDataTo(_Cache);
 		}
 	}
 
@@ -978,16 +978,22 @@ namespace Majorsilence.Reporting.Rdl
                 _name = name;
             }
 
+            internal bool IsParameterValue =>
+                _name == ReportParameter.RuntimeValueKey || _name == ReportParameter.RuntimeValuesKey;
+
             public bool Equals(RCacheKey other) => _id == other._id && string.Equals(_name, other._name, StringComparison.Ordinal);
             public override bool Equals(object obj) => obj is RCacheKey k && Equals(k);
             public override int GetHashCode() => HashCode.Combine(_id, _name);
         }
 
-        internal void TransferRowsTo(RCache target)
+        // What one render leaves for the next after a single RunGetData: the rows fetched, and
+        // the report parameters' values, which every render reads again, and passes to each
+        // subreport as it runs it. Without them every render after the first saw none.
+        internal void TransferRunDataTo(RCache target)
         {
             foreach (var kvp in _RunCache)
             {
-                if (kvp.Value is Rows)
+                if (kvp.Value is Rows || kvp.Key.IsParameterValue)
                     target._RunCache.TryAdd(kvp.Key, kvp.Value);
             }
         }
