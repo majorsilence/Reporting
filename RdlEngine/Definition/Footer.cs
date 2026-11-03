@@ -63,7 +63,28 @@ namespace Majorsilence.Reporting.Rdl
 		{
 
 			Page p = pgs.CurrentPage;
-			if (p.YOffset + await HeightOfRows(pgs, row).ConfigureAwait(false) > pgs.BottomOfPage)
+			float height = await HeightOfRows(pgs, row).ConfigureAwait(false);
+			if (TallerThanPage(pgs, height))
+			{
+				// A footer that cannot fit on any one page is not moved as a whole: each row
+				// that does not fit what is left of the page starts the next one.
+				for (int i = 0; i < _TableRows.Items.Count - _BottomRows; i++)
+				{
+					TableRow tr = _TableRows.Items[i];
+					p = pgs.CurrentPage;
+					float h = await tr.HeightOfRow(pgs, row).ConfigureAwait(false);
+					if (h > 0 && p.YOffset + h > pgs.BottomOfPage)
+					{
+						await OwnerTable.RunPageBottomRows(pgs, row, false).ConfigureAwait(false);
+						p = OwnerTable.RunPageNew(pgs, p);
+						await OwnerTable.RunPageHeader(pgs, row, false, null).ConfigureAwait(false);
+						await tr.HeightOfRow(pgs, row).ConfigureAwait(false);
+					}
+					await tr.RunPage(pgs, row).ConfigureAwait(false);
+				}
+				return;
+			}
+			if (p.YOffset + height > pgs.BottomOfPage)
 			{
                 await OwnerTable.RunPageBottomRows(pgs, row, false).ConfigureAwait(false);
 				p = OwnerTable.RunPageNew(pgs, p);
@@ -75,6 +96,12 @@ namespace Majorsilence.Reporting.Rdl
                 await RunPageRows(pgs, row, 0, _TableRows.Items.Count - _BottomRows).ConfigureAwait(false);
 
 			return;
+		}
+
+		// Whether rows this tall fill more than a page's body: they cannot be kept on one page.
+		internal bool TallerThanPage(Pages pgs, float height)
+		{
+			return height > pgs.BottomOfPage - OwnerReport.TopOfPage;
 		}
 
 		// The bottom rows, which the table prints at the foot of each page itself.

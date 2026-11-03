@@ -1079,7 +1079,10 @@ namespace Majorsilence.Reporting.Rdl
 			if (tg == null || tg.Footer == null)
 				return 0;
 
-			return await tg.Footer.HeightOfRows(pgs, wc.Data.Data[ge.EndRow]).ConfigureAwait(false);
+			// A footer taller than a page is paged row by row (Footer.RunPage), so the last
+			// detail row is not moved to a new page to make room for all of it.
+			float height = await tg.Footer.HeightOfRows(pgs, wc.Data.Data[ge.EndRow]).ConfigureAwait(false);
+			return tg.Footer.TallerThanPage(pgs, height) ? 0 : height;
 		}
 
         private int RunGroupsCount(List<GroupEntry> groupEntries, int count)
