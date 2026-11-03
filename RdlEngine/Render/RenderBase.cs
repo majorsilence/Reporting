@@ -132,11 +132,14 @@ namespace Majorsilence.Reporting.Rdl
 
 
         /// <summary>
-        /// Page Text element at the X Y position; multiple lines handled
+        /// Page Text element at the X Y position; multiple lines handled.
+        /// wordBroken, when not null, says of each line whether it ends inside a word that the next
+        /// line goes on with (a word wider than the box, broken between its letters).
         /// </summary>
         /// <returns></returns>
         internal abstract protected void AddText(float x, float y, float height, float width, string[] sa,
-            StyleInfo si, float[] tw, bool bWrap, string url, bool bNoClip, string tooltip, bool bClipSides, bool bNoWrap);
+            StyleInfo si, float[] tw, bool bWrap, string url, bool bNoClip, string tooltip, bool bClipSides, bool bNoWrap,
+            bool[] wordBroken);
 
         #endregion
 
@@ -318,10 +321,11 @@ namespace Majorsilence.Reporting.Rdl
                 {
                     PageText pt = pi as PageText;
                     float[] textwidth;
-                    string[] sa = MeasureString(pt, pgs.G, out textwidth);
+                    string[] sa = MeasureString(pt, pgs.G, out textwidth, out bool[] wordBroken);
 
 
-                    AddText(pt.X, pt.Y, pt.H, pt.W, sa, pt.SI, textwidth, pt.CanGrow, pt.HyperLink, pt.NoClip, pt.Tooltip, pt.ClipSides, pt.NoWrap);
+                    AddText(pt.X, pt.Y, pt.H, pt.W, sa, pt.SI, textwidth, pt.CanGrow, pt.HyperLink, pt.NoClip, pt.Tooltip, pt.ClipSides, pt.NoWrap,
+                        wordBroken);
 
                     if (pt.Bookmark != null)
                     {
@@ -454,7 +458,7 @@ namespace Majorsilence.Reporting.Rdl
             return (float)(y * pgs.G.DpiY / 72.0f);
         }
 
-        private string[] MeasureString(PageText pt, Draw2.Graphics g, out float[] width)
+        private string[] MeasureString(PageText pt, Draw2.Graphics g, out float[] width, out bool[] wordBroken)
         {
             StyleInfo si = pt.SI;
             string s = pt.Text;
@@ -464,6 +468,7 @@ namespace Majorsilence.Reporting.Rdl
             System.Drawing.SizeF ms;
             string[] sa = null;
             width = null;
+            wordBroken = null;
             try
             {
                 // STYLE
@@ -542,6 +547,7 @@ namespace Majorsilence.Reporting.Rdl
                 string[] flines = s.Split(LINEBREAK);
                 List<string> lines = new List<string>();
                 List<float> lineWidths = new List<float>();
+                List<int> brokenLines = null;   // the lines that end inside a word, made only when one does
                 foreach (string tfl in flines)
                 {
                     string fl;
@@ -582,6 +588,13 @@ namespace Majorsilence.Reporting.Rdl
                     if (wordLocations == null)
                         continue;
 
+                    // 2b) A word wider than the line is broken between its letters, as Crystal and SSRS
+                    // print it: it starts a line and has as much of it on each line as fits, and the
+                    // words after it follow what is left of it. Its pieces are measured in place of it.
+                    bool[] breakBefore = BreakLongWords(parts, cra, wordLocations, ptWidth, g, drawFont, drawFormat, ref cra);
+                    if (breakBefore != null)
+                        wordLocations = MeasureString(wfl, g, drawFont, drawFormat, cra);
+
                     // 3) Loop thru creating new lines as needed
                     int startLoc = 0;
                     Draw2.CharacterRange crs = cra[startLoc];
@@ -593,10 +606,12 @@ namespace Majorsilence.Reporting.Rdl
                     for (int i = 1; i < cra.Length; i++)
                     {
                         cwidth = wordLocations[i].end - wordLocations[startLoc].start + bwidth;
-                        if (cwidth > ptWidth)
+                        if (cwidth > ptWidth || (breakBefore != null && breakBefore[i]))
                         {	// time for a new line
                             cre = cra[i - 1];
                             ts = wfl.Substring(crs.First, cre.First + cre.Length - crs.First);
+                            if (ts.Length > 0 && ts[ts.Length - 1] != ' ')
+                                (brokenLines ??= new List<int>()).Add(lines.Count);
                             lines.Add(ts);
                             lineWidths.Add(wordLocations[i - 1].end - wordLocations[startLoc].start + bwidth);
 
@@ -630,12 +645,81 @@ namespace Majorsilence.Reporting.Rdl
                 // create the final array from the Lists
                 string[] la = lines.ToArray();
                 width = lineWidths.ToArray();
+                if (brokenLines != null)
+                {
+                    wordBroken = new bool[la.Length];
+                    foreach (int b in brokenLines)
+                        wordBroken[b] = true;
+                }
                 return la;
             }
             finally
             {
                 // drawFont and drawFormat are shared for the whole render; see ReleaseMeasureResources.
             }
+        }
+
+        /// <summary>
+        /// Breaks each word of a paragraph that is wider than the line (ptWidth) into the pieces it is
+        /// printed in: as much of it as fits on a line, in turn, and then what is left. cra, the
+        /// character ranges of the words, is replaced by one with a range for each piece, and the
+        /// result says before which ranges a line must start: before the word's first piece, unless
+        /// nothing but spaces comes before it, and before each piece after that. Null, with cra as it
+        /// was, when every word fits.
+        /// </summary>
+        private bool[] BreakLongWords(string[] parts, Draw2.CharacterRange[] words, WordStartFinish[] wordLocations,
+            float ptWidth, Draw2.Graphics g, Draw2.Font drawFont, Draw2.StringFormat drawFormat, ref Draw2.CharacterRange[] cra)
+        {
+            Func<string, float> width = t => Measurement.PointsFromPixels(MeasureString(t, g, drawFont, drawFormat).Width, g.DpiX);
+            List<Draw2.CharacterRange> pieces = null;
+            List<bool> breakBefore = null;
+            bool anyWordBefore = false;
+            for (int i = 0; i < parts.Length; i++)
+            {
+                string word = parts[i];
+                // The measured range takes in the space after the word, so a word under it fits;
+                // one over it is measured again on its own.
+                if (word.Length > 1 && wordLocations[i].end - wordLocations[i].start > ptWidth && width(word) > ptWidth)
+                {
+                    if (pieces == null)
+                    {
+                        pieces = new List<Draw2.CharacterRange>(words.Length + 4);
+                        breakBefore = new List<bool>(words.Length + 4);
+                        for (int j = 0; j < i; j++)
+                        {
+                            pieces.Add(words[j]);
+                            breakBefore.Add(false);
+                        }
+                    }
+                    int first = words[i].First;
+                    string rest = word;
+                    bool startsLine = anyWordBefore;
+                    while (rest.Length > 1 && width(rest) > ptWidth)
+                    {
+                        int fit = TextWrap.FittingPrefix(rest, ptWidth, width);
+                        if (fit >= rest.Length)
+                            break;
+                        pieces.Add(new Draw2.CharacterRange(first, fit));
+                        breakBefore.Add(startsLine);
+                        startsLine = true;
+                        first += fit;
+                        rest = rest.Substring(fit);
+                    }
+                    // What is left keeps the space after the word, as the word's own range did.
+                    pieces.Add(new Draw2.CharacterRange(first, words[i].First + words[i].Length - first));
+                    breakBefore.Add(startsLine);
+                }
+                else if (pieces != null)
+                {
+                    pieces.Add(words[i]);
+                    breakBefore.Add(false);
+                }
+                anyWordBefore |= word.Length > 0;
+            }
+            if (pieces == null)
+                return null;
+            cra = pieces.ToArray();
+            return breakBefore.ToArray();
         }
 
         /// <summary>

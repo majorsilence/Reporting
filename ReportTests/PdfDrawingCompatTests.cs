@@ -84,5 +84,17 @@ namespace ReportTests
         {
             Assert.That(RenderPdf_Raw.RejoinSoftWraps(lines), Is.EqualTo(expected));
         }
+
+        // A word RenderBase broke between its letters is joined up again, with nothing between
+        // its pieces, so that the PDF breaks it where its own font says.
+        [Test]
+        public void RejoinSoftWraps_JoinsAWordBrokenBetweenItsLetters()
+        {
+            string[] lines = { "ABCDEFG", "HIJ KL ", "MNOPQ", "next paragraph" };
+            bool[] wordBroken = { true, false, false, false };
+
+            Assert.That(RenderPdf_Raw.RejoinSoftWraps(lines, wordBroken),
+                Is.EqualTo(new[] { "ABCDEFGHIJ KL MNOPQ", "next paragraph" }));
+        }
     }
 }
