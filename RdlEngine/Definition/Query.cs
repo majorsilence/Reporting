@@ -149,9 +149,14 @@ namespace Majorsilence.Reporting.Rdl
             }
             catch (Exception e)
             {
-                // Issue #35 - Kept the logging
-                OwnerReport.rl.LogError(4, "SQL Exception during report compilation: " + e.Message + "\r\nSQL: " + sql);
-                throw;
+                // Some queries can't be described without running them. SQL Server answers SchemaOnly
+                // with SET FMTONLY ON, so a batch that fills a temp table and then reads it fails here
+                // although it runs. The schema pass only checks the fields, so its failure is a warning:
+                // the fields are taken as declared in the report, and the data pass runs the query and
+                // reports any error it really has.
+                _Columns = null;
+                OwnerReport.rl.LogError(4, "SQL Exception during report compilation: " + e.Message + "\r\nSQL: " + sql +
+                    "\r\nThe query's fields are taken as declared in the report.");
             }
         }
 

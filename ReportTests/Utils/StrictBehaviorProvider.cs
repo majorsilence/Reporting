@@ -186,6 +186,12 @@ namespace ReportTests.Utils
             StrictBehaviorProvider.RecordBehavior(behavior);
             StrictBehaviorProvider.RecordParameters(_inner.Parameters);
 
+            // SchemaOnly compiles every statement of the batch before any of them runs, as SQL
+            // Server's SET FMTONLY ON does: a statement that reads a table an earlier statement
+            // creates fails here, as it does there.
+            if ((behavior & CommandBehavior.SchemaOnly) != 0)
+                _inner.Prepare();
+
             // Strip SchemaOnly before handing the behaviour to SQLite: it ignores the flag, and
             // the point here is to apply the documented semantics ourselves.
             DbDataReader reader = _inner.ExecuteReader(behavior & ~CommandBehavior.SchemaOnly);
