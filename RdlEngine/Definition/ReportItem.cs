@@ -256,9 +256,12 @@ namespace Majorsilence.Reporting.Rdl
                         w2 = -w2;
                     }
                 }
-                if (ri.Height == null || ri.Top == null) // if position/height not specified don't use to reposition
+                if (ri.Height == null) // if height not specified don't use to reposition
                     continue;
-                if (y < ri.Top.Size + ri.Height.Size)
+                // A missing Top is 0, as RDL has it: designers leave it out for an item at the top,
+                // and such an item still pushes down what is below it when it grows.
+                int riTop = ri.Top == null ? 0 : ri.Top.Size;
+                if (y < riTop + ri.Height.Size)
                     continue;
                 _YParents.Add(ri);		// X coordinate overlap
                 maxParents--;
@@ -769,11 +772,11 @@ namespace Majorsilence.Reporting.Rdl
             float s_top = saveri.Top == null ? 0 : saveri.Top.Points;
             float s_h = saveri.Height == null ? 0 : saveri.Height.Points;
 
-            gap -= saveri.Top.Points;
+            gap -= s_top;                   // the item above may have no Top: it is at 0
             if (top < s_top + s_h)          // do we have an overlap;
                 gap = top - (s_top + s_h);    // yes; force overlap even when moving report item down
             else
-                gap -= saveri.Height.Points;  // no; move report item down just the gap between the items  
+                gap -= s_h;                   // no; move report item down just the gap between the items
 
 			return gap;
 		}
