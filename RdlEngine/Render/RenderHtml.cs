@@ -500,6 +500,135 @@ function findObject(id) {
 		// css class names of items with a constant style and no positioning; per render, so no locking
 		private readonly System.Collections.Generic.Dictionary<(Style, ReportLink), string> _constantCssNames = new System.Collections.Generic.Dictionary<(Style, ReportLink), string>();
 
+		// The body and each rectangle lay their items out as a CSS grid whose lines are the items' design
+		// edges, with every row allowed to grow: a data region that renders taller than it was drawn pushes
+		// the items below it down, as the paginated renderers and SSRS do. Absolute positioning at the
+		// design Top (the previous approach) stacked the items below a grown table on top of its rows.
+		private sealed class GridLayout
+		{
+			private readonly System.Collections.Generic.List<float> _rows = new System.Collections.Generic.List<float>();
+			private readonly System.Collections.Generic.List<float> _cols = new System.Collections.Generic.List<float>();
+			private readonly System.Collections.Generic.Dictionary<ReportItem, (int RowStart, int RowEnd, int ColStart, int ColEnd)> _cells =
+				new System.Collections.Generic.Dictionary<ReportItem, (int, int, int, int)>();
+			private int _rowTracks;
+			private int _colTracks;
+
+			// Edges closer than this are one grid line. Report designers rarely align items exactly:
+			// an item drawn half a point into the one above it would otherwise share a (growing) track
+			// with it and be drawn over its last half point of growth instead of after it.
+			private const float SnapPoints = 1.5f;
+
+			internal GridLayout(Report rpt, ReportItems items)
+			{
+				var tops = new System.Collections.Generic.SortedSet<float> { 0 };
+				var lefts = new System.Collections.Generic.SortedSet<float> { 0 };
+				foreach (ReportItem ri in items.Items)
+				{
+					var (top, bottom, left, right) = Edges(rpt, ri);
+					tops.Add(top); tops.Add(bottom);
+					lefts.Add(left); lefts.Add(right);
+				}
+				Snap(tops, _rows);
+				Snap(lefts, _cols);
+				_rowTracks = _rows.Count - 1;
+				_colTracks = _cols.Count - 1;
+				foreach (ReportItem ri in items.Items)
+				{
+					var (top, bottom, left, right) = Edges(rpt, ri);
+					// Grid lines are 1-based; an item with no height or width still occupies one track.
+					int rs = Line(_rows, top), re = Line(_rows, bottom);
+					int cs = Line(_cols, left), ce = Line(_cols, right);
+					if (re == rs) re++;
+					if (ce == cs) ce++;
+					_rowTracks = Math.Max(_rowTracks, re - 1);
+					_colTracks = Math.Max(_colTracks, ce - 1);
+					_cells[ri] = (rs, re, cs, ce);
+				}
+			}
+
+			private static void Snap(System.Collections.Generic.SortedSet<float> edges, System.Collections.Generic.List<float> lines)
+			{
+				foreach (float edge in edges)
+				{
+					if (lines.Count == 0 || edge - lines[lines.Count - 1] > SnapPoints)
+						lines.Add(edge);
+				}
+			}
+
+			// The 1-based grid line nearest the edge.
+			private static int Line(System.Collections.Generic.List<float> lines, float edge)
+			{
+				int nearest = 0;
+				for (int i = 1; i < lines.Count; i++)
+				{
+					if (Math.Abs(lines[i] - edge) < Math.Abs(lines[nearest] - edge))
+						nearest = i;
+				}
+				return nearest + 1;
+			}
+
+			private static (float Top, float Bottom, float Left, float Right) Edges(Report rpt, ReportItem ri)
+			{
+				float top = ri.Top == null ? 0 : ri.Top.Points;
+				float left = ri.LeftCalc(rpt);
+				return (top, top + (ri.Height == null ? 0 : ri.Height.Points), left, left + ri.WidthOrOwnerWidth(rpt));
+			}
+
+			internal string Placement(ReportItem ri)
+			{
+				var c = _cells[ri];
+				return string.Format(NumberFormatInfo.InvariantInfo, "grid-row: {0} / {1}; grid-column: {2} / {3}; ", c.RowStart, c.RowEnd, c.ColStart, c.ColEnd);
+			}
+
+			// Columns are the design widths; rows are the design heights at least, so a region that renders
+			// shorter than it was drawn leaves the space the designer left, as SSRS does.
+			internal string Template()
+			{
+				var sb = new StringBuilder("display: grid; align-content: start; justify-content: start; grid-template-columns:");
+				for (int i = 0; i < _colTracks; i++)
+					sb.AppendFormat(NumberFormatInfo.InvariantInfo, " {0:0.###}pt", Track(_cols, i));
+				sb.Append("; grid-template-rows:");
+				for (int i = 0; i < _rowTracks; i++)
+					sb.AppendFormat(NumberFormatInfo.InvariantInfo, " minmax({0:0.###}pt, auto)", Track(_rows, i));
+				sb.Append("; ");
+				return sb.ToString();
+			}
+
+			private static float Track(System.Collections.Generic.List<float> lines, int i)
+				=> i + 1 < lines.Count ? lines[i + 1] - lines[i] : 0;
+		}
+
+		private readonly System.Collections.Generic.Dictionary<ReportItems, GridLayout> _grids = new System.Collections.Generic.Dictionary<ReportItems, GridLayout>();
+
+		private GridLayout GridFor(ReportItems items)
+		{
+			if (!_grids.TryGetValue(items, out GridLayout grid))
+				_grids[items] = grid = new GridLayout(r, items);
+			return grid;
+		}
+
+		// The body, and a rectangle outside any table or matrix cell, lay their items out as a grid. Page
+		// headers and footers keep absolute positioning: they are fixed-height and clipped, so nothing in
+		// them grows. A rectangle in a cell keeps its table markup, as its items are not positioned at all.
+		private static bool IsGridContainer(ReportItems items)
+		{
+			if (items == null)
+				return false;
+			if (items.Parent is Body)
+				return true;
+			if (!(items.Parent is Rectangle))
+				return false;
+			for (ReportLink p = items.Parent.Parent; p != null; p = p.Parent)
+			{
+				if (p is TableCell || p is RowGrouping || p is MatrixCell || p is ColumnGrouping || p is Corner)
+					return false;
+			}
+			return true;
+		}
+
+		private GridLayout GridContaining(ReportItem ri)
+			=> ri.Parent is ReportItems items && IsGridContainer(items) ? GridFor(items) : null;
+
 		private async ValueTask<string> CssPosition(ReportLink rl,Row row, bool bForceRelative, float h, float w)
 		{
 			if (!(rl is ReportItem))		// if not a report item then no position
@@ -528,6 +657,30 @@ function findObject(id) {
 			ReportItem ri = (ReportItem) rl;
 
 			StringBuilder sb = new StringBuilder();
+
+			GridLayout grid = GridContaining(ri);
+			if (grid != null)
+			{
+				if (ri is List)
+				{
+					// Every entry of a list shares this css, so the entries flow inside the wrapper ListStart
+					// placed on the grid; the list's own height keeps the entries from collapsing.
+					sb.AppendFormat(NumberFormatInfo.InvariantInfo, "position: relative; height: {0}pt; ", await ((List)ri).HeightOfList(r, GetGraphics, row).ConfigureAwait(false));
+					return sb.ToString();
+				}
+				sb.Append(grid.Placement(ri));
+				if (!(ri is Matrix || ri is Image || ri is Chart) && ri.Width != null)
+					sb.AppendFormat(NumberFormatInfo.InvariantInfo, "width: {0}; ", ri.Width.CSS);
+				if (ri is Rectangle)
+				{
+					// A rectangle grows with its items (it is a grid itself); its design height is the minimum.
+					if (ri.Height != null)
+						sb.AppendFormat(NumberFormatInfo.InvariantInfo, "min-height: {0}; ", ri.Height.CSS);
+				}
+				else if (!(ri is Matrix || ri is Table || ri is Image || ri is Chart) && ri.Height != null)
+					sb.AppendFormat(NumberFormatInfo.InvariantInfo, "height: {0}; ", ri.Height.CSS);
+				return sb.ToString();
+			}
 
 			if (ri.Left != null && ri.Left.Size > 0)
 			{
@@ -583,7 +736,11 @@ function findObject(id) {
 			string cssPrefix=null;
 			ReportLink p;
 
-			if (rl is Table || rl is Matrix || rl is Rectangle)
+			if (rl is Rectangle rect)
+			{
+				cssPrefix = IsGridContainer(rect.ReportItems) ? "div#" : "table#";
+			}
+			else if (rl is Table || rl is Matrix)
 			{
 				cssPrefix = "table#";
 			}
@@ -722,7 +879,7 @@ function findObject(id) {
 		public void BodyStart(Body b)
 		{
 			if (b.ReportItems != null && b.ReportItems.Items.Count > 0)
-				tw.WriteLine("<tr><td><div style=\"POSITION: relative; \">");
+				tw.WriteLine("<tr><td><div style=\"POSITION: relative; {0}\">", GridFor(b.ReportItems).Template());
 		}
 
 		public void BodyEnd(Body b)
@@ -788,7 +945,9 @@ function findObject(id) {
 			else
 				bCell = false;
 
-			if (tp == typeof(Rectangle))
+			// A rectangle outside a cell is a grid (see GridLayout); only the table-markup rectangle wraps its items in cells.
+			bool bRectangleCell = tp == typeof(Rectangle) && !IsGridContainer((ReportItems)tb.Parent);
+			if (bRectangleCell)
 				tw.Write("<td>");
 
 			if (bCell)
@@ -805,7 +964,7 @@ function findObject(id) {
 				tw.Write("<div class='{0}'>{1}</div>", cssName, t);
 			}
 
-			if (tp == typeof(Rectangle))
+			if (bRectangleCell)
 				tw.Write("</td>");
 		}
 
@@ -836,16 +995,21 @@ function findObject(id) {
 		{
 			// identifiy reportitem it if necessary
 			string bookmark = await l.BookmarkValue(this.r, r).ConfigureAwait(false);
-			if (bookmark != null)	// 
+			if (bookmark != null)	//
 				tw.WriteLine("<div id=\"{0}\">", bookmark);		// can't use the table id since we're using for css style
+			GridLayout grid = GridContaining(l);
+			if (grid != null)		// the entries flow inside this wrapper, which takes the list's place on the grid
+				tw.WriteLine("<div style=\"{0}\">", grid.Placement(l));
 			return true;
 		}
 
 		public async Task ListEnd(List l, Row r)
 		{
+			if (GridContaining(l) != null)
+				tw.WriteLine("</div>");
 			string bookmark = await l.BookmarkValue(this.r, r).ConfigureAwait(false);
 			if (bookmark != null)
-				tw.WriteLine("</div>"); 
+				tw.WriteLine("</div>");
 		}
 
 		public async Task ListEntryBegin(List l, Row r)
@@ -1486,6 +1650,12 @@ function findObject(id) {
 			if (bookmark != null)
 				tw.WriteLine("<div id=\"{0}\">", bookmark);		// can't use the table id since we're using for css style
 
+			if (IsGridContainer(rect.ReportItems))
+			{
+				tw.WriteLine("<div id='{0}' style=\"{1}\">", cssName, GridFor(rect.ReportItems).Template());
+				return true;
+			}
+
 			// Calculate the width of all the columns
 			int width = rect.Width == null? -1: rect.Width.PixelsX;
 			if (width < 0)
@@ -1498,7 +1668,10 @@ function findObject(id) {
 
 		public async Task RectangleEnd(Rdl.Rectangle rect, Row r)
 		{
-			tw.WriteLine("</tr></table>");
+			if (IsGridContainer(rect.ReportItems))
+				tw.WriteLine("</div>");
+			else
+				tw.WriteLine("</tr></table>");
 			string bookmark = await rect.BookmarkValue(this.r, r).ConfigureAwait(false);
 			if (bookmark != null)
 				tw.WriteLine("</div>"); 
