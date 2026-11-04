@@ -564,7 +564,26 @@ namespace Majorsilence.Reporting.Rdl
 				width.InnerText = "1in";
 				rg.AppendChild(width);
 				//Additional for static rows...not yet implemented
-                if (catGrp.StaticCategories != null)
+                if (catGrp.StaticCategories != null && catGrp.StaticCategories.Items.Count == 1)
+                {
+                    // One static category holds every row, as a chart with no categories does: group on a
+                    // constant and show the member's label.
+                    XmlElement dr = mDoc.CreateElement("DynamicRows");
+                    rg.AppendChild(dr);
+                    XmlElement drgrp = mDoc.CreateElement("Grouping");
+                    dr.AppendChild(drgrp);
+                    XmlElement drges = mDoc.CreateElement("GroupExpressions");
+                    drgrp.AppendChild(drges);
+                    XmlElement drge = mDoc.CreateElement("GroupExpression");
+                    drges.AppendChild(drge);
+                    drge.InnerText = "";
+                    XmlElement drris = mDoc.CreateElement("ReportItems");
+                    dr.AppendChild(drris);
+                    XmlElement drri = mDoc.CreateElement("ChartExpression");
+                    drris.AppendChild(drri);
+                    CreateChartExpression(mDoc, drri, catGrp.StaticCategories.Items[0].Label?.Source ?? "", null);
+                }
+                else if (catGrp.StaticCategories != null)
                 {
                     XmlElement dr = mDoc.CreateElement("StaticRows");
                     rg.AppendChild(dr);
@@ -586,11 +605,12 @@ namespace Majorsilence.Reporting.Rdl
                         XmlElement drge = mDoc.CreateElement("GroupExpression");
                         drges.AppendChild(drge);
                         drge.InnerText = ge.Expression.Source;
-                        XmlElement drri = mDoc.CreateElement("ChartExpression");
-                        drris.AppendChild(drri);
-                        CreateChartExpression(mDoc, drri, ge.Expression.Source, catGrp.DynamicCategories.Label);
-
                     }
+                    // A group on several expressions is still one category: DynamicRows takes exactly one
+                    // display item, so it shows the first expression, as it does for a one-expression group.
+                    XmlElement drri = mDoc.CreateElement("ChartExpression");
+                    drris.AppendChild(drri);
+                    CreateChartExpression(mDoc, drri, catGrp.DynamicCategories.Grouping.GroupExpressions.Items[0].Expression.Source, catGrp.DynamicCategories.Label);
 
                     if (catGrp.DynamicCategories.Sorting != null)
                     {
@@ -714,27 +734,29 @@ namespace Majorsilence.Reporting.Rdl
                             XmlElement dcge = mDoc.CreateElement("GroupExpression");
                             dcges.AppendChild(dcge);
                             dcge.InnerText = ge.Expression.Source;
-                            XmlElement dcri = mDoc.CreateElement("ChartExpression");
-                            dcris.AppendChild(dcri);
-                            CreateChartExpression(mDoc, dcri, ge.Expression.Source, serGrp.DynamicSeries.Label);
+                        }
+                        // One series per group however many expressions it groups on: DynamicColumns takes
+                        // exactly one display item and one Sorting.
+                        XmlElement dcri = mDoc.CreateElement("ChartExpression");
+                        dcris.AppendChild(dcri);
+                        CreateChartExpression(mDoc, dcri, serGrp.DynamicSeries.Grouping.GroupExpressions.Items[0].Expression.Source, serGrp.DynamicSeries.Label);
 
-                            if (serGrp.DynamicSeries.Sorting != null)
+                        if (serGrp.DynamicSeries.Sorting != null)
+                        {
+                            XmlElement dcsrt = mDoc.CreateElement("Sorting");
+                            dc.AppendChild(dcsrt);
+                            foreach (SortBy sb in serGrp.DynamicSeries.Sorting.Items)
                             {
-                                XmlElement dcsrt = mDoc.CreateElement("Sorting");
-                                dc.AppendChild(dcsrt);
-                                foreach (SortBy sb in serGrp.DynamicSeries.Sorting.Items)
+                                XmlElement dcsrtby = mDoc.CreateElement("SortBy");
+                                dcsrt.AppendChild(dcsrtby);
+                                XmlElement srtexp = mDoc.CreateElement("SortExpression");
+                                srtexp.InnerText = sb.SortExpression.Source;
+                                dcsrtby.AppendChild(srtexp);
+                                if (sb.Direction == SortDirectionEnum.Descending)
                                 {
-                                    XmlElement dcsrtby = mDoc.CreateElement("SortBy");
-                                    dcsrt.AppendChild(dcsrtby);
-                                    XmlElement srtexp = mDoc.CreateElement("SortExpression");
-                                    srtexp.InnerText = sb.SortExpression.Source;
-                                    dcsrtby.AppendChild(srtexp);
-                                    if (sb.Direction == SortDirectionEnum.Descending)
-                                    {
-                                        XmlElement srtdir = mDoc.CreateElement("Direction");
-                                        srtdir.InnerText = "Descending";
-                                        dcsrtby.AppendChild(srtdir);
-                                    }
+                                    XmlElement srtdir = mDoc.CreateElement("Direction");
+                                    srtdir.InnerText = "Descending";
+                                    dcsrtby.AppendChild(srtdir);
                                 }
                             }
                         }
