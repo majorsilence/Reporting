@@ -138,6 +138,12 @@ namespace Majorsilence.Reporting.Rdl
         {
             await base.Run(ip, row).ConfigureAwait(false);
 
+            // RunPage (the paged formats) already skips hidden instances; the IPresent path must
+            // too, or an HTML render fetches an image nobody will see — for an on-demand URL
+            // (the odontogram family) that is a whole browser render spent on a hidden item.
+            if (await IsHidden(ip.Report(), row).ConfigureAwait(false))
+                return;
+
             string mtype = null;
             Stream strm = null;
             try
@@ -285,6 +291,30 @@ namespace Majorsilence.Reporting.Rdl
                     case ImageSourceEnum.External:
                         string fname = this.ImageUrl = await _Value.EvaluateString(rpt, row).ConfigureAwait(false);
                         mtype = GetMimeType(fname);
+                        IExternalImageResolver resolver = rpt.ExternalImageResolver;
+                        if (resolver != null)
+                        {
+                            // The host owns every external fetch: URL, file name or anything
+                            // else the expression produced, the resolver decides what it means.
+                            var resolverCached = rpt.GetExternalImage(fname);
+                            if (resolverCached != null)
+                            {
+                                strm = new MemoryStream(resolverCached.Content);
+                                mtype = resolverCached.MimeType ?? mtype;
+                                break;
+                            }
+
+                            ExternalImageResult resolved = await resolver.Resolve(fname,
+                                this.Width?.PixelsX, this.Height?.PixelsY,
+                                CancellationToken.None).ConfigureAwait(false);
+                            if (resolved == null || resolved.Content == null)
+                                break;      // strm stays null: the engine's missing-image behaviour
+
+                            rpt.AddExternalImage(fname, resolved.Content, resolved.MimeType);
+                            mtype = resolved.MimeType ?? mtype;
+                            strm = new MemoryStream(resolved.Content);
+                            break;
+                        }
                         if (fname.StartsWith("http:") ||
                             fname.StartsWith("file:") ||
                             fname.StartsWith("https:"))

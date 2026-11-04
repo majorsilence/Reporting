@@ -244,6 +244,30 @@ namespace Majorsilence.Reporting.Rdl
                     case StyleBackgroundImageSourceEnum.External:
                         string fname = await _Value.EvaluateString(rpt, row).ConfigureAwait(false);
                         mtype = Image.GetMimeType(fname);
+                        IExternalImageResolver resolver = rpt.ExternalImageResolver;
+                        if (resolver != null)
+                        {
+                            // The host owns every external fetch, background images included: this
+                            // path's own HttpClient follows redirects and its FileStream opens any
+                            // server path, neither of which a host-supplied value may reach.
+                            var resolverCached = rpt.GetExternalImage(fname);
+                            if (resolverCached != null)
+                            {
+                                strm = new MemoryStream(resolverCached.Content);
+                                mtype = resolverCached.MimeType ?? mtype;
+                                break;
+                            }
+
+                            ExternalImageResult resolved = await resolver.Resolve(fname, null, null,
+                                System.Threading.CancellationToken.None).ConfigureAwait(false);
+                            if (resolved == null || resolved.Content == null)
+                                break;      // strm stays null: the engine's missing-image behaviour
+
+                            rpt.AddExternalImage(fname, resolved.Content, resolved.MimeType);
+                            mtype = resolved.MimeType ?? mtype;
+                            strm = new MemoryStream(resolved.Content);
+                            break;
+                        }
                         if (fname.StartsWith("http:") ||
                             fname.StartsWith("file:") ||
                             fname.StartsWith("https:"))

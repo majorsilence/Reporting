@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Report xmlns="http://schemas.microsoft.com/sqlserver/reporting/2005/01/reportdefinition">
+  <!-- Two External images whose Value is an expression building the same URL: with a
+       resolver set on the Report both draw its bytes, and the per-report external-image
+       cache means the resolver is asked once. -->
+  <PageWidth>8.5in</PageWidth>
+  <PageHeight>11in</PageHeight>
+  <LeftMargin>0.5in</LeftMargin>
+  <RightMargin>0.5in</RightMargin>
+  <TopMargin>0.5in</TopMargin>
+  <BottomMargin>0.5in</BottomMargin>
+  <Width>7.5in</Width>
+  <Body>
+    <Height>3in</Height>
+    <ReportItems>
+      <Image Name="ExprImage1">
+        <Top>0.25in</Top>
+        <Left>0.25in</Left>
+        <Width>2in</Width>
+        <Height>1in</Height>
+        <Source>External</Source>
+        <Value>="http://img.example/render" &amp; "?patient=1"</Value>
+        <Sizing>FitProportional</Sizing>
+      </Image>
+      <Image Name="ExprImage2">
+        <Top>1.5in</Top>
+        <Left>0.25in</Left>
+        <Width>2in</Width>
+        <Height>1in</Height>
+        <Source>External</Source>
+        <Value>="http://img.example/render" &amp; "?patient=1"</Value>
+        <Sizing>FitProportional</Sizing>
+      </Image>
+    </ReportItems>
+  </Body>
+</Report>
