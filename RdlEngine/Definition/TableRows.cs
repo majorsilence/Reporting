@@ -90,7 +90,7 @@ namespace Majorsilence.Reporting.Rdl
 					Page p = pgs.CurrentPage;			// this can change after running a row
 					float hrows = await t.HeightOfRow(pgs, row).ConfigureAwait(false);	// height of this row
 					float height = p.YOffset + hrows;
-					if (height > pgs.BottomOfPage)
+					if (height > pgs.BottomOfPage && !p.IsEmpty())	// an empty page is kept (see Details.RunPage)
 					{
                         await OwnerTable.RunPageBottomRows(pgs, row, false).ConfigureAwait(false);
 						p = OwnerTable.RunPageNew(pgs, p);

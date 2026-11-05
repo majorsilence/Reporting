@@ -339,7 +339,10 @@ namespace Majorsilence.Reporting.Rdl
                 pi.SI.BackgroundImage = null;           // chart already has the background image
             }
 
-            if (pgs.CurrentPage.YOffset + pi.Y + pi.H >= pgs.BottomOfPage && !pgs.CurrentPage.IsEmpty())
+            // Only a chart directly in the body moves to the next page, as a textbox does: in a
+            // table cell or a rectangle it stays with what holds it, which pages itself. Moving
+            // alone left the row's rectangle behind and printed the chart a page later.
+            if (this.IsInBody && pgs.CurrentPage.YOffset + pi.Y + pi.H >= pgs.BottomOfPage && !pgs.CurrentPage.IsEmpty())
             {   // force page break if it doesn't fit on the page
                 pgs.NextOrNew();
                 pgs.CurrentPage.YOffset = OwnerReport.TopOfPage;
