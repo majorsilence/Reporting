@@ -732,6 +732,7 @@ namespace Majorsilence.Reporting.Rdl
 			{
 				var pth = new PageTextHtml(text);
 				await SetPagePositionAndStyle(rpt, pth, row).ConfigureAwait(false);
+				pth.WrapInset = WrapInsetPoints;
 				await pth.Build(g).ConfigureAwait(false);
 				return pth.TotalHeight;
 			}
@@ -843,6 +844,7 @@ namespace Majorsilence.Reporting.Rdl
 						pth = new PageTextHtml(o==null? "": o.ToString());
 						await SetPagePositionAndStyle(rpt, pth, row).ConfigureAwait(false);
 					}
+					pth.WrapInset = WrapInsetPoints;	// measured breaking where it is drawn breaking
 					await pth.Build(g).ConfigureAwait(false);
 					height = RSize.PointsFromPixels(g, RSize.PixelsFromPoints(pth.TotalHeight));
 				}
