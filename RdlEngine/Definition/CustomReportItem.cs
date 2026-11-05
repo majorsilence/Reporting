@@ -158,7 +158,10 @@ namespace Majorsilence.Reporting.Rdl
 				bm.Save(ostrm, codec, encoderParameters);
                 bm.Dispose();
 
-                await ip.Image(new Image(rpt.ReportDefinition, this, xNode), row, null, ostrm).ConfigureAwait(false);
+                // The PNG was just written to ostrm, which leaves its position at the end: rewind it so
+                // the renderer reads the image instead of nothing, and say it is a PNG.
+                ostrm.Position = 0;
+                await ip.Image(new Image(rpt.ReportDefinition, this, xNode), row, "image/png", ostrm).ConfigureAwait(false);
 				ostrm.Close();
             }
             catch (Exception ex)

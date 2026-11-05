@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Report xmlns="http://schemas.microsoft.com/sqlserver/reporting/2005/01/reportdefinition">
+  <!-- A rectangle whose style carries an External background image with an expression value:
+       with a resolver set on the Report, the bytes come from it, never from the engine's own
+       HttpClient/FileStream path. -->
+  <PageWidth>8.5in</PageWidth>
+  <PageHeight>11in</PageHeight>
+  <LeftMargin>0.5in</LeftMargin>
+  <RightMargin>0.5in</RightMargin>
+  <TopMargin>0.5in</TopMargin>
+  <BottomMargin>0.5in</BottomMargin>
+  <Width>7.5in</Width>
+  <Body>
+    <Height>3in</Height>
+    <ReportItems>
+      <Rectangle Name="Band">
+        <Top>0.25in</Top>
+        <Left>0.25in</Left>
+        <Width>3in</Width>
+        <Height>1in</Height>
+        <Style>
+          <BackgroundImage>
+            <Source>External</Source>
+            <Value>="http://img.example/band" &amp; ".png"</Value>
+            <BackgroundRepeat>Repeat</BackgroundRepeat>
+          </BackgroundImage>
+        </Style>
+        <ReportItems>
+          <Textbox Name="Caption"><Top>0.1in</Top><Left>0.1in</Left><Width>2in</Width><Height>0.25in</Height><Value>Band</Value></Textbox>
+        </ReportItems>
+      </Rectangle>
+    </ReportItems>
+  </Body>
+</Report>

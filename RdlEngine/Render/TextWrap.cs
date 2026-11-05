@@ -17,15 +17,35 @@ namespace Majorsilence.Reporting.Rdl
         /// <paramref name="maxWidth"/> starts a line and is broken after the last letter that fits,
         /// its rest carried to the next line, where the words after it follow it as usual; with
         /// <paramref name="breakWords"/> false it has a line of its own, whole.
+        /// The spaces a paragraph starts with - an indent, or the spaces a tab became
+        /// (Textbox.ExpandTabs) - stay in front of its first word when that word fits after them.
+        /// They were taken as empty words and dropped, so a signature set in from the margin by
+        /// tabs printed at the margin as soon as its paragraph wrapped.
         /// </summary>
         internal static void WrapParagraph(string text, float maxWidth, Func<string, float> width, List<string> output,
             bool breakWords = true)
         {
             string[] words = text.Split(' ');
             string current = null;      // the line being built; the candidate (line + " " + word) is the only string made per word
+            int indent = 0;             // the paragraph's leading spaces, while its first word is still to come
 
             foreach (string word in words)
             {
+                if (current == null && word.Length == 0)
+                {
+                    indent++;
+                    continue;
+                }
+                if (current == null && indent > 0)
+                {
+                    string indented = new string(' ', indent) + word;
+                    indent = 0;
+                    if (width(indented) <= maxWidth)
+                    {
+                        current = indented;
+                        continue;
+                    }
+                }
                 if (string.IsNullOrEmpty(current))
                 {
                     current = breakWords ? BreakWord(word, maxWidth, width, output) : word;

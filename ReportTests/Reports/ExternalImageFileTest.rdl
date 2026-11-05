@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Report xmlns="http://schemas.microsoft.com/sqlserver/reporting/2005/01/reportdefinition">
+  <!-- An External image whose expression Value names a local file: with no resolver set,
+       the engine's own file path loads it exactly as before the resolver hook existed. -->
+  <PageWidth>8.5in</PageWidth>
+  <PageHeight>11in</PageHeight>
+  <LeftMargin>0.5in</LeftMargin>
+  <RightMargin>0.5in</RightMargin>
+  <TopMargin>0.5in</TopMargin>
+  <BottomMargin>0.5in</BottomMargin>
+  <Width>7.5in</Width>
+  <Body>
+    <Height>3in</Height>
+    <ReportItems>
+      <Image Name="FileImage1">
+        <Top>0.25in</Top>
+        <Left>0.25in</Left>
+        <Width>2in</Width>
+        <Height>1in</Height>
+        <Source>External</Source>
+        <Value>="checker" &amp; ".png"</Value>
+        <Sizing>FitProportional</Sizing>
+      </Image>
+    </ReportItems>
+  </Body>
+</Report>

@@ -52,7 +52,9 @@ namespace Majorsilence.Reporting.Rdl
 								// Auto uses the setting on the Report element.
 		bool _IsToggle;		// Textbox is used to toggle a detail row
 		bool _NoWrap;		// a box that may not grow prints each line whole, unwrapped; see NoWrapOf
+		float _TabStopPoints = TabStopPoints;	// how far apart the tab stops are; see TabStopIntervalOf
 		bool _TotalPagesLater;	// a body box reading Globals!TotalPages: run again once the page count is known
+		float? _WrapInsetPoints;	// how much narrower its lines break than they are drawn; see WrapInsetPoints
 		List<string> _ExprReferences;	// array of names of expressions that reference this Textbox;
 								//  only needed for page header/footer references 
 
@@ -103,6 +105,7 @@ namespace Majorsilence.Reporting.Rdl
 			}
 			
 			_NoWrap = NoWrapOf(Custom);
+			_TabStopPoints = TabStopIntervalOf(r, Custom);
 
 			if (_Value == null)
 				OwnerReport.rl.LogError(8, "Textbox value not specified for " + (this.Name == null? "'name not specified'": this.Name.Nm));
@@ -134,6 +137,24 @@ namespace Majorsilence.Reporting.Rdl
 					return string.Equals(xNode.InnerText.Trim(), "true", StringComparison.OrdinalIgnoreCase);
 			}
 			return false;
+		}
+
+		// <Custom><TabStopInterval>18pt</TabStopInterval></Custom> sets how far apart the box's
+		// tab stops are, from where its text starts. Crystal Reports' are a quarter inch apart,
+		// where Word's, and this engine's default, are half an inch. A size that does not parse,
+		// or is not positive, leaves the default.
+		private static float TabStopIntervalOf(ReportDefn r, Custom custom)
+		{
+			if (custom == null)
+				return TabStopPoints;
+			foreach (XmlNode xNode in custom.CustomXmlNode.ChildNodes)
+			{
+				if (xNode.Name != "TabStopInterval")
+					continue;
+				float points = new RSize(r, xNode.InnerText.Trim()).Points;
+				return points > 0 ? points : TabStopPoints;
+			}
+			return TabStopPoints;
 		}
 
 		// Handle parsing of function in final pass
@@ -297,6 +318,7 @@ namespace Majorsilence.Reporting.Rdl
 			// beside it - cut to the column, such a cell would print nothing at all.
 			// A box asked not to wrap is cut at its sides wherever it is: it has asked for that.
 			pt.NoWrap = _NoWrap && !this.CanGrow;
+			pt.WrapInset = WrapInsetPoints;
 			pt.ClipSides = !this.CanGrow && (pt.NoWrap || !this.IsTableOrMatrixCell(r));
 
             // check TextAlign: if General then correct based on data type
@@ -377,6 +399,32 @@ namespace Majorsilence.Reporting.Rdl
 		// single page can offer (that case previously clipped the overflow). Splits
 		// the text at whitespace boundaries into page-sized chunks, emitting one
 		// PageText per page. Returns the last chunk (already added to its page).
+		// <Custom><WrapInset>31pt</WrapInset></Custom> breaks the box's lines that much short of
+		// where they are drawn to: its text wraps as if the box were narrower on the right, but
+		// is aligned, and a justified line spread, against the box's full width inside its
+		// padding. Crystal Reports breaks a line by measuring it in a font a little wider than the
+		// one it draws, so its lines break short of the edge while a justified paragraph still
+		// reaches it; padding on the right had the breaks right, and stopped the justified lines
+		// that far short too. A size that does not parse, or is not positive, is none.
+		private float WrapInsetPoints
+		{
+			get
+			{
+				if (_WrapInsetPoints is float known)
+					return known;
+				float inset = 0;
+				if (Custom != null)
+					foreach (XmlNode xNode in Custom.CustomXmlNode.ChildNodes)
+						if (xNode.Name == "WrapInset")
+						{
+							inset = Math.Max(0, new RSize(OwnerReport, xNode.InnerText.Trim()).Points);
+							break;
+						}
+				_WrapInsetPoints = inset;
+				return inset;
+			}
+		}
+
 		private async Task<PageText> RunPageSplitOverflow(Report rpt, Pages pgs, PageText pt, Row row)
 		{
 			Graphics g = pgs.G;
@@ -387,6 +435,7 @@ namespace Majorsilence.Reporting.Rdl
 				wrapPoints -= await Style.EvalPaddingLeft(rpt, row).ConfigureAwait(false) + await Style.EvalPaddingRight(rpt, row).ConfigureAwait(false);
 				padV = await Style.EvalPaddingTop(rpt, row).ConfigureAwait(false) + await Style.EvalPaddingBottom(rpt, row).ConfigureAwait(false);
 			}
+			wrapPoints -= WrapInsetPoints;
 			bool html = pt is PageTextHtml;
 			float lineH = await MeasureTextHeightPoints(rpt, g, "Xg", row, wrapPoints, html).ConfigureAwait(false);
 
@@ -599,10 +648,10 @@ namespace Majorsilence.Reporting.Rdl
 
 		private static object AsLineFeeds(object value) => value is string text ? LineBreaksAsLineFeeds(text) : value;
 
-		// Tab stops every half inch from where the text starts, the default in Word and in
-		// Crystal Reports. RDL has no tab stops, and a tab was drawn as whatever the font makes of
-		// the character, usually nothing, so "Printed Date: 1/2/2026<tab><tab>Last modified: ..."
-		// ran together.
+		// Tab stops every half inch from where the text starts, Word's default, unless the box sets
+		// its own interval (TabStopIntervalOf). RDL has no tab stops, and a tab was drawn as
+		// whatever the font makes of the character, usually nothing, so "Printed Date:
+		// 1/2/2026<tab><tab>Last modified: ..." ran together.
 		internal const float TabStopPoints = 36f;
 
 		/// <summary>
@@ -616,6 +665,12 @@ namespace Majorsilence.Reporting.Rdl
 		/// less an empty string's, and a space's width is taken from sixteen of them. Taken
 		/// one at a time, each stop came out a few points early ("A" measured 13.5pt) and a
 		/// space anywhere from 2.25 to 3pt against its 2.78.
+		///
+		/// Which stop a tab goes to is decided from where the text is meant to be - the stop the
+		/// tab before it reached, plus the text since - not from the spaces put in for that tab,
+		/// which, a whole number of them, can fall just short of it. Measured that way the next
+		/// tab found itself before the stop already reached, went to it again and added a single
+		/// space, so two tabs at the start of a line came out a stop and a space in, not two stops.
 		/// </remarks>
 		internal async Task<string> ExpandTabs(Report rpt, Graphics g, Row row, string text)
 		{
@@ -629,19 +684,24 @@ namespace Majorsilence.Reporting.Rdl
 					result.Append('\n');
 				string[] parts = lines[l].Split('\t');
 				var line = new StringBuilder(lines[l].Length + 16);
+				float reached = 0;		// the stop the last tab went to
 				for (int p = 0; p < parts.Length; p++)
 				{
 					line.Append(parts[p]);
 					if (p == parts.Length - 1)
 						break;
+					float since = parts[p].Length == 0
+						? 0
+						: Math.Max(0, await TextWidthPoints(rpt, g, row, parts[p]).ConfigureAwait(false) - empty);
+					float stop = ((int) Math.Floor((reached + since) / _TabStopPoints) + 1) * _TabStopPoints;
 					string sofar = line.ToString();
 					float measured = await TextWidthPoints(rpt, g, row, sofar).ConfigureAwait(false);
 					float width = Math.Max(0, measured - empty);
 					float space = (await TextWidthPoints(rpt, g, row, sofar + new string(' ', SpaceSample)).ConfigureAwait(false) - measured)
 						/ SpaceSample;
-					float stop = ((int) Math.Floor(width / TabStopPoints) + 1) * TabStopPoints;
 					int spaces = space > 0 ? (int) Math.Round((stop - width) / space) : 1;
 					line.Append(' ', Math.Max(1, spaces));
+					reached = stop;
 				}
 				result.Append(line);
 			}
@@ -765,7 +825,7 @@ namespace Majorsilence.Reporting.Rdl
 			object o = TryEvaluate(rpt, row, out object value) ? value : await Evaluate(rpt, row).ConfigureAwait(false);
 
 			TypeCode tc = _Value.GetTypeCode();
-			float wrapPoints = this.WidthPoints(rpt);		// the width between the paddings the text is drawn in
+			float wrapPoints = this.WidthPoints(rpt) - WrapInsetPoints;	// the width between the paddings the text breaks in
 
 			Style.MeasureSetup setup = null;
 			if (this.Style != null)

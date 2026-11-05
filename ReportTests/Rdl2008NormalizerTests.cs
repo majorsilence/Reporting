@@ -267,6 +267,81 @@ namespace ReportTests
         }
 
         [Test]
+        public async Task LoneGroupRow_BesideAHiddenDetailGroup_IsOneRowPerGroupInstance ()
+        {
+            // A summary table (List Invoices "Summary by Clinic", Day Sheet "Summary by Period"):
+            // a header, one row per group with its totals, a totals row, and a hidden per-record
+            // group the designer left beside it. Before, the chain was refused, the flat mapping
+            // made every row a detail row, and each record printed its clinic beside the grand
+            // total; the hidden rows printed too.
+            const string hierarchy = @"
+                <TablixMembers>
+                  <TablixMember />
+                  <TablixMember>
+                    <Group Name=""ByName""><GroupExpressions><GroupExpression>=Fields!Name.Value</GroupExpression></GroupExpressions></Group>
+                  </TablixMember>
+                  <TablixMember><KeepWithGroup>Before</KeepWithGroup></TablixMember>
+                  <TablixMember><Group Name=""Details"" /><Visibility><Hidden>true</Hidden></Visibility></TablixMember>
+                </TablixMembers>";
+
+            var rdl = TablixReport (hierarchy,
+                Row ("0.25in", Cell (Textbox ("H1", "Summary")), Cell (Textbox ("H2", "Amount"))) +
+                Row ("0.25in", Cell (Textbox ("G1", "=Fields!Name.Value")), Cell (Textbox ("G2", "=Sum(Fields!Amount.Value)"))) +
+                Row ("0.25in", Cell (Textbox ("F1", "Totals")), Cell (Textbox ("F2", "=Sum(Fields!Amount.Value)"))) +
+                Row ("0.25in", Cell (Textbox ("D1", "NEVER SHOWN")), Cell (Textbox ("D2", "=Fields!Amount.Value"))));
+
+            var html = await RenderHtml (rdl);
+
+            Assert.That (html, Does.Contain ("Widget").And.Contain ("Gadget"), "one row per group instance");
+            Assert.That (html, Does.Contain ("Totals"), "the static row after the group is the footer");
+            Assert.That (html, Does.Not.Contain ("NEVER SHOWN"), "the hidden per-record group renders nothing");
+            Assert.That (System.Text.RegularExpressions.Regex.Matches (html, "<tr style").Count, Is.EqualTo (4),
+                "header, one row per group instance, footer: " + html);
+        }
+
+        [Test]
+        public async Task RowHeaderLevels_WrapTheGroupChain ()
+        {
+            // Day Sheet "Summary by Location": every level carries a TablixHeader, so the static
+            // header and footer members each wrap a single row member, and the group's own
+            // header level wraps its details and group footer. Those wrappers used to make the
+            // chain unreadable and the grouping was lost.
+            const string hierarchy = @"
+                <TablixMembers>
+                  <TablixMember>
+                    <TablixHeader><Size>1in</Size><CellContents><Textbox Name=""RH1""><Value>Period</Value></Textbox></CellContents></TablixHeader>
+                    <TablixMembers><TablixMember /></TablixMembers>
+                  </TablixMember>
+                  <TablixMember>
+                    <Group Name=""ByName""><GroupExpressions><GroupExpression>=Fields!Name.Value</GroupExpression></GroupExpressions></Group>
+                    <TablixHeader><Size>1in</Size><CellContents><Textbox Name=""RH2""><Value>=Fields!Name.Value</Value></Textbox></CellContents></TablixHeader>
+                    <TablixMembers>
+                      <TablixMember><Group Name=""Details"" /></TablixMember>
+                      <TablixMember><KeepWithGroup>Before</KeepWithGroup></TablixMember>
+                    </TablixMembers>
+                  </TablixMember>
+                  <TablixMember>
+                    <TablixHeader><Size>1in</Size><CellContents><Textbox Name=""RH3""><Value>All</Value></Textbox></CellContents></TablixHeader>
+                    <TablixMembers><TablixMember /></TablixMembers>
+                  </TablixMember>
+                </TablixMembers>";
+
+            var rdl = TablixReport (hierarchy,
+                Row ("0.25in", Cell (Textbox ("H1", "Planned")), Cell (Textbox ("H2", "Amount"))) +
+                Row ("0.25in", Cell (Textbox ("D1", "=Fields!Name.Value")), Cell (Textbox ("D2", "=Fields!Amount.Value"))) +
+                Row ("0.25in", Cell (Textbox ("GF1", "Location Total")), Cell (Textbox ("GF2", "=Sum(Fields!Amount.Value)"))) +
+                Row ("0.25in", Cell (Textbox ("F1", "Grand Total")), Cell (Textbox ("F2", "=Sum(Fields!Amount.Value)"))));
+
+            var html = await RenderHtml (rdl);
+
+            Assert.That (html, Does.Contain ("Widget").And.Contain ("Gadget"), "detail rows");
+            Assert.That (System.Text.RegularExpressions.Regex.Matches (html, "Location Total").Count, Is.EqualTo (2), "a group footer per group instance");
+            Assert.That (html, Does.Contain ("Grand Total"), "the footer");
+            Assert.That (System.Text.RegularExpressions.Regex.Matches (html, "<tr style").Count, Is.EqualTo (6),
+                "header, (detail + group footer) per group instance, footer: " + html);
+        }
+
+        [Test]
         public async Task Rdl2016Namespace_IsAlsoNormalized ()
         {
             const string ns2016 = "http://schemas.microsoft.com/sqlserver/reporting/2016/01/reportdefinition";

@@ -871,6 +871,8 @@ namespace Majorsilence.Reporting.Rdl
             internal RowLevel Inner;              // that group's own level
             internal XmlElement DetailsMember;    // a Group without expressions: one per record
             internal List<int> Details = new List<int> ();
+            internal bool Body;                   // the group or the details has been seen
+            internal Dictionary<int, XmlElement> Members = new Dictionary<int, XmlElement> ();   // the member each row came from
         }
 
         private static bool HasExpressionGroup (XmlElement members)
@@ -889,8 +891,11 @@ namespace Majorsilence.Reporting.Rdl
 
         /// <summary>
         /// Plans a Table with TableGroups from a row hierarchy that is a single chain of groups:
-        /// static rows, then one group (itself the same shape) or the detail rows, then static
-        /// rows. Returns null for anything else -- sibling groups, groups holding no rows -- so
+        /// static rows, then one group (itself the same shape, or a lone row per group instance)
+        /// or the detail rows, then static rows. A static member with members of its own is a
+        /// row-header level around those members (see HoistRowGroupHeaders), and a group that
+        /// can never show may follow the body (SSRS renders adjacent groups in turn; a hidden one
+        /// renders nothing). Returns null for anything else -- visible sibling groups, say -- so
         /// the caller falls back to the flat mapping rather than guessing.
         /// </summary>
         private static RowLevel PlanGroupedRows (XmlElement hierarchy, int rowCount)
@@ -907,62 +912,111 @@ namespace Majorsilence.Reporting.Rdl
         private static RowLevel ParseLevel (XmlElement members, ref int next)
         {
             var level = new RowLevel ();
-            var seenBody = false;
+            return ParseMembers (members, level, ref next) && level.Body ? level : null;
+        }
 
+        private static bool ParseMembers (XmlElement members, RowLevel level, ref int next)
+        {
             foreach (var member in ChildrenNamed (members, "TablixMember")) {
                 var group = FindChild (member, "Group");
                 var nested = FindChild (member, "TablixMembers");
 
                 if (group == null) {
-                    // A static member must be a single row.
-                    if (nested != null)
-                        return null;
-                    (seenBody ? level.Footer : level.Header).Add (next++);
-                    if (!seenBody)
+                    if (nested != null) {
+                        // A row-header level: its label became a leading column, and the members
+                        // it wraps belong to this level.
+                        if (!ParseMembers (nested, level, ref next))
+                            return false;
+                        continue;
+                    }
+                    level.Members[next] = member;
+                    (level.Body ? level.Footer : level.Header).Add (next++);
+                    if (!level.Body)
                         level.HeaderMembers.Add (member);
                     continue;
                 }
 
-                if (seenBody)
-                    return null;
-                seenBody = true;
+                if (level.Body) {
+                    // A second group beside the first. Table has no place for it; a hidden one
+                    // (Day Sheet and List Invoices keep hidden per-record rows beside their
+                    // summary group) renders nothing, so its rows are dropped.
+                    if (!IsAlwaysHidden (member))
+                        return false;
+                    next += LeafCount (member);
+                    continue;
+                }
+                level.Body = true;
 
                 if (FindChild (group, "GroupExpressions") != null) {
-                    if (nested == null)
-                        return null;
                     level.GroupMember = member;
-                    level.Inner = ParseLevel (nested, ref next);
-                    if (level.Inner == null)
-                        return null;
+                    if (nested == null) {
+                        // A group with no members is one row per group instance: a group header
+                        // with nothing under it.
+                        level.Inner = new RowLevel { Body = true };
+                        level.Inner.Members[next] = member;
+                        level.Inner.Header.Add (next++);
+                    } else {
+                        level.Inner = ParseLevel (nested, ref next);
+                        if (level.Inner == null)
+                            return false;
+                    }
                 } else {
                     // Details: its own static children are the rows repeated per record.
                     level.DetailsMember = member;
                     if (nested == null) {
+                        level.Members[next] = member;
                         level.Details.Add (next++);
                     } else {
                         foreach (var child in ChildrenNamed (nested, "TablixMember")) {
                             if (FindChild (child, "Group") != null || FindChild (child, "TablixMembers") != null)
-                                return null;
+                                return false;
+                            level.Members[next] = child;
                             level.Details.Add (next++);
                         }
                     }
                 }
             }
 
-            return seenBody ? level : null;
+            return true;
+        }
+
+        /// <summary>Hidden with no toggle to show it: nothing the member owns ever renders.</summary>
+        private static bool IsAlwaysHidden (XmlElement member)
+        {
+            var visibility = FindChild (member, "Visibility");
+            return visibility != null
+                && string.Equals (FindChild (visibility, "Hidden")?.InnerText?.Trim (), "true", StringComparison.OrdinalIgnoreCase)
+                && FindChild (visibility, "ToggleItem") == null;
+        }
+
+        private static int LeafCount (XmlElement member)
+        {
+            var nested = FindChild (member, "TablixMembers");
+            if (nested == null)
+                return 1;
+            var count = 0;
+            foreach (var child in ChildrenNamed (nested, "TablixMember"))
+                count += LeafCount (child);
+            return count;
         }
 
         private static void AppendGroupedSections (XmlElement table, XmlDocument doc, string ns,
             List<XmlElement> rows, RowLevel top, bool repeatHeaderRows, XmlElement tablixSort)
         {
-            XmlElement Section (string sectionName, List<int> indexes, bool repeat)
+            XmlElement Section (string sectionName, RowLevel level, List<int> indexes, bool repeat)
             {
                 if (indexes.Count == 0)
                     return null;
 
                 var tableRows = doc.CreateElement ("TableRows", ns);
-                foreach (var i in indexes)
-                    tableRows.AppendChild (BuildTableRow (doc, ns, rows[i]));
+                foreach (var i in indexes) {
+                    var tableRow = BuildTableRow (doc, ns, rows[i]);
+                    // 2008 hangs a row's visibility (a hidden total, a drill-down) on its member.
+                    var visibility = level.Members.TryGetValue (i, out var member) ? FindChild (member, "Visibility") : null;
+                    if (visibility != null && FindChild (tableRow, "Visibility") == null)
+                        tableRow.AppendChild (visibility.CloneNode (true));
+                    tableRows.AppendChild (tableRow);
+                }
                 var section = doc.CreateElement (sectionName, ns);
                 section.AppendChild (tableRows);
                 if (repeat)
@@ -979,19 +1033,20 @@ namespace Majorsilence.Reporting.Rdl
                 groups.Add (l);
             var innermost = groups[groups.Count - 1];
 
-            var header = Section ("Header", top.Header, repeatHeaderRows || Repeats (top));
+            var header = Section ("Header", top, top.Header, repeatHeaderRows || Repeats (top));
             if (header != null)
                 table.AppendChild (header);
 
-            var detailSort = FindChild (innermost.DetailsMember, "SortExpressions") ?? tablixSort;
-            var details = Section ("Details", innermost.Details, false);
+            // A chain ending in a lone group row has no details: the table is its group headers.
+            var detailSort = (innermost.DetailsMember == null ? null : FindChild (innermost.DetailsMember, "SortExpressions")) ?? tablixSort;
+            var details = Section ("Details", innermost, innermost.Details, false);
             if (details != null) {
                 if (detailSort != null)
                     details.AppendChild (BuildSorting (doc, ns, detailSort));
                 table.AppendChild (details);
             }
 
-            var footer = Section ("Footer", top.Footer, false);
+            var footer = Section ("Footer", top, top.Footer, false);
             if (footer != null)
                 table.AppendChild (footer);
 
@@ -1005,10 +1060,10 @@ namespace Majorsilence.Reporting.Rdl
                     tableGroup.AppendChild (BuildSorting (doc, ns, sort));
 
                 // The group's own header and footer rows sit inside it, in the inner level.
-                var gh = Section ("Header", l.Inner.Header, Repeats (l.Inner));
+                var gh = Section ("Header", l.Inner, l.Inner.Header, Repeats (l.Inner));
                 if (gh != null)
                     tableGroup.AppendChild (gh);
-                var gf = Section ("Footer", l.Inner.Footer, false);
+                var gf = Section ("Footer", l.Inner, l.Inner.Footer, false);
                 if (gf != null)
                     tableGroup.AppendChild (gf);
 
