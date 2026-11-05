@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Report xmlns="http://schemas.microsoft.com/sqlserver/reporting/2005/01/reportdefinition">
+  <!-- A hidden External image with an expression value: no output format may cost a fetch for
+       an instance that will not be shown. -->
+  <PageWidth>8.5in</PageWidth>
+  <PageHeight>11in</PageHeight>
+  <LeftMargin>0.5in</LeftMargin>
+  <RightMargin>0.5in</RightMargin>
+  <TopMargin>0.5in</TopMargin>
+  <BottomMargin>0.5in</BottomMargin>
+  <Width>7.5in</Width>
+  <Body>
+    <Height>3in</Height>
+    <ReportItems>
+      <Image Name="HiddenImage">
+        <Top>0.25in</Top>
+        <Left>0.25in</Left>
+        <Width>2in</Width>
+        <Height>1in</Height>
+        <Source>External</Source>
+        <Value>="http://img.example/hidden" &amp; ".png"</Value>
+        <Visibility><Hidden>true</Hidden></Visibility>
+        <Sizing>FitProportional</Sizing>
+      </Image>
+      <Textbox Name="Shown"><Top>1.5in</Top><Left>0.25in</Left><Width>2in</Width><Height>0.25in</Height><Value>Shown</Value></Textbox>
+    </ReportItems>
+  </Body>
+</Report>

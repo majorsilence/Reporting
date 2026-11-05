@@ -73,6 +73,13 @@ namespace Majorsilence.Reporting.Rdl
 				_ExternalImages[url] = new ExternalImage(content, mimeType);
 		}
 
+		/// <summary>
+		/// When set, every External-source image value is resolved through this instead of the
+		/// engine's own HttpClient/file handling (still once per distinct value, via the cache
+		/// above). Null results fall back to the engine's missing-image behaviour.
+		/// </summary>
+		public IExternalImageResolver ExternalImageResolver { get; set; }
+
 		// Some report runtime variables
 		private string _Folder;			// folder name
 		private string _ReportName;		// report name
