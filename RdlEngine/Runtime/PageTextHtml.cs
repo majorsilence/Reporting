@@ -100,6 +100,9 @@ namespace Majorsilence.Reporting.Rdl
 			float padLeft = this.SI.PaddingLeft, padTop = this.SI.PaddingTop;
 			float textWidth = this.W - padLeft - this.SI.PaddingRight;
 			_textWidth = textWidth;
+			// Lines break WrapInset short of the right, and are still aligned across the full
+			// width, as plain text is (Textbox.WrapInsetPoints).
+			textWidth -= this.WrapInset;
 			// Now set the default style for the rest of the members
 			StyleInfo si = this.SI.Clone() as StyleInfo;
 			si.BStyleBottom = si.BStyleLeft = si.BStyleRight = si.BStyleTop = BorderStyleEnum.None;
@@ -127,6 +130,7 @@ namespace Majorsilence.Reporting.Rdl
 			int? OlLiCount = null;	//Maintains number of OL items; zero indicates UL item (bullet)
 			// The style only changes at an html command, so the text runs between two commands share one copy.
 			StyleInfo runStyle = null;
+			StyleInfo paragraphStyle = null;	// the style a <p> pushed, which its end or the next <p> pops
 			foreach (string token in tokens)
 			{
 				if (token[0] == PageTextHtmlLexer.HTMLCMD)		// indicates an HTML command
@@ -284,6 +288,33 @@ namespace Majorsilence.Reporting.Rdl
 						maxLineHeight = xPos = lineXPos = maxDescent = 0;
 						bFirstInLine = true;
 						bWhiteSpace = false;
+						// A paragraph's alignment lasts to its end, or to the next paragraph,
+						// which ends it whether or not it was closed.
+						if (paragraphStyle != null && CurrentStyle(si) == paragraphStyle)
+							PopStyle();
+						// A bare <p> stays in the style it is in; only one with attributes has its own.
+						paragraphStyle = ltoken == "<p>" ? null : HandleBlock(token.Substring(1), CurrentStyle(si));
+					}
+					else if (ltoken == "</p>")
+					{
+						if (paragraphStyle != null && CurrentStyle(si) == paragraphStyle)
+							PopStyle();
+						paragraphStyle = null;
+					}
+					else if (ltoken.StartsWith("<div") || ltoken == "</div>")
+					{	// a division starts and ends a line, with no space around it as a paragraph has
+						if (lineItems.Count > 0)
+						{
+							yPos += LinePitch(maxLineHeight);
+							NormalizeLineHeight(lineItems, maxLineHeight, maxDescent);
+							maxLineHeight = xPos = lineXPos = maxDescent = 0;
+							bFirstInLine = true;
+							bWhiteSpace = false;
+						}
+						if (ltoken == "</div>")
+							PopStyle();
+						else
+							HandleBlock(token.Substring(1), cs);
 					}
 					else if (ltoken.StartsWith("<a"))
 					{
@@ -535,6 +566,18 @@ namespace Majorsilence.Reporting.Rdl
             return;
         }
 
+		// A paragraph or division: its style, with its align attribute as text-align, pushed for
+		// the lines inside it. Returns what was pushed.
+		private StyleInfo HandleBlock(string token, StyleInfo model)
+		{
+			HandleStyle(token, model);
+			StyleInfo si = CurrentStyle(model);
+			string align = (string) ParseHtmlCmd(token)["align"];
+			if (align != null)
+				HandleStyleString("text-align:" + align, si);
+			return si;
+		}
+
         private void HandleFont(string token, StyleInfo model)
         {
             StyleInfo si = model.Clone() as StyleInfo;	// always push a StyleInfo
@@ -607,6 +650,15 @@ namespace Majorsilence.Reporting.Rdl
 						break;
 					case "font-weight":
 						HandleStyleFontWeight(si, tval);
+						break;
+					case "text-align":
+						switch (tval.ToLower())
+						{
+							case "left": si.TextAlign = TextAlignEnum.Left; break;
+							case "center": si.TextAlign = TextAlignEnum.Center; break;
+							case "right": si.TextAlign = TextAlignEnum.Right; break;
+							case "justify": si.TextAlign = TextAlignEnum.Justified; break;
+						}
 						break;
 				}
 			}
@@ -776,9 +828,19 @@ namespace Majorsilence.Reporting.Rdl
 		{
 			// Each line is aligned on its own, as plain text is. Every line used to start at
 			// the left edge whatever the box's TextAlign, so centred or right-aligned rich
-			// text printed flush left.
+			// text printed flush left. A line takes the alignment of the paragraph it is in
+			// (text-align or align on a <p> or <div>), which its text carries, and otherwise the
+			// box's: a centred title over a body at the left printed all at the box's one
+			// alignment. A justified line is set at the left.
+			TextAlignEnum align = this.SI.TextAlign;
+			foreach (PageItem pi in lineItems)
+				if (pi is PageText)
+				{
+					align = pi.SI.TextAlign;
+					break;
+				}
 			float shift = 0;
-			if (this.SI.TextAlign == TextAlignEnum.Center || this.SI.TextAlign == TextAlignEnum.Right)
+			if (align == TextAlignEnum.Center || align == TextAlignEnum.Right)
 			{
 				float left = float.MaxValue, right = float.MinValue;
 				foreach (PageItem pi in lineItems)
@@ -789,7 +851,7 @@ namespace Majorsilence.Reporting.Rdl
 				if (right > left)
 				{
 					float spare = _textWidth - (right - left);
-					shift = this.SI.TextAlign == TextAlignEnum.Center ? spare / 2 : spare;
+					shift = align == TextAlignEnum.Center ? spare / 2 : spare;
 				}
 			}
 
