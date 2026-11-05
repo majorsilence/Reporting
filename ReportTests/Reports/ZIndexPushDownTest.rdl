@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Report Name="ZIndexPushDownTest">
+  <Description>A header textbox, then two stacked tables. The upper table grows over several pages and carries the HIGHER ZIndex (Report Builder numbers items in creation order, so this is common). The lower table must still be pushed below it: ZIndex is drawing order, not position. Without the fix the lower table anchored to the header instead and was drawn on page 1 through the upper table's rows.</Description>
+  <DataSources>
+    <DataSource Name="DS1">
+      <ConnectionProperties>
+        <DataProvider>Microsoft.Data.Sqlite</DataProvider>
+        <ConnectString>Data Source=:memory:</ConnectString>
+        <IntegratedSecurity>false</IntegratedSecurity>
+      </ConnectionProperties>
+    </DataSource>
+  </DataSources>
+  <DataSets>
+    <DataSet Name="Many">
+      <Query>
+        <DataSourceName>DS1</DataSourceName>
+        <CommandText>WITH RECURSIVE cnt(x) AS (SELECT 1 UNION ALL SELECT x + 1 FROM cnt WHERE x &lt; 60) SELECT x AS Id FROM cnt</CommandText>
+      </Query>
+      <Fields>
+        <Field Name="Id"><DataField>Id</DataField></Field>
+      </Fields>
+    </DataSet>
+    <DataSet Name="One">
+      <Query>
+        <DataSourceName>DS1</DataSourceName>
+        <CommandText>SELECT 'LOWER' AS Label</CommandText>
+      </Query>
+      <Fields>
+        <Field Name="Label"><DataField>Label</DataField></Field>
+      </Fields>
+    </DataSet>
+  </DataSets>
+  <Body>
+    <Height>2in</Height>
+    <ReportItems>
+      <Textbox Name="Header">
+        <Top>0in</Top>
+        <Left>0in</Left>
+        <Height>0.3in</Height>
+        <Width>4in</Width>
+        <ZIndex>0</ZIndex>
+        <Value>HEADER</Value>
+      </Textbox>
+      <Table Name="LowerTable">
+        <DataSetName>One</DataSetName>
+        <Top>1.2in</Top>
+        <Left>0in</Left>
+        <Width>4in</Width>
+        <Height>0.3in</Height>
+        <ZIndex>1</ZIndex>
+        <TableColumns>
+          <TableColumn><Width>4in</Width></TableColumn>
+        </TableColumns>
+        <Details>
+          <TableRows>
+            <TableRow>
+              <Height>0.3in</Height>
+              <TableCells>
+                <TableCell>
+                  <ReportItems>
+                    <Textbox Name="LowerCell"><Value>=Fields!Label.Value</Value></Textbox>
+                  </ReportItems>
+                </TableCell>
+              </TableCells>
+            </TableRow>
+          </TableRows>
+        </Details>
+      </Table>
+      <Table Name="UpperTable">
+        <DataSetName>Many</DataSetName>
+        <Top>0.5in</Top>
+        <Left>0in</Left>
+        <Width>4in</Width>
+        <Height>0.5in</Height>
+        <ZIndex>2</ZIndex>
+        <TableColumns>
+          <TableColumn><Width>4in</Width></TableColumn>
+        </TableColumns>
+        <Details>
+          <TableRows>
+            <TableRow>
+              <Height>0.25in</Height>
+              <TableCells>
+                <TableCell>
+                  <ReportItems>
+                    <Textbox Name="RowCell"><Value>="ROW" &amp; Fields!Id.Value</Value></Textbox>
+                  </ReportItems>
+                </TableCell>
+              </TableCells>
+            </TableRow>
+          </TableRows>
+        </Details>
+      </Table>
+    </ReportItems>
+  </Body>
+  <Width>6in</Width>
+  <PageWidth>8.5in</PageWidth>
+  <PageHeight>11in</PageHeight>
+  <TopMargin>0.5in</TopMargin>
+  <BottomMargin>0.5in</BottomMargin>
+  <LeftMargin>0.5in</LeftMargin>
+  <RightMargin>0.5in</RightMargin>
+</Report>
