@@ -187,6 +187,7 @@ namespace Majorsilence.Reporting.Rdl
             Rows uData = this.GetMyUserData(rpt);
             if (uData != null)
             {
+                await FilterUserData(rpt, uData, f).ConfigureAwait(false);
                 this.SetMyData(rpt, uData);
                 return uData.Data == null || uData.Data.Count == 0 ? false : true;
             }
@@ -312,6 +313,7 @@ namespace Majorsilence.Reporting.Rdl
             Rows uData = this.GetMyUserData(rpt);
             if (uData != null)
             {
+                await FilterUserData(rpt, uData, f).ConfigureAwait(false);
                 this.SetMyData(rpt, uData);
                 return uData.Data == null || uData.Data.Count == 0 ? false : true;
             }
@@ -487,19 +489,14 @@ namespace Majorsilence.Reporting.Rdl
                     }
                 }
 
-                // Apply the filters 
-                if (f == null || await f.Apply(rpt, or).ConfigureAwait(false))
-                {
-                    or.RowNumber = rowCount;    // 
-                    rowCount++;
-                    ar.Add(or);
-                }
+                // Filtered when the report gets its data (FilterUserData)
+                or.RowNumber = rowCount;
+                rowCount++;
+                ar.Add(or);
                 if (--maxRows <= 0)             // don't retrieve more than max
                     break;
             }
             ar.TrimExcess();        // free up any extraneous space; can be sizeable for large # rows
-            if (f != null)
-                await f.ApplyFinalFilters(rpt, rows, false).ConfigureAwait(false);
 
             SetMyUserData(rpt, rows);
         }
@@ -524,19 +521,14 @@ namespace Majorsilence.Reporting.Rdl
             {
                 Row or = new Row(rows, dr.FieldCount);
                 dr.GetValues(or.Data);
-                // Apply the filters 
-                if (f == null || await f.Apply(rpt, or).ConfigureAwait(false))
-                {
-                    or.RowNumber = rowCount;    // 
-                    rowCount++;
-                    ar.Add(or);
-                }
+                // Filtered when the report gets its data (FilterUserData)
+                or.RowNumber = rowCount;
+                rowCount++;
+                ar.Add(or);
                 if (--maxRows <= 0)             // don't retrieve more than max
                     break;
             }
             ar.TrimExcess();        // free up any extraneous space; can be sizeable for large # rows
-            if (f != null)
-                await f.ApplyFinalFilters(rpt, rows, false).ConfigureAwait(false);
 
             SetMyUserData(rpt, rows);
         }
@@ -584,19 +576,14 @@ namespace Majorsilence.Reporting.Rdl
                         continue;
                     or.Data[fld.ColumnNumber] = dr[fld.DataField];
                 }
-                // Apply the filters 
-                if (f == null || await f.Apply(rpt, or).ConfigureAwait(false))
-                {
-                    or.RowNumber = rowCount;    // 
-                    rowCount++;
-                    ar.Add(or);
-                }
+                // Filtered when the report gets its data (FilterUserData)
+                or.RowNumber = rowCount;
+                rowCount++;
+                ar.Add(or);
                 if (--maxRows <= 0)             // don't retrieve more than max
                     break;
             }
             ar.TrimExcess();        // free up any extraneous space; can be sizeable for large # rows
-            if (f != null)
-                await f.ApplyFinalFilters(rpt, rows, false).ConfigureAwait(false);
 
             SetMyUserData(rpt, rows);
         }
@@ -652,18 +639,13 @@ namespace Majorsilence.Reporting.Rdl
                         }
                     }
                 }
-                // Apply the filters 
-                if (f == null || await f.Apply(rpt, or).ConfigureAwait(false))
-                {
-                    or.RowNumber = rowCount;    // 
-                    rowCount++;
-                    ar.Add(or);
-                }
+                // Filtered when the report gets its data (FilterUserData)
+                or.RowNumber = rowCount;
+                rowCount++;
+                ar.Add(or);
             }
 
             ar.TrimExcess();        // free up any extraneous space; can be sizeable for large # rows
-            if (f != null)
-                await f.ApplyFinalFilters(rpt, rows, false).ConfigureAwait(false);
 
             SetMyUserData(rpt, rows);
         }
@@ -1095,6 +1077,26 @@ namespace Majorsilence.Reporting.Rdl
             }
         }
 
+        // Data given with SetData is filtered when the report gets its data, not when it is
+        // given: a filter can read the report's parameters, which RunGetData sets first. The
+        // rows given are kept whole, so each run filters them afresh.
+        private async Task FilterUserData(Report rpt, Rows uData, Filters f)
+        {
+            if (f == null || !(rpt.Cache.Get(this, "userdataall") is List<Row> all))
+                return;
+            List<Row> kept = new List<Row>();
+            foreach (Row or in all)
+            {
+                if (await f.Apply(rpt, or).ConfigureAwait(false))
+                {
+                    or.RowNumber = kept.Count;
+                    kept.Add(or);
+                }
+            }
+            uData.Data = kept;
+            await f.ApplyFinalFilters(rpt, uData, false).ConfigureAwait(false);
+        }
+
         private Rows GetMyUserData(Report rpt)
         {
             return rpt.Cache.Get(this, "userdata") as Rows;
@@ -1105,10 +1107,12 @@ namespace Majorsilence.Reporting.Rdl
             if (data == null)
             {
                 rpt.Cache.Remove(this, "userdata");
+                rpt.Cache.Remove(this, "userdataall");
             }
             else
             {
                 rpt.Cache.AddReplace(this, "userdata", data);
+                rpt.Cache.AddReplace(this, "userdataall", data.Data);
             }
         }
 
