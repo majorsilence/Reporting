@@ -201,7 +201,7 @@ namespace Majorsilence.Reporting.Rdl
 
         protected internal override void AddText(float x, float y, float height, float width,
             string[] sa, StyleInfo si, float[] tw, bool bWrap, string url, bool bNoClip, string tooltip, bool bClipSides, bool bNoWrap,
-            bool[] wordBroken)
+            bool[] wordBroken, float wrapInset)
         {
             if (sa == null || sa.Length == 0) return;
 
@@ -237,7 +237,9 @@ namespace Majorsilence.Reporting.Rdl
                 // may not grow and has room for one line only: Crystal sets a word on that line
                 // whole and cuts it at the box's edge, so its last letter that fits shows in part,
                 // where breaking it would leave that letter off.
-                sa = RewrapLines(RejoinSoftWraps(sa, wordBroken), baseStyle, availableW, paragraphEnds,
+                // The lines break wrapInset short of the width they are drawn in; a justified
+                // line is still spread to the full width below.
+                sa = RewrapLines(RejoinSoftWraps(sa, wordBroken), baseStyle, Math.Max(1, availableW - wrapInset), paragraphEnds,
                     breakWords: maxLines != 1);
             }
 

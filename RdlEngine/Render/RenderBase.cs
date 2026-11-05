@@ -135,11 +135,13 @@ namespace Majorsilence.Reporting.Rdl
         /// Page Text element at the X Y position; multiple lines handled.
         /// wordBroken, when not null, says of each line whether it ends inside a word that the next
         /// line goes on with (a word wider than the box, broken between its letters).
+        /// wrapInset is how much short of the right padding the lines break (PageText.WrapInset);
+        /// they are drawn and aligned against the box's full width all the same.
         /// </summary>
         /// <returns></returns>
         internal abstract protected void AddText(float x, float y, float height, float width, string[] sa,
             StyleInfo si, float[] tw, bool bWrap, string url, bool bNoClip, string tooltip, bool bClipSides, bool bNoWrap,
-            bool[] wordBroken);
+            bool[] wordBroken, float wrapInset);
 
         #endregion
 
@@ -325,7 +327,7 @@ namespace Majorsilence.Reporting.Rdl
 
 
                     AddText(pt.X, pt.Y, pt.H, pt.W, sa, pt.SI, textwidth, pt.CanGrow, pt.HyperLink, pt.NoClip, pt.Tooltip, pt.ClipSides, pt.NoWrap,
-                        wordBroken);
+                        wordBroken, pt.WrapInset);
 
                     if (pt.Bookmark != null)
                     {
@@ -511,8 +513,8 @@ namespace Majorsilence.Reporting.Rdl
                 //  1) split the string into the forced line breaks (ie "\n and \r")
                 //  2) foreach of the forced line breaks; break these into words and recombine 
                 s = Majorsilence.Reporting.Rdl.Textbox.LineBreaksAsLineFeeds(s);	// a CR LF is one break, and a CR alone is one too
-                // remove the size reserved for left and right padding
-                float ptWidth = pt.W - pt.SI.PaddingLeft - pt.SI.PaddingRight;
+                // remove the size reserved for left and right padding, and the inset its lines break short by
+                float ptWidth = pt.W - pt.SI.PaddingLeft - pt.SI.PaddingRight - pt.WrapInset;
                 if (ptWidth <= 0)
                     ptWidth = 1;
 
