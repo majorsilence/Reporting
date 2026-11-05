@@ -158,9 +158,7 @@ namespace Majorsilence.Reporting.Rdl
 			// Go and draw the pies
 			for (int iRow=1; iRow <= CategoryCount; iRow++)
 			{
-				int pieLocX=(int) (Layout.PlotArea.Left + ((iRow-1) * ((double) (Layout.PlotArea.Width) / CategoryCount)));
-
-				pieLocX += gapSize;	// space before series
+				double slotWidth = (double) (Layout.PlotArea.Width) / CategoryCount;
 				double total=0;
 				for (int iCol=1; iCol <= SeriesCount; iCol++)
 				{
@@ -170,6 +168,9 @@ namespace Majorsilence.Reporting.Rdl
 				// Pie size is a ratio of the area of the pies (not the diameter)
 				startAngle=0.0f;
 				int pieSize = (int) (2 * Math.Sqrt(Math.PI * ((maxPieSize/2) * (maxPieSize/2) * total/maxCategory) / Math.PI));
+				// Each pie is centred in its category's share of the plot area, as it is centred
+				// in its height; it was drawn at the share's left edge.
+				int pieLocX=(int) (Layout.PlotArea.Left + ((iRow-1) * slotWidth) + (slotWidth - pieSize) / 2);
 				for (int iCol=1; iCol <= SeriesCount; iCol++)
 				{
 					double v = await GetDataValue(rpt, iRow, iCol).ConfigureAwait(false);
@@ -286,6 +287,15 @@ namespace Majorsilence.Reporting.Rdl
 					adjY = - adjY;
 				}
 				rect = new System.Drawing.Rectangle(rect.Left + adjX + offset, rect.Top + adjY + offset, side, side);
+			}
+
+			// A slice that is the whole pie is drawn as a circle: an arc swept a full turn ends
+			// where it starts, and was drawn as a single line from the centre.
+			if (endAngle - startAngle >= 360)
+			{
+				g.FillEllipse(brush, rect);
+				g.DrawEllipse(Draw2.Pens.Black, rect);
+				return;
 			}
 
 			g.FillPie(brush, rect, startAngle, endAngle - startAngle);
