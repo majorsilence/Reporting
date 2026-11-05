@@ -131,10 +131,19 @@ namespace Majorsilence.Reporting.Rdl
             if (im == null || im.Length == 0) return;
 
             bool isJpeg = im.Length > 3 && im[0] == 0xFF && im[1] == 0xD8 && im[2] == 0xFF;
-            byte[] imgData = isJpeg ? im : DecodeToRgb(im, ref samplesW, ref samplesH);
-            if (imgData == null) return;
-
-            _currentPage.DrawImage(imgData, samplesW, samplesH, isJpeg, x, y, width, height);
+            if (isJpeg)
+            {
+                _currentPage.DrawImage(im, samplesW, samplesH, true, x, y, width, height);
+            }
+            else
+            {
+                // Keep the alpha channel: PdfImage.FromRgba stores fully opaque pixels as plain RGB
+                // and adds a soft mask (SMask) only when some pixel is not opaque, so a transparent
+                // PNG no longer comes out with black where it should be see-through.
+                byte[] rgba = DecodeToRgba(im, ref samplesW, ref samplesH);
+                if (rgba == null) return;
+                _currentPage.DrawImage(PdfImage.FromRgba(rgba, samplesW, samplesH), x, y, width, height);
+            }
             AddAnnotations(x, y, height, width, url, tooltip);
             iAddBorder(si, x, y, height, width);
         }
@@ -990,7 +999,7 @@ namespace Majorsilence.Reporting.Rdl
 
         // ── image decoding ────────────────────────────────────────────────────
 
-        private static byte[] DecodeToRgb(byte[] data, ref int samplesW, ref int samplesH)
+        private static byte[] DecodeToRgba(byte[] data, ref int samplesW, ref int samplesH)
         {
             try
             {
@@ -998,17 +1007,18 @@ namespace Majorsilence.Reporting.Rdl
                 using var img = new Majorsilence.Forms.Drawing.Bitmap(ms);
                 samplesW = img.Width;
                 samplesH = img.Height;
-                var rgb = new byte[samplesW * samplesH * 3];
+                var rgba = new byte[samplesW * samplesH * 4];
                 int idx = 0;
                 for (int row = 0; row < samplesH; row++)
                     for (int col = 0; col < samplesW; col++)
                     {
                         var px = img.GetPixel(col, row);
-                        rgb[idx++] = px.R;
-                        rgb[idx++] = px.G;
-                        rgb[idx++] = px.B;
+                        rgba[idx++] = px.R;
+                        rgba[idx++] = px.G;
+                        rgba[idx++] = px.B;
+                        rgba[idx++] = px.A;
                     }
-                return rgb;
+                return rgba;
             }
             catch
             {
