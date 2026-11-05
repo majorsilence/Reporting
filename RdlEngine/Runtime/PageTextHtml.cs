@@ -289,7 +289,8 @@ namespace Majorsilence.Reporting.Rdl
 						// which ends it whether or not it was closed.
 						if (paragraphStyle != null && CurrentStyle(si) == paragraphStyle)
 							PopStyle();
-						paragraphStyle = HandleBlock(token.Substring(1), CurrentStyle(si));
+						// A bare <p> stays in the style it is in; only one with attributes has its own.
+						paragraphStyle = ltoken == "<p>" ? null : HandleBlock(token.Substring(1), CurrentStyle(si));
 					}
 					else if (ltoken == "</p>")
 					{
