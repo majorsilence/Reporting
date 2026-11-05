@@ -54,6 +54,10 @@ namespace Majorsilence.Reporting.Rdl
 			set { _NoWrap = value; }
 		}
 
+		// How much narrower than the box, on the right, its lines break; they are still drawn
+		// and aligned against the box's full width (Textbox.WrapInsetPoints).
+		internal float WrapInset { get; set; }
+
 		public bool CanGrow
 		{
 			get { return bGrow; }

@@ -54,6 +54,7 @@ namespace Majorsilence.Reporting.Rdl
 		bool _NoWrap;		// a box that may not grow prints each line whole, unwrapped; see NoWrapOf
 		float _TabStopPoints = TabStopPoints;	// how far apart the tab stops are; see TabStopIntervalOf
 		bool _TotalPagesLater;	// a body box reading Globals!TotalPages: run again once the page count is known
+		float? _WrapInsetPoints;	// how much narrower its lines break than they are drawn; see WrapInsetPoints
 		List<string> _ExprReferences;	// array of names of expressions that reference this Textbox;
 								//  only needed for page header/footer references 
 
@@ -317,6 +318,7 @@ namespace Majorsilence.Reporting.Rdl
 			// beside it - cut to the column, such a cell would print nothing at all.
 			// A box asked not to wrap is cut at its sides wherever it is: it has asked for that.
 			pt.NoWrap = _NoWrap && !this.CanGrow;
+			pt.WrapInset = WrapInsetPoints;
 			pt.ClipSides = !this.CanGrow && (pt.NoWrap || !this.IsTableOrMatrixCell(r));
 
             // check TextAlign: if General then correct based on data type
@@ -397,6 +399,32 @@ namespace Majorsilence.Reporting.Rdl
 		// single page can offer (that case previously clipped the overflow). Splits
 		// the text at whitespace boundaries into page-sized chunks, emitting one
 		// PageText per page. Returns the last chunk (already added to its page).
+		// <Custom><WrapInset>31pt</WrapInset></Custom> breaks the box's lines that much short of
+		// where they are drawn to: its text wraps as if the box were narrower on the right, but
+		// is aligned, and a justified line spread, against the box's full width inside its
+		// padding. Crystal Reports breaks a line by measuring it in a font a little wider than the
+		// one it draws, so its lines break short of the edge while a justified paragraph still
+		// reaches it; padding on the right had the breaks right, and stopped the justified lines
+		// that far short too. A size that does not parse, or is not positive, is none.
+		private float WrapInsetPoints
+		{
+			get
+			{
+				if (_WrapInsetPoints is float known)
+					return known;
+				float inset = 0;
+				if (Custom != null)
+					foreach (XmlNode xNode in Custom.CustomXmlNode.ChildNodes)
+						if (xNode.Name == "WrapInset")
+						{
+							inset = Math.Max(0, new RSize(OwnerReport, xNode.InnerText.Trim()).Points);
+							break;
+						}
+				_WrapInsetPoints = inset;
+				return inset;
+			}
+		}
+
 		private async Task<PageText> RunPageSplitOverflow(Report rpt, Pages pgs, PageText pt, Row row)
 		{
 			Graphics g = pgs.G;
@@ -407,6 +435,7 @@ namespace Majorsilence.Reporting.Rdl
 				wrapPoints -= await Style.EvalPaddingLeft(rpt, row).ConfigureAwait(false) + await Style.EvalPaddingRight(rpt, row).ConfigureAwait(false);
 				padV = await Style.EvalPaddingTop(rpt, row).ConfigureAwait(false) + await Style.EvalPaddingBottom(rpt, row).ConfigureAwait(false);
 			}
+			wrapPoints -= WrapInsetPoints;
 			bool html = pt is PageTextHtml;
 			float lineH = await MeasureTextHeightPoints(rpt, g, "Xg", row, wrapPoints, html).ConfigureAwait(false);
 
@@ -796,7 +825,7 @@ namespace Majorsilence.Reporting.Rdl
 			object o = TryEvaluate(rpt, row, out object value) ? value : await Evaluate(rpt, row).ConfigureAwait(false);
 
 			TypeCode tc = _Value.GetTypeCode();
-			float wrapPoints = this.WidthPoints(rpt);		// the width between the paddings the text is drawn in
+			float wrapPoints = this.WidthPoints(rpt) - WrapInsetPoints;	// the width between the paddings the text breaks in
 
 			Style.MeasureSetup setup = null;
 			if (this.Style != null)
