@@ -121,6 +121,7 @@ namespace Majorsilence.Reporting.Rdl
 
 			PageRectangle pr = new PageRectangle();
             await SetPagePositionAndStyle(r, pr, row).ConfigureAwait(false);
+            float? bottom = null;       // set when the rectangle ends on a later page
 			if (pr.SI.BackgroundImage != null)
 				pr.SI.BackgroundImage.H = pr.H;		//   and in the background image
 
@@ -136,16 +137,21 @@ namespace Majorsilence.Reporting.Rdl
                     float saveY = p.YOffset;
        //             p.YOffset += (Top == null ? 0 : this.Top.Points);
                     p.YOffset = pr.Y;       // top of rectangle is base for contained report items
-                    int firstContained = p.Count;
+                    int pageIndex = IndexOf(pgs, p);
+                    var itemsBefore = new System.Collections.Generic.List<int>();
+                    for (int i = pageIndex; i < pgs.Count; i++)
+                        itemsBefore.Add(pgs[i].Count);
                     await _ReportItems.RunPage(pgs, row, GetOffsetCalc(pgs.Report) + LeftCalc(r)).ConfigureAwait(false);
                     p.YOffset = saveY;
                     if (pgs.CurrentPage == p)
                     {
                         // What a rectangle drawn beneath holds is drawn beneath with it.
                         if (_DrawBeneath)
-                            p.DrawBeneath(firstContained, ZIndex);
-                        GrowToContents(p, firstContained, pr);
+                            p.DrawBeneath(itemsBefore[0], ZIndex);
+                        GrowToContents(p, itemsBefore[0], pr);
                     }
+                    else
+                        bottom = SplitAcrossPages(pgs, pageIndex, itemsBefore, pr);
                 }
 
                 // Handle page breaking at end
@@ -159,7 +165,7 @@ namespace Majorsilence.Reporting.Rdl
             if (bHidden)
                 SetPagePositionEndHidden(pgs, pr.Y + pr.H);
             else
-                SetPagePositionEnd(pgs, pr.Y + pr.H);
+                SetPagePositionEnd(pgs, bottom ?? pr.Y + pr.H);
 
 			return;
         }
@@ -182,6 +188,63 @@ namespace Majorsilence.Reporting.Rdl
             pr.H = bottom - pr.Y;
             if (pr.SI.BackgroundImage != null)
                 pr.SI.BackgroundImage.H = pr.H;
+        }
+
+        // As SSRS splits a rectangle whose items run onto later pages: the first page keeps the top and
+        // side borders down to its last item there, a middle page has the sides, and the last page the
+        // sides and the bottom border below its last item. Returns the bottom of the last piece.
+        private static float SplitAcrossPages(Pages pgs, int pageIndex, System.Collections.Generic.List<int> itemsBefore, PageRectangle pr)
+        {
+            GrowToContents(pgs[pageIndex], itemsBefore[0], pr);
+            var bottomBorder = pr.SI.BStyleBottom;
+            pr.SI = (StyleInfo)pr.SI.Clone();
+            pr.SI.BStyleBottom = BorderStyleEnum.None;
+
+            int lastIndex = IndexOf(pgs, pgs.CurrentPage);
+            float end = pr.Y + pr.H;
+            for (int i = pageIndex + 1; i <= lastIndex; i++)
+            {
+                Page q = pgs[i];
+                int first = i - pageIndex < itemsBefore.Count ? itemsBefore[i - pageIndex] : 0;
+                if (first >= q.Count)
+                    continue;
+                var (top, itemsBottom) = ItemsBounds(q, first);
+                var piece = (PageRectangle)pr.Clone();
+                piece.SI = (StyleInfo)pr.SI.Clone();
+                piece.SI.BStyleTop = BorderStyleEnum.None;
+                piece.SI.BStyleBottom = i == lastIndex ? bottomBorder : BorderStyleEnum.None;
+                piece.SI.BackgroundImage = null;
+                q.InsertObject(piece);      // behind the items it holds
+                piece.ItemNumber = -1;      // and stays behind them when the page is sorted
+                piece.X = pr.X;
+                piece.Y = top;
+                piece.W = pr.W;
+                piece.H = itemsBottom - top;
+                end = piece.Y + piece.H;
+            }
+            return end;
+        }
+
+        private static (float Top, float Bottom) ItemsBounds(Page p, int first)
+        {
+            float top = float.MaxValue, bottom = float.MinValue;
+            for (int i = first; i < p.Count; i++)
+            {
+                PageItem pi = p[i];
+                top = Math.Min(top, pi is PageLine tl ? Math.Min(tl.Y, tl.Y2) : pi.Y);
+                bottom = Math.Max(bottom, pi is PageLine bl ? Math.Max(bl.Y, bl.Y2) : pi.Y + pi.H);
+            }
+            return (top, bottom);
+        }
+
+        private static int IndexOf(Pages pgs, Page p)
+        {
+            for (int i = 0; i < pgs.Count; i++)
+            {
+                if (pgs[i] == p)
+                    return i;
+            }
+            return pgs.Count - 1;
         }
 
         internal override void RemoveWC(Report rpt)
