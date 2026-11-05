@@ -116,7 +116,10 @@ namespace Majorsilence.Reporting.Rdl
 
 				if (r == end) 
 					height += footerHeight;		// on last row; may need additional room for footer
-				if (height > pgs.BottomOfPage)
+				// A page that holds nothing yet but the headers repeated at its top is not left:
+				// RunPageNew keeps it, as a new one would hold no more, so breaking would only
+				// print the headers on it again. What does not fit runs past its bottom.
+				if (height > pgs.BottomOfPage && !p.IsEmpty())
 				{
                     await OwnerTable.RunPageFooter(pgs, row, false).ConfigureAwait(false);
 					p = OwnerTable.RunPageNew(pgs, p);

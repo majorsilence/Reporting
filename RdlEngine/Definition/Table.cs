@@ -382,7 +382,7 @@ namespace Majorsilence.Reporting.Rdl
             if (_Footer != null && (_Footer.RepeatOnNewPage || bLast))
             {
                 Page p = pgs.CurrentPage;
-                if (p.YOffset + await _Footer.HeightOfRows(pgs, row).ConfigureAwait(false) > pgs.BottomOfPage)
+                if (p.YOffset + await _Footer.HeightOfRows(pgs, row).ConfigureAwait(false) > pgs.BottomOfPage && !p.IsEmpty())
                 {
                     await RunPageBottomRows(pgs, row, false).ConfigureAwait(false);
                     p = RunPageNew(pgs, p);
@@ -1010,7 +1010,7 @@ namespace Majorsilence.Reporting.Rdl
 			else	// When no details we need to figure out whether any more fits on a page
 			{
 				Page p = pgs.CurrentPage;
-				if (p.YOffset + footerHeight > pgs.BottomOfPage) //	Do we need new page to fit footer?
+				if (p.YOffset + footerHeight > pgs.BottomOfPage && !p.IsEmpty()) //	Do we need new page to fit footer?
 				{
                     await RunPageBottomRows(pgs, wc.Data.Data[ge.EndRow], false).ConfigureAwait(false);
 					p = RunPageNew(pgs, p);
@@ -1240,7 +1240,7 @@ namespace Majorsilence.Reporting.Rdl
 					{
 						Page p = pgs.CurrentPage;			// this can change after running a row
 						float height = p.YOffset + await header.HeightOfRows(pgs, r).ConfigureAwait(false);
-						if (height > pgs.BottomOfPage)
+						if (height > pgs.BottomOfPage && !p.IsEmpty())
 						{
                             await RunPageBottomRows(pgs, r, false).ConfigureAwait(false);
 							p = RunPageNew(pgs, p);

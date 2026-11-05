@@ -73,7 +73,7 @@ namespace Majorsilence.Reporting.Rdl
 					TableRow tr = _TableRows.Items[i];
 					p = pgs.CurrentPage;
 					float h = await tr.HeightOfRow(pgs, row).ConfigureAwait(false);
-					if (h > 0 && p.YOffset + h > pgs.BottomOfPage)
+					if (h > 0 && p.YOffset + h > pgs.BottomOfPage && !p.IsEmpty())
 					{
 						await OwnerTable.RunPageBottomRows(pgs, row, false).ConfigureAwait(false);
 						p = OwnerTable.RunPageNew(pgs, p);
@@ -84,7 +84,7 @@ namespace Majorsilence.Reporting.Rdl
 				}
 				return;
 			}
-			if (p.YOffset + height > pgs.BottomOfPage)
+			if (p.YOffset + height > pgs.BottomOfPage && !p.IsEmpty())	// an empty page is kept (see Details.RunPage)
 			{
                 await OwnerTable.RunPageBottomRows(pgs, row, false).ConfigureAwait(false);
 				p = OwnerTable.RunPageNew(pgs, p);
