@@ -377,5 +377,60 @@ namespace ReportTests
 
             Assert.That (Regex.Matches (memory.GetText (), "<img").Count, Is.EqualTo (1), "one chart in the header, drawn over all rows");
         }
+
+        // SSRS groups a chart axis on several expressions and shows one label per group (Perio Trends
+        // Report: =Fields!DateCreated.Value and =Fields!Id.Value, labelled by the date).
+        private static string TwoExpressionGroup (string axis)
+            => Chart2008.Replace (
+                axis == "category"
+                    ? "<Group Name=\"Revenue_CategoryGroup\"><GroupExpressions><GroupExpression>=Fields!Name.Value</GroupExpression></GroupExpressions></Group>"
+                    : "<Group Name=\"Revenue_SeriesGroup\"><GroupExpressions><GroupExpression>=Fields!Region.Value</GroupExpression></GroupExpressions></Group>",
+                axis == "category"
+                    ? "<Group Name=\"Revenue_CategoryGroup\"><GroupExpressions><GroupExpression>=Fields!Name.Value</GroupExpression><GroupExpression>=Fields!Region.Value</GroupExpression></GroupExpressions></Group>"
+                    : "<Group Name=\"Revenue_SeriesGroup\"><GroupExpressions><GroupExpression>=Fields!Region.Value</GroupExpression><GroupExpression>=Fields!Name.Value</GroupExpression></GroupExpressions></Group>");
+
+        [TestCase ("category")]
+        [TestCase ("series")]
+        public async Task Chart2008_GroupedOnTwoExpressions_RendersWithOneLabelPerGroup (string axis)
+        {
+            var xml = TwoExpressionGroup (axis);
+            Assert.That (xml, Is.Not.EqualTo (Chart2008), "the group was not replaced");
+            var parser = new RDLParser (ReportWith (Rdl2008, xml)) { SkipDatabaseSchemaValidation = true };
+            using var report = await parser.Parse ();
+
+            Assert.That (report.ErrorMaxSeverity, Is.LessThanOrEqualTo (4), string.Join (" | ", Messages (report)));
+            var matrix = ((Chart)report.ReportDefinition.Body.ReportItems.Items.Single ()).ChartMatrix;
+            var (grouping, items) = axis == "category"
+                ? (matrix.RowGroupings.Items.Single ().DynamicRows.Grouping, matrix.RowGroupings.Items.Single ().DynamicRows.ReportItems)
+                : (matrix.ColumnGroupings.Items.Single ().DynamicColumns.Grouping, matrix.ColumnGroupings.Items.Single ().DynamicColumns.ReportItems);
+            Assert.That (grouping.GroupExpressions.Items.Count, Is.EqualTo (2), "grouped on both expressions");
+            Assert.That (items.Items.Count, Is.EqualTo (1), "one label per group");
+
+            await report.DataSets["Data"].SetData (Data ());
+            await report.RunGetData (null);
+            using var memory = new MemoryStreamGen ();
+            await report.RunRender (memory, OutputPresentationType.HTML);
+            Assert.That (memory.GetText (), Does.Contain ("<img"));
+        }
+
+        [Test]
+        public async Task Chart2008_WithOneUngroupedCategory_RendersAllRowsAsOneCategory ()
+        {
+            // Perio Trends Report: one category member with no group (the whole dataset), series side by side.
+            var xml = Chart2008
+                .Replace ("<Group Name=\"Revenue_CategoryGroup\"><GroupExpressions><GroupExpression>=Fields!Name.Value</GroupExpression></GroupExpressions></Group>", "")
+                .Replace ("<SortExpressions><SortExpression><Value>=Fields!Name.Value</Value></SortExpression></SortExpressions>", "")
+                .Replace ("<Label>=Fields!Name.Value</Label>", "<Label />");
+            Assert.That (xml, Is.Not.EqualTo (Chart2008), "the category member was not replaced");
+            var parser = new RDLParser (ReportWith (Rdl2008, xml)) { SkipDatabaseSchemaValidation = true };
+            using var report = await parser.Parse ();
+
+            Assert.That (report.ErrorMaxSeverity, Is.LessThanOrEqualTo (4), string.Join (" | ", Messages (report)));
+            await report.DataSets["Data"].SetData (Data ());
+            await report.RunGetData (null);
+            using var memory = new MemoryStreamGen ();
+            await report.RunRender (memory, OutputPresentationType.HTML);
+            Assert.That (memory.GetText (), Does.Contain ("<img"));
+        }
     }
 }
