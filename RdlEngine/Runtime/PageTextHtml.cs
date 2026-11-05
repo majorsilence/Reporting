@@ -103,6 +103,9 @@ namespace Majorsilence.Reporting.Rdl
 			// Now set the default style for the rest of the members
 			StyleInfo si = this.SI.Clone() as StyleInfo;
 			si.BStyleBottom = si.BStyleLeft = si.BStyleRight = si.BStyleTop = BorderStyleEnum.None;
+			// Each run's position already holds the box's padding, and the renderers add a run's
+			// own padding when they draw it; kept, the text sat one padding too low and too far right.
+			si.PaddingBottom = si.PaddingLeft = si.PaddingRight = si.PaddingTop = 0;
 			pt.SI.TextAlign = TextAlignEnum.Left;
 			pt.SI.VerticalAlign = VerticalAlignEnum.Top;
 			si.BackgroundColor = System.Drawing.Color.Empty;
