@@ -72,11 +72,14 @@ namespace ReportTests
         public void WeekdayNonAmerican_InvalidString_ThrowsFormatException() =>
             Assert.Throws<FormatException>(() => VBFunctions.WeekdayNonAmerican("not-a-date"));
 
-        [TestCase(1, false, "Sunday")]
-        [TestCase(2, false, "Monday")]
-        [TestCase(7, false, "Saturday")]
-        public void WeekdayName_ReturnsCorrectName(int day, bool abbrev, string expected) =>
-            Assert.That(VBFunctions.WeekdayName(day, abbrev), Is.EqualTo(expected));
+        // WeekdayName follows the current culture, so compare with that culture's day name
+        // rather than an English literal (the test then passes on any machine).
+        [TestCase(1, DayOfWeek.Sunday)]
+        [TestCase(2, DayOfWeek.Monday)]
+        [TestCase(7, DayOfWeek.Saturday)]
+        public void WeekdayName_ReturnsCorrectName(int day, DayOfWeek expected) =>
+            Assert.That(VBFunctions.WeekdayName(day, false),
+                Is.EqualTo(System.Globalization.CultureInfo.CurrentCulture.DateTimeFormat.GetDayName(expected)));
 
         [Test]
         public void WeekdayName_Abbreviated_ReturnsShortenedName() =>
