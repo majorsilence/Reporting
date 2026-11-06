@@ -396,6 +396,9 @@
 	<data name="Parser_ErrorP_NoScope4Aggregate" xml:space="preserve">
     <value>No scope provided for aggregate function '{0}' but more than one DataSet defined.</value>
   </data>
+	<data name="Parser_ErrorP_LookupRequires4Arguments" xml:space="preserve">
+    <value>{0} function requires 4 arguments: source, destination, result, dataSetName.</value>
+  </data>
 	<data name="Parser_ErrorP_FieldNotInDataSet" xml:space="preserve">
     <value>Field '{0}' is not in DataSet {1}.</value>
   </data>
