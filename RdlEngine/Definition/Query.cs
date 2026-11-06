@@ -797,7 +797,10 @@ namespace Majorsilence.Reporting.Rdl
                     dp.Value = ToTypedArray(ar);
                 }
                 else
-                    dp.Value = pvalue;
+                    // Issue #542. ADO.NET providers treat a parameter whose Value is a CLR null
+                    // as not set at all (SqlClient omits it from the call entirely), so a report
+                    // parameter evaluating to Nothing must become DBNull.Value, not null.
+                    dp.Value = pvalue ?? (object)DBNull.Value;
                 cmSQL.Parameters.Add(dp);
             }
         }
