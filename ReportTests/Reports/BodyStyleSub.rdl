@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Report Name="BodyStyleSub">
+  <Description>Subreport half of the Body/Style test: a body with a background and border,
+  holding a textbox shorter than the body's own designed Height.</Description>
+  <Body>
+    <Height>1in</Height>
+    <ReportItems>
+      <Textbox Name="SubText">
+        <Top>0in</Top>
+        <Left>0in</Left>
+        <Height>0.25in</Height>
+        <Width>3in</Width>
+        <Value>="SUB-TEXT"</Value>
+      </Textbox>
+    </ReportItems>
+    <Style>
+      <BackgroundColor>#f9f9f9</BackgroundColor>
+      <BorderStyle>
+        <Default>Solid</Default>
+      </BorderStyle>
+      <BorderColor>
+        <Default>#999999</Default>
+      </BorderColor>
+    </Style>
+  </Body>
+  <Width>3in</Width>
+  <PageWidth>8.5in</PageWidth>
+  <PageHeight>11in</PageHeight>
+</Report>

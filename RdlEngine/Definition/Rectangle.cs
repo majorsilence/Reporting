@@ -174,7 +174,9 @@ namespace Majorsilence.Reporting.Rdl
         // can print past its designed bottom, and the border, the background and the items
         // placed below the rectangle follow it down. Only on the rectangle's own page. What a
         // rectangle drawn beneath draws takes no room, and the rectangle does not grow to hold it.
-        private static void GrowToContents(Page p, int firstContained, PageRectangle pr)
+        // Shared with Body.RunPage, which wraps the report body's own items the same way,
+        // for the top-level report's Body/Style and a subreport's.
+        internal static void GrowToContents(Page p, int firstContained, PageRectangle pr)
         {
             float bottom = pr.Y + pr.H;
             for (int i = firstContained; i < p.Count; i++)
@@ -193,7 +195,7 @@ namespace Majorsilence.Reporting.Rdl
         // As SSRS splits a rectangle whose items run onto later pages: the first page keeps the top and
         // side borders down to its last item there, a middle page has the sides, and the last page the
         // sides and the bottom border below its last item. Returns the bottom of the last piece.
-        private static float SplitAcrossPages(Pages pgs, int pageIndex, System.Collections.Generic.List<int> itemsBefore, PageRectangle pr)
+        internal static float SplitAcrossPages(Pages pgs, int pageIndex, System.Collections.Generic.List<int> itemsBefore, PageRectangle pr)
         {
             GrowToContents(pgs[pageIndex], itemsBefore[0], pr);
             var bottomBorder = pr.SI.BStyleBottom;
@@ -237,7 +239,7 @@ namespace Majorsilence.Reporting.Rdl
             return (top, bottom);
         }
 
-        private static int IndexOf(Pages pgs, Page p)
+        internal static int IndexOf(Pages pgs, Page p)
         {
             for (int i = 0; i < pgs.Count; i++)
             {
