@@ -9,7 +9,10 @@
         <Configurations>Debug;Release</Configurations>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
         <DefineConstants>$(DefineConstants);DRAWINGCOMPAT</DefineConstants>
-        <IsPackable>false</IsPackable>
+        <IsPackable>true</IsPackable>
+        <PackageId>Majorsilence.Reporting.UI.RdlAvalonia</PackageId>
+        <Description>Avalonia report viewer control for Majorsilence Reporting: pages, zoom, find, print and export of an RDL report, on Windows, Linux and macOS. Targets .NET 8 and .NET 10.</Description>
+        <PackageTags>$(PackageTags);avalonia;viewer</PackageTags>
     </PropertyGroup>
     <ItemGroup>
         <None Remove=".gitignore"/>
@@ -25,7 +28,7 @@
         <PackageReference Include="Avalonia" />
         <PackageReference Include="Avalonia.Desktop" />
 <PackageReference Include="Avalonia.Themes.Fluent" />
-        <PackageReference Include="XamlNameReferenceGenerator" />
+        <PackageReference Include="XamlNameReferenceGenerator" PrivateAssets="all" />
         <PackageReference Include="SkiaSharp" />
     </ItemGroup>
     <ItemGroup>
