@@ -90,8 +90,43 @@ namespace Majorsilence.Reporting.Rdl
 			}
 			this.SetCurrentColumn(pgs.Report, 0);
 
-			if (_ReportItems != null)
+			if (_ReportItems == null)
+				return;
+
+			if (_Style == null)
+			{
                 await _ReportItems.RunPage(pgs, null, OwnerReport.LeftMargin.Points).ConfigureAwait(false);
+				return;
+			}
+
+			// SSRS draws the body's Style (BackgroundColor, Border) behind its items, as a
+			// rectangle sized to the body's actual rendered extent - its design Height grown
+			// to fit its contents, and split across pages when they run past the first one.
+			// Rectangle.RunPage does the same for a report item that holds a Rectangle; here
+			// it is reused for the top-level report's Body on every page, and (through
+			// Subreport.RunPage calling this same method) for a subreport's.
+			Page startPage = pgs.CurrentPage;
+			int pageIndex = Rectangle.IndexOf(pgs, startPage);
+
+			PageRectangle pr = new PageRectangle();
+			pr.X = OwnerReport.LeftMargin.Points;
+			pr.W = OwnerReport.Width.Points;
+			pr.Y = 0;
+			pr.H = _Height == null ? 0 : _Height.Points;
+			pr.SI = await _Style.GetStyleInfoShared(pgs.Report, null).ConfigureAwait(false);
+
+			startPage.AddObject(pr);
+
+			var itemsBefore = new System.Collections.Generic.List<int>();
+			for (int i = pageIndex; i < pgs.Count; i++)
+				itemsBefore.Add(pgs[i].Count);
+
+            await _ReportItems.RunPage(pgs, null, OwnerReport.LeftMargin.Points).ConfigureAwait(false);
+
+			if (pgs.CurrentPage == startPage)
+				Rectangle.GrowToContents(startPage, itemsBefore[0], pr);
+			else
+				Rectangle.SplitAcrossPages(pgs, pageIndex, itemsBefore, pr);
 
 			return ;
 		}

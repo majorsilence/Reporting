@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Report Name="BodyStyleSubreportTest">
+  <Description>A header subreport whose Body has a Style (background, border), as in #545:
+  a light grey box with a grey border behind the subreport's content.</Description>
+  <Body>
+    <Height>3in</Height>
+    <ReportItems>
+      <Subreport Name="Header">
+        <Top>0.5in</Top>
+        <Left>1in</Left>
+        <Height>1in</Height>
+        <Width>3in</Width>
+        <ReportName>BodyStyleSub</ReportName>
+      </Subreport>
+    </ReportItems>
+  </Body>
+  <Width>6.5in</Width>
+  <PageWidth>8.5in</PageWidth>
+  <PageHeight>11in</PageHeight>
+</Report>
