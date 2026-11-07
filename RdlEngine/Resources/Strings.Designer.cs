@@ -689,7 +689,16 @@ namespace Majorsilence.Reporting.RdlEngine.Resources {
                 return ResourceManager.GetString("Parser_ErrorP_NoScope4Aggregate", resourceCulture);
             }
         }
-        
+
+        /// <summary>
+        ///   Looks up a localized string similar to {0} function requires 4 arguments: source, destination, result, dataSetName..
+        /// </summary>
+        public static string Parser_ErrorP_LookupRequires4Arguments {
+            get {
+                return ResourceManager.GetString("Parser_ErrorP_LookupRequires4Arguments", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   Looks up a localized string similar to {0} is not a Code method.  Verify the name of the method and its arguments match an existing code function..
         /// </summary>
