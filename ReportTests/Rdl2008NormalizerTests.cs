@@ -162,6 +162,33 @@ namespace ReportTests
             Assert.That (html, Does.Contain ("Gadget"), "second detail row missing");
         }
 
+        // Issue #543: 2008 puts a static row's Visibility on its TablixRowHierarchy member.
+        [TestCase ("=True", false)]
+        [TestCase ("true", false)]
+        [TestCase ("=False", true)]
+        public async Task StaticRowVisibility_IsReadFromTheRowHierarchyMember (string hidden, bool expectShown)
+        {
+            var hierarchy = $@"
+            <TablixMembers>
+              <TablixMember><KeepWithGroup>After</KeepWithGroup></TablixMember>
+              <TablixMember><Visibility><Hidden>{hidden}</Hidden></Visibility><KeepWithGroup>After</KeepWithGroup></TablixMember>
+              <TablixMember><Group Name=""Details"" /></TablixMember>
+            </TablixMembers>";
+            var rdl = TablixReport (hierarchy,
+                Row ("0.25in", Cell (Textbox ("H1", "ROW-SHOWN")), Cell (Textbox ("H2", "x"))) +
+                Row ("0.25in", Cell (Textbox ("H3", "ROW-OPTIONAL")), Cell (Textbox ("H4", "y"))) +
+                Row ("0.25in", Cell (Textbox ("D1", "=Fields!Name.Value")), Cell (Textbox ("D2", "=Fields!Amount.Value"))));
+
+            var html = await RenderHtml (rdl);
+
+            Assert.That (html, Does.Contain ("ROW-SHOWN"));
+            Assert.That (html, Does.Contain ("Widget"));
+            if (expectShown)
+                Assert.That (html, Does.Contain ("ROW-OPTIONAL"));
+            else
+                Assert.That (html, Does.Not.Contain ("ROW-OPTIONAL"));
+        }
+
         [Test]
         public async Task ColSpan_CoveredCellIsDropped_SoColumnCountMatches ()
         {
