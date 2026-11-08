@@ -91,6 +91,25 @@ namespace Majorsilence.Excel
         private readonly List<string> _customNumFmts = new List<string>();
         private const int FirstCustomNumFmtId = 164; // ids below 164 are reserved for built-ins
 
+        // When true, SetCell(string) text goes through the shared strings table (xl/sharedStrings.xml,
+        // t="s" cells) instead of writing each cell's text inline (t="inlineStr"). Off by default to
+        // keep existing output unchanged; worth turning on when the same strings repeat across many cells.
+        public bool UseSharedStrings { get; set; }
+
+        private readonly List<string> _sharedStrings = new List<string>();
+        private readonly Dictionary<string, int> _sharedStringIndexes = new Dictionary<string, int>();
+        private int _sharedStringRefCount;
+
+        private int ResolveSharedString(string value)
+        {
+            _sharedStringRefCount++;
+            if (_sharedStringIndexes.TryGetValue(value, out int idx)) return idx;
+            idx = _sharedStrings.Count;
+            _sharedStrings.Add(value);
+            _sharedStringIndexes[value] = idx;
+            return idx;
+        }
+
         public XlsxWriter(string sheetName)
         {
             // Required default entries per OOXML spec
@@ -141,7 +160,16 @@ namespace Majorsilence.Excel
         public void SetCell(int rowIndex, int colIndex, string value, XlsxCellFormat format = null, int sheetIndex = 0)
         {
             int styleIndex = ResolveStyleIndex(format);
-            _sheets[sheetIndex].Cells.Add(new CellEntry(rowIndex, colIndex, CellValueKind.InlineString, value ?? "", styleIndex));
+            string v = value ?? "";
+            if (UseSharedStrings)
+            {
+                int idx = ResolveSharedString(v);
+                _sheets[sheetIndex].Cells.Add(new CellEntry(rowIndex, colIndex, CellValueKind.SharedString, idx.ToString(System.Globalization.CultureInfo.InvariantCulture), styleIndex));
+            }
+            else
+            {
+                _sheets[sheetIndex].Cells.Add(new CellEntry(rowIndex, colIndex, CellValueKind.InlineString, v, styleIndex));
+            }
         }
 
         public void SetCell(int rowIndex, int colIndex, double value, XlsxCellFormat format = null, int sheetIndex = 0)
@@ -278,14 +306,17 @@ namespace Majorsilence.Excel
             bool anyImages = false;
             foreach (var s in _sheets)
                 if (s.Images.Count > 0) { anyImages = true; break; }
+            bool useSharedStrings = UseSharedStrings && _sharedStrings.Count > 0;
 
             using (var zip = new ZipArchive(output, ZipArchiveMode.Create, leaveOpen: true))
             {
-                WriteText(zip, "[Content_Types].xml", BuildContentTypes(anyImages));
+                WriteText(zip, "[Content_Types].xml", BuildContentTypes(anyImages, useSharedStrings));
                 WriteText(zip, "_rels/.rels", BuildRootRels());
                 WriteText(zip, "xl/workbook.xml", BuildWorkbook());
-                WriteText(zip, "xl/_rels/workbook.xml.rels", BuildWorkbookRels());
+                WriteText(zip, "xl/_rels/workbook.xml.rels", BuildWorkbookRels(useSharedStrings));
                 WriteText(zip, "xl/styles.xml", BuildStyles());
+                if (useSharedStrings)
+                    WriteText(zip, "xl/sharedStrings.xml", BuildSharedStrings());
 
                 int imageOffset = 0; // images are numbered globally across all sheets
                 for (int s = 0; s < _sheets.Count; s++)
@@ -380,7 +411,7 @@ namespace Majorsilence.Excel
 
         // ── XML builders ──────────────────────────────────────────────────────────
 
-        private string BuildContentTypes(bool anyImages)
+        private string BuildContentTypes(bool anyImages, bool useSharedStrings)
         {
             var sb = new StringBuilder();
             sb.Append("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>");
@@ -393,6 +424,8 @@ namespace Majorsilence.Excel
             for (int s = 0; s < _sheets.Count; s++)
                 sb.Append($"<Override PartName=\"/xl/worksheets/sheet{s + 1}.xml\" ContentType=\"application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml\"/>");
             sb.Append("<Override PartName=\"/xl/styles.xml\" ContentType=\"application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml\"/>");
+            if (useSharedStrings)
+                sb.Append("<Override PartName=\"/xl/sharedStrings.xml\" ContentType=\"application/vnd.openxmlformats-officedocument.spreadsheetml.sharedStrings+xml\"/>");
             for (int s = 0; s < _sheets.Count; s++)
                 if (_sheets[s].Images.Count > 0 || _sheets[s].Lines.Count > 0)
                     sb.Append($"<Override PartName=\"/xl/drawings/drawing{s + 1}.xml\" ContentType=\"application/vnd.openxmlformats-officedocument.drawing+xml\"/>");
@@ -427,7 +460,7 @@ namespace Majorsilence.Excel
             return sb.ToString();
         }
 
-        private string BuildWorkbookRels()
+        private string BuildWorkbookRels(bool useSharedStrings)
         {
             var sb = new StringBuilder();
             sb.Append("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>");
@@ -435,7 +468,21 @@ namespace Majorsilence.Excel
             for (int s = 0; s < _sheets.Count; s++)
                 sb.Append($"<Relationship Id=\"rId{s + 1}\" Type=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet\" Target=\"worksheets/sheet{s + 1}.xml\"/>");
             sb.Append($"<Relationship Id=\"rId{_sheets.Count + 1}\" Type=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles\" Target=\"styles.xml\"/>");
+            if (useSharedStrings)
+                sb.Append($"<Relationship Id=\"rId{_sheets.Count + 2}\" Type=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships/sharedStrings\" Target=\"sharedStrings.xml\"/>");
             sb.Append("</Relationships>");
+            return sb.ToString();
+        }
+
+        private string BuildSharedStrings()
+        {
+            var sb = new StringBuilder();
+            sb.Append("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>");
+            sb.Append($"<sst xmlns=\"http://schemas.openxmlformats.org/spreadsheetml/2006/main\" " +
+                      $"count=\"{_sharedStringRefCount}\" uniqueCount=\"{_sharedStrings.Count}\">");
+            foreach (var s in _sharedStrings)
+                sb.Append($"<si><t xml:space=\"preserve\">{XmlEscape(s)}</t></si>");
+            sb.Append("</sst>");
             return sb.ToString();
         }
 
@@ -644,6 +691,9 @@ namespace Majorsilence.Excel
                             case CellValueKind.Formula:
                                 string cachedValue = cell.Value != null ? $"<v>{cell.Value}</v>" : "";
                                 sb.Append($"<c r=\"{cellRef}\"{styleAttr}><f>{XmlEscape(cell.Formula)}</f>{cachedValue}</c>");
+                                break;
+                            case CellValueKind.SharedString:
+                                sb.Append($"<c r=\"{cellRef}\" t=\"s\"{styleAttr}><v>{cell.Value}</v></c>");
                                 break;
                             default:
                                 sb.Append($"<c r=\"{cellRef}\" t=\"inlineStr\"{styleAttr}><is><t>{XmlEscape(cell.Value)}</t></is></c>");
@@ -961,7 +1011,7 @@ namespace Majorsilence.Excel
             public Sheet(string name) { Name = name; }
         }
 
-        private enum CellValueKind { InlineString, Number, Boolean, Formula }
+        private enum CellValueKind { InlineString, Number, Boolean, Formula, SharedString }
 
         private class CellEntry
         {
