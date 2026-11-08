@@ -11,6 +11,8 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\RdlEngine\Majorsilence.Reporting.RdlEngine.csproj" />
+    <!-- Custom report items (barcodes, QR codes, ...) that templates may use. -->
+    <ProjectReference Include="..\RdlCri\Majorsilence.Reporting.RdlCri.csproj" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" />
