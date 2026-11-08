@@ -4,7 +4,7 @@
     <TargetFrameworks>netstandard2.0;net6.0;net8.0;net10.0</TargetFrameworks>
     <AssemblyTitle>Majorsilence Excel</AssemblyTitle>
     <PackageId>Majorsilence.Excel</PackageId>
-    <Description>Zero-dependency .xlsx (OOXML SpreadsheetML) writer. Writes cells, styles (fonts, fills, borders, alignment), merged cells, column widths, row heights, images, and lines without Excel, Office interop, or any third-party package. Native AOT compatible. Targets .NET Standard 2.0, .NET 6, .NET 8, and .NET 10.</Description>
+    <Description>Zero-dependency .xlsx (OOXML SpreadsheetML) writer and reader. Writes typed cells, formulas, multiple sheets, styles (fonts, fills, borders, alignment), merged cells, column widths, row heights, images, and lines, and reads sheet names, cell values, formulas, number formats, and merges, without Excel, Office interop, or any third-party package. Native AOT compatible. Targets .NET Standard 2.0, .NET 6, .NET 8, and .NET 10.</Description>
     <PackageTags>excel;xlsx;spreadsheet;ooxml;aot;zero-dependency;dotnet</PackageTags>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <IsPackable>true</IsPackable>
