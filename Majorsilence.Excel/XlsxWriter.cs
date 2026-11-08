@@ -262,6 +262,17 @@ namespace Majorsilence.Excel
         public void AddInternalHyperlink(int rowIndex, int colIndex, string location, int sheetIndex = 0)
             => _sheets[sheetIndex].InternalHyperlinks.Add((rowIndex, colIndex, location));
 
+        // Adds a dropdown-list data validation over the given range, offering the given fixed
+        // set of options. List items cannot themselves contain a comma (an OOXML inline-list
+        // limitation); use the string-formula overload with a range reference instead for that.
+        public void AddListValidation(int r1, int c1, int r2, int c2, IEnumerable<string> options, int sheetIndex = 0)
+            => AddListValidation(r1, c1, r2, c2, "\"" + string.Join(",", options) + "\"", sheetIndex);
+
+        // Adds a dropdown-list data validation over the given range, sourced from formula1 — an
+        // inline quoted literal (e.g. "\"Yes,No\"") or a cell range reference (e.g. "Sheet2!$A$1:$A$5").
+        public void AddListValidation(int r1, int c1, int r2, int c2, string formula1, int sheetIndex = 0)
+            => _sheets[sheetIndex].DataValidations.Add((r1, c1, r2, c2, formula1));
+
         public void Write(Stream output)
         {
             bool anyImages = false;
@@ -666,6 +677,22 @@ namespace Majorsilence.Excel
                 sb.Append("</mergeCells>");
             }
 
+            // Data validations (must follow mergeCells and precede hyperlinks per OOXML ordering)
+            if (sheet.DataValidations.Count > 0)
+            {
+                sb.Append($"<dataValidations count=\"{sheet.DataValidations.Count}\">");
+                foreach (var dv in sheet.DataValidations)
+                {
+                    string ref1 = ColRef(dv.c1) + (dv.r1 + 1);
+                    string ref2 = ColRef(dv.c2) + (dv.r2 + 1);
+                    sb.Append("<dataValidation type=\"list\" allowBlank=\"1\" showInputMessage=\"1\" showErrorMessage=\"1\" " +
+                              $"sqref=\"{ref1}:{ref2}\">");
+                    sb.Append($"<formula1>{XmlEscape(dv.Formula1)}</formula1>");
+                    sb.Append("</dataValidation>");
+                }
+                sb.Append("</dataValidations>");
+            }
+
             // Hyperlinks (must follow mergeCells and precede pageMargins per OOXML ordering)
             if (sheet.ExternalHyperlinks.Count > 0 || sheet.InternalHyperlinks.Count > 0)
             {
@@ -928,6 +955,8 @@ namespace Majorsilence.Excel
 
             public readonly List<(int Row, int Col, string Url)> ExternalHyperlinks = new List<(int, int, string)>();
             public readonly List<(int Row, int Col, string Location)> InternalHyperlinks = new List<(int, int, string)>();
+
+            public readonly List<(int r1, int c1, int r2, int c2, string Formula1)> DataValidations = new List<(int, int, int, int, string)>();
 
             public Sheet(string name) { Name = name; }
         }
