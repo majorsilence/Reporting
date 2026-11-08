@@ -119,6 +119,25 @@ namespace Majorsilence.Excel
         public void SetRowHeight(int rowIndex, double heightInPoints, int sheetIndex = 0)
             => _sheets[sheetIndex].RowHeights[rowIndex] = heightInPoints;
 
+        // Outline (grouping) level for Excel's collapsible row/column groups. 0 = not grouped.
+        public void SetColumnOutlineLevel(int colIndex, int level, int sheetIndex = 0)
+            => _sheets[sheetIndex].ColumnOutlineLevels[colIndex] = level;
+
+        public void SetRowOutlineLevel(int rowIndex, int level, int sheetIndex = 0)
+            => _sheets[sheetIndex].RowOutlineLevels[rowIndex] = level;
+
+        public void SetColumnHidden(int colIndex, bool hidden, int sheetIndex = 0)
+        {
+            var hiddenCols = _sheets[sheetIndex].HiddenColumns;
+            if (hidden) hiddenCols.Add(colIndex); else hiddenCols.Remove(colIndex);
+        }
+
+        public void SetRowHidden(int rowIndex, bool hidden, int sheetIndex = 0)
+        {
+            var hiddenRows = _sheets[sheetIndex].HiddenRows;
+            if (hidden) hiddenRows.Add(rowIndex); else hiddenRows.Remove(rowIndex);
+        }
+
         public void SetCell(int rowIndex, int colIndex, string value, XlsxCellFormat format = null, int sheetIndex = 0)
         {
             int styleIndex = ResolveStyleIndex(format);
@@ -545,14 +564,24 @@ namespace Majorsilence.Excel
                 sb.Append("</sheetView></sheetViews>");
             }
 
-            // Column widths (must come before sheetData per OOXML ordering)
-            if (sheet.ColumnWidths.Count > 0)
+            // Column widths/outline/hidden state (must come before sheetData per OOXML ordering)
+            var colIndices = new SortedSet<int>(sheet.ColumnWidths.Keys);
+            foreach (var k in sheet.ColumnOutlineLevels.Keys) colIndices.Add(k);
+            foreach (var k in sheet.HiddenColumns) colIndices.Add(k);
+            if (colIndices.Count > 0)
             {
                 sb.Append("<cols>");
-                foreach (var kv in sheet.ColumnWidths)
+                foreach (int colIdx in colIndices)
                 {
-                    int col = kv.Key + 1; // 1-based in xlsx
-                    sb.Append($"<col min=\"{col}\" max=\"{col}\" width=\"{FormatDouble(kv.Value)}\" customWidth=\"1\"/>");
+                    int col = colIdx + 1; // 1-based in xlsx
+                    sb.Append($"<col min=\"{col}\" max=\"{col}\"");
+                    if (sheet.ColumnWidths.TryGetValue(colIdx, out double w))
+                        sb.Append($" width=\"{FormatDouble(w)}\" customWidth=\"1\"");
+                    if (sheet.ColumnOutlineLevels.TryGetValue(colIdx, out int colLvl) && colLvl > 0)
+                        sb.Append($" outlineLevel=\"{colLvl}\"");
+                    if (sheet.HiddenColumns.Contains(colIdx))
+                        sb.Append(" hidden=\"1\"");
+                    sb.Append("/>");
                 }
                 sb.Append("</cols>");
             }
@@ -569,34 +598,46 @@ namespace Majorsilence.Excel
                 list.Add(c);
             }
 
+            // A row needs an element if it has cells, or just a height/outline/hidden setting.
+            var rowIndices = new SortedSet<int>(byRow.Keys);
+            foreach (var k in sheet.RowHeights.Keys) rowIndices.Add(k);
+            foreach (var k in sheet.RowOutlineLevels.Keys) rowIndices.Add(k);
+            foreach (var k in sheet.HiddenRows) rowIndices.Add(k);
+
             sb.Append("<sheetData>");
-            foreach (var kv in byRow)
+            foreach (int rowIdx in rowIndices)
             {
-                int rowIdx = kv.Key;
                 string htAttr = sheet.RowHeights.TryGetValue(rowIdx, out double ht)
                     ? $" ht=\"{FormatDouble(ht)}\" customHeight=\"1\""
                     : "";
-                sb.Append($"<row r=\"{rowIdx + 1}\"{htAttr}>");
-                kv.Value.Sort((a, b) => a.Col.CompareTo(b.Col));
-                foreach (var cell in kv.Value)
+                string outlineAttr = sheet.RowOutlineLevels.TryGetValue(rowIdx, out int rowLvl) && rowLvl > 0
+                    ? $" outlineLevel=\"{rowLvl}\""
+                    : "";
+                string hiddenAttr = sheet.HiddenRows.Contains(rowIdx) ? " hidden=\"1\"" : "";
+                sb.Append($"<row r=\"{rowIdx + 1}\"{htAttr}{outlineAttr}{hiddenAttr}>");
+                if (byRow.TryGetValue(rowIdx, out var cells))
                 {
-                    string cellRef = ColRef(cell.Col) + (cell.Row + 1);
-                    string styleAttr = cell.StyleIndex > 0 ? $" s=\"{cell.StyleIndex}\"" : "";
-                    switch (cell.Kind)
+                    cells.Sort((a, b) => a.Col.CompareTo(b.Col));
+                    foreach (var cell in cells)
                     {
-                        case CellValueKind.Number:
-                            sb.Append($"<c r=\"{cellRef}\"{styleAttr}><v>{cell.Value}</v></c>");
-                            break;
-                        case CellValueKind.Boolean:
-                            sb.Append($"<c r=\"{cellRef}\" t=\"b\"{styleAttr}><v>{cell.Value}</v></c>");
-                            break;
-                        case CellValueKind.Formula:
-                            string cachedValue = cell.Value != null ? $"<v>{cell.Value}</v>" : "";
-                            sb.Append($"<c r=\"{cellRef}\"{styleAttr}><f>{XmlEscape(cell.Formula)}</f>{cachedValue}</c>");
-                            break;
-                        default:
-                            sb.Append($"<c r=\"{cellRef}\" t=\"inlineStr\"{styleAttr}><is><t>{XmlEscape(cell.Value)}</t></is></c>");
-                            break;
+                        string cellRef = ColRef(cell.Col) + (cell.Row + 1);
+                        string styleAttr = cell.StyleIndex > 0 ? $" s=\"{cell.StyleIndex}\"" : "";
+                        switch (cell.Kind)
+                        {
+                            case CellValueKind.Number:
+                                sb.Append($"<c r=\"{cellRef}\"{styleAttr}><v>{cell.Value}</v></c>");
+                                break;
+                            case CellValueKind.Boolean:
+                                sb.Append($"<c r=\"{cellRef}\" t=\"b\"{styleAttr}><v>{cell.Value}</v></c>");
+                                break;
+                            case CellValueKind.Formula:
+                                string cachedValue = cell.Value != null ? $"<v>{cell.Value}</v>" : "";
+                                sb.Append($"<c r=\"{cellRef}\"{styleAttr}><f>{XmlEscape(cell.Formula)}</f>{cachedValue}</c>");
+                                break;
+                            default:
+                                sb.Append($"<c r=\"{cellRef}\" t=\"inlineStr\"{styleAttr}><is><t>{XmlEscape(cell.Value)}</t></is></c>");
+                                break;
+                        }
                     }
                 }
                 sb.Append("</row>");
@@ -865,6 +906,10 @@ namespace Majorsilence.Excel
             public readonly string Name;
             public readonly SortedDictionary<int, double> ColumnWidths = new SortedDictionary<int, double>();
             public readonly SortedDictionary<int, double> RowHeights = new SortedDictionary<int, double>();
+            public readonly SortedDictionary<int, int> ColumnOutlineLevels = new SortedDictionary<int, int>();
+            public readonly SortedDictionary<int, int> RowOutlineLevels = new SortedDictionary<int, int>();
+            public readonly HashSet<int> HiddenColumns = new HashSet<int>();
+            public readonly HashSet<int> HiddenRows = new HashSet<int>();
             public readonly List<CellEntry> Cells = new List<CellEntry>();
             public readonly List<(int r1, int c1, int r2, int c2)> Merges = new List<(int, int, int, int)>();
             public readonly List<ImageEntry> Images = new List<ImageEntry>();
