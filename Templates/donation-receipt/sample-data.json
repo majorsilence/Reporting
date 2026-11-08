@@ -1,0 +1,14 @@
+{
+  "CharityName": "Harbourlight Community Foundation",
+  "CharityAddress": "45 Example Harbour Road\nPort Sample, Nova Scotia B0X 1X0\nCanada",
+  "RegistrationNumber": "12345 6789 RR0001",
+  "Website": "www.example.org",
+  "LocationIssued": "Port Sample NS",
+  "SignerName": "Alex Morgan",
+  "Currency": "CAD",
+  "ThankYou": "Thank you for your gift",
+  "Receipts": [
+    { "ReceiptNumber": "RR 00123", "DonorName": "Jane Sample", "DonorAddress": "123 Maple Street\nAnytown, Ontario A1A 1A1\nCanada", "GiftDate": "2026-03-02", "DateIssued": "2026-03-02", "GiftAmount": 100.00, "BenefitAmount": 0.00 },
+    { "ReceiptNumber": "RR 00124", "DonorName": "John Example", "DonorAddress": "77 Birch Lane, Apt 4\nSampleton, British Columbia V0V 0V0\nCanada", "GiftDate": "2026-03-05", "DateIssued": "2026-03-06", "GiftAmount": 250.00, "BenefitAmount": 40.00 }
+  ]
+}

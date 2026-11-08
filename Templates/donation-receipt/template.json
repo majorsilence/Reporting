@@ -1,0 +1,12 @@
+{
+  "name": "Donation Receipt",
+  "slug": "donation-receipt",
+  "description": "An official charitable donation receipt for income tax purposes: charity logo and address, donor address, gift/benefit/eligible amounts, and a signature block. One receipt per page.",
+  "tags": ["nonprofit", "receipt", "tax", "letter-size"],
+  "dataProvider": "Json",
+  "parameters": [],
+  "dataContract": {
+    "root": ["CharityName", "CharityAddress", "RegistrationNumber", "Website", "LocationIssued", "SignerName", "Currency", "ThankYou"],
+    "root.Receipts[]": ["ReceiptNumber", "DonorName", "DonorAddress", "GiftDate", "DateIssued", "GiftAmount", "BenefitAmount"]
+  }
+}

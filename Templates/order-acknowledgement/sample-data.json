@@ -1,0 +1,31 @@
+{
+  "AckNumber": "100045821",
+  "Currency": "CAD $",
+  "VendorName": "Northwind Components",
+  "VendorAddress": "1200 Example Way, Suite 400\nPO Box 123\nSpringfield, IL 62701-0123\nUSA",
+  "VendorWebsite": "www.example.com",
+  "BillTo": "JANE SAMPLE\n123 MAPLE STREET\nANYTOWN ON A1A 1A1\nCANADA",
+  "ShipTo": "JANE SAMPLE\n123 MAPLE STREET\nANYTOWN ON A1A 1A1\nCANADA",
+  "Buyer": "Jane Sample\nAnytown ON A1A 1A1\nCANADA",
+  "ShipFrom": "NORTHWIND COMPONENTS\n1200 EXAMPLE WAY, SUITE 400\nPO BOX 123\nSPRINGFIELD IL 62701-0123",
+  "CustomerNumber": "500123456",
+  "PaymentTerms": "Credit Card",
+  "ShippingMethod": "Courier Intl Priority",
+  "OrderSource": "INTERNET",
+  "OrderDate": "02-MAR-2026",
+  "EstimatedRelease": "02-MAR-2026/AUTO",
+  "EstimatedTariff": 0.00,
+  "ShippingCharges": 15.00,
+  "TaxLabel": "HST",
+  "TaxRate": 0.15,
+  "Incoterm": "INCOTERM 2020: DDP ANYTOWN, ON, CANADA",
+  "WebOrderId": "900012345",
+  "TermsText": "All transactions with Northwind Components, including its affiliates, are subject to Northwind's",
+  "TermsLinkText": "Terms of Use and Conditions of Order.",
+  "TermsUrl": "https://www.example.com/terms",
+  "Lines": [
+    { "LineNumber": 1, "Ordered": 1, "Available": 1, "Backordered": 0, "PartNumber": "NW-1001-ND", "Manufacturer": "ACME AUDIO INC",       "MfgPartNumber": "AA-1001", "Description": "SPEAKER 4OHM 3IN DIAMETER",    "Eccn": "EAR99", "Htsus": "8518.29.8000", "Notes": "ROHS3 COMPLIANT",                "UnitPrice": 3.09 },
+    { "LineNumber": 2, "Ordered": 2, "Available": 2, "Backordered": 0, "PartNumber": "NW-2040-ND", "Manufacturer": "SAMPLE SEMICONDUCTOR", "MfgPartNumber": "SS-2040", "Description": "EVAL BOARD CLASS-D AMPLIFIER", "Eccn": "EAR99", "Htsus": "8518.40.2000", "Notes": "ROHS3 COMP REACH NOT AVAILABLE", "UnitPrice": 9.42 },
+    { "LineNumber": 3, "Ordered": 5, "Available": 3, "Backordered": 2, "PartNumber": "NW-3367-ND", "Manufacturer": "ACME AUDIO INC",       "MfgPartNumber": "AA-3367", "Description": "MINI USB MICROPHONE",          "Eccn": "EAR99", "Htsus": "8518.10.8030", "Notes": "ROHS3 COMP REACH NOT AVAILABLE", "UnitPrice": 9.42 }
+  ]
+}
