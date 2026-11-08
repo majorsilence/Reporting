@@ -63,6 +63,10 @@ namespace Majorsilence.Excel
         // Number format. An OOXML format code string (e.g. "0.00%", "m/d/yyyy"), or null for
         // General. See XlsxNumberFormats for common presets.
         public string? NumberFormatCode;
+
+        // Protection; takes effect only on a sheet protected with ProtectSheet.
+        public bool Locked = true;
+        public bool FormulaHidden;
     }
 
     // Common OOXML number format codes for use with XlsxCellFormat.NumberFormatCode.
@@ -421,7 +425,9 @@ namespace Majorsilence.Excel
                 HorizAlign = fmt.HorizontalAlign,
                 VertAlign = fmt.VerticalAlign,
                 WrapText = fmt.WrapText,
-                Rotation = fmt.Rotation
+                Rotation = fmt.Rotation,
+                Locked = fmt.Locked,
+                FormulaHidden = fmt.FormulaHidden
             };
             return GetOrAdd(_cellXfs, xf);
         }
@@ -596,6 +602,8 @@ namespace Majorsilence.Excel
                 if (applyBorder) sb.Append(" applyBorder=\"1\"");
                 if (applyNumFmt) sb.Append(" applyNumberFormat=\"1\"");
                 if (applyAlign) sb.Append(" applyAlignment=\"1\"");
+                bool applyProtection = !xf.Locked || xf.FormulaHidden;
+                if (applyProtection) sb.Append(" applyProtection=\"1\"");
                 sb.Append(">");
                 if (applyAlign)
                 {
@@ -614,6 +622,8 @@ namespace Majorsilence.Excel
                     }
                     sb.Append("/>");
                 }
+                if (applyProtection)
+                    sb.Append($"<protection locked=\"{(xf.Locked ? 1 : 0)}\" hidden=\"{(xf.FormulaHidden ? 1 : 0)}\"/>");
                 sb.Append("</xf>");
             }
             sb.Append("</cellXfs>");
@@ -768,6 +778,7 @@ namespace Majorsilence.Excel
                 sb.Append("</row>");
             }
             sb.Append("</sheetData>");
+            AppendSheetProtection(sb, sheet);
 
             // Auto-filter (must follow sheetData and precede mergeCells per OOXML ordering)
             if (sheet.AutoFilterRange.HasValue)
@@ -1037,11 +1048,14 @@ namespace Majorsilence.Excel
             public string VertAlign = "top";
             public bool WrapText;
             public int Rotation;
+            public bool Locked = true;
+            public bool FormulaHidden;
 
             public bool Equals(XfDef o) =>
                 o != null && FontId == o.FontId && FillId == o.FillId &&
                 BorderId == o.BorderId && NumFmtId == o.NumFmtId && HorizAlign == o.HorizAlign &&
-                VertAlign == o.VertAlign && WrapText == o.WrapText && Rotation == o.Rotation;
+                VertAlign == o.VertAlign && WrapText == o.WrapText && Rotation == o.Rotation &&
+                Locked == o.Locked && FormulaHidden == o.FormulaHidden;
         }
 
         // ── Data holders ──────────────────────────────────────────────────────────
