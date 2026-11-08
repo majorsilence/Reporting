@@ -80,23 +80,10 @@ namespace Majorsilence.Excel
 
     public class XlsxWriter
     {
-        private readonly string _sheetName;
-        private readonly SortedDictionary<int, double> _columnWidths = new SortedDictionary<int, double>();
-        private readonly SortedDictionary<int, double> _rowHeights = new SortedDictionary<int, double>();
-        private readonly List<CellEntry> _cells = new List<CellEntry>();
-        private readonly List<(int r1, int c1, int r2, int c2)> _merges = new List<(int, int, int, int)>();
-        private readonly List<ImageEntry> _images = new List<ImageEntry>();
-        private readonly List<LineEntry> _lines = new List<LineEntry>();
+        // Sheets, in workbook order. Index 0 is always the sheet created by the constructor.
+        private readonly List<Sheet> _sheets = new List<Sheet>();
 
-        // Print setup
-        private double _leftMarginInches = 0.75;
-        private double _topMarginInches = 1.0;
-        private double _rightMarginInches = 0.75;
-        private double _bottomMarginInches = 1.0;
-        private bool _landscape = false;
-        private int _paperSize = 9; // A4
-
-        // Style tables
+        // Style tables (workbook-level: shared and deduplicated across all sheets)
         private readonly List<FontDef> _fonts = new List<FontDef>();
         private readonly List<FillDef> _fills = new List<FillDef>();
         private readonly List<BorderDef> _borders = new List<BorderDef>();
@@ -106,45 +93,53 @@ namespace Majorsilence.Excel
 
         public XlsxWriter(string sheetName)
         {
-            _sheetName = string.IsNullOrEmpty(sheetName) ? "Sheet1" : sheetName;
             // Required default entries per OOXML spec
             _fonts.Add(new FontDef { Name = "Calibri", SizePt = 11 });
             _fills.Add(new FillDef { PatternType = "none" });   // index 0
             _fills.Add(new FillDef { PatternType = "gray125" }); // index 1
             _borders.Add(new BorderDef());                       // index 0 = empty
             _cellXfs.Add(new XfDef());                          // index 0 = default
+
+            _sheets.Add(new Sheet(string.IsNullOrEmpty(sheetName) ? "Sheet1" : sheetName));
         }
 
-        public void SetColumnWidth(int colIndex, double widthInChars)
-            => _columnWidths[colIndex] = widthInChars;
-
-        public void SetRowHeight(int rowIndex, double heightInPoints)
-            => _rowHeights[rowIndex] = heightInPoints;
-
-        // The style index of each format instance passed to SetCell; a format is not changed after it is passed.
-        private readonly Dictionary<XlsxCellFormat, int> _styleIndexes = new Dictionary<XlsxCellFormat, int>(ReferenceEqualityComparer.Instance);
-
-        public void SetCell(int rowIndex, int colIndex, string value, XlsxCellFormat format = null)
+        // Adds another worksheet to the workbook and returns its index, for use as the
+        // sheetIndex argument to the other methods on this class (0 is the sheet created by
+        // the constructor).
+        public int AddSheet(string sheetName)
         {
-            int styleIndex = ResolveStyleIndex(format);
-            _cells.Add(new CellEntry(rowIndex, colIndex, CellValueKind.InlineString, value ?? "", styleIndex));
+            string name = string.IsNullOrEmpty(sheetName) ? $"Sheet{_sheets.Count + 1}" : sheetName;
+            _sheets.Add(new Sheet(name));
+            return _sheets.Count - 1;
         }
 
-        public void SetCell(int rowIndex, int colIndex, double value, XlsxCellFormat format = null)
+        public void SetColumnWidth(int colIndex, double widthInChars, int sheetIndex = 0)
+            => _sheets[sheetIndex].ColumnWidths[colIndex] = widthInChars;
+
+        public void SetRowHeight(int rowIndex, double heightInPoints, int sheetIndex = 0)
+            => _sheets[sheetIndex].RowHeights[rowIndex] = heightInPoints;
+
+        public void SetCell(int rowIndex, int colIndex, string value, XlsxCellFormat format = null, int sheetIndex = 0)
         {
             int styleIndex = ResolveStyleIndex(format);
-            _cells.Add(new CellEntry(rowIndex, colIndex, CellValueKind.Number, FormatDouble(value), styleIndex));
+            _sheets[sheetIndex].Cells.Add(new CellEntry(rowIndex, colIndex, CellValueKind.InlineString, value ?? "", styleIndex));
         }
 
-        public void SetCell(int rowIndex, int colIndex, bool value, XlsxCellFormat format = null)
+        public void SetCell(int rowIndex, int colIndex, double value, XlsxCellFormat format = null, int sheetIndex = 0)
         {
             int styleIndex = ResolveStyleIndex(format);
-            _cells.Add(new CellEntry(rowIndex, colIndex, CellValueKind.Boolean, value ? "1" : "0", styleIndex));
+            _sheets[sheetIndex].Cells.Add(new CellEntry(rowIndex, colIndex, CellValueKind.Number, FormatDouble(value), styleIndex));
+        }
+
+        public void SetCell(int rowIndex, int colIndex, bool value, XlsxCellFormat format = null, int sheetIndex = 0)
+        {
+            int styleIndex = ResolveStyleIndex(format);
+            _sheets[sheetIndex].Cells.Add(new CellEntry(rowIndex, colIndex, CellValueKind.Boolean, value ? "1" : "0", styleIndex));
         }
 
         // Written as a date/time serial number (days since 1899-12-30, Excel's epoch) with a
         // default date number format, unless the caller's own format already specifies one.
-        public void SetCell(int rowIndex, int colIndex, DateTime value, XlsxCellFormat format = null)
+        public void SetCell(int rowIndex, int colIndex, DateTime value, XlsxCellFormat format = null, int sheetIndex = 0)
         {
             if (format == null)
             {
@@ -157,7 +152,7 @@ namespace Majorsilence.Excel
             }
             int styleIndex = ResolveStyleIndex(format);
             double serial = (value - ExcelEpoch).TotalDays;
-            _cells.Add(new CellEntry(rowIndex, colIndex, CellValueKind.Number, FormatDouble(serial), styleIndex));
+            _sheets[sheetIndex].Cells.Add(new CellEntry(rowIndex, colIndex, CellValueKind.Number, FormatDouble(serial), styleIndex));
         }
 
         private static readonly DateTime ExcelEpoch = new DateTime(1899, 12, 30);
@@ -165,7 +160,7 @@ namespace Majorsilence.Excel
         // Writes a formula cell. formula is the OOXML formula text without a leading '='
         // (a leading '=' is stripped if present). cachedValue, if given, is stored as the
         // cell's <v> so the file shows a sensible result before Excel recalculates.
-        public void SetFormula(int rowIndex, int colIndex, string formula, double? cachedValue = null, XlsxCellFormat format = null)
+        public void SetFormula(int rowIndex, int colIndex, string formula, double? cachedValue = null, XlsxCellFormat format = null, int sheetIndex = 0)
         {
             if (formula == null) throw new ArgumentNullException(nameof(formula));
             int styleIndex = ResolveStyleIndex(format);
@@ -173,8 +168,11 @@ namespace Majorsilence.Excel
             var entry = new CellEntry(rowIndex, colIndex, CellValueKind.Formula,
                 cachedValue.HasValue ? FormatDouble(cachedValue.Value) : null, styleIndex)
             { Formula = f };
-            _cells.Add(entry);
+            _sheets[sheetIndex].Cells.Add(entry);
         }
+
+        // The style index of each format instance passed to SetCell; a format is not changed after it is passed.
+        private readonly Dictionary<XlsxCellFormat, int> _styleIndexes = new Dictionary<XlsxCellFormat, int>(ReferenceEqualityComparer.Instance);
 
         private int ResolveStyleIndex(XlsxCellFormat format)
         {
@@ -184,47 +182,60 @@ namespace Majorsilence.Excel
             return styleIndex;
         }
 
-        public void AddMerge(int r1, int c1, int r2, int c2)
-            => _merges.Add((r1, c1, r2, c2));
+        public void AddMerge(int r1, int c1, int r2, int c2, int sheetIndex = 0)
+            => _sheets[sheetIndex].Merges.Add((r1, c1, r2, c2));
 
-        public void AddImage(byte[] data, long posXEmu, long posYEmu, long widthEmu, long heightEmu)
-            => _images.Add(new ImageEntry(data, posXEmu, posYEmu, widthEmu, heightEmu));
+        public void AddImage(byte[] data, long posXEmu, long posYEmu, long widthEmu, long heightEmu, int sheetIndex = 0)
+            => _sheets[sheetIndex].Images.Add(new ImageEntry(data, posXEmu, posYEmu, widthEmu, heightEmu));
 
         public void AddLine(long x1Emu, long y1Emu, long x2Emu, long y2Emu, double lineWidthPt,
-            byte r = 0, byte g = 0, byte b = 0)
-            => _lines.Add(new LineEntry(x1Emu, y1Emu, x2Emu, y2Emu, lineWidthPt, r, g, b));
+            byte r = 0, byte g = 0, byte b = 0, int sheetIndex = 0)
+            => _sheets[sheetIndex].Lines.Add(new LineEntry(x1Emu, y1Emu, x2Emu, y2Emu, lineWidthPt, r, g, b));
 
-        public void SetPrintSetup(double leftIn, double topIn, double rightIn, double bottomIn, bool landscape)
+        public void SetPrintSetup(double leftIn, double topIn, double rightIn, double bottomIn, bool landscape, int sheetIndex = 0)
         {
-            _leftMarginInches = leftIn;
-            _topMarginInches = topIn;
-            _rightMarginInches = rightIn;
-            _bottomMarginInches = bottomIn;
-            _landscape = landscape;
+            var sheet = _sheets[sheetIndex];
+            sheet.LeftMarginInches = leftIn;
+            sheet.TopMarginInches = topIn;
+            sheet.RightMarginInches = rightIn;
+            sheet.BottomMarginInches = bottomIn;
+            sheet.Landscape = landscape;
         }
 
         public void Write(Stream output)
         {
-            bool hasDrawings = _images.Count > 0 || _lines.Count > 0;
+            bool anyImages = false;
+            foreach (var s in _sheets)
+                if (s.Images.Count > 0) { anyImages = true; break; }
 
             using (var zip = new ZipArchive(output, ZipArchiveMode.Create, leaveOpen: true))
             {
-                WriteText(zip, "[Content_Types].xml", BuildContentTypes(hasDrawings));
+                WriteText(zip, "[Content_Types].xml", BuildContentTypes(anyImages));
                 WriteText(zip, "_rels/.rels", BuildRootRels());
                 WriteText(zip, "xl/workbook.xml", BuildWorkbook());
                 WriteText(zip, "xl/_rels/workbook.xml.rels", BuildWorkbookRels());
                 WriteText(zip, "xl/styles.xml", BuildStyles());
-                WriteText(zip, "xl/worksheets/sheet1.xml", BuildSheet(hasDrawings));
 
-                if (hasDrawings)
+                int imageOffset = 0; // images are numbered globally across all sheets
+                for (int s = 0; s < _sheets.Count; s++)
                 {
-                    WriteText(zip, "xl/worksheets/_rels/sheet1.xml.rels", BuildSheetRels());
-                    WriteText(zip, "xl/drawings/drawing1.xml", BuildDrawing());
-                    if (_images.Count > 0)
+                    var sheet = _sheets[s];
+                    int sheetNum = s + 1;
+                    bool hasDrawings = sheet.Images.Count > 0 || sheet.Lines.Count > 0;
+
+                    WriteText(zip, $"xl/worksheets/sheet{sheetNum}.xml", BuildSheet(sheet, hasDrawings));
+
+                    if (hasDrawings)
                     {
-                        WriteText(zip, "xl/drawings/_rels/drawing1.xml.rels", BuildDrawingRels());
-                        for (int i = 0; i < _images.Count; i++)
-                            WriteBytes(zip, $"xl/media/image{i + 1}.jpg", _images[i].Data);
+                        WriteText(zip, $"xl/worksheets/_rels/sheet{sheetNum}.xml.rels", BuildSheetRels(sheetNum));
+                        WriteText(zip, $"xl/drawings/drawing{sheetNum}.xml", BuildDrawing(sheet));
+                        if (sheet.Images.Count > 0)
+                        {
+                            WriteText(zip, $"xl/drawings/_rels/drawing{sheetNum}.xml.rels", BuildDrawingRels(sheet, imageOffset));
+                            for (int i = 0; i < sheet.Images.Count; i++)
+                                WriteBytes(zip, $"xl/media/image{imageOffset + i + 1}.jpg", sheet.Images[i].Data);
+                            imageOffset += sheet.Images.Count;
+                        }
                     }
                 }
             }
@@ -294,20 +305,22 @@ namespace Majorsilence.Excel
 
         // ── XML builders ──────────────────────────────────────────────────────────
 
-        private string BuildContentTypes(bool hasDrawings)
+        private string BuildContentTypes(bool anyImages)
         {
             var sb = new StringBuilder();
             sb.Append("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>");
             sb.Append("<Types xmlns=\"http://schemas.openxmlformats.org/package/2006/content-types\">");
             sb.Append("<Default Extension=\"rels\" ContentType=\"application/vnd.openxmlformats-package.relationships+xml\"/>");
             sb.Append("<Default Extension=\"xml\" ContentType=\"application/xml\"/>");
-            if (_images.Count > 0)
+            if (anyImages)
                 sb.Append("<Default Extension=\"jpg\" ContentType=\"image/jpeg\"/>");
             sb.Append("<Override PartName=\"/xl/workbook.xml\" ContentType=\"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml\"/>");
-            sb.Append("<Override PartName=\"/xl/worksheets/sheet1.xml\" ContentType=\"application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml\"/>");
+            for (int s = 0; s < _sheets.Count; s++)
+                sb.Append($"<Override PartName=\"/xl/worksheets/sheet{s + 1}.xml\" ContentType=\"application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml\"/>");
             sb.Append("<Override PartName=\"/xl/styles.xml\" ContentType=\"application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml\"/>");
-            if (hasDrawings)
-                sb.Append("<Override PartName=\"/xl/drawings/drawing1.xml\" ContentType=\"application/vnd.openxmlformats-officedocument.drawing+xml\"/>");
+            for (int s = 0; s < _sheets.Count; s++)
+                if (_sheets[s].Images.Count > 0 || _sheets[s].Lines.Count > 0)
+                    sb.Append($"<Override PartName=\"/xl/drawings/drawing{s + 1}.xml\" ContentType=\"application/vnd.openxmlformats-officedocument.drawing+xml\"/>");
             sb.Append("</Types>");
             return sb.ToString();
         }
@@ -320,20 +333,29 @@ namespace Majorsilence.Excel
 
         private string BuildWorkbook()
         {
-            string name = XmlEscape(_sheetName);
-            return "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>" +
-                "<workbook xmlns=\"http://schemas.openxmlformats.org/spreadsheetml/2006/main\" " +
-                "xmlns:r=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships\">" +
-                "<sheets><sheet name=\"" + name + "\" sheetId=\"1\" r:id=\"rId1\"/></sheets>" +
-                "</workbook>";
+            var sb = new StringBuilder();
+            sb.Append("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>");
+            sb.Append("<workbook xmlns=\"http://schemas.openxmlformats.org/spreadsheetml/2006/main\" " +
+                      "xmlns:r=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships\">");
+            sb.Append("<sheets>");
+            for (int s = 0; s < _sheets.Count; s++)
+                sb.Append($"<sheet name=\"{XmlEscape(_sheets[s].Name)}\" sheetId=\"{s + 1}\" r:id=\"rId{s + 1}\"/>");
+            sb.Append("</sheets>");
+            sb.Append("</workbook>");
+            return sb.ToString();
         }
 
-        private string BuildWorkbookRels() =>
-            "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>" +
-            "<Relationships xmlns=\"http://schemas.openxmlformats.org/package/2006/relationships\">" +
-            "<Relationship Id=\"rId1\" Type=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet\" Target=\"worksheets/sheet1.xml\"/>" +
-            "<Relationship Id=\"rId2\" Type=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles\" Target=\"styles.xml\"/>" +
-            "</Relationships>";
+        private string BuildWorkbookRels()
+        {
+            var sb = new StringBuilder();
+            sb.Append("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>");
+            sb.Append("<Relationships xmlns=\"http://schemas.openxmlformats.org/package/2006/relationships\">");
+            for (int s = 0; s < _sheets.Count; s++)
+                sb.Append($"<Relationship Id=\"rId{s + 1}\" Type=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet\" Target=\"worksheets/sheet{s + 1}.xml\"/>");
+            sb.Append($"<Relationship Id=\"rId{_sheets.Count + 1}\" Type=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles\" Target=\"styles.xml\"/>");
+            sb.Append("</Relationships>");
+            return sb.ToString();
+        }
 
         private string BuildStyles()
         {
@@ -451,7 +473,7 @@ namespace Majorsilence.Excel
             sb.Append($"</{side}>");
         }
 
-        private string BuildSheet(bool hasDrawings)
+        private string BuildSheet(Sheet sheet, bool hasDrawings)
         {
             var sb = new StringBuilder();
             sb.Append("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>");
@@ -459,10 +481,10 @@ namespace Majorsilence.Excel
                       "xmlns:r=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships\">");
 
             // Column widths (must come before sheetData per OOXML ordering)
-            if (_columnWidths.Count > 0)
+            if (sheet.ColumnWidths.Count > 0)
             {
                 sb.Append("<cols>");
-                foreach (var kv in _columnWidths)
+                foreach (var kv in sheet.ColumnWidths)
                 {
                     int col = kv.Key + 1; // 1-based in xlsx
                     sb.Append($"<col min=\"{col}\" max=\"{col}\" width=\"{FormatDouble(kv.Value)}\" customWidth=\"1\"/>");
@@ -472,7 +494,7 @@ namespace Majorsilence.Excel
 
             // Sheet data — group cells by row
             var byRow = new SortedDictionary<int, List<CellEntry>>();
-            foreach (var c in _cells)
+            foreach (var c in sheet.Cells)
             {
                 if (!byRow.TryGetValue(c.Row, out var list))
                 {
@@ -486,7 +508,7 @@ namespace Majorsilence.Excel
             foreach (var kv in byRow)
             {
                 int rowIdx = kv.Key;
-                string htAttr = _rowHeights.TryGetValue(rowIdx, out double ht)
+                string htAttr = sheet.RowHeights.TryGetValue(rowIdx, out double ht)
                     ? $" ht=\"{FormatDouble(ht)}\" customHeight=\"1\""
                     : "";
                 sb.Append($"<row r=\"{rowIdx + 1}\"{htAttr}>");
@@ -517,10 +539,10 @@ namespace Majorsilence.Excel
             sb.Append("</sheetData>");
 
             // Merged cells
-            if (_merges.Count > 0)
+            if (sheet.Merges.Count > 0)
             {
-                sb.Append($"<mergeCells count=\"{_merges.Count}\">");
-                foreach (var m in _merges)
+                sb.Append($"<mergeCells count=\"{sheet.Merges.Count}\">");
+                foreach (var m in sheet.Merges)
                 {
                     string ref1 = ColRef(m.c1) + (m.r1 + 1);
                     string ref2 = ColRef(m.c2) + (m.r2 + 1);
@@ -530,11 +552,11 @@ namespace Majorsilence.Excel
             }
 
             // Page setup (must follow mergeCells and precede drawing per OOXML ordering)
-            sb.Append($"<pageMargins left=\"{FormatDouble(_leftMarginInches)}\" right=\"{FormatDouble(_rightMarginInches)}\" " +
-                      $"top=\"{FormatDouble(_topMarginInches)}\" bottom=\"{FormatDouble(_bottomMarginInches)}\" " +
+            sb.Append($"<pageMargins left=\"{FormatDouble(sheet.LeftMarginInches)}\" right=\"{FormatDouble(sheet.RightMarginInches)}\" " +
+                      $"top=\"{FormatDouble(sheet.TopMarginInches)}\" bottom=\"{FormatDouble(sheet.BottomMarginInches)}\" " +
                       "header=\"0.5\" footer=\"0.5\"/>");
-            string orient = _landscape ? "landscape" : "portrait";
-            sb.Append($"<pageSetup paperSize=\"{_paperSize}\" orientation=\"{orient}\"/>");
+            string orient = sheet.Landscape ? "landscape" : "portrait";
+            sb.Append($"<pageSetup paperSize=\"{sheet.PaperSize}\" orientation=\"{orient}\"/>");
 
             if (hasDrawings)
                 sb.Append("<drawing r:id=\"rId1\"/>");
@@ -543,13 +565,13 @@ namespace Majorsilence.Excel
             return sb.ToString();
         }
 
-        private string BuildSheetRels() =>
+        private string BuildSheetRels(int sheetNum) =>
             "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>" +
             "<Relationships xmlns=\"http://schemas.openxmlformats.org/package/2006/relationships\">" +
-            "<Relationship Id=\"rId1\" Type=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships/drawing\" Target=\"../drawings/drawing1.xml\"/>" +
+            $"<Relationship Id=\"rId1\" Type=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships/drawing\" Target=\"../drawings/drawing{sheetNum}.xml\"/>" +
             "</Relationships>";
 
-        private string BuildDrawing()
+        private string BuildDrawing(Sheet sheet)
         {
             var sb = new StringBuilder();
             sb.Append("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>");
@@ -559,9 +581,9 @@ namespace Majorsilence.Excel
 
             int shapeId = 1;
 
-            for (int i = 0; i < _images.Count; i++)
+            for (int i = 0; i < sheet.Images.Count; i++)
             {
-                var img = _images[i];
+                var img = sheet.Images[i];
                 sb.Append("<xdr:absoluteAnchor>");
                 sb.Append($"<xdr:pos x=\"{img.PosXEmu}\" y=\"{img.PosYEmu}\"/>");
                 sb.Append($"<xdr:ext cx=\"{img.WidthEmu}\" cy=\"{img.HeightEmu}\"/>");
@@ -574,9 +596,9 @@ namespace Majorsilence.Excel
                 sb.Append("<xdr:clientData/></xdr:absoluteAnchor>");
             }
 
-            for (int i = 0; i < _lines.Count; i++)
+            for (int i = 0; i < sheet.Lines.Count; i++)
             {
-                var ln = _lines[i];
+                var ln = sheet.Lines[i];
                 long x = Math.Min(ln.X1, ln.X2);
                 long y = Math.Min(ln.Y1, ln.Y2);
                 long cx = Math.Abs(ln.X2 - ln.X1);
@@ -611,15 +633,17 @@ namespace Majorsilence.Excel
             return sb.ToString();
         }
 
-        private string BuildDrawingRels()
+        // imageOffset: how many images earlier sheets have already claimed, so media file names
+        // (which live in one shared xl/media folder) stay globally unique across all sheets.
+        private string BuildDrawingRels(Sheet sheet, int imageOffset)
         {
             var sb = new StringBuilder();
             sb.Append("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>");
             sb.Append("<Relationships xmlns=\"http://schemas.openxmlformats.org/package/2006/relationships\">");
-            for (int i = 0; i < _images.Count; i++)
+            for (int i = 0; i < sheet.Images.Count; i++)
                 sb.Append($"<Relationship Id=\"rId{i + 1}\" " +
                     "Type=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships/image\" " +
-                    $"Target=\"../media/image{i + 1}.jpg\"/>");
+                    $"Target=\"../media/image{imageOffset + i + 1}.jpg\"/>");
             sb.Append("</Relationships>");
             return sb.ToString();
         }
@@ -722,6 +746,29 @@ namespace Majorsilence.Excel
         }
 
         // ── Data holders ──────────────────────────────────────────────────────────
+
+        // Everything that is per-worksheet rather than shared at the workbook level (which is
+        // only the style tables: fonts/fills/borders/cellXfs/customNumFmts stay on XlsxWriter
+        // itself so equal styles are deduplicated across sheets too).
+        private class Sheet
+        {
+            public readonly string Name;
+            public readonly SortedDictionary<int, double> ColumnWidths = new SortedDictionary<int, double>();
+            public readonly SortedDictionary<int, double> RowHeights = new SortedDictionary<int, double>();
+            public readonly List<CellEntry> Cells = new List<CellEntry>();
+            public readonly List<(int r1, int c1, int r2, int c2)> Merges = new List<(int, int, int, int)>();
+            public readonly List<ImageEntry> Images = new List<ImageEntry>();
+            public readonly List<LineEntry> Lines = new List<LineEntry>();
+
+            public double LeftMarginInches = 0.75;
+            public double TopMarginInches = 1.0;
+            public double RightMarginInches = 0.75;
+            public double BottomMarginInches = 1.0;
+            public bool Landscape;
+            public int PaperSize = 9; // A4
+
+            public Sheet(string name) { Name = name; }
+        }
 
         private enum CellValueKind { InlineString, Number, Boolean, Formula }
 
