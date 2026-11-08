@@ -59,6 +59,23 @@ namespace Majorsilence.Excel
         public string VerticalAlign = "top";        // "top","center","bottom"
         public bool WrapText = true;
         public int Rotation = 0;
+
+        // Number format. An OOXML format code string (e.g. "0.00%", "m/d/yyyy"), or null for
+        // General. See XlsxNumberFormats for common presets.
+        public string? NumberFormatCode;
+    }
+
+    // Common OOXML number format codes for use with XlsxCellFormat.NumberFormatCode.
+    public static class XlsxNumberFormats
+    {
+        public const string Integer = "0";
+        public const string TwoDecimal = "0.00";
+        public const string ThousandsTwoDecimal = "#,##0.00";
+        public const string Currency = "$#,##0.00";
+        public const string Percentage = "0.00%";
+        public const string ShortDate = "m/d/yyyy";
+        public const string ShortDateTime = "m/d/yyyy h:mm";
+        public const string Time = "h:mm:ss";
     }
 
     public class XlsxWriter
@@ -84,6 +101,8 @@ namespace Majorsilence.Excel
         private readonly List<FillDef> _fills = new List<FillDef>();
         private readonly List<BorderDef> _borders = new List<BorderDef>();
         private readonly List<XfDef> _cellXfs = new List<XfDef>();
+        private readonly List<string> _customNumFmts = new List<string>();
+        private const int FirstCustomNumFmtId = 164; // ids below 164 are reserved for built-ins
 
         public XlsxWriter(string sheetName)
         {
@@ -107,10 +126,48 @@ namespace Majorsilence.Excel
 
         public void SetCell(int rowIndex, int colIndex, string value, XlsxCellFormat format = null)
         {
-            int styleIndex = 0;
-            if (format != null && !_styleIndexes.TryGetValue(format, out styleIndex))
+            int styleIndex = ResolveStyleIndex(format);
+            _cells.Add(new CellEntry(rowIndex, colIndex, CellValueKind.InlineString, value ?? "", styleIndex));
+        }
+
+        public void SetCell(int rowIndex, int colIndex, double value, XlsxCellFormat format = null)
+        {
+            int styleIndex = ResolveStyleIndex(format);
+            _cells.Add(new CellEntry(rowIndex, colIndex, CellValueKind.Number, FormatDouble(value), styleIndex));
+        }
+
+        public void SetCell(int rowIndex, int colIndex, bool value, XlsxCellFormat format = null)
+        {
+            int styleIndex = ResolveStyleIndex(format);
+            _cells.Add(new CellEntry(rowIndex, colIndex, CellValueKind.Boolean, value ? "1" : "0", styleIndex));
+        }
+
+        // Written as a date/time serial number (days since 1899-12-30, Excel's epoch) with a
+        // default date number format, unless the caller's own format already specifies one.
+        public void SetCell(int rowIndex, int colIndex, DateTime value, XlsxCellFormat format = null)
+        {
+            if (format == null)
+            {
+                format = new XlsxCellFormat
+                {
+                    NumberFormatCode = value.TimeOfDay == TimeSpan.Zero
+                        ? XlsxNumberFormats.ShortDate
+                        : XlsxNumberFormats.ShortDateTime
+                };
+            }
+            int styleIndex = ResolveStyleIndex(format);
+            double serial = (value - ExcelEpoch).TotalDays;
+            _cells.Add(new CellEntry(rowIndex, colIndex, CellValueKind.Number, FormatDouble(serial), styleIndex));
+        }
+
+        private static readonly DateTime ExcelEpoch = new DateTime(1899, 12, 30);
+
+        private int ResolveStyleIndex(XlsxCellFormat format)
+        {
+            if (format == null) return 0;
+            if (!_styleIndexes.TryGetValue(format, out int styleIndex))
                 _styleIndexes[format] = styleIndex = GetOrAddCellStyle(format);
-            _cells.Add(new CellEntry(rowIndex, colIndex, value ?? "", styleIndex));
+            return styleIndex;
         }
 
         public void AddMerge(int r1, int c1, int r2, int c2)
@@ -189,17 +246,28 @@ namespace Majorsilence.Excel
             };
             int borderId = GetOrAdd(_borders, border);
 
+            int numFmtId = fmt.NumberFormatCode != null ? GetOrAddNumFmt(fmt.NumberFormatCode) : 0;
+
             var xf = new XfDef
             {
                 FontId = fontId,
                 FillId = fillId,
                 BorderId = borderId,
+                NumFmtId = numFmtId,
                 HorizAlign = fmt.HorizontalAlign,
                 VertAlign = fmt.VerticalAlign,
                 WrapText = fmt.WrapText,
                 Rotation = fmt.Rotation
             };
             return GetOrAdd(_cellXfs, xf);
+        }
+
+        private int GetOrAddNumFmt(string formatCode)
+        {
+            int existing = _customNumFmts.IndexOf(formatCode);
+            if (existing >= 0) return FirstCustomNumFmtId + existing;
+            _customNumFmts.Add(formatCode);
+            return FirstCustomNumFmtId + _customNumFmts.Count - 1;
         }
 
         private static int GetOrAdd<T>(List<T> list, T item) where T : IEquatable<T>
@@ -259,6 +327,15 @@ namespace Majorsilence.Excel
             sb.Append("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>");
             sb.Append("<styleSheet xmlns=\"http://schemas.openxmlformats.org/spreadsheetml/2006/main\">");
 
+            // Custom number formats (built-ins, numFmtId 0-163, need no entry here)
+            if (_customNumFmts.Count > 0)
+            {
+                sb.Append($"<numFmts count=\"{_customNumFmts.Count}\">");
+                for (int i = 0; i < _customNumFmts.Count; i++)
+                    sb.Append($"<numFmt numFmtId=\"{FirstCustomNumFmtId + i}\" formatCode=\"{XmlEscape(_customNumFmts[i])}\"/>");
+                sb.Append("</numFmts>");
+            }
+
             // Fonts
             sb.Append($"<fonts count=\"{_fonts.Count}\">");
             foreach (var f in _fonts)
@@ -310,12 +387,14 @@ namespace Majorsilence.Excel
                 bool applyFont = xf.FontId != 0;
                 bool applyFill = xf.FillId != 0;
                 bool applyBorder = xf.BorderId != 0;
+                bool applyNumFmt = xf.NumFmtId != 0;
                 bool applyAlign = !string.IsNullOrEmpty(xf.HorizAlign) || !string.IsNullOrEmpty(xf.VertAlign) || xf.WrapText || xf.Rotation != 0;
 
-                sb.Append($"<xf numFmtId=\"0\" fontId=\"{xf.FontId}\" fillId=\"{xf.FillId}\" borderId=\"{xf.BorderId}\" xfId=\"0\"");
+                sb.Append($"<xf numFmtId=\"{xf.NumFmtId}\" fontId=\"{xf.FontId}\" fillId=\"{xf.FillId}\" borderId=\"{xf.BorderId}\" xfId=\"0\"");
                 if (applyFont) sb.Append(" applyFont=\"1\"");
                 if (applyFill) sb.Append(" applyFill=\"1\"");
                 if (applyBorder) sb.Append(" applyBorder=\"1\"");
+                if (applyNumFmt) sb.Append(" applyNumberFormat=\"1\"");
                 if (applyAlign) sb.Append(" applyAlignment=\"1\"");
                 sb.Append(">");
                 if (applyAlign)
@@ -402,8 +481,18 @@ namespace Majorsilence.Excel
                 {
                     string cellRef = ColRef(cell.Col) + (cell.Row + 1);
                     string styleAttr = cell.StyleIndex > 0 ? $" s=\"{cell.StyleIndex}\"" : "";
-                    string val = cell.Value;
-                    sb.Append($"<c r=\"{cellRef}\" t=\"inlineStr\"{styleAttr}><is><t>{XmlEscape(val)}</t></is></c>");
+                    switch (cell.Kind)
+                    {
+                        case CellValueKind.Number:
+                            sb.Append($"<c r=\"{cellRef}\"{styleAttr}><v>{cell.Value}</v></c>");
+                            break;
+                        case CellValueKind.Boolean:
+                            sb.Append($"<c r=\"{cellRef}\" t=\"b\"{styleAttr}><v>{cell.Value}</v></c>");
+                            break;
+                        default:
+                            sb.Append($"<c r=\"{cellRef}\" t=\"inlineStr\"{styleAttr}><is><t>{XmlEscape(cell.Value)}</t></is></c>");
+                            break;
+                    }
                 }
                 sb.Append("</row>");
             }
@@ -602,7 +691,7 @@ namespace Majorsilence.Excel
 
         private class XfDef : IEquatable<XfDef>
         {
-            public int FontId, FillId, BorderId;
+            public int FontId, FillId, BorderId, NumFmtId;
             public string HorizAlign = "general";
             public string VertAlign = "top";
             public bool WrapText;
@@ -610,18 +699,21 @@ namespace Majorsilence.Excel
 
             public bool Equals(XfDef o) =>
                 o != null && FontId == o.FontId && FillId == o.FillId &&
-                BorderId == o.BorderId && HorizAlign == o.HorizAlign &&
+                BorderId == o.BorderId && NumFmtId == o.NumFmtId && HorizAlign == o.HorizAlign &&
                 VertAlign == o.VertAlign && WrapText == o.WrapText && Rotation == o.Rotation;
         }
 
         // ── Data holders ──────────────────────────────────────────────────────────
 
+        private enum CellValueKind { InlineString, Number, Boolean }
+
         private class CellEntry
         {
             public int Row, Col, StyleIndex;
-            public string Value;
-            public CellEntry(int row, int col, string value, int style)
-            { Row = row; Col = col; Value = value; StyleIndex = style; }
+            public CellValueKind Kind;
+            public string Value; // raw text for InlineString; invariant-culture numeric text for Number/Boolean
+            public CellEntry(int row, int col, CellValueKind kind, string value, int style)
+            { Row = row; Col = col; Kind = kind; Value = value; StyleIndex = style; }
         }
 
         private class ImageEntry
