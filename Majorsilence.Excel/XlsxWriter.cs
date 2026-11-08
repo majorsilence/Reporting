@@ -162,6 +162,20 @@ namespace Majorsilence.Excel
 
         private static readonly DateTime ExcelEpoch = new DateTime(1899, 12, 30);
 
+        // Writes a formula cell. formula is the OOXML formula text without a leading '='
+        // (a leading '=' is stripped if present). cachedValue, if given, is stored as the
+        // cell's <v> so the file shows a sensible result before Excel recalculates.
+        public void SetFormula(int rowIndex, int colIndex, string formula, double? cachedValue = null, XlsxCellFormat format = null)
+        {
+            if (formula == null) throw new ArgumentNullException(nameof(formula));
+            int styleIndex = ResolveStyleIndex(format);
+            string f = formula.Length > 0 && formula[0] == '=' ? formula.Substring(1) : formula;
+            var entry = new CellEntry(rowIndex, colIndex, CellValueKind.Formula,
+                cachedValue.HasValue ? FormatDouble(cachedValue.Value) : null, styleIndex)
+            { Formula = f };
+            _cells.Add(entry);
+        }
+
         private int ResolveStyleIndex(XlsxCellFormat format)
         {
             if (format == null) return 0;
@@ -489,6 +503,10 @@ namespace Majorsilence.Excel
                         case CellValueKind.Boolean:
                             sb.Append($"<c r=\"{cellRef}\" t=\"b\"{styleAttr}><v>{cell.Value}</v></c>");
                             break;
+                        case CellValueKind.Formula:
+                            string cachedValue = cell.Value != null ? $"<v>{cell.Value}</v>" : "";
+                            sb.Append($"<c r=\"{cellRef}\"{styleAttr}><f>{XmlEscape(cell.Formula)}</f>{cachedValue}</c>");
+                            break;
                         default:
                             sb.Append($"<c r=\"{cellRef}\" t=\"inlineStr\"{styleAttr}><is><t>{XmlEscape(cell.Value)}</t></is></c>");
                             break;
@@ -705,13 +723,14 @@ namespace Majorsilence.Excel
 
         // ── Data holders ──────────────────────────────────────────────────────────
 
-        private enum CellValueKind { InlineString, Number, Boolean }
+        private enum CellValueKind { InlineString, Number, Boolean, Formula }
 
         private class CellEntry
         {
             public int Row, Col, StyleIndex;
             public CellValueKind Kind;
-            public string Value; // raw text for InlineString; invariant-culture numeric text for Number/Boolean
+            public string Value; // raw text for InlineString; invariant-culture numeric text for Number/Boolean/Formula's cached value
+            public string? Formula; // formula text (Formula kind only), without the leading '='
             public CellEntry(int row, int col, CellValueKind kind, string value, int style)
             { Row = row; Col = col; Kind = kind; Value = value; StyleIndex = style; }
         }
