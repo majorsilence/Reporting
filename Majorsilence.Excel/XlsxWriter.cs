@@ -255,7 +255,7 @@ namespace Majorsilence.Excel
         // The style index of each format instance passed to SetCell; a format is not changed after it is passed.
         private readonly Dictionary<XlsxCellFormat, int> _styleIndexes = new Dictionary<XlsxCellFormat, int>(ReferenceEqualityComparer.Instance);
 
-        private int ResolveStyleIndex(XlsxCellFormat format)
+        internal int ResolveStyleIndex(XlsxCellFormat format)
         {
             if (format == null) return 0;
             if (!_styleIndexes.TryGetValue(format, out int styleIndex))
@@ -527,7 +527,7 @@ namespace Majorsilence.Excel
             return sb.ToString();
         }
 
-        private string BuildStyles()
+        internal string BuildStyles()
         {
             var sb = new StringBuilder();
             sb.Append("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>");
@@ -960,7 +960,7 @@ namespace Majorsilence.Excel
 
         // ── Helpers ───────────────────────────────────────────────────────────────
 
-        private static string ColRef(int colIndex)
+        internal static string ColRef(int colIndex)
         {
             // 0-based column index to A, B, ... Z, AA, AB, ...
             string result = "";
@@ -974,14 +974,14 @@ namespace Majorsilence.Excel
             return result;
         }
 
-        private static string XmlEscape(string s)
+        internal static string XmlEscape(string s)
         {
             if (s == null) return "";
             return s.Replace("&", "&amp;").Replace("<", "&lt;").Replace(">", "&gt;")
                     .Replace("\"", "&quot;").Replace("'", "&apos;");
         }
 
-        private static string FormatDouble(double d) => d.ToString("G", System.Globalization.CultureInfo.InvariantCulture);
+        internal static string FormatDouble(double d) => d.ToString("G", System.Globalization.CultureInfo.InvariantCulture);
 
         private static void WriteText(ZipArchive zip, string path, string content)
         {
