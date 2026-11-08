@@ -165,6 +165,22 @@ namespace ReportTests.Containers.Fixtures
             Assert.That(result.Html, Does.Contain("A: 3/600"));
         }
 
+        // The issue's own repro: the batch renames Product to Prod, so the declared Product is never
+        // returned. With the schema pass unable to describe the batch, the data pass warns (#549).
+        [Test]
+        public async Task TempTableBatch_MissingDataField_WarnsInTheDataPass()
+        {
+            const string batch = "SELECT Product AS Prod, Amount INTO #T FROM Sales; SELECT Prod, Amount FROM #T";
+            using Report report = await new RDLParser(BuildRdl(_connectionString, new DataSetSpec("A", batch))).Parse();
+            Assert.That(report.ErrorMaxSeverity, Is.LessThanOrEqualTo(4), string.Join("; ", Messages(report)));
+
+            await report.RunGetData(null);
+
+            Assert.That(report.ErrorMaxSeverity, Is.LessThanOrEqualTo(4), string.Join("; ", Messages(report)));
+            Assert.That(Messages(report), Has.Exactly(1).Contains("DataField 'Product' not returned by query of DataSet 'A'."));
+            Assert.That(Messages(report), Has.None.Contains("DataField 'Amount'"));
+        }
+
         [Test]
         public async Task TempTableStoredProcedure_WithQueryParameter_ReturnsFilteredRows()
         {
