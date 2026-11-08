@@ -202,6 +202,19 @@ namespace Majorsilence.Excel
             sheet.Landscape = landscape;
         }
 
+        // Freezes the given number of leading rows and/or columns so they stay visible while
+        // scrolling. Pass 0 for either to leave that axis unfrozen.
+        public void FreezePanes(int frozenRows, int frozenCols, int sheetIndex = 0)
+        {
+            var sheet = _sheets[sheetIndex];
+            sheet.FrozenRows = frozenRows;
+            sheet.FrozenCols = frozenCols;
+        }
+
+        // Enables Excel's column filter dropdowns over the given cell range.
+        public void SetAutoFilter(int r1, int c1, int r2, int c2, int sheetIndex = 0)
+            => _sheets[sheetIndex].AutoFilterRange = (r1, c1, r2, c2);
+
         public void Write(Stream output)
         {
             bool anyImages = false;
@@ -480,6 +493,19 @@ namespace Majorsilence.Excel
             sb.Append("<worksheet xmlns=\"http://schemas.openxmlformats.org/spreadsheetml/2006/main\" " +
                       "xmlns:r=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships\">");
 
+            // Frozen panes (sheetViews must precede cols per OOXML ordering)
+            if (sheet.FrozenRows > 0 || sheet.FrozenCols > 0)
+            {
+                string topLeftCell = ColRef(sheet.FrozenCols) + (sheet.FrozenRows + 1);
+                string activePane = sheet.FrozenRows > 0 && sheet.FrozenCols > 0 ? "bottomRight"
+                    : sheet.FrozenRows > 0 ? "bottomLeft" : "topRight";
+                sb.Append("<sheetViews><sheetView workbookViewId=\"0\"><pane");
+                if (sheet.FrozenCols > 0) sb.Append($" xSplit=\"{sheet.FrozenCols}\"");
+                if (sheet.FrozenRows > 0) sb.Append($" ySplit=\"{sheet.FrozenRows}\"");
+                sb.Append($" topLeftCell=\"{topLeftCell}\" activePane=\"{activePane}\" state=\"frozen\"/>");
+                sb.Append("</sheetView></sheetViews>");
+            }
+
             // Column widths (must come before sheetData per OOXML ordering)
             if (sheet.ColumnWidths.Count > 0)
             {
@@ -537,6 +563,15 @@ namespace Majorsilence.Excel
                 sb.Append("</row>");
             }
             sb.Append("</sheetData>");
+
+            // Auto-filter (must follow sheetData and precede mergeCells per OOXML ordering)
+            if (sheet.AutoFilterRange.HasValue)
+            {
+                var af = sheet.AutoFilterRange.Value;
+                string ref1 = ColRef(af.c1) + (af.r1 + 1);
+                string ref2 = ColRef(af.c2) + (af.r2 + 1);
+                sb.Append($"<autoFilter ref=\"{ref1}:{ref2}\"/>");
+            }
 
             // Merged cells
             if (sheet.Merges.Count > 0)
@@ -766,6 +801,10 @@ namespace Majorsilence.Excel
             public double BottomMarginInches = 1.0;
             public bool Landscape;
             public int PaperSize = 9; // A4
+
+            public int FrozenRows;
+            public int FrozenCols;
+            public (int r1, int c1, int r2, int c2)? AutoFilterRange;
 
             public Sheet(string name) { Name = name; }
         }
