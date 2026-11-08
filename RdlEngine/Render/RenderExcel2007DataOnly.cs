@@ -65,6 +65,7 @@ namespace Majorsilence.Reporting.Rdl
                 workbook.SetRowHeight(i, rowHeight);
             }
 
+            var cellWriter = new ExcelCellWriter(workbook, styled: false);
             for (int i = 0; i < excelBuilder.Rows.Count - 1; i++)
             {
                 var builderRow = excelBuilder.Rows[i];
@@ -85,7 +86,7 @@ namespace Majorsilence.Reporting.Rdl
                         if (rightAttach > 0 || bottomAttach > 0)
                             workbook.AddMerge(rowIndex, colIndex, rowIndex + bottomAttach, colIndex + rightAttach);
 
-                        workbook.SetCell(rowIndex, colIndex, builderCell.Value);
+                        cellWriter.Write(rowIndex, colIndex, builderCell);
                     }
                 }
             }
