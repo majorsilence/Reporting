@@ -49,6 +49,9 @@ namespace Majorsilence.Excel
         public DateTime? DateValue { get; internal set; }
         public string? Formula { get; internal set; }
         public string? NumberFormatCode { get; internal set; }
+
+        /// <summary>The text Excel would show for the cell, with its number format applied (en-US conventions).</summary>
+        public string DisplayText { get; internal set; } = "";
     }
 
     public sealed class XlsxReadSheet
@@ -305,7 +308,32 @@ namespace Majorsilence.Excel
                     }
                     break;
             }
+            cell.DisplayText = DisplayTextOf(cell);
             return cell;
+        }
+
+        private string DisplayTextOf(XlsxReadCell cell)
+        {
+            switch (cell.Type)
+            {
+                case XlsxCellType.String:
+                    return XlsxNumberFormatter.FormatText(cell.Text, cell.NumberFormatCode);
+                case XlsxCellType.Number:
+                    return XlsxNumberFormatter.Format(cell.Number!.Value, cell.NumberFormatCode, _date1904);
+                case XlsxCellType.Date:
+                    if (cell.Number.HasValue)
+                        return XlsxNumberFormatter.Format(cell.Number.Value, cell.NumberFormatCode, _date1904);
+                    // An ISO (t="d") date: show it through its format when that's a date format.
+                    if (IsDateFormat(cell.NumberFormatCode))
+                    {
+                        double serial = (cell.DateValue!.Value - (_date1904 ? Epoch1904 : Epoch1900)).TotalDays;
+                        if (serial >= 0)
+                            return XlsxNumberFormatter.Format(serial, cell.NumberFormatCode, _date1904);
+                    }
+                    return cell.Text;
+                default:
+                    return cell.Text;
+            }
         }
 
         private bool TrySerialToDate(double serial, out DateTime date)
