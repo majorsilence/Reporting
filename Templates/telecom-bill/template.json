@@ -1,0 +1,13 @@
+{
+  "name": "Telecom Bill",
+  "slug": "telecom-bill",
+  "description": "A multi-page phone/internet/TV bill: account summary with computed section totals and tax, a detachable payment stub, last-bill balance, and per-service charge sections with an optional 'includes' panel.",
+  "tags": ["business", "billing", "utility", "letter-size"],
+  "dataProvider": "Json",
+  "parameters": [],
+  "dataContract": {
+    "root": ["ProviderName", "ProviderRemitAddress", "Website", "ContactInfo", "TaxName", "TaxRate", "TaxRegistration", "LateFeeText", "CustomerName", "MailingAddress", "AccountNumber", "MainPhone", "BillDate", "PayBy", "PreviousAmountDue", "PaymentReceived", "PaymentDate"],
+    "root.Sections[]": ["Code", "Name", "SortOrder", "ChargesFor", "Period", "Includes"],
+    "root.Charges[]": ["Section", "Description", "Amount"]
+  }
+}
