@@ -307,10 +307,12 @@ namespace Majorsilence.Reporting.Rdl
                 await RunGroupsPage(pgs, wc, wc.Groups, wc.Data.Data.Count - 1, groupHeight, null).ConfigureAwait(false);
             }
 
-		    // Footer
-            if (row == null)
+		    // Footer. RunPage always renders this table's whole content (header, every
+            // group/page break and footer) in one call: `row` is just the outer binding
+            // context (null at the top of the Body, the current row when the table is
+            // nested inside a List/Matrix cell), not a "last page" flag, so the footer must
+            // run every time regardless of row (issue #580).
             {
-                // Row == null means the inital/last page
                 Row lRow = wc.Data.Data.Count > 0 ? wc.Data.Data[wc.Data.Data.Count - 1] : null;
                 await RunPageFooter(pgs, lRow, true).ConfigureAwait(false);
             }
