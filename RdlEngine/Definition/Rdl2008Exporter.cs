@@ -220,6 +220,50 @@ namespace Majorsilence.Reporting.Rdl
             return found;
         }
 
+        // List, Table, Matrix and Grouping convert their own PageBreakAtStart/PageBreakAtEnd while
+        // being rebuilt (BuildTablix, BuildTablixFromTable, BuildTablixFromMatrix, BuildGroup); every
+        // other 2005 element (Rectangle, Textbox, Image, Subreport, ...) keeps the pair untouched
+        // unless this converts it, so the 2008 schema -- which only knows PageBreak/BreakLocation --
+        // rejects the file.
+        private static readonly HashSet<string> OwnsPageBreakConversion = new HashSet<string> { "List", "Table", "Matrix", "Grouping" };
+
+        private static void ConvertPageBreaks (XmlElement root)
+        {
+            var ns = root.NamespaceURI;
+            void Walk (XmlElement element)
+            {
+                foreach (var child in element.ChildNodes.OfType<XmlElement> ().ToList ()) {
+                    if (child.NamespaceURI == ns && !OwnsPageBreakConversion.Contains (child.LocalName))
+                        ConvertPageBreak (child);
+                    Walk (child);
+                }
+            }
+            Walk (root);
+        }
+
+        private static void ConvertPageBreak (XmlElement element)
+        {
+            var atStart = Child (element, "PageBreakAtStart");
+            var atEnd = Child (element, "PageBreakAtEnd");
+            if (atStart == null && atEnd == null)
+                return;
+
+            var isStart = atStart != null && string.Equals (atStart.InnerText, "true", StringComparison.OrdinalIgnoreCase);
+            var isEnd = atEnd != null && string.Equals (atEnd.InnerText, "true", StringComparison.OrdinalIgnoreCase);
+            if (atStart != null)
+                element.RemoveChild (atStart);
+            if (atEnd != null)
+                element.RemoveChild (atEnd);
+            if (!isStart && !isEnd)
+                return;
+
+            var doc = element.OwnerDocument;
+            var ns = element.NamespaceURI;
+            var pageBreak = El (doc, ns, "PageBreak");
+            pageBreak.AppendChild (El (doc, ns, "BreakLocation", isStart && isEnd ? "StartAndEnd" : isStart ? "Start" : "End"));
+            element.AppendChild (pageBreak);
+        }
+
         private static void ConvertBorders (XmlElement style)
         {
             var doc = style.OwnerDocument;
@@ -378,6 +422,7 @@ namespace Majorsilence.Reporting.Rdl
                 ConvertTextbox (textbox);
             foreach (var style in Styles2005 (root))
                 ConvertBorders (style);
+            ConvertPageBreaks (root);
             FixQuirks (root, apply: true);
             foreach (var chart in Charts2005 (root)) {
                 var converted = Rdl2008ChartConverter.FromEngine (chart);
