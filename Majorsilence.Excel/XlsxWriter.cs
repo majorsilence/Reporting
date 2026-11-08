@@ -78,6 +78,24 @@ namespace Majorsilence.Excel
         public const string Time = "h:mm:ss";
     }
 
+    // One differently-formatted run of text within a rich-text cell (see XlsxWriter.SetRichText).
+    // Unset font properties fall back to Excel's own default run formatting, not to the cell's
+    // XlsxCellFormat font (rich text runs carry their own font metadata independently of cell style).
+    public class XlsxTextRun
+    {
+        public string Text = "";
+        public bool Bold;
+        public bool Italic;
+        public bool Underline;
+        public bool Strikeout;
+        public string? FontName;
+        public double? FontSizePt;
+        public (byte R, byte G, byte B)? Color;
+
+        public XlsxTextRun() { }
+        public XlsxTextRun(string text) { Text = text; }
+    }
+
     public class XlsxWriter
     {
         // Sheets, in workbook order. Index 0 is always the sheet created by the constructor.
@@ -215,6 +233,18 @@ namespace Majorsilence.Excel
             var entry = new CellEntry(rowIndex, colIndex, CellValueKind.Formula,
                 cachedValue.HasValue ? FormatDouble(cachedValue.Value) : null, styleIndex)
             { Formula = f };
+            _sheets[sheetIndex].Cells.Add(entry);
+        }
+
+        // Writes a cell whose text is made of several differently-formatted runs (e.g. a bold
+        // word within an otherwise plain sentence). format still controls the cell's own
+        // border/fill/alignment/number format as usual; each run's own font properties are
+        // independent of it.
+        public void SetRichText(int rowIndex, int colIndex, IEnumerable<XlsxTextRun> runs, XlsxCellFormat format = null, int sheetIndex = 0)
+        {
+            int styleIndex = ResolveStyleIndex(format);
+            var entry = new CellEntry(rowIndex, colIndex, CellValueKind.RichText, null, styleIndex)
+            { RichTextRuns = new List<XlsxTextRun>(runs) };
             _sheets[sheetIndex].Cells.Add(entry);
         }
 
@@ -602,6 +632,28 @@ namespace Majorsilence.Excel
             sb.Append($"</{side}>");
         }
 
+        // rPr child element order is fixed by the OOXML schema: rFont, b, i, strike, color, sz, u.
+        private static void AppendRichTextRun(StringBuilder sb, XlsxTextRun run)
+        {
+            bool hasRunProps = run.Bold || run.Italic || run.Underline || run.Strikeout ||
+                               run.FontName != null || run.FontSizePt.HasValue || run.Color.HasValue;
+            sb.Append("<r>");
+            if (hasRunProps)
+            {
+                sb.Append("<rPr>");
+                if (run.FontName != null) sb.Append($"<rFont val=\"{XmlEscape(run.FontName)}\"/>");
+                if (run.Bold) sb.Append("<b/>");
+                if (run.Italic) sb.Append("<i/>");
+                if (run.Strikeout) sb.Append("<strike/>");
+                if (run.Color.HasValue) sb.Append($"<color rgb=\"FF{run.Color.Value.R:X2}{run.Color.Value.G:X2}{run.Color.Value.B:X2}\"/>");
+                if (run.FontSizePt.HasValue) sb.Append($"<sz val=\"{FormatDouble(run.FontSizePt.Value)}\"/>");
+                if (run.Underline) sb.Append("<u/>");
+                sb.Append("</rPr>");
+            }
+            sb.Append($"<t xml:space=\"preserve\">{XmlEscape(run.Text)}</t>");
+            sb.Append("</r>");
+        }
+
         private string BuildSheet(Sheet sheet, bool hasDrawings)
         {
             var sb = new StringBuilder();
@@ -694,6 +746,12 @@ namespace Majorsilence.Excel
                                 break;
                             case CellValueKind.SharedString:
                                 sb.Append($"<c r=\"{cellRef}\" t=\"s\"{styleAttr}><v>{cell.Value}</v></c>");
+                                break;
+                            case CellValueKind.RichText:
+                                sb.Append($"<c r=\"{cellRef}\" t=\"inlineStr\"{styleAttr}><is>");
+                                foreach (var run in cell.RichTextRuns!)
+                                    AppendRichTextRun(sb, run);
+                                sb.Append("</is></c>");
                                 break;
                             default:
                                 sb.Append($"<c r=\"{cellRef}\" t=\"inlineStr\"{styleAttr}><is><t>{XmlEscape(cell.Value)}</t></is></c>");
@@ -1011,7 +1069,7 @@ namespace Majorsilence.Excel
             public Sheet(string name) { Name = name; }
         }
 
-        private enum CellValueKind { InlineString, Number, Boolean, Formula, SharedString }
+        private enum CellValueKind { InlineString, Number, Boolean, Formula, SharedString, RichText }
 
         private class CellEntry
         {
@@ -1019,6 +1077,7 @@ namespace Majorsilence.Excel
             public CellValueKind Kind;
             public string Value; // raw text for InlineString; invariant-culture numeric text for Number/Boolean/Formula's cached value
             public string? Formula; // formula text (Formula kind only), without the leading '='
+            public List<XlsxTextRun>? RichTextRuns; // RichText kind only
             public CellEntry(int row, int col, CellValueKind kind, string value, int style)
             { Row = row; Col = col; Kind = kind; Value = value; StyleIndex = style; }
         }
