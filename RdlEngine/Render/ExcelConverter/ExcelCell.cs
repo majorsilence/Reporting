@@ -17,6 +17,11 @@ namespace RdlEngine.Render.ExcelConverter
         public ReportItem ReportItem { get; set; }
         public ExcelTable ExcelTable { get; set; }
         public string Value { get; set; }
+
+        // The evaluated value when it can be written as a typed Excel cell (double, bool or DateTime)
+        // looking the same as Value; null keeps the cell as the text in Value.
+        public object TypedValue { get; set; }
+        public string NumberFormatCode { get; set; }
         public ExcelRow Row { get; private set; }
         public ExcelColumn Column { get; private set; }
 

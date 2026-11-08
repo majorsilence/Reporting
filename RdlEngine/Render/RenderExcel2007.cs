@@ -66,8 +66,7 @@ namespace Majorsilence.Reporting.Rdl
                 workbook.SetRowHeight(i, rowHeight);
             }
 
-            // Cells with a constant style share one StyleInfo instance, so its format is made once.
-            var formats = new Dictionary<StyleInfo, XlsxCellFormat>(ReferenceEqualityComparer.Instance);
+            var cellWriter = new ExcelCellWriter(workbook, styled: true);
             for (int i = 0; i < excelBuilder.Rows.Count - 1; i++)
             {
                 var builderRow = excelBuilder.Rows[i];
@@ -79,9 +78,6 @@ namespace Majorsilence.Reporting.Rdl
 
                     if (builderCell.ReportItem != null)
                     {
-                        if (!formats.TryGetValue(builderCell.Style, out var fmt))
-                            formats[builderCell.Style] = fmt = new ExcelCellStyle(builderCell.Style).ToXlsxFormat();
-
                         var rightAttach = excelBuilder.GetRightAttachCells(builderCell);
                         var bottomAttach = excelBuilder.GetBottomAttachCells(builderCell);
 
@@ -91,7 +87,7 @@ namespace Majorsilence.Reporting.Rdl
                         if (rightAttach > 0 || bottomAttach > 0)
                             workbook.AddMerge(rowIndex, colIndex, rowIndex + bottomAttach, colIndex + rightAttach);
 
-                        workbook.SetCell(rowIndex, colIndex, builderCell.Value, fmt);
+                        cellWriter.Write(rowIndex, colIndex, builderCell);
                     }
                 }
             }

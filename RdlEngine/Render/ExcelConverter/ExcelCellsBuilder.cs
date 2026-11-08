@@ -166,6 +166,7 @@ namespace RdlEngine.Render.ExcelConverter
 				}
 				currentCell.GrowedBottomPosition = rowPosition + rowHeight;
                 await SetCellStyle(currentCell, cellTextBox, row).ConfigureAwait(false);
+				await SetTypedValue(currentCell, (Textbox)cellTextBox, row).ConfigureAwait(false);
 				Cells.Add(currentCell);
 			}
 
@@ -217,9 +218,36 @@ namespace RdlEngine.Render.ExcelConverter
 			ExcelCell currentCell = new ExcelCell(reportItem, value, currentRow, currentColumn);
 			currentCell.OriginalBottomPosition = OriginalBottomPosition;
             await SetCellStyle(currentCell, reportItem, row).ConfigureAwait(false);
+			await SetTypedValue(currentCell, reportItem, row).ConfigureAwait(false);
 			Cells.Add(currentCell);
 			currentCell.OriginalHeight = height;
 			currentCell.GrowedBottomPosition = topPosition + height;
+		}
+
+		private async Task SetTypedValue(ExcelCell excelCell, Textbox textbox, Row row)
+		{
+			if (excelCell.Value == null || excelCell.Value.Length == 0)
+				return;
+			if (textbox.TryIsHtml(out bool isHtml) ? isHtml : await textbox.IsHtml(Report, row).ConfigureAwait(false))
+				return;
+
+			object value = await textbox.Evaluate(Report, row).ConfigureAwait(false);
+			if (value == null || value is string)
+				return;
+
+			string format = null, language = null;
+			if (textbox.Style?.Format != null)
+			{
+				format = await textbox.Style.Format.EvaluateString(Report, row).ConfigureAwait(false);
+				if (!string.IsNullOrEmpty(format))
+					language = await textbox.Style.EvalLanguage(Report, row).ConfigureAwait(false);
+			}
+
+			if (ExcelValueConverter.TryConvert(value, format, language, out object typed, out string code))
+			{
+				excelCell.TypedValue = typed;
+				excelCell.NumberFormatCode = code;
+			}
 		}
 
 		private async Task SetCellStyle(ExcelCell excelCell, ReportItem reportItem, Row row)
