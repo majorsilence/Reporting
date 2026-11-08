@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Majorsilence.Excel;
 using Majorsilence.Forms.Drawing.Imaging;
 using RdlEngine.Render.ExcelConverter;
 

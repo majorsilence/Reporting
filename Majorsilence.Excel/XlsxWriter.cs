@@ -4,16 +4,27 @@ using System.IO;
 using System.IO.Compression;
 using System.Text;
 
-namespace RdlEngine.Render.ExcelConverter
+namespace Majorsilence.Excel
 {
+#if NETSTANDARD2_0
+    // System.Collections.Generic.ReferenceEqualityComparer isn't available before net5.0.
+    internal sealed class ReferenceEqualityComparer : IEqualityComparer<object>
+    {
+        public static readonly ReferenceEqualityComparer Instance = new ReferenceEqualityComparer();
+        private ReferenceEqualityComparer() { }
+        public bool Equals(object x, object y) => ReferenceEquals(x, y);
+        public int GetHashCode(object obj) => System.Runtime.CompilerServices.RuntimeHelpers.GetHashCode(obj);
+    }
+#endif
+
     // EMU (English Metric Units): 1 point = 12700 EMU, 1 inch = 914400 EMU
-    internal static class XlsxUnits
+    public static class XlsxUnits
     {
         public const long EmuPerPoint = 12700L;
         public const long EmuPerInch = 914400L;
     }
 
-    internal class XlsxBorderSide
+    public class XlsxBorderSide
     {
         public string Style = ""; // "thin","medium","thick","dotted","dashed","double","hair", "" = none
         public (byte R, byte G, byte B) Color = (0, 0, 0);
@@ -22,7 +33,7 @@ namespace RdlEngine.Render.ExcelConverter
             o != null && Style == o.Style && Color == o.Color;
     }
 
-    internal class XlsxCellFormat
+    public class XlsxCellFormat
     {
         // Font
         public string FontName = "Calibri";
@@ -50,7 +61,7 @@ namespace RdlEngine.Render.ExcelConverter
         public int Rotation = 0;
     }
 
-    internal class XlsxWriter
+    public class XlsxWriter
     {
         private readonly string _sheetName;
         private readonly SortedDictionary<int, double> _columnWidths = new SortedDictionary<int, double>();
