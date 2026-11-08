@@ -258,6 +258,10 @@ namespace Majorsilence.Reporting.Rdl
                     {
                         qcn[fld.ColumnNumber] = -1;
                     }
+                    // With the columns known at parse time, Field.FinalPass has already reported a
+                    // missing DataField; without them this is the first chance to.
+                    if (qcn[fld.ColumnNumber] < 0 && _Columns == null)
+                        rpt.rl.LogError(4, "DataField '" + fld.DataField + "' not returned by query of DataSet '" + DataSetName + "'.");
                 }
 
                 // The columns that come from the query, worked out once: enumerating the fields for every row
