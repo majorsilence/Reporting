@@ -215,6 +215,34 @@ namespace Majorsilence.Excel
         public void SetAutoFilter(int r1, int c1, int r2, int c2, int sheetIndex = 0)
             => _sheets[sheetIndex].AutoFilterRange = (r1, c1, r2, c2);
 
+        // Workbook-level defined names (named ranges), keyed by name -> absolute formula text.
+        private readonly List<(string Name, string Formula)> _definedNames = new List<(string, string)>();
+
+        // Defines a workbook-level name for a cell range on the given sheet.
+        public void AddDefinedName(string name, int sheetIndex, int r1, int c1, int r2, int c2)
+        {
+            string sheetRef = "'" + _sheets[sheetIndex].Name.Replace("'", "''") + "'";
+            string range = r1 == r2 && c1 == c2
+                ? AbsoluteCellRef(c1, r1)
+                : $"{AbsoluteCellRef(c1, r1)}:{AbsoluteCellRef(c2, r2)}";
+            _definedNames.Add((name, $"{sheetRef}!{range}"));
+        }
+
+        // Defines a workbook-level name for a single cell on the given sheet.
+        public void AddDefinedName(string name, int sheetIndex, int row, int col)
+            => AddDefinedName(name, sheetIndex, row, col, row, col);
+
+        private static string AbsoluteCellRef(int colIndex, int rowIndex) => "$" + ColRef(colIndex) + "$" + (rowIndex + 1);
+
+        // Attaches a hyperlink to an external URL on the given cell.
+        public void AddHyperlink(int rowIndex, int colIndex, string url, int sheetIndex = 0)
+            => _sheets[sheetIndex].ExternalHyperlinks.Add((rowIndex, colIndex, url));
+
+        // Attaches a hyperlink to another location within the workbook (e.g. "Sheet2!A1" or
+        // "'My Sheet'!A1:B2") on the given cell.
+        public void AddInternalHyperlink(int rowIndex, int colIndex, string location, int sheetIndex = 0)
+            => _sheets[sheetIndex].InternalHyperlinks.Add((rowIndex, colIndex, location));
+
         public void Write(Stream output)
         {
             bool anyImages = false;
@@ -235,19 +263,23 @@ namespace Majorsilence.Excel
                     var sheet = _sheets[s];
                     int sheetNum = s + 1;
                     bool hasDrawings = sheet.Images.Count > 0 || sheet.Lines.Count > 0;
+                    bool hasSheetRels = hasDrawings || sheet.ExternalHyperlinks.Count > 0;
 
                     WriteText(zip, $"xl/worksheets/sheet{sheetNum}.xml", BuildSheet(sheet, hasDrawings));
 
-                    if (hasDrawings)
+                    if (hasSheetRels)
                     {
-                        WriteText(zip, $"xl/worksheets/_rels/sheet{sheetNum}.xml.rels", BuildSheetRels(sheetNum));
-                        WriteText(zip, $"xl/drawings/drawing{sheetNum}.xml", BuildDrawing(sheet));
-                        if (sheet.Images.Count > 0)
+                        WriteText(zip, $"xl/worksheets/_rels/sheet{sheetNum}.xml.rels", BuildSheetRels(sheetNum, sheet, hasDrawings));
+                        if (hasDrawings)
                         {
-                            WriteText(zip, $"xl/drawings/_rels/drawing{sheetNum}.xml.rels", BuildDrawingRels(sheet, imageOffset));
-                            for (int i = 0; i < sheet.Images.Count; i++)
-                                WriteBytes(zip, $"xl/media/image{imageOffset + i + 1}.jpg", sheet.Images[i].Data);
-                            imageOffset += sheet.Images.Count;
+                            WriteText(zip, $"xl/drawings/drawing{sheetNum}.xml", BuildDrawing(sheet));
+                            if (sheet.Images.Count > 0)
+                            {
+                                WriteText(zip, $"xl/drawings/_rels/drawing{sheetNum}.xml.rels", BuildDrawingRels(sheet, imageOffset));
+                                for (int i = 0; i < sheet.Images.Count; i++)
+                                    WriteBytes(zip, $"xl/media/image{imageOffset + i + 1}.jpg", sheet.Images[i].Data);
+                                imageOffset += sheet.Images.Count;
+                            }
                         }
                     }
                 }
@@ -354,6 +386,13 @@ namespace Majorsilence.Excel
             for (int s = 0; s < _sheets.Count; s++)
                 sb.Append($"<sheet name=\"{XmlEscape(_sheets[s].Name)}\" sheetId=\"{s + 1}\" r:id=\"rId{s + 1}\"/>");
             sb.Append("</sheets>");
+            if (_definedNames.Count > 0)
+            {
+                sb.Append("<definedNames>");
+                foreach (var dn in _definedNames)
+                    sb.Append($"<definedName name=\"{XmlEscape(dn.Name)}\">{XmlEscape(dn.Formula)}</definedName>");
+                sb.Append("</definedNames>");
+            }
             sb.Append("</workbook>");
             return sb.ToString();
         }
@@ -586,6 +625,25 @@ namespace Majorsilence.Excel
                 sb.Append("</mergeCells>");
             }
 
+            // Hyperlinks (must follow mergeCells and precede pageMargins per OOXML ordering)
+            if (sheet.ExternalHyperlinks.Count > 0 || sheet.InternalHyperlinks.Count > 0)
+            {
+                sb.Append("<hyperlinks>");
+                int baseRid = hasDrawings ? 2 : 1;
+                for (int i = 0; i < sheet.ExternalHyperlinks.Count; i++)
+                {
+                    var hl = sheet.ExternalHyperlinks[i];
+                    string cellRef = ColRef(hl.Col) + (hl.Row + 1);
+                    sb.Append($"<hyperlink ref=\"{cellRef}\" r:id=\"rId{baseRid + i}\"/>");
+                }
+                foreach (var hl in sheet.InternalHyperlinks)
+                {
+                    string cellRef = ColRef(hl.Col) + (hl.Row + 1);
+                    sb.Append($"<hyperlink ref=\"{cellRef}\" location=\"{XmlEscape(hl.Location)}\"/>");
+                }
+                sb.Append("</hyperlinks>");
+            }
+
             // Page setup (must follow mergeCells and precede drawing per OOXML ordering)
             sb.Append($"<pageMargins left=\"{FormatDouble(sheet.LeftMarginInches)}\" right=\"{FormatDouble(sheet.RightMarginInches)}\" " +
                       $"top=\"{FormatDouble(sheet.TopMarginInches)}\" bottom=\"{FormatDouble(sheet.BottomMarginInches)}\" " +
@@ -600,11 +658,28 @@ namespace Majorsilence.Excel
             return sb.ToString();
         }
 
-        private string BuildSheetRels(int sheetNum) =>
-            "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>" +
-            "<Relationships xmlns=\"http://schemas.openxmlformats.org/package/2006/relationships\">" +
-            $"<Relationship Id=\"rId1\" Type=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships/drawing\" Target=\"../drawings/drawing{sheetNum}.xml\"/>" +
-            "</Relationships>";
+        // Drawing relationship (if any) is always rId1, matching the hardcoded r:id="rId1" on
+        // <drawing> in BuildSheet; external hyperlinks follow at rId2, rId3, ... in list order,
+        // matching the rIds BuildSheet assigns them.
+        private string BuildSheetRels(int sheetNum, Sheet sheet, bool hasDrawings)
+        {
+            var sb = new StringBuilder();
+            sb.Append("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>");
+            sb.Append("<Relationships xmlns=\"http://schemas.openxmlformats.org/package/2006/relationships\">");
+            int rid = 1;
+            if (hasDrawings)
+            {
+                sb.Append($"<Relationship Id=\"rId{rid}\" Type=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships/drawing\" Target=\"../drawings/drawing{sheetNum}.xml\"/>");
+                rid++;
+            }
+            foreach (var hl in sheet.ExternalHyperlinks)
+            {
+                sb.Append($"<Relationship Id=\"rId{rid}\" Type=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink\" Target=\"{XmlEscape(hl.Url)}\" TargetMode=\"External\"/>");
+                rid++;
+            }
+            sb.Append("</Relationships>");
+            return sb.ToString();
+        }
 
         private string BuildDrawing(Sheet sheet)
         {
@@ -805,6 +880,9 @@ namespace Majorsilence.Excel
             public int FrozenRows;
             public int FrozenCols;
             public (int r1, int c1, int r2, int c2)? AutoFilterRange;
+
+            public readonly List<(int Row, int Col, string Url)> ExternalHyperlinks = new List<(int, int, string)>();
+            public readonly List<(int Row, int Col, string Location)> InternalHyperlinks = new List<(int, int, string)>();
 
             public Sheet(string name) { Name = name; }
         }
