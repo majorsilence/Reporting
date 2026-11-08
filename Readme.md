@@ -272,6 +272,7 @@ The entire project is Apache 2.0 licensed with select sub projects tri-licensed.
 
 tri-licensed projects
 
+- Majorsilence.Excel
 - Majorsilence.Pdf
 - Majorsilence.Pdf.Security
 - Majorsilence.Reporting.UI
