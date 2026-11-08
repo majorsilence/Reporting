@@ -1202,6 +1202,11 @@ namespace Majorsilence.Reporting.Rdl
 				if (scope == null)
 				{
 					scope = idLookup.LookupMatrix();
+					// Outside any group of a table (its header or footer) the scope is the table's
+					// own rows: after its filters, and in a list or a table group just the rows of the
+					// current instance (#601). The dataset would be all of its rows.
+					if (scope == null)
+						scope = idLookup.ContextTable;
 					if (scope == null)
 						scope = idLookup.ScopeDataSet(null);
 				}
