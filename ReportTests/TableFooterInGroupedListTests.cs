@@ -16,11 +16,8 @@ namespace ReportTests
     /// (null at the top of the Body, the current group row when nested in a List), not a "last page"
     /// flag -- so the footer was skipped for every table nested in a List.
     ///
-    /// The footer's sum uses an explicit scope (the List's Grouping name) rather than a bare
-    /// <c>=Sum(Fields!Amt.Value)</c>: an unscoped aggregate here defaults to the Table's whole bound
-    /// dataset rather than the current List group (<c>Expression.FinalPass</c>'s ancestor walk stops
-    /// at the Table, a DataRegion, before it would reach the List's Grouping) -- a separate scoping
-    /// gap, not part of this fix, filed on its own.
+    /// The footer's sum names the List's Grouping as its scope. A bare <c>=Sum(Fields!Amt.Value)</c>
+    /// gives the same totals since #601; TableAggregateDefaultScopeTests covers that.
     /// </summary>
     [TestFixture]
     public class TableFooterInGroupedListTests
