@@ -124,6 +124,19 @@ namespace RdlEngine.Render.ExcelConverter
 			Tables.Add(CurrentExcelTable);
 		}
 
+		private static List<ExcelRow> SectionRowsOf(TableRow tr, ExcelTable table)
+		{
+			for(ReportLink rl = tr.Parent; rl != null; rl = rl.Parent) {
+				if(rl is Header h)
+					return h.Parent is Table ? table.HeaderRows : table.DetailRows;
+				if(rl is Footer f)
+					return f.Parent is Table ? table.FooterRows : table.DetailRows;
+				if(rl is Details || rl is Table)
+					break;
+			}
+			return table.DetailRows;
+		}
+
 		public async Task AddRow(TableRow tr, Row row)
 		{
 			if(CurrentExcelTable.Table == null) {
@@ -135,6 +148,7 @@ namespace RdlEngine.Render.ExcelConverter
 			ShiftBottomRows(shiftingRows, rowHeight);
 
 			var currentRow = AddRow(rowPosition, rowHeight);
+			SectionRowsOf(tr, CurrentExcelTable).Add(currentRow);
 			foreach(var cell in tr.TableCells.Items) {
 				var column = CurrentExcelTable.Table.TableColumns.Items[cell.ColIndex];
 				if(await column.IsHidden(Report, row).ConfigureAwait(false))

@@ -66,6 +66,7 @@ namespace Majorsilence.Reporting.Rdl
             }
 
             var cellWriter = new ExcelCellWriter(workbook, styled: false);
+            var merges = new List<(int, int, int, int)>();
             for (int i = 0; i < excelBuilder.Rows.Count - 1; i++)
             {
                 var builderRow = excelBuilder.Rows[i];
@@ -84,12 +85,17 @@ namespace Majorsilence.Reporting.Rdl
                         var colIndex = excelBuilder.Columns.IndexOf(builderCell.Column);
 
                         if (rightAttach > 0 || bottomAttach > 0)
+                        {
                             workbook.AddMerge(rowIndex, colIndex, rowIndex + bottomAttach, colIndex + rightAttach);
+                            merges.Add((rowIndex, colIndex, rowIndex + bottomAttach, colIndex + rightAttach));
+                        }
 
                         cellWriter.Write(rowIndex, colIndex, builderCell);
                     }
                 }
             }
+
+            ExcelTableFeatures.Apply(workbook, excelBuilder, merges);
 
             // Images
             foreach (var image in excelBuilder.Images)
