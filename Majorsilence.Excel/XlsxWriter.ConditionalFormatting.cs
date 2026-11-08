@@ -157,7 +157,7 @@ namespace Majorsilence.Excel
             public int? NumFmtId;
             public string? NumberFormatCode;
 
-            public bool Equals(DxfDef o) =>
+            public bool Equals(DxfDef? o) =>
                 o != null && Bold == o.Bold && Italic == o.Italic && Strikeout == o.Strikeout &&
                 Underline == o.Underline && FontColor == o.FontColor && BackgroundColor == o.BackgroundColor &&
                 NumFmtId == o.NumFmtId;
