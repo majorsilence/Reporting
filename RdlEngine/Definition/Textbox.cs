@@ -319,6 +319,8 @@ namespace Majorsilence.Reporting.Rdl
 			// A box asked not to wrap is cut at its sides wherever it is: it has asked for that.
 			pt.NoWrap = _NoWrap && !this.CanGrow;
 			pt.WrapInset = WrapInsetPoints;
+			if (pth != null)
+				pth.TabStopInterval = _TabStopPoints;
 			pt.ClipSides = !this.CanGrow && (pt.NoWrap || !this.IsTableOrMatrixCell(r));
 
             // check TextAlign: if General then correct based on data type
@@ -733,6 +735,7 @@ namespace Majorsilence.Reporting.Rdl
 				var pth = new PageTextHtml(text);
 				await SetPagePositionAndStyle(rpt, pth, row).ConfigureAwait(false);
 				pth.WrapInset = WrapInsetPoints;
+				pth.TabStopInterval = _TabStopPoints;
 				await pth.Build(g).ConfigureAwait(false);
 				return pth.TotalHeight;
 			}
@@ -845,8 +848,11 @@ namespace Majorsilence.Reporting.Rdl
 						await SetPagePositionAndStyle(rpt, pth, row).ConfigureAwait(false);
 					}
 					pth.WrapInset = WrapInsetPoints;	// measured breaking where it is drawn breaking
+					pth.TabStopInterval = _TabStopPoints;
 					await pth.Build(g).ConfigureAwait(false);
-					height = RSize.PointsFromPixels(g, RSize.PixelsFromPoints(pth.TotalHeight));
+					// In whole pixels rounded up, as plain text's height is (Style.WrappedHeight); cut
+					// down, nine lines 12pt apart came out 107.25pt high, short of the last line.
+					height = RSize.PointsFromPixels(g, (int) Math.Ceiling(pth.TotalHeight * g.DpiX / 72f - 0.01f));
 				}
 				else if (!Style.TryMeasureHeight(rpt, g, o = AsLineFeeds(o), tc, wrapPoints, out height))
 					height = await Style.MeasureHeight(rpt, g, o, tc, row, wrapPoints).ConfigureAwait(false);

@@ -153,6 +153,83 @@ namespace ReportTests
             });
         }
 
+        // A box that sets its own tab stops has its html tabs go to them, as its plain text's do.
+        [Test]
+        public async Task ATab_GoesToTheBoxsOwnStops()
+        {
+            RdlEngineConfig.RdlEngineConfigInit();
+            string rdl = Rdl("Left", NoPadding).Replace("&lt;b&gt;Bold&lt;/b&gt; plain&lt;br/&gt;Second",
+                "&lt;b&gt;Date:&lt;/b&gt;&lt;tab/&gt;Today&lt;tab/&gt;&lt;tab/&gt;End")
+                .Replace("<CanGrow>true</CanGrow>", "<CanGrow>true</CanGrow><Custom><TabStopInterval>18pt</TabStopInterval></Custom>");
+            using var report = await new RDLParser(rdl) { SkipDatabaseSchemaValidation = true }.Parse();
+            await report.RunGetData(null);
+            var pages = await report.BuildPages();
+            var html = pages.Cast<Page>().SelectMany(p => p.Cast<PageItem>()).OfType<PageTextHtml>().Single();
+            await html.Build(pages.G);
+            var runs = html.Cast<PageItem>().OfType<PageText>().Skip(1).Where(t => t.Text.Length > 0).ToArray();
+            float todayEnds = Right(runs[1]);
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(runs.Select(r => r.Text), Is.EqualTo(new[] { "Date:", "Today", "End" }));
+                Assert.That(runs[1].X, Is.EqualTo(36f).Within(0.01f), "the second 18pt stop: \"Date:\" is past the first");
+                Assert.That(runs[2].X, Is.EqualTo(((int) (todayEnds / 18) + 2) * 18f).Within(0.01f), "two stops on");
+            });
+        }
+
+        // A growing box is as tall as its lines, in whole pixels rounded up as plain text's is:
+        // nine lines 12pt apart came out 107.25pt high.
+        [Test]
+        public async Task AGrowingBox_IsAsTallAsItsLines()
+        {
+            RdlEngineConfig.RdlEngineConfigInit();
+            string rdl = Rdl("Left", NoPadding + "<LineHeight>12pt</LineHeight>").Replace("&lt;b&gt;Bold&lt;/b&gt; plain&lt;br/&gt;Second",
+                string.Join("&lt;br&gt;", Enumerable.Range(1, 9).Select(i => "Line " + i)));
+            using var report = await new RDLParser(rdl) { SkipDatabaseSchemaValidation = true }.Parse();
+            await report.RunGetData(null);
+            var pages = await report.BuildPages();
+            var html = pages.Cast<Page>().SelectMany(p => p.Cast<PageItem>()).OfType<PageTextHtml>().Single();
+
+            Assert.That(html.H, Is.EqualTo(108f).Within(0.01f));
+        }
+
+        // A line break at the end leaves an empty line, as a line feed at the end of plain text
+        // does, and the box grows by it: such a box grew a line shorter as html than as text.
+        [Test]
+        public async Task AGrowingBoxEndingInALineBreak_GrowsByTheEmptyLine()
+        {
+            RdlEngineConfig.RdlEngineConfigInit();
+            string rdl = Rdl("Left", NoPadding + "<LineHeight>12pt</LineHeight>").Replace("&lt;b&gt;Bold&lt;/b&gt; plain&lt;br/&gt;Second",
+                "&lt;div&gt;&lt;b&gt;Name&lt;/b&gt;&lt;br&gt;Street&lt;br&gt;&lt;/div&gt;");
+            using var report = await new RDLParser(rdl) { SkipDatabaseSchemaValidation = true }.Parse();
+            await report.RunGetData(null);
+            var pages = await report.BuildPages();
+            var html = pages.Cast<Page>().SelectMany(p => p.Cast<PageItem>()).OfType<PageTextHtml>().Single();
+
+            Assert.That(html.H, Is.EqualTo(36f).Within(0.01f));
+        }
+
+        // A box that may not grow shows the lines that fit in it, as plain text does; its runs
+        // are drawn unclipped, and the rest printed over whatever was below it.
+        [Test]
+        public async Task ABoxThatMayNotGrow_ShowsTheLinesThatFit()
+        {
+            RdlEngineConfig.RdlEngineConfigInit();
+            string rdl = Rdl("Left", NoPadding + "<LineHeight>12pt</LineHeight>")
+                .Replace("&lt;b&gt;Bold&lt;/b&gt; plain&lt;br/&gt;Second",
+                    string.Join("&lt;br&gt;", Enumerable.Range(1, 5).Select(i => "Line " + i)))
+                .Replace("<CanGrow>true</CanGrow>", "<CanGrow>false</CanGrow>")
+                .Replace("<Height>12pt</Height>", "<Height>30pt</Height>");
+            using var report = await new RDLParser(rdl) { SkipDatabaseSchemaValidation = true }.Parse();
+            await report.RunGetData(null);
+            var pages = await report.BuildPages();
+            var html = pages.Cast<Page>().SelectMany(p => p.Cast<PageItem>()).OfType<PageTextHtml>().Single();
+            await html.Build(pages.G);
+            var runs = html.Cast<PageItem>().OfType<PageText>().Skip(1).Where(t => t.Text.Trim().Length > 0).ToArray();
+
+            Assert.That(runs.Select(r => r.Text.Trim()), Is.EqualTo(new[] { "Line 1", "Line 2" }));
+        }
+
         [Test]
         public async Task TheTextSitsInsideThePadding()
         {

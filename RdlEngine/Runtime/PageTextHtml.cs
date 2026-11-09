@@ -25,9 +25,17 @@ namespace Majorsilence.Reporting.Rdl
 		Stack _StyleStack;				// work variable when processing styles
 		float _TotalHeight=0;
 		float _textWidth;				// the width inside the padding, which each line is aligned in
+		float _textLeft;				// where that width starts
 		public PageTextHtml(string t) : base(t)
 		{
 		}
+
+		/// <summary>
+		/// How far apart a &lt;tab&gt;'s stops are: the box's own interval, which its plain text
+		/// keeps too (Textbox.TabStopIntervalOf). The fixed default put a box that sets its
+		/// own interval's tabs at other stops as html than as plain text.
+		/// </summary>
+		internal float TabStopInterval { get; set; } = Textbox.TabStopPoints;
 
 		/// <summary>
 		/// Reset will force a recalculation of the embedded PageItems;
@@ -100,6 +108,7 @@ namespace Majorsilence.Reporting.Rdl
 			float padLeft = this.SI.PaddingLeft, padTop = this.SI.PaddingTop;
 			float textWidth = this.W - padLeft - this.SI.PaddingRight;
 			_textWidth = textWidth;
+			_textLeft = this.X + padLeft;
 			// Lines break WrapInset short of the right, and are still aligned across the full
 			// width, as plain text is (Textbox.WrapInsetPoints).
 			textWidth -= this.WrapInset;
@@ -125,6 +134,7 @@ namespace Majorsilence.Reporting.Rdl
 			float descent;				// working value for descent
 			System.Drawing.SizeF ms;
 			bool bWhiteSpace=false;
+			bool endsInBreak = false;	// a <br> is the last thing, but for closing tags
 			List<PageItem> lineItems = new List<PageItem>();
             bool bIsOrderedList = false;
 			int? OlLiCount = null;	//Maintains number of OL items; zero indicates UL item (bullet)
@@ -179,6 +189,7 @@ namespace Majorsilence.Reporting.Rdl
 					runStyle = null;
 					StyleInfo cs = CurrentStyle(si);
 					string ltoken = token.Substring(1,Math.Min(token.Length-1,10)).ToLower();
+					endsInBreak = ltoken.StartsWith("<br") || endsInBreak && ltoken.StartsWith("</");
 					if (ltoken == "<b>" || ltoken == "<strong>")
 						cs.FontWeight = FontWeightEnum.Bold;
 					else if (ltoken == "</b>" || ltoken == "</strong>")
@@ -246,8 +257,8 @@ namespace Majorsilence.Reporting.Rdl
 						cs.FontSize = h;
 					}
 					else if (ltoken.StartsWith("<tab"))
-					{	// to the next stop, every TabStopPoints from the line's start, as a tab in plain text goes
-						float stop = ((int)Math.Floor(xPos / Textbox.TabStopPoints) + 1) * Textbox.TabStopPoints;
+					{	// to the next stop, every TabStopInterval from the line's start, as a tab in plain text goes
+						float stop = ((int)Math.Floor(xPos / TabStopInterval) + 1) * TabStopInterval;
 						xPos = lineXPos = stop;
 						bFirstInLine = false;
 						bWhiteSpace = false;
@@ -402,6 +413,7 @@ namespace Majorsilence.Reporting.Rdl
                     ntoken = ntoken.Replace(PageTextHtmlLexer.NBSP, ' ');
 
 					bWhiteSpace = false;			// can only use whitespace once
+					endsInBreak = false;
 					ms = this.MeasureString(ntoken, CurrentStyle(si), g, out descent);
 					if (xPos + ms.Width < textWidth)
 					{
@@ -423,7 +435,14 @@ namespace Majorsilence.Reporting.Rdl
 					}
 				}
 				else if (sb.Length == 0)	// EOF and no previous string means we're done
+				{
+					// A line break at the end leaves an empty line after it, as a line feed at the
+					// end of plain text does. Without it a growing box whose text, or a field in
+					// it, ended in a line break grew a line shorter than as plain text.
+					if (endsInBreak)
+						yPos += LinePitch(maxLineHeight);
 					continue;
+				}
 
 				pt = new PageText(sb.ToString());
                 pt.AllowSelect = false;
@@ -447,7 +466,8 @@ namespace Majorsilence.Reporting.Rdl
 				maxDescent = Math.Max(maxDescent, descent);
 				maxLineHeight = Math.Max(maxLineHeight, ms.Height);
 				yPos += LinePitch(maxLineHeight);	// Increment y position
-				NormalizeLineHeight(lineItems, maxLineHeight, maxDescent);
+				// A line the next word did not fit on is not its paragraph's last: justified, it is spread.
+				NormalizeLineHeight(lineItems, maxLineHeight, maxDescent, token != PageTextHtmlLexer.EOF ? g : null);
 				lineXPos = maxLineHeight = maxDescent = 0;	// start line height over
 
 				// Now set the xPos just after the current token
@@ -455,6 +475,16 @@ namespace Majorsilence.Reporting.Rdl
 				xPos = ms.Width;	 
 			}
 		
+			// A box that may not grow shows the lines that fit in it and no more, as plain text
+			// does (RenderPdf_Raw.MaxLines): its runs are drawn unclipped, so the lines past its
+			// bottom printed over whatever was below. The first line always shows.
+			if (!this.CanGrow && this.H > 0)
+			{
+				PageItem box = _items[0];
+				float firstLine = this.Y + padTop + 0.01f, bottom = this.Y + this.H - this.SI.PaddingBottom + 1;
+				_items.RemoveAll(pi => pi != box && pi is PageText run && run.Y > firstLine && run.Y + run.H > bottom);
+			}
+
 			_TotalHeight = yPos;		// set the calculated height of the result
 			_StyleStack = null;
 			return;
@@ -824,14 +854,17 @@ namespace Majorsilence.Reporting.Rdl
 			return this.SI.LineHeight > maxLineHeight ? this.SI.LineHeight : maxLineHeight;
 		}
 
-		private void NormalizeLineHeight(List<PageItem> lineItems, float maxLineHeight, float maxDescent)
+		// spreadIn is the Graphics to measure with for a line that is not its paragraph's last,
+		// which justified is spread across the width; null for any other line.
+		private void NormalizeLineHeight(List<PageItem> lineItems, float maxLineHeight, float maxDescent, Draw.Graphics spreadIn = null)
 		{
 			// Each line is aligned on its own, as plain text is. Every line used to start at
 			// the left edge whatever the box's TextAlign, so centred or right-aligned rich
 			// text printed flush left. A line takes the alignment of the paragraph it is in
 			// (text-align or align on a <p> or <div>), which its text carries, and otherwise the
 			// box's: a centred title over a body at the left printed all at the box's one
-			// alignment. A justified line is set at the left.
+			// alignment. A justified line is set at the left, and spread if it is not its
+			// paragraph's last.
 			TextAlignEnum align = this.SI.TextAlign;
 			foreach (PageItem pi in lineItems)
 				if (pi is PageText)
@@ -839,6 +872,8 @@ namespace Majorsilence.Reporting.Rdl
 					align = pi.SI.TextAlign;
 					break;
 				}
+			if (align == TextAlignEnum.Justified && spreadIn != null)
+				SpreadLine(lineItems, spreadIn);
 			float shift = 0;
 			if (align == TextAlignEnum.Center || align == TextAlignEnum.Right)
 			{
@@ -870,6 +905,70 @@ namespace Majorsilence.Reporting.Rdl
 				}
 			}
 			lineItems.Clear();
+		}
+
+		// A justified line spread to the full width, as plain text spreads every line of a
+		// justified paragraph but its last: each run is cut into its words, a word keeping the
+		// spaces after it, and the room the line leaves at the right is shared out evenly between
+		// the gaps where a space separates two words. Lines used to be set at the left, ragged.
+		private void SpreadLine(List<PageItem> lineItems, Draw.Graphics g)
+		{
+			var words = new List<(PageText word, bool gapBefore)>();
+			bool anyWord = false, spaced = false;	// a word set before, and a space since it
+			for (int i = 0; i < lineItems.Count; i++)
+			{
+				if (lineItems[i] is not PageText run || run.Text.Length == 0)
+					continue;
+				string text = run.Text;
+				int at = _items.LastIndexOf(run);
+				int start = 0;
+				for (int k = 1; k <= text.Length; k++)
+				{
+					// a word starts after a space; spaces the run starts with go with its first word
+					if (k < text.Length && !(text[k] != ' ' && text[k - 1] == ' ' && text.AsSpan(start, k - start).Trim(' ').Length > 0))
+						continue;
+					PageText word = start == 0 ? run : (PageText) run.Clone();
+					// where the word starts, from the run's end, so the run's own spacing is kept
+					if (start > 0)
+						word.X = run.X + run.W - this.MeasureString(text.Substring(start), run.SI, g, out _).Width;
+					word.Text = text.Substring(start, k - start);
+					if (word != run)
+						_items.Insert(++at, word);
+					bool blank = word.Text.Trim(' ').Length == 0;
+					words.Add((word, !blank && anyWord && (spaced || word.Text[0] == ' ')));
+					anyWord |= !blank;
+					spaced = blank ? spaced || anyWord : word.Text.EndsWith(' ');
+					start = k;
+				}
+			}
+			lineItems.Clear();
+			foreach (var w in words)
+			{
+				w.word.W = this.MeasureString(w.word.Text, w.word.SI, g, out _).Width;
+				lineItems.Add(w.word);
+			}
+			// Spaces at the end of the line are no gap.
+			int last = words.Count - 1;
+			while (last >= 0 && words[last].word.Text.Trim().Length == 0)
+				last--;
+			if (last <= 0)
+				return;
+			int gaps = 0;
+			for (int i = 0; i <= last; i++)
+				if (words[i].gapBefore)
+					gaps++;
+			PageText end = words[last].word;
+			float right = end.X + this.MeasureString(end.Text.TrimEnd(), end.SI, g, out _).Width;
+			float extra = gaps == 0 ? 0 : (_textLeft + _textWidth - right) / gaps;
+			if (extra <= 0)
+				return;
+			int passed = 0;
+			foreach (var w in words)
+			{
+				if (w.gapBefore)
+					passed++;
+				w.word.X += extra * passed;
+			}
 		}
 
 		private Hashtable ParseHtmlCmd(string token)
