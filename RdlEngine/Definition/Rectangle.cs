@@ -159,6 +159,7 @@ namespace Majorsilence.Reporting.Rdl
                 {	// force page break at beginning of dataregion
                     pgs.NextOrNew();
                     pgs.CurrentPage.YOffset = OwnerReport.TopOfPage;
+                    bottom = pgs.CurrentPage.YOffset;   // what follows starts at the top of the new page
                 }
             }
 //			SetPagePositionEnd(pgs, pgs.CurrentPage.YOffset);
@@ -192,7 +193,10 @@ namespace Majorsilence.Reporting.Rdl
 
         // As SSRS splits a rectangle whose items run onto later pages: the first page keeps the top and
         // side borders down to its last item there, a middle page has the sides, and the last page the
-        // sides and the bottom border below its last item. Returns the bottom of the last piece.
+        // sides and the bottom border below its last item. Returns where the items below the rectangle
+        // are placed from on the page its items ended on: the bottom of the piece there or, when the
+        // items ended by breaking onto a page that holds none of them, that page's offset, as a table
+        // that ends with a page break leaves it.
         private static float SplitAcrossPages(Pages pgs, int pageIndex, System.Collections.Generic.List<int> itemsBefore, PageRectangle pr)
         {
             GrowToContents(pgs[pageIndex], itemsBefore[0], pr);
@@ -201,7 +205,8 @@ namespace Majorsilence.Reporting.Rdl
             pr.SI.BStyleBottom = BorderStyleEnum.None;
 
             int lastIndex = IndexOf(pgs, pgs.CurrentPage);
-            float end = pr.Y + pr.H;
+            float end = pgs[lastIndex].YOffset;
+            PageRectangle lastPiece = pr;
             for (int i = pageIndex + 1; i <= lastIndex; i++)
             {
                 Page q = pgs[i];
@@ -212,7 +217,7 @@ namespace Majorsilence.Reporting.Rdl
                 var piece = (PageRectangle)pr.Clone();
                 piece.SI = (StyleInfo)pr.SI.Clone();
                 piece.SI.BStyleTop = BorderStyleEnum.None;
-                piece.SI.BStyleBottom = i == lastIndex ? bottomBorder : BorderStyleEnum.None;
+                piece.SI.BStyleBottom = BorderStyleEnum.None;
                 piece.SI.BackgroundImage = null;
                 q.InsertObject(piece);      // behind the items it holds
                 piece.ItemNumber = -1;      // and stays behind them when the page is sorted
@@ -220,8 +225,11 @@ namespace Majorsilence.Reporting.Rdl
                 piece.Y = top;
                 piece.W = pr.W;
                 piece.H = itemsBottom - top;
-                end = piece.Y + piece.H;
+                lastPiece = piece;
+                if (i == lastIndex)
+                    end = piece.Y + piece.H;
             }
+            lastPiece.SI.BStyleBottom = bottomBorder;   // the last piece drawn closes the rectangle
             return end;
         }
 
