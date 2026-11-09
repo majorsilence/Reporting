@@ -230,6 +230,34 @@ namespace ReportTests
             Assert.That(runs.Select(r => r.Text.Trim()), Is.EqualTo(new[] { "Line 1", "Line 2" }));
         }
 
+        // A line shows when its letters fit, the ascent and descent of the font it is drawn in,
+        // as plain text's last line does (RenderPdf_Raw.MaxLines): the space a line keeps below
+        // them belongs to the line after it. The second line starts 30pt down; a box with half
+        // a point to spare below its letters shows it, one half a point short does not.
+        [TestCase(0.5f, 2)]
+        [TestCase(-0.5f, 1)]
+        public async Task ABoxThatMayNotGrow_ShowsALineItsLettersFit(float spare, int lines)
+        {
+            var drawn = RenderPdf_Raw.DrawnFont("Arial", false, false);
+            float letters = drawn != null ? 24f * (drawn.Ascender - drawn.Descender) / drawn.UnitsPerEm : 24f * (0.905f + 0.212f);
+            string height = (30f + letters + spare).ToString("0.###", System.Globalization.CultureInfo.InvariantCulture);
+
+            RdlEngineConfig.RdlEngineConfigInit();
+            string rdl = Rdl("Left", NoPadding + "<LineHeight>30pt</LineHeight>")
+                .Replace("&lt;b&gt;Bold&lt;/b&gt; plain&lt;br/&gt;Second", "One&lt;br&gt;Two")
+                .Replace("<FontSize>10pt</FontSize>", "<FontSize>24pt</FontSize>")
+                .Replace("<CanGrow>true</CanGrow>", "<CanGrow>false</CanGrow>")
+                .Replace("<Height>12pt</Height>", $"<Height>{height}pt</Height>");
+            using var report = await new RDLParser(rdl) { SkipDatabaseSchemaValidation = true }.Parse();
+            await report.RunGetData(null);
+            var pages = await report.BuildPages();
+            var html = pages.Cast<Page>().SelectMany(p => p.Cast<PageItem>()).OfType<PageTextHtml>().Single();
+            await html.Build(pages.G);
+            var runs = html.Cast<PageItem>().OfType<PageText>().Skip(1).Where(t => t.Text.Trim().Length > 0).ToArray();
+
+            Assert.That(runs.Select(r => r.Text.Trim()), Is.EqualTo(new[] { "One", "Two" }.Take(lines)));
+        }
+
         [Test]
         public async Task TheTextSitsInsideThePadding()
         {
