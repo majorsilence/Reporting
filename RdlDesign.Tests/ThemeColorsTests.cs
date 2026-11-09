@@ -113,7 +113,12 @@ namespace Majorsilence.Reporting.RdlDesign.Tests
             // check also runs in Release, where ChromeColors.Resolve's Debug.Assert is compiled out.
             string root = FindRepoDirectory("RdlViewer");
             var used = new System.Collections.Generic.HashSet<string>();
-            foreach (string file in new[] { Path.Combine(root, "RdlViewer", "ChromeColors.cs"), Path.Combine(root, "RdlDesign", "DesignerColors.cs") })
+            foreach (string file in new[]
+            {
+                Path.Combine(root, "RdlViewer", "ChromeColors.cs"),
+                Path.Combine(root, "RdlDesign", "DesignerColors.cs"),
+                Path.Combine(root, "RdlDesign", "Syntax", "SyntaxColors.cs"),
+            })
                 foreach (System.Text.RegularExpressions.Match m in System.Text.RegularExpressions.Regex.Matches(File.ReadAllText(file), "Resolve\\(\"(--rdl-[a-z-]+)\""))
                     used.Add(m.Groups[1].Value);
 
