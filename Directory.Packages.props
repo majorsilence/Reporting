@@ -14,18 +14,18 @@
          tests. Six Labors Split License v1 - free for OSI-licensed open source projects (this
          repo is Apache-2.0) and small businesses; never shipped in a published package. -->
     <PackageVersion Include="SixLabors.ImageSharp" Version="3.1.12" />
-    <PackageVersion Include="Majorsilence.Forms" Version="26.11.10" />
-    <PackageVersion Include="Majorsilence.Forms.Drawing.Common" Version="26.11.10" />
-    <PackageVersion Include="Majorsilence.Forms.Avalonia" Version="26.11.10" />
-    <PackageVersion Include="Majorsilence.Forms.Headless" Version="26.11.10" />
+    <PackageVersion Include="Majorsilence.Forms" Version="26.11.15" />
+    <PackageVersion Include="Majorsilence.Forms.Drawing.Common" Version="26.11.15" />
+    <PackageVersion Include="Majorsilence.Forms.Avalonia" Version="26.11.15" />
+    <PackageVersion Include="Majorsilence.Forms.Headless" Version="26.11.15" />
     <!-- Windows-only (net8.0-windows/net10.0-windows); only the legacy SampleDesignerControlWPF
          example references it, to host Majorsilence.Forms controls inside a real
          System.Windows.Forms container via ToWinFormsControl(). On nuget.org as of 26.0.52. -->
-    <PackageVersion Include="Majorsilence.Forms.WinForms" Version="26.11.10" />
-    <PackageVersion Include="Majorsilence.Forms.Wpf" Version="26.11.10" />
-    <PackageVersion Include="Majorsilence.Forms.Uno" Version="26.11.10" />
-    <PackageVersion Include="Majorsilence.Forms.Gtk4" Version="26.11.10" />
-    <PackageVersion Include="Majorsilence.Forms.Terminal" Version="26.11.10" />
+    <PackageVersion Include="Majorsilence.Forms.WinForms" Version="26.11.15" />
+    <PackageVersion Include="Majorsilence.Forms.Wpf" Version="26.11.15" />
+    <PackageVersion Include="Majorsilence.Forms.Uno" Version="26.11.15" />
+    <PackageVersion Include="Majorsilence.Forms.Gtk4" Version="26.11.15" />
+    <PackageVersion Include="Majorsilence.Forms.Terminal" Version="26.11.15" />
     <!-- Hosting examples (Examples/Hosting): the Uno and GTK 4 heads. -->
     <PackageVersion Include="Uno.WinUI" Version="6.5.237" />
     <PackageVersion Include="Uno.WinUI.Runtime.Skia.X11" Version="6.5.237" />
