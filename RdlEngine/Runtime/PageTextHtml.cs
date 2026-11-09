@@ -477,12 +477,15 @@ namespace Majorsilence.Reporting.Rdl
 		
 			// A box that may not grow shows the lines that fit in it and no more, as plain text
 			// does (RenderPdf_Raw.MaxLines): its runs are drawn unclipped, so the lines past its
-			// bottom printed over whatever was below. The first line always shows.
+			// bottom printed over whatever was below. The first line always shows. A line fits
+			// when its letters do, its ascent and descent: the space a line keeps below them
+			// belongs to the line after it. Asking a run's whole measured height dropped the last
+			// line of a box exactly four 13.5pt lines tall, which plain text prints.
 			if (!this.CanGrow && this.H > 0)
 			{
 				PageItem box = _items[0];
-				float firstLine = this.Y + padTop + 0.01f, bottom = this.Y + this.H - this.SI.PaddingBottom + 1;
-				_items.RemoveAll(pi => pi != box && pi is PageText run && run.Y > firstLine && run.Y + run.H > bottom);
+				float firstLine = this.Y + padTop + 0.01f, bottom = this.Y + this.H - this.SI.PaddingBottom + 0.01f;
+				_items.RemoveAll(pi => pi != box && pi is PageText run && run.Y > firstLine && run.Y + LetterHeight(run) > bottom);
 			}
 
 			_TotalHeight = yPos;		// set the calculated height of the result
@@ -1055,6 +1058,19 @@ namespace Majorsilence.Reporting.Rdl
 				if (drawFormat != null)
 					drawFormat.Dispose();
 			}
+		}
+
+		// The height of a run's letters in points: the ascent and descent of the font the PDF
+		// draws it in, from the font's hhea table, as RenderPdf_Raw.MaxLines asks of plain text's
+		// last line; the PDF's own estimate where that font is not found. The graphics library's
+		// cell ascent and descent run taller for some fonts (Calibri's are 1.22 of its size,
+		// its hhea's 1.0), and its measured line is taller still.
+		private static float LetterHeight(PageText run)
+		{
+			var ttf = RenderPdf_Raw.DrawnFont(run.SI.FontFamily, run.SI.IsFontBold(), run.SI.FontStyle == FontStyleEnum.Italic);
+			return ttf != null && ttf.UnitsPerEm > 0
+				? run.SI.FontSize * (ttf.Ascender - ttf.Descender) / ttf.UnitsPerEm
+				: run.SI.FontSize * (0.905f + 0.212f);
 		}
 
 		private static (Draw.Font, float) CreateMeasureFont((string, float, Draw.FontStyle) key, StyleInfo si, Draw.Graphics g)
