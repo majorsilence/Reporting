@@ -1,0 +1,12 @@
+{
+  "name": "Dental Claim",
+  "slug": "dental-claim",
+  "description": "A two-page group-benefits dental claim form: dentist and patient sections, a procedure grid with fee totals, the employee's statement with Yes/No checkboxes and signature lines, and an instructions page. Prints blank or pre-filled.",
+  "tags": ["insurance", "healthcare", "form", "letter-size"],
+  "dataProvider": "Json",
+  "parameters": [],
+  "dataContract": {
+    "root": ["PlanName", "InsurerName", "InsurerLegalName", "FormCode", "FormRevision", "ClaimsAddress", "Phone", "Fax", "Website", "FirmNumber", "CertificateNumber", "DentistUniqueNo", "DentistSpecialty", "PatientAccountNo", "DentistInfo", "DentistPhone", "DentistNotes", "PatientName", "PatientAddress", "PatientCity", "PatientProvince", "PatientPostalCode", "Employer", "EmployeeName", "EmployeeAddress", "EmployeeCity", "EmployeeProvince", "EmployeePostalCode", "EmployeeBirthdate", "PatientRelationship", "PatientBirthdate", "HsaApply", "OtherCoverage", "FamilyMemberInsured", "OtherInsurer", "SpouseBirthdate", "Accident", "AccidentDetails", "DependentOver21", "ChildDisabled", "ChildStudent", "SchoolName", "StudyDates", "InitialPlacement", "PlacementDetails", "Orthodontic"],
+    "root.Lines[]": ["ServiceDate", "ProcedureCode", "ToothCode", "ToothSurfaces", "DentistFee", "LabCharge"]
+  }
+}

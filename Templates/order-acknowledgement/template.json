@@ -1,0 +1,12 @@
+{
+  "name": "Order Acknowledgement",
+  "slug": "order-acknowledgement",
+  "description": "A distributor-style sales order acknowledgement: bill/ship/buyer/ship-from boxes, order details, a multi-line item table with backorder quantities, and tax/shipping totals.",
+  "tags": ["business", "sales", "landscape", "letter-size"],
+  "dataProvider": "Json",
+  "parameters": [],
+  "dataContract": {
+    "root": ["AckNumber", "Currency", "VendorName", "VendorAddress", "VendorWebsite", "BillTo", "ShipTo", "Buyer", "ShipFrom", "CustomerNumber", "PaymentTerms", "ShippingMethod", "OrderSource", "OrderDate", "EstimatedRelease", "EstimatedTariff", "ShippingCharges", "TaxLabel", "TaxRate", "Incoterm", "WebOrderId", "TermsText", "TermsLinkText", "TermsUrl"],
+    "root.Lines[]": ["LineNumber", "Ordered", "Available", "Backordered", "PartNumber", "Manufacturer", "MfgPartNumber", "Description", "Eccn", "Htsus", "Notes", "UnitPrice"]
+  }
+}

@@ -2,13 +2,15 @@ using System;
 using System.IO;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Majorsilence.Excel;
 using Majorsilence.Forms.Drawing.Imaging;
 using RdlEngine.Render.ExcelConverter;
 
 namespace Majorsilence.Reporting.Rdl
 {
     ///<summary>
-    /// Renders a report to Excel 2007.   This handles some page formatting but does not do true page formatting.
+    /// Renders a report to Excel 2007 (.xlsx), or to Excel 97-2003 (.xls) when legacyXls is set.
+    /// This handles some page formatting but does not do true page formatting.
     ///</summary>
     internal class RenderExcel2007 : IPresent
     {
@@ -16,17 +18,19 @@ namespace Majorsilence.Reporting.Rdl
         IStreamGen _sg;
 
         ExcelCellsBuilder excelBuilder = new ExcelCellsBuilder();
-        XlsxWriter workbook;
+        IExcelWorkbook workbook;
         double k = 5.637142013; // points per Excel character width
 
-        public RenderExcel2007(Report rep, IStreamGen sg)
+        public RenderExcel2007(Report rep, IStreamGen sg, bool legacyXls = false)
         {
             report = rep;
             _sg = sg;
 
             excelBuilder.Report = report;
             string sheetName = string.IsNullOrEmpty(rep.Name) ? "NewSheet" : rep.Name;
-            workbook = new XlsxWriter(sheetName);
+            workbook = legacyXls
+                ? new XlsWorkbook(sheetName, message => rep.rl.LogError(4, message))
+                : new XlsxWorkbook(sheetName);
 
             double leftIn = rep.LeftMarginPoints / 72.0;
             double topIn = rep.TopMarginPoints / 72.0;
@@ -65,8 +69,8 @@ namespace Majorsilence.Reporting.Rdl
                 workbook.SetRowHeight(i, rowHeight);
             }
 
-            // Cells with a constant style share one StyleInfo instance, so its format is made once.
-            var formats = new Dictionary<StyleInfo, XlsxCellFormat>(ReferenceEqualityComparer.Instance);
+            var cellWriter = new ExcelCellWriter(workbook, styled: true);
+            var merges = new List<(int, int, int, int)>();
             for (int i = 0; i < excelBuilder.Rows.Count - 1; i++)
             {
                 var builderRow = excelBuilder.Rows[i];
@@ -78,9 +82,6 @@ namespace Majorsilence.Reporting.Rdl
 
                     if (builderCell.ReportItem != null)
                     {
-                        if (!formats.TryGetValue(builderCell.Style, out var fmt))
-                            formats[builderCell.Style] = fmt = new ExcelCellStyle(builderCell.Style).ToXlsxFormat();
-
                         var rightAttach = excelBuilder.GetRightAttachCells(builderCell);
                         var bottomAttach = excelBuilder.GetBottomAttachCells(builderCell);
 
@@ -88,12 +89,17 @@ namespace Majorsilence.Reporting.Rdl
                         var colIndex = excelBuilder.Columns.IndexOf(builderCell.Column);
 
                         if (rightAttach > 0 || bottomAttach > 0)
+                        {
                             workbook.AddMerge(rowIndex, colIndex, rowIndex + bottomAttach, colIndex + rightAttach);
+                            merges.Add((rowIndex, colIndex, rowIndex + bottomAttach, colIndex + rightAttach));
+                        }
 
-                        workbook.SetCell(rowIndex, colIndex, builderCell.Value, fmt);
+                        cellWriter.Write(rowIndex, colIndex, builderCell);
                     }
                 }
             }
+
+            ExcelTableFeatures.Apply(workbook, excelBuilder, merges);
 
             // Images
             foreach (var image in excelBuilder.Images)

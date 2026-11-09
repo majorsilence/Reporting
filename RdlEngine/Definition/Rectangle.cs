@@ -175,7 +175,9 @@ namespace Majorsilence.Reporting.Rdl
         // can print past its designed bottom, and the border, the background and the items
         // placed below the rectangle follow it down. Only on the rectangle's own page. What a
         // rectangle drawn beneath draws takes no room, and the rectangle does not grow to hold it.
-        private static void GrowToContents(Page p, int firstContained, PageRectangle pr)
+        // Shared with Body.RunPage, which wraps the report body's own items the same way,
+        // for the top-level report's Body/Style and a subreport's.
+        internal static void GrowToContents(Page p, int firstContained, PageRectangle pr)
         {
             float bottom = pr.Y + pr.H;
             for (int i = firstContained; i < p.Count; i++)
@@ -197,7 +199,7 @@ namespace Majorsilence.Reporting.Rdl
         // are placed from on the page its items ended on: the bottom of the piece there or, when the
         // items ended by breaking onto a page that holds none of them, that page's offset, as a table
         // that ends with a page break leaves it.
-        private static float SplitAcrossPages(Pages pgs, int pageIndex, System.Collections.Generic.List<int> itemsBefore, PageRectangle pr)
+        internal static float SplitAcrossPages(Pages pgs, int pageIndex, System.Collections.Generic.List<int> itemsBefore, PageRectangle pr)
         {
             GrowToContents(pgs[pageIndex], itemsBefore[0], pr);
             var bottomBorder = pr.SI.BStyleBottom;
@@ -245,7 +247,7 @@ namespace Majorsilence.Reporting.Rdl
             return (top, bottom);
         }
 
-        private static int IndexOf(Pages pgs, Page p)
+        internal static int IndexOf(Pages pgs, Page p)
         {
             for (int i = 0; i < pgs.Count; i++)
             {

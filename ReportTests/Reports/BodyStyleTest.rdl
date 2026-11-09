@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Report Name="BodyStyleTest">
+  <Description>A top-level report whose Body has a Style (background, border). Its content is
+  shorter than the Body's designed Height, so the background should cover the designed
+  Height, not shrink to the content (#545).</Description>
+  <Body>
+    <Height>3in</Height>
+    <ReportItems>
+      <Textbox Name="OnlyText">
+        <Top>0in</Top>
+        <Left>0in</Left>
+        <Height>0.25in</Height>
+        <Width>3in</Width>
+        <Value>="BODY-TEXT"</Value>
+      </Textbox>
+    </ReportItems>
+    <Style>
+      <BackgroundColor>#f9f9f9</BackgroundColor>
+      <BorderStyle>
+        <Default>Solid</Default>
+      </BorderStyle>
+      <BorderColor>
+        <Default>#999999</Default>
+      </BorderColor>
+    </Style>
+  </Body>
+  <Width>6.5in</Width>
+  <PageWidth>8.5in</PageWidth>
+  <PageHeight>11in</PageHeight>
+  <LeftMargin>1in</LeftMargin>
+  <TopMargin>1in</TopMargin>
+</Report>

@@ -387,6 +387,9 @@ namespace Majorsilence.Reporting.RdlCmd
                     case "xlsx":
                         await report.RunRender(sg, OutputPresentationType.Excel2007);
                         break;
+                    case "xls":
+                        await report.RunRender(sg, OutputPresentationType.Excel97);
+                        break;
                     case "rtf":
                         await report.RunRender(sg, OutputPresentationType.RTF);
                         break;
@@ -397,7 +400,7 @@ namespace Majorsilence.Reporting.RdlCmd
                         await report.RunRender(sg, OutputPresentationType.TIFBW);
                         break;
 					default:
-						Console.WriteLine("Unsupported file extension '{0}'.  Must be 'pdf', 'xml', 'mht', 'csv', 'xslx', 'xlsx_table', 'rtf', 'tif', 'tifb' or 'html'", type);
+						Console.WriteLine("Unsupported file extension '{0}'.  Must be 'pdf', 'xml', 'mht', 'csv', 'xlsx', 'xlsx_table', 'xls', 'rtf', 'tif', 'tifb' or 'html'", type);
 						returnCode = 8;
 						break;
 				}
@@ -628,7 +631,7 @@ namespace Majorsilence.Reporting.RdlCmd
 			Console.WriteLine("  One special argument is 'rc:ofile' which names the output file.");
 			Console.WriteLine("  For example, /ffile1.rdl?parm1=XYZ Inc.&parm2=1000&rc:ofile=xyzfile");
 			Console.WriteLine("/t is followed by the type of output file: pdf, html, mht, xml, csv,");
-            Console.WriteLine("  xslx, xlsx_table, rtf, tif, tifb   e.g /tpdf+xml");
+            Console.WriteLine("  xlsx, xlsx_table, xls, rtf, tif, tifb   e.g /tpdf+xml");
 			Console.WriteLine("/o is followed by the output directory.   The file name is the same as the");
 			Console.WriteLine("  input (or the rc:ofile parameter) except with the type as the extension.");
             Console.WriteLine("/c is followed by the connection string");

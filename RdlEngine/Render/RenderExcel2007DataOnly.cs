@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Majorsilence.Excel;
 using RdlEngine.Render.ExcelConverter;
 
 namespace Majorsilence.Reporting.Rdl
@@ -15,7 +16,7 @@ namespace Majorsilence.Reporting.Rdl
         IStreamGen _sg;
 
         ExcelCellsBuilder excelBuilder = new ExcelCellsBuilder();
-        XlsxWriter workbook;
+        IExcelWorkbook workbook;
         double k = 5.637142013; // points per Excel character width
 
         public RenderExcel2007DataOnly(Report rep, IStreamGen sg)
@@ -25,7 +26,7 @@ namespace Majorsilence.Reporting.Rdl
 
             excelBuilder.Report = report;
             string sheetName = string.IsNullOrEmpty(rep.Name) ? "NewSheet" : rep.Name;
-            workbook = new XlsxWriter(sheetName);
+            workbook = new XlsxWorkbook(sheetName);
 
             double leftIn = rep.LeftMarginPoints / 72.0;
             double topIn = rep.TopMarginPoints / 72.0;
@@ -64,6 +65,8 @@ namespace Majorsilence.Reporting.Rdl
                 workbook.SetRowHeight(i, rowHeight);
             }
 
+            var cellWriter = new ExcelCellWriter(workbook, styled: false);
+            var merges = new List<(int, int, int, int)>();
             for (int i = 0; i < excelBuilder.Rows.Count - 1; i++)
             {
                 var builderRow = excelBuilder.Rows[i];
@@ -82,12 +85,17 @@ namespace Majorsilence.Reporting.Rdl
                         var colIndex = excelBuilder.Columns.IndexOf(builderCell.Column);
 
                         if (rightAttach > 0 || bottomAttach > 0)
+                        {
                             workbook.AddMerge(rowIndex, colIndex, rowIndex + bottomAttach, colIndex + rightAttach);
+                            merges.Add((rowIndex, colIndex, rowIndex + bottomAttach, colIndex + rightAttach));
+                        }
 
-                        workbook.SetCell(rowIndex, colIndex, builderCell.Value);
+                        cellWriter.Write(rowIndex, colIndex, builderCell);
                     }
                 }
             }
+
+            ExcelTableFeatures.Apply(workbook, excelBuilder, merges);
 
             // Images
             foreach (var image in excelBuilder.Images)

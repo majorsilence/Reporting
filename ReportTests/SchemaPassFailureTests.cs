@@ -98,6 +98,23 @@ namespace ReportTests
             await report.RunRender(sg, OutputPresentationType.HTML);
 
             Assert.That(sg.GetText(), Does.Contain("Rows: 2"));
+            Assert.That(Messages(report), Has.None.Contains("not returned by query"));
+        }
+
+        // With the schema pass unable to describe the batch, a DataField the query doesn't return
+        // used to read as null silently. The data pass now warns, naming the field and DataSet (#549).
+        [Test]
+        public async Task TempTableQuery_MissingDataField_WarnsInTheDataPass()
+        {
+            string rdl = QueryRdl("CREATE TEMP TABLE T AS SELECT 1 AS M UNION ALL SELECT 2; SELECT M FROM T;");
+            using var report = await new RDLParser(rdl) { Folder = _folder }.Parse();
+            Assert.That(report.ErrorMaxSeverity, Is.LessThanOrEqualTo(4), string.Join("; ", Messages(report)));
+            Assert.That(Messages(report), Has.None.Contains("not returned by query"));
+
+            await report.RunGetData(null);
+
+            Assert.That(report.ErrorMaxSeverity, Is.LessThanOrEqualTo(4), string.Join("; ", Messages(report)));
+            Assert.That(Messages(report), Has.Exactly(1).Contains("DataField 'N' not returned by query of DataSet 'Numbers'."));
         }
 
         [Test]

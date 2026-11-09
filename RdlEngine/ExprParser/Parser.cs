@@ -629,6 +629,7 @@ namespace Majorsilence.Reporting.Rdl
 			int argCount=0;
 			
 			bool isAggregate = IsAggregate(method, bOnePart);
+			bool isLookupFunction = bOnePart && IsLookupFunction(method);
 			if (_NoAggregate && isAggregate)
 				throw new ParserException(string.Format(Strings.Parser_ErrorP_AggregateCannotUsedWithinGrouping, method));
 			if (_InAggregate && isAggregate)
@@ -710,6 +711,13 @@ namespace Majorsilence.Reporting.Rdl
 				}
 			}
 
+			// Lookup/LookupSet/MultiLookup's 2nd (destination) and 3rd (result) arguments
+			// are Fields! references that must bind to the target DataSet -- their 4th and
+			// last argument, a constant -- rather than the current scope. That DataSet has
+			// to be known before any argument is parsed, so it is resolved by scanning
+			// ahead now, the same way RunningValue's scope is found above.
+			DataSetDefn lookupDataSet = isLookupFunction ? ResolveLookupDataSet(method) : null;
+
             List<IExpr> largs = new List<IExpr>();
 			while(true)
 			{
@@ -728,8 +736,17 @@ namespace Majorsilence.Reporting.Rdl
 				}
 				else
 					throw new ParserException(Strings.Parser_ErrorP_Invalid_function_arguments + GetLocationInfoWithValue(curToken));
-				
+
+				bool scopeToLookupDataSet = isLookupFunction && (argCount == 1 || argCount == 2);
+				DataSetDefn savedAggregateDataSet = inAggregateDataSet;
+				if (scopeToLookupDataSet)
+					inAggregateDataSet = lookupDataSet;
+
 				e = await MatchExprAndOr().ConfigureAwait(false);
+
+				if (scopeToLookupDataSet)
+					inAggregateDataSet = savedAggregateDataSet;
+
 				if (e == null)
 					throw new ParserException(Strings.Parser_ErrorP_ExpectingComma + GetLocationInfoWithValue(curToken));
 
@@ -1007,6 +1024,21 @@ namespace Majorsilence.Reporting.Rdl
 					aggrVarP.LevelCheck = bSimple;
 					result = aggrVarP;
 					break;
+				case "lookup":
+					if (args.Length != 4)
+						throw new ParserException(string.Format(Strings.Parser_ErrorP_LookupRequires4Arguments, "Lookup") + GetLocationInfo(curToken));
+					result = new FunctionLookup(args[0], args[1], args[2], lookupDataSet);
+					break;
+				case "lookupset":
+					if (args.Length != 4)
+						throw new ParserException(string.Format(Strings.Parser_ErrorP_LookupRequires4Arguments, "LookupSet") + GetLocationInfo(curToken));
+					result = new FunctionLookupSet(args[0], args[1], args[2], lookupDataSet);
+					break;
+				case "multilookup":
+					if (args.Length != 4)
+						throw new ParserException(string.Format(Strings.Parser_ErrorP_LookupRequires4Arguments, "MultiLookup") + GetLocationInfo(curToken));
+					result = new FunctionMultiLookup(args[0], args[1], args[2], lookupDataSet);
+					break;
 				default:
 					result = ResolveMethodCall(fullname, args);		// through exception when fails
 					break;
@@ -1047,6 +1079,79 @@ namespace Majorsilence.Reporting.Rdl
 					break;
 			}
 			return rc;
+		}
+
+		private static bool IsLookupFunction(string method)
+		{
+			switch (method.ToLowerInvariant())
+			{
+				case "lookup":
+				case "lookupset":
+				case "multilookup":
+					return true;
+				default:
+					return false;
+			}
+		}
+
+		/// <summary>
+		/// Lookup/LookupSet/MultiLookup all take the target DataSet's name as their 4th
+		/// and last argument -- a constant, like an aggregate's scope. Scans ahead for it
+		/// using the same comma/paren-depth tracking RunningValue's scope lookup uses
+		/// (see the _InAggregate block above): curToken already holds the first token of
+		/// the first argument, and the scan only peeks at `tokens`, it does not consume
+		/// them, so the normal argument-parsing loop runs over the same tokens afterwards.
+		/// </summary>
+		private DataSetDefn ResolveLookupDataSet(string method)
+		{
+			const int commasBeforeDataSet = 3;		// source, destination, result, <dataset>
+			int level = 0;
+			bool nextIsDataSet = false;
+			Token dataSetToken = null;
+			int commaCount = 0;
+
+			if (curToken.Type == TokenTypes.RPAREN)
+				level = -1;
+			else if (curToken.Type == TokenTypes.LPAREN)
+				level++;
+
+			if (level >= 0)
+			foreach (Token tok in tokens)
+			{
+				if (nextIsDataSet)
+				{
+					dataSetToken = tok;
+					break;
+				}
+
+				if (level == 0 && tok.Type == TokenTypes.COMMA)
+				{
+					commaCount++;
+					if (commaCount < commasBeforeDataSet)
+						continue;
+					nextIsDataSet = true;
+					continue;
+				}
+				if (tok.Type == TokenTypes.RPAREN)
+				{
+					level--;
+					if (level < 0)
+						break;
+				}
+				if (tok.Type == TokenTypes.LPAREN)
+					level++;
+			}
+
+			if (dataSetToken == null)
+				throw new ParserException(string.Format(Strings.Parser_ErrorP_LookupRequires4Arguments, method) + GetLocationInfo(curToken));
+			if (dataSetToken.Type != TokenTypes.QUOTE)
+				throw new ParserException(string.Format(Strings.Parser_ErrorP_ScopeMustConstant, method) + GetLocationInfo(curToken));
+
+			DataSetDefn ds = idLookup.ScopeDataSet(dataSetToken.Value);
+			if (ds == null)
+				throw new ParserException(string.Format(Strings.Parser_ErrorP_ScopeNotKnownDataSet, dataSetToken.Value));
+
+			return ds;
 		}
 
 		private async Task<(object scope, bool bSimple)> ResolveAggrScope(IExpr[] args, int indexOfScope)
@@ -1097,6 +1202,11 @@ namespace Majorsilence.Reporting.Rdl
 				if (scope == null)
 				{
 					scope = idLookup.LookupMatrix();
+					// Outside any group of a table (its header or footer) the scope is the table's
+					// own rows: after its filters, and in a list or a table group just the rows of the
+					// current instance (#601). The dataset would be all of its rows.
+					if (scope == null)
+						scope = idLookup.ContextTable;
 					if (scope == null)
 						scope = idLookup.ScopeDataSet(null);
 				}

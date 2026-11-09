@@ -95,20 +95,27 @@ namespace Majorsilence.Reporting.Rdl
 		{
 			_Rpt = rpt;
             _SortBy = new List<RowsSortExpression>();
-			// Pull all the sort expression together
+			// Pull all the sort expressions together.  At each grouping level, that
+			// level's own <Sorting> expressions (if any) are added first so they decide
+			// the order its group instances appear in; the level's group-key expression(s)
+			// follow, so they only break ties between rows whose Sorting values compare
+			// equal -- which keeps each group instance's rows contiguous without letting
+			// the group key silently override an explicit Sorting order (issue #579).
 			if (tg != null)
 			{
 				foreach(TableGroup t in tg.Items)
 				{
+					AddSortExpressions(t.Sorting);
 					foreach(GroupExpression ge in t.Grouping.GroupExpressions.Items)
 					{
 						_SortBy.Add(new RowsSortExpression(ge.Expression));
 					}
-					// TODO what to do with the sort expressions!!!!
 				}
 			}
 			if (g != null)
 			{
+				AddSortExpressions(s);
+				s = null;	// already applied at this group's level
 				if (g.ParentGroup != null)
 					_SortBy.Add(new RowsSortExpression(g.ParentGroup));
 				else if (g.GroupExpressions != null)
@@ -119,13 +126,7 @@ namespace Majorsilence.Reporting.Rdl
 					}
 				}
 			}
-			if (s != null)
-			{
-				foreach (SortBy sb in s.Items)
-				{
-					_SortBy.Add(new RowsSortExpression(sb.SortExpression, sb.Direction == SortDirectionEnum.Ascending));
-				}
-			}
+			AddSortExpressions(s);
             if (_SortBy.Count > 0)
             {
                 _SortBy.TrimExcess();
@@ -134,6 +135,16 @@ namespace Majorsilence.Reporting.Rdl
             {
                 _SortBy = null;
             }
+		}
+
+		void AddSortExpressions(Sorting s)
+		{
+			if (s == null)
+				return;
+			foreach (SortBy sb in s.Items)
+			{
+				_SortBy.Add(new RowsSortExpression(sb.SortExpression, sb.Direction == SortDirectionEnum.Ascending));
+			}
 		}
 
 		internal Report Report

@@ -634,8 +634,9 @@ namespace Majorsilence.Reporting.Rdl
             // the flat header/detail/footer classification.
             var groupedPlan = PlanGroupedRows (rowHierarchy, rows.Count);
             List<RowPlacement> placements = null;
+            List<XmlElement> rowMembers = null;
             if (groupedPlan == null) {
-                placements = ClassifyRows (rowHierarchy, rows.Count, name, rl);
+                placements = ClassifyRows (rowHierarchy, rows.Count, name, rl, out rowMembers);
                 if (placements == null)
                     return null;
             }
@@ -695,14 +696,14 @@ namespace Majorsilence.Reporting.Rdl
 
             // RepeatRowHeaders is what makes column headings reappear after a page break; a
             // long report without it reads as unlabelled columns from page two onward.
-            AppendSection (table, doc, ns, "Header", rows, placements, RowPlacement.Header,
+            AppendSection (table, doc, ns, "Header", rows, placements, rowMembers, RowPlacement.Header,
                 repeatOnNewPage: repeatHeaderRows);
             // 2008 hangs sorting off the data region, 2005 off the detail rows it sorts.
             // Untranslated, the detail order is whatever the query happened to return, which
             // is neither what the report asked for nor what SSRS shows.
-            AppendSection (table, doc, ns, "Details", rows, placements, RowPlacement.Detail,
+            AppendSection (table, doc, ns, "Details", rows, placements, rowMembers, RowPlacement.Detail,
                 sorting: sortExpressions == null ? null : BuildSorting (doc, ns, sortExpressions));
-            AppendSection (table, doc, ns, "Footer", rows, placements, RowPlacement.Footer);
+            AppendSection (table, doc, ns, "Footer", rows, placements, rowMembers, RowPlacement.Footer);
 
             return table;
         }
@@ -1180,14 +1181,16 @@ namespace Majorsilence.Reporting.Rdl
         /// a Details group nests a stack of static rows. Static members outside any group are
         /// header before the detail rows and footer after them.
         /// </remarks>
-        private static List<RowPlacement> ClassifyRows (XmlElement hierarchy, int rowCount, string tablixName, ReportLog rl)
+        private static List<RowPlacement> ClassifyRows (XmlElement hierarchy, int rowCount, string tablixName, ReportLog rl,
+            out List<XmlElement> members)
         {
             var placements = new List<RowPlacement> ();
+            var leafMembers = new List<XmlElement> ();
             var seenDetail = false;
 
-            void Walk (XmlElement members, bool insideGroup)
+            void Walk (XmlElement memberList, bool insideGroup)
             {
-                foreach (var member in ChildrenNamed (members, "TablixMember")) {
+                foreach (var member in ChildrenNamed (memberList, "TablixMember")) {
                     var group = FindChild (member, "Group");
                     var nested = FindChild (member, "TablixMembers");
                     var inGroup = insideGroup || group != null;
@@ -1197,6 +1200,7 @@ namespace Majorsilence.Reporting.Rdl
                         continue;
                     }
 
+                    leafMembers.Add (member);
                     if (inGroup) {
                         placements.Add (RowPlacement.Detail);
                         seenDetail = true;
@@ -1215,9 +1219,11 @@ namespace Majorsilence.Reporting.Rdl
                 // members). Guessing would silently reorder the report, so refuse.
                 rl?.LogError (8, $"Tablix '{tablixName}' has {rowCount} row(s) but {placements.Count} " +
                     "row hierarchy leaf member(s); its layout is not supported yet and it was ignored.");
+                members = null;
                 return null;
             }
 
+            members = leafMembers;
             return placements;
         }
 
@@ -1264,7 +1270,7 @@ namespace Majorsilence.Reporting.Rdl
         }
 
         private static void AppendSection (XmlElement table, XmlDocument doc, string ns, string sectionName,
-            List<XmlElement> rows, List<RowPlacement> placements, RowPlacement wanted,
+            List<XmlElement> rows, List<RowPlacement> placements, List<XmlElement> members, RowPlacement wanted,
             bool repeatOnNewPage = false, XmlElement sorting = null)
         {
             var tableRows = doc.CreateElement ("TableRows", ns);
@@ -1274,7 +1280,14 @@ namespace Majorsilence.Reporting.Rdl
                 if (placements[i] != wanted)
                     continue;
 
-                tableRows.AppendChild (BuildTableRow (doc, ns, rows[i]));
+                var tableRow = BuildTableRow (doc, ns, rows[i]);
+                // 2008 hangs a static row's visibility (e.g. an optional label/value row hidden
+                // when its parameter is empty) on its TablixRowHierarchy member, not on the
+                // TablixRow itself -- that element isn't part of the 2008 schema (issue #543).
+                var visibility = i < members?.Count ? FindChild (members[i], "Visibility") : null;
+                if (visibility != null && FindChild (tableRow, "Visibility") == null)
+                    tableRow.AppendChild (visibility.CloneNode (true));
+                tableRows.AppendChild (tableRow);
                 any = true;
             }
 

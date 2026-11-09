@@ -172,6 +172,15 @@ namespace Majorsilence.Reporting.Rdl
 						re = new RowEnumerable (ge.StartRow, ge.EndRow, row.R.Data, _LevelCheck);
 					}
 				}
+				else if (t == typeof(Table))
+				{
+					// The rows of the table instance being run: a nested table runs once per instance
+					// of what it sits in, so the value can't be kept for the report.
+					bSave = false;
+					re = row != null
+						? new RowEnumerable(0, row.R.Data.Count - 1, row.R.Data, false)
+						: new RowEnumerable(0, -1, new List<Row>(), false);	// a table with no rows
+				}
 				else if (t == typeof(Matrix))
 				{
 					bSave=false;

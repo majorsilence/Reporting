@@ -258,6 +258,10 @@ namespace Majorsilence.Reporting.Rdl
                     {
                         qcn[fld.ColumnNumber] = -1;
                     }
+                    // With the columns known at parse time, Field.FinalPass has already reported a
+                    // missing DataField; without them this is the first chance to.
+                    if (qcn[fld.ColumnNumber] < 0 && _Columns == null)
+                        rpt.rl.LogError(4, "DataField '" + fld.DataField + "' not returned by query of DataSet '" + DataSetName + "'.");
                 }
 
                 // The columns that come from the query, worked out once: enumerating the fields for every row
@@ -797,7 +801,10 @@ namespace Majorsilence.Reporting.Rdl
                     dp.Value = ToTypedArray(ar);
                 }
                 else
-                    dp.Value = pvalue;
+                    // Issue #542. ADO.NET providers treat a parameter whose Value is a CLR null
+                    // as not set at all (SqlClient omits it from the call entirely), so a report
+                    // parameter evaluating to Nothing must become DBNull.Value, not null.
+                    dp.Value = pvalue ?? (object)DBNull.Value;
                 cmSQL.Parameters.Add(dp);
             }
         }

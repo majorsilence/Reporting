@@ -1,0 +1,41 @@
+{
+  "ProviderName": "Bluewave Communications",
+  "ProviderRemitAddress": "PO Box 1000\nSample City, NS B0X 0X0",
+  "Website": "www.example.com",
+  "ContactInfo": "Visit us online: www.example.com, 24 hours a day\nCustomer Service: 1 800 555-0100,\n   Monday to Friday 8am to 9pm, Saturday & Sunday 9am to 6pm\nRepair service: 611\nInternet technical support: 1 800 555-0111",
+  "TaxName": "HST",
+  "TaxRate": 0.15,
+  "TaxRegistration": "123456789 RT0001",
+  "LateFeeText": "A late payment charge of 2.00% per month (26.82% per annum) will apply on the total balance owing. Services are provided according to Bluewave Communications' General Terms of Service: www.example.com/terms",
+
+  "CustomerName": "JANE SAMPLE",
+  "MailingAddress": "123 MAPLE ST\nANYTOWN ON  A1A 1A1",
+  "AccountNumber": "1234567 8",
+  "MainPhone": "555 555-0123",
+  "BillDate": "2026-09-27",
+  "PayBy": "2026-10-18",
+  "PreviousAmountDue": 125.06,
+  "PaymentReceived": 125.06,
+  "PaymentDate": "2026-09-11",
+
+  "Sections": [
+    { "Code": "BUNDLE",   "Name": "Bundles",                  "SortOrder": 1, "ChargesFor": "555 555-0123", "Period": "Aug 28 to Sep 27",
+      "Includes": "Your Wave Bundle includes:\nHome Phone and Long Distance\n• Home Phone Service\n• Voicemail (includes Voicemail-to-Email)\n• Call Forwarding, Call Return, 3 Way Calling\nInternet\n• Gigabit Fibre Internet\n• Unlimited Internet Usage\nDigital TV\n• HD TV and Program Guide\n• Cloud PVR" },
+    { "Code": "PHONE",    "Name": "Home phone",               "SortOrder": 2, "ChargesFor": "555 555-0123", "Period": "Aug 28 to Sep 27", "Includes": "" },
+    { "Code": "LD",       "Name": "Long distance and usage",  "SortOrder": 3, "ChargesFor": "555 555-0123", "Period": "Aug 28 to Sep 27", "Includes": "" },
+    { "Code": "INTERNET", "Name": "Internet",                 "SortOrder": 4, "ChargesFor": "555 555-0123", "Period": "Aug 28 to Sep 27", "Includes": "" },
+    { "Code": "TV",       "Name": "Digital TV",               "SortOrder": 5, "ChargesFor": "555 555-0123", "Period": "Aug 28 to Sep 27", "Includes": "" }
+  ],
+
+  "Charges": [
+    { "Section": "BUNDLE",   "Description": "Wave Bundle",                                 "Amount": 263.00 },
+    { "Section": "BUNDLE",   "Description": "World Calling Add-on",                        "Amount": 0.00 },
+    { "Section": "BUNDLE",   "Description": "Bundle credit",                               "Amount": -155.00 },
+    { "Section": "PHONE",    "Description": "911 Service Fee",                             "Amount": 0.75 },
+    { "Section": "LD",       "Description": "Unlimited Canada/U.S. Long Distance Plan",    "Amount": 0.00 },
+    { "Section": "INTERNET", "Description": "Internet Speed Upgrade to Gigabit Fibre",     "Amount": 15.00 },
+    { "Section": "INTERNET", "Description": "Credit",                                      "Amount": -15.00 },
+    { "Section": "TV",       "Description": "TV Boxes (1st receiver included) 1 @ $8.00",  "Amount": 0.00 },
+    { "Section": "TV",       "Description": "Cloud PVR",                                   "Amount": 0.00 }
+  ]
+}
