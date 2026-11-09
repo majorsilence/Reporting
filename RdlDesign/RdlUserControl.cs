@@ -72,9 +72,24 @@ namespace Majorsilence.Reporting.RdlDesign
 
         private ThemeScope EnsureThemeScope() => ThemeScope ??= new ThemeScope();
 
+        // The older toolbar bitmaps have a variant for dark themes (#526).
+        protected override void OnThemeChanged(EventArgs e)
+        {
+            ToolbarIconTheme.Apply(this, mainTB, toolStrip1);
+            base.OnThemeChanged(e);
+        }
+
+        protected override void OnParentChanged(EventArgs e)
+        {
+            ToolbarIconTheme.Apply(this, mainTB, toolStrip1);      // the parent's scope may be another theme
+            base.OnParentChanged(e);
+        }
+
         public RdlUserControl()
         {
             InitializeComponent();
+            ToolbarIconTheme.Register(mainTB, toolStrip1);
+            ToolbarIconTheme.Apply(this, mainTB, toolStrip1);
 
 
             _GetPassword = new Rdl.NeedPassword(this.GetPassword);

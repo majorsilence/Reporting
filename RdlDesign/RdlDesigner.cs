@@ -207,8 +207,17 @@ namespace Majorsilence.Reporting.RdlDesign
 		public RdlDesigner(string IpcChannelPortName, bool openPreviousSession)
 		{
             InitializeComponent();
+            ToolbarIconTheme.Register(mainTB, toolStrip1, menuStrip1, ContextMenuTB);
+            ToolbarIconTheme.Apply(this, mainTB, toolStrip1, menuStrip1, ContextMenuTB);
             _openPreviousSession = openPreviousSession;
             ApplyBranding();
+        }
+
+        // The older toolbar bitmaps have a variant for dark themes (#526).
+        protected override void OnThemeChanged(EventArgs e)
+        {
+            ToolbarIconTheme.Apply(this, mainTB, toolStrip1, menuStrip1, ContextMenuTB);
+            base.OnThemeChanged(e);
         }
 
         // White-labelling: what ReportingBranding.Current overrides; unset values keep the built-in text.
