@@ -103,8 +103,47 @@ namespace ReportTests
             });
         }
 
+        // #628: SSRS keeps the space the design leaves below the body's lowest item, not the
+        // designed Height. The 2in body holds a shown 0.25in textbox and a hidden one ending at
+        // 1.75in, so it renders 0.25in of text plus the 0.25in left below the hidden one.
+        [Test]
+        public async Task TopLevelBody_ShrinksWhenItsItemsRenderShorter()
+        {
+            var items = await FirstPage("BodyShrinkTest.rdl");
+            var shown = Text(items, "SHOWN-TEXT");
+            var background = items.OfType<PageRectangle>()
+                .Single(r => r.SI.BackgroundColor == System.Drawing.ColorTranslator.FromHtml("#f9f9f9"));
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(items.OfType<PageText>().Any(t => t.Text == "HIDDEN-TEXT"), Is.False);
+                Assert.That(background.Y, Is.EqualTo(shown.Y).Within(0.5f));
+                Assert.That(background.H, Is.EqualTo(0.5f * 72f).Within(0.5f));
+            });
+        }
+
+        [Test]
+        public async Task SubreportBody_ShrinksWhenItsItemsRenderShorter_AndItemsBelowFollow()
+        {
+            var items = await FirstPage("BodyShrinkSubreportTest.rdl");
+            var shown = Text(items, "SHOWN-TEXT");
+            var below = Text(items, "BELOW-TEXT");
+            var background = items.OfType<PageRectangle>()
+                .Single(r => r.SI.BackgroundColor == System.Drawing.ColorTranslator.FromHtml("#f9f9f9"));
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(background.Y, Is.EqualTo(shown.Y).Within(0.5f));
+                Assert.That(background.H, Is.EqualTo(0.5f * 72f).Within(0.5f));
+                // Designed 0.25in below the subreport; it follows the box's real bottom.
+                Assert.That(below.Y, Is.EqualTo(background.Y + background.H + 0.25f * 72f).Within(0.5f));
+            });
+        }
+
         [TestCase("BodyStyleTest.rdl")]
         [TestCase("BodyStyleSubreportTest.rdl")]
+        [TestCase("BodyShrinkTest.rdl")]
+        [TestCase("BodyShrinkSubreportTest.rdl")]
         public async Task RendersToPdf_WithoutError(string rdlFile)
         {
             Report report = await LoadReport(rdlFile);

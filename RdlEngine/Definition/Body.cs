@@ -124,11 +124,51 @@ namespace Majorsilence.Reporting.Rdl
             await _ReportItems.RunPage(pgs, null, OwnerReport.LeftMargin.Points).ConfigureAwait(false);
 
 			if (pgs.CurrentPage == startPage)
+			{
 				Rectangle.GrowToContents(startPage, itemsBefore[0], pr);
+				ShrinkToContents(startPage, itemsBefore[0], pr);
+			}
 			else
 				Rectangle.SplitAcrossPages(pgs, pageIndex, itemsBefore, pr);
 
 			return ;
+		}
+
+		// SSRS keeps the space the design leaves below the body's lowest item, not the body's
+		// designed Height (#628). When the items render shorter than designed - a hidden item,
+		// a table with hidden rows - the body ends that much higher, and its border and
+		// background with it. Hidden items still count for the designed bottom, as they do in
+		// the design. Only ever shrinks: GrowToContents has already grown it to its items.
+		private void ShrinkToContents(Page p, int firstContained, PageRectangle pr)
+		{
+			if (_Height == null)
+				return;
+
+			float designedLowest = 0;
+			foreach (ReportItem ri in _ReportItems.Items)
+			{
+				float top = ri.Top == null ? 0 : ri.Top.Points;
+				float height = ri.Height == null ? 0 : ri.Height.Points;
+				designedLowest = Math.Max(designedLowest, Math.Max(top, top + height));
+			}
+			float spaceBelow = Math.Max(0, _Height.Points - designedLowest);
+
+			float renderedBottom = pr.Y;
+			for (int i = firstContained; i < p.Count; i++)
+			{
+				PageItem pi = p[i];
+				if (pi == pr || p.IsBeneath(pi))
+					continue;
+				float itemBottom = pi is PageLine pl ? Math.Max(pl.Y, pl.Y2) : pi.Y + pi.H;
+				renderedBottom = Math.Max(renderedBottom, itemBottom);
+			}
+
+			float bottom = renderedBottom + spaceBelow;
+			if (bottom >= pr.Y + pr.H)
+				return;
+			pr.H = bottom - pr.Y;
+			if (pr.SI.BackgroundImage != null)
+				pr.SI.BackgroundImage.H = pr.H;
 		}
 
 		internal ReportItems ReportItems

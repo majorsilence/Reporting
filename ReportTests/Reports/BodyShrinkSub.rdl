@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Report Name="BodyShrinkSub">
+  <Description>Subreport half of the body shrink test (#628): a 2in body with a background and
+  border, a visible 0.25in textbox, and a hidden 1.5in textbox below it that leaves 0.25in of
+  designed space under it.</Description>
+  <Body>
+    <Height>2in</Height>
+    <ReportItems>
+      <Textbox Name="ShownText">
+        <Top>0in</Top>
+        <Left>0in</Left>
+        <Height>0.25in</Height>
+        <Width>3in</Width>
+        <Value>="SHOWN-TEXT"</Value>
+      </Textbox>
+      <Textbox Name="HiddenText">
+        <Top>0.25in</Top>
+        <Left>0in</Left>
+        <Height>1.5in</Height>
+        <Width>3in</Width>
+        <Value>="HIDDEN-TEXT"</Value>
+        <Visibility>
+          <Hidden>true</Hidden>
+        </Visibility>
+      </Textbox>
+    </ReportItems>
+    <Style>
+      <BackgroundColor>#f9f9f9</BackgroundColor>
+      <BorderStyle>
+        <Default>Solid</Default>
+      </BorderStyle>
+      <BorderColor>
+        <Default>#999999</Default>
+      </BorderColor>
+    </Style>
+  </Body>
+  <Width>3in</Width>
+  <PageWidth>8.5in</PageWidth>
+  <PageHeight>11in</PageHeight>
+</Report>
