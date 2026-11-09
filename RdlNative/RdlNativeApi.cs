@@ -301,8 +301,10 @@ public static class RdlNativeApi
             "xlsx_table"      => OutputPresentationType.ExcelTableOnly,
             "xls"             => OutputPresentationType.Excel97,
             "rtf"             => OutputPresentationType.RTF,
+            "docx"            => OutputPresentationType.Word,
             "tif" or "tiff"   => OutputPresentationType.TIF,
             "tifb"            => OutputPresentationType.TIFBW,
+            "svg"             => OutputPresentationType.SVG,
             "mht" or "mhtml"  => OutputPresentationType.MHTML,
             _                 => OutputPresentationType.PDF,
         };

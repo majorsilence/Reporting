@@ -25,7 +25,11 @@
  *   rdl_report_close(h);
  *
  * Supported format strings: "pdf", "html", "xml", "csv", "xlsx", "xlsx_table",
- *                            "rtf", "tif", "tifb", "mht"
+ *                            "rtf", "docx", "tif", "tifb", "svg", "mht"
+ *
+ * "svg" is one image per page: rdl_report_render_file writes page 1 to the path given and
+ * pages 2, 3, ... beside it as <name>2.svg, <name>3.svg, ...; rdl_report_render_buffer
+ * returns page 1 only.
  */
 
 #ifndef RDLNATIVE_H

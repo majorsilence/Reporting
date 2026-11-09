@@ -254,6 +254,14 @@ namespace Majorsilence.Reporting.RdlDesign
             return bOK;
         }
 
+        /// <summary>
+        /// The file extension an export is saved with; Word is a .docx document
+        /// </summary>
+        internal static string ExportExtension(Rdl.OutputPresentationType type)
+        {
+            return type == OutputPresentationType.Word ? "docx" : type.ToString().ToLower();
+        }
+
         public async Task<bool> ExportAsync(Rdl.OutputPresentationType type)
         {
             SaveFileDialog sfd = new SaveFileDialog();
@@ -272,6 +280,9 @@ namespace Majorsilence.Reporting.RdlDesign
                     break;
                 case OutputPresentationType.TIF:
                     sfd.Filter = Strings.MDIChild_Export_TIF;
+                    break;
+                case OutputPresentationType.SVG:
+                    sfd.Filter = Strings.MDIChild_Export_SVG;
                     break;
                 case OutputPresentationType.RTF:
                     sfd.Filter = Strings.MDIChild_Export_RTF;
@@ -296,11 +307,11 @@ namespace Majorsilence.Reporting.RdlDesign
 
             if (SourceFile != null)
             {
-                sfd.FileName = Path.GetFileNameWithoutExtension(SourceFile.LocalPath) + "." + type.ToString().ToLower();
+                sfd.FileName = Path.GetFileNameWithoutExtension(SourceFile.LocalPath) + "." + ExportExtension(type);
             }
             else
             {
-                sfd.FileName = "*." + type.ToString().ToLower();
+                sfd.FileName = "*." + ExportExtension(type);
             }
 
             try

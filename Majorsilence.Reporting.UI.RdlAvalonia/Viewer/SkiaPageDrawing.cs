@@ -234,10 +234,39 @@ namespace Majorsilence.Reporting.UI.RdlAvalonia.Viewer
             {
                 var stringFormat = GetStringFormat(pt);
                 var textRect = ApplyPadding(rect, pt.SI);
+                if (pt.ToggleKey != null)
+                {   // the text moves right past the +/- drawn before it
+                    int space = (int)(PageItem.ToggleGlyphSpace * _zoom);
+                    textRect = new System.Drawing.Rectangle(textRect.X + space, textRect.Y,
+                        Math.Max(0, textRect.Width - space), textRect.Height);
+                    DrawToggleGlyph(pt, g);
+                }
                 g.DrawString(pt.Text, font, brush, textRect, stringFormat);
                 font.Dispose();
                 brush.Dispose();
             }
+        }
+
+        // The drill-down +/- of a toggle textbox: a small box before its text, with a plus when
+        // what it toggles is hidden and a minus when it shows.
+        private void DrawToggleGlyph(PageText pt, Drawing.Graphics g)
+        {
+            pt.GetToggleGlyphBounds(out float gx, out float gy, out float gsize);
+            float x = ConvertXtoPixels(gx);
+            float y = ConvertYtoPixels(gy);
+            float size = Math.Max(5f, gsize * _zoom);
+            float bar = Math.Max(1f, size / 7f);
+            float inset = size / 4f;
+
+            var ink = pt.SI != null ? ToDrawingColor(pt.SI.Color) : DefaultBlack;
+            using var fill = new Drawing.SolidBrush(System.Drawing.Color.White);
+            using var mark = new Drawing.SolidBrush(ink);
+            g.FillRectangle(fill, new System.Drawing.RectangleF(x, y, size, size));
+            var pen = new Drawing.Pen(ink, 1);
+            g.DrawRectangle(pen, new System.Drawing.Rectangle((int)x, (int)y, (int)size, (int)size));
+            g.FillRectangle(mark, new System.Drawing.RectangleF(x + inset, y + (size - bar) / 2, size - 2 * inset, bar));
+            if (!pt.ToggleExpanded)     // vertical bar: the plus
+                g.FillRectangle(mark, new System.Drawing.RectangleF(x + (size - bar) / 2, y + inset, bar, size - 2 * inset));
         }
 
         private System.Drawing.Rectangle ApplyPadding(System.Drawing.Rectangle rect, StyleInfo? si)

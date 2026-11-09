@@ -1440,7 +1440,7 @@ namespace Majorsilence.Reporting.RdlDesign.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Only HTML, MHT, XML, CSV, RTF, DOC, Excel, TIF and PDF are allowed as Export types..
+        ///   Looks up a localized string similar to Only HTML, MHT, XML, CSV, RTF, DOC, Excel, TIF, SVG and PDF are allowed as Export types..
         /// </summary>
         internal static string MDIChild_Error_AllowedExportTypes {
             get {
@@ -1458,7 +1458,7 @@ namespace Majorsilence.Reporting.RdlDesign.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to DOC file (*.doc)|*.doc|All files (*.*)|*.*.
+        ///   Looks up a localized string similar to Word document (*.docx)|*.docx|All files (*.*)|*.*.
         /// </summary>
         internal static string MDIChild_Export_DOC {
             get {
@@ -1517,6 +1517,15 @@ namespace Majorsilence.Reporting.RdlDesign.Resources {
         internal static string MDIChild_Export_TIF {
             get {
                 return ResourceManager.GetString("MDIChild_Export_TIF", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to SVG files, one per page (*.svg)|*.svg|All files (*.*)|*.*.
+        /// </summary>
+        internal static string MDIChild_Export_SVG {
+            get {
+                return ResourceManager.GetString("MDIChild_Export_SVG", resourceCulture);
             }
         }
         

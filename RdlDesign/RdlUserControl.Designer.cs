@@ -72,6 +72,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			this.CsvToolStripButton2 = new Majorsilence.Forms.ToolStripButton();
 			this.RtfToolStripButton2 = new Majorsilence.Forms.ToolStripButton();
 			this.TifToolStripButton2 = new Majorsilence.Forms.ToolStripButton();
+			this.SvgToolStripButton2 = new Majorsilence.Forms.ToolStripButton();
 			this.ButtonShowProperties = new Majorsilence.Forms.ToolStripButton();
 			this.panel1 = new Majorsilence.Forms.Panel();
 			this.label1 = new Majorsilence.Forms.Label();
@@ -313,6 +314,7 @@ namespace Majorsilence.Reporting.RdlDesign
             this.CsvToolStripButton2,
             this.RtfToolStripButton2,
             this.TifToolStripButton2,
+            this.SvgToolStripButton2,
             this.ButtonShowProperties});
 			resources.ApplyResources(this.toolStrip1, "toolStrip1");
 			this.toolStrip1.Name = "toolStrip1";
@@ -478,6 +480,15 @@ namespace Majorsilence.Reporting.RdlDesign
 			this.TifToolStripButton2.Name = "TifToolStripButton2";
 			this.TifToolStripButton2.Tag = "TIF";
 			this.TifToolStripButton2.Click += this.TifToolStripButton2_Click;
+			//
+			// SvgToolStripButton2
+			//
+			this.SvgToolStripButton2.DisplayStyle = Majorsilence.Forms.ToolStripItemDisplayStyle.Text;
+			this.SvgToolStripButton2.Name = "SvgToolStripButton2";
+			this.SvgToolStripButton2.Tag = "SVG";
+			this.SvgToolStripButton2.Text = "SVG";
+			this.SvgToolStripButton2.ToolTipText = "Export as SVG, one file per page";
+			this.SvgToolStripButton2.Click += this.SvgToolStripButton2_Click;
 			// 
 			// ButtonShowProperties
 			// 
@@ -602,6 +613,7 @@ namespace Majorsilence.Reporting.RdlDesign
         private Majorsilence.Forms.ToolStripButton CsvToolStripButton2;
         private Majorsilence.Forms.ToolStripButton RtfToolStripButton2;
         private Majorsilence.Forms.ToolStripButton TifToolStripButton2;
+        private Majorsilence.Forms.ToolStripButton SvgToolStripButton2;
         private Majorsilence.Forms.Panel panel1;
         private Majorsilence.Forms.Label label1;
         private Majorsilence.Forms.Label label2;

@@ -660,6 +660,10 @@ namespace Majorsilence.Reporting.RdlDesign
             {
                 TifToolStripButton2.Enabled = bEnablePreview;
             }
+            if (SvgToolStripButton2 != null)
+            {
+                SvgToolStripButton2.Enabled = bEnablePreview;
+            }
             if (XmlToolStripButton2 != null)
             {
                 XmlToolStripButton2.Enabled = bEnablePreview;
@@ -808,6 +812,14 @@ namespace Majorsilence.Reporting.RdlDesign
             }
         }
 
+        /// <summary>
+        /// The file extension an export is saved with; Word is a .docx document
+        /// </summary>
+        private static string ExportExtension(Rdl.OutputPresentationType type)
+        {
+            return type == OutputPresentationType.Word ? "docx" : type.ToString().ToLower();
+        }
+
         public async Task<bool> ExportAsync(Rdl.OutputPresentationType type)
         {
             SaveFileDialog sfd = new SaveFileDialog();
@@ -826,6 +838,9 @@ namespace Majorsilence.Reporting.RdlDesign
 					break;
 				case OutputPresentationType.TIF:
 					sfd.Filter = Strings.MDIChild_Export_TIF;
+					break;
+				case OutputPresentationType.SVG:
+					sfd.Filter = Strings.MDIChild_Export_SVG;
 					break;
 				case OutputPresentationType.RTF:
 					sfd.Filter = Strings.MDIChild_Export_RTF;
@@ -850,11 +865,11 @@ namespace Majorsilence.Reporting.RdlDesign
 
             if (SourceFile != null)
             {
-                sfd.FileName = Path.GetFileNameWithoutExtension(SourceFile.LocalPath) + "." + type.ToString().ToLower();
+                sfd.FileName = Path.GetFileNameWithoutExtension(SourceFile.LocalPath) + "." + ExportExtension(type);
             }
             else
             {
-                sfd.FileName = "*." + type.ToString().ToLower();
+                sfd.FileName = "*." + ExportExtension(type);
             }
 
             try
@@ -1499,6 +1514,11 @@ namespace Majorsilence.Reporting.RdlDesign
         private async void TifToolStripButton2_Click(object sender, EventArgs e)
         {
             await ExportAsync(Rdl.OutputPresentationType.TIF);
+        }
+
+        private async void SvgToolStripButton2_Click(object sender, EventArgs e)
+        {
+            await ExportAsync(Rdl.OutputPresentationType.SVG);
         }
 
         private void foreColorPicker1_Validated(object sender, EventArgs e)

@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Report xmlns="http://schemas.microsoft.com/sqlserver/reporting/2005/01/reportdefinition" xmlns:rd="http://schemas.microsoft.com/SQLServer/reporting/reportdesigner">
+  <Description>Issue #632: Word (.docx) output. A table grouped by region with a page break after each group, a header row that repeats, a merged header cell, borders and shading, and a page header that is not on the first page.</Description>
+  <Width>6in</Width>
+  <PageWidth>8.5in</PageWidth>
+  <PageHeight>11in</PageHeight>
+  <TopMargin>.5in</TopMargin><BottomMargin>.5in</BottomMargin><LeftMargin>.75in</LeftMargin><RightMargin>.75in</RightMargin>
+  <DataSources>
+    <DataSource Name="DS1"><ConnectionProperties><DataProvider>xxx</DataProvider><ConnectString>none</ConnectString></ConnectionProperties></DataSource>
+  </DataSources>
+  <DataSets>
+    <DataSet Name="Data">
+      <Query><DataSourceName>DS1</DataSourceName><CommandText></CommandText></Query>
+      <Fields>
+        <Field Name="Region"><DataField>Region</DataField><rd:TypeName>System.String</rd:TypeName></Field>
+        <Field Name="Amount"><DataField>Amount</DataField><rd:TypeName>System.Int32</rd:TypeName></Field>
+      </Fields>
+      <fyi:Rows xmlns:fyi="http://www.fyireporting.com/schemas">
+        <Row><Region>North</Region><Amount>10</Amount></Row>
+        <Row><Region>North</Region><Amount>5</Amount></Row>
+        <Row><Region>South</Region><Amount>50</Amount></Row>
+        <Row><Region>West</Region><Amount>20</Amount></Row>
+      </fyi:Rows>
+    </DataSet>
+  </DataSets>
+  <PageHeader>
+    <Height>0.3in</Height>
+    <PrintOnFirstPage>false</PrintOnFirstPage>
+    <PrintOnLastPage>true</PrintOnLastPage>
+    <ReportItems>
+      <Textbox Name="HeaderText">
+        <Top>0in</Top><Left>0in</Left><Height>0.25in</Height><Width>4in</Width>
+        <Value>Regional amounts</Value>
+        <Style><FontWeight>Bold</FontWeight></Style>
+      </Textbox>
+    </ReportItems>
+  </PageHeader>
+  <Body>
+    <Height>2in</Height>
+    <ReportItems>
+      <Textbox Name="Title">
+        <Top>0in</Top><Left>0in</Left><Height>0.3in</Height><Width>6in</Width>
+        <Value>DOCX TITLE &amp; &lt;more&gt;</Value>
+        <Style><FontFamily>Times New Roman</FontFamily><FontSize>16pt</FontSize><FontStyle>Italic</FontStyle><Color>#C00000</Color><TextAlign>Center</TextAlign><TextDecoration>Underline</TextDecoration></Style>
+      </Textbox>
+      <Table Name="Table1">
+        <DataSetName>Data</DataSetName>
+        <Top>0.4in</Top><Left>0in</Left><Width>6in</Width><Height>0.8in</Height>
+        <TableColumns><TableColumn><Width>3in</Width></TableColumn><TableColumn><Width>3in</Width></TableColumn></TableColumns>
+        <Header>
+          <RepeatOnNewPage>true</RepeatOnNewPage>
+          <TableRows>
+            <TableRow><Height>0.2in</Height><TableCells>
+              <TableCell><ColSpan>2</ColSpan><ReportItems><Textbox Name="hMerged"><Value>MERGED HEADING</Value>
+                <Style><BorderStyle><Default>Solid</Default></BorderStyle><BorderColor><Default>#1F4E79</Default></BorderColor><BackgroundColor>#DDEBF7</BackgroundColor><TextAlign>Center</TextAlign></Style>
+              </Textbox></ReportItems></TableCell>
+            </TableCells></TableRow>
+          </TableRows>
+        </Header>
+        <TableGroups>
+          <TableGroup>
+            <Grouping Name="ByRegion"><GroupExpressions><GroupExpression>=Fields!Region.Value</GroupExpression></GroupExpressions><PageBreakAtEnd>true</PageBreakAtEnd></Grouping>
+            <Header><TableRows><TableRow><Height>0.2in</Height><TableCells>
+              <TableCell><ReportItems><Textbox Name="gRegion"><Value>=Fields!Region.Value</Value><Style><FontWeight>Bold</FontWeight></Style></Textbox></ReportItems></TableCell>
+              <TableCell><ReportItems><Textbox Name="gSum"><Value>=Sum(Fields!Amount.Value)</Value></Textbox></ReportItems></TableCell>
+            </TableCells></TableRow></TableRows></Header>
+          </TableGroup>
+        </TableGroups>
+        <Details><TableRows><TableRow><Height>0.2in</Height><TableCells>
+          <TableCell><ReportItems><Textbox Name="dRegion"><Value>=Fields!Region.Value</Value></Textbox></ReportItems></TableCell>
+          <TableCell><ReportItems><Textbox Name="dAmt"><Value>=Fields!Amount.Value</Value></Textbox></ReportItems></TableCell>
+        </TableCells></TableRow></TableRows></Details>
+      </Table>
+    </ReportItems>
+  </Body>
+</Report>

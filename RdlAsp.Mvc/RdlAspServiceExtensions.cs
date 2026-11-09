@@ -7,7 +7,7 @@ namespace Majorsilence.Reporting.RdlAsp
     {
         /// <summary>
         /// Adds what the report controllers need: their <see cref="Settings"/>, a memory cache and MVC controllers.
-        /// Reports are then shown at <c>/msr/RdlReport/ShowFile/{report}/{html|pdf|xml|csv|xlsx|rtf}</c>
+        /// Reports are then shown at <c>/msr/RdlReport/ShowFile/{report}/{html|pdf|xml|csv|xlsx|rtf|docx}</c>
         /// and listed at <c>/msr/RdlList</c>.
         /// </summary>
         public static IMvcBuilder AddRdlAsp(this IServiceCollection services, Action<Settings> configure = null)

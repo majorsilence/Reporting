@@ -460,6 +460,9 @@ namespace Majorsilence.Reporting.RdlReader
                 case "rtf":
                     type = OutputPresentationType.RTF;
                     break;
+                case "docx":
+                    type = OutputPresentationType.Word;
+                    break;
                 case "mht":
                 case "mhtml":
                     type = OutputPresentationType.MHTML;
@@ -470,6 +473,9 @@ namespace Majorsilence.Reporting.RdlReader
                 case "tif":
                 case "tiff":
                     type = OutputPresentationType.TIF;
+                    break;
+                case "svg":     // one file per page: name.svg, name2.svg, ...
+                    type = OutputPresentationType.SVG;
                     break;
                 default:
                     MessageBox.Show(this,

@@ -215,6 +215,16 @@ await Scenario("chart in a PDF and a TIFF", async () =>
     Expect.Tiff(tif);
 });
 
+await Scenario("list as SVG, drawn as vectors", async () =>
+{
+    // RenderSvg reaches Majorsilence.Forms' Graphics(SKCanvas) constructor by reflection; if
+    // trimming dropped it the page would come out as one embedded bitmap with no <text>.
+    var svg = await Render.Text(work, ReportBuilder.ListReport(), OutputPresentationType.SVG, r => r.DataSets["Data"].SetData(salesRows));
+    Expect.Contains(svg, "<svg", "<text", "North / 2023");
+    if (svg.Contains("<image", StringComparison.Ordinal))
+        throw new InvalidOperationException("SVG page was drawn as a bitmap, not as vectors");
+});
+
 await Scenario("SetData(DataTable)", async () =>
 {
     var rdl = ReportBuilder.Table(new[] { "Name:String", "Qty:Int32" }, new[] { "=Fields!Name.Value", "=Fields!Qty.Value" });

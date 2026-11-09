@@ -16,6 +16,15 @@ namespace ReportTests.Utils
             return ValidateOpenXmlDocument(SpreadsheetDocument.Open(calcfile, true));
         }
 
+        /// <summary>
+        /// Validate a Word document (.docx) against the Open XML schemas; throws with the errors found
+        /// </summary>
+        public static bool ValidateWordprocessingDocument(System.IO.Stream docx)
+        {
+            using (WordprocessingDocument doc = WordprocessingDocument.Open(docx, false))
+                return ValidateOpenXmlDocument(doc);
+        }
+
 
         private static bool ValidateOpenXmlDocument(OpenXmlPackage package )
         {

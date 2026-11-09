@@ -166,6 +166,6 @@
     <value>Incorrect Pass key entered.</value>
   </data>
   <data name="RdlViewer_menuFileSaveAs_Click_FilesFilter" xml:space="preserve">
-    <value>PDF files (*.pdf)|*.pdf|XML files (*.xml)|*.xml|HTML files (*.html)|*.html|CSV files (*.csv)|*.csv|RTF files (*.rtf)|*.rtf|TIF files (*.tif)|*.tif|Excel 2007 Table Only (*.xlsx)|*.xlsx|Excel 2007 (*.xlsx)|*.xlsx|MHT files (*.mht)|*.mht</value>
+    <value>PDF files (*.pdf)|*.pdf|XML files (*.xml)|*.xml|HTML files (*.html)|*.html|CSV files (*.csv)|*.csv|RTF files (*.rtf)|*.rtf|TIF files (*.tif)|*.tif|Excel 2007 Table Only (*.xlsx)|*.xlsx|Excel 2007 (*.xlsx)|*.xlsx|MHT files (*.mht)|*.mht|Word files (*.docx)|*.docx|SVG files, one per page (*.svg)|*.svg</value>
   </data>
 </root>

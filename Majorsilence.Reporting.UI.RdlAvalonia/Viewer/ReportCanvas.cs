@@ -92,6 +92,19 @@ namespace Majorsilence.Reporting.UI.RdlAvalonia.Viewer
         public event EventHandler? SelectionChanged;
 
         /// <summary>
+        /// Raised when a drill-down toggle (+/-) is clicked, with its <see cref="PageItem.ToggleKey"/>.
+        /// The owner toggles it in the report and builds the pages again.
+        /// </summary>
+        public event EventHandler<string>? ToggleClicked;
+
+        /// <summary>
+        /// The toggle key of the drill-down toggle at <paramref name="position"/> (canvas
+        /// coordinates) on the page shown, or null when there is none.
+        /// </summary>
+        public string? ToggleKeyAt(Point position) =>
+            _hitList.FirstOrDefault(h => h.Contains(position) && h.PageItem.ToggleKey != null)?.PageItem.ToggleKey;
+
+        /// <summary>
         /// Gets or sets whether the selection tool is enabled
         /// </summary>
         public bool SelectToolEnabled
@@ -276,11 +289,22 @@ namespace Majorsilence.Reporting.UI.RdlAvalonia.Viewer
         protected override void OnPointerPressed(PointerPressedEventArgs e)
         {
             base.OnPointerPressed(e);
-            
+
+            var point = e.GetCurrentPoint(this);
+            if (point.Properties.IsLeftButtonPressed)
+            {
+                var toggleKey = ToggleKeyAt(point.Position);
+                if (toggleKey != null)
+                {   // a drill-down +/-: expand or collapse what it toggles
+                    ToggleClicked?.Invoke(this, toggleKey);
+                    e.Handled = true;
+                    return;
+                }
+            }
+
             if (!_selectToolEnabled)
                 return;
 
-            var point = e.GetCurrentPoint(this);
             if (point.Properties.IsLeftButtonPressed)
             {
                 _isSelecting = true;
@@ -307,7 +331,7 @@ namespace Majorsilence.Reporting.UI.RdlAvalonia.Viewer
             if (!_isSelecting)
             {
                 var hoverEntry = _hitList.FirstOrDefault(h => h.Contains(pos));
-                Cursor = !string.IsNullOrEmpty(hoverEntry?.PageItem.HyperLink)
+                Cursor = !string.IsNullOrEmpty(hoverEntry?.PageItem.HyperLink) || hoverEntry?.PageItem.ToggleKey != null
                     ? new Cursor(StandardCursorType.Hand)
                     : new Cursor(StandardCursorType.Ibeam);
 

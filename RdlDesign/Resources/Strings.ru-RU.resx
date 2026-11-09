@@ -1076,7 +1076,7 @@ http://www.apache.org/licenses/LICENSE-2.0
     <value>CSV (*.csv)|*.csv|Все файлы (*.*)|*.*</value>
   </data>
   <data name="MDIChild_Export_DOC" xml:space="preserve">
-    <value>DOC (*.doc)|*.doc|Все файлы (*.*)|*.*</value>
+    <value>Word (*.docx)|*.docx|Все файлы (*.*)|*.*</value>
   </data>
   <data name="MDIChild_Export_Excel" xml:space="preserve">
     <value>Excel (*.xlsx)|*.xlsx|Все файлы (*.*)|*.*</value>

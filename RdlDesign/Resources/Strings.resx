@@ -999,7 +999,7 @@ the website https://github.com/majorsilence/Reporting.</value>
 {0}</value>
   </data>
   <data name="MDIChild_Error_AllowedExportTypes" xml:space="preserve">
-    <value>Only HTML, MHT, XML, CSV, RTF, DOC, Excel, TIF and PDF are allowed as Export types.</value>
+    <value>Only HTML, MHT, XML, CSV, RTF, DOC, Excel, TIF, SVG and PDF are allowed as Export types.</value>
   </data>
   <data name="Undo_Error_UnknownAction" xml:space="preserve">
     <value>Unknown Action</value>
@@ -1094,11 +1094,14 @@ the website https://github.com/majorsilence/Reporting.</value>
   <data name="MDIChild_Export_TIF" xml:space="preserve">
     <value>TIF file (*.tif, *.tiff)|*.tiff;*.tif|All files (*.*)|*.*</value>
   </data>
+  <data name="MDIChild_Export_SVG" xml:space="preserve">
+    <value>SVG files, one per page (*.svg)|*.svg|All files (*.*)|*.*</value>
+  </data>
   <data name="MDIChild_Export_RTF" xml:space="preserve">
     <value>RTF file (*.rtf)|*.rtf|All files (*.*)|*.*</value>
   </data>
   <data name="MDIChild_Export_DOC" xml:space="preserve">
-    <value>DOC file (*.doc)|*.doc|All files (*.*)|*.*</value>
+    <value>Word document (*.docx)|*.docx|All files (*.*)|*.*</value>
   </data>
   <data name="MDIChild_Export_Excel" xml:space="preserve">
     <value>Excel file (*.xlsx)|*.xlsx|All files (*.*)|*.*</value>
