@@ -72,11 +72,14 @@ namespace ReportTests
         }
 
         // The words of a spread line are set evenly apart, the runs of other styles in it too.
-        // A word's piece holds the spaces beside it, so each gap is the room shared out.
+        // A word's piece holds the spaces beside it, so each gap is the room shared out. The
+        // WrapInset breaks the line at least 40pt short, so there is room to share in any font
+        // (without it, Liberation Sans can fill the line all but exactly).
         [Test]
         public async Task TheWordsOfASpreadLine_AreEvenlyApart()
         {
-            var lines = await Lines("<b>Bold</b> words and <i>more words</i> " + Words);
+            var lines = await Lines("<b>Bold</b> words and <i>more words</i> " + Words,
+                "<Custom><WrapInset>40pt</WrapInset></Custom>");
             var first = lines[0];
             var gaps = first.Zip(first.Skip(1), (a, b) => b.X - Right(a)).ToArray();
 
