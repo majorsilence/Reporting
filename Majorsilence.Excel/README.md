@@ -145,6 +145,39 @@ using (var w = new XlsxStreamWriter(file, "Data"))
 
 It supports text, numbers, booleans, dates, formulas, cell formats, multiple sheets, merges, AutoFilter and print setup. Use `XlsxWriter` for the other features.
 
+## Legacy Excel 97-2003 files: `XlsWriter`
+
+For software that can't open `.xlsx`, `XlsWriter` writes the binary `.xls` format (BIFF8 in an OLE2 compound file). Its API is shaped like `XlsxWriter`'s, and it takes the same `XlsxCellFormat`:
+
+```csharp
+var xls = new XlsWriter("Sales");
+xls.SetCell(0, 0, "Product", new XlsxCellFormat { Bold = true });
+xls.SetCell(1, 0, "Apples");
+xls.SetCell(1, 1, 1234.5, new XlsxCellFormat { NumberFormatCode = "#,##0.00" });
+xls.SetCell(1, 2, new DateTime(2024, 3, 15));
+xls.AddMerge(3, 0, 3, 2);
+xls.SetColumnWidth(0, 20);
+xls.FreezePanes(1, 0);
+
+using var legacy = File.Create("sales.xls");
+xls.Write(legacy);
+```
+
+It supports:
+- text, numbers, booleans and dates
+- fonts, fills, borders, alignment, number formats and the `Locked`/`FormulaHidden` flags
+- merges, column widths and row heights
+- outlining and hidden rows/columns
+- frozen panes, print setup and multiple sheets
+
+The format's own limits apply:
+- 65,536 rows and 256 columns (`XlsWriter.MaxRows`/`MaxColumns`); writing outside them throws
+- about 4,000 distinct cell formats
+- 56 colours: a colour beyond the first 56 maps to the nearest one in use
+- sheet names of up to 31 characters: longer names are cut, and characters Excel forbids are replaced
+
+Formulas, rich text, images, comments, tables, validation, conditional formatting and hyperlinks are `.xlsx` only.
+
 ## Reading a workbook
 
 ```csharp

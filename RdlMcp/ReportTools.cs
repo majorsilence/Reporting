@@ -45,6 +45,7 @@ public sealed class ReportTools
             ["rtf"] = (OutputPresentationType.RTF, "rtf", true),
             ["xlsx"] = (OutputPresentationType.Excel2007, "xlsx", false),
             ["xlsx_table"] = (OutputPresentationType.ExcelTableOnly, "xlsx", false),
+            ["xls"] = (OutputPresentationType.Excel97, "xls", false),
             ["tif"] = (OutputPresentationType.TIF, "tif", false),
             ["tiff"] = (OutputPresentationType.TIF, "tif", false),
             ["tifbw"] = (OutputPresentationType.TIFBW, "tif", false),

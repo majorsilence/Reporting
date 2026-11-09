@@ -8,7 +8,7 @@ namespace RdlEngine.Render.ExcelConverter
     /// <summary>Writes builder cells to the workbook, typed when the builder found a typed value.</summary>
     internal sealed class ExcelCellWriter
     {
-        private readonly XlsxWriter _workbook;
+        private readonly IExcelWorkbook _workbook;
         private readonly bool _styled;
 
         // Cells with a constant style share one StyleInfo instance, so each style/number format pair is made once.
@@ -16,7 +16,7 @@ namespace RdlEngine.Render.ExcelConverter
             new Dictionary<StyleInfo, Dictionary<string, XlsxCellFormat>>(ReferenceEqualityComparer.Instance);
         private readonly Dictionary<string, XlsxCellFormat> _unstyledFormats = new Dictionary<string, XlsxCellFormat>();
 
-        public ExcelCellWriter(XlsxWriter workbook, bool styled)
+        public ExcelCellWriter(IExcelWorkbook workbook, bool styled)
         {
             _workbook = workbook;
             _styled = styled;

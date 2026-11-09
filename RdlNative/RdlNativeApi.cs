@@ -299,6 +299,7 @@ public static class RdlNativeApi
             "csv"             => OutputPresentationType.CSV,
             "xlsx"            => OutputPresentationType.Excel2007,
             "xlsx_table"      => OutputPresentationType.ExcelTableOnly,
+            "xls"             => OutputPresentationType.Excel97,
             "rtf"             => OutputPresentationType.RTF,
             "tif" or "tiff"   => OutputPresentationType.TIF,
             "tifb"            => OutputPresentationType.TIFBW,

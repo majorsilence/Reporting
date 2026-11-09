@@ -31,8 +31,9 @@ namespace Majorsilence.Reporting.Rdl
 		Excel2007DataOnly,
         TIF,
         TIFBW,                   // black and white tif
-        Excel2003,
-        RenderPdf_Majorsilence
+        Excel2003,               // renders .xlsx, like Excel2007
+        RenderPdf_Majorsilence,
+        Excel97                  // Excel 97-2003 binary workbook (.xls, BIFF8)
     }
 
 	[Serializable]

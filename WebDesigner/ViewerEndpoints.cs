@@ -177,8 +177,10 @@ public static class ViewerEndpoints
                     return await RenderBinary(report, OutputPresentationType.CSV, "text/csv", (name ?? "report") + ".csv");
                 case "xlsx":
                     return await RenderBinary(report, OutputPresentationType.Excel2007, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", (name ?? "report") + ".xlsx");
+                case "xls":
+                    return await RenderBinary(report, OutputPresentationType.Excel97, "application/vnd.ms-excel", (name ?? "report") + ".xls");
                 default:
-                    return Results.BadRequest($"Unsupported format '{format}'. Supported: html, pdf, csv, xlsx.");
+                    return Results.BadRequest($"Unsupported format '{format}'. Supported: html, pdf, csv, xlsx, xls.");
             }
         }
         catch (Exception ex)

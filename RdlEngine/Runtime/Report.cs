@@ -304,6 +304,10 @@ namespace Majorsilence.Reporting.Rdl
 					ip = new RenderExcel2007(this, sg);
                     await _Report.Run(ip).ConfigureAwait(false);
 					break;
+                case OutputPresentationType.Excel97:
+                    ip = new RenderExcel2007(this, sg, legacyXls: true);
+                    await _Report.Run(ip).ConfigureAwait(false);
+                    break;
                 case OutputPresentationType.ExcelTableOnly:
                 case OutputPresentationType.Excel2007DataOnly:
                     ip = new RenderExcel2007DataOnly(this, sg);
@@ -838,6 +842,8 @@ namespace Majorsilence.Reporting.Rdl
 				case OutputPresentationType.ExcelTableOnly:
 				case OutputPresentationType.Excel2007DataOnly:
 					return "EXCELOPENXML";
+				case OutputPresentationType.Excel97:
+					return "EXCEL";
 				case OutputPresentationType.TIF:
 				case OutputPresentationType.TIFBW:
 					return "IMAGE";

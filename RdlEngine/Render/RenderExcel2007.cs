@@ -9,7 +9,8 @@ using RdlEngine.Render.ExcelConverter;
 namespace Majorsilence.Reporting.Rdl
 {
     ///<summary>
-    /// Renders a report to Excel 2007.   This handles some page formatting but does not do true page formatting.
+    /// Renders a report to Excel 2007 (.xlsx), or to Excel 97-2003 (.xls) when legacyXls is set.
+    /// This handles some page formatting but does not do true page formatting.
     ///</summary>
     internal class RenderExcel2007 : IPresent
     {
@@ -17,17 +18,19 @@ namespace Majorsilence.Reporting.Rdl
         IStreamGen _sg;
 
         ExcelCellsBuilder excelBuilder = new ExcelCellsBuilder();
-        XlsxWriter workbook;
+        IExcelWorkbook workbook;
         double k = 5.637142013; // points per Excel character width
 
-        public RenderExcel2007(Report rep, IStreamGen sg)
+        public RenderExcel2007(Report rep, IStreamGen sg, bool legacyXls = false)
         {
             report = rep;
             _sg = sg;
 
             excelBuilder.Report = report;
             string sheetName = string.IsNullOrEmpty(rep.Name) ? "NewSheet" : rep.Name;
-            workbook = new XlsxWriter(sheetName);
+            workbook = legacyXls
+                ? new XlsWorkbook(sheetName, message => rep.rl.LogError(4, message))
+                : new XlsxWorkbook(sheetName);
 
             double leftIn = rep.LeftMarginPoints / 72.0;
             double topIn = rep.TopMarginPoints / 72.0;
