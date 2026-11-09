@@ -46,6 +46,14 @@ namespace RdlReader.Properties {
             }
         }
         
+        // Images go through Majorsilence.Forms' resource manager: the BCL one hands back the
+        // System.Drawing.Bitmap a resx file reference names, which is not a Majorsilence.Forms.Drawing.Bitmap
+        // (InvalidCastException in every image property, so the main window could not be created).
+        private static global::Majorsilence.Forms.ComponentResourceManager imageResources;
+
+        internal static global::Majorsilence.Forms.ComponentResourceManager ImageResources =>
+            imageResources ??= new global::Majorsilence.Forms.ComponentResourceManager("RdlReader.Properties.Resources", typeof(Resources).Assembly);
+
         /// <summary>
         ///   Overrides the current thread's CurrentUICulture property for all
         ///   resource lookups using this strongly typed resource class.
@@ -65,7 +73,7 @@ namespace RdlReader.Properties {
         /// </summary>
         internal static Majorsilence.Forms.Drawing.Bitmap document_open {
             get {
-                object obj = ResourceManager.GetObject("document_open", resourceCulture);
+                object obj = ImageResources.GetObject("document_open", resourceCulture);
                 return ((Majorsilence.Forms.Drawing.Bitmap)(obj));
             }
         }
@@ -75,7 +83,7 @@ namespace RdlReader.Properties {
         /// </summary>
         internal static Majorsilence.Forms.Drawing.Bitmap document_print {
             get {
-                object obj = ResourceManager.GetObject("document_print", resourceCulture);
+                object obj = ImageResources.GetObject("document_print", resourceCulture);
                 return ((Majorsilence.Forms.Drawing.Bitmap)(obj));
             }
         }
@@ -85,7 +93,7 @@ namespace RdlReader.Properties {
         /// </summary>
         internal static Majorsilence.Forms.Drawing.Bitmap document_save {
             get {
-                object obj = ResourceManager.GetObject("document_save", resourceCulture);
+                object obj = ImageResources.GetObject("document_save", resourceCulture);
                 return ((Majorsilence.Forms.Drawing.Bitmap)(obj));
             }
         }
