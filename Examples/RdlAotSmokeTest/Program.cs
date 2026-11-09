@@ -217,8 +217,8 @@ await Scenario("chart in a PDF and a TIFF", async () =>
 
 await Scenario("list as SVG, drawn as vectors", async () =>
 {
-    // RenderSvg reaches Majorsilence.Forms' Graphics(SKCanvas) constructor by reflection; if
-    // trimming dropped it the page would come out as one embedded bitmap with no <text>.
+    // RenderSvg draws the page onto SkiaSharp's SVG canvas through Graphics.FromCanvas, so text
+    // and shapes must come out as vectors, not as one embedded bitmap with no <text>.
     var svg = await Render.Text(work, ReportBuilder.ListReport(), OutputPresentationType.SVG, r => r.DataSets["Data"].SetData(salesRows));
     Expect.Contains(svg, "<svg", "<text", "North / 2023");
     if (svg.Contains("<image", StringComparison.Ordinal))

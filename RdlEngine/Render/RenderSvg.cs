@@ -15,10 +15,8 @@
  */
 
 using System;
-using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
-using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
@@ -123,78 +121,16 @@ namespace Majorsilence.Reporting.Rdl
             // The SVG is written out when the canvas is disposed, so it is finished before ms is read.
             using (var canvas = SKSvgCanvas.Create(SKRect.Create(widthPx, heightPx), ms))
             {
-                Draw2.Graphics? g = CreateGraphics(canvas);
-                if (g != null)
+                // The GDI-style page drawing goes straight onto the SVG canvas, so text and shapes
+                // stay vectors. The canvas is in SVG units (96 per inch), which is FromCanvas's default.
+                using (Draw2.Graphics g = Draw2.Graphics.FromCanvas(canvas, SvgUnitsPerInch))
                 {
-                    using (g)
-                    {
-                        g.PageUnit = Draw2.GraphicsUnit.Point;
-                        g.FillRectangle(Draw2.Brushes.White, 0F, 0F, widthPx * 72f / SvgUnitsPerInch, heightPx * 72f / SvgUnitsPerInch);
-                        await drawer.DrawPage(g, p).ConfigureAwait(false);
-                    }
-                }
-                else
-                {
-                    await DrawRasterFallback(p, canvas, widthPx, heightPx).ConfigureAwait(false);
+                    g.PageUnit = Draw2.GraphicsUnit.Point;
+                    g.FillRectangle(Draw2.Brushes.White, 0F, 0F, widthPx * 72f / SvgUnitsPerInch, heightPx * 72f / SvgUnitsPerInch);
+                    await drawer.DrawPage(g, p).ConfigureAwait(false);
                 }
             }
             return FinishSvg(ms.ToArray(), widthPx, heightPx);
-        }
-
-        // Majorsilence.Forms.Drawing.Graphics has no public way to draw onto a caller's SKCanvas -
-        // only Graphics.FromImage, onto a bitmap it owns - but it does have an internal constructor
-        // taking an SKCanvas (the one its own controls paint through). That is the only way to get
-        // the GDI-style page drawing onto the SVG canvas, so it is found by reflection; the
-        // DynamicDependency keeps it through trimming and Native AOT. Null when a later
-        // Majorsilence.Forms no longer has it, and the page is then drawn as a picture instead.
-        [DynamicDependency(DynamicallyAccessedMemberTypes.NonPublicConstructors, typeof(Draw2.Graphics))]
-        private static Draw2.Graphics? CreateGraphics(SKCanvas canvas)
-        {
-            foreach (ConstructorInfo ci in typeof(Draw2.Graphics).GetConstructors(BindingFlags.NonPublic | BindingFlags.Instance))
-            {
-                ParameterInfo[] ps = ci.GetParameters();
-                if (ps.Length == 0 || ps[0].ParameterType != typeof(SKCanvas))
-                    continue;
-                bool restOptional = true;
-                for (int i = 1; i < ps.Length; i++)
-                    restOptional &= ps[i].IsOptional;
-                if (!restOptional)
-                    continue;
-
-                object?[] args = new object?[ps.Length];
-                args[0] = canvas;
-                for (int i = 1; i < ps.Length; i++)
-                    args[i] = ps[i].HasDefaultValue ? ps[i].DefaultValue : null;
-                try
-                {
-                    return (Draw2.Graphics?)ci.Invoke(args);
-                }
-                catch (TargetInvocationException)
-                {
-                    return null;
-                }
-            }
-            return null;
-        }
-
-        // The page drawn as TIF draws it, onto a bitmap, and the bitmap placed on the SVG page.
-        // Used only when CreateGraphics finds no way to draw onto the SVG canvas directly.
-        private const float FallbackDpi = 192f;
-
-        private async Task DrawRasterFallback(Page p, SKCanvas canvas, float widthPx, float heightPx)
-        {
-            var drawer = new RenderTif(r, FallbackDpi);
-            float scale = FallbackDpi / SvgUnitsPerInch;
-            using var skBitmap = new SKBitmap(Math.Max(1, (int)Math.Ceiling(widthPx * scale)), Math.Max(1, (int)Math.Ceiling(heightPx * scale)));
-            Draw2.Image bm = skBitmap!;
-            using (Draw2.Graphics g = Draw2.Graphics.FromImage(bm))
-            {
-                g.PageUnit = Draw2.GraphicsUnit.Pixel;
-                g.FillRectangle(Draw2.Brushes.White, 0F, 0F, (float)bm.Width, (float)bm.Height);
-                await drawer.DrawPage(g, p).ConfigureAwait(false);
-            }
-            using var image = SKImage.FromBitmap(skBitmap);
-            canvas.DrawImage(image, SKRect.Create(widthPx, heightPx));
         }
 
         // SkiaSharp's SVG needs three things put right before it is handed out:
