@@ -46,6 +46,14 @@ namespace RdlMapFile.Properties {
             }
         }
         
+        // Images go through Majorsilence.Forms' resource manager: the BCL one hands back the
+        // System.Drawing.Bitmap a resx file reference names, which is not a Majorsilence.Forms.Drawing.Bitmap
+        // (InvalidCastException in every image property, so the main window could not be created).
+        private static global::Majorsilence.Forms.ComponentResourceManager imageResources;
+
+        internal static global::Majorsilence.Forms.ComponentResourceManager ImageResources =>
+            imageResources ??= new global::Majorsilence.Forms.ComponentResourceManager("RdlMapFile.Properties.Resources", typeof(Resources).Assembly);
+
         /// <summary>
         ///   Overrides the current thread's CurrentUICulture property for all
         ///   resource lookups using this strongly typed resource class.
@@ -65,7 +73,7 @@ namespace RdlMapFile.Properties {
         /// </summary>
         internal static Majorsilence.Forms.Drawing.Bitmap line {
             get {
-                object obj = ResourceManager.GetObject("line", resourceCulture);
+                object obj = ImageResources.GetObject("line", resourceCulture);
                 return ((Majorsilence.Forms.Drawing.Bitmap)(obj));
             }
         }
@@ -75,7 +83,7 @@ namespace RdlMapFile.Properties {
         /// </summary>
         internal static Majorsilence.Forms.Drawing.Bitmap poly {
             get {
-                object obj = ResourceManager.GetObject("poly", resourceCulture);
+                object obj = ImageResources.GetObject("poly", resourceCulture);
                 return ((Majorsilence.Forms.Drawing.Bitmap)(obj));
             }
         }
@@ -85,7 +93,7 @@ namespace RdlMapFile.Properties {
         /// </summary>
         internal static Majorsilence.Forms.Drawing.Bitmap selection {
             get {
-                object obj = ResourceManager.GetObject("selection", resourceCulture);
+                object obj = ImageResources.GetObject("selection", resourceCulture);
                 return ((Majorsilence.Forms.Drawing.Bitmap)(obj));
             }
         }
@@ -95,7 +103,7 @@ namespace RdlMapFile.Properties {
         /// </summary>
         internal static Majorsilence.Forms.Drawing.Bitmap text {
             get {
-                object obj = ResourceManager.GetObject("text", resourceCulture);
+                object obj = ImageResources.GetObject("text", resourceCulture);
                 return ((Majorsilence.Forms.Drawing.Bitmap)(obj));
             }
         }
