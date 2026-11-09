@@ -13,7 +13,7 @@ namespace RdlEngine.Render.ExcelConverter
         // Freezing more than this much of the sheet's top leaves little room to scroll.
         private const float MaxFrozenHeightPoints = 216f;
 
-        public static void Apply(XlsxWriter workbook, ExcelCellsBuilder builder, IReadOnlyList<(int r1, int c1, int r2, int c2)> merges)
+        public static void Apply(IExcelWorkbook workbook, ExcelCellsBuilder builder, IReadOnlyList<(int r1, int c1, int r2, int c2)> merges)
         {
             if (builder.Tables.Count != 1)
                 return;

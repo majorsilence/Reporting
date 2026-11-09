@@ -16,7 +16,7 @@ namespace Majorsilence.Reporting.Rdl
         IStreamGen _sg;
 
         ExcelCellsBuilder excelBuilder = new ExcelCellsBuilder();
-        XlsxWriter workbook;
+        IExcelWorkbook workbook;
         double k = 5.637142013; // points per Excel character width
 
         public RenderExcel2007DataOnly(Report rep, IStreamGen sg)
@@ -26,7 +26,7 @@ namespace Majorsilence.Reporting.Rdl
 
             excelBuilder.Report = report;
             string sheetName = string.IsNullOrEmpty(rep.Name) ? "NewSheet" : rep.Name;
-            workbook = new XlsxWriter(sheetName);
+            workbook = new XlsxWorkbook(sheetName);
 
             double leftIn = rep.LeftMarginPoints / 72.0;
             double topIn = rep.TopMarginPoints / 72.0;
