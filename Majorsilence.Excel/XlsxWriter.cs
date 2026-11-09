@@ -333,6 +333,7 @@ namespace Majorsilence.Excel
 
         public void Write(Stream output)
         {
+            PrepareTables();
             bool anyImages = false;
             foreach (var s in _sheets)
                 if (s.Images.Count > 0) { anyImages = true; break; }
@@ -354,7 +355,7 @@ namespace Majorsilence.Excel
                     var sheet = _sheets[s];
                     int sheetNum = s + 1;
                     bool hasDrawings = sheet.Images.Count > 0 || sheet.Lines.Count > 0;
-                    bool hasSheetRels = hasDrawings || sheet.ExternalHyperlinks.Count > 0;
+                    bool hasSheetRels = hasDrawings || sheet.ExternalHyperlinks.Count > 0 || sheet.Comments.Count > 0 || sheet.Tables.Count > 0;
 
                     WriteText(zip, $"xl/worksheets/sheet{sheetNum}.xml", BuildSheet(sheet, hasDrawings));
 
@@ -372,6 +373,8 @@ namespace Majorsilence.Excel
                                 imageOffset += sheet.Images.Count;
                             }
                         }
+                        WriteCommentParts(zip, sheetNum, sheet);
+                        WriteTableParts(zip, sheet);
                     }
                 }
             }
@@ -459,6 +462,8 @@ namespace Majorsilence.Excel
             for (int s = 0; s < _sheets.Count; s++)
                 if (_sheets[s].Images.Count > 0 || _sheets[s].Lines.Count > 0)
                     sb.Append($"<Override PartName=\"/xl/drawings/drawing{s + 1}.xml\" ContentType=\"application/vnd.openxmlformats-officedocument.drawing+xml\"/>");
+            AppendCommentContentTypes(sb);
+            AppendTableContentTypes(sb);
             sb.Append("</Types>");
             return sb.ToString();
         }
@@ -833,6 +838,8 @@ namespace Majorsilence.Excel
 
             if (hasDrawings)
                 sb.Append("<drawing r:id=\"rId1\"/>");
+            AppendLegacyDrawing(sb, sheet, hasDrawings);
+            AppendTableParts(sb, sheet, hasDrawings);
 
             sb.Append("</worksheet>");
             return sb.ToString();
@@ -840,7 +847,7 @@ namespace Majorsilence.Excel
 
         // Drawing relationship (if any) is always rId1, matching the hardcoded r:id="rId1" on
         // <drawing> in BuildSheet; external hyperlinks follow at rId2, rId3, ... in list order,
-        // matching the rIds BuildSheet assigns them.
+        // then the comment parts, matching the rIds BuildSheet assigns them.
         private string BuildSheetRels(int sheetNum, Sheet sheet, bool hasDrawings)
         {
             var sb = new StringBuilder();
@@ -857,6 +864,8 @@ namespace Majorsilence.Excel
                 sb.Append($"<Relationship Id=\"rId{rid}\" Type=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink\" Target=\"{XmlEscape(hl.Url)}\" TargetMode=\"External\"/>");
                 rid++;
             }
+            rid = AppendCommentRels(sb, sheetNum, sheet, rid);
+            rid = AppendTableRels(sb, sheet, rid);
             sb.Append("</Relationships>");
             return sb.ToString();
         }
