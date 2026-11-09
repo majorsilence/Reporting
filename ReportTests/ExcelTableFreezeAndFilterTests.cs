@@ -4,7 +4,7 @@ using System.IO.Compression;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using Majorsilence.Excel;
+using Majorsilence.Spreadsheet;
 using Majorsilence.Reporting.Rdl;
 using NUnit.Framework;
 

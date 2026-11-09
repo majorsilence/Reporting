@@ -47,8 +47,6 @@
   <Project Path="Examples/MarkdownToPdf/MarkdownToPdf.csproj" />
   <Project Path="Examples/PdfAotSmokeTest/PdfAotSmokeTest.csproj" />
   <Project Path="Examples/RdlAotSmokeTest/RdlAotSmokeTest.csproj" />
-  <Project Path="Majorsilence.Excel.Tests/Majorsilence.Excel.Tests.csproj" />
-  <Project Path="Majorsilence.Excel/Majorsilence.Excel.csproj" />
   <Project Path="Majorsilence.Pdf.Markdown.Tests/Majorsilence.Pdf.Markdown.Tests.csproj" />
   <Project Path="Majorsilence.Pdf.Markdown/Majorsilence.Pdf.Markdown.csproj" />
   <Project Path="Majorsilence.Pdf.Previewer.Tests/Majorsilence.Pdf.Previewer.Tests.csproj" />
@@ -58,6 +56,8 @@
   <Project Path="Majorsilence.Pdf/Majorsilence.Pdf.csproj" />
   <Project Path="Majorsilence.Reporting.UI.RdlAvalonia/Majorsilence.Reporting.UI.RdlAvalonia.csproj" />
   <Project Path="Majorsilence.Reporting.UI/Majorsilence.Reporting.UI.csproj" />
+  <Project Path="Majorsilence.Spreadsheet.Tests/Majorsilence.Spreadsheet.Tests.csproj" />
+  <Project Path="Majorsilence.Spreadsheet/Majorsilence.Spreadsheet.csproj" />
   <Project Path="Majorsilence.WinformUtils.Tests/Majorsilence.WinformUtils.Tests.csproj" />
   <Project Path="Majorsilence.WinformUtils/Majorsilence.WinformUtils.csproj" />
   <Project Path="RdlAsp.Mvc/Majorsilence.Reporting.RdlAsp.Mvc.csproj" />
