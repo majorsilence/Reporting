@@ -96,7 +96,7 @@ namespace Majorsilence.Excel
         public XlsxTextRun(string text) { Text = text; }
     }
 
-    public class XlsxWriter
+    public partial class XlsxWriter
     {
         // Sheets, in workbook order. Index 0 is always the sheet created by the constructor.
         private readonly List<Sheet> _sheets = new List<Sheet>();
@@ -615,6 +615,7 @@ namespace Majorsilence.Excel
 
             // cellStyles (required)
             sb.Append("<cellStyles count=\"1\"><cellStyle name=\"Normal\" xfId=\"0\" builtinId=\"0\"/></cellStyles>");
+            AppendDxfs(sb);
 
             sb.Append("</styleSheet>");
             return sb.ToString();
@@ -784,6 +785,9 @@ namespace Majorsilence.Excel
                 }
                 sb.Append("</mergeCells>");
             }
+
+            // Conditional formatting (follows mergeCells, precedes dataValidations)
+            AppendConditionalFormatting(sb, sheet);
 
             // Data validations (must follow mergeCells and precede hyperlinks per OOXML ordering)
             if (sheet.DataValidations.Count > 0)
@@ -1036,7 +1040,7 @@ namespace Majorsilence.Excel
         // Everything that is per-worksheet rather than shared at the workbook level (which is
         // only the style tables: fonts/fills/borders/cellXfs/customNumFmts stay on XlsxWriter
         // itself so equal styles are deduplicated across sheets too).
-        private class Sheet
+        private partial class Sheet
         {
             public readonly string Name;
             public readonly SortedDictionary<int, double> ColumnWidths = new SortedDictionary<int, double>();
