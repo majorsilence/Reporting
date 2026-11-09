@@ -57,13 +57,15 @@ namespace Majorsilence.Reporting.RdlDesign.Syntax
             scintilla.Styles[Style.Default].Font = "Courier";
             scintilla.Styles[Style.Default].Size = 10;
             scintilla.StyleClearAll();
-            scintilla.Styles[Style.Xml.Attribute].ForeColor = Color.Red;
-            scintilla.Styles[Style.Xml.Entity].ForeColor = Color.Red;
-            scintilla.Styles[Style.Xml.Comment].ForeColor = Color.Green;
-            scintilla.Styles[Style.Xml.Tag].ForeColor = Color.Blue;
-            scintilla.Styles[Style.Xml.TagEnd].ForeColor = Color.Blue;
-            scintilla.Styles[Style.Xml.DoubleString].ForeColor = Color.DeepPink;
-            scintilla.Styles[Style.Xml.SingleString].ForeColor = Color.DeepPink;
+            // Each colour follows the theme (#527): the classic colour on a light theme, a lighter shade
+            // on a dark one, or the theme's --rdl-syntax-* variable.
+            scintilla.Styles[Style.Xml.Attribute].ThemedForeColor = () => SyntaxColors.Attribute(Color.Red);
+            scintilla.Styles[Style.Xml.Entity].ThemedForeColor = () => SyntaxColors.Entity(Color.Red);
+            scintilla.Styles[Style.Xml.Comment].ThemedForeColor = () => SyntaxColors.Comment(Color.Green);
+            scintilla.Styles[Style.Xml.Tag].ThemedForeColor = () => SyntaxColors.Tag(Color.Blue);
+            scintilla.Styles[Style.Xml.TagEnd].ThemedForeColor = () => SyntaxColors.Tag(Color.Blue);
+            scintilla.Styles[Style.Xml.DoubleString].ThemedForeColor = () => SyntaxColors.String(Color.DeepPink);
+            scintilla.Styles[Style.Xml.SingleString].ThemedForeColor = () => SyntaxColors.String(Color.DeepPink);
         }
     }
 }

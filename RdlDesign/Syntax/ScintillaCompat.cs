@@ -15,9 +15,10 @@
 // class itself has to keep the original type name for the namespace-prefix rewrite to work).
 //
 // D4 scope: text editing (Text, undo/redo, selection, search-in-target) is real, backed by the
-// underlying RichTextBox. Everything styling/lexer/margin/marker/indicator-related is a
-// documented no-op -- see D5 ("ScintillaCompat made real") for actually wiring up syntax
-// colorization via Majorsilence.Forms.RichTextBox's SelectionColor/SelectionFont per-span API.
+// underlying RichTextBox. D5 made syntax colouring real through the base Colorizer hook: a
+// Container lexer's StyleNeeded/SetStyling runs (the expression editor), and BuiltInLexers for
+// Lexer.Sql and Lexer.Xml with SetKeywords (the SQL and XML editors, #527). Margins, markers,
+// indicators, folding and brace matching are still no-ops.
 
 using System;
 using System.Collections.Generic;
@@ -197,7 +198,12 @@ namespace Majorsilence.Reporting.RdlDesign.Syntax
 
         // --- Cosmetic: lexer/styling/margins/markers/indicators -- all no-op ----------------
 
-        public Lexer Lexer { get; set; }
+        private Lexer _lexer;
+        public Lexer Lexer
+        {
+            get => _lexer;
+            set { _lexer = value; _lexedText = null; }
+        }
         public new bool UseTabs { get; set; }
         public bool HScrollBar { get; set; }
         public WrapMode WrapMode { get; set; }
@@ -207,7 +213,30 @@ namespace Majorsilence.Reporting.RdlDesign.Syntax
 
         public void StyleResetDefault() { }
         public void StyleClearAll() { }
-        public void SetKeywords(int keywordSet, string keywords) { }
+        // The keyword lists of the SQL lexer (#527): word -> its keyword set, matched ignoring case.
+        private readonly Dictionary<string, int> _keywords = new(StringComparer.OrdinalIgnoreCase);
+
+        public void SetKeywords(int keywordSet, string keywords)
+        {
+            foreach (var word in (keywords ?? string.Empty).Split((char[])null, StringSplitOptions.RemoveEmptyEntries))
+                _keywords.TryAdd(word, keywordSet);     // a word in two lists keeps the first, as in Scintilla
+            _lexedText = null;
+        }
+
+        // Scintilla's SQL lexer styles keyword sets 0, 1, 4 and 5 (its "keywords", "database objects",
+        // "user1" and "user2" lists); the others are not used by ScintillaSqlStyle.
+        private int? SqlKeywordStyle(string word)
+        {
+            if (!_keywords.TryGetValue(word, out int set)) return null;
+            return set switch
+            {
+                0 => Majorsilence.Reporting.RdlDesign.Syntax.Style.Sql.Word,
+                1 => Majorsilence.Reporting.RdlDesign.Syntax.Style.Sql.Word2,
+                4 => Majorsilence.Reporting.RdlDesign.Syntax.Style.Sql.User1,
+                5 => Majorsilence.Reporting.RdlDesign.Syntax.Style.Sql.User2,
+                _ => null,
+            };
+        }
         public void SetProperty(string name, string value) { }
 
         public int BraceMatch(int position) => InvalidPosition;
@@ -273,24 +302,48 @@ namespace Majorsilence.Reporting.RdlDesign.Syntax
 
         // Fires StyleNeeded (as real Scintilla does when it needs a range colored) covering the
         // whole document, then converts whatever SetStyling calls that triggered into
-        // TextSpanStyle spans using each style index's configured Styles[] entry. No-op (empty
-        // result) when nothing is listening for StyleNeeded -- e.g. SQL/XML editors, which
-        // configure a built-in lexer instead of a Container one and never call StyleText.
+        // TextSpanStyle spans using each style index's configured Styles[] entry. With no
+        // StyleNeeded listener and no built-in lexer the result is empty.
+        //
+        // The SQL and XML editors set Lexer to Sql or Xml and listen to no StyleNeeded; for them
+        // BuiltInLexers stands in for Scintilla's own lexers (#527). Their runs depend only on the
+        // text, so they are kept until it changes; the colours are looked up on every call, so a
+        // theme change shows the next time the editor paints.
+        private string _lexedText;
+        private List<(int Start, int Length, int Style)> _lexedRuns;
+
         private IEnumerable<TextSpanStyle> ComputeColorSpans(string text)
         {
-            // Full recolor each call (not incremental like real Scintilla) -- reset so
-            // GetEndStyled() reports 0 and StyleText starts from the beginning of the document.
-            _stylingPos = 0;
-            _styleRuns.Clear();
-            RaiseStyleNeeded(text.Length);
+            text ??= string.Empty;
+            List<(int Start, int Length, int Style)> runs;
+            if (StyleNeeded == null && (Lexer == Lexer.Sql || Lexer == Lexer.Xml))
+            {
+                if (!ReferenceEquals(text, _lexedText) && text != _lexedText)
+                {
+                    _lexedRuns = Lexer == Lexer.Sql ? BuiltInLexers.Sql(text, SqlKeywordStyle) : BuiltInLexers.Xml(text);
+                    _lexedText = text;
+                }
+                runs = _lexedRuns;
+            }
+            else
+            {
+                // Full recolor each call (not incremental like real Scintilla) -- reset so
+                // GetEndStyled() reports 0 and StyleText starts from the beginning of the document.
+                _stylingPos = 0;
+                _styleRuns.Clear();
+                RaiseStyleNeeded(text.Length);
+                runs = _styleRuns;
+            }
 
-            foreach (var run in _styleRuns)
+            foreach (var run in runs)
             {
                 if (run.Start < 0 || run.Length <= 0 || run.Start + run.Length > text.Length)
                     continue;
 
                 var style = Styles[run.Style];
-                var color = style.ForeColor.IsEmpty ? Majorsilence.Reporting.RdlViewer.ChromeColors.Text : style.ForeColor;
+                var color = style.ThemedForeColor?.Invoke() ?? style.ForeColor;
+                if (color.IsEmpty)
+                    color = Majorsilence.Reporting.RdlViewer.ChromeColors.Text;
                 yield return new TextSpanStyle(run.Start, run.Length,
                     new SkiaSharp.SKColor(color.R, color.G, color.B, color.A),
                     style.Bold, style.Underline);
@@ -380,6 +433,13 @@ namespace Majorsilence.Reporting.RdlDesign.Syntax
     public sealed class Style
     {
         public System.Drawing.Color ForeColor { get; set; }
+
+        /// <summary>
+        /// Not in Scintilla: when set, the colour used instead of <see cref="ForeColor"/>, read each
+        /// time the text is coloured so it follows the theme (#527).
+        /// </summary>
+        public Func<System.Drawing.Color>? ThemedForeColor { get; set; }
+
         public System.Drawing.Color BackColor { get; set; }
         public bool Underline { get; set; }
         public bool Bold { get; set; }

@@ -36,6 +36,19 @@
   --rdl-zoom-background: #1c1c1f;      /* toolbar zoom box */
   --rdl-expression-hover: #3a3a41;     /* toolbar "fx" button, hovered */
 
+  /* ---- Designer: SQL and XML editors ---- */
+  --rdl-syntax-keyword: #6cb4ee;       /* SQL keywords */
+  --rdl-syntax-logical: #a0a0a8;       /* SQL and, or, join, ... */
+  --rdl-syntax-function: #d4a0e0;      /* SQL functions */
+  --rdl-syntax-system: #4ec9b0;        /* SQL system objects */
+  --rdl-syntax-operator: #e4e4e8;
+  --rdl-syntax-number: #b5cea8;
+  --rdl-syntax-string: #e0a080;
+  --rdl-syntax-comment: #7fa868;
+  --rdl-syntax-tag: #6cb4ee;           /* XML tags */
+  --rdl-syntax-attribute: #9cdcfe;     /* XML attribute names */
+  --rdl-syntax-entity: #d7ba7d;        /* XML entities such as &amp; */
+
   /* ---- Designer: on the page (drawn on white paper) ---- */
   --rdl-margin-color: #eef3f8;         /* page margins */
   --rdl-out-of-page-color: salmon;     /* parts of items that fall off the paper */

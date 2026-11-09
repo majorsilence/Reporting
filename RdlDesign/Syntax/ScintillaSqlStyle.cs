@@ -24,17 +24,19 @@ namespace Majorsilence.Reporting.RdlDesign.Syntax
             // Set the Styles
             scintilla.Styles[Style.LineNumber].ForeColor = Color.FromArgb(255, 128, 128, 128);  //Dark Gray
             scintilla.Styles[Style.LineNumber].BackColor = Color.FromArgb(255, 228, 228, 228);  //Light Gray
-            scintilla.Styles[Style.Sql.Comment].ForeColor = Color.Green;
-            scintilla.Styles[Style.Sql.CommentLine].ForeColor = Color.Green;
-            scintilla.Styles[Style.Sql.CommentLineDoc].ForeColor = Color.Green;
-            scintilla.Styles[Style.Sql.Number].ForeColor = Color.Maroon;
-            scintilla.Styles[Style.Sql.Word].ForeColor = Color.Blue;
-            scintilla.Styles[Style.Sql.Word2].ForeColor = Color.Fuchsia;
-            scintilla.Styles[Style.Sql.User1].ForeColor = Color.Gray;
-            scintilla.Styles[Style.Sql.User2].ForeColor = Color.FromArgb(255, 00, 128, 192);    //Medium Blue-Green
-            scintilla.Styles[Style.Sql.String].ForeColor = Color.Red;
-            scintilla.Styles[Style.Sql.Character].ForeColor = Color.Red;
-            scintilla.Styles[Style.Sql.Operator].ForeColor = Color.Black;
+            // Each colour follows the theme (#527): the classic colour on a light theme, a lighter shade
+            // on a dark one, or the theme's --rdl-syntax-* variable.
+            Themed(Style.Sql.Comment, () => SyntaxColors.Comment(Color.Green));
+            Themed(Style.Sql.CommentLine, () => SyntaxColors.Comment(Color.Green));
+            Themed(Style.Sql.CommentLineDoc, () => SyntaxColors.Comment(Color.Green));
+            Themed(Style.Sql.Number, () => SyntaxColors.Number(Color.Maroon));
+            Themed(Style.Sql.Word, () => SyntaxColors.Keyword(Color.Blue));
+            Themed(Style.Sql.Word2, () => SyntaxColors.Function(Color.Fuchsia));
+            Themed(Style.Sql.User1, () => SyntaxColors.Logical(Color.Gray));
+            Themed(Style.Sql.User2, () => SyntaxColors.SystemName(Color.FromArgb(255, 00, 128, 192)));    //Medium Blue-Green
+            Themed(Style.Sql.String, () => SyntaxColors.String(Color.Red));
+            Themed(Style.Sql.Character, () => SyntaxColors.String(Color.Red));
+            Themed(Style.Sql.Operator, () => SyntaxColors.Operator(Color.Black));
 
             //Brace Matching
             scintilla.IndentationGuides = IndentView.LookBoth;
@@ -77,6 +79,11 @@ namespace Majorsilence.Reporting.RdlDesign.Syntax
             scintilla.SetKeywords(5, @"sys objects sysobjects ");
         }
         
+        private void Themed(int style, System.Func<Color> color)
+        {
+            scintilla.Styles[style].ThemedForeColor = color;
+        }
+
         private static bool IsBrace(int c)
         {
             switch (c)
