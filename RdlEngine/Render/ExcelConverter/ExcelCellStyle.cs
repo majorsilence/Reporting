@@ -1,6 +1,6 @@
 using System;
 using Drawing = Majorsilence.Forms.Drawing;
-using Majorsilence.Excel;
+using Majorsilence.Spreadsheet;
 using Majorsilence.Reporting.Rdl;
 
 namespace RdlEngine.Render.ExcelConverter

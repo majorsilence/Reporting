@@ -3,7 +3,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using Majorsilence.Excel;
+using Majorsilence.Spreadsheet;
 using Majorsilence.Reporting.Rdl;
 using NUnit.Framework;
 using RdlEngine.Render.ExcelConverter;

@@ -1,6 +1,6 @@
 using System;
 using System.IO;
-using Majorsilence.Excel;
+using Majorsilence.Spreadsheet;
 
 namespace RdlEngine.Render.ExcelConverter
 {
