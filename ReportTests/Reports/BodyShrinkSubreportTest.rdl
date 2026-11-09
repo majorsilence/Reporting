@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Report Name="BodyShrinkSubreportTest">
+  <Description>A header subreport whose styled body holds a hidden item (#628): the grey box
+  fits the rows shown, and the text placed below the subreport moves up with it.</Description>
+  <Body>
+    <Height>3in</Height>
+    <ReportItems>
+      <Subreport Name="Header">
+        <Top>0.5in</Top>
+        <Left>1in</Left>
+        <Height>0.5in</Height>
+        <Width>3in</Width>
+        <ReportName>BodyShrinkSub</ReportName>
+      </Subreport>
+      <Textbox Name="Below">
+        <Top>1.25in</Top>
+        <Left>1in</Left>
+        <Height>0.25in</Height>
+        <Width>3in</Width>
+        <Value>="BELOW-TEXT"</Value>
+      </Textbox>
+    </ReportItems>
+  </Body>
+  <Width>6.5in</Width>
+  <PageWidth>8.5in</PageWidth>
+  <PageHeight>11in</PageHeight>
+</Report>

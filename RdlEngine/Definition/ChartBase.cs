@@ -1482,14 +1482,16 @@ namespace Majorsilence.Reporting.Rdl
             //}
 
 
-            // Adjust the margins based on the legend
+            // Adjust the margins based on the legend. A position's first word is the side the
+            // legend sits on, the second where it is aligned along that side: RightTop is on the
+            // right, aligned to the top, and takes only its width from the plot area (#629).
             if (!IsLegendInsidePlotArea())  // When inside plot area we don't adjust plot margins
             {
                 if (IsLegendLeft())
                     Layout.LeftMargin += legendRect.Width;
                 else if (IsLegendRight())
                     Layout.RightMargin += legendRect.Width;
-                if (IsLegendTop())
+                else if (IsLegendTop())
                     Layout.TopMargin += legendRect.Height;
                 else if (IsLegendBottom())
                     Layout.BottomMargin += legendRect.Height;
@@ -1516,11 +1518,9 @@ namespace Majorsilence.Reporting.Rdl
             bool rc;
             switch (l.Position)
             {
-                case LegendPositionEnum.BottomLeft:
                 case LegendPositionEnum.LeftBottom:
                 case LegendPositionEnum.LeftCenter:
                 case LegendPositionEnum.LeftTop:
-                case LegendPositionEnum.TopLeft:
                     rc = true;
                     break;
                 default:
@@ -1570,10 +1570,8 @@ namespace Majorsilence.Reporting.Rdl
             bool rc;
             switch (l.Position)
             {
-                case LegendPositionEnum.BottomRight:
                 case LegendPositionEnum.RightBottom:
                 case LegendPositionEnum.RightCenter:
-                case LegendPositionEnum.TopRight:
                 case LegendPositionEnum.RightTop:
                     rc = true;
                     break;
@@ -1593,11 +1591,9 @@ namespace Majorsilence.Reporting.Rdl
             bool rc;
             switch (l.Position)
             {
-                case LegendPositionEnum.LeftTop:
                 case LegendPositionEnum.TopLeft:
                 case LegendPositionEnum.TopCenter:
                 case LegendPositionEnum.TopRight:
-                case LegendPositionEnum.RightTop:
                     rc = true;
                     break;
                 default:
@@ -1618,9 +1614,7 @@ namespace Majorsilence.Reporting.Rdl
             {
                 case LegendPositionEnum.BottomCenter:
                 case LegendPositionEnum.BottomLeft:
-                case LegendPositionEnum.LeftBottom:
                 case LegendPositionEnum.BottomRight:
-                case LegendPositionEnum.RightBottom:
                     rc = true;
                     break;
                 default:
