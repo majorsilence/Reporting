@@ -30,10 +30,16 @@ internal sealed class PdfWatcher : IDisposable
         {
             NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.Size | NotifyFilters.CreationTime,
         };
-        _watcher.Changed += (_, _) => _debounceTimer.Change(_debounce, Timeout.InfiniteTimeSpan);
-        _watcher.Created += (_, _) => _debounceTimer.Change(_debounce, Timeout.InfiniteTimeSpan);
+        _watcher.Changed += (_, _) => Signal();
+        _watcher.Created += (_, _) => Signal();
         _watcher.EnableRaisingEvents = true;
     }
+
+    /// <summary>
+    /// Notes one write: <see cref="Changed"/> is raised once no further write has come for the
+    /// debounce window.
+    /// </summary>
+    internal void Signal() => _debounceTimer.Change(_debounce, Timeout.InfiniteTimeSpan);
 
     /// <summary>
     /// Reads the current file bytes, retrying briefly if the file is transiently locked by a
