@@ -426,7 +426,7 @@
         <value>Fichier CSV (*.csv)|*.csv|Tous les fichiers (*.*)|*.*</value>
     </data>
     <data name="MDIChild_Export_DOC" xml:space="preserve">
-        <value>Fichier DOC (*.doc)|*.doc|Tous les fichiers (*.*)|*.*</value>
+        <value>Document Word (*.docx)|*.docx|Tous les fichiers (*.*)|*.*</value>
     </data>
     <data name="MDIChild_Export_Excel" xml:space="preserve">
         <value>Fichier Excel (*.xlsx)|*.xlsx|Tous les fichiers (*.*)|*.*</value>

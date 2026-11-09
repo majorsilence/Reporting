@@ -226,7 +226,7 @@
     <value>235, 22</value>
   </data>
   <data name="dOCToolStripMenuItem.Text" xml:space="preserve">
-    <value>DOC</value>
+    <value>Word (DOCX)</value>
   </data>
   <data name="rTFDOCToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
     <value>235, 22</value>

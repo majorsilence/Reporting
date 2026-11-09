@@ -469,6 +469,14 @@ namespace Majorsilence.Reporting.RdlViewer
             if (mea.Button != MouseButtons.Left || hle == null)
                 return;
 
+            if (hle.pi.ToggleKey != null)
+            {   // a drill-down +/-: expand or collapse what it toggles and lay the report out again
+                RdlViewer rv = this.Parent as RdlViewer;
+                if (rv != null)
+                    _ = rv.ToggleItem(hle.pi.ToggleKey);
+                return;
+            }
+
             if (hle.pi.HyperLink != null)
             {
                 RdlViewer rv = this.Parent as RdlViewer;
@@ -680,7 +688,7 @@ namespace Majorsilence.Reporting.RdlViewer
             Cursor c = Cursors.Default;
             if (hle == null)
             { }
-            else if (hle.pi.HyperLink != null || hle.pi.BookmarkLink != null)
+            else if (hle.pi.HyperLink != null || hle.pi.BookmarkLink != null || hle.pi.ToggleKey != null)
                 c = Cursors.Hand;
 
             if (this.Cursor != c)
@@ -771,7 +779,7 @@ namespace Majorsilence.Reporting.RdlViewer
                         }
                     }
                     // Only care about items with links and tips
-                    else if (pi.HyperLink != null || pi.BookmarkLink != null || pi.Tooltip != null)
+                    else if (pi.HyperLink != null || pi.BookmarkLink != null || pi.Tooltip != null || pi.ToggleKey != null)
                     {
                         HitListEntry hle;
                         if (pi is PagePolygon)
@@ -800,7 +808,16 @@ namespace Majorsilence.Reporting.RdlViewer
                     // 2005 spec file, page 9, in the text box has
                     // CanGrow and CanShrink
                     PageText pt = pi as PageText;
-                    DrawString(pt, g, rect);
+                    if (pt.ToggleKey != null)
+                    {   // the text moves right past the +/- drawn before it
+                        PageText shifted = (PageText)pt.Clone();
+                        shifted.SI = (StyleInfo)pt.SI.Clone();
+                        shifted.SI.PaddingLeft += PageItem.ToggleGlyphSpace;
+                        DrawString(shifted, g, rect);
+                        DrawToggleGlyph(pt, g);
+                    }
+                    else
+                        DrawString(pt, g, rect);
                 }
                 else if (pi is PageImage)
                 {
@@ -841,6 +858,29 @@ namespace Majorsilence.Reporting.RdlViewer
 
                 DrawBorder(pi, g, rect);
             }
+        }
+
+        // The drill-down +/- of a toggle textbox: a small box before its text, with a plus when
+        // what it toggles is hidden and a minus when it shows.
+        private void DrawToggleGlyph(PageText pt, Graphics g)
+        {
+            pt.GetToggleGlyphBounds(out float gx, out float gy, out float gsize);
+            float x = PixelsX(gx + _left - _hScroll);
+            float y = PixelsY(gy + _top - _vScroll);
+            float size = Math.Max(5f, PixelsX(gsize));
+            float bar = Math.Max(1f, size / 7f);
+            float inset = size / 4f;
+
+            Color ink = ToSysColor(pt.SI.Color);
+            using var fill = new SolidBrush(Color.White);
+            using var mark = new SolidBrush(ink);
+            g.FillRectangle(fill, new RectangleF(x, y, size, size));
+            Pen pn = new Pen(ink, 1);
+            g.DrawRectangle(pn, new System.Drawing.Rectangle((int)x, (int)y, (int)size, (int)size));
+            // horizontal bar: both glyphs
+            g.FillRectangle(mark, new RectangleF(x + inset, y + (size - bar) / 2, size - 2 * inset, bar));
+            if (!pt.ToggleExpanded)     // vertical bar: the plus
+                g.FillRectangle(mark, new RectangleF(x + (size - bar) / 2, y + inset, bar, size - 2 * inset));
         }
 
         private void DrawBackground(Graphics g, System.Drawing.RectangleF rect, StyleInfo si)

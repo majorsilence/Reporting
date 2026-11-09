@@ -132,6 +132,9 @@ namespace Majorsilence.Reporting.RdlViewer
                 case "rtf":
                     type = Majorsilence.Reporting.Rdl.OutputPresentationType.RTF;
                     break;
+                case "docx":
+                    type = Majorsilence.Reporting.Rdl.OutputPresentationType.Word;
+                    break;
                 case "mht":
                     type = Majorsilence.Reporting.Rdl.OutputPresentationType.MHTML;
                     break;
@@ -147,8 +150,11 @@ namespace Majorsilence.Reporting.RdlViewer
                 case "tiff":
                     type = Majorsilence.Reporting.Rdl.OutputPresentationType.TIF;
                     break;
+                case "svg":     // one file per page: name.svg, name2.svg, ...
+                    type = Majorsilence.Reporting.Rdl.OutputPresentationType.SVG;
+                    break;
                 default:
-                    MessageBox.Show(String.Format("{0} is not a valid file type. File extension must be PDF, XML, HTML, CSV, MHT, RTF, TIF, XLSX.", dlg.FileName),
+                    MessageBox.Show(String.Format("{0} is not a valid file type. File extension must be PDF, XML, HTML, CSV, MHT, RTF, DOCX, TIF, SVG, XLSX.", dlg.FileName),
                         "Invalid File Type", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     break;
             }

@@ -18,7 +18,7 @@ namespace Majorsilence.Reporting.Rdl
 	/// Main Report definition; this is the top of the tree that contains the complete
 	/// definition of a instance of a report.
 	///</summary>
-	public class Report : IDisposable
+	public partial class Report : IDisposable
 	{
         // private definitions
 		ReportDefn _Report;
@@ -274,6 +274,10 @@ namespace Majorsilence.Reporting.Rdl
                     ip = rtif;
                     await _Report.Run(ip).ConfigureAwait(false);
                     break;
+                case OutputPresentationType.SVG:
+                    ip = new RenderSvg(this, sg);
+                    await _Report.Run(ip).ConfigureAwait(false);
+                    break;
                 case OutputPresentationType.XML:
 					if (_Report.DataTransform != null && _Report.DataTransform.Length > 0)
 					{
@@ -297,6 +301,10 @@ namespace Majorsilence.Reporting.Rdl
                     break;
                 case OutputPresentationType.RTF:
                     ip = new RenderRtf(this, sg);
+                    await _Report.Run(ip).ConfigureAwait(false);
+                    break;
+                case OutputPresentationType.Word:       // a Word .docx document; RTF stays RTF
+                    ip = new RenderDocx(this, sg);
                     await _Report.Run(ip).ConfigureAwait(false);
                     break;
 				case OutputPresentationType.Excel2003:
@@ -440,6 +448,29 @@ namespace Majorsilence.Reporting.Rdl
 
             return;
         }
+
+		/// <summary>
+		/// RunRenderSvg renders the given page structure as SVG, one image per page: page 1 to
+		/// sg's main stream and each later page to a stream of its own (sg.GetIOStream), in order.
+		/// </summary>
+		public async Task RunRenderSvg(IStreamGen sg, Pages pgs)
+		{
+			PageNumber = 1;		// reset page numbers
+			TotalPages = 1;
+
+			RenderSvg ip = new RenderSvg(this, sg);
+			try
+			{
+				ip.Start();
+				await ip.RunPages(pgs).ConfigureAwait(false);
+				await ip.End().ConfigureAwait(false);
+			}
+			finally
+			{
+				pgs.CleanUp();		// always want to make sure we cleanup to reduce resource usage
+				ResetRenderCache();
+			}
+		}
 
 		private void RunRenderXmlTransform(IStreamGen sg, MemoryStreamGen msg)
 		{
@@ -846,6 +877,7 @@ namespace Majorsilence.Reporting.Rdl
 					return "EXCEL";
 				case OutputPresentationType.TIF:
 				case OutputPresentationType.TIFBW:
+				case OutputPresentationType.SVG:	// SSRS has no SVG renderer; its IMAGE renderer is the one that writes page images (TIFF, EMF, PNG ...)
 					return "IMAGE";
 				default:
 					return type.ToString().ToUpperInvariant();

@@ -149,7 +149,7 @@ Copyright (C) 2012 Петр Гилл &lt;peter@majorsilence.com&gt;
     <value>Файлы отчётов (*.rdl)|*.rdl|Все файлы (*.*)|*.*</value>
   </data>
   <data name="RdlReader_SaveG_NotValidFileType" xml:space="preserve">
-    <value>{0} - некорректный тип файла. Допустимые расширения файлов: PDF, XML, HTML, CSV, MHT, RTF, TIF, XLSX.</value>
+    <value>{0} - некорректный тип файла. Допустимые расширения файлов: PDF, XML, HTML, CSV, MHT, RTF, DOCX, TIF, SVG, XLSX.</value>
   </data>
   <data name="RdlReader_SaveG_SaveAsError" xml:space="preserve">
     <value>Ошибка при сохранении</value>
@@ -176,6 +176,6 @@ Copyright (C) 2012 Петр Гилл &lt;peter@majorsilence.com&gt;
     <value>Уровень увеличения является недопустимым числом.</value>
   </data>
   <data name="RdlReader_menuFileSaveAs_Click_FilesFilter" xml:space="preserve">
-    <value>PDF (*.pdf)|*.pdf|XML (*.xml)|*.xml|HTML (*.html)|*.html|CSV files (*.csv)|*.csv|RTF (*.rtf)|*.rtf|TIF (*.tif)|*.tif|Excel 2007 только таблица (*.xlsx)|*.xlsx|Excel 2007 (*.xlsx)|*.xlsx|MHT (*.mht)|*.mht</value>
+    <value>PDF (*.pdf)|*.pdf|XML (*.xml)|*.xml|HTML (*.html)|*.html|CSV files (*.csv)|*.csv|RTF (*.rtf)|*.rtf|TIF (*.tif)|*.tif|Excel 2007 только таблица (*.xlsx)|*.xlsx|Excel 2007 (*.xlsx)|*.xlsx|MHT (*.mht)|*.mht|Word (*.docx)|*.docx|SVG, по файлу на страницу (*.svg)|*.svg</value>
   </data>
 </root>

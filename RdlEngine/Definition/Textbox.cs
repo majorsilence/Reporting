@@ -51,6 +51,9 @@ namespace Majorsilence.Reporting.Rdl
 								// should render as an element or attribute: Auto (Default)
 								// Auto uses the setting on the Report element.
 		bool _IsToggle;		// Textbox is used to toggle a detail row
+		List<Visibility> _ToggleTargets;	// the Visibility of every item naming this textbox as its ToggleItem
+		Expression[] _ToggleScope;	// the group expressions telling one instance of this textbox from another
+		bool _ToggleScopeByRow;	//   and when the instances are rows rather than groups
 		bool _NoWrap;		// a box that may not grow prints each line whole, unwrapped; see NoWrapOf
 		float _TabStopPoints = TabStopPoints;	// how far apart the tab stops are; see TabStopIntervalOf
 		bool _TotalPagesLater;	// a body box reading Globals!TotalPages: run again once the page count is known
@@ -347,6 +350,9 @@ namespace Majorsilence.Reporting.Rdl
                     }
                 }
             }
+
+            if (_ToggleTargets != null && !bHidden)
+                await SetPageToggle(r, pt, row).ConfigureAwait(false);
 
             // Hidden objects don't affect the current page?
             if (!bHidden)
@@ -978,6 +984,112 @@ namespace Majorsilence.Reporting.Rdl
 		{
 			get { return  _IsToggle; }
 			set {  _IsToggle = value; }
+		}
+
+		internal void AddToggleTarget(Visibility v)
+		{
+			if (_ToggleTargets == null)
+				_ToggleTargets = new List<Visibility>();
+			if (!_ToggleTargets.Contains(v))
+				_ToggleTargets.Add(v);
+		}
+
+		// Names the instance of this toggle textbox that row is in: the textbox and the values of
+		// the groups around it, up to its data region (the row too when its scope is detail rows).
+		// An item it toggles is in the same instance, or one within it, so evaluated on the item's
+		// row this gives the same key. Outside any group there is one instance: the name.
+		internal async Task<string> ToggleKey(Report rpt, Row row)
+		{
+			string name = this.Name == null ? "" : this.Name.Nm;
+			Expression[] scope = _ToggleScope ?? SetToggleScope();
+			if (row == null || (scope.Length == 0 && !_ToggleScopeByRow))
+				return name;
+
+			StringBuilder sb = new StringBuilder(name);
+			foreach (Expression e in scope)
+			{
+				object v;
+				if (!e.TryEvaluate(rpt, row, out v))
+					v = await e.Evaluate(rpt, row).ConfigureAwait(false);
+				sb.Append('\u001f');
+				sb.Append(v == null ? "\u0000" : Convert.ToString(v, System.Globalization.CultureInfo.InvariantCulture));
+			}
+			if (_ToggleScopeByRow)
+			{
+				sb.Append('\u001f');
+				sb.Append('#');
+				sb.Append(row.RowNumber);
+			}
+			return sb.ToString();
+		}
+
+		private Expression[] SetToggleScope()
+		{
+			List<Expression> scope = new List<Expression>();
+			bool byRow = false;
+			for (ReportLink p = this.Parent; p != null; p = p.Parent)
+			{
+				if (p is TableGroup tg)
+				{	// the table's groups are nested in the order listed: this one and those before it
+					if (tg.Parent?.Parent is Table t && t.TableGroups != null)
+					{
+						foreach (TableGroup g in t.TableGroups.Items)
+						{
+							AddGroupExpressions(scope, g.Grouping);
+							if (g == tg)
+								break;
+						}
+					}
+					else
+						AddGroupExpressions(scope, tg.Grouping);
+					break;
+				}
+				if (p is Details d)
+				{
+					Table t = d.OwnerTable;
+					if (t?.TableGroups != null)
+						foreach (TableGroup g in t.TableGroups.Items)
+							AddGroupExpressions(scope, g.Grouping);
+					if (d.Grouping != null)
+						AddGroupExpressions(scope, d.Grouping);
+					else
+						byRow = true;
+					break;
+				}
+				if (p is List l)
+				{
+					if (l.Grouping != null)
+						AddGroupExpressions(scope, l.Grouping);
+					else
+						byRow = true;
+					break;
+				}
+				if (p is DataRegion)
+					break;
+			}
+			_ToggleScopeByRow = byRow;
+			Expression[] result = scope.ToArray();
+			_ToggleScope = result;
+			return result;
+		}
+
+		private static void AddGroupExpressions(List<Expression> scope, Grouping g)
+		{
+			if (g?.GroupExpressions == null)
+				return;
+			foreach (GroupExpression ge in g.GroupExpressions.Items)
+				if (ge.Expression != null)
+					scope.Add(ge.Expression);
+		}
+
+		// The toggle this instance is: its key, and whether what it toggles shows. Only the page
+		// item says so; its layout is the same, so output that ignores toggles is unchanged.
+		private async Task SetPageToggle(Report r, PageText pt, Row row)
+		{
+			string key = await ToggleKey(r, row).ConfigureAwait(false);
+			bool initiallyHidden = await _ToggleTargets[0].IsInitiallyHidden(r, row).ConfigureAwait(false);
+			pt.ToggleKey = key;
+			pt.ToggleExpanded = initiallyHidden == r.IsToggled(key);
 		}
 
 		internal int RunCount(Report rpt)

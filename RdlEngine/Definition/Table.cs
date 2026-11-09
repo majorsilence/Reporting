@@ -923,6 +923,14 @@ namespace Majorsilence.Reporting.Rdl
 
 				// Handle the group header
 				TableGroup tg = ge.Group?.Parent as TableGroup;	// detail groups will result in null
+
+				// In an interactive viewer a group collapsed by its toggle prints nothing: not its
+				// header, the groups and rows within it, nor its footer. Static output lays out
+				// every group, as it always has.
+				if (rpt.InteractiveToggles && tg?.Visibility?.ToggleTextbox != null
+					&& await tg.Visibility.IsHidden(rpt, wc.Data.Data[ge.StartRow]).ConfigureAwait(false))
+					continue;
+
 				if (ge.Group != null)
 				{
                      //   if (ge.Group.PageBreakAtStart && !pgs.CurrentPage.IsEmpty())

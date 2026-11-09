@@ -54,6 +54,21 @@ namespace Majorsilence.Reporting.Rdl
             _RenderColor = true;
         }
 
+        /// <summary>
+        /// Drawing only, with no output stream: RenderSvg draws its pages through this renderer's
+        /// page drawing, so a page looks the same as an SVG as it does as a TIF. dpi is the
+        /// resolution page coordinates (points) are converted at; 72 leaves them in points.
+        /// </summary>
+        internal RenderTif(Report rep, float dpi)
+        {
+            r = rep;
+            DpiX = DpiY = dpi;
+            _RenderColor = true;
+        }
+
+        /// <summary>Draws the items of one page onto g, which the caller has set up and owns.</summary>
+        internal Task DrawPage(Draw2.Graphics g, Page p) => ProcessPage(g, p);
+
         public void Dispose() { }
 
         /// <summary>

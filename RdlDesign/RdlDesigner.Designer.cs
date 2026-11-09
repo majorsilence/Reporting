@@ -31,6 +31,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			this.pDFToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
 			this.pDFOldStyleToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
 			this.tIFFToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
+			this.sVGToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
 			this.cSVToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
 			this.excelToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
 			this.Excel2007ToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
@@ -295,6 +296,7 @@ namespace Majorsilence.Reporting.RdlDesign
             this.pDFToolStripMenuItem,
             this.pDFOldStyleToolStripMenuItem,
             this.tIFFToolStripMenuItem,
+            this.sVGToolStripMenuItem,
             this.cSVToolStripMenuItem,
             this.excelToolStripMenuItem,
             this.Excel2007ToolStripMenuItem,
@@ -323,6 +325,12 @@ namespace Majorsilence.Reporting.RdlDesign
 			this.tIFFToolStripMenuItem.Name = "tIFFToolStripMenuItem";
 			resources.ApplyResources(this.tIFFToolStripMenuItem, "tIFFToolStripMenuItem");
 			this.tIFFToolStripMenuItem.Click += this.tIFFToolStripMenuItem_Click;
+			//
+			// sVGToolStripMenuItem
+			//
+			this.sVGToolStripMenuItem.Name = "sVGToolStripMenuItem";
+			this.sVGToolStripMenuItem.Text = "SVG...";
+			this.sVGToolStripMenuItem.Click += this.exportToolStripMenuItemSvg_Click;
 			// 
 			// cSVToolStripMenuItem
 			// 
@@ -6717,6 +6725,7 @@ namespace Majorsilence.Reporting.RdlDesign
         private ToolStripMenuItem exportToolStripMenuItem;
         private ToolStripMenuItem pDFToolStripMenuItem;
         private ToolStripMenuItem tIFFToolStripMenuItem;
+        private ToolStripMenuItem sVGToolStripMenuItem;
         private ToolStripMenuItem cSVToolStripMenuItem;
         private ToolStripMenuItem excelToolStripMenuItem;
         private ToolStripMenuItem rTFDOCToolStripMenuItem;

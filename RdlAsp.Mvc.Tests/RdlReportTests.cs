@@ -113,6 +113,21 @@ public class RdlReportTests
     }
 
     [Test]
+    public async Task Docx_IsSentAsAWordDocument()
+    {
+        var response = await _client.GetAsync("/msr/RdlReport/ShowFile/Parameters/docx?Who=somebody");
+        byte[] bytes = await response.Content.ReadAsByteArrayAsync();
+
+        Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
+        Assert.That(response.Content.Headers.ContentType!.MediaType,
+            Is.EqualTo("application/vnd.openxmlformats-officedocument.wordprocessingml.document"));
+        Assert.That(System.Text.Encoding.ASCII.GetString(bytes, 0, 2), Is.EqualTo("PK"), "A docx file is a zip.");
+        using var zip = new System.IO.Compression.ZipArchive(new System.IO.MemoryStream(bytes));
+        using var reader = new System.IO.StreamReader(zip.GetEntry("word/document.xml")!.Open());
+        Assert.That(reader.ReadToEnd(), Does.Contain("somebody"));
+    }
+
+    [Test]
     public async Task QueryString_ValuesReachTheReport()
     {
         string html = await _client.GetStringAsync("/msr/RdlReport/ShowFile/Parameters/html?Min=42&Who=Ann");

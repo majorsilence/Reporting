@@ -263,6 +263,7 @@ namespace Majorsilence.Reporting.UI.RdlAvalonia.Viewer
             ReloadButton.Click += async (_, _) => await RebuildAsync();
             CopyButton.Click += (_, _) => ReportCanvas.CopySelection();
             SelectAllButton.Click += (_, _) => ReportCanvas.SelectAll();
+            ReportCanvas.ToggleClicked += async (_, key) => await ToggleItemAsync(key);
             FirstPageButton.Click += (_, _) => SetPage(1);
             PreviousPageButton.Click += (_, _) => SetPage(_pageCurrent - 1);
             NextPageButton.Click += (_, _) => SetPage(_pageCurrent + 1);
@@ -413,8 +414,10 @@ namespace Majorsilence.Reporting.UI.RdlAvalonia.Viewer
                     new Avalonia.Platform.Storage.FilePickerFileType("CSV")             { Patterns = new[] { "*.csv" } },
                     new Avalonia.Platform.Storage.FilePickerFileType("MHTML")           { Patterns = new[] { "*.mhtml", "*.mht" } },
                     new Avalonia.Platform.Storage.FilePickerFileType("RTF")             { Patterns = new[] { "*.rtf" } },
+                    new Avalonia.Platform.Storage.FilePickerFileType("Word")            { Patterns = new[] { "*.docx" } },
                     new Avalonia.Platform.Storage.FilePickerFileType("Excel")           { Patterns = new[] { "*.xlsx" } },
-                    new Avalonia.Platform.Storage.FilePickerFileType("TIFF")            { Patterns = new[] { "*.tif", "*.tiff" } }
+                    new Avalonia.Platform.Storage.FilePickerFileType("TIFF")            { Patterns = new[] { "*.tif", "*.tiff" } },
+                    new Avalonia.Platform.Storage.FilePickerFileType("SVG (one file per page)") { Patterns = new[] { "*.svg" } }
                 }
             });
 
@@ -442,9 +445,11 @@ namespace Majorsilence.Reporting.UI.RdlAvalonia.Viewer
                 case "mht":
                 case "mhtml": outputType = OutputPresentationType.MHTML;      break;
                 case "rtf":   outputType = OutputPresentationType.RTF;        break;
+                case "docx":  outputType = OutputPresentationType.Word;       break;
                 case "xlsx":  outputType = OutputPresentationType.Excel2007;  break;
                 case "tif":
                 case "tiff":  outputType = OutputPresentationType.TIF;        break;
+                case "svg":   outputType = OutputPresentationType.SVG;        break;
             }
 
             PdfSecurity? security = null;
@@ -513,6 +518,9 @@ namespace Majorsilence.Reporting.UI.RdlAvalonia.Viewer
                     case OutputPresentationType.RTF:
                         await _report.RunRender(sg, OutputPresentationType.RTF);
                         break;
+                    case OutputPresentationType.Word:
+                        await _report.RunRender(sg, OutputPresentationType.Word);
+                        break;
                     case OutputPresentationType.Excel2007:
                         await _report.RunRender(sg, OutputPresentationType.Excel2007);
                         break;
@@ -527,6 +535,9 @@ namespace Majorsilence.Reporting.UI.RdlAvalonia.Viewer
                         break;
                     case OutputPresentationType.TIF:
                         await _report.RunRender(sg, OutputPresentationType.TIF);
+                        break;
+                    case OutputPresentationType.SVG:    // one file per page: name.svg, name2.svg, ...
+                        await _report.RunRender(sg, OutputPresentationType.SVG);
                         break;
                     default:
                         throw new InvalidOperationException("Unsupported export format: " + Path.GetExtension(filePath));
@@ -590,6 +601,10 @@ namespace Majorsilence.Reporting.UI.RdlAvalonia.Viewer
             try
             {
                 await report.RunGetData(_parameters);
+                // New data starts every drill-down toggle as the report says again; the viewer
+                // draws the +/- and lays out toggled groups.
+                report.ClearToggles();
+                report.InteractiveToggles = true;
                 var pages = await report.BuildPages();
                 if (report.ErrorMaxSeverity > 0)
                 {
@@ -602,6 +617,48 @@ namespace Majorsilence.Reporting.UI.RdlAvalonia.Viewer
             catch
             {
                 return null;
+            }
+        }
+
+        private bool _toggling;     // a toggle's pages are being built; further clicks wait for them
+
+        /// <summary>
+        /// Expands or collapses the drill-down toggle (Visibility/ToggleItem) instance
+        /// <paramref name="toggleKey"/> (a <see cref="PageItem.ToggleKey"/>) and lays the report
+        /// out again from the data already read, keeping the page and scroll position.
+        /// </summary>
+        public async Task ToggleItemAsync(string toggleKey)
+        {
+            if (_report == null || _pages == null || toggleKey == null || _toggling)
+                return;
+
+            _toggling = true;
+            try
+            {
+                var offset = ReportScrollViewer.Offset;
+                var page = _pageCurrent;
+
+                _report.Toggle(toggleKey);
+                var pages = await _report.BuildPages();
+                if (_report.ErrorMaxSeverity > 0)
+                {
+                    _errorMessages = _report.ErrorItems;
+                    _report.ErrorReset();
+                }
+
+                _pages = pages;
+                ReportCanvas.SetReport(_report, _pages);
+                UpdatePageUi();
+                SetPage(page);              // clamped to the new page count
+                UpdateErrorsUi();
+                _thumbnailsDirty = true;
+                if (ThumbnailPanel.IsVisible)
+                    await BuildThumbnailsAsync();
+                ReportScrollViewer.Offset = offset;
+            }
+            finally
+            {
+                _toggling = false;
             }
         }
 

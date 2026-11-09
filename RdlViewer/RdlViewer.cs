@@ -879,7 +879,8 @@ namespace Majorsilence.Reporting.RdlViewer
 
             OneFileStreamGen sg = new OneFileStreamGen(FileName, true); // overwrite with this name
             if (!(type == OutputPresentationType.PDF || type == OutputPresentationType.PDFOldStyle ||
-                type == OutputPresentationType.TIF || type == OutputPresentationType.TIFBW))
+                type == OutputPresentationType.TIF || type == OutputPresentationType.TIFBW ||
+                type == OutputPresentationType.SVG))
             {
                 var ld = await GetParameters();        // split parms into dictionary
                 await _Report.RunGetData(ld);                     // obtain the data (again)
@@ -902,12 +903,17 @@ namespace Majorsilence.Reporting.RdlViewer
                     case OutputPresentationType.TIFBW:
                         await _Report.RunRenderTif(sg, _pgs, false);
                         break;
+                    case OutputPresentationType.SVG:    // one file per page: name.svg, name2.svg, ...
+                        await _Report.RunRenderSvg(sg, _pgs);
+                        break;
                     case OutputPresentationType.CSV:
                         await _Report.RunRender(sg, OutputPresentationType.CSV);
                         break;
-                    case OutputPresentationType.Word:
                     case OutputPresentationType.RTF:
                         await _Report.RunRender(sg, OutputPresentationType.RTF);
+                        break;
+                    case OutputPresentationType.Word:
+                        await _Report.RunRender(sg, OutputPresentationType.Word);
                         break;
                     case OutputPresentationType.ExcelTableOnly:
                         await _Report.RunRender(sg, OutputPresentationType.ExcelTableOnly);
@@ -1486,6 +1492,10 @@ namespace Majorsilence.Reporting.RdlViewer
             {
                 await report.RunGetData(ld);
 
+                // New data starts every drill-down toggle collapsed (or as the report says) again;
+                // the viewer draws the +/- and lays out toggled groups.
+                report.ClearToggles();
+                report.InteractiveToggles = true;
                 pgs = await report.BuildPages();
 
                 if (report.ErrorMaxSeverity > 0)
@@ -2222,6 +2232,42 @@ namespace Majorsilence.Reporting.RdlViewer
         {
             if (Hyperlink != null)
                 Hyperlink(this, hlea);
+        }
+
+        bool _toggling;     // a toggle's pages are being built; further clicks wait for them
+
+        /// <summary>
+        /// Expands or collapses the drill-down toggle (Visibility/ToggleItem) instance
+        /// <paramref name="toggleKey"/> (a <see cref="PageItem.ToggleKey"/>) and lays the report
+        /// out again from the data already read, keeping the scroll position.
+        /// </summary>
+        public async Task ToggleItem(string toggleKey)
+        {
+            if (_Report == null || _pgs == null || toggleKey == null || _toggling)
+                return;
+
+            _toggling = true;
+            try
+            {
+                int vScroll = _vScroll.Value;
+                int hScroll = _hScroll.Value;
+
+                _Report.Toggle(toggleKey);
+                Pages pgs = await _Report.BuildPages();
+                if (pgs == null)
+                    return;
+
+                _pgs = pgs;
+                _DrawPanel.Pgs = _pgs;
+                CalcZoom();         // the page count may have changed: sets the scroll ranges
+                _vScroll.Value = Math.Max(_vScroll.Minimum, Math.Min(vScroll, _vScroll.Maximum));
+                _hScroll.Value = Math.Max(_hScroll.Minimum, Math.Min(hScroll, _hScroll.Maximum));
+                _DrawPanel.Invalidate();
+            }
+            finally
+            {
+                _toggling = false;
+            }
         }
 
         public void HideRunButton()

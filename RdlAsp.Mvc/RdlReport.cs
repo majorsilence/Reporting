@@ -14,7 +14,7 @@ using Microsoft.Extensions.Caching.Memory;
 namespace Majorsilence.Reporting.RdlAsp
 {
     /// <summary>
-    /// RdlReport generates a report from a RDL file and sends it as html, pdf, xml, csv, xlsx or rtf.
+    /// RdlReport generates a report from a RDL file and sends it as html, pdf, xml, csv, xlsx, rtf or docx.
     /// </summary>
     public class RdlReport : Controller
     {
@@ -209,6 +209,11 @@ namespace Majorsilence.Reporting.RdlAsp
                         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", false);
                 case "rtf":
                     return new Format(OutputPresentationType.RTF, "rtf", "application/rtf", true);
+                case "svg":     // one image per page; the response is the first page
+                    return new Format(OutputPresentationType.SVG, "svg", "image/svg+xml", false);
+                case "docx":
+                    return new Format(OutputPresentationType.Word, "docx",
+                        "application/vnd.openxmlformats-officedocument.wordprocessingml.document", false);
                 default:
                     return null;
             }
