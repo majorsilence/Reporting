@@ -156,7 +156,7 @@ namespace Majorsilence.Reporting.Rdl
 		{
 			foreach (TableRow tr in trs.Items)
 			{
-				int cols=0;
+				int cols=tr.CoveredColumns;	// taken by cells spanning down from rows above
 				foreach (TableCell tc in tr.TableCells.Items)
 				{
 					cols += tc.ColSpan;

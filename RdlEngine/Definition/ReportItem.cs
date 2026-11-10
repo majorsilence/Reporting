@@ -508,8 +508,7 @@ namespace Majorsilence.Reporting.Rdl
 				pi.W = width;
 				pi.Y = 0;
 
-				TableRow tr = (TableRow) (_TC.Parent.Parent);
-				pi.H = tr.HeightCalc(rpt);	// this is a cached item; note tr.HeightOfRow must already be called on row
+				pi.H = _TC.HeightCalc(rpt);	// cached; note tr.HeightOfRow must already be called on the row(s)
 			}
 			else if (wc.MC != null)
 			{	// must be part of a matrix

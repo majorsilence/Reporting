@@ -22,6 +22,8 @@ namespace Majorsilence.Reporting.Rdl
 									// TableCell are ignored.
 		int _ColSpan;	// Indicates the number of columns this cell spans.1
 						// A ColSpan of 1 is the same as not specifying a ColSpan	
+		int _RowSpan;	// Indicates the number of rows, in the same TableRows, this cell spans.
+						// The positions it covers in the rows below have no TableCell of their own.
 
 		// some bookkeeping fields
 		Table _OwnerTable;			// Table that owns this column
@@ -35,6 +37,7 @@ namespace Majorsilence.Reporting.Rdl
 			_ColIndex = colIndex;
 			_ReportItems=null;
 			_ColSpan=1;
+			_RowSpan=1;
 
 			// Loop thru all the child nodes
 			foreach(XmlNode xNodeLoop in xNode.ChildNodes)
@@ -48,6 +51,9 @@ namespace Majorsilence.Reporting.Rdl
 						break;
 					case "ColSpan":
 						_ColSpan = XmlUtil.Integer(xNodeLoop.InnerText);
+						break;
+					case "RowSpan":
+						_RowSpan = Math.Max(1, XmlUtil.Integer(xNodeLoop.InnerText));
 						break;
 					default:
 						// don't know this element - log it
@@ -140,6 +146,37 @@ namespace Majorsilence.Reporting.Rdl
 		internal int ColIndex
 		{
 			get { return  _ColIndex; }
+			set { _ColIndex = value; }	// TableRows moves a cell past the columns spanned from rows above
+		}
+
+		/// <summary>The number of rows this cell spans, counting its own; 1 when it spans none.</summary>
+		internal int RowSpan
+		{
+			get { return _RowSpan; }
+			set { _RowSpan = Math.Max(1, value); }
+		}
+
+		/// <summary>The row the cell is in (for a cell spanning rows, the first of them).</summary>
+		internal TableRow Row
+		{
+			get { return Parent?.Parent as TableRow; }
+		}
+
+		/// <summary>
+		/// The height the cell is laid out at: its row's, or for a cell spanning rows the
+		/// rows' together. Each row's HeightOfRow must already have been called for the row.
+		/// </summary>
+		internal float HeightCalc(Report rpt)
+		{
+			TableRow tr = Row;
+			if (_RowSpan <= 1 || !(tr?.Parent is TableRows trs))
+				return tr == null ? 0 : tr.HeightCalc(rpt);
+			int first = trs.Items.IndexOf(tr);
+			int last = Math.Min(trs.Items.Count, first + _RowSpan);
+			float height = 0;
+			for (int i = first; i < last; i++)
+				height += trs.Items[i].HeightCalc(rpt);
+			return height;
 		}
 
 		internal bool InTableFooter

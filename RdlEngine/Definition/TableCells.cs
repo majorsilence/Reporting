@@ -72,8 +72,34 @@ namespace Majorsilence.Reporting.Rdl
 			Page maxpg = savepg;
 			float maxy = savey;
 
+			// A cell spanning rows is drawn once the last of them is laid out, from where its
+			// first row started, at the rows' height together (TableCell.HeightCalc).
+			if (Parent is TableRow tr && tr.SpanEnds != null)
+			{
+				foreach (TableCell span in tr.SpanEnds)
+				{
+					if (!(pgs.Report.Cache.Get(span, "spanstart") is SpanStart start))
+						continue;	// its first row was hidden
+					pgs.Report.Cache.Remove(span, "spanstart");
+					Page sp = start.Page;
+					float oldx = sp.XOffset, oldy = sp.YOffset;
+					pgs.CurrentPage = sp;
+					sp.XOffset = start.X;
+					sp.YOffset = start.Y;
+					await span.RunPage(pgs, row).ConfigureAwait(false);
+					sp.XOffset = oldx;
+					sp.YOffset = oldy;
+				}
+				pgs.CurrentPage = savepg;
+			}
+
 			foreach (TableCell tc in _Items)
 			{
+				if (tc.RowSpan > 1)
+				{	// drawn with the last row it spans, above
+					pgs.Report.Cache.AddReplace(tc, "spanstart", new SpanStart(savepg, savepg.XOffset, savey));
+					continue;
+				}
                 await tc.RunPage(pgs, row).ConfigureAwait(false);
 				if (maxpg != pgs.CurrentPage)
 				{	// a page break
@@ -94,6 +120,14 @@ namespace Majorsilence.Reporting.Rdl
 			pgs.CurrentPage = maxpg;
 			savepg.YOffset = maxy;
 			return ;
+		}
+
+		// Where the row a cell spanning rows starts in was laid out.
+		private sealed class SpanStart
+		{
+			internal readonly Page Page;
+			internal readonly float X, Y;
+			internal SpanStart(Page page, float x, float y) { Page = page; X = x; Y = y; }
 		}
 
         internal List<TableCell> Items

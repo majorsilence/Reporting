@@ -25,6 +25,8 @@ namespace Majorsilence.Reporting.Rdl
 		bool _CanGrow;			// indicates that row height can increase in size
 		bool _CanShrink;		// indicates that row height can decrease in size
 		List<Textbox> _GrowList;	// list of TextBox's that need to be checked for growth
+		List<TableCell> _Covering;	// cells of rows above that span into this row
+		List<TableCell> _SpanEnds;	// those of them whose span ends with this row
 
 		internal TableRow(ReportDefn r, ReportLink p, XmlNode xNode) : base(r, p)
 		{
@@ -69,9 +71,17 @@ namespace Majorsilence.Reporting.Rdl
 			if (_Visibility != null)
                 await _Visibility.FinalPass().ConfigureAwait(false);
 
+			// A cell spanning rows is sized with the last of them (see HeightOfRow), not its first.
+			var sized = new List<TableCell>();
 			foreach (TableCell tc in _TableCells.Items)
+				if (tc.RowSpan <= 1)
+					sized.Add(tc);
+			if (_SpanEnds != null)
+				sized.AddRange(_SpanEnds);
+
+			foreach (TableCell tc in sized)
 			{
-				ReportItem ri = tc.ReportItems.Items[0] as ReportItem;
+				ReportItem ri = tc.ReportItems?.Items.Count > 0 ? tc.ReportItems.Items[0] : null;
 				if (!(ri is Textbox))
 					continue;
 				Textbox tb = ri as Textbox;
@@ -82,7 +92,7 @@ namespace Majorsilence.Reporting.Rdl
 					_GrowList.Add(tb);
 					_CanGrow = true;
 				}
-				if (tb.CanShrink)
+				if (tb.CanShrink && tc.RowSpan <= 1)	// a spanning cell's shrinking leaves the rows' heights be
 					_CanShrink = true;
 			}
 
@@ -247,6 +257,42 @@ namespace Majorsilence.Reporting.Rdl
 			return false;
 		}
 
+		internal void AddCoveringCell(TableCell tc, bool endsHere)
+		{
+			_Covering ??= new List<TableCell>();
+			int at = 0;		// in column order
+			while (at < _Covering.Count && _Covering[at].ColIndex < tc.ColIndex)
+				at++;
+			_Covering.Insert(at, tc);
+			if (endsHere)
+				(_SpanEnds ??= new List<TableCell>()).Add(tc);
+		}
+
+		/// <summary>Cells of rows above that span into this row, in column order; null when none.</summary>
+		internal List<TableCell> CoveringCells
+		{
+			get { return _Covering; }
+		}
+
+		/// <summary>The cells of rows above whose span ends with this row; null when none.</summary>
+		internal List<TableCell> SpanEnds
+		{
+			get { return _SpanEnds; }
+		}
+
+		/// <summary>The columns of the row taken by cells spanning into it from rows above.</summary>
+		internal int CoveredColumns
+		{
+			get
+			{
+				int n = 0;
+				if (_Covering != null)
+					foreach (TableCell tc in _Covering)
+						n += tc.ColSpan;
+				return n;
+			}
+		}
+
 		internal TableCells TableCells
 		{
 			get { return  _TableCells; }
@@ -286,6 +332,8 @@ namespace Majorsilence.Reporting.Rdl
 			float height = 0;
 			foreach (TableCell tc in _TableCells.Items)
 			{
+				if (tc.RowSpan > 1)
+					continue;	// sized with the last row it spans, below
 				Textbox tb = tc.ReportItems.Items[0] as Textbox;
 				float cellHeight;
 				if (tb != null && (tb.CanGrow || tb.CanShrink))
@@ -310,6 +358,26 @@ namespace Majorsilence.Reporting.Rdl
 				height = Math.Max(height, defnHeight);
 			else
 				height = Math.Min(height, defnHeight);
+
+			// A growing cell spanning rows that ends with this one: what the rows above it in the
+			// span leave of its text, this row makes room for. Those rows have been measured
+			// already: rows are measured top down.
+			if (_SpanEnds != null && _CanGrow)
+			{
+				foreach (TableCell tc in _SpanEnds)
+				{
+					if (!(tc.ReportItems?.Items.Count > 0 && tc.ReportItems.Items[0] is Textbox tb) || !tb.CanGrow)
+						continue;
+					if (await tcs[tc.ColIndex].IsHidden(rpt, r).ConfigureAwait(false))
+						continue;
+					float content = await tb.RunTextCalcHeight(rpt, g, r).ConfigureAwait(false);
+					float above = 0;	// the span's rows but this one
+					if (this.Parent is TableRows trs)
+						for (int i = trs.Items.IndexOf(tc.Row); i >= 0 && i < trs.Items.Count && trs.Items[i] != this; i++)
+							above += trs.Items[i].HeightCalc(rpt);
+					height = Math.Max(height, content - above);
+				}
+			}
 
 			wc.CalcHeight = height;
 			return wc.CalcHeight;
