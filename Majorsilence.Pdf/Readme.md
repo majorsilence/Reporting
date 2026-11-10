@@ -183,7 +183,7 @@ PdfDocument.Create()
     .WithFontRegistry(registry)
     .WithTextShaper(myShaper)       // an ITextShaper, e.g. over HarfBuzzSharp
     .AddPage(PageSizes.A4, canvas =>
-        canvas.DrawText("مرحبا بالعالم", 520, 72,
+        canvas.DrawText("\u0645\u0631\u062D\u0628\u0627", 520, 72,   // "marhaba" (hello)
             TextStyle.Default.WithFamily("NotoSansArabic").WithSize(16)
                 .WithRightToLeft().WithAlignment(TextAlignment.Right)))
     .Save("arabic.pdf");
