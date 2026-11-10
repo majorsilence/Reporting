@@ -74,12 +74,25 @@ namespace Majorsilence.Pdf
         public bool IsUpsideDown { get; private set; }
 
         /// <summary>
-        /// When <c>true</c> the Unicode code points in the text string are reversed before
-        /// rendering, producing visual right-to-left output (suitable for Hebrew and pre-shaped
-        /// Arabic).  Combine with <see cref="TextAlignment.Right"/> so that <c>x</c> is treated
-        /// as the right edge of the text run.
+        /// The base direction of the text is right to left: the Unicode Bidirectional Algorithm
+        /// lays it out as a right-to-left paragraph, so right-to-left text reads from the right and
+        /// a left-to-right word or a number inside it keeps its own order. Combine with
+        /// <see cref="TextAlignment.Right"/> so that <c>x</c> is the right edge of the text run.
         /// </summary>
         public bool IsRightToLeft { get; private set; }
+
+        /// <summary>
+        /// Every character is laid out in the base direction (<see cref="IsRightToLeft"/>),
+        /// whatever its own: the text is not run through the bidirectional algorithm (Unicode
+        /// Bidi-Override). Right to left, the characters are simply drawn in reverse order.
+        /// </summary>
+        public bool IsBidiOverride { get; private set; }
+
+        /// <summary>
+        /// Extra space, in points, after each space character (U+0020): how a justified line is
+        /// spread to its width. Applied to text in embedded fonts; the standard fonts ignore it.
+        /// </summary>
+        public float WordSpacing { get; private set; }
 
         // ── construction ──────────────────────────────────────────────────────
 
@@ -158,13 +171,28 @@ namespace Majorsilence.Pdf
         }
 
         /// <summary>
-        /// Reverse the code-point order of the text for visual right-to-left rendering.
+        /// Lay the text out as a right-to-left paragraph (see <see cref="IsRightToLeft"/>).
         /// Use together with <see cref="TextAlignment.Right"/> when <c>x</c> should be
         /// the right edge of the text run.
         /// </summary>
         public TextStyle WithRightToLeft(bool rtl = true)
         {
             var s = Clone(); s.IsRightToLeft = rtl; return s;
+        }
+
+        /// <summary>
+        /// Lay every character out in the base direction, without the bidirectional algorithm
+        /// (see <see cref="IsBidiOverride"/>).
+        /// </summary>
+        public TextStyle WithBidiOverride(bool bidiOverride = true)
+        {
+            var s = Clone(); s.IsBidiOverride = bidiOverride; return s;
+        }
+
+        /// <summary>Add <paramref name="points"/> after each space (see <see cref="WordSpacing"/>).</summary>
+        public TextStyle WithWordSpacing(float points)
+        {
+            var s = Clone(); s.WordSpacing = points; return s;
         }
     }
 }

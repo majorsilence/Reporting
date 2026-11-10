@@ -94,6 +94,9 @@
 	<ItemGroup>
 		<PackageReference Include="SharpZipLib" />
 		<PackageReference Include="SkiaSharp" />
+		<!-- Shapes right-to-left and complex-script text for PDF output (HarfBuzzTextShaper). -->
+		<PackageReference Include="HarfBuzzSharp" />
+		<PackageReference Include="HarfBuzzSharp.NativeAssets.Linux" />
 
 		<PackageReference Include="System.Data.Odbc" />
 		<!-- OleDB is COM-based and not AOT-compatible; kept for compilation but throws at AOT runtime -->

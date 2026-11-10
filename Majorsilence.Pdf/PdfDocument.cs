@@ -34,6 +34,7 @@ namespace Majorsilence.Pdf
         private readonly PdfSerializer _ser = new PdfSerializer();
         private readonly FontCache _fontCache = new FontCache();
         private FontRegistry? _fontRegistry;
+        private ITextShaper? _textShaper;
 
         private PdfVersion    _version    = PdfVersion.Pdf14;
         private PdfConformance _conformance = PdfConformance.None;
@@ -100,6 +101,18 @@ namespace Majorsilence.Pdf
             return this;
         }
 
+        /// <summary>
+        /// Shape text with <paramref name="shaper"/>: joining forms and ligatures for Arabic,
+        /// reordering and conjuncts for Indic scripts, mark positioning. Without one, each
+        /// character is drawn with the glyph the font's cmap gives it. Used for text in fonts
+        /// from a <see cref="FontRegistry"/> or a font file; the standard fonts are never shaped.
+        /// </summary>
+        public PdfDocument WithTextShaper(ITextShaper shaper)
+        {
+            _textShaper = shaper ?? throw new ArgumentNullException(nameof(shaper));
+            return this;
+        }
+
         // ── metadata ─────────────────────────────────────────────────────────
 
         private string _author  = "";
@@ -120,7 +133,7 @@ namespace Majorsilence.Pdf
         public PdfCanvas AddPage(float width, float height)
         {
             var page = _ser.CreatePage(width, height);
-            return new PdfCanvas(page, _ser, _fontCache, _fontRegistry);
+            return new PdfCanvas(page, _ser, _fontCache, _fontRegistry, _textShaper);
         }
 
         /// <inheritdoc cref="AddPage(float,float)"/>

@@ -171,6 +171,16 @@ await Scenario("PDF output", async () =>
     Expect.ValidPdf(bytes);
 });
 
+await Scenario("right-to-left and complex-script text in a PDF", async () =>
+{
+    // Arabic and Hebrew through the bidirectional algorithm and HarfBuzz (a native library
+    // P/Invoked under Native AOT), with a Latin word and a number among them.
+    var rdl = ReportBuilder.Table(new[] { "Name:String", "Qty:Int32" }, new[] { "=Fields!Name.Value", "=Fields!Qty.Value" });
+    var bytes = await Render.Bytes(work, rdl, OutputPresentationType.PDF, r =>
+        r.DataSets["Data"].SetData(new List<Item> { new("مرحبا بالعالم 2026", 3), new("שלום Hello", 5) }));
+    Expect.ValidPdf(bytes);
+});
+
 foreach (var format in new[]
 {
     OutputPresentationType.HTML, OutputPresentationType.XML, OutputPresentationType.RTF,

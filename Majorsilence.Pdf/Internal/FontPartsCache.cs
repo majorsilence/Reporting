@@ -83,9 +83,24 @@ namespace Majorsilence.Pdf.Internal
             return new string(chars);
         }
 
-        internal static FontParts GetOrBuild(TrueTypeFont ttf, HashSet<ushort> glyphs, Func<FontParts> build)
+        internal static FontParts GetOrBuild(TrueTypeFont ttf, HashSet<ushort> glyphs, Func<FontParts> build) =>
+            GetOrBuild(ttf, glyphs, null, build);
+
+        /// <summary>
+        /// As above, for glyphs some of which were drawn by a shaper: their text is in the ToUnicode CMap,
+        /// so it is part of what the parts are keyed on.
+        /// </summary>
+        internal static FontParts GetOrBuild(TrueTypeFont ttf, HashSet<ushort> glyphs,
+            SortedDictionary<ushort, string>? shapedText, Func<FontParts> build)
         {
             string key = KeyOf(glyphs);
+            if (shapedText != null && shapedText.Count > 0)
+            {
+                var sb = new StringBuilder(key).Append('\uFFFF');
+                foreach (var kv in shapedText)
+                    sb.Append((char)kv.Key).Append(kv.Value).Append('\uFFFE');
+                key = sb.ToString();
+            }
             var perFont = ByFont.GetValue(ttf, _ => new ConcurrentDictionary<string, FontParts>(StringComparer.Ordinal));
             if (perFont.TryGetValue(key, out var hit))
             {

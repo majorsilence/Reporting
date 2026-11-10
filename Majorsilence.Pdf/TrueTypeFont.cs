@@ -17,6 +17,7 @@ namespace Majorsilence.Pdf
     {
         private readonly byte[] _data;
         private readonly int _fontOffset; // 0 for plain TTF/OTF; >0 when font lives inside a TTC collection
+        private readonly int _faceIndex;
         private int _unitsPerEm;
         private short _ascender;
         private short _descender;
@@ -50,6 +51,12 @@ namespace Majorsilence.Pdf
         public byte[] Data => _data;
 
         /// <summary>
+        /// Which font of a TrueType collection this is (0 for a single-font file). <see cref="Data"/>
+        /// is the whole file, so a shaper opens the font as face <see cref="FaceIndex"/> of it.
+        /// </summary>
+        public int FaceIndex => _faceIndex;
+
+        /// <summary>
         /// True for an OpenType font with CFF outlines (a <c>CFF </c> table and no <c>glyf</c>),
         /// which a PDF embeds as a CIDFontType0 in <c>/FontFile3</c> rather than as TrueType.
         /// </summary>
@@ -72,14 +79,15 @@ namespace Majorsilence.Pdf
         public TrueTypeFont(byte[] data, int faceIndex)
         {
             _data = data;
-            _fontOffset = DetectFontOffset(faceIndex);
+            _fontOffset = DetectFontOffset(faceIndex, out _faceIndex);
             Parse();
         }
 
         // Returns the byte offset of the sfnt OffsetTable within _data.
         // For a plain TTF/OTF this is 0; for a TTC we jump to the requested font entry.
-        private int DetectFontOffset(int faceIndex)
+        private int DetectFontOffset(int faceIndex, out int usedFaceIndex)
         {
+            usedFaceIndex = 0;
             if (_data.Length < 4) return 0;
             // TTC magic: 't','t','c','f'
             if (_data[0] == 0x74 && _data[1] == 0x74 && _data[2] == 0x63 && _data[3] == 0x66)
@@ -90,7 +98,7 @@ namespace Majorsilence.Pdf
                 if (_data.Length >= 16 + faceIndex * 4)
                 {
                     int off = S32(_data, 12 + faceIndex * 4);
-                    if (off > 0 && off < _data.Length - 12) return off;
+                    if (off > 0 && off < _data.Length - 12) { usedFaceIndex = faceIndex; return off; }
                 }
             }
             return 0;
@@ -407,6 +415,31 @@ namespace Majorsilence.Pdf
             }
             return total / _unitsPerEm * fontSize;
         }
+
+        private Dictionary<ushort, int>? _glyphToChar;
+
+        /// <summary>
+        /// The character the font's cmap maps to the glyph (the lowest, when it maps several), or
+        /// false when none does. The glyphs a shaper substitutes - Arabic joining forms, ligatures,
+        /// Indic conjuncts - mostly have none, or only an Arabic presentation-form character.
+        /// </summary>
+        public bool TryGetCharacterFor(ushort glyphId, out int codePoint)
+        {
+            var map = _glyphToChar;
+            if (map == null)
+            {
+                // Built once; a race only builds the same map twice. Never changed once published.
+                map = new Dictionary<ushort, int>(_charToGlyph.Count);
+                foreach (var kv in _charToGlyph)
+                    if (!map.TryGetValue(kv.Value, out int existing) || kv.Key < existing)
+                        map[kv.Value] = kv.Key;
+                _glyphToChar = map;
+            }
+            return map.TryGetValue(glyphId, out codePoint);
+        }
+
+        /// <summary>Whether some character maps to the glyph in the font's cmap.</summary>
+        public bool HasCharacterFor(ushort glyphId) => TryGetCharacterFor(glyphId, out _);
 
         // Returns all Unicode code-point → glyph-ID pairs present in the font.
         public IEnumerable<(int codePoint, ushort glyphId)> GetCharGlyphMappings()

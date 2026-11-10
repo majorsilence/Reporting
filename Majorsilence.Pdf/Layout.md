@@ -95,6 +95,6 @@ Cells are placed left to right in the next free column, as in HTML, so a row bel
 
 ## Limits
 
-- Text uses the core renderer's shaping: good for Latin, Cyrillic, Greek and CJK, weaker for complex scripts.
+- Text uses the core renderer's text drawing: the bidirectional algorithm always, and shaping for Arabic and Indic scripts when the document has a text shaper (`WithTextShaper`). Line breaking is at spaces and hyphens only, which does not suit Thai, Lao or Khmer.
 - Images: JPEG (gray or YCbCr) and non-interlaced 8-bit PNG. Convert anything else to raw pixels and use `PdfImage.FromRgb24` / `FromRgba`.
 - A `Row` is atomic: put long content in a `Box` or directly in the flow instead.
