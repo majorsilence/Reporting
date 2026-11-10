@@ -284,6 +284,9 @@ namespace Majorsilence.Reporting.RdlDesign
                 case OutputPresentationType.SVG:
                     sfd.Filter = Strings.MDIChild_Export_SVG;
                     break;
+                case OutputPresentationType.PPTX:
+                    sfd.Filter = Strings.MDIChild_Export_PPTX;
+                    break;
                 case OutputPresentationType.RTF:
                     sfd.Filter = Strings.MDIChild_Export_RTF;
                     break;

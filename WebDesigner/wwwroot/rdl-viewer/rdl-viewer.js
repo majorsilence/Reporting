@@ -1,5 +1,5 @@
 // <report-viewer> — a vanilla-JS custom element that renders an RDL report with a
-// parameter panel, refresh, export (PDF/CSV/XLSX), and print, using the ViewerEndpoints
+// parameter panel, refresh, export (PDF/CSV/XLSX/PPTX), and print, using the ViewerEndpoints
 // backend (POST {render-endpoint} and GET {parameters-endpoint}).
 //
 // Attributes:
@@ -39,6 +39,7 @@ const SHADOW_HTML = `
       <option value="pdf">PDF</option>
       <option value="csv">CSV</option>
       <option value="xlsx">Excel</option>
+      <option value="pptx">PowerPoint</option>
     </select>
     <button data-action="export">&#8681; Export</button>
     <button data-action="print">&#128424; Print</button>

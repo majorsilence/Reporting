@@ -117,6 +117,24 @@ public class ViewerEndpointsTests
     }
 
     [Test]
+    public async Task Render_Pptx_ReturnsAPresentation()
+    {
+        var response = await _client.PostAsJsonAsync("/rdl-viewer/render", new
+        {
+            name = "SimpleSalesReport",
+            format = "pptx",
+        });
+        Assert.That(response.IsSuccessStatusCode, Is.True);
+        Assert.That(response.Content.Headers.ContentType?.MediaType,
+            Is.EqualTo("application/vnd.openxmlformats-officedocument.presentationml.presentation"));
+
+        var bytes = await response.Content.ReadAsByteArrayAsync();
+        using var zip = new System.IO.Compression.ZipArchive(new System.IO.MemoryStream(bytes));
+        using var reader = new System.IO.StreamReader(zip.GetEntry("ppt/slides/slide1.xml")!.Open());
+        Assert.That(reader.ReadToEnd(), Does.Contain("Northwind Traders"));
+    }
+
+    [Test]
     public async Task Render_Csv_ReturnsCsvContent()
     {
         var response = await _client.PostAsJsonAsync("/rdl-viewer/render", new

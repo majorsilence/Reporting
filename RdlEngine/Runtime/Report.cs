@@ -321,6 +321,10 @@ namespace Majorsilence.Reporting.Rdl
                     ip = new RenderExcel2007DataOnly(this, sg);
                     await _Report.Run(ip).ConfigureAwait(false);
                     break;
+                case OutputPresentationType.PPTX:
+                    ip = new RenderPptx(this, sg);
+                    await _Report.Run(ip).ConfigureAwait(false);
+                    break;
                 case OutputPresentationType.ASPHTML:
 				case OutputPresentationType.HTML:
 				default:
@@ -459,6 +463,28 @@ namespace Majorsilence.Reporting.Rdl
 			TotalPages = 1;
 
 			RenderSvg ip = new RenderSvg(this, sg);
+			try
+			{
+				ip.Start();
+				await ip.RunPages(pgs).ConfigureAwait(false);
+				await ip.End().ConfigureAwait(false);
+			}
+			finally
+			{
+				pgs.CleanUp();		// always want to make sure we cleanup to reduce resource usage
+				ResetRenderCache();
+			}
+		}
+
+		/// <summary>
+		/// RunRenderPptx renders the given page structure as a PowerPoint presentation, one slide per page.
+		/// </summary>
+		public async Task RunRenderPptx(IStreamGen sg, Pages pgs)
+		{
+			PageNumber = 1;		// reset page numbers
+			TotalPages = 1;
+
+			RenderPptx ip = new RenderPptx(this, sg);
 			try
 			{
 				ip.Start();

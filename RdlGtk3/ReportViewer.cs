@@ -675,6 +675,13 @@ namespace Majorsilence.Reporting.RdlGtk3
                 fc.AddFilter(tiffFilter);
             }
 
+            if (!_restrictedOutputPresentationTypes.Contains(OutputPresentationType.PPTX))
+            {
+                FileFilter pptxFilter = new() { Name = "PowerPoint" };
+                pptxFilter.AddPattern("*.pptx");
+                fc.AddFilter(pptxFilter);
+            }
+
             if (!_restrictedOutputPresentationTypes.Contains(OutputPresentationType.ASPHTML))
             {
                 FileFilter asphtmlFilter = new() { Name = "ASP HTML" };
@@ -771,6 +778,15 @@ namespace Majorsilence.Reporting.RdlGtk3
                         {
                             filename = filename + ".tif";
                             searchPattern = "*.tif";
+                        }
+                    }
+                    else if (fc.Filter.Name == "PowerPoint")
+                    {
+                        exportType = OutputPresentationType.PPTX;
+                        if (filename.ToLower().Trim().EndsWith(".pptx") == false)
+                        {
+                            filename = filename + ".pptx";
+                            searchPattern = "*.pptx";
                         }
                     }
                     else if (fc.Filter.Name == "ASP HTML")

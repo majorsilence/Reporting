@@ -405,8 +405,11 @@ namespace Majorsilence.Reporting.RdlCmd
                     case "svg":     // one file per page: file.svg, file2.svg, file3.svg, ...
                         await report.RunRender(sg, OutputPresentationType.SVG);
                         break;
+                    case "pptx":    // one slide per page
+                        await report.RunRender(sg, OutputPresentationType.PPTX);
+                        break;
 					default:
-						Console.WriteLine("Unsupported file extension '{0}'.  Must be 'pdf', 'xml', 'mht', 'csv', 'xlsx', 'xlsx_table', 'xls', 'rtf', 'docx', 'tif', 'tifb', 'svg' or 'html'", type);
+						Console.WriteLine("Unsupported file extension '{0}'.  Must be 'pdf', 'xml', 'mht', 'csv', 'xlsx', 'xlsx_table', 'xls', 'rtf', 'docx', 'pptx', 'tif', 'tifb', 'svg' or 'html'", type);
 						returnCode = 8;
 						break;
 				}
@@ -637,7 +640,7 @@ namespace Majorsilence.Reporting.RdlCmd
 			Console.WriteLine("  One special argument is 'rc:ofile' which names the output file.");
 			Console.WriteLine("  For example, /ffile1.rdl?parm1=XYZ Inc.&parm2=1000&rc:ofile=xyzfile");
 			Console.WriteLine("/t is followed by the type of output file: pdf, html, mht, xml, csv,");
-            Console.WriteLine("  xlsx, xlsx_table, xls, rtf, docx, tif, tifb, svg   e.g /tpdf+xml");
+            Console.WriteLine("  xlsx, xlsx_table, xls, rtf, docx, pptx, tif, tifb, svg   e.g /tpdf+xml");
             Console.WriteLine("  svg writes one file per page: file.svg, file2.svg, file3.svg, ...");
 			Console.WriteLine("/o is followed by the output directory.   The file name is the same as the");
 			Console.WriteLine("  input (or the rc:ofile parameter) except with the type as the extension.");

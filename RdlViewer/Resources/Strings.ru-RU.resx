@@ -151,7 +151,7 @@
     <value>Неподдерживаемое разрешение</value>
   </data>
   <data name="RdlViewer_menuFileSaveAs_Click_FilesFilter" xml:space="preserve">
-    <value>PDF (*.pdf)|*.pdf|XML (*.xml)|*.xml|HTML (*.html)|*.html|CSV files (*.csv)|*.csv|RTF (*.rtf)|*.rtf|TIF (*.tif)|*.tif|Excel 2007 только таблица (*.xlsx)|*.xlsx|Excel 2007 (*.xlsx)|*.xlsx|MHT (*.mht)|*.mht|Word (*.docx)|*.docx|SVG, по файлу на страницу (*.svg)|*.svg</value>
+    <value>PDF (*.pdf)|*.pdf|XML (*.xml)|*.xml|HTML (*.html)|*.html|CSV files (*.csv)|*.csv|RTF (*.rtf)|*.rtf|TIF (*.tif)|*.tif|Excel 2007 только таблица (*.xlsx)|*.xlsx|Excel 2007 (*.xlsx)|*.xlsx|MHT (*.mht)|*.mht|Word (*.docx)|*.docx|SVG, по файлу на страницу (*.svg)|*.svg|PowerPoint (*.pptx)|*.pptx</value>
   </data>
   <data name="RdlViewer_ParametersLeave_InvalidReportParameter" xml:space="preserve">
     <value>Некорректный параметр отчёта</value>

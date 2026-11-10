@@ -302,6 +302,7 @@ public static class RdlNativeApi
             "xls"             => OutputPresentationType.Excel97,
             "rtf"             => OutputPresentationType.RTF,
             "docx"            => OutputPresentationType.Word,
+            "pptx"            => OutputPresentationType.PPTX,
             "tif" or "tiff"   => OutputPresentationType.TIF,
             "tifb"            => OutputPresentationType.TIFBW,
             "svg"             => OutputPresentationType.SVG,

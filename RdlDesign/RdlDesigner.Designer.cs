@@ -32,6 +32,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			this.pDFOldStyleToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
 			this.tIFFToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
 			this.sVGToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
+			this.pPTXToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
 			this.cSVToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
 			this.excelToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
 			this.Excel2007ToolStripMenuItem = new Majorsilence.Forms.ToolStripMenuItem();
@@ -302,6 +303,7 @@ namespace Majorsilence.Reporting.RdlDesign
             this.Excel2007ToolStripMenuItem,
             this.dOCToolStripMenuItem,
             this.rTFDOCToolStripMenuItem,
+            this.pPTXToolStripMenuItem,
             this.xMLToolStripMenuItem,
             this.webPageHTMLToolStripMenuItem,
             this.webArchiveSingleFileMHTToolStripMenuItem});
@@ -331,6 +333,12 @@ namespace Majorsilence.Reporting.RdlDesign
 			this.sVGToolStripMenuItem.Name = "sVGToolStripMenuItem";
 			this.sVGToolStripMenuItem.Text = "SVG...";
 			this.sVGToolStripMenuItem.Click += this.exportToolStripMenuItemSvg_Click;
+			//
+			// pPTXToolStripMenuItem
+			//
+			this.pPTXToolStripMenuItem.Name = "pPTXToolStripMenuItem";
+			this.pPTXToolStripMenuItem.Text = "PowerPoint (PPTX)...";
+			this.pPTXToolStripMenuItem.Click += this.exportToolStripMenuItemPptx_Click;
 			// 
 			// cSVToolStripMenuItem
 			// 
@@ -6726,6 +6734,7 @@ namespace Majorsilence.Reporting.RdlDesign
         private ToolStripMenuItem pDFToolStripMenuItem;
         private ToolStripMenuItem tIFFToolStripMenuItem;
         private ToolStripMenuItem sVGToolStripMenuItem;
+        private ToolStripMenuItem pPTXToolStripMenuItem;
         private ToolStripMenuItem cSVToolStripMenuItem;
         private ToolStripMenuItem excelToolStripMenuItem;
         private ToolStripMenuItem rTFDOCToolStripMenuItem;

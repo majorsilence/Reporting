@@ -34,7 +34,8 @@ namespace Majorsilence.Reporting.Rdl
         Excel2003,               // renders .xlsx, like Excel2007
         RenderPdf_Majorsilence,
         Excel97,                 // Excel 97-2003 binary workbook (.xls, BIFF8)
-        SVG                      // vector page images: page 1 in the main stream, later pages in further streams
+        SVG,                     // vector page images: page 1 in the main stream, later pages in further streams
+        PPTX                     // PowerPoint presentation, one slide per page
     }
 
 	[Serializable]

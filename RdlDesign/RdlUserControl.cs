@@ -664,6 +664,10 @@ namespace Majorsilence.Reporting.RdlDesign
             {
                 SvgToolStripButton2.Enabled = bEnablePreview;
             }
+            if (PptxToolStripButton2 != null)
+            {
+                PptxToolStripButton2.Enabled = bEnablePreview;
+            }
             if (XmlToolStripButton2 != null)
             {
                 XmlToolStripButton2.Enabled = bEnablePreview;
@@ -841,6 +845,9 @@ namespace Majorsilence.Reporting.RdlDesign
 					break;
 				case OutputPresentationType.SVG:
 					sfd.Filter = Strings.MDIChild_Export_SVG;
+					break;
+				case OutputPresentationType.PPTX:
+					sfd.Filter = Strings.MDIChild_Export_PPTX;
 					break;
 				case OutputPresentationType.RTF:
 					sfd.Filter = Strings.MDIChild_Export_RTF;
@@ -1519,6 +1526,11 @@ namespace Majorsilence.Reporting.RdlDesign
         private async void SvgToolStripButton2_Click(object sender, EventArgs e)
         {
             await ExportAsync(Rdl.OutputPresentationType.SVG);
+        }
+
+        private async void PptxToolStripButton2_Click(object sender, EventArgs e)
+        {
+            await ExportAsync(Rdl.OutputPresentationType.PPTX);
         }
 
         private void foreColorPicker1_Validated(object sender, EventArgs e)

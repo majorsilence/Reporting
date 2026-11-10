@@ -1875,6 +1875,17 @@ namespace Majorsilence.Reporting.RdlDesign
             });
 		}
 
+		private async void exportToolStripMenuItemPptx_Click(object sender, EventArgs e)
+		{
+			MDIChild mc = this.ActiveMdiChild as MDIChild;
+			if (mc == null)
+				return;
+
+            await ShowSaveInProgressAsync(mc.Tab.Text,async () => {
+                await mc.ExportAsync(Rdl.OutputPresentationType.PPTX);
+            });
+		}
+
 		private async void menuFileSaveAs_Click(object sender, EventArgs e)
 		{
 			MDIChild mc = this.ActiveMdiChild as MDIChild;
