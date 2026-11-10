@@ -477,6 +477,9 @@ namespace Majorsilence.Reporting.RdlReader
                 case "svg":     // one file per page: name.svg, name2.svg, ...
                     type = OutputPresentationType.SVG;
                     break;
+                case "pptx":    // one slide per page
+                    type = OutputPresentationType.PPTX;
+                    break;
                 default:
                     MessageBox.Show(this,
                         String.Format(Strings.RdlReader_SaveG_NotValidFileType, sfd.FileName), Strings.RdlReader_SaveG_SaveAsError,

@@ -44,6 +44,7 @@ public sealed class ReportTools
             ["csv"] = (OutputPresentationType.CSV, "csv", true),
             ["rtf"] = (OutputPresentationType.RTF, "rtf", true),
             ["docx"] = (OutputPresentationType.Word, "docx", false),
+            ["pptx"] = (OutputPresentationType.PPTX, "pptx", false),
             ["xlsx"] = (OutputPresentationType.Excel2007, "xlsx", false),
             ["xlsx_table"] = (OutputPresentationType.ExcelTableOnly, "xlsx", false),
             ["xls"] = (OutputPresentationType.Excel97, "xls", false),

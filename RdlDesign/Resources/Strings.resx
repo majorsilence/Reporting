@@ -999,7 +999,7 @@ the website https://github.com/majorsilence/Reporting.</value>
 {0}</value>
   </data>
   <data name="MDIChild_Error_AllowedExportTypes" xml:space="preserve">
-    <value>Only HTML, MHT, XML, CSV, RTF, DOC, Excel, TIF, SVG and PDF are allowed as Export types.</value>
+    <value>Only HTML, MHT, XML, CSV, RTF, DOC, PPTX, Excel, TIF, SVG and PDF are allowed as Export types.</value>
   </data>
   <data name="Undo_Error_UnknownAction" xml:space="preserve">
     <value>Unknown Action</value>
@@ -1096,6 +1096,9 @@ the website https://github.com/majorsilence/Reporting.</value>
   </data>
   <data name="MDIChild_Export_SVG" xml:space="preserve">
     <value>SVG files, one per page (*.svg)|*.svg|All files (*.*)|*.*</value>
+  </data>
+  <data name="MDIChild_Export_PPTX" xml:space="preserve">
+    <value>PowerPoint presentation (*.pptx)|*.pptx|All files (*.*)|*.*</value>
   </data>
   <data name="MDIChild_Export_RTF" xml:space="preserve">
     <value>RTF file (*.rtf)|*.rtf|All files (*.*)|*.*</value>

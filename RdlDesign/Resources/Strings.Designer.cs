@@ -1440,7 +1440,7 @@ namespace Majorsilence.Reporting.RdlDesign.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Only HTML, MHT, XML, CSV, RTF, DOC, Excel, TIF, SVG and PDF are allowed as Export types..
+        ///   Looks up a localized string similar to Only HTML, MHT, XML, CSV, RTF, DOC, PPTX, Excel, TIF, SVG and PDF are allowed as Export types..
         /// </summary>
         internal static string MDIChild_Error_AllowedExportTypes {
             get {
@@ -1520,6 +1520,15 @@ namespace Majorsilence.Reporting.RdlDesign.Resources {
             }
         }
 
+        /// <summary>
+        ///   Looks up a localized string similar to PowerPoint presentation (*.pptx)|*.pptx|All files (*.*)|*.*.
+        /// </summary>
+        internal static string MDIChild_Export_PPTX {
+            get {
+                return ResourceManager.GetString("MDIChild_Export_PPTX", resourceCulture);
+            }
+        }
+        
         /// <summary>
         ///   Looks up a localized string similar to SVG files, one per page (*.svg)|*.svg|All files (*.*)|*.*.
         /// </summary>

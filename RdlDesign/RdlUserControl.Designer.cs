@@ -73,6 +73,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			this.RtfToolStripButton2 = new Majorsilence.Forms.ToolStripButton();
 			this.TifToolStripButton2 = new Majorsilence.Forms.ToolStripButton();
 			this.SvgToolStripButton2 = new Majorsilence.Forms.ToolStripButton();
+			this.PptxToolStripButton2 = new Majorsilence.Forms.ToolStripButton();
 			this.ButtonShowProperties = new Majorsilence.Forms.ToolStripButton();
 			this.panel1 = new Majorsilence.Forms.Panel();
 			this.label1 = new Majorsilence.Forms.Label();
@@ -315,6 +316,7 @@ namespace Majorsilence.Reporting.RdlDesign
             this.RtfToolStripButton2,
             this.TifToolStripButton2,
             this.SvgToolStripButton2,
+            this.PptxToolStripButton2,
             this.ButtonShowProperties});
 			resources.ApplyResources(this.toolStrip1, "toolStrip1");
 			this.toolStrip1.Name = "toolStrip1";
@@ -489,6 +491,15 @@ namespace Majorsilence.Reporting.RdlDesign
 			this.SvgToolStripButton2.Text = "SVG";
 			this.SvgToolStripButton2.ToolTipText = "Export as SVG, one file per page";
 			this.SvgToolStripButton2.Click += this.SvgToolStripButton2_Click;
+			//
+			// PptxToolStripButton2
+			//
+			this.PptxToolStripButton2.DisplayStyle = Majorsilence.Forms.ToolStripItemDisplayStyle.Text;
+			this.PptxToolStripButton2.Name = "PptxToolStripButton2";
+			this.PptxToolStripButton2.Tag = "PPTX";
+			this.PptxToolStripButton2.Text = "PPTX";
+			this.PptxToolStripButton2.ToolTipText = "Export as PowerPoint, one slide per page";
+			this.PptxToolStripButton2.Click += this.PptxToolStripButton2_Click;
 			// 
 			// ButtonShowProperties
 			// 
@@ -614,6 +625,7 @@ namespace Majorsilence.Reporting.RdlDesign
         private Majorsilence.Forms.ToolStripButton RtfToolStripButton2;
         private Majorsilence.Forms.ToolStripButton TifToolStripButton2;
         private Majorsilence.Forms.ToolStripButton SvgToolStripButton2;
+        private Majorsilence.Forms.ToolStripButton PptxToolStripButton2;
         private Majorsilence.Forms.Panel panel1;
         private Majorsilence.Forms.Label label1;
         private Majorsilence.Forms.Label label2;

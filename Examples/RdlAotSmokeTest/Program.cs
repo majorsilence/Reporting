@@ -337,6 +337,7 @@ foreach (var format in new[]
     OutputPresentationType.Word, OutputPresentationType.MHTML, OutputPresentationType.ExcelTableOnly,
     OutputPresentationType.Excel2007DataOnly, OutputPresentationType.Excel2003, OutputPresentationType.TIFBW,
     OutputPresentationType.RenderPdf_Majorsilence, OutputPresentationType.PDFOldStyle, OutputPresentationType.Excel97,
+    OutputPresentationType.PPTX,
 })
 {
     await Scenario($"{format} output", async () =>
@@ -349,6 +350,7 @@ foreach (var format in new[]
         else if (format == OutputPresentationType.Excel97 && !(bytes[0] == 0xD0 && bytes[1] == 0xCF && bytes[2] == 0x11 && bytes[3] == 0xE0))
             throw new InvalidOperationException("Excel97 output is not an OLE2 compound file");
         else if (format is OutputPresentationType.RenderPdf_Majorsilence or OutputPresentationType.PDFOldStyle) Expect.ValidPdf(bytes);
+        else if (format == OutputPresentationType.PPTX) Expect.ZipHeader(bytes);
     });
 }
 

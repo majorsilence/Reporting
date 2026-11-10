@@ -415,6 +415,7 @@ namespace Majorsilence.Reporting.UI.RdlAvalonia.Viewer
                     new Avalonia.Platform.Storage.FilePickerFileType("MHTML")           { Patterns = new[] { "*.mhtml", "*.mht" } },
                     new Avalonia.Platform.Storage.FilePickerFileType("RTF")             { Patterns = new[] { "*.rtf" } },
                     new Avalonia.Platform.Storage.FilePickerFileType("Word")            { Patterns = new[] { "*.docx" } },
+                    new Avalonia.Platform.Storage.FilePickerFileType("PowerPoint")      { Patterns = new[] { "*.pptx" } },
                     new Avalonia.Platform.Storage.FilePickerFileType("Excel")           { Patterns = new[] { "*.xlsx" } },
                     new Avalonia.Platform.Storage.FilePickerFileType("TIFF")            { Patterns = new[] { "*.tif", "*.tiff" } },
                     new Avalonia.Platform.Storage.FilePickerFileType("SVG (one file per page)") { Patterns = new[] { "*.svg" } }
@@ -446,6 +447,7 @@ namespace Majorsilence.Reporting.UI.RdlAvalonia.Viewer
                 case "mhtml": outputType = OutputPresentationType.MHTML;      break;
                 case "rtf":   outputType = OutputPresentationType.RTF;        break;
                 case "docx":  outputType = OutputPresentationType.Word;       break;
+                case "pptx":  outputType = OutputPresentationType.PPTX;       break;
                 case "xlsx":  outputType = OutputPresentationType.Excel2007;  break;
                 case "tif":
                 case "tiff":  outputType = OutputPresentationType.TIF;        break;
@@ -520,6 +522,9 @@ namespace Majorsilence.Reporting.UI.RdlAvalonia.Viewer
                         break;
                     case OutputPresentationType.Word:
                         await _report.RunRender(sg, OutputPresentationType.Word);
+                        break;
+                    case OutputPresentationType.PPTX:   // one slide per page
+                        await _report.RunRender(sg, OutputPresentationType.PPTX);
                         break;
                     case OutputPresentationType.Excel2007:
                         await _report.RunRender(sg, OutputPresentationType.Excel2007);

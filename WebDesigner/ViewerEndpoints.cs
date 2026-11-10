@@ -16,7 +16,7 @@ public static class ViewerEndpoints
     /// <summary>
     /// Maps the RDL viewer API endpoints:
     /// <list type="bullet">
-    ///   <item><c>POST /{prefix}/render</c> — body: <c>{"name"|"rdl","parameters":{},"format":"html"|"pdf"|"csv"|"xlsx"}</c></item>
+    ///   <item><c>POST /{prefix}/render</c> — body: <c>{"name"|"rdl","parameters":{},"format":"html"|"pdf"|"csv"|"xlsx"|"xls"|"pptx"}</c></item>
     ///   <item><c>GET  /{prefix}/render/{name}.{ext}?param=value...</c> — convenience route; query string becomes report parameters</item>
     ///   <item><c>GET  /{prefix}/parameters/{name}</c> — report-parameter metadata (name, type, default, prompt, ...) as JSON</item>
     /// </list>
@@ -179,8 +179,10 @@ public static class ViewerEndpoints
                     return await RenderBinary(report, OutputPresentationType.Excel2007, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", (name ?? "report") + ".xlsx");
                 case "xls":
                     return await RenderBinary(report, OutputPresentationType.Excel97, "application/vnd.ms-excel", (name ?? "report") + ".xls");
+                case "pptx":
+                    return await RenderBinary(report, OutputPresentationType.PPTX, "application/vnd.openxmlformats-officedocument.presentationml.presentation", (name ?? "report") + ".pptx");
                 default:
-                    return Results.BadRequest($"Unsupported format '{format}'. Supported: html, pdf, csv, xlsx, xls.");
+                    return Results.BadRequest($"Unsupported format '{format}'. Supported: html, pdf, csv, xlsx, xls, pptx.");
             }
         }
         catch (Exception ex)

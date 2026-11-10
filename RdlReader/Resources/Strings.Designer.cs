@@ -109,7 +109,7 @@ namespace RdlReader.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to PDF files (*.pdf)|*.pdf|XML files (*.xml)|*.xml|HTML files (*.html)|*.html|CSV files (*.csv)|*.csv|RTF files (*.rtf)|*.rtf|TIF files (*.tif)|*.tif|Excel 2007 Table Only (*.xlsx)|*.xlsx|Excel 2007 (*.xlsx)|*.xlsx|MHT files (*.mht)|*.mht|Word files (*.docx)|*.docx|SVG files, one per page (*.svg)|*.svg.
+        ///   Looks up a localized string similar to PDF files (*.pdf)|*.pdf|XML files (*.xml)|*.xml|HTML files (*.html)|*.html|CSV files (*.csv)|*.csv|RTF files (*.rtf)|*.rtf|TIF files (*.tif)|*.tif|Excel 2007 Table Only (*.xlsx)|*.xlsx|Excel 2007 (*.xlsx)|*.xlsx|MHT files (*.mht)|*.mht|Word files (*.docx)|*.docx|SVG files, one per page (*.svg)|*.svg|PowerPoint files (*.pptx)|*.pptx.
         /// </summary>
         internal static string RdlReader_menuFileSaveAs_Click_FilesFilter {
             get {
@@ -118,7 +118,7 @@ namespace RdlReader.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to {0} is not a valid file type.  File extension must be PDF, XML, HTML, CSV, MHT, RTF, DOCX, TIF, SVG, XLSX..
+        ///   Looks up a localized string similar to {0} is not a valid file type.  File extension must be PDF, XML, HTML, CSV, MHT, RTF, DOCX, PPTX, TIF, SVG, XLSX..
         /// </summary>
         internal static string RdlReader_SaveG_NotValidFileType {
             get {

@@ -26,6 +26,15 @@ namespace ReportTests.Utils
         }
 
 
+        /// <summary>
+        /// Validate a PowerPoint presentation (.pptx) against the Open XML schemas; throws with the errors found
+        /// </summary>
+        public static bool ValidatePresentationDocument(System.IO.Stream pptx)
+        {
+            using (PresentationDocument doc = PresentationDocument.Open(pptx, false))
+                return ValidateOpenXmlDocument(doc);
+        }
+
         private static bool ValidateOpenXmlDocument(OpenXmlPackage package )
         {
             string errorDesc = "";

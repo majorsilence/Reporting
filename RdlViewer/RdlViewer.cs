@@ -880,7 +880,7 @@ namespace Majorsilence.Reporting.RdlViewer
             OneFileStreamGen sg = new OneFileStreamGen(FileName, true); // overwrite with this name
             if (!(type == OutputPresentationType.PDF || type == OutputPresentationType.PDFOldStyle ||
                 type == OutputPresentationType.TIF || type == OutputPresentationType.TIFBW ||
-                type == OutputPresentationType.SVG))
+                type == OutputPresentationType.SVG || type == OutputPresentationType.PPTX))
             {
                 var ld = await GetParameters();        // split parms into dictionary
                 await _Report.RunGetData(ld);                     // obtain the data (again)
@@ -905,6 +905,9 @@ namespace Majorsilence.Reporting.RdlViewer
                         break;
                     case OutputPresentationType.SVG:    // one file per page: name.svg, name2.svg, ...
                         await _Report.RunRenderSvg(sg, _pgs);
+                        break;
+                    case OutputPresentationType.PPTX:   // one slide per page
+                        await _Report.RunRenderPptx(sg, _pgs);
                         break;
                     case OutputPresentationType.CSV:
                         await _Report.RunRender(sg, OutputPresentationType.CSV);
