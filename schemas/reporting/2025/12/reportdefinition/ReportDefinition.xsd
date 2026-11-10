@@ -1172,6 +1172,7 @@
         <xsd:choice minOccurs="1" maxOccurs="unbounded">
             <xsd:element name="ReportItems" type="ReportItemsType"/>
             <xsd:element name="ColSpan" type="xsd:unsignedInt" minOccurs="0"/>
+            <xsd:element name="RowSpan" type="xsd:unsignedInt" minOccurs="0"/>
             <xsd:any namespace="##other" processContents="skip"/>
         </xsd:choice>
         <xsd:anyAttribute namespace="##other" processContents="skip"/>

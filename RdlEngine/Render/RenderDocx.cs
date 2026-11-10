@@ -79,6 +79,9 @@ namespace Majorsilence.Reporting.Rdl
             internal string HeaderRows;         // header rows that repeat after a page break split
             internal bool RowHidden;            // the current row is hidden
             internal bool BodyLevel;            // the table is not inside a table cell
+            internal TableRow Row;              // the row being written
+            internal int NextCovering;          // the next of Row's cells spanning down from above to write
+            internal Dictionary<TableCell, StyleInfo> SpanStyles; // style of each cell spanning rows, for the rows it covers
         }
 
         /// <summary>Work state for a matrix that is being written</summary>
@@ -933,6 +936,8 @@ namespace Majorsilence.Reporting.Rdl
             }
             if (ts.BodyLevel && InBody)
                 _contentSinceBreak = true;      // a page break between groups now has something before it
+            ts.Row = tr;
+            ts.NextCovering = 0;
         }
 
         public void TableRowEnd(TableRow tr, Row row)
@@ -948,13 +953,35 @@ namespace Majorsilence.Reporting.Rdl
                     _discard.Clear();
                 return;
             }
+            WriteCoveredCells(ts, int.MaxValue);
+            ts.Row = null;
             Out.Append("</w:tr>");
         }
 
-        public async Task TableCellStart(TableCell t, Row row)
+        // Word merges a cell down over the rows it spans by a continuing cell in each of them;
+        // the report has no cell there. Writes those that come before column 'before'.
+        private void WriteCoveredCells(TableState ts, int before)
         {
-            TableState ts = _tables.Count > 0 ? _tables.Peek() : null;
-            int width = 0, span = 0;
+            List<TableCell> covering = ts?.Row?.CoveringCells;
+            if (covering == null)
+                return;
+            while (ts.NextCovering < covering.Count && covering[ts.NextCovering].ColIndex < before)
+            {
+                TableCell span = covering[ts.NextCovering++];
+                ColumnsOf(ts, span, out int width, out int cols);
+                if (cols == 0)
+                    continue;       // its columns are hidden
+                StyleInfo si = null;
+                ts.SpanStyles?.TryGetValue(span, out si);
+                WriteCellStart(width, cols, si, "<w:vMerge/>");
+                WriteCellEnd();
+            }
+        }
+
+        private static void ColumnsOf(TableState ts, TableCell t, out int width, out int span)
+        {
+            width = 0;
+            span = 0;
             for (int ci = t.ColIndex; ci < t.ColIndex + t.ColSpan; ci++)
             {
                 if (ts != null && ci < ts.VisibleColumns.Length && ts.VisibleColumns[ci])
@@ -963,21 +990,32 @@ namespace Majorsilence.Reporting.Rdl
                     span++;
                 }
             }
+        }
+
+        public async Task TableCellStart(TableCell t, Row row)
+        {
+            TableState ts = _tables.Count > 0 ? _tables.Peek() : null;
+            WriteCoveredCells(ts, t.ColIndex);
+            ColumnsOf(ts, t, out int width, out int span);
             ReportItem ri = t.ReportItems.Items[0];
             StyleInfo si = ri.Style == null ? null : await ri.Style.GetStyleInfoShared(r, row).ConfigureAwait(false);   // read only
-            WriteCellStart(width, Math.Max(1, span), si);
+            if (t.RowSpan > 1 && ts != null)
+                (ts.SpanStyles ??= new Dictionary<TableCell, StyleInfo>())[t] = si;
+            WriteCellStart(width, Math.Max(1, span), si, t.RowSpan > 1 ? "<w:vMerge w:val=\"restart\"/>" : null);
         }
 
         /// <summary>
         /// Start a table cell: width, merged columns, borders, background, padding, vertical alignment
         /// </summary>
-        private void WriteCellStart(int width, int span, StyleInfo si)
+        private void WriteCellStart(int width, int span, StyleInfo si, string vMerge = null)
         {
             StringBuilder sb = Out;
             sb.Append("<w:tc><w:tcPr>");
             sb.AppendFormat(CultureInfo.InvariantCulture, "<w:tcW w:w=\"{0}\" w:type=\"dxa\"/>", width);
             if (span > 1)
                 sb.AppendFormat(CultureInfo.InvariantCulture, "<w:gridSpan w:val=\"{0}\"/>", span);
+            if (vMerge != null)
+                sb.Append(vMerge);      // after gridSpan, as the schema orders them
             if (si != null)
             {
                 sb.Append("<w:tcBorders>").Append(Borders(si, false)).Append("</w:tcBorders>");

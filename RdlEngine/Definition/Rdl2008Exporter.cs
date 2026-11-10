@@ -611,12 +611,27 @@ namespace Majorsilence.Reporting.Rdl
             var columnWidths = tableColumns.ConvertAll (c => Child (c, "Width")?.InnerText ?? "1in");
             var bodyRows = El (doc, ns, "TablixRows");
 
+            // A 2005 RowSpan covers its columns in the rows below, which have no cell there;
+            // 2008 keeps a placeholder for those positions, as it does for a ColSpan's. Spans
+            // reach no further than one section's rows.
+            var coveredUntil = new List<int> ();    // per column: the first section row not covered
+            var sectionRow = 0;
+            void StartSection ()
+            {
+                coveredUntil.Clear ();
+                sectionRow = 0;
+            }
+            bool Covered (int column) => column < coveredUntil.Count && coveredUntil[column] > sectionRow;
+
             XmlElement BuildRow (XmlElement tableRow)
             {
                 var row = El (doc, ns, "TablixRow");
                 row.AppendChild (El (doc, ns, "Height", Child (tableRow, "Height")?.InnerText ?? "0.25in"));
                 var cells = El (doc, ns, "TablixCells");
+                var column = 0;
                 foreach (var tableCell in Kids (Child (tableRow, "TableCells"), "TableCell")) {
+                    for (; Covered (column); column++)
+                        cells.AppendChild (El (doc, ns, "TablixCell"));
                     var contents = El (doc, ns, "CellContents");
                     var itemList = new List<XmlElement> ();
                     var reportItems = Child (tableCell, "ReportItems");
@@ -645,13 +660,28 @@ namespace Majorsilence.Reporting.Rdl
                         int.TryParse (colSpan.InnerText, out span);
                     }
 
+                    var rowSpanEl = Child (tableCell, "RowSpan");
+                    if (rowSpanEl != null && int.TryParse (rowSpanEl.InnerText, out var rowSpan) && rowSpan > 1) {
+                        contents.AppendChild (rowSpanEl.CloneNode (true));
+                        for (var c = column; c < column + Math.Max (1, span); c++) {
+                            while (coveredUntil.Count <= c)
+                                coveredUntil.Add (0);
+                            coveredUntil[c] = sectionRow + rowSpan;
+                        }
+                    }
+
                     var cell = El (doc, ns, "TablixCell");
                     cell.AppendChild (contents);
                     cells.AppendChild (cell);
                     // 2008 keeps a placeholder for each position a ColSpan covers.
                     for (var i = 1; i < span; i++)
                         cells.AppendChild (El (doc, ns, "TablixCell"));
+                    column += Math.Max (1, span);
                 }
+                for (; column < columnWidths.Count; column++)
+                    if (Covered (column))
+                        cells.AppendChild (El (doc, ns, "TablixCell"));
+                sectionRow++;
                 row.AppendChild (cells);
                 bodyRows.AppendChild (row);
                 return row;
@@ -677,6 +707,7 @@ namespace Majorsilence.Reporting.Rdl
                 if (section == null)
                     return members;
                 var repeat = string.Equals (Child (section, "RepeatOnNewPage")?.InnerText, "true", StringComparison.OrdinalIgnoreCase);
+                StartSection ();
                 foreach (var tableRow in Kids (Child (section, "TableRows"), "TableRow"))
                     members.Add (StaticMember (tableRow, keepWithGroup, repeat));
                 return members;
@@ -692,6 +723,7 @@ namespace Majorsilence.Reporting.Rdl
                     if (details == null)
                         return result;
                     var rowMembers = new List<XmlElement> ();
+                    StartSection ();
                     foreach (var tableRow in Kids (Child (details, "TableRows"), "TableRow"))
                         rowMembers.Add (StaticMember (tableRow, null, false));
                     var member = El (doc, ns, "TablixMember");

@@ -49,7 +49,57 @@ namespace Majorsilence.Reporting.Rdl
 			if (_Items.Count == 0)
 				OwnerReport.rl.LogError(8, "For TableRows at least one TableRow is required.");
 			else
+			{
                 _Items.TrimExcess();
+				AssignRowSpans();
+			}
+		}
+
+		// A cell with a RowSpan covers its columns in the rows below it, which have no cell
+		// of their own there: their cells take the columns the span leaves free, left to right.
+		// A span reaches no further than these rows (a header's rows, a group footer's, the
+		// rows of one detail record).
+		private void AssignRowSpans()
+		{
+			var coveredUntil = new List<int>();		// per column: the first row no longer covered
+			var spanning = new List<TableCell>();	// the cells spanning rows, in the order met
+			for (int ri = 0; ri < _Items.Count; ri++)
+			{
+				TableRow tr = _Items[ri];
+				if (tr.TableCells == null)
+					continue;
+				int col = 0;
+				foreach (TableCell tc in tr.TableCells.Items)
+				{
+					while (col < coveredUntil.Count && coveredUntil[col] > ri)
+						col++;
+					tc.ColIndex = col;
+					if (tc.RowSpan > 1)
+					{
+						if (ri + tc.RowSpan > _Items.Count)
+						{
+							OwnerReport.rl.LogError(4, string.Format("A TableCell spans {0} rows where only {1} follow it; it spans those.", tc.RowSpan, _Items.Count - ri));
+							tc.RowSpan = _Items.Count - ri;
+						}
+						for (int c = col; c < col + tc.ColSpan; c++)
+						{
+							while (coveredUntil.Count <= c)
+								coveredUntil.Add(0);
+							coveredUntil[c] = ri + tc.RowSpan;
+						}
+						if (tc.RowSpan > 1)
+							spanning.Add(tc);
+					}
+					col += tc.ColSpan;
+				}
+			}
+
+			foreach (TableCell tc in spanning)
+			{
+				int first = _Items.IndexOf(tc.Row);
+				for (int ri = first + 1; ri < first + tc.RowSpan; ri++)
+					_Items[ri].AddCoveringCell(tc, ri == first + tc.RowSpan - 1);
+			}
 		}
 		
 		async override internal Task FinalPass()
@@ -85,10 +135,20 @@ namespace Majorsilence.Reporting.Rdl
 		{
 			if (bCheckRows)
 			{	// we need to check to see if a row will fit on the page
-				foreach (TableRow t in _Items)
+				int keepUntil = -1;		// the last row of the rows a cell spans, which go to a new page together
+				for (int i = 0; i < _Items.Count; i++)
 				{
+					TableRow t = _Items[i];
 					Page p = pgs.CurrentPage;			// this can change after running a row
 					float hrows = await t.HeightOfRow(pgs, row).ConfigureAwait(false);	// height of this row
+					if (i > keepUntil && (keepUntil = LastRowSpanned(i)) > i)
+					{	// a cell spanning rows starts here: the rows it spans must fit below, where they
+						// fit on a page at all. Measured top down: a span's last row grows by what the
+						// rows above it leave of its text. Those that do not fit on one page are paged
+						// row by row, as any.
+						for (int j = i + 1; j <= keepUntil; j++)
+							hrows += await _Items[j].HeightOfRow(pgs, row).ConfigureAwait(false);
+					}
 					float height = p.YOffset + hrows;
 					if (height > pgs.BottomOfPage && !p.IsEmpty())	// an empty page is kept (see Details.RunPage)
 					{
@@ -105,6 +165,17 @@ namespace Majorsilence.Reporting.Rdl
                     await t.RunPage(pgs, row).ConfigureAwait(false);
 			}
 			return;
+		}
+
+		// The last row that a cell starting in row i, or in a row spanned with it, spans.
+		private int LastRowSpanned(int i)
+		{
+			int last = i;
+			for (int ri = i; ri <= last; ri++)
+				foreach (TableCell tc in _Items[ri].TableCells.Items)
+					if (tc.RowSpan > 1)
+						last = Math.Max(last, ri + tc.RowSpan - 1);
+			return Math.Min(last, _Items.Count - 1);
 		}
 
 		internal Table OwnerTable

@@ -979,6 +979,8 @@ function findObject(id) {
 
             if (t.ColSpan > 1)
                 tw.Write(" colspan={0}", t.ColSpan);
+            if (t.RowSpan > 1)
+                tw.Write(" rowspan={0}", t.RowSpan);
 
             Textbox tb = r as Textbox;
             if (tb != null &&               // have textbox

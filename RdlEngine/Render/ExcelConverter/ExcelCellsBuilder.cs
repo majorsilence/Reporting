@@ -48,6 +48,8 @@ namespace RdlEngine.Render.ExcelConverter
 		public List<ExcelTable> Tables { get; private set; }
 
 		private float rowPosition = 0f;
+		// Cells spanning rows, made in a row above, that grow down through the rows they span.
+		private readonly List<(ExcelCell Cell, TableCell Span)> spanning = new List<(ExcelCell, TableCell)>();
 		private ExcelTable CurrentExcelTable = null;
 
 		public ExcelCellsBuilder()
@@ -149,6 +151,20 @@ namespace RdlEngine.Render.ExcelConverter
 
 			var currentRow = AddRow(rowPosition, rowHeight);
 			SectionRowsOf(tr, CurrentExcelTable).Add(currentRow);
+
+			// A cell spanning rows reaches down over each row it covers; it is merged over the
+			// rows its height takes in, as a cell spanning columns is over the columns.
+			for(int i = spanning.Count - 1; i >= 0; i--) {
+				var (spanCell, span) = spanning[i];
+				if(tr.CoveringCells == null || !tr.CoveringCells.Contains(span)) {
+					spanning.RemoveAt(i);	// the rows it spans are done
+					continue;
+				}
+				spanCell.OriginalHeight += rowHeight;
+				spanCell.GrowedBottomPosition += rowHeight;
+				if(tr.SpanEnds != null && tr.SpanEnds.Contains(span))
+					spanning.RemoveAt(i);
+			}
 			foreach(var cell in tr.TableCells.Items) {
 				var column = CurrentExcelTable.Table.TableColumns.Items[cell.ColIndex];
 				if(await column.IsHidden(Report, row).ConfigureAwait(false))
@@ -179,6 +195,8 @@ namespace RdlEngine.Render.ExcelConverter
 					currentCell.OriginalWidth = spanWidth;
 				}
 				currentCell.GrowedBottomPosition = rowPosition + rowHeight;
+				if(cell.RowSpan > 1)
+					spanning.Add((currentCell, cell));
                 await SetCellStyle(currentCell, cellTextBox, row).ConfigureAwait(false);
 				await SetTypedValue(currentCell, (Textbox)cellTextBox, row).ConfigureAwait(false);
 				Cells.Add(currentCell);
