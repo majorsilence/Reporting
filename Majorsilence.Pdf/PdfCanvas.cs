@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using Majorsilence.Pdf.Internal;
+using Majorsilence.Pdf.Text;
 
 namespace Majorsilence.Pdf
 {
@@ -26,21 +27,24 @@ namespace Majorsilence.Pdf
     ///     .Save("output.pdf");
     /// </code>
     /// </example>
-    public sealed class PdfCanvas
+    public sealed partial class PdfCanvas
     {
         private readonly PageData _page;
         private readonly PdfSerializer _ser;
         private readonly FontCache _fontCache;
         private readonly FontRegistry? _registry;
+        private readonly ITextShaper? _shaper;
         private StringBuilder Content => _page.Content;
         private int _stateDepth;
 
-        internal PdfCanvas(PageData page, PdfSerializer ser, FontCache fontCache, FontRegistry? registry = null)
+        internal PdfCanvas(PageData page, PdfSerializer ser, FontCache fontCache, FontRegistry? registry = null,
+            ITextShaper? shaper = null)
         {
             _page = page;
             _ser = ser;
             _fontCache = fontCache;
             _registry = registry;
+            _shaper = shaper;
         }
 
         // ── coordinate helper ─────────────────────────────────────────────────
@@ -61,14 +65,30 @@ namespace Majorsilence.Pdf
             if (string.IsNullOrEmpty(text)) return this;
             style ??= TextStyle.Default;
 
-            // RTL: reverse the visual order of Unicode code points before any rendering.
-            // Callers should combine this with TextAlignment.Right so that x is the right edge.
-            if (style.IsRightToLeft)
-                text = ReverseCodePoints(text);
+            // ── resolve font source ───────────────────────────────────────────
+
+            // Explicit file path always wins.
+            FontSource? primarySource = style.FontFilePath != null
+                ? FontSource.FromPath(style.FontFilePath)
+                : _registry?.Resolve(style.FontFamily, style.IsBold, style.IsItalic);
+
+            // Right-to-left and complex-script text in an embedded font is laid out by the
+            // bidirectional algorithm and the shaper (see PdfCanvas.ComplexText.cs). The standard
+            // fonts have nothing to shape with: their text is only put in display order.
+            List<ComplexItem>? complex = null;
+            if (primarySource != null)
+            {
+                if (NeedsComplexLayout(text, style))
+                    complex = LayoutComplex(text, _fontCache.GetOrLoad(primarySource), primarySource, style);
+            }
+            else if (style.IsRightToLeft || UnicodeBidi.HasRightToLeftOrControls(text))
+            {
+                text = VisualOrder(text, style);
+            }
 
             if (style.Alignment != TextAlignment.Left)
             {
-                float w = MeasureTextWidth(text, style);
+                float w = complex != null ? ComplexWidth(complex, style) : MeasureTextWidth(text, style);
                 if (style.Alignment == TextAlignment.Right) x -= w;
                 else x -= w / 2f;
             }
@@ -76,13 +96,6 @@ namespace Majorsilence.Pdf
             float pdfY = PdfY(y);
             float r = style.Color.Rf, g = style.Color.Gf, b = style.Color.Bf;
             var sb = Content;
-
-            // ── resolve font source ───────────────────────────────────────────
-
-            // Explicit file path always wins.
-            FontSource? primarySource = style.FontFilePath != null
-                ? FontSource.FromPath(style.FontFilePath)
-                : _registry?.Resolve(style.FontFamily, style.IsBold, style.IsItalic);
 
             sb.Append("q\n");
 
@@ -100,7 +113,11 @@ namespace Majorsilence.Pdf
 
             float totalWidth;
 
-            if (primarySource != null)
+            if (complex != null)
+            {
+                totalWidth = EmitComplex(sb, complex, x, pdfY, style, rotated);
+            }
+            else if (primarySource != null)
             {
                 // ── TTF path (explicit file or registry family) ───────────────
                 var primaryTtf = _fontCache.GetOrLoad(primarySource);
@@ -344,27 +361,6 @@ namespace Majorsilence.Pdf
                 if (c == ' ') lastBreak = pos; // break opportunity is AFTER the space
             }
             return pos;
-        }
-
-        // Reverse Unicode code points (not UTF-16 chars) so surrogate pairs stay intact.
-        private static string ReverseCodePoints(string text)
-        {
-            var points = new List<string>(text.Length);
-            for (int i = 0; i < text.Length; )
-            {
-                if (char.IsHighSurrogate(text[i]) && i + 1 < text.Length && char.IsLowSurrogate(text[i + 1]))
-                {
-                    points.Add(text.Substring(i, 2));
-                    i += 2;
-                }
-                else
-                {
-                    points.Add(text[i].ToString());
-                    i++;
-                }
-            }
-            points.Reverse();
-            return string.Concat(points);
         }
 
         // The fallback fonts a string needs. A fallback chain can hold large CJK fonts, so they
@@ -1025,7 +1021,12 @@ namespace Majorsilence.Pdf
 
             // Explicit TTF file
             if (style.FontFilePath != null)
-                return WidthOf(_fontCache.GetOrLoad(style.FontFilePath), text, style.FontSize);
+            {
+                var fileTtf = _fontCache.GetOrLoad(style.FontFilePath);
+                if (NeedsComplexLayout(text, style))
+                    return ComplexWidth(LayoutComplex(text, fileTtf, FontSource.FromPath(style.FontFilePath), style), style);
+                return WidthOf(fileTtf, text, style.FontSize);
+            }
 
             // Registry-resolved family (may have fallback segments)
             if (_registry != null)
@@ -1034,6 +1035,8 @@ namespace Majorsilence.Pdf
                 if (src != null)
                 {
                     var primary = _fontCache.GetOrLoad(src);
+                    if (NeedsComplexLayout(text, style))
+                        return ComplexWidth(LayoutComplex(text, primary, src, style), style);
                     var fallbacks = LoadFallbacks(text, primary, src, style);
                     if (fallbacks.Count == 0)
                         return WidthOf(primary, text, style.FontSize);

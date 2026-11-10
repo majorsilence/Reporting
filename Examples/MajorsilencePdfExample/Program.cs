@@ -1056,10 +1056,11 @@ static X509Certificate2 CreateSelfSignedCert()
 
 // ── example 15: right-to-left text ───────────────────────────────────────────
 // Uses the bundled NotoSansHebrew / NotoSansArabic fonts (SIL OFL 1.1 license).
-// IsRightToLeft reverses code-point order for visual RTL rendering.
+// IsRightToLeft makes the paragraph right to left; the Unicode Bidirectional Algorithm
+// puts each line in display order (numbers and Latin words inside keep theirs).
 // Hebrew works correctly without a shaping engine (letters have no contextual forms).
-// Arabic requires an external shaper for proper ligature forms; this example
-// shows visual reversal which is readable for many Arabic words.
+// Arabic needs a shaper (PdfDocument.WithTextShaper) for its joining forms and ligatures;
+// without one, as here, the letters are in the right order but drawn unjoined.
 // Combine WithRightToLeft() with TextAlignment.Right so x is the right anchor.
 
 static void RightToLeftExample(string name, FontRegistry fonts, PdfVersion version)
@@ -1120,8 +1121,8 @@ static void RightToLeftExample(string name, FontRegistry fonts, PdfVersion versi
                 StrokeStyle.Default.WithWidth(0.3f).WithColor(PdfColor.LightGray));
             y += sectionGap + 4;
 
-            // ── Arabic (visual reversal only) ─────────────────────────────────
-            canvas.DrawText("Arabic (العربية) — NotoSansArabic + visual reversal (no ligature shaping):", 72, y, label); y += 20;
+            // ── Arabic (display order, unshaped) ──────────────────────────────
+            canvas.DrawText("Arabic (العربية) — NotoSansArabic + bidi display order (no shaper: letters unjoined):", 72, y, label); y += 20;
 
             canvas.DrawText("مرحبا بالعالم", rightMargin, y, rtlArabic.WithSize(24).WithBold()); y += 32;
             canvas.DrawText("كتاب, قلم, ورقة", rightMargin, y, rtlArabic); y += 26;

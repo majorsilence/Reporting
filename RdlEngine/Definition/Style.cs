@@ -206,6 +206,7 @@ namespace Majorsilence.Reporting.Rdl
 					case "language":
 						_Language = new Expression(r, this, xNodeLoop, ExpressionType.Language);
 						break;
+					case "unicodebidi":				// the RDL element's name
 					case "unicodebidirectional":
 						_UnicodeBiDirectional = new Expression(r, this, xNodeLoop, ExpressionType.Enum);
 						break;

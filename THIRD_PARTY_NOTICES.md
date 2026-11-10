@@ -27,6 +27,13 @@ All bundled fonts are distributed under the **SIL Open Font License, Version 1.1
 | Caladea | Copyright (c) 2012 Carolina Giovagnoli, Andres Torresi, Huerta Tipografia | Cambria |
 | Noto Sans | Copyright (c) 2010-2020 Google Inc. / Google LLC | Unicode fallback |
 
+### Test fonts
+
+`ReportTests/Fonts/NotoSansDevanagari-Regular.ttf` (Noto Sans Devanagari, Copyright 2015
+Google Inc.) is used only by the tests, to check Devanagari shaping in PDF output; it is not
+shipped in any package. It is under the SIL Open Font License 1.1, whose full text is beside it
+in `ReportTests/Fonts/OFL-1.1.txt`.
+
 ### SIL Open Font License 1.1 — Summary
 
 The OFL allows the fonts to be freely used, studied, modified, and redistributed,

@@ -19,6 +19,10 @@ namespace Majorsilence.Pdf.Internal
         internal readonly string? StandardName;
         internal readonly TrueTypeFont? Ttf;
         internal readonly HashSet<ushort>? UsedGlyphs;
+        // For the ToUnicode CMap, the text of the glyphs a shaper substituted - contextual forms,
+        // ligatures, conjuncts - where the font's cmap maps no character to them, or only an Arabic
+        // presentation form. Made when the first one is drawn.
+        internal SortedDictionary<ushort, string>? ShapedText;
         internal FontResource(string pdfName, string standardName)
         { PdfName = pdfName; StandardName = standardName; }
         internal FontResource(string pdfName, TrueTypeFont ttf)
@@ -620,14 +624,15 @@ namespace Majorsilence.Pdf.Internal
             // documents. With glyphs in use, the printable ASCII glyphs are always embedded too, so that
             // documents mostly ask for the same subset. A font nothing was drawn with is embedded whole.
             FontParts parts;
+            var shaped = font.ShapedText;
             if (used != null && used.Count > 0)
             {
                 var glyphs = FontPartsCache.WithBaseGlyphs(ttf, used);
-                parts = FontPartsCache.GetOrBuild(ttf, glyphs, () => BuildFontParts(ttf, glyphs, true));
+                parts = FontPartsCache.GetOrBuild(ttf, glyphs, shaped, () => BuildFontParts(ttf, glyphs, true, shaped));
             }
             else
             {
-                parts = BuildFontParts(ttf, used, false);
+                parts = BuildFontParts(ttf, used, false, shaped);
             }
 
             // ── ToUnicode CMap ────────────────────────────────────────────────
@@ -685,11 +690,31 @@ namespace Majorsilence.Pdf.Internal
 
         // The ToUnicode CMap, /W array and font program for the glyphs in used (every glyph when null or when
         // subsetting is not wanted), compressed but not encrypted.
-        private static FontParts BuildFontParts(TrueTypeFont ttf, HashSet<ushort>? used, bool subset)
+        private static FontParts BuildFontParts(TrueTypeFont ttf, HashSet<ushort>? used, bool subset,
+            SortedDictionary<ushort, string>? shapedText = null)
         {
-            var mapList = new List<(int codePoint, ushort glyphId)>();
+            // One text per glyph: its character in the cmap, else the text a shaper drew it for.
+            // (A cmap can map several characters to one glyph; the first is kept, as a viewer
+            // can only use one.)
+            var glyphText = new SortedDictionary<ushort, string>();
             foreach (var m in ttf.GetCharGlyphMappings())
-                if (used == null || used.Contains(m.glyphId)) mapList.Add(m);
+            {
+                if (used != null && !used.Contains(m.glyphId)) continue;
+                if (m.codePoint < 0 || m.codePoint > 0x10FFFF || (m.codePoint >= 0xD800 && m.codePoint <= 0xDFFF)) continue;
+                if (!glyphText.ContainsKey(m.glyphId) || m.codePoint < CodePointOf(glyphText[m.glyphId]))
+                    glyphText[m.glyphId] = char.ConvertFromUtf32(m.codePoint);
+            }
+            // The text a shaper drew a glyph for wins: it is only kept where the cmap has none for
+            // the glyph, or only a presentation form of what was typed.
+            if (shapedText != null)
+            {
+                foreach (var kv in shapedText)
+                    if (used == null || used.Contains(kv.Key))
+                        glyphText[kv.Key] = kv.Value;
+            }
+            var mapList = new List<(ushort glyphId, string text)>(glyphText.Count);
+            foreach (var kv in glyphText)
+                mapList.Add((kv.Key, kv.Value));
 
             var cmap = new StringBuilder();
             cmap.Append("/CIDInit /ProcSet findresource begin\n12 dict begin\nbegincmap\n");
@@ -701,18 +726,25 @@ namespace Majorsilence.Pdf.Internal
                 int chunk = Math.Min(100, mapList.Count - i);
                 cmap.Append($"{chunk} beginbfchar\n");
                 for (int j = i; j < i + chunk; j++)
-                    cmap.Append($"<{mapList[j].glyphId:X4}> <{mapList[j].codePoint:X4}>\n");
+                {
+                    cmap.Append($"<{mapList[j].glyphId:X4}> <");
+                    foreach (char c in mapList[j].text)       // UTF-16BE, so a character past U+FFFF is a surrogate pair
+                        cmap.Append(((int)c).ToString("X4"));
+                    cmap.Append(">\n");
+                }
                 cmap.Append("endbfchar\n");
             }
             cmap.Append("endcmap\nCMapName currentdict /CMap defineresource pop\nend\nend");
             byte[] cmapComp = Compress(Latin1.GetBytes(cmap.ToString()));
 
+            // Every glyph drawn has its width, not only those a character maps to: a viewer gives a
+            // glyph missing from /W the default width, and a shaped glyph is often in no cmap.
             var glyphWidths = new SortedDictionary<ushort, int>();
             foreach (var m in mapList)
-            {
-                int w1000 = (int)Math.Round(ttf.GetAdvanceWidth(m.glyphId) * 1000.0 / ttf.UnitsPerEm);
-                glyphWidths[m.glyphId] = w1000;
-            }
+                glyphWidths[m.glyphId] = PdfWidth(ttf, m.glyphId);
+            if (used != null)
+                foreach (ushort g in used)
+                    glyphWidths[g] = PdfWidth(ttf, g);
             var wArray = new StringBuilder("/W [");
             foreach (var kv in glyphWidths) wArray.Append($" {kv.Key} [{kv.Value}]");
             wArray.Append(" ]");
@@ -733,6 +765,13 @@ namespace Majorsilence.Pdf.Internal
                 fontComp, EndStream);
             return new FontParts(cmapComp, wArray.ToString(), fontComp, fontData.Length, cmapObject, fontObject);
         }
+
+        /// <summary>A glyph's width as the /W array gives it: thousandths of an em, rounded.</summary>
+        internal static int PdfWidth(TrueTypeFont ttf, ushort glyphId) =>
+            (int)Math.Round(ttf.GetAdvanceWidth(glyphId) * 1000.0 / ttf.UnitsPerEm);
+
+        private static int CodePointOf(string s) =>
+            s.Length >= 2 && char.IsHighSurrogate(s[0]) ? char.ConvertToUtf32(s[0], s[1]) : s[0];
 
         private static HashSet<ushort> AllGlyphs(TrueTypeFont ttf)
         {

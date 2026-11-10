@@ -170,7 +170,26 @@ PdfDocument.Create()
 
 `AddInstalledFonts(directory, includeSubfolders)` registers every font in a folder under the family name it declares; add `replaceExisting: true` to replace families already registered. To add fonts to Majorsilence.Reporting's PDF export, see `PdfFonts` in the Reporting readme.
 
-Unicode shaping with multi-script support (Latin, Cyrillic, Greek, Arabic, CJK) is available when the appropriate NotoSans fonts are registered.
+Text in any script draws when a font for it is registered (the fallback chain picks it per character).
+
+### Right-to-left and complex scripts
+
+Every line goes through the Unicode Bidirectional Algorithm (UAX #9), so Hebrew and Arabic read right to left and a number or an English phrase inside them keeps its own order. `WithRightToLeft()` makes the paragraph right to left (combine it with `TextAlignment.Right` so `x` is the right edge); `WithBidiOverride()` lays every character out in that direction instead.
+
+Joining scripts (Arabic) and the Brahmic scripts (Devanagari, Bengali, Tamil ...) also need *shaping*: contextual letter forms, ligatures, conjuncts, reordered vowel signs and mark positions come from the font's OpenType tables. The library has no shaper of its own, so that it keeps no native dependency; plug one in with `WithTextShaper`:
+
+```csharp
+PdfDocument.Create()
+    .WithFontRegistry(registry)
+    .WithTextShaper(myShaper)       // an ITextShaper, e.g. over HarfBuzzSharp
+    .AddPage(PageSizes.A4, canvas =>
+        canvas.DrawText("\u0645\u0631\u062D\u0628\u0627", 520, 72,   // "marhaba" (hello)
+            TextStyle.Default.WithFamily("NotoSansArabic").WithSize(16)
+                .WithRightToLeft().WithAlignment(TextAlignment.Right)))
+    .Save("arabic.pdf");
+```
+
+Without a shaper each character is drawn with the glyph the font's cmap gives it, in display order and with brackets mirrored: right for Hebrew, but Arabic letters then do not join. Shaped glyphs carry their text in the ToUnicode CMap, so the PDF's text can still be copied and searched. Majorsilence.Reporting's PDF export shapes with HarfBuzz.
 
 ### Images
 

@@ -523,16 +523,14 @@ namespace Majorsilence.Reporting.Rdl
 		/// <returns></returns>
 		public static UnicodeBiDirectionalEnum GetUnicodeBiDirectional(string v, UnicodeBiDirectionalEnum def)
 		{
-			UnicodeBiDirectionalEnum u;
-            try
-            {
-                u = (UnicodeBiDirectionalEnum)Enum.Parse(typeof(UnicodeBiDirectionalEnum), v);
-            }
-            catch
-            {
-                u = def;
-            }
-            return u; 
+			// RDL spells it Normal, Embed or BiDi-Override.
+			switch ((v ?? "").Trim().Replace("-", "").Replace("_", "").ToLowerInvariant())
+			{
+				case "normal": return UnicodeBiDirectionalEnum.Normal;
+				case "embed": return UnicodeBiDirectionalEnum.Embed;
+				case "bidioverride": return UnicodeBiDirectionalEnum.BiDi_Override;
+				default: return def;
+			}
 
 		}
 

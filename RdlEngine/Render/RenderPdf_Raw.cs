@@ -82,6 +82,11 @@ namespace Majorsilence.Reporting.Rdl
                 .WithCreator("Majorsilence Reporting - RenderPdf_Raw")
                 .WithFontRegistry(_fontRegistry);
 
+            // Shapes Arabic, Indic and other complex-script text; without HarfBuzz's native library
+            // such text is still put in display order, a glyph per character.
+            var shaper = HarfBuzzTextShaper.Instance;
+            if (shaper != null) _doc.WithTextShaper(shaper);
+
             if (_security  != null) _doc.WithSecurity(_security);
             if (_signature != null) _doc.WithSignature(_signature);
         }
@@ -206,6 +211,7 @@ namespace Majorsilence.Reporting.Rdl
             if (sa == null || sa.Length == 0) return;
 
             TextStyle baseStyle = ResolveFont(si);
+            TextAlignEnum align = HorizontalAlign(si);
 
             // RenderBase.MeasureString wraps text using System.Drawing/SkiaSharp metrics, which
             // can differ from Majorsilence.Pdf's embedded TrueType metrics.  Re-wrap here using
@@ -288,7 +294,7 @@ namespace Majorsilence.Reporting.Rdl
 
                 if (si.WritingMode == WritingModeEnum.lr_tb || si.WritingMode == WritingModeEnum.rl_bt)
                 {
-                    switch (si.TextAlign)
+                    switch (align)
                     {
                         case TextAlignEnum.Center:
                             if (width > 0)
@@ -364,8 +370,11 @@ namespace Majorsilence.Reporting.Rdl
                         : startX + textwidth;
 
                     if (paragraphEnds != null && i < paragraphEnds.Count && !paragraphEnds[i]
-                        && DrawJustified(text, startX, startY + metrics.ascent, availableW, baseStyle))
+                        && DrawJustified(text, x + si.PaddingLeft, startY + metrics.ascent, availableW, baseStyle))
+                    {
+                        startX = x + si.PaddingLeft;    // a spread line fills the box, whichever side it starts from
                         maxX = startX + availableW;
+                    }
                     else
                         _currentPage.DrawText(text, startX, startY + metrics.ascent, baseStyle);
 
@@ -396,7 +405,7 @@ namespace Majorsilence.Reporting.Rdl
                     //   tb-lr: reads upward, tops to the left, first line at the left edge.
                     float inner = height - si.PaddingTop - si.PaddingBottom;
                     float offset;       // distance of the run's start from the start edge of its direction
-                    switch (si.TextAlign)
+                    switch (align)
                     {
                         case TextAlignEnum.Center: offset = (inner - textwidth) / 2f; break;
                         case TextAlignEnum.Right:  offset = inner - textwidth;        break;
@@ -424,6 +433,14 @@ namespace Majorsilence.Reporting.Rdl
             AddAnnotations(x, y, height, width, url, tooltip);
             iAddBorder(si, x, y, height, width);
         }
+
+        // General alignment is the start edge of the text: the right one for a right-to-left box.
+        // (Textbox.RunPage has already made a General number or date Right.) So is the last line of
+        // a justified paragraph, the one line it does not spread.
+        private static TextAlignEnum HorizontalAlign(StyleInfo si) =>
+            si.Direction == DirectionEnum.RTL && (si.TextAlign == TextAlignEnum.General || si.TextAlign == TextAlignEnum.Justified)
+                ? TextAlignEnum.Right
+                : si.TextAlign;
 
         // Distance between successive baselines: the style's explicit LineHeight when one is
         // set, otherwise the font's own measured line height (ascent + descent + lineGap).
@@ -526,6 +543,9 @@ namespace Majorsilence.Reporting.Rdl
         // line of one word or one that would have to be squeezed to fit.
         private bool DrawJustified(string text, float startX, float baseline, float width, TextStyle style)
         {
+            if (style.IsRightToLeft || HasRightToLeftLetters(text))
+                return DrawJustifiedBidi(text, startX, baseline, width, style);
+
             string[] words = text.Trim().Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
             if (words.Length < 2) return false;
             float[] widths = new float[words.Length];
@@ -541,6 +561,42 @@ namespace Majorsilence.Reporting.Rdl
                 wx += widths[w] + gap;
             }
             return true;
+        }
+
+        // A justified line with right-to-left text is drawn as one line, its runs in the order the
+        // bidirectional algorithm displays them, with the spare width shared out after its spaces;
+        // placing its words one by one from the left would put them in the wrong order.
+        private bool DrawJustifiedBidi(string text, float startX, float baseline, float width, TextStyle style)
+        {
+            string line = text.Trim(' ');
+            int spaces = 0;
+            foreach (char c in line)
+                if (c == ' ') spaces++;
+            if (spaces == 0) return false;
+            float natural = _currentPage.MeasureTextWidth(line, style);
+            float extra = (width - natural) / spaces;
+            if (extra <= 0) return false;
+            _currentPage.DrawText(line, startX, baseline, style.WithAlignment(Majorsilence.Pdf.TextAlignment.Left).WithWordSpacing(extra));
+            return true;
+        }
+
+        // Hebrew, Arabic and the other right-to-left scripts, and their presentation forms.
+        private static bool HasRightToLeftLetters(string text)
+        {
+            for (int i = 0; i < text.Length; i++)
+            {
+                char c = text[i];
+                if ((c >= '\u0590' && c <= '\u08FF') || (c >= '\uFB1D' && c <= '\uFDFF') || (c >= '\uFE70' && c <= '\uFEFF'))
+                    return true;
+                if (char.IsHighSurrogate(c) && i + 1 < text.Length)
+                {
+                    int cp = char.ConvertToUtf32(c, text[i + 1]);
+                    if ((cp >= 0x10800 && cp <= 0x10FFF) || (cp >= 0x1E800 && cp <= 0x1EFFF))
+                        return true;
+                    i++;
+                }
+            }
+            return false;
         }
 
         // As a growing box is measured (Style.MeasureString), so that it grows by the lines drawn here.
@@ -687,8 +743,47 @@ namespace Majorsilence.Reporting.Rdl
             }
 
             AddCjkFallbacks(reg);
+            AddComplexScriptFallbacks(reg);
 
             return reg;
+        }
+
+        // Latin fonts have no Arabic, Hebrew or Indic glyphs either. A family for each script goes
+        // on the chain, the first one installed of each, so a report in Arial on a machine whose
+        // Arial (or its Liberation substitute) lacks them still draws them. Noto Sans Arabic and
+        // Noto Sans Hebrew are bundled, so those two scripts always have one.
+        private static readonly string[][] ComplexScriptFallbackFamilies =
+        {
+            // Arabic
+            new[] { "Noto Sans Arabic", "NotoSansArabic", "Noto Naskh Arabic", "Segoe UI", "Arial", "Tahoma", "DejaVu Sans" },
+            // Hebrew
+            new[] { "Noto Sans Hebrew", "NotoSansHebrew", "Segoe UI", "Arial", "David", "DejaVu Sans" },
+            // Devanagari
+            new[] { "Noto Sans Devanagari", "Noto Serif Devanagari", "Nirmala UI", "Mangal", "Lohit Devanagari", "Kohinoor Devanagari" },
+            // Bengali, Tamil, Telugu, Gujarati, Gurmukhi, Kannada, Malayalam
+            new[] { "Noto Sans Bengali", "Nirmala UI", "Vrinda", "Lohit Bengali" },
+            new[] { "Noto Sans Tamil", "Nirmala UI", "Latha", "Lohit Tamil" },
+            new[] { "Noto Sans Telugu", "Nirmala UI", "Gautami", "Lohit Telugu" },
+            new[] { "Noto Sans Gujarati", "Nirmala UI", "Shruti", "Lohit Gujarati" },
+            new[] { "Noto Sans Gurmukhi", "Nirmala UI", "Raavi", "Lohit Gurmukhi" },
+            new[] { "Noto Sans Kannada", "Nirmala UI", "Tunga", "Lohit Kannada" },
+            new[] { "Noto Sans Malayalam", "Nirmala UI", "Kartika", "Lohit Malayalam" },
+            // Thai
+            new[] { "Noto Sans Thai", "Leelawadee UI", "Tahoma", "Thonburi" },
+        };
+
+        private static void AddComplexScriptFallbacks(FontRegistry reg)
+        {
+            var added = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            foreach (string[] script in ComplexScriptFallbackFamilies)
+            {
+                foreach (string family in script)
+                {
+                    if (!reg.Contains(family)) continue;
+                    if (added.Add(family)) reg.AddFallback(family);
+                    break;
+                }
+            }
         }
 
         // Latin fonts have no CJK glyphs, so Chinese, Japanese or Korean text in a font the
@@ -864,17 +959,25 @@ namespace Majorsilence.Reporting.Rdl
 
         // TextStyle is immutable, and the style ResolveFont builds depends only on these values, so one
         // is made per distinct combination per render rather than per text item (each With* call clones).
-        private readonly Dictionary<(string Family, float Size, int Rgb, bool Bold, bool Italic), TextStyle> _textStyles =
-            new Dictionary<(string, float, int, bool, bool), TextStyle>();
+        private readonly Dictionary<(string Family, float Size, int Rgb, bool Bold, bool Italic, int Bidi), TextStyle> _textStyles =
+            new Dictionary<(string, float, int, bool, bool, int), TextStyle>();
 
         private TextStyle ResolveFont(StyleInfo si)
         {
             bool bold   = si.IsFontBold();
             bool italic = si.FontStyle == FontStyleEnum.Italic;
-            var key = (si.FontFamily ?? "", si.FontSize, (si.Color.R << 16) | (si.Color.G << 8) | si.Color.B, bold, italic);
+            bool rtl = si.Direction == DirectionEnum.RTL;
+            bool bidiOverride = si.UnicodeBiDirectional == UnicodeBiDirectionalEnum.BiDi_Override;
+            var key = (si.FontFamily ?? "", si.FontSize, (si.Color.R << 16) | (si.Color.G << 8) | si.Color.B, bold, italic,
+                (rtl ? 1 : 0) | (bidiOverride ? 2 : 0));
             if (!_textStyles.TryGetValue(key, out var style))
             {
                 style = BuildTextStyle(si, bold, italic);
+                // Direction is the paragraph's base direction for the bidirectional algorithm;
+                // Bidi-Override lays every character out in it. (Embed is Normal here: a text box
+                // is a paragraph of its own, with nothing around it to embed in.)
+                if (rtl) style = style.WithRightToLeft();
+                if (bidiOverride) style = style.WithBidiOverride();
                 _textStyles[key] = style;
             }
             return style;
