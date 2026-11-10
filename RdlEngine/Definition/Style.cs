@@ -731,11 +731,11 @@ namespace Majorsilence.Reporting.Rdl
 			MeasureSetup m = TryGetMeasureSetup(rpt);
 			if (m == null || !TryGetFormatedString(rpt, this, o, tc, out string s))
 				return false;
-			height = HeightWith(m, g, s, wrapPoints);
+			height = HeightWith(rpt, m, g, s, wrapPoints);
 			return true;
 		}
 
-		private static float HeightWith(MeasureSetup m, Draw2.Graphics g, string s, float wrapPoints)
+		private static float HeightWith(Report rpt, MeasureSetup m, Draw2.Graphics g, string s, float wrapPoints)
 		{
 			if (m.OneLineG != g)
 			{
@@ -743,7 +743,7 @@ namespace Majorsilence.Reporting.Rdl
 				m.OneLineNoWrap = g.MeasureString("Xg", m.Font, int.MaxValue, m.NoWrap).Height;
 				m.OneLineG = g;
 			}
-			return WrappedHeight(g, m.Font, m.DrawnFont, s, wrapPoints, m.LineHeight, m.OneLineWrap);
+			return WrappedHeight(g, m.Font, m.DrawnFont, s, wrapPoints, m.LineHeight, m.OneLineWrap, Kerned(rpt));
 		}
 
 		/// <summary>
@@ -755,7 +755,7 @@ namespace Majorsilence.Reporting.Rdl
 		{
 			MeasureSetup setup = await GetMeasureSetup(rpt, r).ConfigureAwait(false);
 			if (setup != null)
-				return HeightWith(setup, g, await GetFormatedString(rpt, this, r, o, tc).ConfigureAwait(false), wrapPoints);
+				return HeightWith(rpt, setup, g, await GetFormatedString(rpt, this, r, o, tc).ConfigureAwait(false), wrapPoints);
 
 			string s = await GetFormatedString(rpt, this, r, o, tc).ConfigureAwait(false); // the string to draw
 			using (Draw2.Font drawFont = await GetFont(rpt, r).ConfigureAwait(false))
@@ -763,7 +763,7 @@ namespace Majorsilence.Reporting.Rdl
 			{
 				var drawnFont = RenderPdf_Raw.DrawnFont(await EvalFontFamily(rpt, r).ConfigureAwait(false), drawFont.Bold, drawFont.Italic);
 				return WrappedHeight(g, drawFont, drawnFont, s, wrapPoints, await EvalLineHeight(rpt, r).ConfigureAwait(false),
-					g.MeasureString("Xg", drawFont, int.MaxValue, drawFormat).Height);
+					g.MeasureString("Xg", drawFont, int.MaxValue, drawFormat).Height, Kerned(rpt));
 			}
 		}
 
@@ -776,7 +776,7 @@ namespace Majorsilence.Reporting.Rdl
 			{
 				drawFormat.Alignment = Draw2.StringAlignment.Near;
 				return WrappedHeight(g, drawFont, RenderPdf_Raw.DrawnFont("Arial", false, false), s, wrapPoints, 0,
-					g.MeasureString("Xg", drawFont, int.MaxValue, drawFormat).Height);
+					g.MeasureString("Xg", drawFont, int.MaxValue, drawFormat).Height, Kerned(rpt));
 			}
 		}
 
@@ -787,19 +787,22 @@ namespace Majorsilence.Reporting.Rdl
 		// the text: the graphics library measures a family the machine lacks in the system's fallback font, so a
 		// box in a font only the PDF has, or in the PDF's substitute for a missing one, grew by other lines than
 		// it was drawn in. Text with characters the font lacks, which the PDF draws in fallback fonts, is
-		// measured by the graphics library, as it was.
+		// measured by the graphics library, as it was. A report that asks for kerning (ReportDefn.Kerning)
+		// has its lines measured kerned, as the PDF draws them.
 		private static float WrappedHeight(Draw2.Graphics g, Draw2.Font font, Majorsilence.Pdf.TrueTypeFont drawnFont, string s,
-			float wrapPoints, float lineHeight, float oneLinePx)
+			float wrapPoints, float lineHeight, float oneLinePx, bool kerning)
 		{
 			float pointsPerPixel = 72f / g.DpiX;
 			float size = font.SizeInPoints;
 			Func<string, float> width = drawnFont != null && HasEveryCharacter(drawnFont, s)
-				? line => drawnFont.GetWidthPoint(line, size)
+				? line => drawnFont.GetWidthPoint(line, size, kerning)
 				: line => g.MeasureRunWidth(line, font) * pointsPerPixel;
 			int lines = TextWrap.LineCount(s, Math.Max(wrapPoints, 1), width);
 			float pitchPx = lineHeight > 0 ? lineHeight * g.DpiY / 72f : oneLinePx;
 			return RSize.PointsFromPixels(g, (int) Math.Ceiling(lines * pitchPx));
 		}
+
+		private static bool Kerned(Report rpt) => rpt?.ReportDefinition?.Kerning ?? false;
 
 		private static bool HasEveryCharacter(Majorsilence.Pdf.TrueTypeFont font, string s)
 		{
