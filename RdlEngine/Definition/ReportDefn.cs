@@ -240,6 +240,10 @@ namespace Majorsilence.Reporting.Rdl
 					case "dataelementstyle":
 						_DataElementStyle = Majorsilence.Reporting.Rdl.DataElementStyle.GetStyle(xNodeLoop.InnerText, this.rl);
 						break;
+					case "custom":
+						_Customer = new Custom(this, null, xNodeLoop);
+						_Kerning = KerningOf(_Customer);
+						break;
 					default:
 						// don't know this element - log it
 						this.rl.LogError(4, "Unknown Report element '" + xNodeLoop.Name + "' ignored.");
@@ -507,6 +511,25 @@ namespace Majorsilence.Reporting.Rdl
 		{
 			get { return  _Customer; }
 			set {  _Customer = value; }
+		}
+
+		bool _Kerning;
+
+		/// <summary>
+		/// The report's <c>&lt;Custom&gt;&lt;Kerning&gt;true&lt;/Kerning&gt;&lt;/Custom&gt;</c>: its text is measured
+		/// and drawn with the font's pair kerning, as GDI-based printing sets it, so that its lines are as wide
+		/// as that output's. Off by default.
+		/// </summary>
+		internal bool Kerning => _Kerning;
+
+		private static bool KerningOf(Custom custom)
+		{
+			foreach (XmlNode xNode in custom.CustomXmlNode.ChildNodes)
+			{
+				if (xNode.Name == "Kerning")
+					return string.Equals(xNode.InnerText.Trim(), "true", StringComparison.OrdinalIgnoreCase);
+			}
+			return false;
 		}
 
 		internal string Name

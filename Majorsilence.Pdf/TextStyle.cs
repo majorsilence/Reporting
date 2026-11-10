@@ -94,6 +94,14 @@ namespace Majorsilence.Pdf
         /// </summary>
         public float WordSpacing { get; private set; }
 
+        /// <summary>
+        /// Apply the font's pair kerning (its <c>kern</c> table): text in an embedded font is
+        /// measured and drawn with each listed pair of glyphs moved together or apart, as
+        /// GDI-based printing sets it. Text laid out by the shaper (right-to-left, complex scripts,
+        /// word spacing) is positioned by the shaper instead, and the standard fonts are not kerned.
+        /// </summary>
+        public bool Kerning { get; private set; }
+
         // ── construction ──────────────────────────────────────────────────────
 
         private TextStyle() { }
@@ -193,6 +201,12 @@ namespace Majorsilence.Pdf
         public TextStyle WithWordSpacing(float points)
         {
             var s = Clone(); s.WordSpacing = points; return s;
+        }
+
+        /// <summary>Measure and draw with the font's pair kerning (see <see cref="Kerning"/>).</summary>
+        public TextStyle WithKerning(bool kerning = true)
+        {
+            var s = Clone(); s.Kerning = kerning; return s;
         }
     }
 }

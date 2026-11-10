@@ -29,6 +29,8 @@ namespace Majorsilence.Pdf
         private Dictionary<int, ushort> _charToGlyph = new Dictionary<int, ushort>();
         private string? _postScriptName;
         private short _xMin, _yMin, _xMax, _yMax;
+        private int _kernOffset = -1;   // the legacy 'kern' table, read on first use (see GetKerning)
+        private Dictionary<uint, short>? _kernPairs;
 
         // Color bitmap (CBDT/CBLC) fields — populated only when no outline glyf table is present.
         private bool _isColorBitmapOnly;
@@ -131,6 +133,7 @@ namespace Majorsilence.Pdf
             ParseHmtx(tables);
             ParseCmap(tables);
             ParseName(tables);
+            if (tables.TryGetValue("kern", out var kern) && kern.length >= 4) _kernOffset = kern.offset;
             _isCff = tables.ContainsKey("CFF ") && !tables.ContainsKey("glyf");
             if (!tables.ContainsKey("glyf") && tables.ContainsKey("CBDT") && tables.ContainsKey("CBLC"))
             {
@@ -395,10 +398,19 @@ namespace Majorsilence.Pdf
             return _advanceWidths[glyphId];
         }
 
-        public float GetWidthPoint(string text, float fontSize)
+        public float GetWidthPoint(string text, float fontSize) => GetWidthPoint(text, fontSize, false);
+
+        /// <summary>
+        /// The width of <paramref name="text"/> in points; with <paramref name="kerning"/>, each
+        /// pair of consecutive glyphs moved together or apart by the font's pair kerning
+        /// (<see cref="GetKerning"/>).
+        /// </summary>
+        public float GetWidthPoint(string text, float fontSize, bool kerning)
         {
             if (_unitsPerEm == 0 || _advanceWidths == null || text == null) return 0f;
             float total = 0f;
+            kerning = kerning && HasKerning;
+            ushort previous = 0;
             for (int i = 0; i < text.Length; i++)
             {
                 int cp;
@@ -411,9 +423,79 @@ namespace Majorsilence.Pdf
                 {
                     cp = text[i];
                 }
-                total += GetAdvanceWidth(GetGlyphId(cp));
+                ushort gid = GetGlyphId(cp);
+                total += GetAdvanceWidth(gid);
+                if (kerning)
+                {
+                    if (previous != 0) total += GetKerning(previous, gid);
+                    previous = gid;
+                }
             }
             return total / _unitsPerEm * fontSize;
+        }
+
+        /// <summary>Whether the font has a horizontal pair kerning table (the legacy <c>kern</c> table).</summary>
+        public bool HasKerning => KernPairs.Count > 0;
+
+        /// <summary>
+        /// How much closer (negative) or further apart (positive) the glyph <paramref name="right"/>
+        /// is set after <paramref name="left"/>, in font units, from the font's <c>kern</c> table;
+        /// 0 for a pair it does not list.
+        /// </summary>
+        public short GetKerning(ushort left, ushort right)
+        {
+            KernPairs.TryGetValue(((uint)left << 16) | right, out short value);
+            return value;
+        }
+
+        private static readonly Dictionary<uint, short> NoKernPairs = new Dictionary<uint, short>();
+
+        // The pairs of the kern table's horizontal format 0 subtables (the Windows version 0
+        // layout), summed over the subtables, or replaced by one with the override bit. Subtables
+        // of minimum values or cross-stream (vertical) adjustments are not kerning in the line's
+        // direction and are skipped. Read once, on first use; a race only reads the same pairs twice.
+        private Dictionary<uint, short> KernPairs
+        {
+            get
+            {
+                var pairs = _kernPairs;
+                if (pairs != null) return pairs;
+                pairs = _kernOffset < 0 ? NoKernPairs : ReadKernPairs(_kernOffset);
+                _kernPairs = pairs;
+                return pairs;
+            }
+        }
+
+        private Dictionary<uint, short> ReadKernPairs(int o)
+        {
+            if (U16(_data, o) != 0) return NoKernPairs;     // the Apple (version 1) layout is not read
+            var pairs = new Dictionary<uint, short>();
+            int nTables = U16(_data, o + 2);
+            int sub = o + 4;
+            for (int t = 0; t < nTables && sub + 6 <= _data.Length; t++)
+            {
+                int length = U16(_data, sub + 2);
+                int coverage = U16(_data, sub + 4);
+                int next = sub + Math.Max(length, 6);
+                if ((coverage >> 8) == 0 && sub + 14 <= _data.Length)
+                {
+                    int nPairs = U16(_data, sub + 6);
+                    // A large table's 16-bit length overflows, so the pairs end where their count says.
+                    next = sub + 14 + nPairs * 6;
+                    bool usable = (coverage & 0x07) == 0x01;  // horizontal, not minimum, not cross-stream
+                    bool replace = (coverage & 0x08) != 0;
+                    for (int p = 0; usable && p < nPairs && sub + 14 + p * 6 + 6 <= _data.Length; p++)
+                    {
+                        int r = sub + 14 + p * 6;
+                        uint key = ((uint)U16(_data, r) << 16) | U16(_data, r + 2);
+                        short value = S16(_data, r + 4);
+                        if (!replace && pairs.TryGetValue(key, out short existing)) value = (short)(existing + value);
+                        pairs[key] = value;
+                    }
+                }
+                sub = next;
+            }
+            return pairs.Count == 0 ? NoKernPairs : pairs;
         }
 
         private Dictionary<ushort, int>? _glyphToChar;

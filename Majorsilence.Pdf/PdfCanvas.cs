@@ -211,9 +211,14 @@ namespace Majorsilence.Pdf
 
                         var font = _ser.GetOrAddTtfFont(segSrc.CacheKey, segTtf);
                         sb.Append("/").Append(font.PdfName).Append(" ").AppendNum(style.FontSize).Append(" Tf\n");
-                        PdfSerializer.AppendGlyphIds(sb, segText, segTtf, font.UsedGlyphs);
-                        sb.Append(" Tj\n");
-                        float segW = WidthOf(segTtf, segText, style.FontSize);
+                        if (style.Kerning && segTtf.HasKerning)
+                            AppendKernedGlyphIds(sb, segText, segTtf, font.UsedGlyphs);
+                        else
+                        {
+                            PdfSerializer.AppendGlyphIds(sb, segText, segTtf, font.UsedGlyphs);
+                            sb.Append(" Tj\n");
+                        }
+                        float segW = WidthOf(segTtf, segText, style.FontSize, style.Kerning);
                         cursorX   += segW;
                         totalWidth += segW;
                     }
@@ -353,6 +358,8 @@ namespace Majorsilence.Pdf
                 if (c == '\n') { pos++; break; } // consume the newline and stop
 
                 float cw = MeasureTextWidth(c.ToString(), style);
+                if (style.Kerning && pos > start)   // with the pair it makes with the character before
+                    cw = MeasureTextWidth(text.Substring(pos - 1, 2), style) - MeasureTextWidth(text[pos - 1].ToString(), style);
                 if (lineW + cw > maxWidth && pos > start)
                     return lastBreak >= start ? lastBreak : pos; // word-break or char-break
 
@@ -429,19 +436,49 @@ namespace Majorsilence.Pdf
         private TrueTypeFont? _widthFont;
         private string? _widthText;
         private float _widthSize;
+        private bool _widthKerned;
         private float _width;
 
-        private float WidthOf(TrueTypeFont ttf, string text, float size)
+        private float WidthOf(TrueTypeFont ttf, string text, float size, bool kerning)
         {
-            if (ReferenceEquals(ttf, _widthFont) && ReferenceEquals(text, _widthText) && size == _widthSize)
+            if (ReferenceEquals(ttf, _widthFont) && ReferenceEquals(text, _widthText) && size == _widthSize
+                && kerning == _widthKerned)
                 return _width;
 
-            float width = ttf.GetWidthPoint(text, size);
+            float width = ttf.GetWidthPoint(text, size, kerning);
             _widthFont = ttf;
             _widthText = text;
             _widthSize = size;
+            _widthKerned = kerning;
             _width = width;
             return width;
+        }
+
+        // The run as a TJ array: its glyph string is broken wherever the font kerns a pair, and the
+        // adjustment written between, in thousandths of an em (a positive number moves the next
+        // glyph left), so the run is drawn as wide as GetWidthPoint with kerning measures it.
+        private static void AppendKernedGlyphIds(StringBuilder sb, string text, TrueTypeFont ttf, HashSet<ushort>? usedGlyphs)
+        {
+            const string Hex = "0123456789ABCDEF";
+            double toThousandths = 1000.0 / ttf.UnitsPerEm;
+            ushort previous = 0;
+            sb.Append("[<");
+            for (int i = 0; i < text.Length; i++)
+            {
+                int codePoint;
+                if (char.IsHighSurrogate(text[i]) && i + 1 < text.Length && char.IsLowSurrogate(text[i + 1]))
+                { codePoint = char.ConvertToUtf32(text[i], text[i + 1]); i++; }
+                else codePoint = text[i];
+                ushort gid = ttf.GetGlyphId(codePoint);
+                usedGlyphs?.Add(gid);
+                short kern = previous != 0 ? ttf.GetKerning(previous, gid) : (short)0;
+                if (kern != 0)
+                    sb.Append("> ").AppendNum((float)Math.Round(-kern * toThousandths, 2)).Append(" <");
+                sb.Append(Hex[(gid >> 12) & 0xF]).Append(Hex[(gid >> 8) & 0xF])
+                  .Append(Hex[(gid >> 4) & 0xF]).Append(Hex[gid & 0xF]);
+                previous = gid;
+            }
+            sb.Append(">] TJ\n");
         }
 
         private static List<(string text, TrueTypeFont ttf, FontSource src)> SegmentByFont(
@@ -1025,7 +1062,7 @@ namespace Majorsilence.Pdf
                 var fileTtf = _fontCache.GetOrLoad(style.FontFilePath);
                 if (NeedsComplexLayout(text, style))
                     return ComplexWidth(LayoutComplex(text, fileTtf, FontSource.FromPath(style.FontFilePath), style), style);
-                return WidthOf(fileTtf, text, style.FontSize);
+                return WidthOf(fileTtf, text, style.FontSize, style.Kerning);
             }
 
             // Registry-resolved family (may have fallback segments)
@@ -1039,12 +1076,12 @@ namespace Majorsilence.Pdf
                         return ComplexWidth(LayoutComplex(text, primary, src, style), style);
                     var fallbacks = LoadFallbacks(text, primary, src, style);
                     if (fallbacks.Count == 0)
-                        return WidthOf(primary, text, style.FontSize);
+                        return WidthOf(primary, text, style.FontSize, style.Kerning);
 
-                    // Width of each run in the font that will draw it.
+                    // Width of each run in the font that will draw it; no pair is kerned across runs.
                     float total = 0f;
                     foreach (var (segText, segTtf, _) in SegmentByFont(text, primary, src, fallbacks))
-                        total += WidthOf(segTtf, segText, style.FontSize);
+                        total += WidthOf(segTtf, segText, style.FontSize, style.Kerning);
                     return total;
                 }
             }

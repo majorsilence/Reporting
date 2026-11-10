@@ -75,6 +75,7 @@ namespace Majorsilence.Reporting.Rdl
             _fontRegistry = BuildFontRegistry();
 
             Report r = base.Report();
+            _kerning = r.ReportDefinition?.Kerning ?? false;
             _doc = PdfDocument.Create()
                 .WithAuthor(r.Author ?? "")
                 .WithTitle(r.Name   ?? "")
@@ -210,7 +211,8 @@ namespace Majorsilence.Reporting.Rdl
         {
             if (sa == null || sa.Length == 0) return;
 
-            TextStyle baseStyle = ResolveFont(si);
+            // Html text (bNoClip) was laid out by the graphics library, run by run, unkerned.
+            TextStyle baseStyle = ResolveFont(si, _kerning && !bNoClip);
             TextAlignEnum align = HorizontalAlign(si);
 
             // RenderBase.MeasureString wraps text using System.Drawing/SkiaSharp metrics, which
@@ -959,17 +961,20 @@ namespace Majorsilence.Reporting.Rdl
 
         // TextStyle is immutable, and the style ResolveFont builds depends only on these values, so one
         // is made per distinct combination per render rather than per text item (each With* call clones).
-        private readonly Dictionary<(string Family, float Size, int Rgb, bool Bold, bool Italic, int Bidi), TextStyle> _textStyles =
+        private readonly Dictionary<(string Family, float Size, int Rgb, bool Bold, bool Italic, int Flags), TextStyle> _textStyles =
             new Dictionary<(string, float, int, bool, bool, int), TextStyle>();
 
-        private TextStyle ResolveFont(StyleInfo si)
+        // The report asks for the font's pair kerning (ReportDefn.Kerning).
+        private bool _kerning;
+
+        private TextStyle ResolveFont(StyleInfo si, bool kerning)
         {
             bool bold   = si.IsFontBold();
             bool italic = si.FontStyle == FontStyleEnum.Italic;
             bool rtl = si.Direction == DirectionEnum.RTL;
             bool bidiOverride = si.UnicodeBiDirectional == UnicodeBiDirectionalEnum.BiDi_Override;
             var key = (si.FontFamily ?? "", si.FontSize, (si.Color.R << 16) | (si.Color.G << 8) | si.Color.B, bold, italic,
-                (rtl ? 1 : 0) | (bidiOverride ? 2 : 0));
+                (rtl ? 1 : 0) | (bidiOverride ? 2 : 0) | (kerning ? 4 : 0));
             if (!_textStyles.TryGetValue(key, out var style))
             {
                 style = BuildTextStyle(si, bold, italic);
@@ -978,6 +983,7 @@ namespace Majorsilence.Reporting.Rdl
                 // is a paragraph of its own, with nothing around it to embed in.)
                 if (rtl) style = style.WithRightToLeft();
                 if (bidiOverride) style = style.WithBidiOverride();
+                if (kerning) style = style.WithKerning();
                 _textStyles[key] = style;
             }
             return style;
