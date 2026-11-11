@@ -28,6 +28,21 @@ namespace Majorsilence.Reporting.Rdl
 		List<TableCell> _Covering;	// cells of rows above that span into this row
 		List<TableCell> _SpanEnds;	// those of them whose span ends with this row
 
+		/// <summary>
+		/// A Tablix row: its TablixRow's height, a visibility (the row's own, else its hierarchy
+		/// member's), and the cells from their CellContents (null for a position a span covers).
+		/// </summary>
+		internal TableRow(ReportDefn r, ReportLink p, XmlNode height, XmlNode visibility, IEnumerable<XmlNode> cellContents) : base(r, p)
+		{
+			_TableCells = new TableCells(r, this, cellContents);
+			if (height != null)
+				_Height = new RSize(r, height);
+			else
+				OwnerReport.rl.LogError(8, "TablixRow requires the Height element.");
+			if (visibility != null)
+				_Visibility = new Visibility(r, this, visibility);
+		}
+
 		internal TableRow(ReportDefn r, ReportLink p, XmlNode xNode) : base(r, p)
 		{
 			_TableCells=null;

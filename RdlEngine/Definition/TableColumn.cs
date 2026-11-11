@@ -17,6 +17,14 @@ namespace Majorsilence.Reporting.Rdl
 		Visibility _Visibility;	// Indicates if the column should be hidden	
 		bool _FixedHeader=false;	// Header of this column should be display even when scrolled
 	
+		/// <summary>A Tablix column: its width, and the visibility its hierarchy member gives it.</summary>
+		internal TableColumn(ReportDefn r, ReportLink p, RSize width, XmlNode visibility) : base(r, p)
+		{
+			_Width = width;
+			if (visibility != null)
+				_Visibility = new Visibility(r, this, visibility);
+		}
+
 		internal TableColumn(ReportDefn r, ReportLink p, XmlNode xNode) : base(r, p)
 		{
 			_Width=null;

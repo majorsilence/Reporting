@@ -121,11 +121,12 @@ namespace Majorsilence.Reporting.Rdl
 			// document first so they -- and every renderer behind them -- stay unchanged.
 			if (Rdl2008Normalizer.NeedsNormalizing(_RdlDocument))
 			{
-				Rdl2008Normalizer.Normalize(_RdlDocument, rl);
+				Rdl2008Normalizer.Normalize(_RdlDocument, rl, nativeTablix: NativeTablix);
 				xNode = _RdlDocument.LastChild;
 			}
 
 			ReportDefn rd = new ReportDefn(xNode, rl, this._Folder, this._DataSourceReferencePassword, oc, OnSubReportGetContent, OverwriteConnectionString, OverwriteInSubreport, SkipDatabaseSchemaValidation);
+			rd.NativeTablix = NativeTablix;
 			await rd.InitializeAsync().ConfigureAwait(false);
 			_Report = new Report(rd);
 			
@@ -182,6 +183,20 @@ namespace Majorsilence.Reporting.Rdl
 		{
 			get { return _skipDatabaseSchemaValidation; }
 			set { _skipDatabaseSchemaValidation = value; }
+		}
+
+		/// <summary>
+		/// Experimental (#427): when true, the engine runs an RDL 2008+ Tablix itself rather than
+		/// the normaliser rewriting it into a 2005 Table first. Only table-shaped Tablixes (no
+		/// column groups) run natively so far; the others are still rewritten. Defaults to false,
+		/// or to true when the RDL_NATIVE_TABLIX environment variable is 1 or true.
+		/// </summary>
+		public bool NativeTablix { get; set; } = NativeTablixDefault();
+
+		private static bool NativeTablixDefault()
+		{
+			string v = Environment.GetEnvironmentVariable("RDL_NATIVE_TABLIX");
+			return v == "1" || string.Equals(v, "true", StringComparison.OrdinalIgnoreCase);
 		}
 
 	}

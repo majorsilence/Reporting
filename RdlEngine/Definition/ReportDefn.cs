@@ -902,6 +902,9 @@ namespace Majorsilence.Reporting.Rdl
 			set {_OverwriteInSubreport = value;}
 		}
 
+		/// <summary>The report was parsed with RDLParser.NativeTablix; its subreports are too.</summary>
+		internal bool NativeTablix { get; set; }
+
 		internal bool SkipDatabaseSchemaValidation
 		{
 			get {return _SkipDatabaseSchemaValidation;}

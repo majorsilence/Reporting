@@ -21,6 +21,11 @@ namespace Majorsilence.Reporting.Rdl
 		Textbox _ToggleTextbox;	//  resolved TextBox for toggling visibility
 		bool _KeepTogether;		// Indicates the group should be kept on one page if it can be.
 	
+		/// <summary>For a Tablix, which sets Grouping, Sorting, Header and Footer.</summary>
+		internal TableGroup(ReportDefn r, ReportLink p) : base(r, p)
+		{
+		}
+
 		internal TableGroup(ReportDefn r, ReportLink p, XmlNode xNode) : base(r, p)
 		{
 			_Grouping=null;

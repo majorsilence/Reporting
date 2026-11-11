@@ -19,6 +19,11 @@ namespace Majorsilence.Reporting.Rdl
 		int _BottomRows;		// The last rows of a table's footer that print at the foot of
 								// every page the table is on (see Table.FooterRowsAtBottomOfPage)
 	
+		/// <summary>For a Tablix, which sets TableRows.</summary>
+		internal Footer(ReportDefn r, ReportLink p) : base(r, p)
+		{
+		}
+
 		internal Footer(ReportDefn r, ReportLink p, XmlNode xNode) : base(r, p)
 		{
 			_TableRows=null;

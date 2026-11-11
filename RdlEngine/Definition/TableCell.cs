@@ -61,6 +61,56 @@ namespace Majorsilence.Reporting.Rdl
 						break;
 				}
 			}
+			Finish();
+		}
+
+		static int _emptyCells;		// names the blank textboxes of empty Tablix cells
+
+		/// <summary>
+		/// A Tablix cell from its RDL 2008+ CellContents: the report item, and the ColSpan and
+		/// RowSpan beside it. A cell left empty holds a blank textbox, as a table cell must hold
+		/// one item.
+		/// </summary>
+		internal TableCell(ReportDefn r, ReportLink p, XmlNode cellContents, int colIndex, bool tablix) : base(r, p)
+		{
+			_ColIndex = colIndex;
+			_ColSpan = 1;
+			_RowSpan = 1;
+			bool hasItem = false;
+			foreach (XmlNode xNodeLoop in cellContents.ChildNodes)
+			{
+				if (xNodeLoop.NodeType != XmlNodeType.Element)
+					continue;
+				switch (xNodeLoop.Name)
+				{
+					case "ColSpan":
+						_ColSpan = Math.Max(1, XmlUtil.Integer(xNodeLoop.InnerText));
+						break;
+					case "RowSpan":
+						_RowSpan = Math.Max(1, XmlUtil.Integer(xNodeLoop.InnerText));
+						break;
+					default:
+						hasItem = true;
+						break;
+				}
+			}
+			XmlNode items = cellContents;
+			if (!hasItem)
+			{
+				XmlDocument doc = cellContents.OwnerDocument;
+				string ns = cellContents.NamespaceURI;
+				XmlElement textbox = doc.CreateElement("Textbox", ns);
+				textbox.SetAttribute("Name", "TablixEmptyCell" + System.Threading.Interlocked.Increment(ref _emptyCells));
+				textbox.AppendChild(doc.CreateElement("Value", ns));
+				items = doc.CreateElement("CellContents", ns);
+				items.AppendChild(textbox);
+			}
+			_ReportItems = new ReportItems(r, this, items, cellContents: true);
+			Finish();
+		}
+
+		private void Finish()
+		{
 			// Must have exactly one ReportItems
 			if (_ReportItems == null)
 				OwnerReport.rl.LogError(8, "ReportItems element is required with a TableCell but not specified.");
