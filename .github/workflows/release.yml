@@ -83,7 +83,9 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v5
         with:
-          dotnet-version: 10.0.x
+          dotnet-version: |
+            10.0.x
+            11.0.x
       - name: Build release zips and NuGet packages
         shell: pwsh
         run: ./build-release.ps1
@@ -105,7 +107,9 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v5
         with:
-          dotnet-version: 10.0.x
+          dotnet-version: |
+            10.0.x
+            11.0.x
       - name: Build AOT Windows
         run: ./build-release-aot-windows.ps1
       - uses: actions/upload-artifact@v6
@@ -135,7 +139,9 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v5
         with:
-          dotnet-version: 10.0.x
+          dotnet-version: |
+            10.0.x
+            11.0.x
       - name: Build AOT ${{ matrix.name }}
         shell: pwsh
         run: ${{ matrix.script }}

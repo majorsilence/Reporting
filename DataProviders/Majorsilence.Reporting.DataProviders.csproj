@@ -10,7 +10,7 @@
 		<PackageId>Majorsilence.Reporting.DataProviders</PackageId>
 		<Description>Pluggable data providers for Majorsilence Reporting — SQL Server, SQLite, MySQL, PostgreSQL, ODBC, JSON, XML, and more. SkiaSharp build for Linux, macOS, Windows, and containers. Targets .NET 8 and .NET 10.</Description>
 		<Configurations>Debug;Release</Configurations>
-		<TargetFrameworks>net8.0;net10.0</TargetFrameworks>
+		<TargetFrameworks>net8.0;net10.0;net11.0</TargetFrameworks>
 		<WarningsAsErrors>4014</WarningsAsErrors>
         <IsPackable>true</IsPackable>
 		<IsAotCompatible>true</IsAotCompatible>

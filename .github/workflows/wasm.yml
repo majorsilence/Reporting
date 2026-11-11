@@ -10,6 +10,9 @@ on:
     branches: [main, "release/**"]
 
 jobs:
+  # The wasm smoke tests target net10.0 and stay on the 10.0.x SDK: the 11.0 SDK's wasm-tools workload
+  # relinks with .NET 11's Emscripten, which SkiaSharp.NativeAssets.WebAssembly's native libraries don't
+  # match (libSkiaSharp then fails to load at runtime).
   pdf-wasm:
     # Publishes Majorsilence.Pdf + Majorsilence.Pdf.Security as a browser-wasm app and runs it under
     # Node, the same way the Native AOT smoke test proves the AOT build actually runs.
