@@ -310,6 +310,7 @@ namespace Majorsilence.Reporting.Rdl
 			_LUGlobals.Add("OverallPageNumber", new FunctionOverallPageNumber());
 			_LUGlobals.Add("OverallTotalPages", new FunctionOverallTotalPages());
 			_LUGlobals.Add("PageName", new FunctionPageName());
+			_LUGlobals.Add("ReportServerUrl", new FunctionReportServerUrl());
 			_LUUser = new ListDictionary();		// if entries grow beyond 10; make hashtable
 			_LUUser.Add("UserID", new FunctionUserID());
 			_LUUser.Add("Language", new FunctionUserLanguage());

@@ -587,6 +587,9 @@ namespace Majorsilence.Reporting.Rdl
 						throw new ParserException(string.Format(Strings.Parser_ErrorP_GlobalsNotFound, method));
 					result = e;
 					return (true, result);
+				case "datasets":	// DataSets!Name.CommandText
+					result = DataSetCommandText(method, thirdPart);
+					return (true, result);
 				case "variables":	// RDL 2008+: a report or group variable
 					Variable v = idLookup.LookupVariable(method);
 					if (v == null)
@@ -880,6 +883,22 @@ namespace Majorsilence.Reporting.Rdl
                             throw new ParserException((string.Format(Strings.Parser_ErrorP_UnknownProperty, curToken.Value, "ReportItems") + GetLocationInfo(curToken)));
                     }
                     break;
+				case "datasets":	// DataSets("Name").CommandText
+				{
+					if (args.Length != 1 || !await args[0].IsConstant().ConfigureAwait(false) || args[0].GetTypeCode() != TypeCode.String)
+						throw new ParserException("DataSets requires the name of a dataset, as a string." + GetLocationInfo(curToken));
+					string property = null;
+					if (curToken.Type == TokenTypes.DOT)
+					{
+						curToken = tokens.Extract();
+						if (curToken.Type != TokenTypes.IDENTIFIER)
+							throw new ParserException("DataSets(...) needs a property, such as CommandText." + GetLocationInfo(curToken));
+						property = curToken.Value;
+						curToken = tokens.Extract();
+					}
+					result = DataSetCommandText(await args[0].EvaluateString(null, null).ConfigureAwait(false), property);
+					break;
+				}
 				case "globals":
 					if (args.Length != 1)
 						throw new ParserException(Strings.Parser_ErrorP_GlobalsRequires1Argument + GetLocationInfo(curToken));
@@ -1264,6 +1283,21 @@ namespace Majorsilence.Reporting.Rdl
 		/// constants plus the VB enum values Report Builder writes into date functions.
 		/// Returns null when the name is not recognised.
 		/// </summary>
+		/// <summary>
+		/// DataSets!Name.CommandText and DataSets("Name").CommandText: the query text of a dataset.
+		/// RewrittenCommandText is the same here, as the engine does not rewrite queries.
+		/// </summary>
+		private IExpr DataSetCommandText(string name, string property)
+		{
+			DataSetDefn ds = idLookup.ScopeDataSet(name);
+			if (ds == null)
+				throw new ParserException(string.Format("DataSet '{0}' not found.", name));
+			if (!string.Equals(property, "CommandText", StringComparison.OrdinalIgnoreCase)
+				&& !string.Equals(property, "RewrittenCommandText", StringComparison.OrdinalIgnoreCase))
+				throw new ParserException(string.Format("DataSets supports only CommandText and RewrittenCommandText, not '{0}'.", property));
+			return new FunctionDataSetCommandText(ds);
+		}
+
 		private static IExpr ResolveWellKnownConstant(string fullname)
 		{
 			string key = fullname.ToLowerInvariant();

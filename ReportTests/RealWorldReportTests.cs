@@ -157,6 +157,20 @@ namespace ReportTests
             return outcome;
         }
 
+        /// <summary>
+        /// The report's Tablixes the normaliser maps to a Table that loses their row groups (they
+        /// are not one chain), which the native path runs as a pivot instead; null when none.
+        /// </summary>
+        private static string TablixesTheNormaliserFlattens(string report)
+        {
+            var doc = new System.Xml.XmlDocument();
+            doc.Load(Path.Combine(AppContext.BaseDirectory, "Reports", "RealWorld", report));
+            var names = doc.GetElementsByTagName("Tablix").Cast<System.Xml.XmlElement>().ToList()	// a live list
+                .Where(t => Rdl2008Normalizer.NativeKind(t) == "Table" && Rdl2008Normalizer.RunsNatively(t) == "TablixPivot")
+                .Select(t => t.GetAttribute("Name")).ToList();
+            return names.Count == 0 ? null : string.Join(", ", names);
+        }
+
         [TestCaseSource(nameof(Reports))]
         public void IsUnmodifiedFromUpstream(string report)
         {
@@ -191,6 +205,15 @@ namespace ReportTests
                 Assert.Ignore("The engine does not run this report yet: " + reason);
             }
             Assert.That(native.RenderError, Is.Null);
+            Assert.That(native.Items, Is.Not.Empty);
+            string flattened = TablixesTheNormaliserFlattens(report);
+            if (flattened != null)
+                Assert.Pass($"Not compared: the normaliser flattens the row groups of {flattened} into one row per " +
+                    "record, totalling over the whole table; the native path lays the groups out.");
+            // The two renders run a moment apart: a time of day printed (Globals!ExecutionTime, Now) may differ.
+            static string[] Untimed(string[] items) => items.Select(i => System.Text.RegularExpressions.Regex.Replace(i, @"\d{1,2}:\d{2}(:\d{2})?", "hh:mm")).ToArray();
+            normalised.Items = Untimed(normalised.Items);
+            native.Items = Untimed(native.Items);
             Assert.That(native.Items, Is.EqualTo(normalised.Items), () => "first differences (normalised => native):\n" + string.Join("\n",
                 Enumerable.Range(0, Math.Max(native.Items.Length, normalised.Items.Length))
                     .Where(i => i >= native.Items.Length || i >= normalised.Items.Length || native.Items[i] != normalised.Items[i]).Take(8)

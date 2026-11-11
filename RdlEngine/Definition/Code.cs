@@ -524,6 +524,8 @@ namespace Majorsilence.Reporting.Rdl
                         return report.Folder;
                     case "reportname":
                         return report.Name;
+                    case "reportserverurl":
+                        return report.ReportServerUrl;
                 }
                 return null;
             }
@@ -551,6 +553,8 @@ namespace Majorsilence.Reporting.Rdl
                 return report.Folder;
             }
         }
+
+        public string ReportServerUrl => report.ReportServerUrl;
 
         public string ReportName
         {
