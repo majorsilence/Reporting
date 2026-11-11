@@ -860,7 +860,7 @@ namespace Majorsilence.Reporting.Rdl
             var items = doc.CreateElement ("ReportItems", ns);
             var contents = FindChild (cells[0], "CellContents");
             var contentItems = contents == null ? new List<XmlElement> () : Children (contents);
-            contentItems.RemoveAll (c => c.LocalName == "ColSpan" || c.LocalName == "RowSpan");
+            contentItems.RemoveAll (c => !IsCellItem (c));
             if (contentItems.Count == 1 && contentItems[0].LocalName == "Rectangle" && IsPlainWrapper (contentItems[0])) {
                 var wrapper = contentItems[0];
                 var inner = FindChild (wrapper, "ReportItems");
@@ -1447,6 +1447,8 @@ namespace Majorsilence.Reporting.Rdl
                         cell.AppendChild (child.CloneNode (true));
                         continue;
                     }
+                    if (!IsCellItem (child))
+                        continue;
 
                     items.AppendChild (child.CloneNode (true));
                 }
@@ -2157,7 +2159,7 @@ namespace Majorsilence.Reporting.Rdl
 
             if (contents != null) {
                 foreach (var child in Children (contents)) {
-                    if (child.LocalName == "ColSpan" || child.LocalName == "RowSpan")
+                    if (!IsCellItem (child))
                         continue;
 
                     items.AppendChild (child.CloneNode (true));
@@ -2201,7 +2203,7 @@ namespace Majorsilence.Reporting.Rdl
                         && colSpan >= Math.Max (rowLevels.Count, 1) && rowSpan >= Math.Max (columnLevels.Count, 1);
 
                     foreach (var child in Children (contents)) {
-                        if (child.LocalName == "ColSpan" || child.LocalName == "RowSpan")
+                        if (!IsCellItem (child))
                             continue;
 
                         var item = (XmlElement)child.CloneNode (true);
@@ -2338,6 +2340,15 @@ namespace Majorsilence.Reporting.Rdl
             "KeepTogether",
             "GridLayoutDefinition",
         };
+
+        /// <summary>
+        /// A CellContents child that is the cell's report item: not its ColSpan or RowSpan, nor
+        /// Report Designer metadata such as rd:Selected (the cell selected when it was saved),
+        /// which would otherwise count as a second item and wrap the cell in a Rectangle.
+        /// </summary>
+        private static bool IsCellItem (XmlElement child)
+            => child.LocalName != "ColSpan" && child.LocalName != "RowSpan"
+                && !string.Equals (child.NamespaceURI, ReportDesignerNamespace, StringComparison.OrdinalIgnoreCase);
 
         private const string ReportDesignerNamespace =
             "http://schemas.microsoft.com/SQLServer/reporting/reportdesigner";

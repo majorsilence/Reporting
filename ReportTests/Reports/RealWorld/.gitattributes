@@ -1,0 +1,3 @@
+# These reports are vendored byte-for-byte from their upstream repositories (see README.md);
+# keep git from rewriting their line endings so they stay identical to upstream (SHA256SUMS).
+*.rdl -text
