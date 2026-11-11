@@ -612,6 +612,13 @@ namespace Majorsilence.Reporting.Rdl
 					result = new IdentifierKey(IdentifierKeyEnum.Simple);
 					return (true, result);
 				default:
+					var (dateSource, dateMember) = SplitDateSource(fullname);
+					if (dateSource != null)
+					{	// Now, Today, DateTime.Now, ... and a property of one: Today.Year
+						result = dateMember == null ? dateSource : DateMemberCall(dateSource, dateMember, Array.Empty<IExpr>(), true);
+						if (result != null)
+							return (true, result);
+					}
 					if (!bOnePart)
 					{
 						IExpr wellKnown = ResolveWellKnownConstant(fullname);
@@ -1298,9 +1305,93 @@ namespace Majorsilence.Reporting.Rdl
 			return new FunctionDataSetCommandText(ds);
 		}
 
+		private static readonly string[] NowNames = { "now", "datetime.now", "date.now", "system.datetime.now" };
+		private static readonly string[] TodayNames = { "today", "datetime.today", "date.today", "system.datetime.today" };
+
+		/// <summary>
+		/// VB's Now and Today, called without parentheses as reports write them, also spelt
+		/// DateTime.Now and Date.Today; and what follows one (Today.AddDays -> "AddDays").
+		/// </summary>
+		private static (IExpr Source, string Member) SplitDateSource(string name)
+		{
+			if (string.IsNullOrEmpty(name))
+				return (null, null);
+			string key = name.ToLowerInvariant();
+			foreach (var (names, function) in new[] { (NowNames, "Now"), (TodayNames, "Today") })
+			{
+				foreach (string n in names)
+				{
+					if (key != n && !key.StartsWith(n + ".", StringComparison.Ordinal))
+						continue;
+					var source = new FunctionSystem(typeof(VBFunctions).FullName, function, Array.Empty<IExpr>(), TypeCode.DateTime);
+					return (source, key.Length == n.Length ? null : name.Substring(n.Length + 1));
+				}
+			}
+			return (null, null);
+		}
+
+		/// <summary>
+		/// A member of a DateTime on Now or Today: the properties Year ... Second, Date, DayOfYear
+		/// and DayOfWeek, and the methods AddDays ... AddYears and ToString. Null for any other.
+		/// </summary>
+		private static IExpr DateMemberCall(IExpr date, string member, IExpr[] args, bool property)
+		{
+			string m = member.ToLowerInvariant();
+			string function = property
+				? m switch
+				{
+					"year" => "Year", "month" => "Month", "day" => "Day", "hour" => "Hour", "minute" => "Minute", "second" => "Second",
+					"date" => "DateDate", "dayofyear" => "DateDayOfYear", "dayofweek" => "DateDayOfWeek",
+					_ => null,
+				}
+				: m switch
+				{
+					"adddays" or "addhours" or "addminutes" or "addseconds" or "addmonths" or "addyears" or "tostring" => "Date" + member,
+					_ => null,
+				};
+			if (function == null)
+				return null;
+			var all = new IExpr[args.Length + 1];
+			all[0] = date;
+			Array.Copy(args, 0, all, 1, args.Length);
+			var types = Array.ConvertAll(all, a => XmlUtil.GetTypeFromTypeCode(a.GetTypeCode()));
+			MethodInfo mi = XmlUtil.GetMethod(typeof(VBFunctions), function, types);
+			if (mi == null)
+				return null;
+			return new FunctionSystem(typeof(VBFunctions).FullName, mi.Name, all, Type.GetTypeCode(mi.ReturnType));
+		}
+
 		private static IExpr ResolveWellKnownConstant(string fullname)
 		{
 			string key = fullname.ToLowerInvariant();
+
+			if (key.StartsWith("firstdayofweek."))
+			{	// VB's FirstDayOfWeek, as Weekday and DateDiff take it
+				switch (key.Substring("firstdayofweek.".Length))
+				{
+					case "system": return new ConstantInteger(0);
+					case "sunday": return new ConstantInteger(1);
+					case "monday": return new ConstantInteger(2);
+					case "tuesday": return new ConstantInteger(3);
+					case "wednesday": return new ConstantInteger(4);
+					case "thursday": return new ConstantInteger(5);
+					case "friday": return new ConstantInteger(6);
+					case "saturday": return new ConstantInteger(7);
+				}
+				return null;
+			}
+
+			if (key.StartsWith("firstweekofyear."))
+			{
+				switch (key.Substring("firstweekofyear.".Length))
+				{
+					case "system": return new ConstantInteger(0);
+					case "jan1": return new ConstantInteger(1);
+					case "firstfourdays": return new ConstantInteger(2);
+					case "firstfullweek": return new ConstantInteger(3);
+				}
+				return null;
+			}
 
 			if (key == "environment.newline" || key == "system.environment.newline")
 				return new ConstantString(Environment.NewLine);
@@ -1489,6 +1580,15 @@ namespace Majorsilence.Reporting.Rdl
 			{
 				cls = "";
 				method = fullname;
+			}
+
+			// A method of Now or Today: Today.AddDays(-7), DateTime.Now.ToString("yyyy")
+			var (dateSource, dateRest) = SplitDateSource(cls);
+			if (dateSource != null && dateRest == null)
+			{
+				IExpr call = DateMemberCall(dateSource, method, args, false);
+				if (call != null)
+					return call;
 			}
 
 			// Fill out the argument types

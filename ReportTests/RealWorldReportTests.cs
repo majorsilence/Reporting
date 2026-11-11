@@ -158,6 +158,17 @@ namespace ReportTests
         }
 
         /// <summary>
+        /// Reports whose native rendering differs from the normaliser's because the normaliser's is
+        /// wrong, each checked by hand: they must still render natively, but are not compared.
+        /// </summary>
+        private static readonly Dictionary<string, string> KnownDifferences = new Dictionary<string, string>(StringComparer.Ordinal)
+        {
+            ["ReportingServicesExamples/ServerReports/Heatmap Calendar.rdl"] =
+                "the Matrix the normaliser makes draws each month's header one week wide and 3.4pt tall, where the " +
+                "report sizes it 0.42cm; the native pivot spans it over the month's weeks.",
+        };
+
+        /// <summary>
         /// The report's Tablixes the normaliser maps to a Table that loses their row groups (they
         /// are not one chain), which the native path runs as a pivot instead; null when none.
         /// </summary>
@@ -206,6 +217,8 @@ namespace ReportTests
             }
             Assert.That(native.RenderError, Is.Null);
             Assert.That(native.Items, Is.Not.Empty);
+            if (KnownDifferences.TryGetValue(report, out string why))
+                Assert.Pass("Not compared: " + why);
             string flattened = TablixesTheNormaliserFlattens(report);
             if (flattened != null)
                 Assert.Pass($"Not compared: the normaliser flattens the row groups of {flattened} into one row per " +
