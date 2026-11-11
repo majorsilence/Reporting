@@ -10,9 +10,10 @@ on:
     branches: [main, "release/**"]
 
 jobs:
-  # The wasm smoke tests target net10.0 and stay on the 10.0.x SDK: the 11.0 SDK's wasm-tools workload
-  # relinks with .NET 11's Emscripten, which SkiaSharp.NativeAssets.WebAssembly's native libraries don't
-  # match (libSkiaSharp then fails to load at runtime).
+  # The wasm apps target net10.0, but the libraries they reference also target net11.0, so the 11.0
+  # SDK is required. Under the 11.0 SDK, `wasm-tools` alone relinks net10.0 apps with .NET 11's
+  # Emscripten, which SkiaSharp.NativeAssets.WebAssembly doesn't match (libSkiaSharp fails to load);
+  # `wasm-tools-net10` supplies the .NET 10 Emscripten toolchain for net10.0 apps.
   pdf-wasm:
     # Publishes Majorsilence.Pdf + Majorsilence.Pdf.Security as a browser-wasm app and runs it under
     # Node, the same way the Native AOT smoke test proves the AOT build actually runs.
@@ -22,13 +23,15 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v5
         with:
-          dotnet-version: 10.0.x
+          dotnet-version: |
+            10.0.x
+            11.0.x
       - name: Setup Node
         uses: actions/setup-node@v5
         with:
           node-version: 22
       - name: Install wasm-tools workload
-        run: dotnet workload install wasm-tools
+        run: dotnet workload install wasm-tools wasm-tools-net10
       - name: Publish the browser-wasm smoke test
         run: dotnet publish Examples/PdfWasmSmokeTest -c Release -p:WasmTestFont=/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf
       - name: Run it under Node
@@ -43,13 +46,15 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v5
         with:
-          dotnet-version: 10.0.x
+          dotnet-version: |
+            10.0.x
+            11.0.x
       - name: Setup Node
         uses: actions/setup-node@v5
         with:
           node-version: 22
       - name: Install wasm-tools workload
-        run: dotnet workload install wasm-tools
+        run: dotnet workload install wasm-tools wasm-tools-net10
       - name: Publish the browser-wasm smoke test
         run: dotnet publish Examples/RdlWasmSmokeTest -c Release
       - name: Run it under Node
@@ -63,9 +68,11 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v5
         with:
-          dotnet-version: 10.0.x
+          dotnet-version: |
+            10.0.x
+            11.0.x
       - name: Install wasm-tools workload
-        run: dotnet workload install wasm-tools
+        run: dotnet workload install wasm-tools wasm-tools-net10
       - name: Publish the Avalonia viewer for the browser
         run: dotnet publish Majorsilence.Reporting.UI.Browser -c Release
       - name: Publish the Majorsilence.Forms viewer for the browser
