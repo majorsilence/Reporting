@@ -127,6 +127,15 @@ namespace Majorsilence.Reporting.Rdl
 			_NumeralLanguage=null;
 			_NumeralVariant=null;
 
+			// RDL 2008+ groups border properties by edge (Border, TopBorder, ...); read them as the
+			// 2005 BorderColor/BorderStyle/BorderWidth they transpose to.
+			if (xNode is XmlElement styleElement && Rdl2008Normalizer.HasEdgeBorders(styleElement))
+			{
+				var transposed = (XmlElement)styleElement.CloneNode(true);
+				Rdl2008Normalizer.NormalizeBorder(transposed);
+				xNode = transposed;
+			}
+
 			// Loop thru all the child nodes
 			foreach(XmlNode xNodeLoop in xNode.ChildNodes)
 			{

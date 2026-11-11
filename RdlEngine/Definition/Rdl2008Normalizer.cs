@@ -70,12 +70,17 @@ namespace Majorsilence.Reporting.Rdl
                 return;
 
             UnwrapReportSections (report, rl);
-            UnwrapPage (report);
-            NormalizeBorders (report);
+            // The engine reads the 2008 Page, edge borders, ActionInfo and NoRowsMessage itself;
+            // the designer edits the 2005 shape, so they are rewritten only for it.
+            if (forEditing) {
+                UnwrapPage (report);
+                NormalizeBorders (report);
+            }
             NormalizeTextboxes (report, rl);
             if (!forEditing)
                 ReplaceUnsupportedItems (report, rl);
-            NormalizeActionsAndNoRows (report);
+            if (forEditing)
+                NormalizeActionsAndNoRows (report);
             NormalizeCharts (report, rl);
             NormalizeTablixes (report, rl);
             if (!forEditing)
@@ -250,7 +255,15 @@ namespace Majorsilence.Reporting.Rdl
                 NormalizeBorder (style);
         }
 
-        private static void NormalizeBorder (XmlElement style)
+        internal static bool HasEdgeBorders (XmlElement style)
+        {
+            foreach (var child in Children (style))
+                if (BorderEdges.ContainsKey (child.LocalName))
+                    return true;
+            return false;
+        }
+
+        internal static void NormalizeBorder (XmlElement style)
         {
             var doc = style.OwnerDocument;
             var ns = style.NamespaceURI;

@@ -157,8 +157,10 @@ namespace Majorsilence.Reporting.Rdl
 				}
 			}
 
+			int? pageColumns = null;
+			XmlNode pageColumnSpacing = null;
 			// Loop thru all the child nodes
-			foreach(XmlNode xNodeLoop in _xNode.ChildNodes)
+			foreach(XmlNode xNodeLoop in ReportChildren(_xNode))
 			{
 				if (xNodeLoop.NodeType != XmlNodeType.Element)
 					continue;
@@ -245,6 +247,17 @@ namespace Majorsilence.Reporting.Rdl
 					case "variables":
 						_Variables = new Variables(this, null, xNodeLoop);
 						break;
+					// RDL 2008+ Page: multi-column layout (on Body in 2005), and the size of an
+					// interactive (HTML) page, which this engine does not page by.
+					case "columns":
+						pageColumns = XmlUtil.Integer(xNodeLoop.InnerText);
+						break;
+					case "columnspacing":
+						pageColumnSpacing = xNodeLoop;
+						break;
+					case "interactiveheight":
+					case "interactivewidth":
+						break;
 					case "initialpagename":
 						_InitialPageName = new Expression(this, null, xNodeLoop, ExpressionType.String);
 						break;
@@ -261,6 +274,13 @@ namespace Majorsilence.Reporting.Rdl
 
 			if (_Body == null)
 				rl.LogError(8, "Body not specified for report.");
+			else
+			{
+				if (pageColumns.HasValue)
+					_Body.Columns = pageColumns.Value;
+				if (pageColumnSpacing != null)
+					_Body.ColumnSpacing = new RSize(this, pageColumnSpacing);
+			}
 
 			if (_Width == null)
 				rl.LogError(4, "Width not specified for report.  Assuming page width.");
@@ -435,6 +455,24 @@ namespace Majorsilence.Reporting.Rdl
 
 			if (_DataSourcesDefn != null)
 				_DataSourcesDefn.CleanUp(ip.Report());	// datasets may not have been cleaned up
+		}
+
+		// The Report's elements, with those of an RDL 2008+ Page element (page size, margins,
+		// header and footer, which 2005 has on Report itself) in its place. The Page's own Style,
+		// the printed page's border, has no 2005 counterpart.
+		private static System.Collections.Generic.IEnumerable<XmlNode> ReportChildren(XmlNode report)
+		{
+			foreach (XmlNode child in report.ChildNodes)
+			{
+				if (child.NodeType == XmlNodeType.Element && child.LocalName == "Page")
+				{
+					foreach (XmlNode pageChild in child.ChildNodes)
+						if (!(pageChild.NodeType == XmlNodeType.Element && pageChild.LocalName == "Style"))
+							yield return pageChild;
+				}
+				else
+					yield return child;
+			}
 		}
 
 		/// <summary>Adds the first page, named by InitialPageName, and resets the page globals.</summary>

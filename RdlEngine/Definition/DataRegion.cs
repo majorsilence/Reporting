@@ -66,6 +66,7 @@ namespace Majorsilence.Reporting.Rdl
 					_KeepTogether = XmlUtil.Boolean(xNodeLoop.InnerText, OwnerReport.rl);
 					break;
 				case "norows":
+				case "norowsmessage":	// RDL 2008+ name
 					_NoRows = new Expression(OwnerReport, this, xNodeLoop, ExpressionType.String);
 					break;
 				case "datasetname":

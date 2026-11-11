@@ -129,6 +129,10 @@ namespace Majorsilence.Reporting.Rdl
 				case "action":
 					_Action = new Action(OwnerReport, this, xNodeLoop);
 					break;
+				case "actioninfo":		// RDL 2008+: ActionInfo/Actions/Action; the first is the one a click follows
+					if (FirstAction(xNodeLoop) is XmlNode first)
+						_Action = new Action(OwnerReport, this, first);
+					break;
 				case "top":
 					_Top = new RSize(OwnerReport, xNodeLoop);
 					break;
@@ -862,6 +866,17 @@ namespace Majorsilence.Reporting.Rdl
 				return null;
 
 			return await _ToolTip.EvaluateString(rpt, r).ConfigureAwait(false);
+		}
+
+		/// <summary>The first Action of a 2008 ActionInfo, or null.</summary>
+		internal static XmlNode FirstAction(XmlNode actionInfo)
+		{
+			foreach (XmlNode actions in actionInfo.ChildNodes)
+				if (actions.NodeType == XmlNodeType.Element && actions.LocalName == "Actions")
+					foreach (XmlNode action in actions.ChildNodes)
+						if (action.NodeType == XmlNodeType.Element && action.LocalName == "Action")
+							return action;
+			return null;
 		}
 
 		/// <summary>Names the page this item starts on, and those after it (PageName).</summary>
