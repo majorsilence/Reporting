@@ -330,7 +330,7 @@ namespace Majorsilence.Reporting.Rdl
             ostrm.Close();
             PageImage pi = new PageImage(IMAGEFORMAT, ba, width, height);   // Create an image
 
-            RunPageRegionBegin(pgs);
+            await RunPageRegionBegin(pgs).ConfigureAwait(false);
 
             await SetPagePositionAndStyle(rpt, pi, row).ConfigureAwait(false);
             if (pi.SI.BackgroundImage != null)
@@ -354,7 +354,7 @@ namespace Majorsilence.Reporting.Rdl
 
             p.AddObject(pi);    // Put image onto the current page
 
-            RunPageRegionEnd(pgs);
+            await RunPageRegionEnd(pgs).ConfigureAwait(false);
 
             if (!this.PageBreakAtEnd && !IsTableOrMatrixCell(rpt))
             {

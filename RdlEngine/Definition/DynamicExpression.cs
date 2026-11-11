@@ -105,6 +105,7 @@ namespace Majorsilence.Reporting.Rdl
                 rpt.ReportDefinition.LUUser, rpt.ReportDefinition.LUAggrScope,
                 grp, m, rpt.ReportDefinition.CodeModules, rpt.ReportDefinition.Classes, rpt.ReportDefinition.DataSetsDefn,
                 rpt.ReportDefinition.CodeType);
+			lu.Context = _rl.Parent;
 
 			try 
 			{

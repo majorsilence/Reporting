@@ -48,6 +48,7 @@ namespace Majorsilence.Reporting.Rdl
 							// such things as including TITLE and ALT
 							// attributes in HTML reports.
 		Expression _Label;	// A label to identify an instance of a report item
+		Expression _PageName;	// RDL 2008 R2+: the name of the pages this item starts
 							// (Variant) within the client UI (to provide a user-friendly
 							// label for searching)
 							//Hierarchical listing of report item and group
@@ -128,6 +129,10 @@ namespace Majorsilence.Reporting.Rdl
 				case "action":
 					_Action = new Action(OwnerReport, this, xNodeLoop);
 					break;
+				case "actioninfo":		// RDL 2008+: ActionInfo/Actions/Action; the first is the one a click follows
+					if (FirstAction(xNodeLoop) is XmlNode first)
+						_Action = new Action(OwnerReport, this, first);
+					break;
 				case "top":
 					_Top = new RSize(OwnerReport, xNodeLoop);
 					break;
@@ -149,7 +154,11 @@ namespace Majorsilence.Reporting.Rdl
 				case "tooltip":
 					_ToolTip = new Expression(OwnerReport, this, xNodeLoop, ExpressionType.String);
 					break;
+				case "pagename":
+					_PageName = new Expression(OwnerReport, this, xNodeLoop, ExpressionType.String);
+					break;
 				case "label":
+				case "documentmaplabel":	// RDL 2008+ name for Label
 					_Label = new Expression(OwnerReport, this, xNodeLoop, ExpressionType.Variant);
 					break;
 				case "linktochild":
@@ -191,6 +200,8 @@ namespace Majorsilence.Reporting.Rdl
                 await _ToolTip.FinalPass().ConfigureAwait(false);
 			if (_Label != null)
                 await _Label.FinalPass().ConfigureAwait(false);
+			if (_PageName != null)
+				await _PageName.FinalPass().ConfigureAwait(false);
 			if (_Bookmark != null)
                 await _Bookmark.FinalPass().ConfigureAwait(false);
 			if (_Custom != null)
@@ -855,6 +866,24 @@ namespace Majorsilence.Reporting.Rdl
 				return null;
 
 			return await _ToolTip.EvaluateString(rpt, r).ConfigureAwait(false);
+		}
+
+		/// <summary>The first Action of a 2008 ActionInfo, or null.</summary>
+		internal static XmlNode FirstAction(XmlNode actionInfo)
+		{
+			foreach (XmlNode actions in actionInfo.ChildNodes)
+				if (actions.NodeType == XmlNodeType.Element && actions.LocalName == "Actions")
+					foreach (XmlNode action in actions.ChildNodes)
+						if (action.NodeType == XmlNodeType.Element && action.LocalName == "Action")
+							return action;
+			return null;
+		}
+
+		/// <summary>Names the page this item starts on, and those after it (PageName).</summary>
+		internal async Task RunPageName(Pages pgs, Row row)
+		{
+			if (_PageName != null)
+				pgs.SetPageName(await _PageName.EvaluateString(pgs.Report, row).ConfigureAwait(false));
 		}
 
 		internal Expression Label

@@ -147,6 +147,64 @@ namespace Majorsilence.Reporting.Rdl
 			return (IExpr) user[name];
 		}
 
+		/// <summary>Where the expression is: what Variables! names are looked up from.</summary>
+		internal ReportLink Context { get; set; }
+
+		/// <summary>
+		/// A variable visible where the expression is: of a group it is within, innermost
+		/// first, else of the report. Null when there is none of that name.
+		/// </summary>
+		internal Variable LookupVariable(string name)
+		{
+			TableGroup viaGroup = null;		// the table group the expression is in, if any
+			bool viaDetails = false;		// or the table's details
+			for (ReportLink rl = Context; rl != null; rl = rl.Parent)
+			{
+				Variable v = VariableOf(GroupingOf(rl), name);
+				if (v != null)
+					return v;
+				if (rl is TableGroup tg)
+					viaGroup ??= tg;
+				else if (rl is Details)
+					viaDetails = true;
+				else if (rl is Table t && t.TableGroups != null && (viaGroup != null || viaDetails))
+				{	// a table's groups and details are siblings: a detail row is within every
+					// group, a group's header or footer within the groups outside it
+					var groups = t.TableGroups.Items;
+					int last = viaDetails && viaGroup == null ? groups.Count - 1 : groups.IndexOf(viaGroup) - 1;
+					for (int i = last; i >= 0; i--)
+						if ((v = VariableOf(groups[i].Grouping, name)) != null)
+							return v;
+				}
+				else if (rl is Matrix mx)
+				{	// a matrix cell is in every row and column group of the matrix
+					foreach (Grouping mg in mx.AllGroupings())
+						if ((v = VariableOf(mg, name)) != null)
+							return v;
+				}
+				if (rl is DataRegion)
+				{	// a region nested in another's cell is within that cell's groups too
+					viaGroup = null;
+					viaDetails = false;
+				}
+			}
+			return Context?.OwnerReport?.Variables?[name];
+		}
+
+		private static Grouping GroupingOf(ReportLink rl)
+		{
+			switch (rl)
+			{
+				case Grouping g: return g;
+				case TableGroup tg: return tg.Grouping;
+				case Details d: return d.Grouping;
+				case List l: return l.Grouping;
+				default: return null;
+			}
+		}
+
+		private static Variable VariableOf(Grouping g, string name) => g?.Variables?[name];
+
 		internal Grouping LookupGrouping()
 		{
 			return g;

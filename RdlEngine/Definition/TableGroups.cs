@@ -15,6 +15,12 @@ namespace Majorsilence.Reporting.Rdl
 	{
         List<TableGroup> _Items;			// list of TableGroup entries
 
+		/// <summary>Empty, for a Tablix to add its groups to.</summary>
+		internal TableGroups(ReportDefn r, ReportLink p) : base(r, p)
+		{
+			_Items = new List<TableGroup>();
+		}
+
 		internal TableGroups(ReportDefn r, ReportLink p, XmlNode xNode) : base(r, p)
 		{
 			TableGroup tg;

@@ -93,6 +93,11 @@ namespace Majorsilence.Reporting.Rdl
 
 		internal int PageNumber=1;			// current page number
 		internal int TotalPages=1;			// total number of pages in report
+		// RDL 2008 R2+: PageNumber and TotalPages restart at a page break with ResetPageNumber;
+		// these count the whole report. PageName is the current page's name.
+		internal int OverallPageNumber=1;
+		internal int OverallTotalPages=1;
+		internal string PageName;
 		internal DateTime ExecutionTime;	// start time of report execution
         
         private bool _itextpdf = true;
@@ -535,8 +540,7 @@ namespace Majorsilence.Reporting.Rdl
 			pgs.PageWidth = _Report.PageWidth.Points;
 			try
 			{
-				Page p = new Page(1);				// kick it off with a new page
-				pgs.AddPage(p);
+				await _Report.StartPages(pgs).ConfigureAwait(false);	// kick it off with a new page
 
                 // Create all the pages
                 await _Report.Body.RunPage(pgs).ConfigureAwait(false);

@@ -91,8 +91,7 @@ namespace Majorsilence.Reporting.Rdl
 				return;
 			Report rpt = pgs.Report;
 
-			rpt.TotalPages = pgs.PageCount;
-            for (int i = 0; i < rpt.TotalPages; i++)
+            for (int i = 0; i < pgs.PageCount; i++)
 			{
 
                 rpt.CurrentPage = pgs[i];		// needs to know for page header/footer expr processing
@@ -101,7 +100,7 @@ namespace Majorsilence.Reporting.Rdl
 									- this._Height.Points;
                 pgs[i].XOffset = 0;
                 pgs.CurrentPage = pgs[i];
-                rpt.PageNumber = pgs[i].PageNumber;
+                pgs.SetPageGlobals(pgs[i]);
                 if (pgs[i].PageNumber == 1 && pgs.Count > 1 && !_PrintOnFirstPage)
 					continue;		// Don't put footer on the first page
                 if (pgs[i].PageNumber == pgs.Count && !_PrintOnLastPage)

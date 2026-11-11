@@ -21,6 +21,28 @@ namespace Majorsilence.Reporting.Rdl
 		bool _CanShrink;			// if any TableRow contains a TextBox with CanShrink
 		bool _CanHide;				// if any TableRow has a Visibility
 
+		/// <summary>Empty, for a Tablix to Add its rows to and then Complete.</summary>
+		internal TableRows(ReportDefn r, ReportLink p) : base(r, p)
+		{
+			_Items = new List<TableRow>();
+		}
+
+		internal void Add(TableRow row)
+		{
+			_Items.Add(row);
+		}
+
+		internal void Complete()
+		{
+			if (_Items.Count == 0)
+				OwnerReport.rl.LogError(8, "For TableRows at least one TableRow is required.");
+			else
+			{
+				_Items.TrimExcess();
+				AssignRowSpans();
+			}
+		}
+
 		internal TableRows(ReportDefn r, ReportLink p, XmlNode xNode) : base(r, p)
 		{
 			TableRow t;
@@ -136,18 +158,32 @@ namespace Majorsilence.Reporting.Rdl
 			if (bCheckRows)
 			{	// we need to check to see if a row will fit on the page
 				int keepUntil = -1;		// the last row of the rows a cell spans, which go to a new page together
+				float? newPageRoom = null;	// what a new page leaves for rows; measured when first needed
 				for (int i = 0; i < _Items.Count; i++)
 				{
 					TableRow t = _Items[i];
 					Page p = pgs.CurrentPage;			// this can change after running a row
 					float hrows = await t.HeightOfRow(pgs, row).ConfigureAwait(false);	// height of this row
-					if (i > keepUntil && (keepUntil = LastRowSpanned(i)) > i)
+					if (i > keepUntil && (keepUntil = LastRowSpanned(i, true)) > i)
 					{	// a cell spanning rows starts here: the rows it spans must fit below, where they
 						// fit on a page at all. Measured top down: a span's last row grows by what the
-						// rows above it leave of its text. Those that do not fit on one page are paged
-						// row by row, as any.
-						for (int j = i + 1; j <= keepUntil; j++)
-							hrows += await _Items[j].HeightOfRow(pgs, row).ConfigureAwait(false);
+						// rows above it leave of its text. Overlapping spans are kept together as one
+						// block when that fits on a new page; otherwise only the spans starting here
+						// are; and rows that do not fit on a new page in any case are paged row by row,
+						// as any, rather than moved to a page they would run off as well.
+						newPageRoom ??= await OwnerTable.HeightOfNewPage(pgs, row, null).ConfigureAwait(false);
+						float block = await HeightOfRows(pgs, row, i, keepUntil).ConfigureAwait(false);
+						if (block > newPageRoom.Value)
+						{
+							keepUntil = LastRowSpanned(i, false);
+							block = await HeightOfRows(pgs, row, i, keepUntil).ConfigureAwait(false);
+							if (block > newPageRoom.Value)
+							{
+								keepUntil = i;
+								block = hrows;
+							}
+						}
+						hrows = block;
 					}
 					float height = p.YOffset + hrows;
 					if (height > pgs.BottomOfPage && !p.IsEmpty())	// an empty page is kept (see Details.RunPage)
@@ -167,15 +203,24 @@ namespace Majorsilence.Reporting.Rdl
 			return;
 		}
 
-		// The last row that a cell starting in row i, or in a row spanned with it, spans.
-		private int LastRowSpanned(int i)
+		// The last row that a cell starting in row i spans; with overlapping, also the last that a
+		// cell starting in a row spanned with it spans, and so on.
+		private int LastRowSpanned(int i, bool overlapping)
 		{
 			int last = i;
-			for (int ri = i; ri <= last; ri++)
+			for (int ri = i; ri <= (overlapping ? last : i); ri++)
 				foreach (TableCell tc in _Items[ri].TableCells.Items)
 					if (tc.RowSpan > 1)
 						last = Math.Max(last, ri + tc.RowSpan - 1);
 			return Math.Min(last, _Items.Count - 1);
+		}
+
+		private async Task<float> HeightOfRows(Pages pgs, Row row, int first, int last)
+		{
+			float height = 0;
+			for (int j = first; j <= last; j++)
+				height += await _Items[j].HeightOfRow(pgs, row).ConfigureAwait(false);
+			return height;
 		}
 
 		internal Table OwnerTable

@@ -512,6 +512,12 @@ namespace Majorsilence.Reporting.Rdl
                         return report.PageNumber;
                     case "totalpages":
                         return report.TotalPages;
+                    case "overallpagenumber":
+                        return report.OverallPageNumber;
+                    case "overalltotalpages":
+                        return report.OverallTotalPages;
+                    case "pagename":
+                        return report.PageName;
                     case "executiontime":
                         return report.ExecutionTime;
                     case "reportfolder":

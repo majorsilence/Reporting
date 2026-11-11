@@ -43,6 +43,7 @@ namespace Majorsilence.Reporting.Rdl
 		Filters _Filters;		// Filters to apply to each row of data in the data region.
 		DataRegion _ParentDataRegion;   // when DataRegions are nested; the nested regions have the parent set 
         Expression _PageBreakCondition;
+		PageBreakDefn _PageBreak;	// RDL 2008+ PageBreak: Disabled and ResetPageNumber besides the location
         ReportDefn MyReport;
         internal DataRegion(ReportDefn r, ReportLink p, XmlNode xNode):base(r,p,xNode)
 		{
@@ -65,6 +66,7 @@ namespace Majorsilence.Reporting.Rdl
 					_KeepTogether = XmlUtil.Boolean(xNodeLoop.InnerText, OwnerReport.rl);
 					break;
 				case "norows":
+				case "norowsmessage":	// RDL 2008+ name
 					_NoRows = new Expression(OwnerReport, this, xNodeLoop, ExpressionType.String);
 					break;
 				case "datasetname":
@@ -75,6 +77,11 @@ namespace Majorsilence.Reporting.Rdl
 					break;
 				case "pagebreakatend":
 					_PageBreakAtEnd = XmlUtil.Boolean(xNodeLoop.InnerText, OwnerReport.rl);
+					break;
+				case "pagebreak":
+					_PageBreak = new PageBreakDefn(OwnerReport, this, xNodeLoop);
+					_PageBreakAtStart |= _PageBreak.AtStart;
+					_PageBreakAtEnd |= _PageBreak.AtEnd;
 					break;
                 case "pagebreakcondition":
                 case "fyi:pagebreakcondition":
@@ -144,6 +151,8 @@ namespace Majorsilence.Reporting.Rdl
                 await _Filters.FinalPass().ConfigureAwait(false);
             if (_PageBreakCondition != null)
                 await _PageBreakCondition.FinalPass().ConfigureAwait(false);
+			if (_PageBreak != null)
+				await _PageBreak.FinalPass().ConfigureAwait(false);
 
             return;
 		}
@@ -168,22 +177,38 @@ namespace Majorsilence.Reporting.Rdl
             await base.Run(ip, row).ConfigureAwait(false);
 		}
 
-		internal void RunPageRegionBegin(Pages pgs)
+		internal async Task RunPageRegionBegin(Pages pgs)
 		{
-			if (this.TC == null && this.PageBreakAtStart && PageBreakCondition && !pgs.CurrentPage.IsEmpty())
+			if (this.TC == null && this.PageBreakAtStart && !pgs.CurrentPage.IsEmpty()
+				&& await PageBreakAllowed(pgs.Report).ConfigureAwait(false))
 			{	// force page break at beginning of dataregion
 				pgs.NextOrNew();
 				pgs.CurrentPage.YOffset = OwnerReport.TopOfPage;
+				if (_PageBreak != null)
+					await _PageBreak.AfterBreak(pgs, null).ConfigureAwait(false);
+			}
+			await RunPageName(pgs, null).ConfigureAwait(false);
+		}
+
+		internal async Task RunPageRegionEnd(Pages pgs)
+		{
+			if (this.TC == null && this.PageBreakAtEnd && !pgs.CurrentPage.IsEmpty()
+				&& await PageBreakAllowed(pgs.Report).ConfigureAwait(false))
+			{	// force page break at end of dataregion
+				pgs.NextOrNew();
+				pgs.CurrentPage.YOffset = OwnerReport.TopOfPage;
+				if (_PageBreak != null)
+					await _PageBreak.AfterBreak(pgs, null).ConfigureAwait(false);
 			}
 		}
 
-		internal void RunPageRegionEnd(Pages pgs)
+		// The region's own page break may be gated: by an fyi PageBreakCondition, which must be
+		// true, and by 2008 R2's PageBreak/Disabled, which must not be.
+		private async Task<bool> PageBreakAllowed(Report rpt)
 		{
-			if (this.TC == null && this.PageBreakAtEnd && !pgs.CurrentPage.IsEmpty())
-			{	// force page break at beginning of dataregion
-				pgs.NextOrNew();
-				pgs.CurrentPage.YOffset = OwnerReport.TopOfPage;
-			}
+			if (_PageBreakCondition != null && !await _PageBreakCondition.EvaluateBoolean(rpt, null).ConfigureAwait(false))
+				return false;
+			return _PageBreak == null || !await _PageBreak.IsDisabled(rpt, null).ConfigureAwait(false);
 		}
 
 		internal async Task<bool> AnyRows(IPresent ip, Rows data)
@@ -219,7 +244,7 @@ namespace Majorsilence.Reporting.Rdl
 				return false;
 
 			// OK we have a message we need to put out
-			RunPageRegionBegin(pgs);				// still perform page break if needed
+			await RunPageRegionBegin(pgs).ConfigureAwait(false);				// still perform page break if needed
 
 			PageText pt = new PageText(msg);
             await SetPagePositionAndStyle(pgs.Report, pt, null).ConfigureAwait(false);
@@ -229,7 +254,7 @@ namespace Majorsilence.Reporting.Rdl
 
 			pgs.CurrentPage.AddObject(pt);
 
-			RunPageRegionEnd(pgs);					// perform end page break if needed
+			await RunPageRegionEnd(pgs).ConfigureAwait(false);					// perform end page break if needed
 
             SetPagePositionEnd(pgs, pt.Y + pt.H);
             
@@ -377,15 +402,6 @@ namespace Majorsilence.Reporting.Rdl
 			get { return  _NoRows; }
 			set {  _NoRows = value; }
 		}
-
-        internal bool PageBreakCondition
-        {
-            get
-            {
-                return false;
-            }
-            //set { _PageBreakCondition = value; }	
-        }
 
         internal string DataSetName
 		{

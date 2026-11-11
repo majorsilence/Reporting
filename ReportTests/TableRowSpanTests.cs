@@ -2,6 +2,7 @@
 using Majorsilence.Reporting.Rdl;
 using NUnit.Framework;
 using System;
+using System.Collections.Generic;
 using System.Data;
 using System.IO;
 using System.IO.Compression;
@@ -401,6 +402,82 @@ namespace ReportTests
             var tableRows = doc.GetElementsByTagName("TableRow").Cast<XmlElement>().ToList();
             Assert.That(tableRows.Select(r => r["TableCells"].ChildNodes.Count), Is.EqualTo(new[] { 2, 1, 1 }));
             Assert.That(tableRows[0]["TableCells"].FirstChild["RowSpan"].InnerText, Is.EqualTo("2"));
+        }
+
+        private static string SpanRow(string cells) => $@"<TableRow><Height>20pt</Height><TableCells>{cells}</TableCells></TableRow>";
+        private static string SpanCell(string name, int rowSpan = 1)
+            => $@"<TableCell>{(rowSpan > 1 ? $"<RowSpan>{rowSpan}</RowSpan>" : "")}<ReportItems><Textbox Name=""{name}""><Value>{name}</Value></Textbox></ReportItems></TableCell>";
+
+        // A one-record, two-column table of 20pt detail rows on a 110pt page.
+        private static async Task<List<Page>> RenderDetailRows(string rows)
+        {
+            string rdl = $@"<?xml version=""1.0"" encoding=""utf-8""?>
+<Report xmlns=""http://schemas.microsoft.com/sqlserver/reporting/2005/01/reportdefinition"">
+  <Width>300pt</Width>
+  <DataSources><DataSource Name=""Src""><ConnectionProperties><DataProvider>SQL</DataProvider><ConnectString /></ConnectionProperties></DataSource></DataSources>
+  <DataSets><DataSet Name=""DS"">
+    <Query><DataSourceName>Src</DataSourceName><CommandText>none</CommandText></Query>
+    <Fields><Field Name=""Dept""><DataField>Dept</DataField></Field></Fields>
+  </DataSet></DataSets>
+  <Body><Height>110pt</Height><ReportItems>
+    <Table Name=""T""><DataSetName>DS</DataSetName>
+      <TableColumns><TableColumn><Width>100pt</Width></TableColumn><TableColumn><Width>100pt</Width></TableColumn></TableColumns>
+      <Details><TableRows>{rows}</TableRows></Details>
+    </Table>
+  </ReportItems></Body>
+  <TopMargin>0pt</TopMargin><BottomMargin>0pt</BottomMargin>
+  <PageHeight>110pt</PageHeight><PageWidth>300pt</PageWidth>
+</Report>";
+            RdlEngineConfig.RdlEngineConfigInit();
+            using var report = await new RDLParser(rdl) { SkipDatabaseSchemaValidation = true }.Parse();
+            Assert.That(report.ErrorMaxSeverity, Is.LessThanOrEqualTo(4));
+            var table = new DataTable();
+            table.Columns.Add("Dept", typeof(string));
+            table.Rows.Add("d1");
+            await report.DataSets["DS"].SetData(table);
+            await report.RunGetData(null);
+            return (await report.BuildPages()).Cast<Page>().ToList();
+        }
+
+        private static int PageOf(List<Page> pages, string text)
+            => pages.FindIndex(p => p.Cast<PageItem>().OfType<PageText>().Any(t => t.Text == text));
+
+        // #648 follow-up: a span taller than a page was moved to a new page, which left the page
+        // before it nearly empty, and it still ran off the bottom of the next one.
+        [Test]
+        public async Task ASpanTallerThanAPage_StartsWhereItIsInsteadOfMovingToANewPage()
+        {
+            // a1-a2 (40pt), then "span" over s1-s10 (200pt) on a 110pt page.
+            var pages = await RenderDetailRows(
+                SpanRow(SpanCell("a1") + SpanCell("b1")) + SpanRow(SpanCell("a2") + SpanCell("b2"))
+                + SpanRow(SpanCell("span", 10) + SpanCell("s1"))
+                + string.Concat(Enumerable.Range(2, 9).Select(i => SpanRow(SpanCell("s" + i)))));
+
+            Assert.That(PageOf(pages, "a2"), Is.EqualTo(0));
+            Assert.That(PageOf(pages, "span"), Is.EqualTo(0), "the span starts below the rows before it");
+            Assert.That(PageOf(pages, "s3"), Is.EqualTo(0), "the page is filled: 5 rows of 20pt in 110pt");
+            Assert.That(PageOf(pages, "s4"), Is.EqualTo(1));
+            var span = pages[0].Cast<PageItem>().OfType<PageText>().Single(t => t.Text == "span");
+            Assert.That(span.Y + span.H, Is.LessThanOrEqualTo(110f + 0.05f), "the cell is cut at the bottom of the page");
+        }
+
+        // Overlapping spans are kept together as one block only while that block fits on a page;
+        // past that, the span starting the block is still kept together on its own.
+        [Test]
+        public async Task OverlappingSpansTooTallTogether_KeepTheFirstSpanTogetherOnItsOwn()
+        {
+            // a1-a2 (40pt); "P" spans r3-r4, and "Q", starting in r4, spans r4-r8. P and Q
+            // together are 120pt, more than the 110pt page; P alone is 40pt and fits below a2.
+            var pages = await RenderDetailRows(
+                SpanRow(SpanCell("a1") + SpanCell("b1")) + SpanRow(SpanCell("a2") + SpanCell("b2"))
+                + SpanRow(SpanCell("P", 2) + SpanCell("q1"))
+                + SpanRow(SpanCell("Q", 5))
+                + string.Concat(Enumerable.Range(5, 4).Select(i => SpanRow(SpanCell("x" + i)))));
+
+            Assert.That(PageOf(pages, "P"), Is.EqualTo(0), "P and its rows stay below a2");
+            Assert.That(PageOf(pages, "Q"), Is.EqualTo(0));
+            Assert.That(PageOf(pages, "x5"), Is.EqualTo(0), "100pt of rows on the 110pt page");
+            Assert.That(PageOf(pages, "x6"), Is.EqualTo(1));
         }
     }
 }

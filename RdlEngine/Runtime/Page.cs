@@ -138,6 +138,12 @@ namespace Majorsilence.Reporting.Rdl
 			get { return _pageno; }
 		}
 
+		/// <summary>Page numbering starts again at 1 on this page (PageBreak/ResetPageNumber).</summary>
+		internal bool ResetPageNumber { get; set; }
+
+		/// <summary>The page's name (PageName), or null.</summary>
+		public string PageName { get; internal set; }
+
 		public float XOffset
 		{
 			get { return _xOffset; }
@@ -206,6 +212,28 @@ namespace Majorsilence.Reporting.Rdl
 					c.ExpressionRows.Add(kv.Key, kv.Value.Data.Count);
 			}
 			return c;
+		}
+
+		// Cuts the items added after c that run past bottom to end there.
+		internal void ClipItemsAfter(Contents c, float bottom)
+		{
+			for (int i = c.Items; i < _items.Count; i++)
+			{
+				PageItem pi = _items[i];
+				if (pi is PageLine || pi is PagePolygon)
+					continue;
+				if (pi.Y < bottom && pi.Y + pi.H > bottom)
+				{
+					pi.H = bottom - pi.Y;
+					if (pi.SI?.BackgroundImage != null)
+					{	// the style may be shared with other items: cut a copy
+						StyleInfo si = (StyleInfo)pi.SI.Clone();
+						si.BackgroundImage = (PageImage)si.BackgroundImage.Clone();
+						si.BackgroundImage.H = pi.H;
+						pi.SI = si;
+					}
+				}
+			}
 		}
 
 		internal void RemoveContentsAfter(Contents c)

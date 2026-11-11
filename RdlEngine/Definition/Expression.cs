@@ -64,9 +64,12 @@ namespace Majorsilence.Reporting.Rdl
 			Matrix m=null;
 			ReportLink phpf=null;
 			bool inDetails = false;
+			ReportLink below = this;	// the link dr was reached from
 			while (dr != null)
 			{
-				if (dr is Grouping)
+				// A group's own expressions (group-by, filters, label) cannot hold an aggregate,
+				// but its variables are evaluated in the group's scope and commonly do.
+				if (dr is Grouping && !(below is Variables))
 					p.NoAggregateFunctions = true;
 				else if (dr is TableGroup)
 					grp = ((TableGroup) dr).Grouping;
@@ -91,6 +94,7 @@ namespace Majorsilence.Reporting.Rdl
 				}
 				else if (dr is DataRegion || dr is DataSetDefn)
 					break;
+				below = dr;
 				dr = dr.Parent;
 			}
 			if (dr != null)
@@ -116,6 +120,7 @@ namespace Majorsilence.Reporting.Rdl
 				grp, m, OwnerReport.CodeModules, OwnerReport.Classes, OwnerReport.DataSetsDefn,
 				OwnerReport.CodeType);
 
+			lu.Context = Parent;
 			lu.ContextTable = dr as Table;
 			lu.InTableDetails = inDetails;
 

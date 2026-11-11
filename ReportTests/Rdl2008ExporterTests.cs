@@ -856,7 +856,8 @@ namespace ReportTests
                 @"<Textbox Name=""B""><Value>x</Value><Style><BorderStyle><Default>Solid</Default><Bottom>Dashed</Bottom></BorderStyle><BorderWidth><Default>2pt</Default></BorderWidth></Style></Textbox>"));
             Rdl2008Exporter.ConvertToTablix (doc);
 
-            Rdl2008Normalizer.Normalize (doc, null);
+            // The designer's round trip: rendering reads these 2008 shapes without rewriting them.
+            Rdl2008Normalizer.Normalize (doc, null, forEditing: true);
 
             var style = First (doc, "Textbox")["Style"];
             Assert.That (style["BorderStyle"]["Default"].InnerText, Is.EqualTo ("Solid"));
@@ -900,7 +901,8 @@ namespace ReportTests
             doc.DocumentElement.InnerXml += PageSetup2005;
             Rdl2008Exporter.ConvertToTablix (doc);
 
-            Rdl2008Normalizer.Normalize (doc, null);
+            // The designer's round trip: rendering reads these 2008 shapes without rewriting them.
+            Rdl2008Normalizer.Normalize (doc, null, forEditing: true);
 
             var root = doc.DocumentElement;
             Assert.That (root["ReportSections"], Is.Null);
@@ -946,7 +948,8 @@ namespace ReportTests
 <Table Name=""T""><NoRows>none</NoRows><TableColumns><TableColumn><Width>1in</Width></TableColumn></TableColumns><Header><TableRows><TableRow><Height>0.25in</Height><TableCells><TableCell><ReportItems><Textbox Name=""H""><Value>h</Value></Textbox></ReportItems></TableCell></TableCells></TableRow></TableRows></Header><Details><TableRows><TableRow><Height>0.25in</Height><TableCells><TableCell><ReportItems><Textbox Name=""X""><Value>x</Value></Textbox></ReportItems></TableCell></TableCells></TableRow></TableRows></Details></Table>"));
             Rdl2008Exporter.ConvertToTablix (doc);
 
-            Rdl2008Normalizer.Normalize (doc, null);
+            // The designer's round trip: rendering reads these 2008 shapes without rewriting them.
+            Rdl2008Normalizer.Normalize (doc, null, forEditing: true);
 
             Assert.That (First (doc, "Textbox")["Action"]["Drillthrough"]["ReportName"].InnerText, Is.EqualTo ("Detail"));
             Assert.That (doc.GetElementsByTagName ("ActionInfo"), Is.Empty);

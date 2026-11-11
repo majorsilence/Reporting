@@ -57,6 +57,7 @@ namespace Majorsilence.Reporting.Rdl
 
         public void NextOrNew()
         {
+            string name = _currentPage?.PageName;
             if (_currentPage == this.LastPage)
                 AddPage(new Page(PageCount + 1));
             else
@@ -64,10 +65,60 @@ namespace Majorsilence.Reporting.Rdl
                 _currentPage = _pages[_currentPage.PageNumber];
                 _currentPage.SetEmpty();
             }
+            _currentPage.PageName ??= name;     // a page keeps the name of the one before it until named again
             //Allows using PageNumber in report body.
             //Important! This feature is NOT included in RDL specification!
             //PageNumber will be wrong if element using it will cause carry to next page after render.
-            Report.PageNumber = _currentPage.PageNumber;
+            Report.PageNumber = LogicalPageNumber(_currentPage);
+            Report.OverallPageNumber = _currentPage.PageNumber;
+            Report.PageName = _currentPage.PageName;
+        }
+
+        /// <summary>
+        /// A page break with ResetPageNumber has just started the current page: its numbering
+        /// (Globals!PageNumber and TotalPages) starts again at 1.
+        /// </summary>
+        internal void ResetPageNumber()
+        {
+            _currentPage.ResetPageNumber = true;
+            Report.PageNumber = 1;
+        }
+
+        /// <summary>Names the current page and the pages after it, until another name is set.</summary>
+        internal void SetPageName(string name)
+        {
+            if (string.IsNullOrEmpty(name))
+                return;
+            _currentPage.PageName = name;
+            Report.PageName = name;
+        }
+
+        /// <summary>The page's number since the last page that reset the numbering.</summary>
+        internal int LogicalPageNumber(Page p)
+        {
+            int n = 1;
+            for (int i = p.PageNumber - 1; i > 0 && !_pages[i].ResetPageNumber; i--)
+                n++;
+            return n;
+        }
+
+        /// <summary>The number of pages from the last reset before the page to the next reset after it.</summary>
+        internal int LogicalTotalPages(Page p)
+        {
+            int total = LogicalPageNumber(p);
+            for (int i = p.PageNumber; i < _pages.Count && !_pages[i].ResetPageNumber; i++)
+                total++;
+            return total;
+        }
+
+        /// <summary>Sets the report's page globals for an expression evaluated on page p.</summary>
+        internal void SetPageGlobals(Page p)
+        {
+            Report.PageNumber = LogicalPageNumber(p);
+            Report.TotalPages = LogicalTotalPages(p);
+            Report.OverallPageNumber = p.PageNumber;
+            Report.OverallTotalPages = PageCount;
+            Report.PageName = p.PageName;
         }
 
         /// <summary>
@@ -117,7 +168,7 @@ namespace Majorsilence.Reporting.Rdl
             {
                 if (!placed.Contains(pt))
                     continue;
-                Report.PageNumber = pt.Page.PageNumber;
+                SetPageGlobals(pt.Page);
                 string t = await tb.RunText(Report, row).ConfigureAwait(false);
                 pt.Text = t == null ? t : Textbox.LineBreaksAsLineFeeds(t);
             }

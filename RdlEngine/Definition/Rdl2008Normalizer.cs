@@ -63,21 +63,30 @@ namespace Majorsilence.Reporting.Rdl
         /// elements (ReportID, DataSourceID, ...) stay in the tree so that saving writes them back.
         /// Rendering passes false, which swaps and removes them so the parser sees only what it knows.
         /// </param>
-        internal static void Normalize (XmlDocument doc, ReportLog rl, bool forEditing = false)
+        /// <param name="nativeTablix">
+        /// The engine runs table-shaped Tablixes itself (RDLParser.NativeTablix): those are left as
+        /// they are, and only the shapes it does not run yet are rewritten.
+        /// </param>
+        internal static void Normalize (XmlDocument doc, ReportLog rl, bool forEditing = false, bool nativeTablix = false)
         {
             var report = FindReportElement (doc);
             if (report == null)
                 return;
 
             UnwrapReportSections (report, rl);
-            UnwrapPage (report);
-            NormalizeBorders (report);
+            // The engine reads the 2008 Page, edge borders, ActionInfo and NoRowsMessage itself;
+            // the designer edits the 2005 shape, so they are rewritten only for it.
+            if (forEditing) {
+                UnwrapPage (report);
+                NormalizeBorders (report);
+            }
             NormalizeTextboxes (report, rl);
             if (!forEditing)
                 ReplaceUnsupportedItems (report, rl);
-            NormalizeActionsAndNoRows (report);
+            if (forEditing)
+                NormalizeActionsAndNoRows (report);
             NormalizeCharts (report, rl);
-            NormalizeTablixes (report, rl);
+            NormalizeTablixes (report, rl, nativeTablix && !forEditing);
             if (!forEditing)
                 RemoveVersionOnlyElements (report);
         }
@@ -250,7 +259,15 @@ namespace Majorsilence.Reporting.Rdl
                 NormalizeBorder (style);
         }
 
-        private static void NormalizeBorder (XmlElement style)
+        internal static bool HasEdgeBorders (XmlElement style)
+        {
+            foreach (var child in Children (style))
+                if (BorderEdges.ContainsKey (child.LocalName))
+                    return true;
+            return false;
+        }
+
+        internal static void NormalizeBorder (XmlElement style)
         {
             var doc = style.OwnerDocument;
             var ns = style.NamespaceURI;
@@ -575,7 +592,7 @@ namespace Majorsilence.Reporting.Rdl
 
         #region Tablix
 
-        private static void NormalizeTablixes (XmlElement root, ReportLog rl)
+        private static void NormalizeTablixes (XmlElement root, ReportLog rl, bool nativeTablix = false)
         {
             // Converting a Tablix clones its cell contents into the new Table, so a Tablix
             // nested inside another region re-enters the tree as an unconverted clone; repeat
@@ -593,6 +610,10 @@ namespace Majorsilence.Reporting.Rdl
                     return;
 
                 foreach (var tablix in pending) {
+                    if (nativeTablix && BecomesTable (tablix)) {
+                        refused.Add (tablix);   // the engine runs it (Tablix); a Tablix in its cells is looked at next pass
+                        continue;
+                    }
                     var table = TryConvertTablix (tablix, rl);
                     if (table != null)
                         tablix.ParentNode.ReplaceChild (table, tablix);
@@ -601,6 +622,13 @@ namespace Majorsilence.Reporting.Rdl
                 }
             }
         }
+
+        /// <summary>
+        /// The Tablix is the shape this rewrites into a Table: the shape the engine's Tablix runs
+        /// natively. Decided on a copy, as the rewrite changes what it works on.
+        /// </summary>
+        internal static bool BecomesTable (XmlElement tablix)
+            => TryConvertTablix ((XmlElement) tablix.CloneNode (true), null)?.LocalName == "Table";
 
         private static XmlElement TryConvertTablix (XmlElement tablix, ReportLog rl)
         {
@@ -748,6 +776,7 @@ namespace Majorsilence.Reporting.Rdl
             // Position, size, style, DataSetName, visibility carry over unchanged. Tablix-only
             // vocabulary has no List counterpart.
             XmlElement tablixSort = null;
+            XmlElement listPageBreak = null;
             foreach (var child in Children (tablix)) {
                 switch (child.LocalName) {
                     case "TablixBody":
@@ -758,7 +787,9 @@ namespace Majorsilence.Reporting.Rdl
                     case "RepeatRowHeaders":
                     case "FixedColumnHeaders":
                     case "FixedRowHeaders":
+                        continue;
                     case "PageBreak":
+                        listPageBreak = child;
                         continue;
                     case "SortExpressions":
                         tablixSort = child;
@@ -813,6 +844,10 @@ namespace Majorsilence.Reporting.Rdl
             if (sort != null)
                 list.AppendChild (BuildSorting (doc, ns, sort));
 
+            // The Tablix's own break is the List region's, before or after all of it.
+            if (listPageBreak != null)
+                AppendPageBreak (list, doc, ns, listPageBreak);
+
             return list;
         }
 
@@ -840,13 +875,7 @@ namespace Majorsilence.Reporting.Rdl
                     continue;
                 }
 
-                var location = FindChild (child, "BreakLocation")?.InnerText;
-                var start = location == "Start" || location == "StartAndEnd";
-                var end = location == "End" || location == "StartAndEnd";
-                if (start)
-                    grouping.AppendChild (CreateTextElement (doc, ns, "PageBreakAtStart", "true"));
-                if (end)
-                    grouping.AppendChild (CreateTextElement (doc, ns, "PageBreakAtEnd", "true"));
+                AppendPageBreak (grouping, doc, ns, child);
             }
 
             return grouping;
@@ -1316,8 +1345,10 @@ namespace Majorsilence.Reporting.Rdl
             var location = FindChild (pageBreak, "BreakLocation")?.InnerText?.Trim();
             var atStart = string.Equals (location, "Start", StringComparison.OrdinalIgnoreCase)
                 || string.Equals (location, "StartAndEnd", StringComparison.OrdinalIgnoreCase);
+            var between = string.Equals (location, "Between", StringComparison.OrdinalIgnoreCase);
             var atEnd = string.Equals (location, "End", StringComparison.OrdinalIgnoreCase)
-                || string.Equals (location, "StartAndEnd", StringComparison.OrdinalIgnoreCase);
+                || string.Equals (location, "StartAndEnd", StringComparison.OrdinalIgnoreCase)
+                || between;     // between a group's instances: after each, the engine leaving out the last
 
             if (atStart) {
                 var start = doc.CreateElement ("PageBreakAtStart", ns);
@@ -1329,6 +1360,12 @@ namespace Majorsilence.Reporting.Rdl
                 end.InnerText = "true";
                 table.AppendChild (end);
             }
+
+            // The flags are the location alone. Where the break says more -- Disabled,
+            // ResetPageNumber, or Between -- the element goes along too: the engine reads it, and
+            // the exporter writes it back with its location taken from the flags.
+            if (between || Children (pageBreak).Exists (c => c.LocalName != "BreakLocation"))
+                table.AppendChild (pageBreak.CloneNode (true));
         }
 
         private static XmlElement BuildTableRow (XmlDocument doc, string ns, XmlElement tablixRow)

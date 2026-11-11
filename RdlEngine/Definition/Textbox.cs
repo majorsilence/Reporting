@@ -167,7 +167,8 @@ namespace Majorsilence.Reporting.Rdl
             await _Value.FinalPass().ConfigureAwait(false);
             ValueIsConstant = await _Value.IsConstant().ConfigureAwait(false);   // read by DataElementOutput
 			_TotalPagesLater = !InPageHeaderOrFooter() && _Value.Source != null &&
-				_Value.Source.IndexOf("Globals!TotalPages", StringComparison.OrdinalIgnoreCase) >= 0;
+				(_Value.Source.IndexOf("Globals!TotalPages", StringComparison.OrdinalIgnoreCase) >= 0
+				 || _Value.Source.IndexOf("Globals!OverallTotalPages", StringComparison.OrdinalIgnoreCase) >= 0);
 
 			if (this.DataElementName == null && this.Name == null)
 			{

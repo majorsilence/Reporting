@@ -54,6 +54,10 @@ namespace Majorsilence.Reporting.Rdl
 					case "action":
 						_Action = new Action(r, this, xNodeLoop);
 						break;
+					case "actioninfo":	// RDL 2008+
+						if (ReportItem.FirstAction(xNodeLoop) is XmlNode firstAction)
+							_Action = new Action(r, this, firstAction);
+						break;
 					case "style":
 						_Style = new Style(r, this, xNodeLoop);
 						break;

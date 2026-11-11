@@ -42,6 +42,8 @@ namespace Majorsilence.Reporting.Rdl
 		Body _Body;				// Describes how the body of the report is structured
 		ReportParameters _ReportParameters;	// Parameters for the report
 		Custom _Customer;		// Custom information to be handed to the report engine
+		Variables _Variables;	// RDL 2008+: report variables (Variables!Name.Value)
+		Expression _InitialPageName;	// RDL 2008 R2+: the name of the first page, until an item names another
 		RSize _Width;			// Width of the report
 		PageHeader _PageHeader;	// The header that is output at the top of each page of the report.
 		PageFooter _PageFooter;	// The footer that is output at the bottom of each page of the report.
@@ -155,8 +157,10 @@ namespace Majorsilence.Reporting.Rdl
 				}
 			}
 
+			int? pageColumns = null;
+			XmlNode pageColumnSpacing = null;
 			// Loop thru all the child nodes
-			foreach(XmlNode xNodeLoop in _xNode.ChildNodes)
+			foreach(XmlNode xNodeLoop in ReportChildren(_xNode))
 			{
 				if (xNodeLoop.NodeType != XmlNodeType.Element)
 					continue;
@@ -240,6 +244,23 @@ namespace Majorsilence.Reporting.Rdl
 					case "dataelementstyle":
 						_DataElementStyle = Majorsilence.Reporting.Rdl.DataElementStyle.GetStyle(xNodeLoop.InnerText, this.rl);
 						break;
+					case "variables":
+						_Variables = new Variables(this, null, xNodeLoop);
+						break;
+					// RDL 2008+ Page: multi-column layout (on Body in 2005), and the size of an
+					// interactive (HTML) page, which this engine does not page by.
+					case "columns":
+						pageColumns = XmlUtil.Integer(xNodeLoop.InnerText);
+						break;
+					case "columnspacing":
+						pageColumnSpacing = xNodeLoop;
+						break;
+					case "interactiveheight":
+					case "interactivewidth":
+						break;
+					case "initialpagename":
+						_InitialPageName = new Expression(this, null, xNodeLoop, ExpressionType.String);
+						break;
 					case "custom":
 						_Customer = new Custom(this, null, xNodeLoop);
 						_Kerning = KerningOf(_Customer);
@@ -253,6 +274,13 @@ namespace Majorsilence.Reporting.Rdl
 
 			if (_Body == null)
 				rl.LogError(8, "Body not specified for report.");
+			else
+			{
+				if (pageColumns.HasValue)
+					_Body.Columns = pageColumns.Value;
+				if (pageColumnSpacing != null)
+					_Body.ColumnSpacing = new RSize(this, pageColumnSpacing);
+			}
 
 			if (_Width == null)
 				rl.LogError(4, "Width not specified for report.  Assuming page width.");
@@ -279,6 +307,9 @@ namespace Majorsilence.Reporting.Rdl
 			_LUGlobals.Add("ExecutionTime", new FunctionExecutionTime());
 			_LUGlobals.Add("ReportFolder", new FunctionReportFolder());
 			_LUGlobals.Add("ReportName", new FunctionReportName());
+			_LUGlobals.Add("OverallPageNumber", new FunctionOverallPageNumber());
+			_LUGlobals.Add("OverallTotalPages", new FunctionOverallTotalPages());
+			_LUGlobals.Add("PageName", new FunctionPageName());
 			_LUUser = new ListDictionary();		// if entries grow beyond 10; make hashtable
 			_LUUser.Add("UserID", new FunctionUserID());
 			_LUUser.Add("Language", new FunctionUserLanguage());
@@ -304,6 +335,10 @@ namespace Majorsilence.Reporting.Rdl
                 await _DataSourcesDefn.FinalPass().ConfigureAwait(false);
 			if (_DataSetsDefn != null)
 				await _DataSetsDefn.FinalPass().ConfigureAwait(false);
+			if (_Variables != null)
+                await _Variables.FinalPass().ConfigureAwait(false);
+			if (_InitialPageName != null)
+				await _InitialPageName.FinalPass().ConfigureAwait(false);
             await _Body.FinalPass().ConfigureAwait(false);
 			if (_PageHeader != null)
                 await _PageHeader.FinalPass().ConfigureAwait(false);
@@ -422,13 +457,41 @@ namespace Majorsilence.Reporting.Rdl
 				_DataSourcesDefn.CleanUp(ip.Report());	// datasets may not have been cleaned up
 		}
 
+		// The Report's elements, with those of an RDL 2008+ Page element (page size, margins,
+		// header and footer, which 2005 has on Report itself) in its place. The Page's own Style,
+		// the printed page's border, has no 2005 counterpart.
+		private static System.Collections.Generic.IEnumerable<XmlNode> ReportChildren(XmlNode report)
+		{
+			foreach (XmlNode child in report.ChildNodes)
+			{
+				if (child.NodeType == XmlNodeType.Element && child.LocalName == "Page")
+				{
+					foreach (XmlNode pageChild in child.ChildNodes)
+						if (!(pageChild.NodeType == XmlNodeType.Element && pageChild.LocalName == "Style"))
+							yield return pageChild;
+				}
+				else
+					yield return child;
+			}
+		}
+
+		/// <summary>Adds the first page, named by InitialPageName, and resets the page globals.</summary>
+		internal async Task StartPages(Pages pgs)
+		{
+			pgs.AddPage(new Page(1));
+			Report rpt = pgs.Report;
+			rpt.PageNumber = rpt.TotalPages = rpt.OverallPageNumber = rpt.OverallTotalPages = 1;
+			rpt.PageName = null;
+			if (_InitialPageName != null)
+				pgs.SetPageName(await _InitialPageName.EvaluateString(rpt, null).ConfigureAwait(false));
+		}
+
 		internal async Task RunPage(IPresent ip)
 		{
 			Pages pgs = new Pages(ip.Report());
 			try
 			{
-				Page p = new Page(1);				// kick it off with a new page
-				pgs.AddPage(p);
+				await StartPages(pgs).ConfigureAwait(false);	// kick it off with a new page
 
                 // Create all the pages
                 await _Body.RunPage(pgs).ConfigureAwait(false);
@@ -505,6 +568,11 @@ namespace Majorsilence.Reporting.Rdl
 		{
 			get { return  _ReportParameters; }
 			set {  _ReportParameters = value; }
+		}
+
+		internal Variables Variables
+		{
+			get { return _Variables; }
 		}
 
 		internal Custom Customer
@@ -833,6 +901,9 @@ namespace Majorsilence.Reporting.Rdl
 			get {return _OverwriteInSubreport;}
 			set {_OverwriteInSubreport = value;}
 		}
+
+		/// <summary>The report was parsed with RDLParser.NativeTablix; its subreports are too.</summary>
+		internal bool NativeTablix { get; set; }
 
 		internal bool SkipDatabaseSchemaValidation
 		{

@@ -64,6 +64,9 @@ namespace Majorsilence.Reporting.Rdl
 		List<Textbox> _HideDuplicates;	// holds any textboxes that use this as a hideduplicate scope
 		bool _InMatrix; // true if grouping is in a matrix
         Expression _PageBreakCondition;
+		Variables _Variables;	// RDL 2008+: group variables (Variables!Name.Value)
+		PageBreakDefn _PageBreak;	// RDL 2008+ PageBreak: Disabled, ResetPageNumber and Between besides the location
+		Expression _PageName;	// RDL 2008 R2+: names the pages each instance starts
 
         internal Grouping(ReportDefn r, ReportLink p, XmlNode xNode) : base(r, p)
 		{
@@ -98,7 +101,19 @@ namespace Majorsilence.Reporting.Rdl
 				switch (xNodeLoop.Name.ToLowerInvariant())
 				{
 					case "label":
+					case "documentmaplabel":	// RDL 2008+ name for Label
 						_Label = new Expression(r, this, xNodeLoop, ExpressionType.String);
+						break;
+					case "variables":
+						_Variables = new Variables(r, this, xNodeLoop);
+						break;
+					case "pagebreak":
+						_PageBreak = new PageBreakDefn(r, this, xNodeLoop);
+						_PageBreakAtStart |= _PageBreak.AtStart;
+						_PageBreakAtEnd |= _PageBreak.AtEnd;
+						break;
+					case "pagename":
+						_PageName = new Expression(r, this, xNodeLoop, ExpressionType.String);
 						break;
 					case "groupexpressions":
 						_GroupExpressions = new GroupExpressions(r, this, xNodeLoop);
@@ -153,10 +168,34 @@ namespace Majorsilence.Reporting.Rdl
 		}
 
 		// Handle parsing of function in final pass
+		internal Variables Variables
+		{
+			get { return _Variables; }
+		}
+
+		/// <summary>The 2008+ PageBreak, when the group has one; null for the 2005 flags alone.</summary>
+		internal PageBreakDefn PageBreak
+		{
+			get { return _PageBreak; }
+		}
+
+		/// <summary>Names the page an instance starts on (PageName), evaluated on its first row.</summary>
+		internal async Task RunPageName(Pages pgs, Row row)
+		{
+			if (_PageName != null)
+				pgs.SetPageName(await _PageName.EvaluateString(pgs.Report, row).ConfigureAwait(false));
+		}
+
 		async override internal Task FinalPass()
 		{
 			if (_Label != null)
                 await _Label.FinalPass().ConfigureAwait(false);
+			if (_Variables != null)
+				await _Variables.FinalPass().ConfigureAwait(false);
+			if (_PageBreak != null)
+				await _PageBreak.FinalPass().ConfigureAwait(false);
+			if (_PageName != null)
+				await _PageName.FinalPass().ConfigureAwait(false);
 			if (_GroupExpressions != null)
                 await _GroupExpressions.FinalPass().ConfigureAwait(false);
 			if (_Custom != null)
@@ -243,6 +282,8 @@ namespace Majorsilence.Reporting.Rdl
                 result = await _PageBreakCondition.EvaluateBoolean(r, row).ConfigureAwait(false);
             else
                 result = SeMancaDefinizione;
+            if (result && _PageBreak != null && await _PageBreak.IsDisabled(r, row).ConfigureAwait(false))
+                result = false;		// 2008 R2 PageBreak/Disabled
             return result;
         }
 
