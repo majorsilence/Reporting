@@ -451,6 +451,26 @@ namespace Majorsilence.Reporting.Rdl
             return FooterHeight;
         }
 
+		// The room a new page leaves for rows: from the top of the page, below the header and group
+		// headers repeated on it (up to stoptg), to the bottom of the page.
+		internal async Task<float> HeightOfNewPage(Pages pgs, Row row, TableGroup stoptg)
+		{
+			float height = pgs.BottomOfPage - OwnerReport.TopOfPage;
+			if (_Header != null && _Header.RepeatOnNewPage)
+				height -= await _Header.HeightOfRows(pgs, row).ConfigureAwait(false);
+			if (_TableGroups != null)
+			{
+				foreach (TableGroup tg in _TableGroups.Items)
+				{
+					if (stoptg != null && tg == stoptg)
+						break;
+					if (tg.Header != null && tg.Header.RepeatOnNewPage)
+						height -= await tg.Header.HeightOfRows(pgs, row).ConfigureAwait(false);
+				}
+			}
+			return height;
+		}
+
 		// A header or footer printed on each page holds back nothing it draws beneath: the
 		// group, record or footer it breaks into goes on over it (see HoldBeneath).
 		internal async Task RunPageHeader(Pages pgs, Row frow, bool bFirst, TableGroup stoptg)

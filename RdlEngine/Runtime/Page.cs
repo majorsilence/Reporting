@@ -208,6 +208,28 @@ namespace Majorsilence.Reporting.Rdl
 			return c;
 		}
 
+		// Cuts the items added after c that run past bottom to end there.
+		internal void ClipItemsAfter(Contents c, float bottom)
+		{
+			for (int i = c.Items; i < _items.Count; i++)
+			{
+				PageItem pi = _items[i];
+				if (pi is PageLine || pi is PagePolygon)
+					continue;
+				if (pi.Y < bottom && pi.Y + pi.H > bottom)
+				{
+					pi.H = bottom - pi.Y;
+					if (pi.SI?.BackgroundImage != null)
+					{	// the style may be shared with other items: cut a copy
+						StyleInfo si = (StyleInfo)pi.SI.Clone();
+						si.BackgroundImage = (PageImage)si.BackgroundImage.Clone();
+						si.BackgroundImage.H = pi.H;
+						pi.SI = si;
+					}
+				}
+			}
+		}
+
 		internal void RemoveContentsAfter(Contents c)
 		{
 			_items.RemoveRange(c.Items, _items.Count - c.Items);

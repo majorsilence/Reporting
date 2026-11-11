@@ -86,7 +86,13 @@ namespace Majorsilence.Reporting.Rdl
 					pgs.CurrentPage = sp;
 					sp.XOffset = start.X;
 					sp.YOffset = start.Y;
+					Page.Contents before = sp.MarkContents();
 					await span.RunPage(pgs, row).ConfigureAwait(false);
+					// Rows too tall together for a page are paged one by one (TableRows.RunPage):
+					// a cell over rows that went on to later pages is cut at the bottom of the
+					// page it starts on, not drawn past it.
+					if (sp != savepg)
+						sp.ClipItemsAfter(before, pgs.BottomOfPage);
 					sp.XOffset = oldx;
 					sp.YOffset = oldy;
 				}
