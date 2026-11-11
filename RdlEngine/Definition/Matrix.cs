@@ -63,6 +63,13 @@ namespace Majorsilence.Reporting.Rdl
         static string nullterminal = '\ufffe'.ToString();
         static string terminal = '\uffff'.ToString();
 
+        /// <summary>For a Tablix run as a pivot (TablixPivot), which builds its grid itself.</summary>
+        protected Matrix(ReportDefn r, ReportLink p, XmlNode xNode, bool tablix) : base(r, p, xNode)
+        {
+            _LayoutDirection = MatrixLayoutDirectionEnum.LTR;
+            _CellDataElementOutput = MatrixCellDataElementOutputEnum.Output;
+        }
+
         internal Matrix(ReportDefn r, ReportLink p, XmlNode xNode) : base(r, p, xNode)
         {
             _Corner = null;
@@ -355,7 +362,7 @@ namespace Majorsilence.Reporting.Rdl
             // Handle the corner;  it might span rows & columns
             bool bCorner = false;
             float cornerHeight = 0;
-            if (iRow == 0 && matrix[0, 0] != null &&
+            if (iRow == 0 && matrix[0, 0] != null && this.ColumnGroupings != null &&
                 (this.ColumnGroupings.Items.Count > 1 ||
                 this.RowGroupings.Items.Count > 1))
             {
@@ -485,7 +492,7 @@ namespace Majorsilence.Reporting.Rdl
 
         // RunBuild is used by both Matrix.Run and Chart.Run to obtain the necessary data
         //   used by their respective rendering interfaces
-        internal async Task<(MatrixCellEntry[,], int numRows, int numCols)> RunBuild(Report rpt)
+        internal virtual async Task<(MatrixCellEntry[,], int numRows, int numCols)> RunBuild(Report rpt)
         {
             if (_ExtraRowSets.Count > 0)
                 return await RunBuildRowSets(rpt).ConfigureAwait(false);
@@ -564,7 +571,7 @@ namespace Majorsilence.Reporting.Rdl
         }
 
         /// <summary>The most column-header rows in any column set; repeated at the top of each page.</summary>
-        int HeaderRowCount
+        private protected virtual int HeaderRowCount
         {
             get
             {
@@ -1444,7 +1451,7 @@ namespace Majorsilence.Reporting.Rdl
         }
 
         /// <summary>The groupings of the matrix's dynamic rows and columns.</summary>
-        internal System.Collections.Generic.IEnumerable<Grouping> AllGroupings()
+        internal virtual System.Collections.Generic.IEnumerable<Grouping> AllGroupings()
         {
             if (_RowGroupings != null)
                 foreach (RowGrouping rg in _RowGroupings.Items)
@@ -1466,6 +1473,12 @@ namespace Majorsilence.Reporting.Rdl
         {
             WorkClass wc = GetValue(rpt);
             return wc.Data;
+        }
+
+        /// <summary>All the region's rows (after its filters), where GetMyData is the cell's.</summary>
+        private protected Rows GetFullData(Report rpt)
+        {
+            return GetValue(rpt).FullData;
         }
 
         internal void SetMyData(Report rpt, Rows data)
@@ -1512,7 +1525,7 @@ namespace Majorsilence.Reporting.Rdl
 
         // Rendering leaves each group flagged as the last cell left it, usually "totalled over". Put
         // them back so an InScope() evaluated after the matrix, outside it, is not misled.
-        private void ResetInScope(Report rpt)
+        private protected virtual void ResetInScope(Report rpt)
         {
             foreach (ColumnGrouping cg in this.ColumnGroupings.Items)
                 cg.DynamicColumns?.Grouping?.SetInScope(rpt, true);
@@ -1530,7 +1543,7 @@ namespace Majorsilence.Reporting.Rdl
             }
         }
 
-        private void SetGroupingValues(Report rpt, MatrixCellEntry mce)
+        private protected virtual void SetGroupingValues(Report rpt, MatrixCellEntry mce)
         {
             WorkClass wc = GetValue(rpt);
             Rows data = wc.FullData;

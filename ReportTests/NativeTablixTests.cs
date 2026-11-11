@@ -15,7 +15,7 @@ namespace ReportTests
     /// report is rendered both ways and every page item compared.
     /// </summary>
     [TestFixture]
-    public class NativeTablixTests
+    public partial class NativeTablixTests
     {
         private const string Ns = "http://schemas.microsoft.com/sqlserver/reporting/2008/01/reportdefinition";
 
@@ -32,11 +32,11 @@ namespace ReportTests
             => "<TablixColumns>" + string.Concat(Enumerable.Repeat("<TablixColumn><Width>1.25in</Width></TablixColumn>", count)) + "</TablixColumns>";
 
         private static string Tablix(string name, int columns, string rows, string rowMembers, string columnMembers = null, string extra = "")
-            => $@"<Tablix Name=""{name}"">
+            => $@"<Tablix Name=""{name}"">{(extra.StartsWith("<TablixCorner>") ? extra : "")}
                 <TablixBody>{Columns(columns)}<TablixRows>{rows}</TablixRows></TablixBody>
                 <TablixColumnHierarchy><TablixMembers>{columnMembers ?? string.Concat(Enumerable.Repeat("<TablixMember />", columns))}</TablixMembers></TablixColumnHierarchy>
                 <TablixRowHierarchy><TablixMembers>{rowMembers}</TablixMembers></TablixRowHierarchy>
-                <DataSetName>Data</DataSetName>{extra}
+                <DataSetName>Data</DataSetName>{(extra.StartsWith("<TablixCorner>") ? "" : extra)}
                 <Top>0.25in</Top><Left>0.25in</Left><Height>0.75in</Height><Width>{columns * 1.25}in</Width>
               </Tablix>";
 
@@ -89,19 +89,27 @@ namespace ReportTests
         }
 
         /// <summary>Renders both ways, checks they match, and returns the native report's items.</summary>
-        private static async Task<string[]> AssertSameBothWays(string rdl, string tablixName = "T")
+        /// <param name="expectedChange">Where the native layout is meant to differ: applied to each normalised item.</param>
+        private static async Task<string[]> AssertSameBothWays(string rdl, string tablixName = "T", bool pivot = false,
+            System.Func<string, string> expectedChange = null)
         {
             var (normalised, r1) = await Render(rdl, native: false);
+            if (expectedChange != null)
+                normalised = normalised.Select(expectedChange).ToArray();
             var (native, r2) = await Render(rdl, native: true);
             using (r1)
             using (r2)
             {
                 var item = r2.ReportDefinition.Body.ReportItems.Items.Single(ri => ri.Name?.Nm == tablixName);
-                Assert.That(item, Is.InstanceOf<Tablix>(), "the engine runs the Tablix itself");
-                Assert.That(r1.ReportDefinition.Body.ReportItems.Items.Single(ri => ri.Name?.Nm == tablixName), Is.Not.InstanceOf<Tablix>());
+                Assert.That(item, pivot ? Is.InstanceOf<TablixPivot>() : Is.InstanceOf<Tablix>(), "the engine runs the Tablix itself");
+                var rewritten = r1.ReportDefinition.Body.ReportItems.Items.Single(ri => ri.Name?.Nm == tablixName);
+                Assert.That(rewritten, Is.Not.InstanceOf<Tablix>().And.Not.InstanceOf<TablixPivot>());
             }
             Assert.That(native.Length, Is.GreaterThan(0));
-            Assert.That(native, Is.EqualTo(normalised));
+            Assert.That(native, Is.EqualTo(normalised), () => "first differences (normalised => native):\n" + string.Join("\n",
+                Enumerable.Range(0, System.Math.Max(native.Length, normalised.Length))
+                    .Where(i => i >= native.Length || i >= normalised.Length || native[i] != normalised[i]).Take(8)
+                    .Select(i => (i < normalised.Length ? normalised[i] : "-") + "  =>  " + (i < native.Length ? native[i] : "-"))));
             return native;
         }
 
@@ -220,37 +228,6 @@ namespace ReportTests
             var table = (Tablix)report.ReportDefinition.Body.ReportItems.Items.Single();
             var cell = table.TableGroups.Items[0].Header.TableRows.Items[0].TableCells.Items[1];
             Assert.That(cell.ReportItems.Items.Single(), Is.InstanceOf<Tablix>());
-        }
-
-        [Test]
-        public async Task APivot_IsStillRewrittenForTheEngine()
-        {
-            string rows = Row(Cell("C", "=Sum(Fields!Amount.Value)"));
-            string members = $@"<TablixMember><Group Name=""ByRegion""><GroupExpressions><GroupExpression>=Fields!Region.Value</GroupExpression></GroupExpressions></Group>
-                  <TablixHeader><Size>1in</Size><CellContents>{Tb("RH", "=Fields!Region.Value")}</CellContents></TablixHeader></TablixMember>";
-            string columnMembers = $@"<TablixMember><Group Name=""ByCity""><GroupExpressions><GroupExpression>=Fields!City.Value</GroupExpression></GroupExpressions></Group>
-                  <TablixHeader><Size>0.25in</Size><CellContents>{Tb("CH", "=Fields!City.Value")}</CellContents></TablixHeader></TablixMember>";
-            string rdl = Report(Tablix("T", 1, rows, members, columnMembers));
-
-            var (normalised, r1) = await Render(rdl, native: false);
-            var (native, r2) = await Render(rdl, native: true);
-            using (r1)
-            using (r2)
-                Assert.That(r2.ReportDefinition.Body.ReportItems.Items.Single(), Is.InstanceOf<Matrix>());
-            Assert.That(native, Is.EqualTo(normalised));
-        }
-
-        [Test]
-        public async Task ATablixTheNormaliserRefuses_IsStillAnUnknownElement([Values(false, true)] bool native)
-        {
-            // Two rows, but one row hierarchy member: a layout the normaliser does not model.
-            string rows = Row(Cell("A1", "=Fields!Name.Value"), Cell("A2", "a")) + Row(Cell("B1", "=Fields!City.Value"), Cell("B2", "b"));
-            string members = @"<TablixMember><Group Name=""Details"" /></TablixMember>";
-            RdlEngineConfig.RdlEngineConfigInit();
-            using var report = await new RDLParser(Report(Tablix("T", 2, rows, members))) { SkipDatabaseSchemaValidation = true, NativeTablix = native }.Parse();
-            string errors = string.Join(" | ", report.ErrorItems?.Cast<object>() ?? Enumerable.Empty<object>());
-            Assert.That(errors, Does.Contain("Unknown ReportItems element 'Tablix'"));
-            Assert.That(report.ReportDefinition.Body.ReportItems?.Items.OfType<Tablix>() ?? Enumerable.Empty<Tablix>(), Is.Empty);
         }
 
         [Test]

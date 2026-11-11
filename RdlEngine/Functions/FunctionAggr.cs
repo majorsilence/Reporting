@@ -181,7 +181,7 @@ namespace Majorsilence.Reporting.Rdl
 						? new RowEnumerable(0, row.R.Data.Count - 1, row.R.Data, false)
 						: new RowEnumerable(0, -1, new List<Row>(), false);	// a table with no rows
 				}
-				else if (t == typeof(Matrix))
+				else if (this._Scope is Matrix)	// a Tablix run as a pivot too
 				{
 					bSave=false;
 					Matrix m = (Matrix) (this._Scope);
