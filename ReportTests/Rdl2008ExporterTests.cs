@@ -1306,12 +1306,16 @@ namespace ReportTests
             // A 2x2 block of detail cells, then a total column (2 cells), a total row (2) and the grand total.
             var cells = System.Text.RegularExpressions.Regex.Matches (html, "<td id='(css\\d+)'[^>]*>(\\d+)\\s*<")
                 .Cast<System.Text.RegularExpressions.Match> ().Select (m => (Class: m.Groups[1].Value, Text: m.Groups[2].Value)).ToList ();
-            var groups = cells.GroupBy (c => c.Class).OrderBy (g => g.Count ()).ToList ();
-            Assert.That (groups.Count, Is.EqualTo (2));
-            Assert.That (groups.Select (g => g.Count ()).ToArray (), Is.EqualTo (new[] { 4, 5 }), "4 detail cells, 5 total cells");
+            // In reading order: [d d T] [d d T] [T T T]. (The normaliser's Matrix styles all the totals
+            // through one textbox; the native pivot keeps each total's own, so the classes differ.)
+            Assert.That (cells.Select (c => c.Text), Is.EqualTo (new[] { "1", "0", "1", "0", "1", "1", "1", "1", "2" }));
             string Rule (string cssClass) => System.Text.RegularExpressions.Regex.Match (html, "td#" + cssClass + @" \{[^}]*\}").Value;
-            Assert.That (Rule (groups[1].Key), Does.Match ("(?i)font-weight:\\s*bold"), "the totals are bold");
-            Assert.That (Rule (groups[0].Key), Does.Not.Match ("(?i)font-weight:\\s*bold"), "the detail cells are not");
+            int[] totals = { 2, 5, 6, 7, 8 };
+            for (int i = 0; i < cells.Count; i++) {
+                var bold = Does.Match ("(?i)font-weight:\\s*bold");
+                Assert.That (Rule (cells[i].Class), totals.Contains (i) ? bold : Does.Not.Match ("(?i)font-weight:\\s*bold"),
+                    totals.Contains (i) ? "the totals are bold" : "the detail cells are not");
+            }
         }
 
         [Test]

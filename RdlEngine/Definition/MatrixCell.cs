@@ -18,6 +18,11 @@ namespace Majorsilence.Reporting.Rdl
 						// ReportItem are ignored. The position is taken to be 0,
 						// 0 and the size to be 100%, 100%.		
 	
+		/// <summary>A cell of a Tablix run as a pivot, which sets ReportItems.</summary>
+		internal MatrixCell(ReportDefn r, ReportLink p) : base(r, p)
+		{
+		}
+
 		internal MatrixCell(ReportDefn r, ReportLink p, XmlNode xNode) : base(r, p)
 		{
 			_ReportItems=null;

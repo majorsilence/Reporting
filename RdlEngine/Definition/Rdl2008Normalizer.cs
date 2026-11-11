@@ -610,8 +610,8 @@ namespace Majorsilence.Reporting.Rdl
                     return;
 
                 foreach (var tablix in pending) {
-                    if (nativeTablix && BecomesTable (tablix)) {
-                        refused.Add (tablix);   // the engine runs it (Tablix); a Tablix in its cells is looked at next pass
+                    if (nativeTablix && RunsNatively (tablix) != null) {
+                        refused.Add (tablix);   // the engine runs it (Tablix or TablixPivot); a Tablix in its cells is looked at next pass
                         continue;
                     }
                     var table = TryConvertTablix (tablix, rl);
@@ -628,7 +628,62 @@ namespace Majorsilence.Reporting.Rdl
         /// natively. Decided on a copy, as the rewrite changes what it works on.
         /// </summary>
         internal static bool BecomesTable (XmlElement tablix)
-            => TryConvertTablix ((XmlElement) tablix.CloneNode (true), null)?.LocalName == "Table";
+            => NativeKind (tablix) == "Table";
+
+        /// <summary>
+        /// What this rewrites the Tablix into -- "Table", "List" or "Matrix" -- or null for a shape
+        /// it refuses. The engine runs a Table shape as Tablix, and a Matrix or refused one as
+        /// TablixPivot. Decided on a copy, as the rewrite changes what it works on.
+        /// </summary>
+        internal static string NativeKind (XmlElement tablix)
+            => TryConvertTablix ((XmlElement) tablix.CloneNode (true), null)?.LocalName;
+
+        /// <summary>
+        /// Which class runs the Tablix natively: "Tablix" for the Table shape, "TablixPivot" for a
+        /// pivot or a shape this refuses but whose hierarchies match its body; null when the
+        /// normaliser handles it -- a List, or a Tablix too broken to lay out, which it reports.
+        /// </summary>
+        internal static string RunsNatively (XmlElement tablix)
+        {
+            switch (NativeKind (tablix)) {
+                case "Table": return FlattensGroups (tablix) ? "TablixPivot" : "Tablix";
+                case "Matrix": return "TablixPivot";
+                case "List": return null;
+                default: return HierarchiesMatchBody (tablix) ? "TablixPivot" : null;
+            }
+        }
+
+        /// <summary>
+        /// The Table this makes would lose row groups: they are not one chain, so the flat mapping
+        /// puts their rows in the details, once per record. The pivot lays them out instead.
+        /// </summary>
+        private static bool FlattensGroups (XmlElement tablix)
+        {
+            var hierarchy = FindChild (tablix, "TablixRowHierarchy");
+            var top = FindChild (hierarchy, "TablixMembers");
+            if (top == null || !HasExpressionGroup (top))
+                return false;
+            var rows = ChildrenNamed (FindChild (FindChild (tablix, "TablixBody"), "TablixRows"), "TablixRow").Count;
+            return PlanGroupedRows (hierarchy, rows) == null;
+        }
+
+        private static bool HierarchiesMatchBody (XmlElement tablix)
+        {
+            var body = FindChild (tablix, "TablixBody");
+            if (body == null)
+                return false;
+            int Leaves (string hierarchy)
+            {
+                var members = FindChild (FindChild (tablix, hierarchy), "TablixMembers");
+                var count = 0;
+                foreach (var member in ChildrenNamed (members, "TablixMember"))
+                    count += LeafCount (member);
+                return count;
+            }
+            var rows = ChildrenNamed (FindChild (body, "TablixRows"), "TablixRow").Count;
+            var columns = ChildrenNamed (FindChild (body, "TablixColumns"), "TablixColumn").Count;
+            return rows > 0 && columns > 0 && Leaves ("TablixRowHierarchy") == rows && Leaves ("TablixColumnHierarchy") == columns;
+        }
 
         private static XmlElement TryConvertTablix (XmlElement tablix, ReportLog rl)
         {

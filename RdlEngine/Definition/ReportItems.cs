@@ -67,9 +67,13 @@ namespace Majorsilence.Reporting.Rdl
 						break;
 					case "tablix":		// RDL 2008+: run natively when the parser asks and the shape allows;
 										// any other one left here is one the normaliser refused
-						if (!r.NativeTablix || !(xNodeLoop is XmlElement tx) || !Rdl2008Normalizer.BecomesTable(tx))
-							goto default;
-						ri = new Tablix(r, this, xNodeLoop);
+						string runner = r.NativeTablix && xNodeLoop is XmlElement tx ? Rdl2008Normalizer.RunsNatively(tx) : null;
+						if (runner == null)
+							goto default;	// one the normaliser refused (and said why)
+						if (runner == "Tablix")
+							ri = new Tablix(r, this, xNodeLoop);
+						else
+							ri = new TablixPivot(r, this, xNodeLoop);
 						break;
 					case "colspan":
 					case "rowspan":
