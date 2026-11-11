@@ -284,7 +284,7 @@ namespace Majorsilence.Reporting.Rdl
 
             await RunPrep(r, row, wc).ConfigureAwait(false);
 
-			RunPageRegionBegin(pgs);
+			await RunPageRegionBegin(pgs).ConfigureAwait(false);
 
 			Page p = pgs.CurrentPage;
 			p.YOffset += this.RelativeY(r);
@@ -332,7 +332,7 @@ namespace Majorsilence.Reporting.Rdl
             //}
             EndBottomRows(pgs, wc);
 
-			RunPageRegionEnd(pgs);
+			await RunPageRegionEnd(pgs).ConfigureAwait(false);
 
 			SetPagePositionEnd(pgs, pgs.CurrentPage.YOffset);
 			RemoveValue(r);
@@ -344,7 +344,7 @@ namespace Majorsilence.Reporting.Rdl
         private async Task RunPageWithNoRows(Pages pgs, Row row)
         {
             Report r = pgs.Report;
-            RunPageRegionBegin(pgs);
+            await RunPageRegionBegin(pgs).ConfigureAwait(false);
 
             Page p = pgs.CurrentPage;
             p.YOffset += this.RelativeY(r);
@@ -366,7 +366,7 @@ namespace Majorsilence.Reporting.Rdl
             await RunPageBottomRows(pgs, null, true).ConfigureAwait(false);
             EndBottomRows(pgs, wc);
 
-            RunPageRegionEnd(pgs);
+            await RunPageRegionEnd(pgs).ConfigureAwait(false);
             SetPagePositionEnd(pgs, pgs.CurrentPage.YOffset);
         }
 
@@ -959,8 +959,11 @@ namespace Majorsilence.Reporting.Rdl
                     {
                         await RunPageBottomRows(pgs, wc.Data.Data[ge.StartRow], false).ConfigureAwait(false);
 						RunPageNew(pgs, pgs.CurrentPage);
+						if (ge.Group.PageBreak != null)
+							await ge.Group.PageBreak.AfterBreak(pgs, wc.Data.Data[ge.StartRow]).ConfigureAwait(false);
                         await RunPageHeader(pgs, wc.Data.Data[ge.StartRow], false, tg).ConfigureAwait(false);
 					}
+					await ge.Group.RunPageName(pgs, wc.Data.Data[ge.StartRow]).ConfigureAwait(false);
 				}
 
 				if (tg != null && tg.KeepTogether && !pgs.CurrentPage.IsEmpty() && !BreaksPageWithin(tg))
@@ -972,11 +975,16 @@ namespace Majorsilence.Reporting.Rdl
 				{
 					// PageBreakCondition gates the break at the end as it does the one at the start,
 					// tested on the instance's last row, the one the break comes after.
+					// A break Between the group's instances is not made after the last of them.
+					bool between = ge.Group.PageBreak?.Between == true;
 					if (ge.Group.PageBreakAtEnd && !pgs.CurrentPage.IsEmpty()
+						&& (!between || (next != null && next.Group == ge.Group))
 						&& await ge.Group.PageBreakCondition(rpt, wc.Data.Data[ge.EndRow], true).ConfigureAwait(false))
 					{
                         await RunPageBottomRows(pgs, wc.Data.Data[ge.EndRow], false).ConfigureAwait(false);
 						RunPageNew(pgs, pgs.CurrentPage);
+						if (ge.Group.PageBreak != null)
+							await ge.Group.PageBreak.AfterBreak(pgs, wc.Data.Data[ge.EndRow]).ConfigureAwait(false);
 						// The new page starts with the next group, at this level or an enclosing one, so its
 						// header is that group's, with the first instance within it at each level, and the
 						// group headers repeated are those of the groups around it. The groups just finished

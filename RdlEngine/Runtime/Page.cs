@@ -138,6 +138,12 @@ namespace Majorsilence.Reporting.Rdl
 			get { return _pageno; }
 		}
 
+		/// <summary>Page numbering starts again at 1 on this page (PageBreak/ResetPageNumber).</summary>
+		internal bool ResetPageNumber { get; set; }
+
+		/// <summary>The page's name (PageName), or null.</summary>
+		public string PageName { get; internal set; }
+
 		public float XOffset
 		{
 			get { return _xOffset; }

@@ -145,13 +145,13 @@ namespace Majorsilence.Reporting.Rdl
 			if (!await AnyRowsPage(pgs, wc.Data).ConfigureAwait(false))		// if no rows return
 				return;						//   nothing left to do
 
-			RunPageRegionBegin(pgs);
+			await RunPageRegionBegin(pgs).ConfigureAwait(false);
 
             await RunSetGrouping(pgs.Report, wc).ConfigureAwait(false);
 
             await RunPageGroups(pgs, wc, wc.Groups).ConfigureAwait(false);
 
-			RunPageRegionEnd(pgs);
+			await RunPageRegionEnd(pgs).ConfigureAwait(false);
 			SetPagePositionEnd(pgs, pgs.CurrentPage.YOffset);
 			RemoveValue(r);
 

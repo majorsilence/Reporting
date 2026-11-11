@@ -241,6 +241,34 @@ namespace Majorsilence.Reporting.Rdl
             Walk (root);
         }
 
+        // The 2008 PageBreak for a 2005 element's PageBreakAtStart/PageBreakAtEnd. Import keeps the
+        // original element beside the flags when it says more than where the break goes (Disabled,
+        // ResetPageNumber, Between); it is the base, with the location taken from the flags, which
+        // the designer may have changed. Null when there is no break and nothing kept.
+        private static XmlElement MergedPageBreak (XmlDocument doc, string ns, XmlElement kept, bool atStart, bool atEnd)
+        {
+            string location = atStart && atEnd ? "StartAndEnd" : atStart ? "Start" : atEnd ? "End" : "None";
+            if (kept == null) {
+                if (location == "None")
+                    return null;
+                var created = El (doc, ns, "PageBreak");
+                created.AppendChild (El (doc, ns, "BreakLocation", location));
+                return created;
+            }
+
+            var merged = (XmlElement) doc.ImportNode (kept, true);
+            var current = Child (merged, "BreakLocation");
+            if (location == "End" && string.Equals (current?.InnerText?.Trim (), "Between", StringComparison.Ordinal))
+                location = "Between";       // imported as a break at the end
+            if (current == null)
+                merged.PrependChild (El (doc, ns, "BreakLocation", location));
+            else
+                current.InnerText = location;
+            return merged;
+        }
+
+        private static bool IsTrue (string value) => string.Equals (value, "true", StringComparison.OrdinalIgnoreCase);
+
         private static void ConvertPageBreak (XmlElement element)
         {
             var atStart = Child (element, "PageBreakAtStart");
@@ -248,20 +276,19 @@ namespace Majorsilence.Reporting.Rdl
             if (atStart == null && atEnd == null)
                 return;
 
-            var isStart = atStart != null && string.Equals (atStart.InnerText, "true", StringComparison.OrdinalIgnoreCase);
-            var isEnd = atEnd != null && string.Equals (atEnd.InnerText, "true", StringComparison.OrdinalIgnoreCase);
+            var isStart = atStart != null && IsTrue (atStart.InnerText);
+            var isEnd = atEnd != null && IsTrue (atEnd.InnerText);
             if (atStart != null)
                 element.RemoveChild (atStart);
             if (atEnd != null)
                 element.RemoveChild (atEnd);
-            if (!isStart && !isEnd)
-                return;
 
-            var doc = element.OwnerDocument;
-            var ns = element.NamespaceURI;
-            var pageBreak = El (doc, ns, "PageBreak");
-            pageBreak.AppendChild (El (doc, ns, "BreakLocation", isStart && isEnd ? "StartAndEnd" : isStart ? "Start" : "End"));
-            element.AppendChild (pageBreak);
+            var kept = Child (element, "PageBreak");
+            if (kept != null)
+                element.RemoveChild (kept);
+            var pageBreak = MergedPageBreak (element.OwnerDocument, element.NamespaceURI, kept, isStart, isEnd);
+            if (pageBreak != null)
+                element.AppendChild (pageBreak);
         }
 
         private static void ConvertBorders (XmlElement style)
@@ -484,6 +511,8 @@ namespace Majorsilence.Reporting.Rdl
             string width = "1in";
             string height = "1in";
             var passThrough = new List<XmlElement> ();
+            bool listBreakAtStart = false, listBreakAtEnd = false;
+            XmlElement listPageBreak = null;
 
             foreach (XmlNode node in list.ChildNodes) {
                 if (node is not XmlElement child)
@@ -497,6 +526,9 @@ namespace Majorsilence.Reporting.Rdl
                     case "DataSetName": dataSetName = child.InnerText; break;
                     case "Width": width = child.InnerText; break;
                     case "Height": height = child.InnerText; break;
+                    case "PageBreakAtStart": listBreakAtStart = IsTrue (child.InnerText); break;
+                    case "PageBreakAtEnd": listBreakAtEnd = IsTrue (child.InnerText); break;
+                    case "PageBreak": listPageBreak = child; break;
                     // Position, visibility, bookmarks, ZIndex, ...: same spelling in both versions.
                     default: passThrough.Add (child); break;
                 }
@@ -558,6 +590,10 @@ namespace Majorsilence.Reporting.Rdl
 
             foreach (var child in passThrough)
                 tablix.AppendChild (child.CloneNode (true));
+
+            var listBreak = MergedPageBreak (tablix.OwnerDocument, tablix.NamespaceURI, listPageBreak, listBreakAtStart, listBreakAtEnd);
+            if (listBreak != null)
+                tablix.AppendChild (listBreak);
 
             tablix.AppendChild (Make ("Height", height));
             tablix.AppendChild (Make ("Width", width));
@@ -796,7 +832,7 @@ namespace Majorsilence.Reporting.Rdl
             rowHierarchy.AppendChild (rowMembersTop);
             tablix.AppendChild (rowHierarchy);
 
-            string pageBreakAtStart = null, pageBreakAtEnd = null;
+            string pageBreakAtStart = null, pageBreakAtEnd = null; XmlElement keptPageBreak = null;
             foreach (XmlNode node in table.ChildNodes) {
                 if (node is not XmlElement child)
                     continue;
@@ -810,18 +846,15 @@ namespace Majorsilence.Reporting.Rdl
                         break;
                     case "PageBreakAtStart": pageBreakAtStart = child.InnerText; break;
                     case "PageBreakAtEnd": pageBreakAtEnd = child.InnerText; break;
+                    case "PageBreak": keptPageBreak = child; break;
                     case "NoRows": tablix.AppendChild (El (doc, ns, "NoRowsMessage", child.InnerText)); break;
                     default: tablix.AppendChild (child.CloneNode (true)); break;
                 }
             }
 
-            var atStart = string.Equals (pageBreakAtStart, "true", StringComparison.OrdinalIgnoreCase);
-            var atEnd = string.Equals (pageBreakAtEnd, "true", StringComparison.OrdinalIgnoreCase);
-            if (atStart || atEnd) {
-                var pageBreak = El (doc, ns, "PageBreak");
-                pageBreak.AppendChild (El (doc, ns, "BreakLocation", atStart && atEnd ? "StartAndEnd" : atStart ? "Start" : "End"));
+            var pageBreak = MergedPageBreak (doc, ns, keptPageBreak, IsTrue (pageBreakAtStart), IsTrue (pageBreakAtEnd));
+            if (pageBreak != null)
                 tablix.AppendChild (pageBreak);
-            }
 
             return tablix;
         }
@@ -1038,7 +1071,7 @@ namespace Majorsilence.Reporting.Rdl
                 tablix.AppendChild (tablixCorner);
             }
 
-            string pageBreakAtStart = null, pageBreakAtEnd = null;
+            string pageBreakAtStart = null, pageBreakAtEnd = null; XmlElement keptPageBreak = null;
             foreach (XmlNode node in matrix.ChildNodes) {
                 if (node is not XmlElement child)
                     continue;
@@ -1056,18 +1089,15 @@ namespace Majorsilence.Reporting.Rdl
                         break;
                     case "PageBreakAtStart": pageBreakAtStart = child.InnerText; break;
                     case "PageBreakAtEnd": pageBreakAtEnd = child.InnerText; break;
+                    case "PageBreak": keptPageBreak = child; break;
                     case "NoRows": tablix.AppendChild (El (doc, ns, "NoRowsMessage", child.InnerText)); break;
                     default: tablix.AppendChild (child.CloneNode (true)); break;
                 }
             }
 
-            var atStart = string.Equals (pageBreakAtStart, "true", StringComparison.OrdinalIgnoreCase);
-            var atEnd = string.Equals (pageBreakAtEnd, "true", StringComparison.OrdinalIgnoreCase);
-            if (atStart || atEnd) {
-                var pageBreak = El (doc, ns, "PageBreak");
-                pageBreak.AppendChild (El (doc, ns, "BreakLocation", atStart && atEnd ? "StartAndEnd" : atStart ? "Start" : "End"));
+            var pageBreak = MergedPageBreak (doc, ns, keptPageBreak, IsTrue (pageBreakAtStart), IsTrue (pageBreakAtEnd));
+            if (pageBreak != null)
                 tablix.AppendChild (pageBreak);
-            }
 
             return tablix;
         }
@@ -1083,7 +1113,7 @@ namespace Majorsilence.Reporting.Rdl
             if (grouping == null)
                 return group;
 
-            string pageBreakAtStart = null, pageBreakAtEnd = null;
+            string pageBreakAtStart = null, pageBreakAtEnd = null; XmlElement keptPageBreak = null;
             foreach (XmlNode node in grouping.ChildNodes) {
                 if (node is not XmlElement child)
                     continue;
@@ -1091,20 +1121,15 @@ namespace Majorsilence.Reporting.Rdl
                 switch (child.LocalName) {
                     case "PageBreakAtStart": pageBreakAtStart = child.InnerText; break;
                     case "PageBreakAtEnd": pageBreakAtEnd = child.InnerText; break;
+                    case "PageBreak": keptPageBreak = child; break;
                     // GroupExpressions, Filters, Parent: unchanged in 2008.
                     default: group.AppendChild (child.CloneNode (true)); break;
                 }
             }
 
-            var atStart = string.Equals (pageBreakAtStart, "true", StringComparison.OrdinalIgnoreCase);
-            var atEnd = string.Equals (pageBreakAtEnd, "true", StringComparison.OrdinalIgnoreCase);
-            if (atStart || atEnd) {
-                var pageBreak = doc.CreateElement ("PageBreak", ns);
-                var location = doc.CreateElement ("BreakLocation", ns);
-                location.InnerText = atStart && atEnd ? "StartAndEnd" : atStart ? "Start" : "End";
-                pageBreak.AppendChild (location);
+            var pageBreak = MergedPageBreak (doc, ns, keptPageBreak, IsTrue (pageBreakAtStart), IsTrue (pageBreakAtEnd));
+            if (pageBreak != null)
                 group.AppendChild (pageBreak);
-            }
 
             return group;
         }

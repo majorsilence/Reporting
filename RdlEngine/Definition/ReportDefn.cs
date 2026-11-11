@@ -43,6 +43,7 @@ namespace Majorsilence.Reporting.Rdl
 		ReportParameters _ReportParameters;	// Parameters for the report
 		Custom _Customer;		// Custom information to be handed to the report engine
 		Variables _Variables;	// RDL 2008+: report variables (Variables!Name.Value)
+		Expression _InitialPageName;	// RDL 2008 R2+: the name of the first page, until an item names another
 		RSize _Width;			// Width of the report
 		PageHeader _PageHeader;	// The header that is output at the top of each page of the report.
 		PageFooter _PageFooter;	// The footer that is output at the bottom of each page of the report.
@@ -244,6 +245,9 @@ namespace Majorsilence.Reporting.Rdl
 					case "variables":
 						_Variables = new Variables(this, null, xNodeLoop);
 						break;
+					case "initialpagename":
+						_InitialPageName = new Expression(this, null, xNodeLoop, ExpressionType.String);
+						break;
 					case "custom":
 						_Customer = new Custom(this, null, xNodeLoop);
 						_Kerning = KerningOf(_Customer);
@@ -283,6 +287,9 @@ namespace Majorsilence.Reporting.Rdl
 			_LUGlobals.Add("ExecutionTime", new FunctionExecutionTime());
 			_LUGlobals.Add("ReportFolder", new FunctionReportFolder());
 			_LUGlobals.Add("ReportName", new FunctionReportName());
+			_LUGlobals.Add("OverallPageNumber", new FunctionOverallPageNumber());
+			_LUGlobals.Add("OverallTotalPages", new FunctionOverallTotalPages());
+			_LUGlobals.Add("PageName", new FunctionPageName());
 			_LUUser = new ListDictionary();		// if entries grow beyond 10; make hashtable
 			_LUUser.Add("UserID", new FunctionUserID());
 			_LUUser.Add("Language", new FunctionUserLanguage());
@@ -310,6 +317,8 @@ namespace Majorsilence.Reporting.Rdl
 				await _DataSetsDefn.FinalPass().ConfigureAwait(false);
 			if (_Variables != null)
                 await _Variables.FinalPass().ConfigureAwait(false);
+			if (_InitialPageName != null)
+				await _InitialPageName.FinalPass().ConfigureAwait(false);
             await _Body.FinalPass().ConfigureAwait(false);
 			if (_PageHeader != null)
                 await _PageHeader.FinalPass().ConfigureAwait(false);
@@ -428,13 +437,23 @@ namespace Majorsilence.Reporting.Rdl
 				_DataSourcesDefn.CleanUp(ip.Report());	// datasets may not have been cleaned up
 		}
 
+		/// <summary>Adds the first page, named by InitialPageName, and resets the page globals.</summary>
+		internal async Task StartPages(Pages pgs)
+		{
+			pgs.AddPage(new Page(1));
+			Report rpt = pgs.Report;
+			rpt.PageNumber = rpt.TotalPages = rpt.OverallPageNumber = rpt.OverallTotalPages = 1;
+			rpt.PageName = null;
+			if (_InitialPageName != null)
+				pgs.SetPageName(await _InitialPageName.EvaluateString(rpt, null).ConfigureAwait(false));
+		}
+
 		internal async Task RunPage(IPresent ip)
 		{
 			Pages pgs = new Pages(ip.Report());
 			try
 			{
-				Page p = new Page(1);				// kick it off with a new page
-				pgs.AddPage(p);
+				await StartPages(pgs).ConfigureAwait(false);	// kick it off with a new page
 
                 // Create all the pages
                 await _Body.RunPage(pgs).ConfigureAwait(false);

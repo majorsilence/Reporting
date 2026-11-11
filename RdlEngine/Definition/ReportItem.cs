@@ -48,6 +48,7 @@ namespace Majorsilence.Reporting.Rdl
 							// such things as including TITLE and ALT
 							// attributes in HTML reports.
 		Expression _Label;	// A label to identify an instance of a report item
+		Expression _PageName;	// RDL 2008 R2+: the name of the pages this item starts
 							// (Variant) within the client UI (to provide a user-friendly
 							// label for searching)
 							//Hierarchical listing of report item and group
@@ -149,6 +150,9 @@ namespace Majorsilence.Reporting.Rdl
 				case "tooltip":
 					_ToolTip = new Expression(OwnerReport, this, xNodeLoop, ExpressionType.String);
 					break;
+				case "pagename":
+					_PageName = new Expression(OwnerReport, this, xNodeLoop, ExpressionType.String);
+					break;
 				case "label":
 				case "documentmaplabel":	// RDL 2008+ name for Label
 					_Label = new Expression(OwnerReport, this, xNodeLoop, ExpressionType.Variant);
@@ -192,6 +196,8 @@ namespace Majorsilence.Reporting.Rdl
                 await _ToolTip.FinalPass().ConfigureAwait(false);
 			if (_Label != null)
                 await _Label.FinalPass().ConfigureAwait(false);
+			if (_PageName != null)
+				await _PageName.FinalPass().ConfigureAwait(false);
 			if (_Bookmark != null)
                 await _Bookmark.FinalPass().ConfigureAwait(false);
 			if (_Custom != null)
@@ -856,6 +862,13 @@ namespace Majorsilence.Reporting.Rdl
 				return null;
 
 			return await _ToolTip.EvaluateString(rpt, r).ConfigureAwait(false);
+		}
+
+		/// <summary>Names the page this item starts on, and those after it (PageName).</summary>
+		internal async Task RunPageName(Pages pgs, Row row)
+		{
+			if (_PageName != null)
+				pgs.SetPageName(await _PageName.EvaluateString(pgs.Report, row).ConfigureAwait(false));
 		}
 
 		internal Expression Label

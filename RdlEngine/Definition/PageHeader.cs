@@ -91,14 +91,13 @@ namespace Majorsilence.Reporting.Rdl
 				return;
 
 			Report rpt = pgs.Report;
-			rpt.TotalPages = pgs.PageCount;
 			foreach (Page p in pgs)
 			{
 				rpt.CurrentPage = p;		// needs to know for page header/footer expr processing
 				p.YOffset = OwnerReport.TopMargin.Points;
 				p.XOffset = 0;
 				pgs.CurrentPage = p;
-				rpt.PageNumber = p.PageNumber;
+				pgs.SetPageGlobals(p);
 				if (p.PageNumber == 1 && pgs.Count > 1 && !_PrintOnFirstPage)
 					continue;		// Don't put header on the first page
 				if (p.PageNumber == pgs.Count && !_PrintOnLastPage)

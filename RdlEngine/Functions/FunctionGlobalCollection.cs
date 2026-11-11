@@ -54,6 +54,12 @@ namespace Majorsilence.Reporting.Rdl
 						return new FunctionPageNumber();
 					case "totalpages":
 						return new FunctionTotalPages();
+					case "overallpagenumber":
+						return new FunctionOverallPageNumber();
+					case "overalltotalpages":
+						return new FunctionOverallTotalPages();
+					case "pagename":
+						return new FunctionPageName();
 					case "executiontime":
 						return new FunctionExecutionTime();
 					case "reportfolder":
@@ -84,6 +90,12 @@ namespace Majorsilence.Reporting.Rdl
 					return rpt.PageNumber;
 				case "totalpages":
 					return rpt.TotalPages;
+				case "overallpagenumber":
+					return rpt.OverallPageNumber;
+				case "overalltotalpages":
+					return rpt.OverallTotalPages;
+				case "pagename":
+					return rpt.PageName;
 				case "executiontime":
 					return rpt.ExecutionTime;
 				case "reportfolder":

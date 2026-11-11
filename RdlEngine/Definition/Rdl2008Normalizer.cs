@@ -748,6 +748,7 @@ namespace Majorsilence.Reporting.Rdl
             // Position, size, style, DataSetName, visibility carry over unchanged. Tablix-only
             // vocabulary has no List counterpart.
             XmlElement tablixSort = null;
+            XmlElement listPageBreak = null;
             foreach (var child in Children (tablix)) {
                 switch (child.LocalName) {
                     case "TablixBody":
@@ -758,7 +759,9 @@ namespace Majorsilence.Reporting.Rdl
                     case "RepeatRowHeaders":
                     case "FixedColumnHeaders":
                     case "FixedRowHeaders":
+                        continue;
                     case "PageBreak":
+                        listPageBreak = child;
                         continue;
                     case "SortExpressions":
                         tablixSort = child;
@@ -813,6 +816,10 @@ namespace Majorsilence.Reporting.Rdl
             if (sort != null)
                 list.AppendChild (BuildSorting (doc, ns, sort));
 
+            // The Tablix's own break is the List region's, before or after all of it.
+            if (listPageBreak != null)
+                AppendPageBreak (list, doc, ns, listPageBreak);
+
             return list;
         }
 
@@ -840,13 +847,7 @@ namespace Majorsilence.Reporting.Rdl
                     continue;
                 }
 
-                var location = FindChild (child, "BreakLocation")?.InnerText;
-                var start = location == "Start" || location == "StartAndEnd";
-                var end = location == "End" || location == "StartAndEnd";
-                if (start)
-                    grouping.AppendChild (CreateTextElement (doc, ns, "PageBreakAtStart", "true"));
-                if (end)
-                    grouping.AppendChild (CreateTextElement (doc, ns, "PageBreakAtEnd", "true"));
+                AppendPageBreak (grouping, doc, ns, child);
             }
 
             return grouping;
@@ -1316,8 +1317,10 @@ namespace Majorsilence.Reporting.Rdl
             var location = FindChild (pageBreak, "BreakLocation")?.InnerText?.Trim();
             var atStart = string.Equals (location, "Start", StringComparison.OrdinalIgnoreCase)
                 || string.Equals (location, "StartAndEnd", StringComparison.OrdinalIgnoreCase);
+            var between = string.Equals (location, "Between", StringComparison.OrdinalIgnoreCase);
             var atEnd = string.Equals (location, "End", StringComparison.OrdinalIgnoreCase)
-                || string.Equals (location, "StartAndEnd", StringComparison.OrdinalIgnoreCase);
+                || string.Equals (location, "StartAndEnd", StringComparison.OrdinalIgnoreCase)
+                || between;     // between a group's instances: after each, the engine leaving out the last
 
             if (atStart) {
                 var start = doc.CreateElement ("PageBreakAtStart", ns);
@@ -1329,6 +1332,12 @@ namespace Majorsilence.Reporting.Rdl
                 end.InnerText = "true";
                 table.AppendChild (end);
             }
+
+            // The flags are the location alone. Where the break says more -- Disabled,
+            // ResetPageNumber, or Between -- the element goes along too: the engine reads it, and
+            // the exporter writes it back with its location taken from the flags.
+            if (between || Children (pageBreak).Exists (c => c.LocalName != "BreakLocation"))
+                table.AppendChild (pageBreak.CloneNode (true));
         }
 
         private static XmlElement BuildTableRow (XmlDocument doc, string ns, XmlElement tablixRow)

@@ -15,6 +15,7 @@ namespace Majorsilence.Reporting.Rdl
 		ReportItems _ReportItems;	// Report items contained within the bounds of the rectangle.
 		bool _PageBreakAtStart;		// Indicates the report should page break at the start of the rectangle.
 		bool _PageBreakAtEnd;		// Indicates the report should page break at the end of the rectangle.		
+		PageBreakDefn _PageBreak;	// RDL 2008+ PageBreak: Disabled and ResetPageNumber besides the location
 		bool _KeepTogether;			// Indicates the rectangle should be kept on one page if it can be.
 		bool _DrawBeneath;			// drawn beneath what follows it, taking no room; see DrawBeneathOf
 
@@ -47,6 +48,11 @@ namespace Majorsilence.Reporting.Rdl
 						break;
 					case "pagebreakatend":
 						_PageBreakAtEnd = XmlUtil.Boolean(xNodeLoop.InnerText, OwnerReport.rl);
+						break;
+					case "pagebreak":
+						_PageBreak = new PageBreakDefn(r, this, xNodeLoop);
+						_PageBreakAtStart |= _PageBreak.AtStart;
+						_PageBreakAtEnd |= _PageBreak.AtEnd;
 						break;
 					case "keeptogether":
 						_KeepTogether = XmlUtil.Boolean(xNodeLoop.InnerText, OwnerReport.rl);
@@ -113,11 +119,16 @@ namespace Majorsilence.Reporting.Rdl
 			SetPagePositionBegin(pgs);
 
             // Handle page breaking at start
-            if (this.PageBreakAtStart && !IsTableOrMatrixCell(r) && !pgs.CurrentPage.IsEmpty() && !bHidden)
+            if (this.PageBreakAtStart && !IsTableOrMatrixCell(r) && !pgs.CurrentPage.IsEmpty() && !bHidden
+                && !await PageBreakDisabled(r, row).ConfigureAwait(false))
             {	// force page break at beginning of dataregion
                 pgs.NextOrNew();
                 pgs.CurrentPage.YOffset = OwnerReport.TopOfPage;
+                if (_PageBreak != null)
+                    await _PageBreak.AfterBreak(pgs, row).ConfigureAwait(false);
             }
+            if (!bHidden && !IsTableOrMatrixCell(r))
+                await RunPageName(pgs, row).ConfigureAwait(false);
 
 			PageRectangle pr = new PageRectangle();
             await SetPagePositionAndStyle(r, pr, row).ConfigureAwait(false);
@@ -155,10 +166,13 @@ namespace Majorsilence.Reporting.Rdl
                 }
 
                 // Handle page breaking at end
-                if (this.PageBreakAtEnd && !IsTableOrMatrixCell(r) && !pgs.CurrentPage.IsEmpty())
+                if (this.PageBreakAtEnd && !IsTableOrMatrixCell(r) && !pgs.CurrentPage.IsEmpty()
+                    && !await PageBreakDisabled(r, row).ConfigureAwait(false))
                 {	// force page break at beginning of dataregion
                     pgs.NextOrNew();
                     pgs.CurrentPage.YOffset = OwnerReport.TopOfPage;
+                    if (_PageBreak != null)
+                        await _PageBreak.AfterBreak(pgs, row).ConfigureAwait(false);
                     bottom = pgs.CurrentPage.YOffset;   // what follows starts at the top of the new page
                 }
             }
@@ -275,6 +289,9 @@ namespace Majorsilence.Reporting.Rdl
 			get { return  _ReportItems; }
 			set {  _ReportItems = value; }
 		}
+
+		private async Task<bool> PageBreakDisabled(Report r, Row row)
+			=> _PageBreak != null && await _PageBreak.IsDisabled(r, row).ConfigureAwait(false);
 
 		internal bool PageBreakAtStart
 		{

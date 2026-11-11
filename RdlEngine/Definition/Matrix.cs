@@ -307,7 +307,7 @@ namespace Majorsilence.Reporting.Rdl
             (matrix, maxRows, maxColumns) = await RunBuild(r).ConfigureAwait(false);
 
             // Now run thru the rows and columns of the matrix creating the pages
-            RunPageRegionBegin(pgs);
+            await RunPageRegionBegin(pgs).ConfigureAwait(false);
             Page p = pgs.CurrentPage;
             p.YOffset += this.RelativeY(r);
 
@@ -331,7 +331,7 @@ namespace Majorsilence.Reporting.Rdl
                 p.YOffset += h;
             }
 
-            RunPageRegionEnd(pgs);
+            await RunPageRegionEnd(pgs).ConfigureAwait(false);
             SetPagePositionEnd(pgs, pgs.CurrentPage.YOffset);
             ResetInScope(r);
             RemoveValue(r);
