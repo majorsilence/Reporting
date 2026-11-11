@@ -17,7 +17,13 @@ namespace Majorsilence.Reporting.Rdl
 	{
 		List<ReportItem> _Items;				// list of report items
 
-		internal ReportItems(ReportDefn r, ReportLink p, XmlNode xNode) : base(r, p)
+		internal ReportItems(ReportDefn r, ReportLink p, XmlNode xNode) : this(r, p, xNode, false)
+		{
+		}
+
+		/// <param name="cellContents">xNode is an RDL 2008+ CellContents, whose ColSpan and RowSpan
+		/// belong to the cell holding it.</param>
+		internal ReportItems(ReportDefn r, ReportLink p, XmlNode xNode, bool cellContents) : base(r, p)
 		{
 			ReportItem ri;
             _Items = new List<ReportItem>();
@@ -59,6 +65,17 @@ namespace Majorsilence.Reporting.Rdl
 					case "chart": 
 						ri = new Chart(r, this, xNodeLoop);
 						break;
+					case "tablix":		// RDL 2008+: run natively when the parser asks and the shape allows;
+										// any other one left here is one the normaliser refused
+						if (!r.NativeTablix || !(xNodeLoop is XmlElement tx) || !Rdl2008Normalizer.BecomesTable(tx))
+							goto default;
+						ri = new Tablix(r, this, xNodeLoop);
+						break;
+					case "colspan":
+					case "rowspan":
+						if (!cellContents)
+							goto default;
+						continue;
 					case "chartexpression":		// For internal use only 
 						ri = new ChartExpression(r, this, xNodeLoop);
 						break;

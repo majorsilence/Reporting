@@ -92,10 +92,26 @@ namespace Majorsilence.Reporting.Rdl
 						break;
 				}
 			}
+			FinishTable(xNode.Name);
+		}
+
+		/// <summary>A Tablix run as a table: it builds the columns and sections itself.</summary>
+		protected Table(ReportDefn r, ReportLink p, XmlNode xNode, bool tablix) : base(r, p, xNode)
+		{
+			_FillPage = true;
+			_DetailDataElementName = "Details";
+			_DetailDataCollectionName = "Details_Collection";
+			_DetailDataElementOutput = DataElementOutputEnum.Output;
+			_IsGrid = false;
+		}
+
+		/// <summary>What follows reading the table's elements: the checks on what they made.</summary>
+		protected void FinishTable(string elementName)
+		{
 			DataRegionFinish();			// Tidy up the DataRegion
 			if (_TableColumns == null)
 			{
-				OwnerReport.rl.LogError(8, "TableColumns element must be specified for a "+xNode.Name+".");
+				OwnerReport.rl.LogError(8, "TableColumns element must be specified for a "+elementName+".");
 				return;
 			}
 			if (_Footer != null && _Footer.TableRows != null && Custom != null)
@@ -105,7 +121,7 @@ namespace Majorsilence.Reporting.Rdl
             if (_IsGrid)
             {
                 if (_TableGroups != null)
-                    OwnerReport.rl.LogError(8, "TableGroups not allowed in Grid element '" + xNode.Name + "'.");
+                    OwnerReport.rl.LogError(8, "TableGroups not allowed in Grid element '" + elementName + "'.");
             }
 
 			if (OwnerReport.rl.MaxSeverity < 8)

@@ -21,6 +21,28 @@ namespace Majorsilence.Reporting.Rdl
 		bool _CanShrink;			// if any TableRow contains a TextBox with CanShrink
 		bool _CanHide;				// if any TableRow has a Visibility
 
+		/// <summary>Empty, for a Tablix to Add its rows to and then Complete.</summary>
+		internal TableRows(ReportDefn r, ReportLink p) : base(r, p)
+		{
+			_Items = new List<TableRow>();
+		}
+
+		internal void Add(TableRow row)
+		{
+			_Items.Add(row);
+		}
+
+		internal void Complete()
+		{
+			if (_Items.Count == 0)
+				OwnerReport.rl.LogError(8, "For TableRows at least one TableRow is required.");
+			else
+			{
+				_Items.TrimExcess();
+				AssignRowSpans();
+			}
+		}
+
 		internal TableRows(ReportDefn r, ReportLink p, XmlNode xNode) : base(r, p)
 		{
 			TableRow t;

@@ -172,7 +172,7 @@ namespace Majorsilence.Reporting.Rdl
 						re = new RowEnumerable (ge.StartRow, ge.EndRow, row.R.Data, _LevelCheck);
 					}
 				}
-				else if (t == typeof(Table))
+				else if (this._Scope is Table)	// a Tablix run as a table too
 				{
 					// The rows of the table instance being run: a nested table runs once per instance
 					// of what it sits in, so the value can't be kept for the report.

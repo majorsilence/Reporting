@@ -32,6 +32,7 @@ namespace Majorsilence.Reporting.Rdl
 				switch (xNodeLoop.Name.ToLowerInvariant())
 				{
 					case "sortexpression":
+					case "value":	// RDL 2008+ SortExpression/Value
 						_SortExpression = new Expression(r, this, xNodeLoop, ExpressionType.Variant);
 						break;
 					case "direction":

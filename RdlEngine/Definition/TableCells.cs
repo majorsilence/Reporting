@@ -16,6 +16,20 @@ namespace Majorsilence.Reporting.Rdl
 	{
         List<TableCell> _Items;			// list of TableCell
 
+		/// <summary>A Tablix row's cells, from their CellContents.</summary>
+		internal TableCells(ReportDefn r, ReportLink p, IEnumerable<XmlNode> cellContents) : base(r, p)
+		{
+			_Items = new List<TableCell>();
+			int colIndex = 0;
+			foreach (XmlNode contents in cellContents)
+			{
+				TableCell tc = new TableCell(r, this, contents, colIndex, true);
+				colIndex += tc.ColSpan;
+				_Items.Add(tc);
+			}
+			_Items.TrimExcess();
+		}
+
 		internal TableCells(ReportDefn r, ReportLink p, XmlNode xNode) : base(r, p)
 		{
 			TableCell tc;

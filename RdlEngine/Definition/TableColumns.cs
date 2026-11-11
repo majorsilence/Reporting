@@ -16,6 +16,12 @@ namespace Majorsilence.Reporting.Rdl
 	{
         List<TableColumn> _Items;			// list of TableColumn
 
+		/// <summary>Empty, for a Tablix to add its columns to.</summary>
+		internal TableColumns(ReportDefn r, ReportLink p) : base(r, p)
+		{
+			_Items = new List<TableColumn>();
+		}
+
 		internal TableColumns(ReportDefn r, ReportLink p, XmlNode xNode) : base(r, p)
 		{
 			TableColumn tc;

@@ -17,6 +17,12 @@ namespace Majorsilence.Reporting.Rdl
 		bool _RepeatOnNewPage;	// Indicates this header should be displayed on
 								// each page that the table (or group) is displayed		
 
+		/// <summary>For a Tablix, which sets TableRows.</summary>
+		internal Header(ReportDefn r, ReportLink p, bool repeatOnNewPage) : base(r, p)
+		{
+			_RepeatOnNewPage = repeatOnNewPage;
+		}
+
 		internal Header(ReportDefn r, ReportLink p, XmlNode xNode) : base(r, p)
 		{
 			_TableRows=null;

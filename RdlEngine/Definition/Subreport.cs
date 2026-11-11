@@ -338,6 +338,7 @@ namespace Majorsilence.Reporting.Rdl
 				// could not be found" / "Unable to connect to datasource" in an environment
 				// with no real database at all, confirmed via a real report's subreport).
 				rdlp.SkipDatabaseSchemaValidation = OwnerReport.SkipDatabaseSchemaValidation;
+				rdlp.NativeTablix = OwnerReport.NativeTablix;
 
 				r = await rdlp.Parse(OwnerReport.GetObjectNumber()).ConfigureAwait(false);
 				OwnerReport.SetObjectNumber(r.ReportDefinition.GetObjectNumber());

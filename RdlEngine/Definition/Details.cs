@@ -20,6 +20,11 @@ namespace Majorsilence.Reporting.Rdl
 		Visibility _Visibility;	// Indicates if the details should be hidden	
 		Textbox _ToggleTextbox;	//  resolved TextBox for toggling visibility
 	
+		/// <summary>For a Tablix, which sets TableRows and Sorting.</summary>
+		internal Details(ReportDefn r, ReportLink p) : base(r, p)
+		{
+		}
+
 		internal Details(ReportDefn r, ReportLink p, XmlNode xNode) : base(r, p)
 		{
 			_TableRows=null;

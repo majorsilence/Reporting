@@ -63,7 +63,11 @@ namespace Majorsilence.Reporting.Rdl
         /// elements (ReportID, DataSourceID, ...) stay in the tree so that saving writes them back.
         /// Rendering passes false, which swaps and removes them so the parser sees only what it knows.
         /// </param>
-        internal static void Normalize (XmlDocument doc, ReportLog rl, bool forEditing = false)
+        /// <param name="nativeTablix">
+        /// The engine runs table-shaped Tablixes itself (RDLParser.NativeTablix): those are left as
+        /// they are, and only the shapes it does not run yet are rewritten.
+        /// </param>
+        internal static void Normalize (XmlDocument doc, ReportLog rl, bool forEditing = false, bool nativeTablix = false)
         {
             var report = FindReportElement (doc);
             if (report == null)
@@ -82,7 +86,7 @@ namespace Majorsilence.Reporting.Rdl
             if (forEditing)
                 NormalizeActionsAndNoRows (report);
             NormalizeCharts (report, rl);
-            NormalizeTablixes (report, rl);
+            NormalizeTablixes (report, rl, nativeTablix && !forEditing);
             if (!forEditing)
                 RemoveVersionOnlyElements (report);
         }
@@ -588,7 +592,7 @@ namespace Majorsilence.Reporting.Rdl
 
         #region Tablix
 
-        private static void NormalizeTablixes (XmlElement root, ReportLog rl)
+        private static void NormalizeTablixes (XmlElement root, ReportLog rl, bool nativeTablix = false)
         {
             // Converting a Tablix clones its cell contents into the new Table, so a Tablix
             // nested inside another region re-enters the tree as an unconverted clone; repeat
@@ -606,6 +610,10 @@ namespace Majorsilence.Reporting.Rdl
                     return;
 
                 foreach (var tablix in pending) {
+                    if (nativeTablix && BecomesTable (tablix)) {
+                        refused.Add (tablix);   // the engine runs it (Tablix); a Tablix in its cells is looked at next pass
+                        continue;
+                    }
                     var table = TryConvertTablix (tablix, rl);
                     if (table != null)
                         tablix.ParentNode.ReplaceChild (table, tablix);
@@ -614,6 +622,13 @@ namespace Majorsilence.Reporting.Rdl
                 }
             }
         }
+
+        /// <summary>
+        /// The Tablix is the shape this rewrites into a Table: the shape the engine's Tablix runs
+        /// natively. Decided on a copy, as the rewrite changes what it works on.
+        /// </summary>
+        internal static bool BecomesTable (XmlElement tablix)
+            => TryConvertTablix ((XmlElement) tablix.CloneNode (true), null)?.LocalName == "Table";
 
         private static XmlElement TryConvertTablix (XmlElement tablix, ReportLog rl)
         {
