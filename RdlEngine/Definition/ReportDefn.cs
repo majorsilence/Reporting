@@ -42,6 +42,7 @@ namespace Majorsilence.Reporting.Rdl
 		Body _Body;				// Describes how the body of the report is structured
 		ReportParameters _ReportParameters;	// Parameters for the report
 		Custom _Customer;		// Custom information to be handed to the report engine
+		Variables _Variables;	// RDL 2008+: report variables (Variables!Name.Value)
 		RSize _Width;			// Width of the report
 		PageHeader _PageHeader;	// The header that is output at the top of each page of the report.
 		PageFooter _PageFooter;	// The footer that is output at the bottom of each page of the report.
@@ -240,6 +241,9 @@ namespace Majorsilence.Reporting.Rdl
 					case "dataelementstyle":
 						_DataElementStyle = Majorsilence.Reporting.Rdl.DataElementStyle.GetStyle(xNodeLoop.InnerText, this.rl);
 						break;
+					case "variables":
+						_Variables = new Variables(this, null, xNodeLoop);
+						break;
 					case "custom":
 						_Customer = new Custom(this, null, xNodeLoop);
 						_Kerning = KerningOf(_Customer);
@@ -304,6 +308,8 @@ namespace Majorsilence.Reporting.Rdl
                 await _DataSourcesDefn.FinalPass().ConfigureAwait(false);
 			if (_DataSetsDefn != null)
 				await _DataSetsDefn.FinalPass().ConfigureAwait(false);
+			if (_Variables != null)
+                await _Variables.FinalPass().ConfigureAwait(false);
             await _Body.FinalPass().ConfigureAwait(false);
 			if (_PageHeader != null)
                 await _PageHeader.FinalPass().ConfigureAwait(false);
@@ -505,6 +511,11 @@ namespace Majorsilence.Reporting.Rdl
 		{
 			get { return  _ReportParameters; }
 			set {  _ReportParameters = value; }
+		}
+
+		internal Variables Variables
+		{
+			get { return _Variables; }
 		}
 
 		internal Custom Customer

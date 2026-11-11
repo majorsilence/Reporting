@@ -150,6 +150,7 @@ namespace Majorsilence.Reporting.Rdl
 					_ToolTip = new Expression(OwnerReport, this, xNodeLoop, ExpressionType.String);
 					break;
 				case "label":
+				case "documentmaplabel":	// RDL 2008+ name for Label
 					_Label = new Expression(OwnerReport, this, xNodeLoop, ExpressionType.Variant);
 					break;
 				case "linktochild":

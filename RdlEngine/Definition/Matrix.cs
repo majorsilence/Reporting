@@ -1443,6 +1443,19 @@ namespace Majorsilence.Reporting.Rdl
             set { _Corner = value; }
         }
 
+        /// <summary>The groupings of the matrix's dynamic rows and columns.</summary>
+        internal System.Collections.Generic.IEnumerable<Grouping> AllGroupings()
+        {
+            if (_RowGroupings != null)
+                foreach (RowGrouping rg in _RowGroupings.Items)
+                    if (rg.DynamicRows?.Grouping != null)
+                        yield return rg.DynamicRows.Grouping;
+            if (_ColumnGroupings != null)
+                foreach (ColumnGrouping cg in _ColumnGroupings.Items)
+                    if (cg.DynamicColumns?.Grouping != null)
+                        yield return cg.DynamicColumns.Grouping;
+        }
+
         internal ColumnGroupings ColumnGroupings
         {
             get { return _ColumnGroupings; }

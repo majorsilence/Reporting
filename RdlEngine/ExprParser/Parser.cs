@@ -587,6 +587,15 @@ namespace Majorsilence.Reporting.Rdl
 						throw new ParserException(string.Format(Strings.Parser_ErrorP_GlobalsNotFound, method));
 					result = e;
 					return (true, result);
+				case "variables":	// RDL 2008+: a report or group variable
+					Variable v = idLookup.LookupVariable(method);
+					if (v == null)
+						throw new ParserException(string.Format("Variable '{0}' not found.", method));
+					thirdPart = NormalizeMemberRef(thirdPart);
+					if (thirdPart != null && thirdPart != "Value")
+						throw new ParserException(string.Format("Variable '{0}' supports only the Value property.", method));
+					result = new FunctionVariable(v);
+					return (true, result);
 				case "user":
 					e = idLookup.LookupUser(method);
 					if (e == null)

@@ -64,6 +64,7 @@ namespace Majorsilence.Reporting.Rdl
 		List<Textbox> _HideDuplicates;	// holds any textboxes that use this as a hideduplicate scope
 		bool _InMatrix; // true if grouping is in a matrix
         Expression _PageBreakCondition;
+		Variables _Variables;	// RDL 2008+: group variables (Variables!Name.Value)
 
         internal Grouping(ReportDefn r, ReportLink p, XmlNode xNode) : base(r, p)
 		{
@@ -98,7 +99,11 @@ namespace Majorsilence.Reporting.Rdl
 				switch (xNodeLoop.Name.ToLowerInvariant())
 				{
 					case "label":
+					case "documentmaplabel":	// RDL 2008+ name for Label
 						_Label = new Expression(r, this, xNodeLoop, ExpressionType.String);
+						break;
+					case "variables":
+						_Variables = new Variables(r, this, xNodeLoop);
 						break;
 					case "groupexpressions":
 						_GroupExpressions = new GroupExpressions(r, this, xNodeLoop);
@@ -153,10 +158,17 @@ namespace Majorsilence.Reporting.Rdl
 		}
 
 		// Handle parsing of function in final pass
+		internal Variables Variables
+		{
+			get { return _Variables; }
+		}
+
 		async override internal Task FinalPass()
 		{
 			if (_Label != null)
                 await _Label.FinalPass().ConfigureAwait(false);
+			if (_Variables != null)
+				await _Variables.FinalPass().ConfigureAwait(false);
 			if (_GroupExpressions != null)
                 await _GroupExpressions.FinalPass().ConfigureAwait(false);
 			if (_Custom != null)
