@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFrameworks>net8.0-windows;net10.0-windows</TargetFrameworks>
+    <TargetFrameworks>net8.0-windows;net10.0-windows;net11.0-windows</TargetFrameworks>
     <UseWPF>true</UseWPF>
     <EnableWindowsTargeting>true</EnableWindowsTargeting>
     <RootNamespace>HostingWpf</RootNamespace>

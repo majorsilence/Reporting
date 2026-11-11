@@ -14,7 +14,7 @@
     <Description>Cross-platform drag-and-drop RDL report designer control for Majorsilence Reporting, built on Majorsilence.Forms. Targets .NET 8 and .NET 10, any OS Majorsilence.Forms.Avalonia supports.</Description>
     <!-- net48 dropped: Majorsilence.Forms itself only targets net8.0/net10.0. -->
     <Configurations>Debug;Release</Configurations>
-    <TargetFrameworks>net8.0;net10.0</TargetFrameworks>
+    <TargetFrameworks>net8.0;net10.0;net11.0</TargetFrameworks>
     <WarningsAsErrors>4014</WarningsAsErrors>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <ApplicationHighDpiMode>SystemAware</ApplicationHighDpiMode>

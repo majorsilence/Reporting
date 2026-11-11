@@ -60,7 +60,9 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v5
         with:
-          dotnet-version: 10.0.x
+          dotnet-version: |
+            10.0.x
+            11.0.x
       - name: Publish the smoke test as a Native AOT binary
         run: dotnet publish Examples/RdlAotSmokeTest -c Release -r linux-x64 -f net10.0 --self-contained true -p:PublishAot=true -o aot-smoke
       - name: Run it against the live servers

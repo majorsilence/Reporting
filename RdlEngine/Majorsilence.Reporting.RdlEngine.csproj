@@ -11,7 +11,7 @@
 		<Description>Cross-platform RDL/RDLC report rendering engine — run SQL Server Reporting Services (SSRS 2005) report definitions without a report server on Linux, macOS, Windows, and containers. SkiaSharp-based rendering, Native-AOT-compatible. Renders to PDF, HTML, MHTML, CSV, Excel, and images. Targets .NET 8 and .NET 10.</Description>
 		<PackageTags>rdl;rdlc;ssrs;reporting;reports;pdf;crystal-reports-alternative;cross-platform;aot;dotnet</PackageTags>
 		<Configurations>Debug;Release</Configurations>
-		<TargetFrameworks>net8.0;net10.0</TargetFrameworks>
+		<TargetFrameworks>net8.0;net10.0;net11.0</TargetFrameworks>
 		<WarningsAsErrors>4014</WarningsAsErrors>
         <IsPackable>true</IsPackable>
         <Nullable>enable</Nullable>
