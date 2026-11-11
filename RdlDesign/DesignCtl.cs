@@ -1170,8 +1170,8 @@ namespace Majorsilence.Reporting.RdlDesign
                             CreateEmptyReportDoc();
 
                         //g.ClipBounds;
-                        var clip = new Rectangle(PixelsX(_hScroll.Value), PixelsY(_vScroll.Value),
-                            PixelsX(_DrawPanel.Width), PixelsY(_DrawPanel.Height));
+                        // Draw adds the scroll offset itself, so the clip is the panel in its own pixels
+                        var clip = new Rectangle(0, 0, _DrawPanel.Width, _DrawPanel.Height);
                         // Draw the report asynchronously
                         await _DrawPanel.Draw(g, PointsX(_hScroll.Value), PointsY(_vScroll.Value), clip);
                     }
@@ -1272,7 +1272,7 @@ namespace Majorsilence.Reporting.RdlDesign
 
 			_vScroll.Minimum = 0;
 			_vScroll.Maximum = h;
-			int sValue =  Math.Min(_vScroll.Value, _vScroll.Maximum);
+			int sValue =  Math.Min(_vScroll.Value, Math.Max(0, h - sh + 1));	// the last page starts at Maximum - LargeChange + 1
 			if (_vScroll.Value != sValue)
 			{
 				_vScroll.Value = sValue;
@@ -1287,7 +1287,7 @@ namespace Majorsilence.Reporting.RdlDesign
 		private void SetScrollControlsH()
 		{
 			int w = PixelsX(_DrawPanel.HorizontalMax);
-			int sw = this.Width - _hScroll.Width;
+			int sw = this.Width - _vScroll.Width;	// the width left of the vertical bar
 			if (sw > w)
 			{
 				_hScroll.Enabled = false;
@@ -1300,7 +1300,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			}
 			_hScroll.Maximum = w;
 			_hScroll.Minimum = 0;
-			int sValue =  Math.Min(_hScroll.Value, _hScroll.Maximum);
+			int sValue =  Math.Min(_hScroll.Value, Math.Max(0, w - Math.Max(sw, 0) + 1));
 			if (_hScroll.Value != sValue)
 			{
 				_hScroll.Value = sValue;
@@ -2026,11 +2026,12 @@ namespace Majorsilence.Reporting.RdlDesign
             bool bNotify = false;
 			if (e.Delta < 0)
 			{
-				if (_vScroll.Value < _vScroll.Maximum)
+				int last = LastScrollValue(_vScroll);
+				if (_vScroll.Value < last)
 				{
 					wvalue = _vScroll.Value + _vScroll.SmallChange;
 
-					_vScroll.Value = Math.Min(_vScroll.Maximum, wvalue);
+					_vScroll.Value = Math.Min(last, wvalue);
                     bNotify = true;
 				}
 			}
@@ -2050,6 +2051,12 @@ namespace Majorsilence.Reporting.RdlDesign
                     VerticalScrollChanged(this, new EventArgs());
                 _DrawPanel.Refresh();
             }
+		}
+
+		// The value where the last page of content starts, as far as the bar's own thumb and track go
+		private static int LastScrollValue(ScrollBar sb)
+		{
+			return Math.Max(sb.Minimum, sb.Maximum - sb.LargeChange + 1);
 		}
 
 		private void DrawPanelKeyDown(object sender, KeyEventArgs e)
@@ -2078,7 +2085,7 @@ namespace Majorsilence.Reporting.RdlDesign
 			}
 			else if (e.KeyCode == Keys.PageDown)
 			{
-				vScroll = Math.Min(_vScroll.Value + _vScroll.LargeChange, _vScroll.Maximum);
+				vScroll = Math.Min(_vScroll.Value + _vScroll.LargeChange, LastScrollValue(_vScroll));
 			}
 			else if (e.KeyCode == Keys.PageUp)
 			{
@@ -2116,14 +2123,14 @@ namespace Majorsilence.Reporting.RdlDesign
 			bool bRefresh = false;
 			if (vScroll != _vScroll.Value && _vScroll.Enabled)
 			{
-				_vScroll.Value = Math.Max(vScroll, 0);
+				_vScroll.Value = Math.Max(Math.Min(vScroll, LastScrollValue(_vScroll)), 0);
 				bRefresh = true;
 				e.Handled = true;
 			}
 
 			if (hScroll != _hScroll.Value && _hScroll.Enabled)
 			{
-				_hScroll.Value = Math.Max(hScroll,0);
+				_hScroll.Value = Math.Max(Math.Min(hScroll, LastScrollValue(_hScroll)), 0);
 				bRefresh = true;
 				e.Handled = true;
 			}
