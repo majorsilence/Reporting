@@ -22,7 +22,9 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v5
         with:
-          dotnet-version: 10.0.x
+          dotnet-version: |
+            10.0.x
+            11.0.x
       - name: Build
         run: dotnet build -c Release ReportTests.Containers/ReportTests.Containers.csproj
       - name: Test

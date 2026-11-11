@@ -9,7 +9,7 @@
         <DelaySign>false</DelaySign>
         <PackageId>Majorsilence.Reporting.RdlCri</PackageId>
         <Configurations>Debug;Release</Configurations>
-		<TargetFrameworks>net8.0;net10.0</TargetFrameworks>
+		<TargetFrameworks>net8.0;net10.0;net11.0</TargetFrameworks>
 		<WarningsAsErrors>4014</WarningsAsErrors>
         <IsPackable>true</IsPackable>
         <Nullable>enable</Nullable>

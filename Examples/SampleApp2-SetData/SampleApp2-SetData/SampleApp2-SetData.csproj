@@ -4,7 +4,7 @@
          this now builds against Majorsilence.Forms directly, whose
          generated System.Windows.Forms-namespace compat surface lets this Designer.cs-generated
          source compile unchanged. -->
-    <TargetFrameworks>net8.0;net10.0</TargetFrameworks>
+    <TargetFrameworks>net8.0;net10.0;net11.0</TargetFrameworks>
     <OutputType>WinExe</OutputType>
     <RootNamespace>SampleApp2_SetData</RootNamespace>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>

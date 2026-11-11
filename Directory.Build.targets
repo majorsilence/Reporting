@@ -47,6 +47,20 @@
     <None Include="$(MSBuildThisFileDirectory)Readme.md" Pack="true" PackagePath="\" Visible="false" />
   </ItemGroup>
 
+  <!--
+    Runtime Async (.NET 11): compile async methods to runtime-native async instead of
+    compiler-generated state machines, for net11.0+ inner builds only. Older TFMs (net8.0/net10.0,
+    netstandard2.0) keep the state-machine codegen because their runtimes cannot execute it.
+    net11.0 no longer needs EnablePreviewFeatures for this. Lives in .targets (not .props) so
+    single-TFM projects, which set TargetFramework in the project body, also see it. Opt a project
+    out with <EnableRuntimeAsync>false</EnableRuntimeAsync>.
+  -->
+  <PropertyGroup Condition="'$(EnableRuntimeAsync)' != 'false' AND '$(TargetFramework)' != '' AND
+                            '$(TargetFrameworkIdentifier)' == '.NETCoreApp' AND
+                            $([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net11.0'))">
+    <Features>$(Features);runtime-async=on</Features>
+  </PropertyGroup>
+
   <Target Name="_DisableAotForNonAotCompatibleTfm" BeforeTargets="ProcessFrameworkReferences"
           Condition="'$(PublishAot)' == 'true' AND '$(TargetFramework)' != '' AND
                      !$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net7.0'))">

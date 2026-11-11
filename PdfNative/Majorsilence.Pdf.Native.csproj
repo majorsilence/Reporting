@@ -4,7 +4,7 @@
 		<AssemblyName>pdfnative</AssemblyName>
 		<RootNamespace>Majorsilence.Pdf.Native</RootNamespace>
 		<!-- AOT publishing targets net10.0 only; net8.0 kept for managed-mode builds -->
-		<TargetFrameworks>net8.0;net10.0</TargetFrameworks>
+		<TargetFrameworks>net8.0;net10.0;net11.0</TargetFrameworks>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<IsAotCompatible>true</IsAotCompatible>
 		<EnableTrimAnalyzer>true</EnableTrimAnalyzer>

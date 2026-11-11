@@ -441,10 +441,14 @@ namespace Majorsilence.Spreadsheet
         // Excel works with 15 significant digits, so 2.675 shows as 2.68 rather than the binary 2.67499...
         private static string RoundToString(double v, int decimals)
         {
-            double sig15 = double.Parse(v.ToString("G15", Inv), Inv);
-            if (sig15 < 7.9e27)
+            string g15 = v.ToString("G15", Inv);
+            double sig15 = double.Parse(g15, Inv);
+            if (Math.Abs(sig15) < 7.9e27)
             {
-                decimal d = Math.Round((decimal)sig15, Math.Min(decimals, 28), MidpointRounding.AwayFromZero);
+                // Parse the G15 text straight to decimal rather than casting the double: from .NET 11
+                // the (decimal)double cast converts the exact binary value (2.67499999...) instead of
+                // rounding to 15 significant digits, which would round 2.675 down to 2.67.
+                decimal d = Math.Round(decimal.Parse(g15, NumberStyles.Float, Inv), Math.Min(decimals, 28), MidpointRounding.AwayFromZero);
                 return d.ToString("F" + decimals, Inv);
             }
             return sig15.ToString("F" + decimals, Inv);

@@ -2,7 +2,7 @@
   <PropertyGroup>
     <!-- net48/net8.0-windows dropped, real System.Windows.Forms reference (UseWindowsForms) dropped:
          this now builds against Majorsilence.Forms directly (using Majorsilence.Forms namespaces). -->
-    <TargetFrameworks>net8.0;net10.0</TargetFrameworks>
+    <TargetFrameworks>net8.0;net10.0;net11.0</TargetFrameworks>
     <OutputType>WinExe</OutputType>
     <RootNamespace>SampleApp2_SetData</RootNamespace>
     <AssemblyName>SampleApp2-SetData</AssemblyName>

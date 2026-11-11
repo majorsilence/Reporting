@@ -17,7 +17,7 @@
          Release-DrawingCompat in Visual Studio. -->
     <Configurations>Debug;Release</Configurations>
     <!-- net48 dropped: Majorsilence.Forms itself only targets net8.0/net10.0. -->
-    <TargetFrameworks>net8.0;net10.0</TargetFrameworks>
+    <TargetFrameworks>net8.0;net10.0;net11.0</TargetFrameworks>
     <WarningsAsErrors>4014</WarningsAsErrors>
     <GenerateResourceUsePreserializedResources>true</GenerateResourceUsePreserializedResources>
     <IsPackable>true</IsPackable>
