@@ -1,0 +1,1422 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Report xmlns="http://schemas.microsoft.com/sqlserver/reporting/2016/01/reportdefinition" xmlns:rd="http://schemas.microsoft.com/SQLServer/reporting/reportdesigner" xmlns:am="http://schemas.microsoft.com/sqlserver/reporting/authoringmetadata">
+  <Description>Execution Log Heatmap Report</Description>
+  <am:AuthoringMetadata>
+    <am:CreatedBy>
+      <am:Name>SSDTRS</am:Name>
+      <am:Version>17.8.34330.188</am:Version>
+    </am:CreatedBy>
+    <am:UpdatedBy>
+      <am:Name>SSDTRS</am:Name>
+      <am:Version>17.8.34330.188</am:Version>
+    </am:UpdatedBy>
+    <am:LastModifiedTimestamp>2023-12-14T21:41:58.5916774Z</am:LastModifiedTimestamp>
+  </am:AuthoringMetadata>
+  <Author>Anthony Duguid</Author>
+  <AutoRefresh>0</AutoRefresh>
+  <DataSources>
+    <DataSource Name="ReportServer">
+      <DataSourceReference>ReportServer</DataSourceReference>
+      <rd:SecurityType>None</rd:SecurityType>
+      <rd:DataSourceID>9c5d5e18-ddee-41b3-ae49-8d83f261caf6</rd:DataSourceID>
+    </DataSource>
+  </DataSources>
+  <DataSets>
+    <DataSet Name="Calendar">
+      <Query>
+        <DataSourceName>ReportServer</DataSourceName>
+        <QueryParameters>
+          <QueryParameter Name="@StartDate">
+            <Value>=Parameters!StartDate.Value</Value>
+          </QueryParameter>
+          <QueryParameter Name="@EndDate">
+            <Value>=Parameters!EndDate.Value</Value>
+          </QueryParameter>
+          <QueryParameter Name="@all_value">
+            <Value>=Parameters!all_value.Value</Value>
+          </QueryParameter>
+          <QueryParameter Name="@LogStatus">
+            <Value>=Parameters!LogStatus.Value</Value>
+          </QueryParameter>
+          <QueryParameter Name="@ReportFolder">
+            <Value>=Parameters!ReportFolder.Value</Value>
+          </QueryParameter>
+          <QueryParameter Name="@ReportName">
+            <Value>=Parameters!ReportName.Value</Value>
+          </QueryParameter>
+          <QueryParameter Name="@UserName">
+            <Value>=Parameters!UserName.Value</Value>
+          </QueryParameter>
+          <QueryParameter Name="@day_of_week">
+            <Value>=Parameters!day_of_week.Value</Value>
+          </QueryParameter>
+        </QueryParameters>
+        <CommandText>/*'---------------------------------------------------------------------------------------
+' Purpose:	to search the reporting services execution log
+'-----------------------------------------------------------------------------------------
+
+DECLARE @all_value AS VARCHAR(10)
+DECLARE @LogStatus AS VARCHAR(50)
+DECLARE @ReportFolder AS VARCHAR(450)
+DECLARE @ReportName AS VARCHAR(450)
+DECLARE @UserName AS VARCHAR(260)
+DECLARE @GroupByColumn AS VARCHAR(50)
+DECLARE @StartDate AS DATETIME
+DECLARE @EndDate AS DATETIME
+
+SET @all_value = '&lt;ALL&gt;'
+SET @LogStatus = '&lt;ALL&gt;'
+SET @ReportFolder = '&lt;ALL&gt;'
+SET @ReportName = '&lt;ALL&gt;' 
+SET @UserName = '&lt;ALL&gt;'
+SET @GroupByColumn = 'Report Folder'
+SET @StartDate = NULL
+SET @EndDate = NULL
+
+*/
+
+
+;WITH 
+week_list
+AS
+(
+	SELECT 
+		  [week_date] = DATEADD(d, 1, DATEADD(wk, wks.[number], DATEADD(yy, DATEDIFF(yy, 0, @StartDate), 0)))
+	FROM 
+		master.dbo.[spt_values] AS wks
+	WHERE 
+		1=1 -- used in testing to be able to comment out other clauses below
+		AND wks.[type] = 'P'
+		AND wks.[number] &lt;= 255
+)
+, 
+week_list_format
+AS
+(
+	SELECT
+		  [front_end_week_number] = DATEPART(wk, yw.[week_date])
+		, yw.[week_date]
+	FROM
+		week_list AS yw
+	WHERE 
+		1=1 -- used in testing to be able to comment out other clauses below
+		AND (yw.[week_date] BETWEEN @StartDate AND @EndDate)
+)
+, 
+day_list
+AS
+(
+	SELECT tbl.* FROM (VALUES
+	  ( 0, 'Monday')
+	, ( 1, 'Tuesday')
+	, ( 2, 'Wednesday')
+	, ( 3, 'Thursday')
+	, ( 4, 'Friday')
+	, ( 5, 'Saturday')
+	, ( 6, 'Sunday')
+	) tbl ([day_of_week], [day_name]) 
+)
+,
+report_users 
+AS
+(
+	SELECT [UserID], [UserName], [SimpleUserName] = UPPER(RIGHT([UserName], (LEN([UserName])-CHARINDEX('\', [UserName])))) FROM dbo.[Users]
+)
+,
+report_catalog
+AS
+(
+	SELECT    
+		  rpt.[ItemID]
+		, rpt.[CreatedById]
+		, rpt.[ModifiedById]
+		, rpt.[Type]
+		, rpt.[Name] 
+		, [ReportName] = rpt.[Name] 
+		, rpt.[Description]
+		, rpt.[Parameter]
+		, [CreationDate] = CONVERT(DATETIME, CONVERT(VARCHAR(11), rpt.[CreationDate], 13))
+		, [ModifiedDate] = CONVERT(DATETIME, CONVERT(VARCHAR(11), rpt.[ModifiedDate], 13))
+		, [ReportFolder] = SUBSTRING(rpt.[Path], 2, Len(rpt.[Path])-Len(rpt.[Name])-2) 
+		, rpt.[Path]
+		, [URL_ReportFolder] = 'http://' + Host_Name() + '/Reports/Pages/Report.aspx?ItemPath=%2f'  + SUBSTRING(rpt.[Path], 2, Len(rpt.[Path])-Len(rpt.[Name])-2)  + '&amp;ViewMode=List'
+		, [URL_Report] = 'http://' + Host_Name() + '/Reports/Pages/Report.aspx?ItemPath=%2f'  + SUBSTRING(rpt.[Path], 2, Len(rpt.[Path])-Len(rpt.[Name])-2)  + '%2f' + rpt.[Name]
+		--, [ReportDefinition] = CONVERT(VARCHAR(MAX), CONVERT(VARBINARY(MAX), rpt.Content))  
+		, [HostName] = Host_Name()
+	FROM 
+		dbo.[Catalog] AS rpt
+	WHERE 
+		1=1
+		AND rpt.[Type] = 2
+)
+, 
+execution_log
+AS
+(
+SELECT 
+	  ReportName = rpt.[Name] 
+	, day_name = DATENAME(dw, CONVERT(DATE, el.TimeStart))
+	, day_of_week = DATEPART(dw, CONVERT(DATE, el.TimeStart))
+	, front_end_week_number = DATEPART( wk, CONVERT(DATE, el.TimeStart))
+	, week_date = DATEADD(dd, -(DATEPART(dw, CONVERT(DATE, el.TimeStart))-1), CONVERT(DATE, el.TimeStart)) 
+	, day_event_count = COUNT(rpt.[Name]) OVER (PARTITION BY CONVERT(DATE, el.TimeStart) ORDER BY CONVERT(DATE, el.TimeStart)) 
+FROM 
+	report_catalog AS rpt 
+	LEFT JOIN dbo.ExecutionLog AS el ON el.ReportID = rpt.ItemID
+	LEFT JOIN report_users AS usr ON el.UserName = usr.UserName
+WHERE 
+	1=1
+	AND (@all_value IN(@LogStatus) OR el.[Status] IN(@LogStatus))
+	AND (@all_value IN (@ReportFolder) OR rpt.[ReportFolder] IN(@ReportFolder))
+	AND (@all_value IN(@ReportName) OR rpt.[ReportName] IN(@ReportName))
+	AND (@all_value IN(@UserName) OR usr.[SimpleUserName] IN(@UserName))
+	AND (@StartDate IS NULL OR CONVERT(DATETIME, CONVERT(VARCHAR(11), el.[TimeStart], 13)) &gt;= @StartDate)
+	AND (@EndDate IS NULL OR CONVERT(DATETIME, CONVERT(VARCHAR(11), el.[TimeStart], 13)) &lt;= @EndDate)
+)
+SELECT 
+	  el.[ReportName]
+	, el.[day_name]
+	, el.[day_of_week]
+	, el.[front_end_week_number]
+	, el.[week_date]
+	, el.[day_event_count]
+FROM 
+	execution_log AS el
+UNION
+SELECT 
+	  [ReportName] = 'Week Date'
+	, [day_name] = NULL
+	, [day_of_week] = NULL
+	, wlf.[front_end_week_number]
+	, wlf.[week_date]
+	, [day_event_count] = 0
+FROM 
+	  week_list_format AS wlf
+	  , execution_log
+UNION
+SELECT 
+	  [ReportName] = 'Day Name'
+	, dl.[day_name]
+	, dl.[day_of_week]
+	, [front_end_week_number] = NULL
+	, [week_date] = NULL
+	, [day_event_count] = 0
+FROM 
+	  day_list AS dl
+	  , execution_log
+WHERE 
+	1=1 -- change to 1=2 to hide the filler records during testing
+	AND (dl.[day_of_week] IN (@day_of_week)) </CommandText>
+        <rd:UseGenericDesigner>true</rd:UseGenericDesigner>
+      </Query>
+      <Fields>
+        <Field Name="ReportName">
+          <DataField>ReportName</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="day_name">
+          <DataField>day_name</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="day_of_week">
+          <DataField>day_of_week</DataField>
+          <rd:TypeName>System.Int32</rd:TypeName>
+        </Field>
+        <Field Name="front_end_week_number">
+          <DataField>front_end_week_number</DataField>
+          <rd:TypeName>System.Int32</rd:TypeName>
+        </Field>
+        <Field Name="week_date">
+          <DataField>week_date</DataField>
+          <rd:TypeName>System.DateTime</rd:TypeName>
+        </Field>
+        <Field Name="day_event_count">
+          <DataField>day_event_count</DataField>
+          <rd:TypeName>System.Int32</rd:TypeName>
+        </Field>
+      </Fields>
+    </DataSet>
+    <DataSet Name="Days">
+      <Query>
+        <DataSourceName>ReportServer</DataSourceName>
+        <CommandText>	SELECT tbl.* FROM (VALUES
+	  ( 0, 'Monday')
+	, ( 1, 'Tuesday')
+	, ( 2, 'Wednesday')
+	, ( 3, 'Thursday')
+	, ( 4, 'Friday')
+	, ( 5, 'Saturday')
+	, ( 6, 'Sunday')
+	) tbl ([day_of_week], [day_name]) </CommandText>
+      </Query>
+      <Fields>
+        <Field Name="day_name">
+          <DataField>day_name</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="day_of_week">
+          <DataField>day_of_week</DataField>
+          <rd:TypeName>System.Int32</rd:TypeName>
+        </Field>
+      </Fields>
+    </DataSet>
+    <DataSet Name="Defaults">
+      <Query>
+        <DataSourceName>ReportServer</DataSourceName>
+        <CommandText>WITH
+current_year
+AS
+(
+	SELECT 
+		  [year_first_date] = DATEADD(yy, DATEDIFF(yy, 0, GETDATE()), 0)
+)
+, 
+year_end_date
+AS
+(
+	SELECT
+		  [year_first_date]
+		, [year_last_date]  =  DATEADD(yy, DATEDIFF(yy, 0, [year_first_date]) + 1, -1)
+	FROM 
+		current_year
+)
+, 
+default_values
+AS
+(
+	SELECT
+		  [year_first_date]
+		, [year_last_date]
+		, [year_first_monday] = DATEADD(wk, DATEDIFF(wk,0, [year_first_date]), 0)
+		, [year_last_monday] = DATEADD(wk, DATEDIFF(wk,0, [year_last_date]), 0)
+	FROM 
+		year_end_date
+)
+SELECT
+	  [year_date] = YEAR([year_first_date])
+	, [year_first_date]
+	, [year_last_date]
+	, [year_first_monday] = 
+		CASE 
+			WHEN YEAR([year_first_date]) != YEAR([year_first_monday]) THEN DATEADD(d, 7, [year_first_monday])
+			ELSE [year_first_monday]
+		END 
+	, [year_last_monday] = 
+		CASE 
+			WHEN YEAR([year_first_date]) != YEAR([year_last_monday]) THEN DATEADD(d, -7, [year_last_monday])
+			ELSE [year_last_monday]
+		END 
+	, [current_week_monday] = DATEADD(wk, DATEDIFF(wk,0, GETDATE()), 0)
+	, [null_string] = '&lt;Undefined&gt;'
+	, [all_value] = '&lt;ALL&gt;'
+	, [no_selection] = '&lt;NONE&gt;'
+FROM 
+	default_values</CommandText>
+      </Query>
+      <Fields>
+        <Field Name="year_date">
+          <DataField>year_date</DataField>
+          <rd:TypeName>System.Int32</rd:TypeName>
+        </Field>
+        <Field Name="year_first_date">
+          <DataField>year_first_date</DataField>
+          <rd:TypeName>System.DateTime</rd:TypeName>
+        </Field>
+        <Field Name="year_last_date">
+          <DataField>year_last_date</DataField>
+          <rd:TypeName>System.DateTime</rd:TypeName>
+        </Field>
+        <Field Name="year_first_monday">
+          <DataField>year_first_monday</DataField>
+          <rd:TypeName>System.DateTime</rd:TypeName>
+        </Field>
+        <Field Name="year_last_monday">
+          <DataField>year_last_monday</DataField>
+          <rd:TypeName>System.DateTime</rd:TypeName>
+        </Field>
+        <Field Name="current_week_monday">
+          <DataField>current_week_monday</DataField>
+          <rd:TypeName>System.DateTime</rd:TypeName>
+        </Field>
+        <Field Name="null_string">
+          <DataField>null_string</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="all_value">
+          <DataField>all_value</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="no_selection">
+          <DataField>no_selection</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+      </Fields>
+    </DataSet>
+    <DataSet Name="Key">
+      <Query>
+        <DataSourceName>ReportServer</DataSourceName>
+        <CommandText>SELECT 'asdf'</CommandText>
+      </Query>
+      <Fields>
+        <Field Name="ID">
+          <DataField />
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+      </Fields>
+    </DataSet>
+    <DataSet Name="ReportFolder">
+      <Query>
+        <DataSourceName>ReportServer</DataSourceName>
+        <QueryParameters>
+          <QueryParameter Name="@all_value">
+            <Value>=Parameters!all_value.Value</Value>
+          </QueryParameter>
+        </QueryParameters>
+        <CommandText>;WITH 
+catalog_type_description
+AS
+(
+	SELECT tbl.* FROM (VALUES
+	  ( 1, 'Folder')
+	, ( 2, 'Report')
+	, ( 3, 'Resource')
+	, ( 4, 'Linked Report')
+	, ( 5, 'Data Source')
+	, ( 6, 'Report Model')
+	, ( 8, 'Shared Dataset')
+	, ( 9, 'Report Part')
+	) tbl ([TypeID], [TypeDescription]) 
+	WHERE [TypeID] = 2
+)
+SELECT 
+	[Report_Folder] = SUBSTRING(c.[Path], 2, Len(c.[Path])-Len(c.[Name])-2)   
+FROM 
+	dbo.[Catalog] AS c WITH (NOLOCK) 
+	INNER JOIN catalog_type_description AS ctd ON ctd.[TypeID] = c.[Type]
+UNION 
+SELECT @all_value
+ORDER BY 1</CommandText>
+      </Query>
+      <Fields>
+        <Field Name="Report_Folder">
+          <DataField>Report_Folder</DataField>
+          <rd:TypeName>System.Object</rd:TypeName>
+        </Field>
+      </Fields>
+    </DataSet>
+    <DataSet Name="ReportName">
+      <Query>
+        <DataSourceName>ReportServer</DataSourceName>
+        <QueryParameters>
+          <QueryParameter Name="@all_value">
+            <Value>=Parameters!all_value.Value</Value>
+          </QueryParameter>
+          <QueryParameter Name="@ReportFolder">
+            <Value>=Parameters!ReportFolder.Value</Value>
+          </QueryParameter>
+        </QueryParameters>
+        <CommandText>/*
+DECLARE @Report_Folder AS VARCHAR(450)
+SET @Report_Folder = '&lt;ALL&gt;'
+*/
+
+SELECT DISTINCT
+	  ReportName = c.Name
+	, ReportFolder = SUBSTRING(c.Path, 2, Len(c.Path)-Len(c.Name)-2)  
+FROM 
+	dbo.ExecutionLog el 
+	INNER JOIN dbo.Catalog c ON el.ReportID = c.ItemID
+WHERE 
+	c.[TYPE] = 2
+	AND (@all_value IN (@ReportFolder) OR SUBSTRING(c.Path, 2, Len(c.Path)-Len(c.Name)-2) IN(@ReportFolder))
+UNION 
+SELECT @all_value, @all_value
+ORDER BY 1</CommandText>
+      </Query>
+      <Fields>
+        <Field Name="ReportName">
+          <DataField>ReportName</DataField>
+          <rd:TypeName>System.Object</rd:TypeName>
+        </Field>
+        <Field Name="ReportFolder">
+          <DataField>ReportFolder</DataField>
+          <rd:TypeName>System.Object</rd:TypeName>
+        </Field>
+      </Fields>
+    </DataSet>
+    <DataSet Name="UserNames">
+      <Query>
+        <DataSourceName>ReportServer</DataSourceName>
+        <QueryParameters>
+          <QueryParameter Name="@all_value">
+            <Value>=Parameters!all_value.Value</Value>
+          </QueryParameter>
+          <QueryParameter Name="@ReportFolder">
+            <Value>=Parameters!ReportFolder.Value</Value>
+          </QueryParameter>
+          <QueryParameter Name="@ReportName">
+            <Value>=Parameters!ReportName.Value</Value>
+          </QueryParameter>
+        </QueryParameters>
+        <CommandText>SELECT DISTINCT	
+	[UserName] = RIGHT(el.[UserName],(LEN(el.[UserName])-CHARINDEX('\',el.[UserName])))  
+FROM 
+	dbo.[ExecutionLog] el 
+	INNER JOIN dbo.[Catalog] c ON el.[ReportID] = c.[ItemID]
+WHERE 
+	c.[TYPE] = 2
+	AND (@all_value IN (@ReportFolder) OR SUBSTRING(c.[Path], 2, Len(c.[Path])-Len(c.[Name])-2) IN(@ReportFolder))
+	AND (@all_value IN(@ReportName) OR c.Name  IN(@ReportName))
+UNION SELECT @all_value</CommandText>
+      </Query>
+      <Fields>
+        <Field Name="UserName">
+          <DataField>UserName</DataField>
+          <rd:TypeName>System.Object</rd:TypeName>
+        </Field>
+      </Fields>
+    </DataSet>
+    <DataSet Name="ReportStatus">
+      <Query>
+        <DataSourceName>ReportServer</DataSourceName>
+        <QueryParameters>
+          <QueryParameter Name="@all_value">
+            <Value>=Parameters!all_value.Value</Value>
+          </QueryParameter>
+        </QueryParameters>
+        <CommandText>SELECT DISTINCT	
+el.[Status]
+FROM dbo.[ExecutionLog] el 
+UNION SELECT @all_value</CommandText>
+      </Query>
+      <Fields>
+        <Field Name="Status">
+          <DataField>Status</DataField>
+          <rd:TypeName>System.Object</rd:TypeName>
+        </Field>
+      </Fields>
+    </DataSet>
+  </DataSets>
+  <ReportSections>
+    <ReportSection>
+      <Body>
+        <ReportItems>
+          <Tablix Name="tbxBookingDetails">
+            <TablixCorner>
+              <TablixCornerRows>
+                <TablixCornerRow>
+                  <TablixCornerCell>
+                    <CellContents>
+                      <Textbox Name="lbl1">
+                        <CanGrow>true</CanGrow>
+                        <KeepTogether>true</KeepTogether>
+                        <Paragraphs>
+                          <Paragraph>
+                            <TextRuns>
+                              <TextRun>
+                                <Value />
+                                <Style>
+                                  <FontFamily>Tahoma</FontFamily>
+                                  <FontSize>8pt</FontSize>
+                                </Style>
+                              </TextRun>
+                            </TextRuns>
+                            <Style>
+                              <TextAlign>Center</TextAlign>
+                            </Style>
+                          </Paragraph>
+                        </Paragraphs>
+                        <Style>
+                          <Border>
+                            <Style>None</Style>
+                            <Width>0.75pt</Width>
+                          </Border>
+                          <VerticalAlign>Middle</VerticalAlign>
+                          <PaddingLeft>2pt</PaddingLeft>
+                          <PaddingRight>2pt</PaddingRight>
+                          <PaddingTop>2pt</PaddingTop>
+                          <PaddingBottom>2pt</PaddingBottom>
+                        </Style>
+                      </Textbox>
+                    </CellContents>
+                  </TablixCornerCell>
+                </TablixCornerRow>
+              </TablixCornerRows>
+            </TablixCorner>
+            <TablixBody>
+              <TablixColumns>
+                <TablixColumn>
+                  <Width>0.4cm</Width>
+                </TablixColumn>
+              </TablixColumns>
+              <TablixRows>
+                <TablixRow>
+                  <Height>0.4cm</Height>
+                  <TablixCells>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="txtweek_number">
+                          <CanGrow>true</CanGrow>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>=Fields!front_end_week_number.Value</Value>
+                                  <Style>
+                                    <FontFamily>Tahoma</FontFamily>
+                                    <FontSize>6pt</FontSize>
+                                    <Color>DimGray</Color>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style>
+                                <TextAlign>Center</TextAlign>
+                              </Style>
+                            </Paragraph>
+                          </Paragraphs>
+                          <Style>
+                            <Border>
+                              <Color>White</Color>
+                              <Style>None</Style>
+                            </Border>
+                            <BackgroundColor>=IIF(Today.AddDays(1-WeekDay(Today,FirstDayOfWeek.Monday)) = Max(Fields!week_date.Value, "WeekDate"), Variables!ColorHighlightToday.Value, "Transparent")</BackgroundColor>
+                            <VerticalAlign>Bottom</VerticalAlign>
+                            <PaddingLeft>2pt</PaddingLeft>
+                            <PaddingRight>2pt</PaddingRight>
+                            <PaddingTop>2pt</PaddingTop>
+                            <PaddingBottom>2pt</PaddingBottom>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                  </TablixCells>
+                </TablixRow>
+                <TablixRow>
+                  <Height>0.4cm</Height>
+                  <TablixCells>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="txtday_percent">
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value />
+                                  <Style>
+                                    <FontFamily>Tahoma</FontFamily>
+                                    <FontSize>3pt</FontSize>
+                                    <Format>0;(0)</Format>
+                                    <Color>White</Color>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style>
+                                <TextAlign>Center</TextAlign>
+                              </Style>
+                            </Paragraph>
+                          </Paragraphs>
+                          <Style>
+                            <Border>
+                              <Color>White</Color>
+                              <Style>Solid</Style>
+                            </Border>
+                            <BackgroundColor>=Code.HeatMapColorGradate(Fields!day_event_count.Value, Max(Fields!day_event_count.Value, "Calendar"), -10, Variables!ColorEventCountGradate.Value)</BackgroundColor>
+                            <PaddingLeft>2pt</PaddingLeft>
+                            <PaddingRight>2pt</PaddingRight>
+                            <PaddingTop>2pt</PaddingTop>
+                            <PaddingBottom>2pt</PaddingBottom>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                  </TablixCells>
+                </TablixRow>
+              </TablixRows>
+            </TablixBody>
+            <TablixColumnHierarchy>
+              <TablixMembers>
+                <TablixMember>
+                  <Group Name="MonthName">
+                    <GroupExpressions>
+                      <GroupExpression>=Left(MonthName(Month(Fields!week_date.Value)), 3)</GroupExpression>
+                    </GroupExpressions>
+                  </Group>
+                  <SortExpressions>
+                    <SortExpression>
+                      <Value>=Month(Fields!week_date.Value)</Value>
+                    </SortExpression>
+                  </SortExpressions>
+                  <TablixHeader>
+                    <Size>0.42cm</Size>
+                    <CellContents>
+                      <Textbox Name="txtmonth_name">
+                        <KeepTogether>true</KeepTogether>
+                        <Paragraphs>
+                          <Paragraph>
+                            <TextRuns>
+                              <TextRun>
+                                <Value>=Left(MonthName(Month(Fields!week_date.Value)), 3)</Value>
+                                <Style>
+                                  <FontFamily>Tahoma</FontFamily>
+                                  <FontSize>7pt</FontSize>
+                                  <Color>DimGray</Color>
+                                </Style>
+                              </TextRun>
+                            </TextRuns>
+                            <Style>
+                              <TextAlign>Center</TextAlign>
+                            </Style>
+                          </Paragraph>
+                        </Paragraphs>
+                        <Style>
+                          <Border>
+                            <Style>None</Style>
+                            <Width>0.75pt</Width>
+                          </Border>
+                          <VerticalAlign>Middle</VerticalAlign>
+                          <PaddingLeft>2pt</PaddingLeft>
+                          <PaddingRight>2pt</PaddingRight>
+                          <PaddingTop>2pt</PaddingTop>
+                          <PaddingBottom>2pt</PaddingBottom>
+                        </Style>
+                      </Textbox>
+                    </CellContents>
+                  </TablixHeader>
+                  <TablixMembers>
+                    <TablixMember>
+                      <Group Name="WeekDate">
+                        <GroupExpressions>
+                          <GroupExpression>=Fields!week_date.Value</GroupExpression>
+                        </GroupExpressions>
+                      </Group>
+                      <SortExpressions>
+                        <SortExpression>
+                          <Value>=Fields!front_end_week_number.Value</Value>
+                        </SortExpression>
+                      </SortExpressions>
+                      <TablixMembers>
+                        <TablixMember />
+                      </TablixMembers>
+                      <Visibility>
+                        <Hidden>=IIF(IsNothing(Fields!front_end_week_number.Value), True, False)</Hidden>
+                      </Visibility>
+                    </TablixMember>
+                  </TablixMembers>
+                </TablixMember>
+              </TablixMembers>
+            </TablixColumnHierarchy>
+            <TablixRowHierarchy>
+              <TablixMembers>
+                <TablixMember>
+                  <TablixHeader>
+                    <Size>0.63583cm</Size>
+                    <CellContents>
+                      <Textbox Name="txt1">
+                        <CanGrow>true</CanGrow>
+                        <KeepTogether>true</KeepTogether>
+                        <Paragraphs>
+                          <Paragraph>
+                            <TextRuns>
+                              <TextRun>
+                                <Value />
+                                <Style>
+                                  <FontFamily>Tahoma</FontFamily>
+                                  <FontSize>8pt</FontSize>
+                                </Style>
+                              </TextRun>
+                            </TextRuns>
+                            <Style>
+                              <TextAlign>Center</TextAlign>
+                            </Style>
+                          </Paragraph>
+                        </Paragraphs>
+                        <Style>
+                          <Border>
+                            <Style>None</Style>
+                            <Width>0.75pt</Width>
+                          </Border>
+                          <VerticalAlign>Middle</VerticalAlign>
+                          <PaddingLeft>2pt</PaddingLeft>
+                          <PaddingRight>2pt</PaddingRight>
+                          <PaddingTop>2pt</PaddingTop>
+                          <PaddingBottom>2pt</PaddingBottom>
+                        </Style>
+                      </Textbox>
+                    </CellContents>
+                  </TablixHeader>
+                  <KeepTogether>true</KeepTogether>
+                </TablixMember>
+                <TablixMember>
+                  <Group Name="DayName">
+                    <GroupExpressions>
+                      <GroupExpression>=Fields!day_name.Value</GroupExpression>
+                    </GroupExpressions>
+                  </Group>
+                  <SortExpressions>
+                    <SortExpression>
+                      <Value>=Fields!day_of_week.Value</Value>
+                    </SortExpression>
+                  </SortExpressions>
+                  <TablixMembers>
+                    <TablixMember>
+                      <TablixHeader>
+                        <Size>0.63583cm</Size>
+                        <CellContents>
+                          <Textbox Name="txtday_name">
+                            <CanGrow>true</CanGrow>
+                            <KeepTogether>true</KeepTogether>
+                            <Paragraphs>
+                              <Paragraph>
+                                <TextRuns>
+                                  <TextRun>
+                                    <Value>=Left(Fields!day_name.Value, 3)</Value>
+                                    <Style>
+                                      <FontFamily>Tahoma</FontFamily>
+                                      <FontSize>7pt</FontSize>
+                                      <Color>DimGray</Color>
+                                    </Style>
+                                  </TextRun>
+                                </TextRuns>
+                                <Style />
+                              </Paragraph>
+                            </Paragraphs>
+                            <Style>
+                              <Border>
+                                <Style>None</Style>
+                                <Width>0.75pt</Width>
+                              </Border>
+                              <PaddingLeft>2pt</PaddingLeft>
+                              <PaddingRight>2pt</PaddingRight>
+                              <PaddingTop>2pt</PaddingTop>
+                              <PaddingBottom>2pt</PaddingBottom>
+                            </Style>
+                          </Textbox>
+                        </CellContents>
+                      </TablixHeader>
+                      <TablixMembers>
+                        <TablixMember>
+                          <RepeatOnNewPage>true</RepeatOnNewPage>
+                          <KeepTogether>true</KeepTogether>
+                        </TablixMember>
+                      </TablixMembers>
+                      <RepeatOnNewPage>true</RepeatOnNewPage>
+                      <KeepTogether>true</KeepTogether>
+                    </TablixMember>
+                  </TablixMembers>
+                  <Visibility>
+                    <Hidden>=IIF(IsNothing(Fields!day_name.Value), True, False)</Hidden>
+                  </Visibility>
+                  <KeepTogether>true</KeepTogether>
+                </TablixMember>
+              </TablixMembers>
+            </TablixRowHierarchy>
+            <RepeatColumnHeaders>true</RepeatColumnHeaders>
+            <RepeatRowHeaders>true</RepeatRowHeaders>
+            <FixedColumnHeaders>true</FixedColumnHeaders>
+            <FixedRowHeaders>true</FixedRowHeaders>
+            <DataSetName>Calendar</DataSetName>
+            <Height>1.22cm</Height>
+            <Width>1.03583cm</Width>
+            <Style>
+              <Border>
+                <Style>None</Style>
+                <Width>0.75pt</Width>
+              </Border>
+              <FontFamily>Tahoma</FontFamily>
+            </Style>
+          </Tablix>
+          <Tablix Name="Tablix1">
+            <TablixBody>
+              <TablixColumns>
+                <TablixColumn>
+                  <Width>0.63583cm</Width>
+                </TablixColumn>
+                <TablixColumn>
+                  <Width>0.4cm</Width>
+                </TablixColumn>
+                <TablixColumn>
+                  <Width>0.4cm</Width>
+                </TablixColumn>
+                <TablixColumn>
+                  <Width>0.4cm</Width>
+                </TablixColumn>
+                <TablixColumn>
+                  <Width>0.4cm</Width>
+                </TablixColumn>
+                <TablixColumn>
+                  <Width>0.4cm</Width>
+                </TablixColumn>
+                <TablixColumn>
+                  <Width>1cm</Width>
+                </TablixColumn>
+              </TablixColumns>
+              <TablixRows>
+                <TablixRow>
+                  <Height>0.4cm</Height>
+                  <TablixCells>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="Textbox2">
+                          <CanGrow>true</CanGrow>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>Less</Value>
+                                  <Style>
+                                    <FontFamily>Tahoma</FontFamily>
+                                    <FontSize>7pt</FontSize>
+                                    <Color>DimGray</Color>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style>
+                                <TextAlign>Right</TextAlign>
+                              </Style>
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>Textbox2</rd:DefaultName>
+                          <Style>
+                            <Border>
+                              <Color>LightGrey</Color>
+                              <Style>None</Style>
+                            </Border>
+                            <PaddingLeft>2pt</PaddingLeft>
+                            <PaddingRight>2pt</PaddingRight>
+                            <PaddingTop>2pt</PaddingTop>
+                            <PaddingBottom>2pt</PaddingBottom>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="Textbox10">
+                          <CanGrow>true</CanGrow>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value />
+                                  <Style>
+                                    <FontFamily>Tahoma</FontFamily>
+                                    <FontSize>7pt</FontSize>
+                                    <Color>DimGray</Color>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style />
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>Textbox10</rd:DefaultName>
+                          <Style>
+                            <Border>
+                              <Color>White</Color>
+                              <Style>Solid</Style>
+                            </Border>
+                            <BackgroundColor>=Code.HeatMapColorGradate(1, 100, -10, Variables!ColorEventCountGradate.Value)</BackgroundColor>
+                            <PaddingLeft>2pt</PaddingLeft>
+                            <PaddingRight>2pt</PaddingRight>
+                            <PaddingTop>2pt</PaddingTop>
+                            <PaddingBottom>2pt</PaddingBottom>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="Textbox9">
+                          <CanGrow>true</CanGrow>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value />
+                                  <Style>
+                                    <FontFamily>Tahoma</FontFamily>
+                                    <FontSize>7pt</FontSize>
+                                    <Color>DimGray</Color>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style />
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>Textbox9</rd:DefaultName>
+                          <Style>
+                            <Border>
+                              <Color>White</Color>
+                              <Style>Solid</Style>
+                            </Border>
+                            <BackgroundColor>=Code.HeatMapColorGradate(25, 100, -10, Variables!ColorEventCountGradate.Value)</BackgroundColor>
+                            <PaddingLeft>2pt</PaddingLeft>
+                            <PaddingRight>2pt</PaddingRight>
+                            <PaddingTop>2pt</PaddingTop>
+                            <PaddingBottom>2pt</PaddingBottom>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="Textbox8">
+                          <CanGrow>true</CanGrow>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value />
+                                  <Style>
+                                    <FontFamily>Tahoma</FontFamily>
+                                    <FontSize>7pt</FontSize>
+                                    <Color>DimGray</Color>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style />
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>Textbox8</rd:DefaultName>
+                          <Style>
+                            <Border>
+                              <Color>White</Color>
+                              <Style>Solid</Style>
+                            </Border>
+                            <BackgroundColor>=Code.HeatMapColorGradate(50, 100, -10, Variables!ColorEventCountGradate.Value)</BackgroundColor>
+                            <PaddingLeft>2pt</PaddingLeft>
+                            <PaddingRight>2pt</PaddingRight>
+                            <PaddingTop>2pt</PaddingTop>
+                            <PaddingBottom>2pt</PaddingBottom>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="Textbox7">
+                          <CanGrow>true</CanGrow>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value />
+                                  <Style>
+                                    <FontFamily>Tahoma</FontFamily>
+                                    <FontSize>7pt</FontSize>
+                                    <Color>DimGray</Color>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style />
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>Textbox7</rd:DefaultName>
+                          <Style>
+                            <Border>
+                              <Color>White</Color>
+                              <Style>Solid</Style>
+                            </Border>
+                            <BackgroundColor>=Code.HeatMapColorGradate(75, 100, -10, Variables!ColorEventCountGradate.Value)</BackgroundColor>
+                            <PaddingLeft>2pt</PaddingLeft>
+                            <PaddingRight>2pt</PaddingRight>
+                            <PaddingTop>2pt</PaddingTop>
+                            <PaddingBottom>2pt</PaddingBottom>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="Textbox4">
+                          <CanGrow>true</CanGrow>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value />
+                                  <Style>
+                                    <FontFamily>Tahoma</FontFamily>
+                                    <FontSize>7pt</FontSize>
+                                    <Color>DimGray</Color>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style />
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>Textbox4</rd:DefaultName>
+                          <Style>
+                            <Border>
+                              <Color>White</Color>
+                              <Style>Solid</Style>
+                            </Border>
+                            <BackgroundColor>=Code.HeatMapColorGradate(100, 100, -10, Variables!ColorEventCountGradate.Value)</BackgroundColor>
+                            <PaddingLeft>2pt</PaddingLeft>
+                            <PaddingRight>2pt</PaddingRight>
+                            <PaddingTop>2pt</PaddingTop>
+                            <PaddingBottom>2pt</PaddingBottom>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="Textbox6">
+                          <CanGrow>true</CanGrow>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>More</Value>
+                                  <Style>
+                                    <FontFamily>Tahoma</FontFamily>
+                                    <FontSize>7pt</FontSize>
+                                    <Color>DimGray</Color>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style />
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>Textbox6</rd:DefaultName>
+                          <Style>
+                            <Border>
+                              <Color>LightGrey</Color>
+                              <Style>None</Style>
+                            </Border>
+                            <PaddingLeft>2pt</PaddingLeft>
+                            <PaddingRight>2pt</PaddingRight>
+                            <PaddingTop>2pt</PaddingTop>
+                            <PaddingBottom>2pt</PaddingBottom>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                  </TablixCells>
+                </TablixRow>
+              </TablixRows>
+            </TablixBody>
+            <TablixColumnHierarchy>
+              <TablixMembers>
+                <TablixMember />
+                <TablixMember />
+                <TablixMember />
+                <TablixMember />
+                <TablixMember />
+                <TablixMember />
+                <TablixMember />
+              </TablixMembers>
+            </TablixColumnHierarchy>
+            <TablixRowHierarchy>
+              <TablixMembers>
+                <TablixMember>
+                  <Group Name="Details" />
+                </TablixMember>
+              </TablixMembers>
+            </TablixRowHierarchy>
+            <DataSetName>Key</DataSetName>
+            <Top>1.58433cm</Top>
+            <Height>0.4cm</Height>
+            <Width>3.63583cm</Width>
+            <ZIndex>1</ZIndex>
+            <Style>
+              <Border>
+                <Style>None</Style>
+              </Border>
+            </Style>
+          </Tablix>
+        </ReportItems>
+        <Height>1.98433cm</Height>
+        <Style />
+      </Body>
+      <Width>10.77958cm</Width>
+      <Page>
+        <PageHeight>29.7cm</PageHeight>
+        <PageWidth>42cm</PageWidth>
+        <InteractiveHeight>0cm</InteractiveHeight>
+        <InteractiveWidth>29.7cm</InteractiveWidth>
+        <LeftMargin>0.75cm</LeftMargin>
+        <RightMargin>0.5cm</RightMargin>
+        <TopMargin>0.5cm</TopMargin>
+        <BottomMargin>0.5cm</BottomMargin>
+        <ColumnSpacing>1.27cm</ColumnSpacing>
+        <Style />
+      </Page>
+    </ReportSection>
+  </ReportSections>
+  <ReportParameters>
+    <ReportParameter Name="all_value">
+      <DataType>String</DataType>
+      <DefaultValue>
+        <DataSetReference>
+          <DataSetName>Defaults</DataSetName>
+          <ValueField>all_value</ValueField>
+        </DataSetReference>
+      </DefaultValue>
+      <Prompt>All Value Hidden</Prompt>
+      <Hidden>true</Hidden>
+    </ReportParameter>
+    <ReportParameter Name="ReportFolder">
+      <DataType>String</DataType>
+      <Prompt>Report Folder</Prompt>
+      <ValidValues>
+        <DataSetReference>
+          <DataSetName>ReportFolder</DataSetName>
+          <ValueField>Report_Folder</ValueField>
+          <LabelField>Report_Folder</LabelField>
+        </DataSetReference>
+      </ValidValues>
+      <MultiValue>true</MultiValue>
+    </ReportParameter>
+    <ReportParameter Name="StartDate">
+      <DataType>DateTime</DataType>
+      <Nullable>true</Nullable>
+      <DefaultValue>
+        <DataSetReference>
+          <DataSetName>Defaults</DataSetName>
+          <ValueField>year_first_date</ValueField>
+        </DataSetReference>
+      </DefaultValue>
+      <Prompt>Start Date</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="ReportName">
+      <DataType>String</DataType>
+      <DefaultValue>
+        <Values>
+          <Value>=Parameters!all_value.Value</Value>
+        </Values>
+      </DefaultValue>
+      <Prompt>Report Name</Prompt>
+      <ValidValues>
+        <DataSetReference>
+          <DataSetName>ReportName</DataSetName>
+          <ValueField>ReportName</ValueField>
+          <LabelField>ReportName</LabelField>
+        </DataSetReference>
+      </ValidValues>
+      <MultiValue>true</MultiValue>
+    </ReportParameter>
+    <ReportParameter Name="EndDate">
+      <DataType>DateTime</DataType>
+      <Nullable>true</Nullable>
+      <DefaultValue>
+        <DataSetReference>
+          <DataSetName>Defaults</DataSetName>
+          <ValueField>year_last_date</ValueField>
+        </DataSetReference>
+      </DefaultValue>
+      <Prompt>End Date</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="UserName">
+      <DataType>String</DataType>
+      <DefaultValue>
+        <Values>
+          <Value>=Parameters!all_value.Value</Value>
+        </Values>
+      </DefaultValue>
+      <Prompt>User Name</Prompt>
+      <ValidValues>
+        <DataSetReference>
+          <DataSetName>UserNames</DataSetName>
+          <ValueField>UserName</ValueField>
+          <LabelField>UserName</LabelField>
+        </DataSetReference>
+      </ValidValues>
+      <MultiValue>true</MultiValue>
+    </ReportParameter>
+    <ReportParameter Name="day_of_week">
+      <DataType>String</DataType>
+      <DefaultValue>
+        <Values>
+          <Value>0</Value>
+          <Value>1</Value>
+          <Value>2</Value>
+          <Value>3</Value>
+          <Value>4</Value>
+        </Values>
+      </DefaultValue>
+      <Prompt>Day</Prompt>
+      <ValidValues>
+        <DataSetReference>
+          <DataSetName>Days</DataSetName>
+          <ValueField>day_of_week</ValueField>
+          <LabelField>day_name</LabelField>
+        </DataSetReference>
+      </ValidValues>
+      <MultiValue>true</MultiValue>
+    </ReportParameter>
+    <ReportParameter Name="LogStatus">
+      <DataType>String</DataType>
+      <DefaultValue>
+        <Values>
+          <Value>&lt;ALL&gt;</Value>
+        </Values>
+      </DefaultValue>
+      <Prompt>Log Status</Prompt>
+      <ValidValues>
+        <DataSetReference>
+          <DataSetName>ReportStatus</DataSetName>
+          <ValueField>Status</ValueField>
+          <LabelField>Status</LabelField>
+        </DataSetReference>
+      </ValidValues>
+      <MultiValue>true</MultiValue>
+    </ReportParameter>
+  </ReportParameters>
+  <ReportParametersLayout>
+    <GridLayoutDefinition>
+      <NumberOfColumns>2</NumberOfColumns>
+      <NumberOfRows>5</NumberOfRows>
+      <CellDefinitions>
+        <CellDefinition>
+          <ColumnIndex>0</ColumnIndex>
+          <RowIndex>0</RowIndex>
+          <ParameterName>all_value</ParameterName>
+        </CellDefinition>
+        <CellDefinition>
+          <ColumnIndex>1</ColumnIndex>
+          <RowIndex>3</RowIndex>
+          <ParameterName>day_of_week</ParameterName>
+        </CellDefinition>
+        <CellDefinition>
+          <ColumnIndex>0</ColumnIndex>
+          <RowIndex>4</RowIndex>
+          <ParameterName>LogStatus</ParameterName>
+        </CellDefinition>
+        <CellDefinition>
+          <ColumnIndex>0</ColumnIndex>
+          <RowIndex>1</RowIndex>
+          <ParameterName>ReportFolder</ParameterName>
+        </CellDefinition>
+        <CellDefinition>
+          <ColumnIndex>0</ColumnIndex>
+          <RowIndex>2</RowIndex>
+          <ParameterName>ReportName</ParameterName>
+        </CellDefinition>
+        <CellDefinition>
+          <ColumnIndex>0</ColumnIndex>
+          <RowIndex>3</RowIndex>
+          <ParameterName>UserName</ParameterName>
+        </CellDefinition>
+        <CellDefinition>
+          <ColumnIndex>1</ColumnIndex>
+          <RowIndex>1</RowIndex>
+          <ParameterName>StartDate</ParameterName>
+        </CellDefinition>
+        <CellDefinition>
+          <ColumnIndex>1</ColumnIndex>
+          <RowIndex>2</RowIndex>
+          <ParameterName>EndDate</ParameterName>
+        </CellDefinition>
+      </CellDefinitions>
+    </GridLayoutDefinition>
+  </ReportParametersLayout>
+  <Code>Private Alt As Boolean
+
+Public Function CandyStripe(Optional ByVal NewRow As Boolean = False, Optional ByVal OddColor as String = "PapayaWhip", Optional ByVal EvenColor as String = "#FFFFFF") As String
+'------------------------------------------------------------------------------------------------
+' Purpose:  To candy stripe the detail rows of a report
+' Example:  BackgroundColor = Code.CandyStripe()
+' Note:     The first column needs a parameter of "True" passed in example: Code.CandyStripe(True)
+'------------------------------------------------------------------------------------------------
+	If NewRow Then 
+		Alt = Not Alt
+	End If
+	
+	If Alt Then
+		Return OddColor
+	Else
+		Return EvenColor
+	End If
+
+End Function
+
+Public Function HeatMapColorGradate( _
+  ByVal Value As Double _
+, ByVal MaxPositive As Double _
+, ByVal Neutral As Double _
+, ByVal ColStr As String) As String
+'------------------------------------------------------------------------------------------------
+' Purpose:  To use a color gradations on a heatmap report
+' Example:  BackgroundColor =Code.HeatMapColorGradate(25, 100, -10, Variables!ColorEventCountGradate.Value)
+' Note:     Use a negative number as the "Neutral" number to avoid too light of a color
+'------------------------------------------------------------------------------------------------
+Const Shd As Double = 255
+Dim ColVar1 As Integer = Convert.ToInt32(Left(Right(ColStr, 6), 2), 16)
+Dim ColVar2 As Integer = Convert.ToInt32(Left(Right(ColStr, 4), 2), 16)
+Dim ColVar3 As Integer = Convert.ToInt32(Right(ColStr, 2), 16) 'Find Largest Range 'Split the #RGB color to R, G, and B components
+Dim decPosRange As Double = Math.Abs(MaxPositive - Neutral) 'Find appropriate color shade
+Dim iColor1 As Integer = ColVar1 + CInt(Math.Round((MaxPositive - Value) * ((Shd - ColVar1) / decPosRange)))
+Dim iColor2 As Integer = ColVar2 + CInt(Math.Round((MaxPositive - Value) * ((Shd - ColVar2) / decPosRange)))
+Dim iColor3 As Integer = ColVar3 + CInt(Math.Round((MaxPositive - Value) * ((Shd - ColVar3) / decPosRange))) 'Return the new color
+Dim heatMapColor As String = "#" &amp; iColor1.ToString("X2") &amp; iColor2.ToString("X2") &amp; iColor3.ToString("X2") 'Reduce a shade for each of the R,G,B components
+
+    Return heatMapColor 
+
+End Function</Code>
+  <EmbeddedImages>
+    <EmbeddedImage Name="development">
+      <MIMEType>image/png</MIMEType>
+      <ImageData>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</ImageData>
+    </EmbeddedImage>
+    <EmbeddedImage Name="testing">
+      <MIMEType>image/png</MIMEType>
+      <ImageData>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</ImageData>
+    </EmbeddedImage>
+  </EmbeddedImages>
+  <Language>en-AU</Language>
+  <Variables>
+    <Variable Name="ColorTableHeader">
+      <Value>Gainsboro</Value>
+    </Variable>
+    <Variable Name="FormatDate">
+      <Value>dd-MMM-yyyy</Value>
+    </Variable>
+    <Variable Name="FormatDateTime">
+      <Value>dd-MMM-yyyy  hh:mm tt</Value>
+    </Variable>
+    <Variable Name="ReportRunDateTime">
+      <Value>=Format(DateTime.Now, Variables!FormatDateTime.Value)</Value>
+    </Variable>
+    <Variable Name="ReportServer">
+      <Value>=Replace(Globals!ReportServerUrl, "/ReportServer", "")</Value>
+    </Variable>
+    <Variable Name="UrlReport">
+      <Value>
+        =Variables!ReportServer.Value + "/ReportServer?"
+        + Replace(Globals!ReportFolder, " ", "+") + "%2f"
+        + Replace(Globals!ReportName, " ", "+") + "&amp;rs:Command=Render"
+      </Value>
+    </Variable>
+    <Variable Name="UserName">
+      <Value>=Right(User!UserID, len(User!UserID)-instr(User!UserID, "\"))</Value>
+    </Variable>
+    <Variable Name="ColorHighlightToday">
+      <Value>Khaki</Value>
+    </Variable>
+    <Variable Name="ColorEventCountGradate">
+      <Value>#2322EE</Value>
+    </Variable>
+  </Variables>
+  <ConsumeContainerWhitespace>true</ConsumeContainerWhitespace>
+  <rd:ReportUnitType>Cm</rd:ReportUnitType>
+  <rd:ReportID>7e5c8bcf-53be-4d06-a48c-31377cdfacc8</rd:ReportID>
+</Report>

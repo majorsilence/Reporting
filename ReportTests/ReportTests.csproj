@@ -34,6 +34,10 @@
 		<PackageReference Include="Majorsilence.Forms.Drawing.Common" />
 	</ItemGroup>
 	<ItemGroup>
+		<!-- Real-world reports and their licences (see Reports\RealWorld\README.md). -->
+		<None Update="Reports\RealWorld\**\*">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
 		<None Update="Reports\ImageSizing.rdl">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>

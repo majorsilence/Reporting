@@ -46,3 +46,17 @@ including bundled with or embedded in software, provided that:
 The full license text is at
 `src/Majorsilence.Forms.Drawing.Common/Fonts/OFL-1.1.txt` in
 <https://github.com/majorsilence/Majorsilence.Forms>.
+
+---
+
+## Test Reports
+
+`ReportTests/Reports/RealWorld/` holds real-world RDL reports used only by the tests, to check
+how RDL 2008+ reports made with Microsoft's tools render; they are not shipped in any package.
+They are unmodified copies, and each source's full licence text is beside its reports.
+`ReportTests/Reports/RealWorld/README.md` lists every file with its upstream path and commit.
+
+| Folder | Source | Copyright | Licence |
+|--------|--------|-----------|---------|
+| `MicrosoftSqlServerSamples/` | <https://github.com/microsoft/sql-server-samples> | Copyright (c) Microsoft Corporation | MIT (`MicrosoftSqlServerSamples/LICENSE.txt`) |
+| `ReportingServicesExamples/` | <https://github.com/sql-server-projects/reporting-services-examples> | Copyright (c) 2019 Anthony Duguid | MIT (`ReportingServicesExamples/LICENSE.txt`) |
