@@ -525,6 +525,9 @@ namespace Majorsilence.Reporting.Rdl
 					if (thirdPart == null || thirdPart == "Value")
 					{
 						result = new FunctionField(f);
+						// Outside any data region, a bare field is the one dataset's first row's.
+						if (!_InAggregate && inAggregateDataSet == null && idLookup.ImplicitDataSet != null)
+							result = new FunctionAggrFirst(_DataCache, result, idLookup.ImplicitDataSet);
 					}
 					else if (thirdPart == "IsMissing")
 					{

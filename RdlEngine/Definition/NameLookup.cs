@@ -147,6 +147,12 @@ namespace Majorsilence.Reporting.Rdl
 			return (IExpr) user[name];
 		}
 
+		/// <summary>
+		/// The report's one dataset, for an expression in the body outside any data region: a bare
+		/// Fields!X.Value there is First(Fields!X.Value, that dataset), as in SSRS. Null otherwise.
+		/// </summary>
+		internal DataSetDefn ImplicitDataSet { get; set; }
+
 		/// <summary>Where the expression is: what Variables! names are looked up from.</summary>
 		internal ReportLink Context { get; set; }
 
