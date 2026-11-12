@@ -693,6 +693,12 @@ namespace Majorsilence.Reporting.Rdl
 			}
 		}
 		/// <summary>
+		/// Globals!ReportServerUrl: the URL of the report server the report runs on, for the links
+		/// reports build from it. The host sets it; empty by default, as there is no report server.
+		/// </summary>
+		public string ReportServerUrl { get; set; } = "";
+
+		/// <summary>
 		/// Get/Set the folder containing the report.
 		/// </summary>
 		public string Folder

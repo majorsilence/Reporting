@@ -94,6 +94,34 @@ namespace Majorsilence.Reporting.Rdl
         // field reference commonly arrives as Object rather than a crisp DateTime.
         static public int Weekday(object dt) => Weekday(ToDate(dt));
 
+        /// <summary>
+        /// VB's Weekday(date, firstDayOfWeek): the day's number counting firstDayOfWeek as 1
+        /// (FirstDayOfWeek.Sunday = 1 ... Saturday = 7; FirstDayOfWeek.System = 0, the culture's).
+        /// </summary>
+        static public int Weekday(DateTime dt, int firstDayOfWeek)
+        {
+            int first = firstDayOfWeek == 0
+                ? (int)System.Globalization.CultureInfo.CurrentCulture.DateTimeFormat.FirstDayOfWeek + 1
+                : firstDayOfWeek;
+            return (Weekday(dt) - first + 7) % 7 + 1;
+        }
+
+        static public int Weekday(object dt, object firstDayOfWeek) => Weekday(ToDate(dt), Convert.ToInt32(firstDayOfWeek));
+
+        // Members of a DateTime that reports call on Now and Today -- Today.AddDays(-7),
+        // DateTime.Now.Year -- which the parser turns into these calls on the value.
+        static public DateTime DateAddDays(object dt, object n) => ToDate(dt).AddDays(Convert.ToDouble(n));
+        static public DateTime DateAddHours(object dt, object n) => ToDate(dt).AddHours(Convert.ToDouble(n));
+        static public DateTime DateAddMinutes(object dt, object n) => ToDate(dt).AddMinutes(Convert.ToDouble(n));
+        static public DateTime DateAddSeconds(object dt, object n) => ToDate(dt).AddSeconds(Convert.ToDouble(n));
+        static public DateTime DateAddMonths(object dt, object n) => ToDate(dt).AddMonths(Convert.ToInt32(n));
+        static public DateTime DateAddYears(object dt, object n) => ToDate(dt).AddYears(Convert.ToInt32(n));
+        static public string DateToString(object dt) => ToDate(dt).ToString();
+        static public string DateToString(object dt, object format) => ToDate(dt).ToString(Convert.ToString(format));
+        static public DateTime DateDate(object dt) => ToDate(dt).Date;
+        static public int DateDayOfYear(object dt) => ToDate(dt).DayOfYear;
+        static public int DateDayOfWeek(object dt) => (int)ToDate(dt).DayOfWeek;
+
 		/// <summary>
 		/// Returns the integer day of week: 1=Monday, 2=Tuesday, ..., 7=Sunday
 		/// </summary>

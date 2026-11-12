@@ -66,6 +66,8 @@ namespace Majorsilence.Reporting.Rdl
 						return new FunctionReportFolder();
 					case "reportname":
 						return new FunctionReportName();
+					case "reportserverurl":
+						return new FunctionReportServerUrl();
 					default:
 						throw new Exception(string.Format(Strings.FunctionGlobalCollection_Error_GlobalsUnknown, o)); 
 				}
@@ -102,6 +104,8 @@ namespace Majorsilence.Reporting.Rdl
 					return rpt.Folder;
 				case "reportname":
 					return rpt.Name;
+				case "reportserverurl":
+					return rpt.ReportServerUrl;
 				default:
 					return null;
 			}

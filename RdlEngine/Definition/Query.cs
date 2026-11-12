@@ -36,6 +36,18 @@ namespace Majorsilence.Reporting.Rdl
 
         IDictionary _Columns;       // QueryColumn (when SQL)
 
+        string _SharedDataSet;      // RDL 2008+: the shared dataset the query is in, which is not loaded
+
+        /// <summary>
+        /// The query of a dataset whose query is in a shared dataset (.rsd), which the engine does
+        /// not load: it has no data source or command, only the rows SetData supplies.
+        /// </summary>
+        internal Query(ReportDefn r, ReportLink p, string sharedDataSet) : base(r, p)
+        {
+            _SharedDataSet = sharedDataSet;
+            _QueryCommandType = QueryCommandTypeEnum.Text;
+        }
+
         internal Query(ReportDefn r, ReportLink p, XmlNode xNode) : base(r, p)
         {
             _DataSourceName = null;
@@ -92,6 +104,8 @@ namespace Majorsilence.Reporting.Rdl
                 await _CommandText.FinalPass().ConfigureAwait(false);
             if (_QueryParameters != null)
                 await _QueryParameters.FinalPass().ConfigureAwait(false);
+            if (_SharedDataSet != null)
+                return;     // no data source: only the rows SetData supplies
 
             // verify the data source
             DataSourceDefn ds = null;

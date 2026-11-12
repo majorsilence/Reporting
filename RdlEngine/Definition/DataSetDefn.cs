@@ -84,6 +84,7 @@ namespace Majorsilence.Reporting.Rdl
 			}
 
 			// Loop thru all the child nodes
+			string sharedDataSet = null;	// RDL 2008+ SharedDataSetReference
 			foreach(XmlNode xNodeLoop in xNode.ChildNodes)
 			{
 				if (xNodeLoop.NodeType != XmlNodeType.Element)
@@ -123,6 +124,11 @@ namespace Majorsilence.Reporting.Rdl
 					case "filters":
 						_Filters = new Filters(r, this, xNodeLoop);
 						break;
+					case "shareddataset":	// RDL 2008+: the query is in a shared dataset (.rsd)
+						foreach (XmlNode s in xNodeLoop.ChildNodes)
+							if (s.NodeType == XmlNodeType.Element && s.LocalName == "SharedDataSetReference")
+								sharedDataSet = s.InnerText;
+						break;
 					default:
 						OwnerReport.rl.LogError(4, "Unknown DataSet element '" + xNodeLoop.Name + "' ignored.");
 						break;
@@ -133,6 +139,13 @@ namespace Majorsilence.Reporting.Rdl
 			else
 				OwnerReport.rl.LogError(4, "Name attribute must be specified in a DataSet.");
 
+			if (_Query == null && sharedDataSet != null)
+			{	// The engine does not load shared datasets (nor the shared data sources their
+				// queries use): the application supplies the rows, as with any SetData dataset.
+				_Query = new Query(r, this, sharedDataSet);
+				OwnerReport.rl.LogError(4, $"DataSet '{Name?.Nm}' uses the shared dataset '{sharedDataSet}', which is not " +
+					"loaded: it has no rows unless the application supplies them (DataSet.SetData).");
+			}
 			if (_Query == null)
 				OwnerReport.rl.LogError(8, "Query element must be specified in a DataSet.");
 

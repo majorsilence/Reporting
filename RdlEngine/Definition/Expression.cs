@@ -38,6 +38,16 @@ namespace Majorsilence.Reporting.Rdl
 			get {return _UniqueName;}
 		}
 
+		// Whether the expression is in the report body (as opposed to a parameter, a page header
+		// or footer, or a dataset).
+		private bool InBody()
+		{
+			for (ReportLink rl = Parent; rl != null; rl = rl.Parent)
+				if (rl is Body)
+					return true;
+			return false;
+		}
+
 		override internal async Task FinalPass()
 		{
 			// optimization: avoid expression overhead if this isn't really an expression
@@ -97,6 +107,14 @@ namespace Majorsilence.Reporting.Rdl
 				below = dr;
 				dr = dr.Parent;
 			}
+			DataSetDefn implicitDataSet = null;
+			if (dr == null && phpf == null && InBody() && OwnerReport.DataSetsDefn?.Items.Count == 1)
+			{	// An item in the body outside any data region, in a report with one dataset: SSRS
+				// reads a bare Fields!X.Value there as the dataset's first row's.
+				foreach (DataSetDefn d in OwnerReport.DataSetsDefn.Items.Values)
+					implicitDataSet = d;
+				fields = implicitDataSet.Fields?.Items;
+			}
 			if (dr != null)
 			{
 				if (dr is DataSetDefn)
@@ -121,6 +139,7 @@ namespace Majorsilence.Reporting.Rdl
 				OwnerReport.CodeType);
 
 			lu.Context = Parent;
+			lu.ImplicitDataSet = implicitDataSet;
 			lu.ContextTable = dr as Table;
 			lu.InTableDetails = inDetails;
 
