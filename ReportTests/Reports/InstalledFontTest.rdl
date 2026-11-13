@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Report Name="InstalledFontTest">
-  <Description>One line in Arial and one in Times New Roman, to see which installed font each is drawn in.</Description>
+  <Description>One line in Arial, one in Times New Roman and a bullet in Wingdings, to see which installed font each is drawn in.</Description>
   <Body>
     <Height>1in</Height>
     <ReportItems>
@@ -19,6 +19,14 @@
         <Width>4in</Width>
         <Value>TIMESTEXT</Value>
         <Style><FontFamily>Times New Roman</FontFamily><FontSize>12pt</FontSize></Style>
+      </Textbox>
+      <Textbox Name="WingdingsBox">
+        <Top>0.7in</Top>
+        <Left>0in</Left>
+        <Height>0.3in</Height>
+        <Width>4in</Width>
+        <Value>&#167;</Value>
+        <Style><FontFamily>Wingdings</FontFamily><FontSize>12pt</FontSize></Style>
       </Textbox>
     </ReportItems>
   </Body>

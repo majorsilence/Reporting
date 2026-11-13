@@ -189,8 +189,10 @@ namespace Majorsilence.Pdf
             int tableBase = e.offset;
             int numSub = U16(_data, tableBase + 2);
 
-            // Prefer: platform 3 enc 10 format 12, then 3/1 format 4, then 0/* format 4
-            int bestOff = -1, bestPri = -1;
+            // Prefer: platform 3 enc 10 format 12, then 3/1 format 4, then 0/* format 4, then
+            // a symbol font's own table (3/0 format 4)
+            int bestOff = -1, bestPri = -2;
+            bool symbol = false;
             for (int i = 0; i < numSub; i++)
             {
                 int r = tableBase + 4 + i * 8;
@@ -203,13 +205,25 @@ namespace Majorsilence.Pdf
                 else if (pid == 3 && eid ==  1 && fmt ==  4) pri = 2;
                 else if (pid == 0 && eid ==  3 && fmt ==  4) pri = 1;
                 else if (pid == 0 &&               fmt ==  4) pri = 0;
-                if (pri > bestPri) { bestPri = pri; bestOff = subOff; }
+                else if (pid == 3 && eid ==  0 && fmt ==  4) pri = -1;
+                else continue;
+                if (pri > bestPri) { bestPri = pri; bestOff = subOff; symbol = pri == -1; }
             }
 
             if (bestOff < 0) return;
             int format = U16(_data, bestOff);
             if (format == 4)  ParseCmapFormat4(bestOff);
             if (format == 12) ParseCmapFormat12(bestOff);
+
+            // A symbol font (Wingdings, Webdings, Symbol) keeps its glyphs at U+F020 to U+F0FF,
+            // and text set in it holds the characters 0x20 to 0xFF: a bullet in Wingdings is
+            // the character 0xA7. Each glyph answers to both.
+            if (symbol)
+            {
+                for (int c = 0x20; c <= 0xFF; c++)
+                    if (!_charToGlyph.ContainsKey(c) && _charToGlyph.TryGetValue(0xF000 + c, out ushort gid))
+                        _charToGlyph[c] = gid;
+            }
         }
 
         private void ParseCmapFormat4(int o)
