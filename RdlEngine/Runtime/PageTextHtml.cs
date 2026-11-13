@@ -436,10 +436,20 @@ namespace Majorsilence.Reporting.Rdl
 				}
 				else if (sb.Length == 0)	// EOF and no previous string means we're done
 				{
+					// Text that ends in a closing tag has its last runs already set on the line,
+					// at the tag, and that line is finished here as any other: placed, aligned and
+					// counted. It was left as it stood, so "Total <b>12.00</b>" right-aligned
+					// printed at the left, a smaller last run sat above the line's baseline, and a
+					// growing box was a line short.
+					if (lineItems.Count > 0)
+					{
+						yPos += LinePitch(maxLineHeight);
+						NormalizeLineHeight(lineItems, maxLineHeight, maxDescent);
+					}
 					// A line break at the end leaves an empty line after it, as a line feed at the
 					// end of plain text does. Without it a growing box whose text, or a field in
 					// it, ended in a line break grew a line shorter than as plain text.
-					if (endsInBreak)
+					else if (endsInBreak)
 						yPos += LinePitch(maxLineHeight);
 					continue;
 				}
