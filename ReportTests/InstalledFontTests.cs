@@ -83,6 +83,16 @@ namespace ReportTests
 
             Assert.That(await FontOf("TIMESTEXT"), Does.Contain("TimesNewRoman"));
         }
+
+        // Wingdings was drawn in the standard dingbats font, which has other pictures at the
+        // same characters: its small square bullet (0xA7) came out as a floral heart.
+        [Test]
+        public async Task ATextboxInWingdings_IsDrawnInTheInstalledWingdings()
+        {
+            Assume.That(Installed("wingding"), Is.True, "Wingdings is not installed here");
+
+            Assert.That(await FontOf("§"), Does.Contain("Wingdings"));
+        }
     }
 }
 #endif

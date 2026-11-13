@@ -861,8 +861,8 @@ namespace Majorsilence.Reporting.Rdl
                     return "Courier New";
 
                 case "symbol":                               return "Symbol";
-                case "zapfdingbats": case "wingdings": case "wingding":
-                    return "ZapfDingbats";
+                case "zapfdingbats":                         return "ZapfDingbats";
+                case "wingdings": case "wingding":           return "Wingdings";
 
                 default: return face;
             }
@@ -909,6 +909,11 @@ namespace Majorsilence.Reporting.Rdl
                 case "Symbol":
                 case "ZapfDingbats":
                     return null; // handled as standard Type-1 below
+
+                // Wingdings itself where it is installed: its glyphs are its own, and the
+                // standard dingbats font has other pictures at the same characters.
+                case "Wingdings":
+                    return registry.Contains("Wingdings") ? "Wingdings" : null;
 
                 default:
                     // The font itself, when it is there. A metric-compatible substitute is for
@@ -1006,7 +1011,7 @@ namespace Majorsilence.Reporting.Rdl
 
             // Symbol and ZapfDingbats have no TTF equivalent — use standard Type-1
             if (face == "Symbol")       return baseStyle.WithFamily("Symbol");
-            if (face == "ZapfDingbats") return baseStyle.WithFamily("ZapfDingbats");
+            if (face == "ZapfDingbats" || face == "Wingdings") return baseStyle.WithFamily("ZapfDingbats");
 
             // Final fallback: standard Helvetica Type-1 (no embedding, WinAnsi only)
             string helvName = bold && italic ? "Helvetica-BoldOblique"

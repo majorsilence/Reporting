@@ -36,6 +36,25 @@ namespace Majorsilence.Pdf.Tests
             "/usr/share/fonts/truetype/msttcorefonts/arial.ttf"
         );
 
+        // ── symbol fonts ──────────────────────────────────────────────────────
+
+        // A symbol font keeps its glyphs at U+F020 to U+F0FF and has no Unicode table; text set
+        // in it holds the characters 0x20 to 0xFF.
+        [Test]
+        public void ASymbolFont_GivesItsGlyphsForTheCharactersTextHolds()
+        {
+            string? path = FindFont(@"C:\Windows\Fonts\wingding.ttf", "/Library/Fonts/Wingdings.ttf",
+                "/System/Library/Fonts/Supplemental/Wingdings.ttf");
+            Assume.That(path, Is.Not.Null, "Wingdings is not installed here");
+
+            var ttf = new TrueTypeFont(path!);
+
+            ushort bullet = ttf.GetGlyphId(0xA7);
+            Assert.That(bullet, Is.Not.Zero, "the character 0xA7 has a glyph");
+            Assert.That(ttf.GetGlyphId(0xF0A7), Is.EqualTo(bullet), "and it is the glyph at U+F0A7");
+            Assert.That(ttf.GetAdvanceWidth(bullet), Is.GreaterThan(0));
+        }
+
         // ── construction tests ────────────────────────────────────────────────
 
         [Test]
