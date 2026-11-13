@@ -265,16 +265,22 @@ namespace Majorsilence.Reporting.Rdl
 					}
 					else if (ltoken.StartsWith("<br"))
 					{
-						yPos += LinePitch(maxLineHeight);
+						// A line holding nothing is as tall as the style its break is in. The
+						// height was carried from the line before instead, and every line after
+						// it as well: under a heading in a larger size, each line of the text
+						// below was set at the heading's height.
+						if (!HoldsText(lineItems) && yPos > 0)
+							maxLineHeight = this.MeasureString("X", cs, g, out descent).Height;
+						yPos += LinePitch(maxLineHeight, lineItems, cs);
 						NormalizeLineHeight(lineItems, maxLineHeight, maxDescent);
-						xPos = lineXPos = maxDescent = 0;
+						xPos = lineXPos = maxDescent = maxLineHeight = 0;
 						bFirstInLine = true;
 						bWhiteSpace = false;
 					}
                     else if (ltoken.StartsWith("<hr"))
                     {   // Add a line
                         // Process existing line if any
-                        yPos += LinePitch(maxLineHeight);
+                        yPos += LinePitch(maxLineHeight, lineItems, CurrentStyle(si));
                         NormalizeLineHeight(lineItems, maxLineHeight, maxDescent);
                         maxLineHeight = xPos = lineXPos = maxDescent = 0;
                         bFirstInLine = true;
@@ -316,7 +322,7 @@ namespace Majorsilence.Reporting.Rdl
 					{	// a division starts and ends a line, with no space around it as a paragraph has
 						if (lineItems.Count > 0)
 						{
-							yPos += LinePitch(maxLineHeight);
+							yPos += LinePitch(maxLineHeight, lineItems, CurrentStyle(si));
 							NormalizeLineHeight(lineItems, maxLineHeight, maxDescent);
 							maxLineHeight = xPos = lineXPos = maxDescent = 0;
 							bFirstInLine = true;
@@ -368,7 +374,7 @@ namespace Majorsilence.Reporting.Rdl
                     }
                     else if (ltoken.StartsWith("<ol") || ltoken.StartsWith("<ul"))
                     {
-                        yPos += LinePitch(maxLineHeight);
+                        yPos += LinePitch(maxLineHeight, lineItems, CurrentStyle(si));
                         NormalizeLineHeight(lineItems, maxLineHeight, maxDescent);
                         maxLineHeight = xPos = lineXPos = maxDescent = 0;
                         bFirstInLine = true;
@@ -378,7 +384,7 @@ namespace Majorsilence.Reporting.Rdl
                     }
                     else if (ltoken.StartsWith("<li"))
                     {
-                        yPos += LinePitch(maxLineHeight);
+                        yPos += LinePitch(maxLineHeight, lineItems, CurrentStyle(si));
                         NormalizeLineHeight(lineItems, maxLineHeight, maxDescent);
                         maxLineHeight = xPos = lineXPos = maxDescent = 0;
                         bFirstInLine = true;
@@ -440,7 +446,10 @@ namespace Majorsilence.Reporting.Rdl
 					// end of plain text does. Without it a growing box whose text, or a field in
 					// it, ended in a line break grew a line shorter than as plain text.
 					if (endsInBreak)
-						yPos += LinePitch(maxLineHeight);
+					{
+						StyleInfo last = CurrentStyle(si);
+						yPos += LinePitch(this.MeasureString("X", last, g, out descent).Height, lineItems, last);
+					}
 					continue;
 				}
 
@@ -465,7 +474,7 @@ namespace Majorsilence.Reporting.Rdl
 				lineItems.Add(pt);
 				maxDescent = Math.Max(maxDescent, descent);
 				maxLineHeight = Math.Max(maxLineHeight, ms.Height);
-				yPos += LinePitch(maxLineHeight);	// Increment y position
+				yPos += LinePitch(maxLineHeight, lineItems, CurrentStyle(si));	// Increment y position
 				// A line the next word did not fit on is not its paragraph's last: justified, it is spread.
 				NormalizeLineHeight(lineItems, maxLineHeight, maxDescent, token != PageTextHtmlLexer.EOF ? g : null);
 				lineXPos = maxLineHeight = maxDescent = 0;	// start line height over
@@ -665,6 +674,12 @@ namespace Majorsilence.Reporting.Rdl
 					case "font-size":
 						HandleStyleFontSize(si, tval);
 						break;
+					case "line-height":
+						// in points, the distance from a line in this style to the next
+						if (tval.EndsWith("pt") && float.TryParse(tval.Substring(0, tval.Length - 2),
+								System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out float lineHeight))
+							si.LineHeight = lineHeight;
+						break;
 					case "font-style":
 						// "normal" too, so a run can be upright in an italic box.
 						if (tval == "italic")
@@ -850,12 +865,29 @@ namespace Majorsilence.Reporting.Rdl
 				_StyleStack.Pop();
 		}
 
-		// The distance to the next line: the style's LineHeight when one is set, as plain text
-		// is drawn, unless the line holds something taller. An unset LineHeight is NaN.
-		private float LinePitch(float maxLineHeight)
+		// The distance to the next line: the LineHeight of the line's runs when one is set, the
+		// greatest where they differ, as plain text is drawn, unless the line holds something
+		// taller. A line of no text takes the style it is in. A run's LineHeight is the box's, or
+		// a line-height its html sets: text in two sizes was all set at the box's one pitch, a
+		// line in the smaller size as far apart as one in the larger. An unset LineHeight is NaN.
+		private float LinePitch(float maxLineHeight, List<PageItem> lineItems, StyleInfo current)
 		{
-			return this.SI.LineHeight > maxLineHeight ? this.SI.LineHeight : maxLineHeight;
+			float pitch = float.NaN;
+			bool any = false;
+			foreach (PageItem pi in lineItems)
+				if (pi is PageText run)
+				{
+					any = true;
+					float height = run.SI.LineHeight;
+					if (!float.IsNaN(height) && (float.IsNaN(pitch) || height > pitch))
+						pitch = height;
+				}
+			if (!any)
+				pitch = current.LineHeight;
+			return pitch > maxLineHeight ? pitch : maxLineHeight;
 		}
+
+		private static bool HoldsText(List<PageItem> lineItems) => lineItems.Exists(pi => pi is PageText);
 
 		// spreadIn is the Graphics to measure with for a line that is not its paragraph's last,
 		// which justified is spread across the width; null for any other line.
