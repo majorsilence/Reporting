@@ -25,6 +25,7 @@ namespace Majorsilence.Reporting.Rdl
 		Stack _StyleStack;				// work variable when processing styles
 		float _TotalHeight=0;
 		float _textWidth;				// the width inside the padding, which each line is aligned in
+		float _blockLeft, _blockRight;	// the margins of the division being laid out, inside that width
 		float _textLeft;				// where that width starts
 		public PageTextHtml(string t) : base(t)
 		{
@@ -141,6 +142,10 @@ namespace Majorsilence.Reporting.Rdl
 			// The style only changes at an html command, so the text runs between two commands share one copy.
 			StyleInfo runStyle = null;
 			StyleInfo paragraphStyle = null;	// the style a <p> pushed, which its end or the next <p> pops
+			// The margins of the division the text is in (margin-left and margin-right in its
+			// style, in points): its lines start blockLeft in and break blockRight short.
+			float blockLeft = 0, blockRight = 0;
+			_blockLeft = _blockRight = 0;
 			foreach (string token in tokens)
 			{
 				if (token[0] == PageTextHtmlLexer.HTMLCMD)		// indicates an HTML command
@@ -153,7 +158,7 @@ namespace Majorsilence.Reporting.Rdl
 						StyleInfo before = CurrentStyle(si);
 						float spaced = this.MeasureString(" x", before, g, out descent).Width;
 						float bare = this.MeasureString("x", before, g, out descent).Width;
-						if (xPos + spaced - bare < textWidth)
+						if (xPos + spaced - bare < textWidth - blockRight)
 						{
 							sb.Append(' ');
 							xPos += spaced - bare;
@@ -259,6 +264,10 @@ namespace Majorsilence.Reporting.Rdl
 					else if (ltoken.StartsWith("<tab"))
 					{	// to the next stop, every TabStopInterval from the line's start, as a tab in plain text goes
 						float stop = ((int)Math.Floor(xPos / TabStopInterval) + 1) * TabStopInterval;
+						// A division's left margin is a stop too, for a first line that starts
+						// left of it: a bullet's text lines up with the lines under it.
+						if (xPos < blockLeft && blockLeft < stop)
+							stop = blockLeft;
 						xPos = lineXPos = stop;
 						bFirstInLine = false;
 						bWhiteSpace = false;
@@ -267,7 +276,8 @@ namespace Majorsilence.Reporting.Rdl
 					{
 						yPos += LinePitch(maxLineHeight);
 						NormalizeLineHeight(lineItems, maxLineHeight, maxDescent);
-						xPos = lineXPos = maxDescent = 0;
+						maxDescent = 0;
+						xPos = lineXPos = blockLeft;
 						bFirstInLine = true;
 						bWhiteSpace = false;
 					}
@@ -323,9 +333,21 @@ namespace Majorsilence.Reporting.Rdl
 							bWhiteSpace = false;
 						}
 						if (ltoken == "</div>")
+						{
 							PopStyle();
+							blockLeft = blockRight = _blockLeft = _blockRight = 0;
+							xPos = lineXPos = 0;
+						}
 						else
+						{
 							HandleBlock(token.Substring(1), cs);
+							// Its margins, and its first line's indent from the left one: negative
+							// for a hanging first line, as a bullet's is.
+							string blockStyle = (string) ParseHtmlCmd(token.Substring(1))["style"];
+							_blockLeft = blockLeft = StylePoints(blockStyle, "margin-left");
+							_blockRight = blockRight = StylePoints(blockStyle, "margin-right");
+							xPos = lineXPos = Math.Max(0, blockLeft + StylePoints(blockStyle, "text-indent"));
+						}
 					}
 					else if (ltoken.StartsWith("<a"))
 					{
@@ -415,7 +437,7 @@ namespace Majorsilence.Reporting.Rdl
 					bWhiteSpace = false;			// can only use whitespace once
 					endsInBreak = false;
 					ms = this.MeasureString(ntoken, CurrentStyle(si), g, out descent);
-					if (xPos + ms.Width < textWidth)
+					if (xPos + ms.Width < textWidth - blockRight)
 					{
                         if (bFirstInLine)
                         {
@@ -468,11 +490,12 @@ namespace Majorsilence.Reporting.Rdl
 				yPos += LinePitch(maxLineHeight);	// Increment y position
 				// A line the next word did not fit on is not its paragraph's last: justified, it is spread.
 				NormalizeLineHeight(lineItems, maxLineHeight, maxDescent, token != PageTextHtmlLexer.EOF ? g : null);
-				lineXPos = maxLineHeight = maxDescent = 0;	// start line height over
+				maxLineHeight = maxDescent = 0;	// start line height over
+				lineXPos = blockLeft;
 
 				// Now set the xPos just after the current token
 				ms = this.MeasureString(token, CurrentStyle(si), g, out descent);
-				xPos = ms.Width;	 
+				xPos = blockLeft + ms.Width;
 			}
 		
 			// A box that may not grow shows the lines that fit in it and no more, as plain text
@@ -598,6 +621,25 @@ namespace Majorsilence.Reporting.Rdl
 
             return;
         }
+
+		// A length in points from a style string ("margin-left:27.75pt"); 0 when it is not there
+		// or is in another unit.
+		private static float StylePoints(string style, string name)
+		{
+			if (string.IsNullOrEmpty(style))
+				return 0;
+			foreach (string item in style.Split(';'))
+			{
+				string[] val = item.Split(':');
+				if (val.Length != 2 || val[0].Trim().ToLowerInvariant() != name)
+					continue;
+				string length = val[1].Trim();
+				if (length.EndsWith("pt") && float.TryParse(length.Substring(0, length.Length - 2),
+						System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out float points))
+					return points;
+			}
+			return 0;
+		}
 
 		// A paragraph or division: its style, with its align attribute as text-align, pushed for
 		// the lines inside it. Returns what was pushed.
@@ -888,7 +930,8 @@ namespace Majorsilence.Reporting.Rdl
 				}
 				if (right > left)
 				{
-					float spare = _textWidth - (right - left);
+					// within the division's margins, which the line already starts inside
+					float spare = _textWidth - _blockLeft - _blockRight - (right - left);
 					shift = align == TextAlignEnum.Center ? spare / 2 : spare;
 				}
 			}
@@ -962,7 +1005,7 @@ namespace Majorsilence.Reporting.Rdl
 					gaps++;
 			PageText end = words[last].word;
 			float right = end.X + this.MeasureString(end.Text.TrimEnd(), end.SI, g, out _).Width;
-			float extra = gaps == 0 ? 0 : (_textLeft + _textWidth - right) / gaps;
+			float extra = gaps == 0 ? 0 : (_textLeft + _textWidth - _blockRight - right) / gaps;
 			if (extra <= 0)
 				return;
 			int passed = 0;
