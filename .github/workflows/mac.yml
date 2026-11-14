@@ -20,14 +20,12 @@ jobs:
           dotnet-version: |
             10.0.x
             11.0.x
-      - name: Restore dependencies
-        run: dotnet restore MajorsilenceReporting-Linux-GtkViewer.slnx
       - name: Build GtkViewer
-        run: dotnet build -c Release MajorsilenceReporting-Linux-GtkViewer.slnx
+        run: dotnet build/build.cs -- --target=BuildGtkViewer
       - name: Build MajorsilenceReporting
-        run: dotnet build -c Release MajorsilenceReporting.slnx
+        run: dotnet build/build.cs -- --target=Build
       - name: Test
-        run: dotnet test -c Release MajorsilenceReporting.slnx --filter "TestCategory!=Containers" --verbosity normal --collect:"XPlat Code Coverage" --logger:"trx"
+        run: dotnet build/build.cs -- --target=Test
       - name: Test Report
         uses: dorny/test-reporter@v2
         if: success() || failure() # run this step even if previous step failed
@@ -37,8 +35,7 @@ jobs:
           reporter: dotnet-trx
       - name: Build AOT macOS
         id: aot_build
-        shell: pwsh
-        run: ./build-release-aot-osx.ps1
+        run: dotnet build/build.cs -- --target=Aot
       - name: Archive AOT artifacts
         uses: actions/upload-artifact@v6
         with:

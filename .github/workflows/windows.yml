@@ -6,6 +6,11 @@ on:
   pull_request:
     branches: [main, "release/**"]
 
+# One shell everywhere: windows-latest would otherwise default to PowerShell, which quotes arguments differently.
+defaults:
+  run:
+    shell: bash
+
 jobs:
   # Windows keeps what only a Windows machine can do: the Windows Native AOT binaries (AOT cannot
   # cross-compile) and the full test run on Windows, where System.Drawing/font behaviour differs.
@@ -24,7 +29,7 @@ jobs:
             11.0.x
       - name: Build AOT Windows
         id: aot_build
-        run: ./build-release-aot-windows.ps1
+        run: dotnet build/build.cs -- --target=Aot
       - name: Archive AOT artifacts
         uses: actions/upload-artifact@v6
         with:
@@ -32,7 +37,7 @@ jobs:
           path: Release-Builds/build-output/*-windows-*.zip
           retention-days: 1
       - name: Test
-        run: dotnet test -c Release MajorsilenceReporting.slnx --filter "TestCategory!=Containers" --verbosity normal --collect:"XPlat Code Coverage" --logger:"trx"
+        run: dotnet build/build.cs -- --target=Test
       - name: Test Report
         uses: dorny/test-reporter@v2
         if: success() || failure() # run this step even if previous step failed

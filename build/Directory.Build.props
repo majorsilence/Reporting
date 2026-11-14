@@ -1,0 +1,13 @@
+<Project>
+  <!--
+    A file-based app (build.cs) inherits the nearest Directory.Build.props above it, which here is the repo
+    root: the shared <Version>, the DRAWINGCOMPAT constant, central package management. None of that is meant
+    for the build script, so this file stops the walk-up by being the nearest one and importing nothing.
+  -->
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <!-- File-based apps turn nullable on; a build script's optional strings are not worth annotating. -->
+    <Nullable>disable</Nullable>
+  </PropertyGroup>
+</Project>
