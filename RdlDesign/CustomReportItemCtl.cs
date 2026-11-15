@@ -145,9 +145,13 @@ namespace Majorsilence.Reporting.RdlDesign
         private void bExpr_Click(object sender, EventArgs e)
         {
             GridItem gi = this.pgProps.SelectedGridItem;
-            
+
+            // Nothing selected, or a category row: there is no property to put an expression into.
+            if (gi?.PropertyDescriptor == null)
+                return;
+
             XmlNode sNode = _ReportItems[0];
-            DialogExprEditor ee = new DialogExprEditor(_Draw, gi.Value.ToString(), sNode, false);
+            DialogExprEditor ee = new DialogExprEditor(_Draw, gi.Value?.ToString() ?? string.Empty, sNode, false);
             try
             {
                 DialogResult dr = ee.ShowDialog();
