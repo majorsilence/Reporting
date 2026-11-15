@@ -2,7 +2,7 @@
 //
 // ReportCode.vbproj compiles the <Code> element of ScoreCard.rdl at BUILD time (RdlCodeGen), so the
 // VB compiler is never needed at runtime. RdlPrecompiledCode.Register() is generated; call it once
-// at startup, before parsing. Compare with ../AotCodeProvider, which registers C# delegates by hand.
+// at startup, before parsing.
 
 using Majorsilence.Reporting.Rdl;
 
