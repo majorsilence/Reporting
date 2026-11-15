@@ -403,11 +403,15 @@ through D4 once the running list got too long to stay readable). Categories, rou
 - **`ControlPaint.DrawReversibleFrame`** (rubber-band selection rectangle in `DesignCtl.cs`): same
   GDI+ XOR-mode direct-to-screen gap as D2's `RubberBand` — made the method a documented no-op.
   Selection logic itself is unaffected, only the live-drag visual feedback is gone.
+  **Update:** the designer's rubber band is now drawn again -- `DesignCtl` keeps the drag rectangle as
+  state and paints it over the rendered surface (`DrawRubberBandOverlay`), without re-rendering the
+  report on every mouse move. The viewer's `RubberBand` is still a no-op.
 - **`GridItem`-based expression editing** (`CustomReportItemCtl.bExpr_Click`): compiles now (see
   `GridItem` above) but is functionally dead — `PropertyGrid.SelectedGridItem` always returns
   `null`, so this code path would `NullReferenceException` at runtime regardless. Not a D4
   regression; the whole feature depends on PropertyGrid selection tracking Majorsilence.Forms
-  doesn't have yet (D6).
+  doesn't have yet (D6). **Update:** `SelectedGridItem` is real in the pinned Majorsilence.Forms, so this
+  works again; `bExpr_Click` now returns quietly when nothing (or a category row) is selected.
 
 ## D5: ScintillaCompat made real (expression coloring)
 

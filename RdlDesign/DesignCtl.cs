@@ -1122,7 +1122,10 @@ namespace Majorsilence.Reporting.RdlDesign
         {
             _paintScope = ThemeScope.Current;
             if (_buffer != null)
+            {
                 e.Graphics.DrawImage(_buffer, 0, 0);
+                DrawRubberBandOverlay(e.Graphics);
+            }
 
             if (_awaitingFollowUpPaint)
             {
@@ -1134,6 +1137,11 @@ namespace Majorsilence.Reporting.RdlDesign
                 if (_buffer != null && _buffer.Width == Math.Max(1, _DrawPanel.Width) && _buffer.Height == Math.Max(1, _DrawPanel.Height))
                     return;
             }
+
+            // Dragging a rubber band repaints once per mouse move; the rendered report has not changed,
+            // so show the buffer with the band on it instead of rendering the whole report each time.
+            if (_rubberBand != null && _buffer != null)
+                return;
 
             _ = Internal_DrawPanelPaintAsync();
         }
@@ -1353,7 +1361,7 @@ namespace Majorsilence.Reporting.RdlDesign
 				// remove last rectangle if necessary
 				if (this._ptRBLast.X != -1)
 				{
-					this.DrawPanelRubberBand(this._ptRBOriginal, this._ptRBLast);
+					ClearRubberBand();
 					// Process the rectangle
 					Rectangle r = DrawPanelRectFromPoints(this._ptRBOriginal, this._ptRBLast);
 					if ((Control.ModifierKeys & Keys.Control) != Keys.Control)	// we allow addition to selection
@@ -1546,11 +1554,6 @@ namespace Majorsilence.Reporting.RdlDesign
 
 			if (_bHaveMouse)
 			{	// we're rubber banding
-				// If we drew previously; we'll draw again to remove old rectangle
-				if( this._ptRBLast.X != -1 )
-				{
-					this.DrawPanelRubberBand( this._ptRBOriginal, _ptRBLast );
-				}
 				_MousePosition = newMousePosition;
 				// Update last point;  but don't rubber band outside our client area
 				if (newMousePosition.X < 0)
@@ -1922,12 +1925,40 @@ namespace Majorsilence.Reporting.RdlDesign
 			menuProperties_Click();		// treat double click like a property menu click
 		}
 
-		// ControlPaint.DrawReversibleFrame doesn't exist in Majorsilence.Forms -- classic GDI+
-		// XOR-mode direct-to-screen drawing with no equivalent in a SkiaSharp/compositing-based
-		// renderer. Same documented gap and fix as RdlViewer.Forms/PageDrawing.cs's RubberBand
-		// (D2): the selection logic is unaffected, only the live-drag visual feedback is gone.
+		// The rubber band is state painted over the rendered surface, not drawn on the screen with an
+		// XOR frame (ControlPaint.DrawReversibleFrame has no equivalent in Majorsilence.Forms). It is
+		// kept in the surface's mouse coordinates; null when there is none.
+		private Rectangle? _rubberBand;
+
 		private void DrawPanelRubberBand(Point p1, Point p2)
 		{
+			_rubberBand = DrawPanelRectFromPoints(p1, p2);
+			_DrawPanel.Invalidate();
+		}
+
+		private void ClearRubberBand()
+		{
+			if (_rubberBand == null)
+				return;
+			_rubberBand = null;
+			_DrawPanel.Invalidate();
+		}
+
+		private void DrawRubberBandOverlay(Graphics g)
+		{
+			if (_rubberBand == null)
+				return;
+			Rectangle r = _rubberBand.Value;
+			// The points are in report pixels (the mouse divided by the zoom); paint in surface pixels.
+			var s = new Rectangle((int)(r.X * SCALEX), (int)(r.Y * SCALEY), (int)(r.Width * SCALEX), (int)(r.Height * SCALEY));
+			Color c = DesignerColors.HoverOutline;
+			using (var fill = new SolidBrush(Color.FromArgb(40, c)))
+			using (var pen = new Pen(c))
+			{
+				pen.DashStyle = Majorsilence.Forms.Drawing.Drawing2D.DashStyle.Dash;
+				g.FillRectangle(fill, s);
+				g.DrawRectangle(pen, s.X, s.Y, Math.Max(0, s.Width - 1), Math.Max(0, s.Height - 1));
+			}
 		}
 
 		private Rectangle DrawPanelRectFromPoints(Point p1, Point p2)
