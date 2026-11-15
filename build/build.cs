@@ -375,9 +375,11 @@ Task ("Package")
 
     foreach (var name in new[] { "designer", "desktop", "mapfile", "reader" })
         Zip ($"{version}-majorsilence-reporting-{name}-{framework}-anycpu.zip", new[] { dirs[name] });
-    // The anycpu RdlCmd zip leaves out the Windows self-contained publishes (they ship in the self-contained zip).
+    // The anycpu RdlCmd zip is the framework-dependent build only. The self-contained publishes above land inside
+    // the same bin folder (<framework>/<rid>/publish), so every one of them is left out here; they ship in the
+    // self-contained zip. runtimes/<rid>/ (native assets) is a different path and stays.
     Zip ($"{version}-majorsilence-reporting-rdlcmd-{framework}-anycpu.zip", new[] { dirs["rdlcmd"] },
-        entry => entry.Contains ($"/{framework}/win-arm64/") || entry.Contains ($"/{framework}/win-x64/"));
+        entry => selfContainedRids.Any (rid => entry.Contains ($"/{framework}/{rid}/")));
     Zip ($"{version}-majorsilence-reporting-rdlcmd-self-contained.zip", new[] { selfContained });
 
     DotNetBuild (mainSolution, new DotNetBuildSettings { Configuration = configuration, Verbosity = DotNetVerbosity.Minimal, MSBuildSettings = noPackOnBuild });
