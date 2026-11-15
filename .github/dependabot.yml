@@ -1,13 +1,17 @@
-# To get started with Dependabot version updates, you'll need to specify which
-# package ecosystems to update and where the package manifests are located.
-# Please see the documentation for all configuration options:
-# https://docs.github.com/github/administering-a-repository/configuration-options-for-dependency-updates
-
 version: 2
+
+# Deliberately narrow. The only thing this repo asks Dependabot to track is the Cake.Sdk pin in
+# global.json ("msbuild-sdks"), which is what build/build.cs resolves. Everything else (the central
+# package versions in Directory.Packages.props, the GitHub Actions versions) is bumped by hand, and
+# `allow` keeps this file from opening a stream of PRs for them.
+#
+# The pin lives in global.json rather than inline as `#:sdk Cake.Sdk@x.y.z` because Dependabot's nuget
+# ecosystem reads global.json's msbuild-sdks but does not parse `#:sdk` directives in a .cs file.
+# global.json carries no "sdk" section, so it does NOT pin the .NET SDK.
 updates:
-  - package-ecosystem: "" # See documentation for possible values
-    directory: "/" # Location of package manifests
+  - package-ecosystem: "nuget"
+    directory: "/"
     schedule:
       interval: "weekly"
-
-
+    allow:
+      - dependency-name: "Cake.Sdk"

@@ -19,6 +19,8 @@ python_project_root/
 x64/
 x86/
 build/
+# ...except the repo-root build/ folder, which holds the Cake.Sdk build script (build/build.cs).
+!/build/
 bld/
 [Bb]in/
 [Oo]bj/

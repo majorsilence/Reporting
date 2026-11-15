@@ -1,0 +1,3 @@
+<Project>
+  <!-- Intentionally empty: stops the repo-root Directory.Build.targets (AOT/runtime-async tweaks) applying to build.cs. -->
+</Project>

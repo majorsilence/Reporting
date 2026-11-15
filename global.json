@@ -1,0 +1,5 @@
+{
+  "msbuild-sdks": {
+    "Cake.Sdk": "7.0.0"
+  }
+}

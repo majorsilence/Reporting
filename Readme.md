@@ -155,6 +155,25 @@ If it doesn't have a feature that you want it to have, add it.  If it has a bug 
 
 See [Contribute](https://github.com/majorsilence/My-FyiReporting/wiki/Contribute).
 
+## Building
+
+CI and releases run through one [Cake.Sdk](https://cakebuild.net/docs/running-builds/runners/cake-sdk) script,
+`build/build.cs` (needs the .NET 10 SDK or later; the Cake.Sdk version is pinned in `global.json`). The GitHub
+workflows keep only what Actions has to own (triggers, runners, `setup-dotnet`, artifacts, service containers,
+the draft release and the nuget.org push) and call a target per step, so any step can be reproduced locally from
+the repository root:
+
+```bash
+dotnet build/build.cs -- --target=Info              # list what this machine would do
+dotnet build/build.cs -- --target=Build
+dotnet build/build.cs -- --target=Test
+dotnet build/build.cs -- --target=Aot --arch=x64    # Native AOT RdlCmd/RdlNative/PdfNative for this OS
+dotnet build/build.cs -- --target=Package           # release zips and NuGet packages into Release-Builds/build-output
+```
+
+The full list of targets is at the top of `build/build.cs`. Most of the solution also targets net11.0, so a full
+build needs the .NET 11 SDK installed alongside 10.
+
 ## Branches and releases
 
 Versions are `year.release.build`.

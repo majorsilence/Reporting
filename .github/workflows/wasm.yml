@@ -11,9 +11,8 @@ on:
 
 jobs:
   # The wasm apps target net10.0, but the libraries they reference also target net11.0, so the 11.0
-  # SDK is required. Under the 11.0 SDK, `wasm-tools` alone relinks net10.0 apps with .NET 11's
-  # Emscripten, which SkiaSharp.NativeAssets.WebAssembly doesn't match (libSkiaSharp fails to load);
-  # `wasm-tools-net10` supplies the .NET 10 Emscripten toolchain for net10.0 apps.
+  # SDK is required. The workload pins (and why `wasm-tools-net10` is needed) live on the WasmWorkloads
+  # target in build/build.cs; each step below runs one Wasm* target.
   pdf-wasm:
     # Publishes Majorsilence.Pdf + Majorsilence.Pdf.Security as a browser-wasm app and runs it under
     # Node, the same way the Native AOT smoke test proves the AOT build actually runs.
@@ -30,12 +29,8 @@ jobs:
         uses: actions/setup-node@v5
         with:
           node-version: 22
-      - name: Install wasm-tools workload
-        run: dotnet workload install wasm-tools wasm-tools-net10
-      - name: Publish the browser-wasm smoke test
-        run: dotnet publish Examples/PdfWasmSmokeTest -c Release -p:WasmTestFont=/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf
-      - name: Run it under Node
-        run: node Examples/PdfWasmSmokeTest/run-node.mjs | tee wasm-smoke.log && grep -q AOT-SMOKE-TEST-OK wasm-smoke.log
+      - name: Install the wasm workloads, publish the browser-wasm smoke test and run it under Node
+        run: dotnet build/build.cs -- --target=WasmPdf
 
   rdl-wasm:
     # Renders reports (expressions, grouping, charts, PDF/HTML/Excel/TIFF, file-based data providers)
@@ -53,12 +48,8 @@ jobs:
         uses: actions/setup-node@v5
         with:
           node-version: 22
-      - name: Install wasm-tools workload
-        run: dotnet workload install wasm-tools wasm-tools-net10
-      - name: Publish the browser-wasm smoke test
-        run: dotnet publish Examples/RdlWasmSmokeTest -c Release
-      - name: Run it under Node
-        run: node Examples/RdlWasmSmokeTest/run-node.mjs | tee rdl-wasm.log && grep -q RDL-WASM-SMOKE-TEST-OK rdl-wasm.log
+      - name: Install the wasm workloads, publish the browser-wasm smoke test and run it under Node
+        run: dotnet build/build.cs -- --target=WasmRdl
 
   viewers-wasm:
     # The two browser viewer hosts (Avalonia report viewer, Majorsilence.Forms report viewer) must publish.
@@ -71,9 +62,5 @@ jobs:
           dotnet-version: |
             10.0.x
             11.0.x
-      - name: Install wasm-tools workload
-        run: dotnet workload install wasm-tools wasm-tools-net10
-      - name: Publish the Avalonia viewer for the browser
-        run: dotnet publish Majorsilence.Reporting.UI.Browser -c Release
-      - name: Publish the Majorsilence.Forms viewer for the browser
-        run: dotnet publish Examples/Hosting/Browser -c Release
+      - name: Install the wasm workloads and publish both viewers for the browser
+        run: dotnet build/build.cs -- --target=WasmViewers

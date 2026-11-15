@@ -1,0 +1,4 @@
+<Project>
+  <!-- Intentionally empty: build.cs references no packages of its own (Cake.Sdk brings what it needs), and
+       this stops the repo-root central package versions applying to it. -->
+</Project>
