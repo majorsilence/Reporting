@@ -27,7 +27,7 @@
 //                     browser-wasm publishes (wasm-tools workloads installed first); the first two run under Node
 //   PdfValidationSamples  write the signed/encrypted sample PDFs that linux.yml checks with pyHanko
 //   TestContainers    the container-backed database tests (needs Docker)
-//   Package           the designer/reader/rdlcmd/mapfile zips and the NuGet packages
+//   Package           the designer/desktop/reader/rdlcmd/mapfile zips and the NuGet packages
 //
 // Zips are written with System.IO.Compression (no 7-Zip). On Linux and macOS that records each file's Unix
 // mode, so the executable bit on the self-contained and AOT binaries survives.
@@ -333,7 +333,7 @@ Task ("Aot")
 });
 
 // ── Release zips and NuGet packages ────────────────────────────────────────────────────────────────────
-// The designer/reader/rdlcmd/mapfile zips and every NuGet package. Every project is plain net8.0/net10.0 and
+// The designer/desktop/reader/rdlcmd/mapfile zips and every NuGet package. Every project is plain net8.0/net10.0 and
 // the self-contained RdlCmd builds are ordinary (non-AOT) publishes, so none of this needs Windows. It clears
 // build-output when it starts, which is why it is its own job and not a step in front of an AOT build.
 Task ("Clean")
@@ -360,19 +360,20 @@ Task ("Package")
 
     string Built (string project) => $"{project}/bin/{configuration}/{framework}";
     var dirs = new Dictionary<string, string>();
-    foreach (var name in new[] { "designer", "mapfile", "reader", "rdlcmd" })
+    foreach (var name in new[] { "designer", "desktop", "mapfile", "reader", "rdlcmd" })
         dirs[name] = Fresh (System.IO.Path.Combine (buildOutput, $"majorsilence-reporting-{name}-{framework}-anycpu"));
     var selfContained = Fresh (System.IO.Path.Combine (buildOutput, "majorsilence-reporting-rdlcmd-self-contained"));
 
     CopyInto (Built ("ReportDesigner"), dirs["designer"]);
     CopyFile ("RdlDesign/App.ico", System.IO.Path.Combine (dirs["designer"], "App.ico"));
+    CopyInto (Built ("RdlDesktop"), dirs["desktop"]);
     CopyInto (Built ("RdlCmd"), dirs["rdlcmd"]);
     CopyInto (Built ("RdlReader"), dirs["reader"]);
     CopyInto (Built ("RdlMapFile"), dirs["mapfile"]);
     foreach (var rid in selfContainedRids)
         CopyInto ($"{Built ("RdlCmd")}/{rid}/publish", Fresh (System.IO.Path.Combine (selfContained, rid)));
 
-    foreach (var name in new[] { "designer", "mapfile", "reader" })
+    foreach (var name in new[] { "designer", "desktop", "mapfile", "reader" })
         Zip ($"{version}-majorsilence-reporting-{name}-{framework}-anycpu.zip", new[] { dirs[name] });
     // The anycpu RdlCmd zip leaves out the Windows self-contained publishes (they ship in the self-contained zip).
     Zip ($"{version}-majorsilence-reporting-rdlcmd-{framework}-anycpu.zip", new[] { dirs["rdlcmd"] },
