@@ -118,6 +118,8 @@ namespace Majorsilence.Reporting.Rdl
 				_Footer.BottomRows = FooterRowsAtBottomOfPage(Custom, _Footer.TableRows.Items.Count);
 			if (Custom != null)
 				KeepsGroupFootersWithLastRow = KeepGroupFootersWithLastRow(Custom);
+			if (Custom != null)
+				KeepsDetailRowsTogether = KeepDetailRowsTogether(Custom);
 
             // Verify Grid restrictions
             if (_IsGrid)
@@ -158,6 +160,23 @@ namespace Majorsilence.Reporting.Rdl
 			foreach (XmlNode xNode in custom.CustomXmlNode.ChildNodes)
 			{
 				if (xNode.Name == "KeepGroupFootersWithLastRow")
+					return !string.Equals(xNode.InnerText.Trim(), "false", StringComparison.OrdinalIgnoreCase);
+			}
+			return true;
+		}
+
+		// The Details rows of one record are kept on a page together: when they do not all fit in
+		// what is left of the page, the record starts the next one.
+		// <Custom><KeepDetailRowsTogether>false</KeepDetailRowsTogether></Custom> prints each of
+		// the record's rows where it fits: the first that does not fit starts the next page, with
+		// the rows after it. Rows that a cell spans still move together.
+		internal bool KeepsDetailRowsTogether { get; private set; } = true;
+
+		private static bool KeepDetailRowsTogether(Custom custom)
+		{
+			foreach (XmlNode xNode in custom.CustomXmlNode.ChildNodes)
+			{
+				if (xNode.Name == "KeepDetailRowsTogether")
 					return !string.Equals(xNode.InnerText.Trim(), "false", StringComparison.OrdinalIgnoreCase);
 			}
 			return true;
