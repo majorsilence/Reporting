@@ -119,12 +119,20 @@ namespace Majorsilence.Reporting.Rdl
                 // add the footerheight that must be on every page
                 height += await OwnerTable.GetPageFooterHeight(pgs, row).ConfigureAwait(false);
 
-				if (r == end && OwnerTable.KeepsGroupFootersWithLastRow)
+				bool withFooter = r == end && OwnerTable.KeepsGroupFootersWithLastRow && footerHeight > 0;
+				if (withFooter)
 					height += footerHeight;		// on last row; may need additional room for footer
 				// A page that holds nothing yet but the headers repeated at its top is not left:
 				// RunPageNew keeps it, as a new one would hold no more, so breaking would only
 				// print the headers on it again. What does not fit runs past its bottom.
-				if (height > pgs.BottomOfPage && !p.IsEmpty())
+				if (height > pgs.BottomOfPage && !p.IsEmpty() && !withFooter && !OwnerTable.KeepsDetailRowsTogether)
+				{
+					// The record's rows are not kept together: each prints where it fits, and the first
+					// that does not fit starts the next page with the rows after it.
+					OwnerTable.BeginBeneath(pgs.Report);
+					await _TableRows.RunPage(pgs, row, true).ConfigureAwait(false);
+				}
+				else if (height > pgs.BottomOfPage && !p.IsEmpty())
 				{
                     await OwnerTable.RunPageFooter(pgs, row, false).ConfigureAwait(false);
 					p = OwnerTable.RunPageNew(pgs, p);
