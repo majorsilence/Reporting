@@ -119,7 +119,7 @@ namespace Majorsilence.Reporting.Rdl
                 // add the footerheight that must be on every page
                 height += await OwnerTable.GetPageFooterHeight(pgs, row).ConfigureAwait(false);
 
-				if (r == end) 
+				if (r == end && OwnerTable.KeepsGroupFootersWithLastRow)
 					height += footerHeight;		// on last row; may need additional room for footer
 				// A page that holds nothing yet but the headers repeated at its top is not left:
 				// RunPageNew keeps it, as a new one would hold no more, so breaking would only

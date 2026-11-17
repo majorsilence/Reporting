@@ -116,6 +116,8 @@ namespace Majorsilence.Reporting.Rdl
 			}
 			if (_Footer != null && _Footer.TableRows != null && Custom != null)
 				_Footer.BottomRows = FooterRowsAtBottomOfPage(Custom, _Footer.TableRows.Items.Count);
+			if (Custom != null)
+				KeepsGroupFootersWithLastRow = KeepGroupFootersWithLastRow(Custom);
 
             // Verify Grid restrictions
             if (_IsGrid)
@@ -141,6 +143,24 @@ namespace Majorsilence.Reporting.Rdl
 					return Math.Max(0, Math.Min(rows, rowCount));
 			}
 			return 0;
+		}
+
+		// A group's last detail row is kept on the page with the footers that follow it: the group's
+		// own and, where the group is the last in the one around it, that one's as well. When they
+		// do not all fit under the row, the row starts the next page with them.
+		// <Custom><KeepGroupFootersWithLastRow>false</KeepGroupFootersWithLastRow></Custom> leaves
+		// the row where it fits, and each footer then moves to the next page on its own when it
+		// does not fit.
+		internal bool KeepsGroupFootersWithLastRow { get; private set; } = true;
+
+		private static bool KeepGroupFootersWithLastRow(Custom custom)
+		{
+			foreach (XmlNode xNode in custom.CustomXmlNode.ChildNodes)
+			{
+				if (xNode.Name == "KeepGroupFootersWithLastRow")
+					return !string.Equals(xNode.InnerText.Trim(), "false", StringComparison.OrdinalIgnoreCase);
+			}
+			return true;
 		}
 
 		private void VerifyCC()
