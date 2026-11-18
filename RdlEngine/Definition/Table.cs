@@ -120,6 +120,8 @@ namespace Majorsilence.Reporting.Rdl
 				KeepsGroupFootersWithLastRow = KeepGroupFootersWithLastRow(Custom);
 			if (Custom != null)
 				KeepsDetailRowsTogether = KeepDetailRowsTogether(Custom);
+			if (Custom != null)
+				KeepsFooterRowsTogether = KeepFooterRowsTogether(Custom);
 
             // Verify Grid restrictions
             if (_IsGrid)
@@ -177,6 +179,23 @@ namespace Majorsilence.Reporting.Rdl
 			foreach (XmlNode xNode in custom.CustomXmlNode.ChildNodes)
 			{
 				if (xNode.Name == "KeepDetailRowsTogether")
+					return !string.Equals(xNode.InnerText.Trim(), "false", StringComparison.OrdinalIgnoreCase);
+			}
+			return true;
+		}
+
+		// The rows of a footer, a group's or the table's, are kept on a page together: when they do
+		// not all fit in what is left of the page, the footer starts the next one.
+		// <Custom><KeepFooterRowsTogether>false</KeepFooterRowsTogether></Custom> prints each of the
+		// footer's rows where it fits: the first that does not fit starts the next page, with the
+		// rows after it, as the rows of a footer taller than a page already do.
+		internal bool KeepsFooterRowsTogether { get; private set; } = true;
+
+		private static bool KeepFooterRowsTogether(Custom custom)
+		{
+			foreach (XmlNode xNode in custom.CustomXmlNode.ChildNodes)
+			{
+				if (xNode.Name == "KeepFooterRowsTogether")
 					return !string.Equals(xNode.InnerText.Trim(), "false", StringComparison.OrdinalIgnoreCase);
 			}
 			return true;
