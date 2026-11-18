@@ -192,15 +192,36 @@ namespace Majorsilence.Reporting.Rdl
 						p = OwnerTable.RunPageNew(pgs, p);
                         await OwnerTable.RunPageHeader(pgs, row, false, null).ConfigureAwait(false);
 					}
+					await PlaceAtBottom(pgs, row, i, _Items.Count).ConfigureAwait(false);
                     await t.RunPage(pgs, row).ConfigureAwait(false);
 				}
 			}
 			else
 			{	// all rows will fit on the page
-				foreach (TableRow t in _Items)
-                    await t.RunPage(pgs, row).ConfigureAwait(false);
+				for (int i = 0; i < _Items.Count; i++)
+				{
+					await PlaceAtBottom(pgs, row, i, _Items.Count).ConfigureAwait(false);
+                    await _Items[i].RunPage(pgs, row).ConfigureAwait(false);
+				}
 			}
 			return;
+		}
+
+		// A row that prints at the foot of the page (TableRow.AtBottomOfPage) is moved down, before
+		// it runs, so that it and the rows after it, up to end, finish at the bottom of the page.
+		// One already lower than that is left where it is: the rows run on from there.
+		internal async Task PlaceAtBottom(Pages pgs, Row row, int i, int end)
+		{
+			if (!_Items[i].AtBottomOfPage)
+				return;
+			float height = 0;
+			for (int j = i; j < end; j++)
+				height += await _Items[j].HeightOfRow(pgs, row).ConfigureAwait(false);
+			await _Items[i].HeightOfRow(pgs, row).ConfigureAwait(false);	// the height this row is drawn at
+			Page p = pgs.CurrentPage;
+			float top = pgs.BottomOfPage - height;
+			if (p.YOffset < top)
+				p.YOffset = top;
 		}
 
 		// The last row that a cell starting in row i spans; with overlapping, also the last that a

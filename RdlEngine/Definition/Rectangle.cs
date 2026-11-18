@@ -17,6 +17,7 @@ namespace Majorsilence.Reporting.Rdl
 		bool _PageBreakAtEnd;		// Indicates the report should page break at the end of the rectangle.		
 		PageBreakDefn _PageBreak;	// RDL 2008+ PageBreak: Disabled and ResetPageNumber besides the location
 		bool _KeepTogether;			// Indicates the rectangle should be kept on one page if it can be.
+		bool _AtBottomOfPage;		// its table row prints at the foot of the page; see AtBottomOfPageOf
 		bool _DrawBeneath;			// drawn beneath what follows it, taking no room; see DrawBeneathOf
 
 		// constructor that doesn't process syntax
@@ -67,6 +68,7 @@ namespace Majorsilence.Reporting.Rdl
 			}
 
 			_DrawBeneath = DrawBeneathOf(Custom);
+			_AtBottomOfPage = AtBottomOfPageOf(Custom);
 		}
 
 		// <Custom><DrawBeneath>true</DrawBeneath></Custom> asks that a rectangle be drawn beneath
@@ -82,6 +84,23 @@ namespace Majorsilence.Reporting.Rdl
 			foreach (XmlNode xNode in custom.CustomXmlNode.ChildNodes)
 			{
 				if (xNode.Name == "DrawBeneath")
+					return string.Equals(xNode.InnerText.Trim(), "true", StringComparison.OrdinalIgnoreCase);
+			}
+			return false;
+		}
+
+		// <Custom><PrintAtBottomOfPage>true</PrintAtBottomOfPage></Custom> on the Rectangle that is
+		// all a table row holds asks that the row print at the foot of the page it falls on, and
+		// not straight under the row before it: it is moved down so that it and the rows after
+		// it in its header, footer or details end at the bottom of the page (above the table's
+		// FooterRowsAtBottomOfPage, where it has those). See TableRows.PlaceAtBottom.
+		private static bool AtBottomOfPageOf(Custom custom)
+		{
+			if (custom == null)
+				return false;
+			foreach (XmlNode xNode in custom.CustomXmlNode.ChildNodes)
+			{
+				if (xNode.Name == "PrintAtBottomOfPage")
 					return string.Equals(xNode.InnerText.Trim(), "true", StringComparison.OrdinalIgnoreCase);
 			}
 			return false;
@@ -310,6 +329,11 @@ namespace Majorsilence.Reporting.Rdl
 		{
 			get { return  _KeepTogether; }
 			set {  _KeepTogether = value; }
+		}
+
+		internal bool AtBottomOfPage
+		{
+			get { return  _AtBottomOfPage; }
 		}
 
 		internal bool DrawBeneath
