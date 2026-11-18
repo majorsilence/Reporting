@@ -263,6 +263,12 @@ namespace Majorsilence.Reporting.Rdl
 			return tc.ReportItems.Items[0] as Rectangle;
 		}
 
+		/// <summary>Whether the row prints at the foot of the page (Rectangle.AtBottomOfPageOf).</summary>
+		internal bool AtBottomOfPage
+		{
+			get { Rectangle band = BandRectangle(); return band != null && band.AtBottomOfPage; }
+		}
+
 		private bool KeepTogether()
 		{
 			foreach (TableCell tc in _TableCells.Items)

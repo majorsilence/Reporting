@@ -85,6 +85,7 @@ namespace Majorsilence.Reporting.Rdl
 						await OwnerTable.RunPageHeader(pgs, row, false, null).ConfigureAwait(false);
 						await tr.HeightOfRow(pgs, row).ConfigureAwait(false);
 					}
+					await _TableRows.PlaceAtBottom(pgs, row, i, _TableRows.Items.Count - _BottomRows).ConfigureAwait(false);
 					await tr.RunPage(pgs, row).ConfigureAwait(false);
 				}
 				return;
@@ -121,6 +122,8 @@ namespace Majorsilence.Reporting.Rdl
 			{
 				TableRow tr = _TableRows.Items[i];
                 await tr.HeightOfRow(pgs, row).ConfigureAwait(false);	// sets the height the row is drawn at
+				if (end == _TableRows.Items.Count - _BottomRows)
+					await _TableRows.PlaceAtBottom(pgs, row, i, end).ConfigureAwait(false);
                 await tr.RunPage(pgs, row).ConfigureAwait(false);
 			}
 		}
