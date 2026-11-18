@@ -69,10 +69,11 @@ namespace Majorsilence.Reporting.Rdl
 
 			Page p = pgs.CurrentPage;
 			float height = await HeightOfRows(pgs, row).ConfigureAwait(false);
-			if (TallerThanPage(pgs, height))
+			if (TallerThanPage(pgs, height) || !OwnerTable.KeepsFooterRowsTogether)
 			{
-				// A footer that cannot fit on any one page is not moved as a whole: each row
-				// that does not fit what is left of the page starts the next one.
+				// A footer that cannot fit on any one page is not moved as a whole, nor is one of a
+				// table that does not keep its footers' rows together: each row that does not fit
+				// what is left of the page starts the next one.
 				for (int i = 0; i < _TableRows.Items.Count - _BottomRows; i++)
 				{
 					TableRow tr = _TableRows.Items[i];
