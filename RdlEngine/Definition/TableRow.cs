@@ -204,6 +204,11 @@ namespace Majorsilence.Reporting.Rdl
 			// text and images count: a line or a box drawn past the row's bottom is drawn so on
 			// purpose, over the rows after it.
 			//
+			// A subreport's table ends below the last thing it drew where its last row has room
+			// under its text. That room is the subreport's, and the row holds it too: a
+			// subreport whose closing total sat 6pt above the foot of its last row had the row
+			// after it start 6pt early.
+			//
 			// Nor does what a Rectangle drawn beneath draws (Rectangle.DrawBeneathOf): like a
 			// watermark it takes no room, and the rows after it print over it. A row whose
 			// Rectangle is drawn so takes only its own height, which may be none. The group
@@ -216,7 +221,13 @@ namespace Majorsilence.Reporting.Rdl
 				? new HashSet<PageItem>(System.Linq.Enumerable.Cast<PageItem>(page), ReferenceEqualityComparer.Instance)
 				: null;
 
+			float outerSubreportEnd = page.SubreportEnd;
+			page.SubreportEnd = float.MinValue;
+
             await _TableCells.RunPage(pgs, row).ConfigureAwait(false);
+
+			float subreportEnd = page.SubreportEnd;
+			page.SubreportEnd = Math.Max(outerSubreportEnd, subreportEnd);
 
 			WorkClass wc = GetWC(pgs.Report);
 			float height = wc.CalcHeight;
@@ -233,10 +244,12 @@ namespace Majorsilence.Reporting.Rdl
 					else
 						reached = Math.Max(reached, pi.Y + pi.H - top);
 				}
+				Rectangle band = BandRectangle();
+				if (band == null || !band.DrawBeneath)
+					reached = Math.Max(reached, subreportEnd - top);
 				// Past rounding at the band's edge only, which must not move every row down.
 				if (reached > height + 0.5f)
 					height = reached;
-				Rectangle band = BandRectangle();
 				if (band != null && band.DrawBeneath)
 					Table.HoldBeneath(pgs.Report, page, top + Math.Max(beneath, band.Height == null ? 0 : band.Height.Points));
 			}
