@@ -116,6 +116,11 @@ namespace Majorsilence.Reporting.Rdl
 			return _beneath != null && _beneath.Contains(pi);
 		}
 
+		// The lowest point the tables, lists and matrixes of a subreport run on the page ended
+		// at, since a table row last set it aside (TableRow.RunPageRow): below whatever they
+		// drew by the blank foot of a last row. float.MinValue when none has.
+		internal float SubreportEnd { get; set; } = float.MinValue;
+
 		public void SortPageItems()
 		{
 			if (!_needSort)

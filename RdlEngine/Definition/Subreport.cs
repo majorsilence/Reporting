@@ -223,6 +223,10 @@ namespace Majorsilence.Reporting.Rdl
                 float designedBottom = startPage.YOffset + (Height == null ? 0 : Height.Points);
                 await r.ReportDefinition.Body.RunPage(pgs).ConfigureAwait(false);		// create a the subreport items
                 yOffset = pgs.CurrentPage.YOffset;
+                // A table row that holds the subreport ends no higher than its tables, lists
+                // and matrixes do. What else it drew the row counts for itself, the text and
+                // images and not the lines and boxes (TableRow.RunPageRow).
+                pgs.CurrentPage.SubreportEnd = Math.Max(pgs.CurrentPage.SubreportEnd, yOffset);
                 if (pgs.CurrentPage == startPage)
                     yOffset = Math.Max(yOffset, BottomOfItems(startPage, firstItem, designedBottom));
             }
