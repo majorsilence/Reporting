@@ -87,6 +87,25 @@ namespace ReportTests
             });
         }
 
+        // A span or font inside a division keeps the division's alignment, and the bold around
+        // it: they used to start from the box's own style, so a right-aligned division whose
+        // text began with an underlined span set that span's line at the box's alignment.
+        [Test]
+        public async Task ASpanOrFont_KeepsTheStyleItIsIn()
+        {
+            var runs = await Runs("<div align=\"right\"><span style=\"text-decoration:underline\">Signed</span></div>"
+                + "<div align=\"right\"><font color=\"red\">Dated</font></div>"
+                + "<b><span style=\"text-decoration:underline\">Heavy</span></b>");
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(runs.Select(r => r.Text.Trim()), Is.EqualTo(new[] { "Signed", "Dated", "Heavy" }));
+                Assert.That(Right(runs[0]), Is.EqualTo(400f).Within(0.5f), "the span is at the right");
+                Assert.That(Right(runs[1]), Is.EqualTo(400f).Within(0.5f), "the font is at the right");
+                Assert.That(runs[2].SI.FontWeight, Is.EqualTo(FontWeightEnum.Bold), "the span is bold");
+            });
+        }
+
         // Lines break WrapInset short of the right edge, and a right-aligned or centred one is
         // still aligned against the full width.
         [Test]

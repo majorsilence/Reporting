@@ -379,8 +379,8 @@ namespace Majorsilence.Reporting.Rdl
                         PopStyle();
                     }
                     else if (ltoken.StartsWith("<span"))
-                    {
-                        HandleStyle(token.Substring(1), si);
+                    {   // from the style it is in, so it keeps its division's alignment
+                        HandleStyle(token.Substring(1), cs);
                     }
                     else if (ltoken == "</span>")
                     {   // we really should match span and font but it shouldn't matter very often?
@@ -388,7 +388,7 @@ namespace Majorsilence.Reporting.Rdl
                     }
                     else if (ltoken.StartsWith("<font"))
                     {
-                        HandleFont(token.Substring(1), si);
+                        HandleFont(token.Substring(1), cs);
                     }
                     else if (ltoken == "</font>")
                     {   // we really should match span and font but it shouldn't matter very often?
