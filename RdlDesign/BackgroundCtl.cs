@@ -579,9 +579,15 @@ namespace Majorsilence.Reporting.RdlDesign
                 if (dr != DialogResult.OK)
                     return;
 
+                string name = dlgEI.ChooseImageName(cbValueEmbedded.Text);
+
                 // Populate the EmbeddedImage names
                 cbValueEmbedded.Items.Clear();
                 cbValueEmbedded.Items.AddRange(_Draw.ReportNames.EmbeddedImageNames);
+
+                // Pick the imported (or still valid) image so the background gets a Value (#673)
+                cbValueEmbedded.Text = name ?? "";
+                fBackImage = true;
             }
             finally
             {
