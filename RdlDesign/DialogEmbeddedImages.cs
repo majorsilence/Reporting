@@ -58,6 +58,53 @@ namespace Majorsilence.Reporting.RdlDesign
                 this.bOK.Enabled = false;
         }
 
+        // The image most recently imported or pasted while the dialog was open.
+        private EmbeddedImageValues _LastAdded;
+
+        /// <summary>
+        /// Adds an imported or pasted image to the list. OK starts disabled on a report
+        /// with no images, so it is enabled here - otherwise the new image can't be kept.
+        /// </summary>
+        internal int AddImage(EmbeddedImageValues eiv)
+        {
+            int index = lbImages.Items.Add(eiv);
+            _LastAdded = eiv;
+            bOK.Enabled = true;
+            return index;
+        }
+
+        internal bool CanAccept => bOK.Enabled;
+
+        internal void Accept() => bOK_Click(this, EventArgs.Empty);
+
+        /// <summary>
+        /// The embedded image name an image report item should use once this dialog has
+        /// closed with OK. An image imported or pasted in the dialog wins; otherwise the
+        /// current value is kept while it still names an image (or is an expression);
+        /// otherwise the image selected in the list is used.
+        /// </summary>
+        internal string ChooseImageName(string current)
+        {
+            if (_LastAdded != null && lbImages.Items.Contains(_LastAdded))
+                return _LastAdded.Name;
+
+            if (!string.IsNullOrEmpty(current))
+            {
+                if (current.TrimStart().StartsWith("="))
+                    return current;
+                foreach (EmbeddedImageValues eiv in lbImages.Items)
+                {
+                    if (eiv.Name == current)
+                        return current;
+                }
+            }
+
+            EmbeddedImageValues selected = lbImages.SelectedItem as EmbeddedImageValues;
+            if (selected != null)
+                return selected.Name;
+            return lbImages.Items.Count > 0 ? ((EmbeddedImageValues)lbImages.Items[0]).Name : current;
+        }
+
         public void Apply()
         {
             XmlNode rNode = _Draw.GetReportNode();
@@ -101,9 +148,7 @@ namespace Majorsilence.Reporting.RdlDesign
             EmbeddedImageValues eiv = new EmbeddedImageValues("embeddedimage");
             eiv.MIMEType = "image/png";
             eiv.ImageData = imagedata;
-            int cur = this.lbImages.Items.Add(eiv);
-
-            lbImages.SelectedIndex = cur;
+            lbImages.SelectedIndex = AddImage(eiv);
 
             this.tbEIName.Focus();
         }
@@ -183,10 +228,11 @@ namespace Majorsilence.Reporting.RdlDesign
                         EmbeddedImageValues eiv = new EmbeddedImageValues(fname);
                         eiv.MIMEType = "image/png";
                         eiv.ImageData = imagedata;
-                        cur = this.lbImages.Items.Add(eiv);
+                        cur = AddImage(eiv);
                     }
                 }
-                lbImages.SelectedIndex = cur;
+                if (cur < lbImages.Items.Count)
+                    lbImages.SelectedIndex = cur;
             }
             finally
             {

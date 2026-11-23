@@ -361,11 +361,13 @@ namespace Majorsilence.Reporting.RdlDesign
 		{
 			DialogEmbeddedImages dlgEI = new DialogEmbeddedImages(this._Draw);
 			dlgEI.StartPosition = FormStartPosition.CenterParent;
+			string name;
             try
             {
                 DialogResult dr = dlgEI.ShowDialog();
                 if (dr != DialogResult.OK)
                     return;
+				name = dlgEI.ChooseImageName(cbValueEmbedded.Text);
             }
             finally
             {
@@ -375,6 +377,9 @@ namespace Majorsilence.Reporting.RdlDesign
 			cbValueEmbedded.Items.Clear();
 			cbValueEmbedded.Items.AddRange(_Draw.ReportNames.EmbeddedImageNames);
 
+			// Pick the imported (or still valid) image so the item gets Source/Value (#673)
+			cbValueEmbedded.Text = name ?? "";
+			fSource = fValue = true;
 		}
 		private void bExpr_Click(object sender, System.EventArgs e)
 		{
