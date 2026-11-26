@@ -35,6 +35,14 @@ namespace Majorsilence.Reporting.Rdl
 			get { return _items.Count; }
 		}
 
+		// Removes the items from the given index on.
+		internal void RemoveObjectsFrom(int index)
+		{
+			if (index < _items.Count)
+				_items.RemoveRange(index, _items.Count - index);
+			_emptyItems = Math.Min(_emptyItems, _items.Count);
+		}
+
 		public void InsertObject(PageItem pi)
 		{
 			AddObjectInternal(pi);
