@@ -292,6 +292,31 @@ namespace Majorsilence.Reporting.Rdl
             set { _PageWidth = value; }
         }
 
+        // How many items each page after the given one holds, for CutBackTo.
+        internal int[] CountsAfter(Page p)
+        {
+            int[] counts = new int[_pages.Count - p.PageNumber];
+            for (int i = 0; i < counts.Length; i++)
+                counts[i] = _pages[p.PageNumber + i].Count;
+            return counts;
+        }
+
+        // Takes back what was put on the pages after the given one since CountsAfter was read:
+        // pages added since are removed, pages that were there keep the items they had, and the
+        // given page is the current one again.
+        internal void CutBackTo(Page p, int[] countsAfter)
+        {
+            int keep = p.PageNumber + countsAfter.Length;
+            while (_pages.Count > keep)
+                _pages.RemoveAt(_pages.Count - 1);
+            for (int i = 0; i < countsAfter.Length; i++)
+                _pages[p.PageNumber + i].RemoveObjectsFrom(countsAfter[i]);
+            _currentPage = p;
+            Report.PageNumber = LogicalPageNumber(p);
+            Report.OverallPageNumber = p.PageNumber;
+            Report.PageName = p.PageName;
+        }
+
         public void RemoveLastPage()
         {
             Page lp = LastPage;

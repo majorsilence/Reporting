@@ -220,8 +220,12 @@ namespace Majorsilence.Reporting.Rdl
                 //
                 Page startPage = pgs.CurrentPage;
                 int firstItem = startPage.Count;
+                bool firstPageOnly = FirstPageOnlyOf(Custom);
+                int[] laterCounts = firstPageOnly ? pgs.CountsAfter(startPage) : null;
                 float designedBottom = startPage.YOffset + (Height == null ? 0 : Height.Points);
                 await r.ReportDefinition.Body.RunPage(pgs).ConfigureAwait(false);		// create a the subreport items
+                if (firstPageOnly && pgs.CurrentPage != startPage)
+                    pgs.CutBackTo(startPage, laterCounts);
                 yOffset = pgs.CurrentPage.YOffset;
                 // A table row that holds the subreport ends no higher than its tables, lists
                 // and matrixes do. What else it drew the row counts for itself, the text and
@@ -259,6 +263,23 @@ namespace Majorsilence.Reporting.Rdl
 
 			SetPagePositionEnd(pgs, yOffset);
 		}
+
+        // <Custom><FirstPageOnly>true</FirstPageOnly></Custom> asks that the subreport print what
+        // fits on the page it starts on and no more: where its content would go on to another
+        // page, what it put there is dropped and the report carries on from the page it started
+        // on. It is for a subreport in a band that has a fixed place on the page, such as one
+        // standing in for a page footer, which has no next page to continue on.
+        private static bool FirstPageOnlyOf(Custom custom)
+        {
+            if (custom == null)
+                return false;
+            foreach (XmlNode xNode in custom.CustomXmlNode.ChildNodes)
+            {
+                if (xNode.Name == "FirstPageOnly")
+                    return string.Equals(xNode.InnerText.Trim(), "true", StringComparison.OrdinalIgnoreCase);
+            }
+            return false;
+        }
 
         // Where a subreport ends on its own page: at the lowest bottom of what it drew there, and
         // no higher than its designed bottom. A table, list or matrix moves the page's offset on
