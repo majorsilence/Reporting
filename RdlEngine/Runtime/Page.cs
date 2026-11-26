@@ -47,6 +47,11 @@ namespace Majorsilence.Reporting.Rdl
 			_items.Add(pi);
 		}
 
+		internal void RemoveObject(PageItem pi)
+		{
+			_items.Remove(pi);
+		}
+
 		private void AddObjectInternal(PageItem pi)
 		{
 			pi.Page = this;

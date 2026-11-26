@@ -71,6 +71,24 @@ namespace Majorsilence.Reporting.Rdl
 			return;
 		}
 
+		/// <summary>
+		/// Whether Hidden reads the page number or the page count, which are only known for an
+		/// item of the body once the body is laid out.
+		/// </summary>
+		internal bool ReadsPageGlobals
+		{
+			get
+			{
+				string source = _Hidden?.Source;
+				if (source == null)
+					return false;
+				foreach (string name in new[] { "Globals!PageNumber", "Globals!TotalPages", "Globals!OverallPageNumber", "Globals!OverallTotalPages" })
+					if (source.IndexOf(name, StringComparison.OrdinalIgnoreCase) >= 0)
+						return true;
+				return false;
+			}
+		}
+
 		internal Expression Hidden
 		{
 			get { return  _Hidden; }
