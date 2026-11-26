@@ -175,6 +175,43 @@ namespace Majorsilence.Reporting.Rdl
             _totalPagesTexts = null;
         }
 
+        // Body items whose Hidden reads the page number or the page count, with what each drew
+        // and the row it was run for.
+        List<(ReportItem Item, PageItem Drawn, Row Row)> _hiddenByPage;
+
+        internal void AddHiddenByPage(ReportItem item, PageItem drawn, Row row)
+        {
+            if (_hiddenByPage == null)
+                _hiddenByPage = new List<(ReportItem, PageItem, Row)>();
+            _hiddenByPage.Add((item, drawn, row));
+        }
+
+        /// <summary>
+        /// Works out, with the page count, each body item whose Hidden reads the page number or
+        /// the page count, on the page it was drawn on, and takes it off that page if it is
+        /// hidden there: totals shown on the last page only, a note on every page but the first.
+        /// What was taken off its page again, as when rows are moved to the next page, is left
+        /// alone.
+        /// </summary>
+        internal async Task RunHiddenByPage()
+        {
+            if (_hiddenByPage == null)
+                return;
+            var placed = new HashSet<PageItem>();
+            foreach (Page p in _pages)
+                foreach (PageItem pi in p)
+                    placed.Add(pi);
+            foreach (var (item, drawn, row) in _hiddenByPage)
+            {
+                if (!placed.Contains(drawn))
+                    continue;
+                SetPageGlobals(drawn.Page);
+                if (await item.IsHidden(Report, row).ConfigureAwait(false))
+                    drawn.Page.RemoveObject(drawn);
+            }
+            _hiddenByPage = null;
+        }
+
         public void SortPageItems()
         {
             foreach (Page p in this)

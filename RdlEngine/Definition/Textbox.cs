@@ -276,7 +276,7 @@ namespace Majorsilence.Reporting.Rdl
 
 			tbr.RunCount++;		// Increment the run count
 
-            bool bHidden = await IsHidden(r, row).ConfigureAwait(false);
+            bool bHidden = !HiddenByPageLater && await IsHidden(r, row).ConfigureAwait(false);
 
 			SetPagePositionBegin(pgs);
 
@@ -383,6 +383,8 @@ namespace Majorsilence.Reporting.Rdl
                     p.AddObject(pt);
                     if (_TotalPagesLater && !bDup && !html)
                         pgs.AddTotalPagesText(this, pt, row);
+                    if (HiddenByPageLater)
+                        pgs.AddHiddenByPage(this, pt, row);
                 }
                 if (!bDup)
                 {
@@ -830,7 +832,7 @@ namespace Majorsilence.Reporting.Rdl
 		{	// normally only called when CanGrow is true
 			float height;
 
-			if (await IsHidden(rpt, row).ConfigureAwait(false))
+			if (!HiddenByPageLater && await IsHidden(rpt, row).ConfigureAwait(false))
 				return 0;
 
 			object o = TryEvaluate(rpt, row, out object value) ? value : await Evaluate(rpt, row).ConfigureAwait(false);

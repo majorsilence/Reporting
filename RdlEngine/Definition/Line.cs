@@ -37,7 +37,7 @@ namespace Majorsilence.Reporting.Rdl
 		override internal async Task RunPage(Pages pgs, Row row)
 		{
 			Report r = pgs.Report;
-            bool bHidden = await IsHidden(r, row).ConfigureAwait(false);
+            bool bHidden = !HiddenByPageLater && await IsHidden(r, row).ConfigureAwait(false);
 
 			SetPagePositionBegin(pgs);
 			PageLine pl = new PageLine();
@@ -49,6 +49,8 @@ namespace Majorsilence.Reporting.Rdl
 			else
 			{
 			    pgs.CurrentPage.AddObject(pl);
+			    if (HiddenByPageLater)
+			        pgs.AddHiddenByPage(this, pl, row);
 			    SetPagePositionEnd(pgs, pl.Y2);
 			}
 		}

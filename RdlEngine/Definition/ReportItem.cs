@@ -196,6 +196,7 @@ namespace Majorsilence.Reporting.Rdl
                 await _Action.FinalPass().ConfigureAwait(false);
 			if (_Visibility != null)
                 await _Visibility.FinalPass().ConfigureAwait(false);
+			HiddenByPageLater = _Visibility != null && _Visibility.ReadsPageGlobals && !InPageHeaderOrFooter();
 			if (_ToolTip != null)
                 await _ToolTip.FinalPass().ConfigureAwait(false);
 			if (_Label != null)
@@ -479,6 +480,14 @@ namespace Majorsilence.Reporting.Rdl
 			}
 		}
 		
+		/// <summary>
+		/// A body item whose Hidden reads the page number or the page count ("on the last page
+		/// only", say). Neither is known while the body is laid out, so the item is drawn where
+		/// it belongs and taken off its page afterwards if it is hidden there
+		/// (Pages.RunHiddenByPage). It keeps its room either way.
+		/// </summary>
+		internal bool HiddenByPageLater { get; private set; }
+
 		internal async Task<bool> IsHidden(Report rpt, Row r)
 		{
 			if (this._Visibility == null)
