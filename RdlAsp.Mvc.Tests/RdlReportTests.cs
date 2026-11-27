@@ -161,6 +161,45 @@ public class RdlReportTests
         Assert.That(html, Does.Contain("/msr/RdlReport/ShowFile/Parameters/pdf?Who="), "Export links keep the chosen values.");
     }
 
+    private static string[] SortedRows(string html) =>
+        Regex.Matches(html, "ROW-[a-z]").Select(m => m.Value).ToArray();
+
+    private static string SortHref(string html)
+    {
+        var m = Regex.Match(html, "<a class=\"rdl-usersort\"[^>]* href=\"([^\"]*)\"");
+        Assert.That(m.Success, Is.True, "The sort header has no link.");
+        return WebUtility.HtmlDecode(m.Groups[1].Value);
+    }
+
+    [Test]
+    public async Task UserSort_LinkKeepsTheParameters_AndSortsTheReportItIsFollowedTo()
+    {
+        string html = await _client.GetStringAsync("/msr/RdlReport/ShowFile/UserSort/html?Who=a%20b");
+        Assert.That(SortedRows(html), Is.EqualTo(new[] { "ROW-c", "ROW-a", "ROW-b" }));
+        string href = SortHref(html);
+        Assert.That(href, Is.EqualTo("/msr/RdlReport/ShowFile/UserSort/html?Who=a%20b&rs:SortId=SortName&rs:SortDirection=Ascending"));
+
+        html = await _client.GetStringAsync(href);
+        Assert.That(SortedRows(html), Is.EqualTo(new[] { "ROW-a", "ROW-b", "ROW-c" }));
+        href = SortHref(html);
+        Assert.That(href, Is.EqualTo("/msr/RdlReport/ShowFile/UserSort/html?Who=a%20b&rs:SortId=SortName&rs:SortDirection=Descending&rs:SortState=ASortName"));
+        Assert.That(html, Does.Contain("name=\"Who\" value=\"a b\""), "The parameter is still chosen.");
+        Assert.That(html, Does.Contain("name=\"rs:SortState\" value=\"ASortName\""), "Running the report again keeps the sort.");
+        Assert.That(html, Does.Contain("/msr/RdlReport/ShowFile/UserSort/pdf?Who=a%20b&amp;rs%3ASortState=ASortName"), "Exports keep the sort.");
+
+        html = await _client.GetStringAsync(href);
+        Assert.That(SortedRows(html), Is.EqualTo(new[] { "ROW-c", "ROW-b", "ROW-a" }));
+    }
+
+    [Test]
+    public async Task UserSort_StateAloneSortsAnExport()
+    {
+        string csv = await _client.GetStringAsync("/msr/RdlReport/ShowFile/UserSort/csv?rs:SortState=DSortName");
+        Assert.That(SortedRows(csv), Is.EqualTo(new[] { "ROW-c", "ROW-b", "ROW-a" }));
+        csv = await _client.GetStringAsync("/msr/RdlReport/ShowFile/UserSort/csv?rs:SortState=ASortName");
+        Assert.That(SortedRows(csv), Is.EqualTo(new[] { "ROW-a", "ROW-b", "ROW-c" }));
+    }
+
     [Test]
     public async Task Html_Images_AreInTheHtml()
     {

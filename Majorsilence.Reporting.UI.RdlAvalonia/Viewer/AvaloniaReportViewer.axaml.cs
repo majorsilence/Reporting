@@ -266,6 +266,7 @@ namespace Majorsilence.Reporting.UI.RdlAvalonia.Viewer
             CopyButton.Click += (_, _) => ReportCanvas.CopySelection();
             SelectAllButton.Click += (_, _) => ReportCanvas.SelectAll();
             ReportCanvas.ToggleClicked += async (_, key) => await ToggleItemAsync(key);
+            ReportCanvas.UserSortClicked += async (_, args) => await SortItemAsync(args.Key, args.Additive);
             FirstPageButton.Click += (_, _) => SetPage(1);
             PreviousPageButton.Click += (_, _) => SetPage(_pageCurrent - 1);
             NextPageButton.Click += (_, _) => SetPage(_pageCurrent + 1);
@@ -629,16 +630,30 @@ namespace Majorsilence.Reporting.UI.RdlAvalonia.Viewer
             }
         }
 
-        private bool _toggling;     // a toggle's pages are being built; further clicks wait for them
+        private bool _toggling;     // a toggle's or a sort's pages are being built; further clicks wait for them
 
         /// <summary>
         /// Expands or collapses the drill-down toggle (Visibility/ToggleItem) instance
         /// <paramref name="toggleKey"/> (a <see cref="PageItem.ToggleKey"/>) and lays the report
         /// out again from the data already read, keeping the page and scroll position.
         /// </summary>
-        public async Task ToggleItemAsync(string toggleKey)
+        public Task ToggleItemAsync(string toggleKey) =>
+            toggleKey == null ? Task.CompletedTask : RelayoutAsync(r => r.Toggle(toggleKey));
+
+        /// <summary>
+        /// Sorts by the sort header (a textbox with a UserSort) <paramref name="userSortKey"/> (a
+        /// <see cref="PageItem.UserSortKey"/>), as a click on it does: ascending first, then flipping
+        /// each time. A plain click replaces the sort; <paramref name="additive"/> (a shift-click)
+        /// adds it after the sorts already chosen. Lays the report out again from the data already
+        /// read, keeping the page and scroll position.
+        /// </summary>
+        public Task SortItemAsync(string userSortKey, bool additive = false) =>
+            userSortKey == null ? Task.CompletedTask : RelayoutAsync(r => r.ToggleUserSort(userSortKey, additive));
+
+        // Changes the report's interactive state and builds its pages again in place.
+        private async Task RelayoutAsync(Action<Report> change)
         {
-            if (_report == null || _pages == null || toggleKey == null || _toggling)
+            if (_report == null || _pages == null || _toggling)
                 return;
 
             _toggling = true;
@@ -647,7 +662,7 @@ namespace Majorsilence.Reporting.UI.RdlAvalonia.Viewer
                 var offset = ReportScrollViewer.Offset;
                 var page = _pageCurrent;
 
-                _report.Toggle(toggleKey);
+                change(_report);
                 var pages = await _report.BuildPages();
                 if (_report.ErrorMaxSeverity > 0)
                 {

@@ -33,6 +33,22 @@ namespace Majorsilence.Reporting.UI.RdlAvalonia.Viewer
         public bool Contains(Point p) => Rect.Contains(p);
     }
     
+    /// <summary>
+    /// A click on a sort header: its <see cref="PageItem.UserSortKey"/>, and whether Shift was held
+    /// (add it to the sorts already chosen instead of replacing them).
+    /// </summary>
+    public sealed class UserSortClickedEventArgs : EventArgs
+    {
+        public UserSortClickedEventArgs(string key, bool additive)
+        {
+            Key = key;
+            Additive = additive;
+        }
+
+        public string Key { get; }
+        public bool Additive { get; }
+    }
+
     public sealed class ReportCanvas : Control
     {
         private Pages? _pages;
@@ -103,6 +119,31 @@ namespace Majorsilence.Reporting.UI.RdlAvalonia.Viewer
         /// </summary>
         public string? ToggleKeyAt(Point position) =>
             _hitList.FirstOrDefault(h => h.Contains(position) && h.PageItem.ToggleKey != null)?.PageItem.ToggleKey;
+
+        /// <summary>
+        /// Raised when a sort header (a textbox with a UserSort) is clicked. The owner sorts by it
+        /// in the report and builds the pages again.
+        /// </summary>
+        public event EventHandler<UserSortClickedEventArgs>? UserSortClicked;
+
+        /// <summary>
+        /// The sort key of the sort header a click at <paramref name="position"/> (canvas
+        /// coordinates) on the page shown sorts by, or null when it does not sort: see
+        /// <see cref="PageItem.IsUserSortClick"/>.
+        /// </summary>
+        public string? UserSortKeyAt(Point position)
+        {
+            double scale = PointsToLogical(1);
+            if (scale <= 0)
+                return null;
+            var hit = _hitList.FirstOrDefault(h => h.Contains(position) && h.PageItem.UserSortKey != null);
+            if (hit == null)
+                return null;
+            var pi = hit.PageItem;
+            float px = pi.X + (float)((position.X - hit.Rect.X) / scale);
+            float py = pi.Y + (float)((position.Y - hit.Rect.Y) / scale);
+            return pi.IsUserSortClick(px, py) ? pi.UserSortKey : null;
+        }
 
         /// <summary>
         /// Gets or sets whether the selection tool is enabled
@@ -293,6 +334,15 @@ namespace Majorsilence.Reporting.UI.RdlAvalonia.Viewer
             var point = e.GetCurrentPoint(this);
             if (point.Properties.IsLeftButtonPressed)
             {
+                var sortKey = UserSortKeyAt(point.Position);
+                if (sortKey != null)
+                {   // a sort header: sort by it, shift adding it to the sorts already chosen
+                    UserSortClicked?.Invoke(this,
+                        new UserSortClickedEventArgs(sortKey, e.KeyModifiers.HasFlag(KeyModifiers.Shift)));
+                    e.Handled = true;
+                    return;
+                }
+
                 var toggleKey = ToggleKeyAt(point.Position);
                 if (toggleKey != null)
                 {   // a drill-down +/-: expand or collapse what it toggles
@@ -332,6 +382,7 @@ namespace Majorsilence.Reporting.UI.RdlAvalonia.Viewer
             {
                 var hoverEntry = _hitList.FirstOrDefault(h => h.Contains(pos));
                 Cursor = !string.IsNullOrEmpty(hoverEntry?.PageItem.HyperLink) || hoverEntry?.PageItem.ToggleKey != null
+                         || hoverEntry?.PageItem.UserSortKey != null
                     ? new Cursor(StandardCursorType.Hand)
                     : new Cursor(StandardCursorType.Ibeam);
 

@@ -178,11 +178,12 @@ namespace Majorsilence.Reporting.Rdl
 			GroupEntry[] currentGroups; 
 
 			// We have some data
+			List<SortBy> sort = rpt.EffectiveSort(_Sorting, this, _Grouping);
 			if (_Grouping != null || 
-				_Sorting != null)		// fix up the data
+				sort != null)		// fix up the data
 			{
 				Rows saveData = wc.Data;
-				wc.Data = new Rows(rpt, null, _Grouping, _Sorting);
+				wc.Data = new Rows(rpt, null, _Grouping, sort);
 				wc.Data.Data = saveData.Data;
 				await wc.Data.SortAsync().ConfigureAwait(false);
                 await PrepGroups(rpt, wc).ConfigureAwait(false);
@@ -204,6 +205,11 @@ namespace Majorsilence.Reporting.Rdl
 
 			wc.Data.CurrentGroups = currentGroups;
 
+			// The rows were sorted one by one; a sort on the group (an aggregate, say) is over each
+			// instance, so the instances are sorted again, as a table sorts its groups.
+			if (_Grouping != null && wc.Groups.Count > 1 && wc.Groups[0].Sort != null)
+				await GroupEntrySort.SortAsync(rpt, wc.Data, wc.Groups).ConfigureAwait(false);
+
 			return;
 		}
 
@@ -217,7 +223,7 @@ namespace Majorsilence.Reporting.Rdl
 			List<GroupExpression> gea = _Grouping.GroupExpressions.Items;
 			GroupEntry[] currentGroups = new GroupEntry[1];
 			_Grouping.SetIndex(rpt, 0);	// set the index of this group (so we can find the GroupEntry)
-			currentGroups[0] = new GroupEntry(_Grouping, _Sorting, 0);
+			currentGroups[0] = new GroupEntry(_Grouping, rpt.EffectiveSort(_Sorting, this, _Grouping), 0);
 
 			// Save the typecodes, and grouping by groupexpression; for later use
 			TypeCode[] tcs = new TypeCode[gea.Count];

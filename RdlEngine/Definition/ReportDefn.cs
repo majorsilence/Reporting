@@ -349,6 +349,11 @@ namespace Majorsilence.Reporting.Rdl
                 await _EmbeddedImages.FinalPass().ConfigureAwait(false);
 			if (_Language != null)
                 await _Language.FinalPass().ConfigureAwait(false);
+			// Last: a UserSort's expression is parsed in a group or data region that may be
+			// anywhere in the report, which has to have had its own final pass.
+			if (UserSorts != null)
+				foreach (UserSort us in UserSorts)
+					await us.FinalPass().ConfigureAwait(false);
 
             _DataCache.TrimExcess();	// reduce size of array of expressions that cache data
 			return;
@@ -905,6 +910,15 @@ namespace Majorsilence.Reporting.Rdl
 			get {return _OverwriteInSubreport;}
 			set {_OverwriteInSubreport = value;}
 		}
+
+		/// <summary>
+		/// The interactive sorts (UserSort) on each level they sort: a Grouping, or a data region
+		/// for its detail rows. Filled in the final pass; null when the report has none.
+		/// </summary>
+		internal Dictionary<ReportLink, List<UserSortBinding>> UserSortBindings { get; set; }
+
+		/// <summary>The textboxes' UserSorts, given their final pass after everything else's.</summary>
+		internal List<UserSort> UserSorts { get; set; }
 
 		/// <summary>The report was parsed with RDLParser.NativeTablix; its subreports are too.</summary>
 		internal bool NativeTablix { get; set; }

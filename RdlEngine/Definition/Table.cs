@@ -613,15 +613,18 @@ namespace Majorsilence.Reporting.Rdl
 		{
 			GroupEntry[] currentGroups; 
 
+			// The detail rows' sort, with any interactive sort on them (or on their group).
+			List<SortBy> detailSort = _Details == null ? null : rpt.EffectiveSort(_Details.Sorting, this, _Details.Grouping);
+
 			// We have some data
 			if (_TableGroups != null || 
 				(_Details != null &&
-				 (_Details.Sorting != null ||
+				 (detailSort != null ||
 				 _Details.Grouping != null)))		// fix up the data
 			{
 				List<Row> saveData = wc.Data.Data;
 				Grouping gr;
-				Sorting srt; 
+				List<SortBy> srt; 
 				if (_Details == null)
 				{
 					gr = null;  srt = null;
@@ -629,7 +632,7 @@ namespace Majorsilence.Reporting.Rdl
 				else
 				{
 					gr = _Details.Grouping;
-					srt = _Details.Sorting;
+					srt = detailSort;
 				}
 
 				wc.Data = new Rows(rpt, _TableGroups, gr, srt);
@@ -672,7 +675,7 @@ namespace Majorsilence.Reporting.Rdl
 			if (fge.Sort != null)
 			{
 				RunGroupsSetGroups(rpt, wc, groupEntries);
-				await GroupEntrySort.SortAsync(rpt, wc, groupEntries).ConfigureAwait(false);
+				await GroupEntrySort.SortAsync(rpt, wc.Data, groupEntries).ConfigureAwait(false);
 			}
 
 			// drill down into nested groups
@@ -701,11 +704,11 @@ namespace Majorsilence.Reporting.Rdl
 				countG = _TableGroups.Items.Count;
 			
 			Grouping dg=null;
-			Sorting ds=null;
+			List<SortBy> ds=null;
 			if (_Details != null && _Details.Grouping != null)
 			{
 				dg = _Details.Grouping;
-				ds = _Details.Sorting;
+				ds = rpt.EffectiveSort(_Details.Sorting, this, dg);
 				countG++;
 			}
 			GroupEntry[] currentGroups = new GroupEntry[countG++];
@@ -716,7 +719,7 @@ namespace Majorsilence.Reporting.Rdl
 					if (tg.Grouping.ParentGroup != null)
 						wc.RecursiveGroup = tg.Grouping;
 					tg.Grouping.SetIndex(rpt, i);		// set the index of this group (so we can find the GroupEntry)
-					currentGroups[i++] = new GroupEntry(tg.Grouping, tg.Sorting, 0);
+					currentGroups[i++] = new GroupEntry(tg.Grouping, rpt.EffectiveSort(tg.Sorting, tg.Grouping), 0);
 					foreach (GroupExpression ge in tg.Grouping.GroupExpressions.Items)
 					{
 						gea.Add(ge);
@@ -1666,27 +1669,27 @@ namespace Majorsilence.Reporting.Rdl
 		// Evaluates each entry's sort expressions once, awaited,
 		// instead of two Task.Run(...).GetResult() hops per comparison. An entry's key depends only on
 		// the entry: the expression is evaluated with that entry as its group's current group, on its first row.
-		internal static async Task SortAsync(Report rpt, TableWorkClass wc, List<GroupEntry> groupEntries)
+		internal static async Task SortAsync(Report rpt, Rows data, List<GroupEntry> groupEntries)
 		{
 			var items = new KeyedGroup[groupEntries.Count];
 			for (int i = 0; i < items.Length; i++)
 			{
 				GroupEntry ge = groupEntries[i];
-				var sortItems = ge.Sort.Items;
+				var sortItems = ge.Sort;
 				var keys = new object[sortItems.Count];
 				for (int k = 0; k < keys.Length; k++)
 				{
 					SortBy sb = (SortBy) sortItems[k];
-					wc.Data.CurrentGroups[ge.Group.GetIndex(rpt)] = ge;
-					keys[k] = await sb.SortExpression.Evaluate(rpt, wc.Data.Data[ge.StartRow]).ConfigureAwait(false);
+					data.CurrentGroups[ge.Group.GetIndex(rpt)] = ge;
+					keys[k] = await sb.SortExpression.Evaluate(rpt, data.Data[ge.StartRow]).ConfigureAwait(false);
 				}
-				items[i] = new KeyedGroup { Entry = ge, Keys = keys };
+				items[i] = new KeyedGroup { Entry = ge, Keys = keys, Index = i };
 			}
 
 			Array.Sort(items, (a, b) =>
 			{
 				int rc = 0;
-				var sortItems = a.Entry.Sort.Items;
+				var sortItems = a.Entry.Sort;
 				for (int k = 0; k < sortItems.Count; k++)
 				{
 					SortBy sb = (SortBy) sortItems[k];
@@ -1698,7 +1701,7 @@ namespace Majorsilence.Reporting.Rdl
 						break;
 					}
 				}
-				return rc;
+				return rc != 0 ? rc : a.Index - b.Index;	// ties keep their order: an interactive sort is stable
 			});
 
 			for (int i = 0; i < items.Length; i++)
@@ -1709,6 +1712,7 @@ namespace Majorsilence.Reporting.Rdl
 		{
 			internal GroupEntry Entry;
 			internal object[] Keys;
+			internal int Index;
 		}
 	}
 

@@ -827,8 +827,8 @@ namespace Majorsilence.Reporting.Rdl
             }
 
             // Sort the entries now, awaiting the sort expressions; the code below reads them synchronously
-            await mcg.PrepareSortedDataAsync(rpt).ConfigureAwait(false);
-            await mrg.PrepareSortedDataAsync(rpt).ConfigureAwait(false);
+            await mcg.PrepareSortedDataAsync(rpt, this, _Data).ConfigureAwait(false);
+            await mrg.PrepareSortedDataAsync(rpt, this, _Data).ConfigureAwait(false);
 
             // Determine how many subtotal columns are needed
             maxColumns += RunCountSubtotalColumns(rpt, wc, mcg, 0);

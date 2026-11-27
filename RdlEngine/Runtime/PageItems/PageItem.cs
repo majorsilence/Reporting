@@ -20,6 +20,8 @@ namespace Majorsilence.Reporting.Rdl
 		bool allowselect = true;  // allow selection of this item
 		string toggleKey;		//  the toggle instance this item is, when it is a visibility toggle textbox
 		bool toggleExpanded;	//  whether the items it toggles are shown
+		string userSortKey;		//  the interactive sort this item is, when it is a textbox with a UserSort
+		UserSortDirection userSortDirection;	//  the direction it sorts in now
 		List<DocumentMapLabel> documentMap;	// document-map labels this item is the target of; null when none
 
 		/// <summary>
@@ -29,6 +31,13 @@ namespace Majorsilence.Reporting.Rdl
 		public const float ToggleGlyphSpace = 10f;
 		/// <summary>The side of the +/- glyph, in points.</summary>
 		public const float ToggleGlyphSize = 7f;
+		/// <summary>
+		/// How far, in points, an interactive viewer moves a sort header's text in from the right
+		/// to draw its sort glyph after it. The page item is laid out without it.
+		/// </summary>
+		public const float UserSortGlyphSpace = 10f;
+		/// <summary>The side of the sort glyph (an up or down triangle, or both), in points.</summary>
+		public const float UserSortGlyphSize = 7f;
 
 		public Page Page
 		{
@@ -169,6 +178,107 @@ namespace Majorsilence.Reporting.Rdl
 			x = this.x + padLeft + (ToggleGlyphSpace - size) / 2;
 			y = this.y + padTop + Math.Max(0, (room - size) / 2);
 		}
+
+		/// <summary>
+		/// Non-null when this item is an instance of a textbox with a UserSort (an interactive
+		/// sort header): pass it to <see cref="Report.ToggleUserSort"/> (or to
+		/// <see cref="UserSortState.Toggle"/> on <see cref="Report.UserSort"/>) on a click, then
+		/// build the pages again. Every instance of the textbox has the same key.
+		/// </summary>
+		public string UserSortKey
+		{
+			get { return userSortKey; }
+			set { userSortKey = value; }
+		}
+
+		/// <summary>
+		/// For a sort header (<see cref="UserSortKey"/> not null): the direction the report is
+		/// sorted by it now -- draw an up triangle, a down one, or (None) both.
+		/// </summary>
+		public UserSortDirection UserSortDirection
+		{
+			get { return userSortDirection; }
+			set { userSortDirection = value; }
+		}
+
+		/// <summary>
+		/// Where an interactive viewer draws the sort glyph of a sort header, in points on the page:
+		/// a square of <see cref="UserSortGlyphSize"/> inside the right padding, in the last
+		/// <see cref="UserSortGlyphSpace"/> of the text's room (the viewer keeps the text that much
+		/// further left), level with the first line. A click in it sorts.
+		/// </summary>
+		public void GetUserSortGlyphBounds(out float x, out float y, out float size)
+		{
+			size = UserSortGlyphSize;
+			float padRight = si != null ? si.PaddingRight : 0;
+			float padTop = si != null ? si.PaddingTop : 0;
+			float padBottom = si != null ? si.PaddingBottom : 0;
+			float line = si != null ? si.FontSize * 1.2f : 12f;
+			float room = Math.Min(h - padTop - padBottom, line);
+			x = this.x + w - padRight - UserSortGlyphSpace + (UserSortGlyphSpace - size) / 2;
+			y = this.y + padTop + Math.Max(0, (room - size) / 2);
+		}
+
+		/// <summary>
+		/// True when the point (<paramref name="px"/>, <paramref name="py"/>), in points on the
+		/// page, is on the sort glyph of a sort header: the glyph's square widened to the whole
+		/// <see cref="UserSortGlyphSpace"/>, so a click just beside it still counts.
+		/// </summary>
+		public bool UserSortGlyphContains(float px, float py)
+		{
+			if (userSortKey == null)
+				return false;
+			GetUserSortGlyphBounds(out float gx, out float gy, out float size);
+			float slop = (UserSortGlyphSpace - size) / 2;
+			return px >= gx - slop && px <= gx + size + slop
+				&& py >= gy - slop && py <= gy + size + slop;
+		}
+
+		/// <summary>
+		/// Whether a click at (<paramref name="px"/>, <paramref name="py"/>), in points on the page,
+		/// on this item sorts by it (pass <see cref="UserSortKey"/> to
+		/// <see cref="Report.ToggleUserSort"/>). Like a drill-down toggle, a sort header is clicked
+		/// anywhere on it; when the textbox also toggles or links, only its sort glyph sorts and
+		/// the rest of it does the other thing.
+		/// </summary>
+		public bool IsUserSortClick(float px, float py)
+		{
+			if (userSortKey == null)
+				return false;
+			if (toggleKey == null && hyperlink == null && bookmarklink == null)
+				return true;
+			return UserSortGlyphContains(px, py);
+		}
+
+		/// <summary>
+		/// The triangles of the sort glyph of a sort header sorted <paramref name="direction"/>,
+		/// inside the square at (<paramref name="x"/>, <paramref name="y"/>) of side
+		/// <paramref name="size"/> (any unit, y growing down): one pointing up for Ascending, one
+		/// pointing down for Descending, and a small up one over a small down one when the report
+		/// is not sorted by it (None). Each triangle is { x1, y1, x2, y2, x3, y3 }.
+		/// </summary>
+		public static float[][] GetUserSortGlyphTriangles(UserSortDirection direction, float x, float y, float size)
+		{
+			float mid = x + size / 2;
+			float right = x + size;
+			float bottom = y + size;
+			switch (direction)
+			{
+				case UserSortDirection.Ascending:
+					return new[] { new[] { x, bottom, mid, y, right, bottom } };
+				case UserSortDirection.Descending:
+					return new[] { new[] { x, y, right, y, mid, bottom } };
+				default:
+					float gap = size / 7f;				// between the two
+					float half = (size - gap) / 2;
+					return new[]
+					{
+						new[] { x, y + half, mid, y, right, y + half },
+						new[] { x, bottom - half, right, bottom - half, mid, bottom },
+					};
+			}
+		}
+
 		#region ICloneable Members
 
 		public object Clone()

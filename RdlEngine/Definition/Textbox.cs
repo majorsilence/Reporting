@@ -51,6 +51,7 @@ namespace Majorsilence.Reporting.Rdl
 								// should render as an element or attribute: Auto (Default)
 								// Auto uses the setting on the Report element.
 		bool _IsToggle;		// Textbox is used to toggle a detail row
+		UserSort _UserSort;	// the user can sort by clicking it (interactive sort)
 		List<Visibility> _ToggleTargets;	// the Visibility of every item naming this textbox as its ToggleItem
 		Expression[] _ToggleScope;	// the group expressions telling one instance of this textbox from another
 		bool _ToggleScopeByRow;	//   and when the instances are rows rather than groups
@@ -97,6 +98,9 @@ namespace Majorsilence.Reporting.Rdl
 						break;
 					case "dataelementstyle":
 						_DataElementStyle = Majorsilence.Reporting.Rdl.DataElementStyle.GetStyle(xNodeLoop.InnerText, OwnerReport.rl);
+						break;
+					case "usersort":
+						_UserSort = new UserSort(r, this, xNodeLoop);
 						break;
 					default:
 						if (ReportItemElement(xNodeLoop))	// try at ReportItem level
@@ -194,6 +198,13 @@ namespace Majorsilence.Reporting.Rdl
 
 			if (_ToggleImage != null)
                 await _ToggleImage.FinalPass().ConfigureAwait(false);
+
+			if (_UserSort != null)
+			{
+				OwnerReport.UserSorts ??= new List<UserSort>();
+				if (!OwnerReport.UserSorts.Contains(_UserSort))
+					OwnerReport.UserSorts.Add(_UserSort);	// its final pass is the report's last
+			}
 
 			if (_HideDuplicates != null)
 			{
@@ -354,6 +365,12 @@ namespace Majorsilence.Reporting.Rdl
 
             if (_ToggleTargets != null && !bHidden)
                 await SetPageToggle(r, pt, row).ConfigureAwait(false);
+
+            if (_UserSort != null && !bHidden)
+            {   // a sort header: the viewer draws its direction and sorts on a click
+                pt.UserSortKey = _UserSort.Key;
+                pt.UserSortDirection = r.UserSortDirectionOf(pt.UserSortKey);
+            }
 
             // Hidden objects don't affect the current page?
             if (!bHidden)
@@ -1093,6 +1110,11 @@ namespace Majorsilence.Reporting.Rdl
 			bool initiallyHidden = await _ToggleTargets[0].IsInitiallyHidden(r, row).ConfigureAwait(false);
 			pt.ToggleKey = key;
 			pt.ToggleExpanded = initiallyHidden == r.IsToggled(key);
+		}
+
+		internal UserSort UserSort
+		{
+			get { return _UserSort; }
 		}
 
 		internal int RunCount(Report rpt)

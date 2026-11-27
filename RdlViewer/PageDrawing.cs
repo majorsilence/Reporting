@@ -469,6 +469,15 @@ namespace Majorsilence.Reporting.RdlViewer
             if (mea.Button != MouseButtons.Left || hle == null)
                 return;
 
+            if (hle.pi.UserSortKey != null && hle.pi.IsUserSortClick(PageX(hle, mea.X), PageY(hle, mea.Y)))
+            {   // a sort header: sort by it (shift adds it to the sorts already chosen) and lay the
+                // report out again
+                RdlViewer rv = this.Parent as RdlViewer;
+                if (rv != null)
+                    _ = rv.SortItem(hle.pi.UserSortKey, (Control.ModifierKeys & Keys.Shift) == Keys.Shift);
+                return;
+            }
+
             if (hle.pi.ToggleKey != null)
             {   // a drill-down +/-: expand or collapse what it toggles and lay the report out again
                 RdlViewer rv = this.Parent as RdlViewer;
@@ -688,7 +697,8 @@ namespace Majorsilence.Reporting.RdlViewer
             Cursor c = Cursors.Default;
             if (hle == null)
             { }
-            else if (hle.pi.HyperLink != null || hle.pi.BookmarkLink != null || hle.pi.ToggleKey != null)
+            else if (hle.pi.HyperLink != null || hle.pi.BookmarkLink != null || hle.pi.ToggleKey != null
+                || hle.pi.UserSortKey != null)
                 c = Cursors.Hand;
 
             if (this.Cursor != c)
@@ -705,6 +715,11 @@ namespace Majorsilence.Reporting.RdlViewer
                 _tt.Active = true;
             }
         }
+
+        // The point on the page, in points, of a mouse position over a hit list entry's item.
+        private float PageX(HitListEntry hle, int mouseX) => hle.pi.X + (mouseX / _LastZoom - hle.rect.X) * 72f / DpiX;
+
+        private float PageY(HitListEntry hle, int mouseY) => hle.pi.Y + (mouseY / _LastZoom - hle.rect.Y) * 72f / DpiY;
 
         private HitListEntry GetHitListEntry(MouseEventArgs mea)
         {
@@ -779,7 +794,8 @@ namespace Majorsilence.Reporting.RdlViewer
                         }
                     }
                     // Only care about items with links and tips
-                    else if (pi.HyperLink != null || pi.BookmarkLink != null || pi.Tooltip != null || pi.ToggleKey != null)
+                    else if (pi.HyperLink != null || pi.BookmarkLink != null || pi.Tooltip != null || pi.ToggleKey != null
+                        || pi.UserSortKey != null)
                     {
                         HitListEntry hle;
                         if (pi is PagePolygon)
@@ -808,13 +824,20 @@ namespace Majorsilence.Reporting.RdlViewer
                     // 2005 spec file, page 9, in the text box has
                     // CanGrow and CanShrink
                     PageText pt = pi as PageText;
-                    if (pt.ToggleKey != null)
-                    {   // the text moves right past the +/- drawn before it
+                    if (pt.ToggleKey != null || pt.UserSortKey != null)
+                    {   // the text moves right past the +/- drawn before it, and left of the sort
+                        // glyph drawn after it
                         PageText shifted = (PageText)pt.Clone();
                         shifted.SI = (StyleInfo)pt.SI.Clone();
-                        shifted.SI.PaddingLeft += PageItem.ToggleGlyphSpace;
+                        if (pt.ToggleKey != null)
+                            shifted.SI.PaddingLeft += PageItem.ToggleGlyphSpace;
+                        if (pt.UserSortKey != null)
+                            shifted.SI.PaddingRight += PageItem.UserSortGlyphSpace;
                         DrawString(shifted, g, rect);
-                        DrawToggleGlyph(pt, g);
+                        if (pt.ToggleKey != null)
+                            DrawToggleGlyph(pt, g);
+                        if (pt.UserSortKey != null)
+                            DrawUserSortGlyph(pt, g);
                     }
                     else
                         DrawString(pt, g, rect);
@@ -881,6 +904,20 @@ namespace Majorsilence.Reporting.RdlViewer
             g.FillRectangle(mark, new RectangleF(x + inset, y + (size - bar) / 2, size - 2 * inset, bar));
             if (!pt.ToggleExpanded)     // vertical bar: the plus
                 g.FillRectangle(mark, new RectangleF(x + (size - bar) / 2, y + inset, bar, size - 2 * inset));
+        }
+
+        // The sort glyph of a sort header, after its text: an up triangle when the report is sorted
+        // by it ascending, a down one when descending, and both, smaller, when it is not.
+        private void DrawUserSortGlyph(PageText pt, Graphics g)
+        {
+            pt.GetUserSortGlyphBounds(out float gx, out float gy, out float gsize);
+            float size = Math.Max(5f, PixelsX(gsize));
+            float x = PixelsX(gx + _left - _hScroll) + (PixelsX(gsize) - size) / 2;
+            float y = PixelsY(gy + _top - _vScroll) + (PixelsY(gsize) - size) / 2;
+
+            using var mark = new SolidBrush(ToSysColor(pt.SI.Color));
+            foreach (float[] t in PageItem.GetUserSortGlyphTriangles(pt.UserSortDirection, x, y, size))
+                g.FillPolygon(mark, new[] { new PointF(t[0], t[1]), new PointF(t[2], t[3]), new PointF(t[4], t[5]) });
         }
 
         private void DrawBackground(Graphics g, System.Drawing.RectangleF rect, StyleInfo si)
