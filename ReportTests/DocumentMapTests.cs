@@ -272,6 +272,245 @@ namespace ReportTests
             Assert.That(pdf, Does.Not.Contain("/Outlines"));
         }
 
+        // ── RDL 2008 Tablix ────────────────────────────────────────────────────
+
+        private const string Ns2008 = "http://schemas.microsoft.com/sqlserver/reporting/2008/01/reportdefinition";
+
+        private static string Tb2008(string name, string value, string extra = "")
+            => $@"<Textbox Name=""{name}"">{extra}<Paragraphs><Paragraph><TextRuns><TextRun><Value>{value}</Value></TextRun></TextRuns></Paragraph></Paragraphs></Textbox>";
+
+        private static string Row2008(string name, string value, string extra = "")
+            => $@"<TablixRow><Height>14pt</Height><TablixCells><TablixCell><CellContents>{Tb2008(name, value, extra)}</CellContents></TablixCell></TablixCells></TablixRow>";
+
+        // A Tablix with its own label, a row group labelled by its key, and labelled detail rows.
+        private static string Tablix2008(string groupLabel = "<DocumentMapLabel>=\"Group \" &amp; Fields!K.Value</DocumentMapLabel>") => $@"
+    <Tablix Name=""T"">
+      <DocumentMapLabel>Tablix</DocumentMapLabel>
+      <TablixBody><TablixColumns><TablixColumn><Width>300pt</Width></TablixColumn></TablixColumns>
+        <TablixRows>{Row2008("Head", "Head")}{Row2008("Line", "=Fields!V.Value", "<DocumentMapLabel>=\"Row \" &amp; Fields!V.Value</DocumentMapLabel>")}</TablixRows>
+      </TablixBody>
+      <TablixColumnHierarchy><TablixMembers><TablixMember /></TablixMembers></TablixColumnHierarchy>
+      <TablixRowHierarchy><TablixMembers>
+        <TablixMember><KeepWithGroup>After</KeepWithGroup></TablixMember>
+        <TablixMember>
+          <Group Name=""G""><GroupExpressions><GroupExpression>=Fields!K.Value</GroupExpression></GroupExpressions>{groupLabel}</Group>
+          <TablixMembers><TablixMember><Group Name=""Details"" /></TablixMember></TablixMembers>
+        </TablixMember>
+      </TablixMembers></TablixRowHierarchy>
+      <DataSetName>Data</DataSetName>
+      <Top>0pt</Top><Left>0pt</Left><Height>28pt</Height><Width>300pt</Width>
+    </Tablix>";
+
+        private static async Task<DocumentMapEntry[]> Map2008(string rdl, bool native, params (string K, string V)[] rows)
+        {
+            RdlEngineConfig.RdlEngineConfigInit();
+            using var report = await new RDLParser(rdl) { SkipDatabaseSchemaValidation = true, NativeTablix = native }.Parse();
+            Assert.That(report.ErrorMaxSeverity, Is.LessThanOrEqualTo(4),
+                "the test report must parse: " + string.Join("; ", report.ErrorItems?.Cast<object>() ?? Enumerable.Empty<object>()));
+            var table = new DataTable();
+            table.Columns.Add("K", typeof(string));
+            table.Columns.Add("V", typeof(string));
+            foreach (var (k, v) in rows)
+                table.Rows.Add(k, v);
+            await report.DataSets["Data"].SetData(table);
+            await report.RunGetData(null);
+            var pages = await report.BuildPages();
+            return pages.GetDocumentMap().ToArray();
+        }
+
+        [TestCase(true, TestName = "Rdl2008TablixLabels_NestAsATable_Native")]
+        [TestCase(false, TestName = "Rdl2008TablixLabels_NestAsATable_Normalised")]
+        public async Task Rdl2008TablixLabels_NestAsATable(bool native)
+        {
+            var map = await Map2008(Report(Tablix2008(), DataSets, ns: Ns2008), native, Rows);
+
+            Assert.That(Outline(map), Is.EqualTo(new[]
+            {
+                "Tablix",
+                "  Group a",
+                "    Row 1",
+                "    Row 2",
+                "  Group b",
+                "    Row 3",
+            }));
+        }
+
+        // A 2005-style Table written in a 2008+ file: the exporter writes its Labels as
+        // DocumentMapLabel, and the Tablix it makes has the same document map.
+        [TestCase(true, TestName = "ExportedTablix_KeepsItsDocumentMap_Native")]
+        [TestCase(false, TestName = "ExportedTablix_KeepsItsDocumentMap_Normalised")]
+        public async Task ExportedTablix_KeepsItsDocumentMap(bool native)
+        {
+            const string ns2010 = "http://schemas.microsoft.com/sqlserver/reporting/2010/01/reportdefinition";
+            var doc = new System.Xml.XmlDocument();
+            doc.LoadXml(Report(Table("<Label>Table</Label>", "<Label>=\"Group \" &amp; Fields!K.Value</Label>",
+                "<Label>=\"Row \" &amp; Fields!V.Value</Label>"), DataSets, ns: ns2010));
+
+            Rdl2008Exporter.ConvertToTablix(doc);
+
+            var nsm = new System.Xml.XmlNamespaceManager(doc.NameTable);
+            nsm.AddNamespace("r", ns2010);
+            Assert.That(doc.SelectNodes("//r:Label", nsm)!.Count, Is.EqualTo(0), "no 2005 Label is left");
+            Assert.That(doc.SelectSingleNode("//r:Tablix/r:DocumentMapLabel", nsm)?.InnerText, Is.EqualTo("Table"));
+            Assert.That(doc.SelectSingleNode("//r:Group[@Name='G']/r:DocumentMapLabel", nsm), Is.Not.Null);
+            Assert.That(doc.SelectSingleNode("//r:Textbox[@Name='Line']/r:DocumentMapLabel", nsm), Is.Not.Null);
+
+            var map = await Map2008(doc.OuterXml, native, Rows);
+            Assert.That(Outline(map), Is.EqualTo(new[]
+            {
+                "Table",
+                "  Group a",
+                "    Row 1",
+                "    Row 2",
+                "  Group b",
+                "    Row 3",
+            }));
+        }
+
+        // ── RDL 2005 Matrix ───────────────────────────────────────────────────
+
+        private static string Matrix(string matrixLabel = "<Label>Matrix</Label>", string columnLabel = "") => $@"
+    <Matrix Name=""M""><DataSetName>Data</DataSetName><Top>0pt</Top><Left>0pt</Left>{matrixLabel}
+      <Corner><ReportItems><Textbox Name=""Corner""><Value>Corner</Value></Textbox></ReportItems></Corner>
+      <ColumnGroupings><ColumnGrouping><Height>14pt</Height><DynamicColumns>
+        <Grouping Name=""Cols""><GroupExpressions><GroupExpression>=Fields!C.Value</GroupExpression></GroupExpressions>{columnLabel}</Grouping>
+        <ReportItems><Textbox Name=""ColHead""><Value>=Fields!C.Value</Value></Textbox></ReportItems>
+      </DynamicColumns></ColumnGrouping></ColumnGroupings>
+      <RowGroupings>
+        <RowGrouping><Width>60pt</Width><DynamicRows>
+          <Grouping Name=""Outer""><GroupExpressions><GroupExpression>=Fields!K.Value</GroupExpression></GroupExpressions>
+            <Label>=""Outer "" &amp; Fields!K.Value</Label></Grouping>
+          <ReportItems><Textbox Name=""OuterHead""><Value>=Fields!K.Value</Value></Textbox></ReportItems>
+        </DynamicRows></RowGrouping>
+        <RowGrouping><Width>60pt</Width><DynamicRows>
+          <Grouping Name=""Inner""><GroupExpressions><GroupExpression>=Fields!V.Value</GroupExpression></GroupExpressions>
+            <Label>=""Inner "" &amp; Fields!V.Value</Label></Grouping>
+          <ReportItems><Textbox Name=""InnerHead""><Value>=Fields!V.Value</Value></Textbox></ReportItems>
+        </DynamicRows></RowGrouping>
+      </RowGroupings>
+      <MatrixRows><MatrixRow><Height>14pt</Height><MatrixCells><MatrixCell><ReportItems>
+        <Textbox Name=""Cell""><Value>=Count(Fields!V.Value)</Value></Textbox></ReportItems></MatrixCell></MatrixCells></MatrixRow></MatrixRows>
+      <MatrixColumns><MatrixColumn><Width>40pt</Width></MatrixColumn></MatrixColumns>
+    </Matrix>";
+
+        private const string MatrixDataSets = @"
+  <DataSources><DataSource Name=""D""><ConnectionProperties><DataProvider>SQL</DataProvider><ConnectString /></ConnectionProperties></DataSource></DataSources>
+  <DataSets><DataSet Name=""Data"">
+    <Query><DataSourceName>D</DataSourceName><CommandText>none</CommandText></Query>
+    <Fields>
+      <Field Name=""K""><DataField>K</DataField></Field>
+      <Field Name=""V""><DataField>V</DataField></Field>
+      <Field Name=""C""><DataField>C</DataField></Field>
+    </Fields>
+  </DataSet></DataSets>";
+
+        private static async Task<DocumentMapEntry[]> MatrixMap(string rdl)
+        {
+            RdlEngineConfig.RdlEngineConfigInit();
+            using var report = await new RDLParser(rdl) { SkipDatabaseSchemaValidation = true }.Parse();
+            Assert.That(report.ErrorMaxSeverity, Is.LessThanOrEqualTo(4),
+                "the test report must parse: " + string.Join("; ", report.ErrorItems?.Cast<object>() ?? Enumerable.Empty<object>()));
+            var table = new DataTable();
+            table.Columns.Add("K", typeof(string));
+            table.Columns.Add("V", typeof(string));
+            table.Columns.Add("C", typeof(string));
+            foreach (var (k, v, c) in new[] { ("a", "1", "x"), ("a", "2", "y"), ("a", "2", "x"), ("b", "3", "y") })
+                table.Rows.Add(k, v, c);
+            await report.DataSets["Data"].SetData(table);
+            await report.RunGetData(null);
+            var pages = await report.BuildPages();
+            return pages.GetDocumentMap().ToArray();
+        }
+
+        [Test]
+        public async Task MatrixRowGroupLabels_NestOuterAboveInner_BeneathTheMatrix()
+        {
+            var map = await MatrixMap(Report(Matrix(), MatrixDataSets));
+
+            Assert.That(Outline(map), Is.EqualTo(new[]
+            {
+                "Matrix",
+                "  Outer a",
+                "    Inner 1",
+                "    Inner 2",
+                "  Outer b",
+                "    Inner 3",
+            }));
+        }
+
+        [Test]
+        public async Task MatrixRowGroupLabels_PointAtTheirRowHeaders()
+        {
+            RdlEngineConfig.RdlEngineConfigInit();
+            var map = await MatrixMap(Report(Matrix(matrixLabel: ""), MatrixDataSets));
+            Assert.That(map.Select(e => e.Label), Is.EqualTo(new[] { "Outer a", "Inner 1", "Inner 2", "Outer b", "Inner 3" }));
+            Assert.That(map[0].Y, Is.EqualTo(map[1].Y).Within(0.01f), "an outer group starts on its first inner group's row");
+            Assert.That(map[2].Y, Is.GreaterThan(map[1].Y));
+            Assert.That(map[3].Y, Is.GreaterThan(map[2].Y));
+        }
+
+        // A 2008 Tablix with a column group, which the engine runs as a pivot (a matrix).
+        private static string Pivot2008() => $@"
+    <Tablix Name=""P"">
+      <DocumentMapLabel>Pivot</DocumentMapLabel>
+      <TablixCorner><TablixCornerRows><TablixCornerRow>
+        <TablixCornerCell><CellContents>{Tb2008("C1", "")}</CellContents></TablixCornerCell>
+        <TablixCornerCell><CellContents>{Tb2008("C2", "")}</CellContents></TablixCornerCell>
+      </TablixCornerRow></TablixCornerRows></TablixCorner>
+      <TablixBody><TablixColumns><TablixColumn><Width>40pt</Width></TablixColumn></TablixColumns>
+        <TablixRows><TablixRow><Height>14pt</Height><TablixCells><TablixCell><CellContents>{Tb2008("Cell", "=Count(Fields!V.Value)")}</CellContents></TablixCell></TablixCells></TablixRow></TablixRows>
+      </TablixBody>
+      <TablixColumnHierarchy><TablixMembers><TablixMember>
+        <Group Name=""Cols""><GroupExpressions><GroupExpression>=Fields!C.Value</GroupExpression></GroupExpressions></Group>
+        <TablixHeader><Size>14pt</Size><CellContents>{Tb2008("ColHead", "=Fields!C.Value")}</CellContents></TablixHeader>
+      </TablixMember></TablixMembers></TablixColumnHierarchy>
+      <TablixRowHierarchy><TablixMembers><TablixMember>
+        <Group Name=""Outer""><GroupExpressions><GroupExpression>=Fields!K.Value</GroupExpression></GroupExpressions>
+          <DocumentMapLabel>=""Outer "" &amp; Fields!K.Value</DocumentMapLabel></Group>
+        <TablixHeader><Size>60pt</Size><CellContents>{Tb2008("OuterHead", "=Fields!K.Value")}</CellContents></TablixHeader>
+        <TablixMembers><TablixMember>
+          <Group Name=""Inner""><GroupExpressions><GroupExpression>=Fields!V.Value</GroupExpression></GroupExpressions>
+            <DocumentMapLabel>=""Inner "" &amp; Fields!V.Value</DocumentMapLabel></Group>
+          <TablixHeader><Size>60pt</Size><CellContents>{Tb2008("InnerHead", "=Fields!V.Value")}</CellContents></TablixHeader>
+        </TablixMember></TablixMembers>
+      </TablixMember></TablixMembers></TablixRowHierarchy>
+      <DataSetName>Data</DataSetName>
+      <Top>0pt</Top><Left>0pt</Left><Height>28pt</Height><Width>160pt</Width>
+    </Tablix>";
+
+        [TestCase(true, TestName = "Rdl2008PivotRowGroupLabels_Nest_Native")]
+        [TestCase(false, TestName = "Rdl2008PivotRowGroupLabels_Nest_Normalised")]
+        public async Task Rdl2008PivotRowGroupLabels_Nest(bool native)
+        {
+            RdlEngineConfig.RdlEngineConfigInit();
+            using var report = await new RDLParser(Report(Pivot2008(), MatrixDataSets, ns: Ns2008))
+                { SkipDatabaseSchemaValidation = true, NativeTablix = native }.Parse();
+            Assert.That(report.ErrorMaxSeverity, Is.LessThanOrEqualTo(4),
+                "the test report must parse: " + string.Join("; ", report.ErrorItems?.Cast<object>() ?? Enumerable.Empty<object>()));
+            if (native)
+                Assert.That(report.ReportDefinition.Body.ReportItems.Items.Single(ri => ri.Name?.Nm == "P"),
+                    Is.InstanceOf<TablixPivot>(), "the engine runs the Tablix as a pivot");
+            var table = new DataTable();
+            table.Columns.Add("K", typeof(string));
+            table.Columns.Add("V", typeof(string));
+            table.Columns.Add("C", typeof(string));
+            foreach (var (k, v, c) in new[] { ("a", "1", "x"), ("a", "2", "y"), ("a", "2", "x"), ("b", "3", "y") })
+                table.Rows.Add(k, v, c);
+            await report.DataSets["Data"].SetData(table);
+            await report.RunGetData(null);
+            var pages = await report.BuildPages();
+
+            Assert.That(Outline(pages.GetDocumentMap().ToArray()), Is.EqualTo(new[]
+            {
+                "Pivot",
+                "  Outer a",
+                "    Inner 1",
+                "    Inner 2",
+                "  Outer b",
+                "    Inner 3",
+            }));
+        }
+
         private static async Task<string> RenderPdf(Report report)
         {
             string file = Path.Combine(Path.GetTempPath(), $"DocumentMap_{Guid.NewGuid():N}.pdf");

@@ -507,6 +507,60 @@ namespace Majorsilence.Reporting.Rdl
 			return keys.ConvertAll(k => byKey[k]);
 		}
 
+		// The row groups whose instances start on a row: those in the row's chain that the row
+		// above does not share.
+		private protected override IEnumerable<(Grouping Grouping, Row Row, int LabelledAbove)>
+			RowGroupStarts(Report rpt, MatrixCellEntry[,] matrix, int iRow)
+		{
+			Chain chain = RowChainOf(matrix, iRow);
+			if (chain == null)
+				yield break;
+			Chain previous = iRow > 0 ? RowChainOf(matrix, iRow - 1) : null;
+			var above = new HashSet<BitArray>(ReferenceEqualityComparer.Instance);
+			for (Chain c = previous; c != null; c = c.Parent)
+				above.Add(c.Bits);
+
+			var outerFirst = new List<Chain>();
+			for (Chain c = chain; c != null; c = c.Parent)
+				outerFirst.Insert(0, c);
+
+			Rows full = GetFullData(rpt);
+			int labelledAbove = 0;
+			foreach (Chain c in outerFirst)
+			{
+				if (!above.Contains(c.Bits))
+				{
+					c.Rows ??= new Rows(rpt, full, 0, full.Data.Count - 1, c.Bits);
+					if (c.Rows.Data.Count > 0)
+						yield return (c.Grouping, c.Rows.Data[0], labelledAbove);
+				}
+				if (c.Grouping.Label != null)
+					labelledAbove++;
+			}
+		}
+
+		// The innermost group chain of a row: a header cell carries only the chain of its own
+		// member, an outer group's header the outer groups, so the deepest chain in the row is taken.
+		private static Chain RowChainOf(MatrixCellEntry[,] matrix, int iRow)
+		{
+			Chain deepest = null;
+			int deepestLength = 0;
+			for (int iCol = 0; iCol < matrix.GetLength(1); iCol++)
+			{
+				if (matrix[iRow, iCol] is not CellEntry ce || ce.RowChain == null)
+					continue;
+				int length = 0;
+				for (Chain c = ce.RowChain; c != null; c = c.Parent)
+					length++;
+				if (length > deepestLength)
+				{
+					deepest = ce.RowChain;
+					deepestLength = length;
+				}
+			}
+			return deepest;
+		}
+
 		private protected override void SetGroupingValues(Report rpt, MatrixCellEntry mce)
 		{
 			// A group the cell is not inside of is totalled over: it sees the cell's rows.
