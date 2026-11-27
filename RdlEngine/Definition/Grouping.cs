@@ -212,7 +212,8 @@ namespace Majorsilence.Reporting.Rdl
             _InMatrix = false;
 			for (ReportLink rl = this.Parent; rl != null; rl = rl.Parent)
 			{
-				if (rl is Matrix)
+				// A map data region's group is run like a matrix's: its rows are set per instance.
+				if (rl is Matrix || rl is MapDataRegion)
 				{
 					_InMatrix = true;
 					break;

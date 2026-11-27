@@ -448,12 +448,13 @@ namespace Majorsilence.Reporting.Rdl
         // Report items added after RDL 2005 that have no counterpart in the engine. Left in place
         // they surface as "unknown element" and, inside a Tablix cell, break the converted table.
         // Gauges and indicators are both GaugePanel; sparklines and data bars are ordinary Charts
-        // and render through the chart conversion.
+        // and render through the chart conversion. A Map the engine draws (MapSupport) stays.
         private static readonly string[] UnsupportedItems = { "Map", "GaugePanel" };
 
         /// <summary>
         /// Swaps each unsupported item for an empty Rectangle with the same position and size, so
-        /// the layout around it holds, and reports them in one warning per kind.
+        /// the layout around it holds, and reports them in one warning per kind. A map with a layer
+        /// the engine draws is kept, and what it has that is not drawn is named in one warning.
         /// </summary>
         private static void ReplaceUnsupportedItems (XmlElement root, ReportLog rl)
         {
@@ -462,6 +463,8 @@ namespace Majorsilence.Reporting.Rdl
                 var replaced = 0;
                 var approximated = 0;
                 var mapFeatures = new HashSet<string> ();
+                var drawnMaps = 0;
+                var drawnWithout = new List<string> ();
 
                 foreach (var item in found) {
                     // Only report items: a Map or Indicator name can also be an unrelated child
@@ -480,8 +483,18 @@ namespace Majorsilence.Reporting.Rdl
                         }
                     }
 
-                    if (kind == "Map")
+                    if (kind == "Map") {
+                        var notDrawn = new List<string> ();
+                        if (MapSupport.Inspect (item, notDrawn)) {
+                            drawnMaps++;
+                            foreach (var part in notDrawn) {
+                                if (!drawnWithout.Contains (part))
+                                    drawnWithout.Add (part);
+                            }
+                            continue;
+                        }
                         mapFeatures.UnionWith (DescribeMap (item));
+                    }
 
                     var doc = item.OwnerDocument;
                     var rectangle = doc.CreateElement ("Rectangle", item.NamespaceURI);
@@ -500,6 +513,11 @@ namespace Majorsilence.Reporting.Rdl
                 if (approximated > 0) {
                     rl?.LogError (4, $"The report contains {approximated} {kind} item(s), which are approximated: " +
                         "indicators as coloured boxes and numbers, gauges as a simplified dial or bar with the scale, ranges and value.");
+                }
+
+                if (drawnWithout.Count > 0) {
+                    rl?.LogError (4, $"The report contains {drawnMaps} Map item(s) drawn without what the engine " +
+                        $"does not support yet: {string.Join (", ", drawnWithout)}.");
                 }
 
                 if (replaced > 0) {
