@@ -590,16 +590,22 @@ namespace Majorsilence.Pdf.Internal
 
         // ── object builders ───────────────────────────────────────────────────
 
+        // An empty value is left out, as the XMP metadata leaves it out: PDF/A requires every Info entry
+        // to have its equivalent in the XMP, and an empty Title or Author has none there.
         private byte[] BuildInfoObj(int objNum)
         {
-            string auth  = EncStr(objNum, _author);
-            string title = EncStr(objNum, _title);
-            string subj  = EncStr(objNum, _subject);
-            string creat = EncStr(objNum, _creator);
-            string prod  = EncStr(objNum, "Majorsilence.Pdf");
-            return Latin1.GetBytes(
-                $"<< /Producer {prod} /Author {auth} " +
-                $"/Title {title} /Subject {subj} /Creator {creat} >>");
+            var info = new StringBuilder("<< /Producer ").Append(EncStr(objNum, "Majorsilence.Pdf"));
+            AppendInfoEntry(info, objNum, "Author",  _author);
+            AppendInfoEntry(info, objNum, "Title",   _title);
+            AppendInfoEntry(info, objNum, "Subject", _subject);
+            AppendInfoEntry(info, objNum, "Creator", _creator);
+            return Latin1.GetBytes(info.Append(" >>").ToString());
+        }
+
+        private void AppendInfoEntry(StringBuilder info, int objNum, string key, string value)
+        {
+            if (!string.IsNullOrEmpty(value))
+                info.Append(" /").Append(key).Append(' ').Append(EncStr(objNum, value));
         }
 
         private static byte[] BuildStandardFontObj(FontResource font) =>
@@ -676,8 +682,11 @@ namespace Majorsilence.Pdf.Internal
             }
 
             // ── CIDFont ───────────────────────────────────────────────────────
+            // The codes drawn are glyph ids, so a TrueType CIDFont maps them to glyphs one to one. Identity is
+            // the default, but PDF/A (ISO 19005-1 6.3.3.2, ISO 19005-2 6.2.11.3.2) requires it to be written.
+            string cidToGid = ttf.IsCff ? "" : "/CIDToGIDMap /Identity ";
             objects.Add(Latin1.GetBytes(
-                $"<< /Type /Font /Subtype /{(ttf.IsCff ? "CIDFontType0" : "CIDFontType2")} /BaseFont /{psName} " +
+                $"<< /Type /Font /Subtype /{(ttf.IsCff ? "CIDFontType0" : "CIDFontType2")} /BaseFont /{psName} {cidToGid}" +
                 $"/CIDSystemInfo << /Registry {EncLitStr(cidFontObjNum, "Adobe")} /Ordering {EncLitStr(cidFontObjNum, "Identity")} /Supplement 0 >> " +
                 $"/FontDescriptor {descriptorObjNum} 0 R /DW 1000 {wArray} >>"));
 

@@ -446,6 +446,41 @@ namespace Majorsilence.Pdf.Tests
             string pdfText = Encoding.Latin1.GetString(bytes);
             Assert.That(pdfText, Does.Not.Contain("pdfaid"));
         }
+
+        [Test]
+        public void PdfA_TrueTypeCidFont_HasIdentityCidToGidMap()
+        {
+            string fontsDir = Majorsilence.Forms.Drawing.FontResourceLoader.GetFontDirectory();
+            Assume.That(Directory.Exists(fontsDir));
+            var reg = new FontRegistry().AddDirectory(fontsDir);
+
+            var bytes = PdfDocument.Create()
+                .WithConformance(PdfConformance.PdfA2b)
+                .WithFontRegistry(reg)
+                .AddPage(PageSizes.A4, c => c.DrawText("PDF/A", 72, 72,
+                    TextStyle.Default.WithFamily("LiberationSans").WithSize(12)))
+                .ToBytes();
+
+            string pdfText = Encoding.Latin1.GetString(bytes);
+            Assert.That(pdfText, Does.Contain("/CIDFontType2"), "the text must be drawn with an embedded TrueType font");
+            Assert.That(pdfText, Does.Contain("/CIDToGIDMap /Identity"), "PDF/A requires CIDToGIDMap on a CIDFontType2");
+        }
+
+        [Test]
+        public void Info_LeavesOutEmptyEntries_AsTheXmpDoes()
+        {
+            var bytes = PdfDocument.Create()
+                .WithConformance(PdfConformance.PdfA2b)
+                .WithTitle("Archived")
+                .AddPage(PageSizes.A4, _ => { })
+                .ToBytes();
+
+            string pdfText = Encoding.Latin1.GetString(bytes);
+            Assert.That(pdfText, Does.Contain("/Title <FEFF"), "a title that is set is written");
+            Assert.That(pdfText, Does.Contain("<dc:title>"),   "and has its XMP equivalent");
+            Assert.That(pdfText, Does.Not.Contain("/Author <FEFF>"),  "an empty author has no XMP equivalent");
+            Assert.That(pdfText, Does.Not.Contain("/Subject <FEFF>"), "an empty subject has no XMP equivalent");
+        }
     }
 
     // ── Visible signature appearance ─────────────────────────────────────────────

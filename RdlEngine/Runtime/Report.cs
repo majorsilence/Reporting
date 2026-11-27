@@ -616,6 +616,12 @@ namespace Majorsilence.Reporting.Rdl
 			get { return _Report.Author; }
 		}
 
+		/// <summary>
+		/// The PDF/A conformance level of the PDF this report renders to; <see cref="Majorsilence.Pdf.PdfConformance.None"/>
+		/// (the default) leaves the PDF as before. A conformance level cannot be combined with PDF security.
+		/// </summary>
+		public Majorsilence.Pdf.PdfConformance PdfConformance { get; set; } = Majorsilence.Pdf.PdfConformance.None;
+
 		public string CSS
 		{
 			get { return _CSS; }
