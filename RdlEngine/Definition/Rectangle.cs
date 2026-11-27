@@ -130,7 +130,22 @@ namespace Majorsilence.Reporting.Rdl
 			}
 		}
 
+		internal override bool IsDocumentMapContainer => true;
+
 		async override internal Task RunPage(Pages pgs, Row row)
+		{
+			int documentMap = await BeginDocumentMap(pgs.Report, row).ConfigureAwait(false);
+			try
+			{
+				await RunPageContents(pgs, row).ConfigureAwait(false);
+			}
+			finally
+			{
+				EndDocumentMap(pgs.Report, documentMap);
+			}
+		}
+
+		private async Task RunPageContents(Pages pgs, Row row)
 		{
 			Report r = pgs.Report;
             bool bHidden = await IsHidden(r, row).ConfigureAwait(false);

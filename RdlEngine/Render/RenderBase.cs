@@ -86,6 +86,12 @@ namespace Majorsilence.Reporting.Rdl
         internal abstract protected void AfterProcessPage();
         internal abstract protected void AddBookmark(PageText pt);
 
+        /// <summary>
+        /// A document-map entry on the current page, in report order: label, nesting level (0 at
+        /// the top; at most one below the entry before) and the top of the item it points at.
+        /// </summary>
+        internal virtual protected void AddDocumentMapLabel(string label, int level, float y) { }
+
         internal abstract protected void AddLine(float x, float y, float x2, float y2, float width, System.Drawing.Color c, BorderStyleEnum ls);
 
 
@@ -244,6 +250,9 @@ namespace Majorsilence.Reporting.Rdl
 
                 //Create a Page 
                 CreatePage();
+                foreach (PageItem pi in Pages.ItemsInReportOrder(p))
+                    foreach (DocumentMapLabel l in pi.DocumentMapLabels)
+                        AddDocumentMapLabel(l.Label, l.Level, pi.Y);
                 await ProcessPage(pgs, p).ConfigureAwait(false);
                 // after a page
                 AfterProcessPage();

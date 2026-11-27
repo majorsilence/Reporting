@@ -482,6 +482,7 @@ namespace Majorsilence.Reporting.Rdl
 			pgs.AddPage(new Page(1));
 			Report rpt = pgs.Report;
 			rpt.PageNumber = rpt.TotalPages = rpt.OverallPageNumber = rpt.OverallTotalPages = 1;
+			rpt.ResetDocumentMap();
 			rpt.PageName = null;
 			if (_InitialPageName != null)
 				pgs.SetPageName(await _InitialPageName.EvaluateString(rpt, null).ConfigureAwait(false));
@@ -496,6 +497,7 @@ namespace Majorsilence.Reporting.Rdl
 
                 // Create all the pages
                 await _Body.RunPage(pgs).ConfigureAwait(false);
+				pgs.Report.EndDocumentMapBody();	// the page header and footer are not in the document map
 
  				if (pgs.LastPage.IsEmpty()&& pgs.PageCount > 1)	// get rid of extraneous pages which
 					pgs.RemoveLastPage();			//   can be caused by region page break at end

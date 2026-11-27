@@ -586,7 +586,26 @@ namespace Majorsilence.Reporting.Rdl
 
 			if (this._ToolTip != null)
 				pi.Tooltip = await _ToolTip.EvaluateString(rpt, row).ConfigureAwait(false);
+
+			// A container's label is the start of what it holds (BeginDocumentMap), not of its own box.
+			if (_Label != null && !IsDocumentMapContainer && !InPageHeaderOrFooter())
+				pi.AddDocumentMapLabel(await _Label.EvaluateString(rpt, row).ConfigureAwait(false), rpt.DocumentMapDepth);
 		}
+
+		// Whether the item holds others that nest beneath its document-map label: a rectangle,
+		// list, table, matrix or subreport. Its label points at the first item drawn inside it.
+		internal virtual bool IsDocumentMapContainer => false;
+
+		// Starts a container's document-map scope; pass what it returns to EndDocumentMap once
+		// the items inside it are laid out.
+		internal async Task<int> BeginDocumentMap(Report rpt, Row row)
+		{
+			if (_Label == null || InPageHeaderOrFooter())
+				return -1;
+			return rpt.BeginDocumentMapScope(await _Label.EvaluateString(rpt, row).ConfigureAwait(false));
+		}
+
+		internal static void EndDocumentMap(Report rpt, int token) => rpt.EndDocumentMapScope(token);
 
 		internal MatrixCellEntry GetMC(Report rpt)
 		{

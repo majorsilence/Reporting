@@ -4,6 +4,7 @@ using Majorsilence.Reporting.RdlEngine.Resources;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Majorsilence.Forms.Drawing;
 using System.Drawing;  // value types (Color, Point, Size, Rectangle, ...) come from System.Drawing.Primitives
@@ -51,6 +52,7 @@ namespace Majorsilence.Reporting.Rdl
 
         public void AddPage(Page p)
         {
+            p.Owner = this;
             _pages.Add(p);
             _currentPage = p;
         }
@@ -210,6 +212,33 @@ namespace Majorsilence.Reporting.Rdl
                     drawn.Page.RemoveObject(drawn);
             }
             _hiddenByPage = null;
+        }
+
+        /// <summary>
+        /// The document map of the report: every document-map label (<c>Label</c> or
+        /// <c>DocumentMapLabel</c>) of the report items and group instances laid out, in report
+        /// order, with the page and position of the item each points at. Empty when the report
+        /// has no labels.
+        /// </summary>
+        public IReadOnlyList<DocumentMapEntry> GetDocumentMap()
+        {
+            var entries = new List<DocumentMapEntry>();
+            for (int i = 0; i < _pages.Count; i++)
+                foreach (PageItem pi in ItemsInReportOrder(_pages[i]))
+                    foreach (DocumentMapLabel l in pi.DocumentMapLabels)
+                        entries.Add(new DocumentMapEntry(l.Label, l.Level, i, pi.X, pi.Y));
+            return entries;
+        }
+
+        // The items of a page that carry document-map labels, in the order they were laid out
+        // (SortPageItems puts them in drawing order, by ZIndex).
+        internal static List<PageItem> ItemsInReportOrder(Page p)
+        {
+            var items = new List<PageItem>();
+            foreach (PageItem pi in p)
+                if (pi.DocumentMapLabels.Count > 0)
+                    items.Add(pi);
+            return items.OrderBy(pi => pi.ItemNumber).ToList();     // stable: items inserted first share a number
         }
 
         public void SortPageItems()

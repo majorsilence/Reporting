@@ -544,6 +544,7 @@ namespace Majorsilence.Reporting.Rdl
 
                 // Create all the pages
                 await _Report.Body.RunPage(pgs).ConfigureAwait(false);
+				EndDocumentMapBody();		// the page header and footer are not in the document map
 
 				if (pgs.LastPage.IsEmpty() && pgs.PageCount > 1) // get rid of extraneous pages which
 					pgs.RemoveLastPage();			//   can be caused by region page break at end
