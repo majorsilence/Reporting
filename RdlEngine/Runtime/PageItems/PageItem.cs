@@ -193,6 +193,66 @@ namespace Majorsilence.Reporting.Rdl
 			y = this.y + padTop + Math.Max(0, (room - size) / 2);
 		}
 
+		/// <summary>
+		/// True when the point (<paramref name="px"/>, <paramref name="py"/>), in points on the
+		/// page, is on the sort glyph of a sort header: the glyph's square widened to the whole
+		/// <see cref="UserSortGlyphSpace"/>, so a click just beside it still counts.
+		/// </summary>
+		public bool UserSortGlyphContains(float px, float py)
+		{
+			if (userSortKey == null)
+				return false;
+			GetUserSortGlyphBounds(out float gx, out float gy, out float size);
+			float slop = (UserSortGlyphSpace - size) / 2;
+			return px >= gx - slop && px <= gx + size + slop
+				&& py >= gy - slop && py <= gy + size + slop;
+		}
+
+		/// <summary>
+		/// Whether a click at (<paramref name="px"/>, <paramref name="py"/>), in points on the page,
+		/// on this item sorts by it (pass <see cref="UserSortKey"/> to
+		/// <see cref="Report.ToggleUserSort"/>). Like a drill-down toggle, a sort header is clicked
+		/// anywhere on it; when the textbox also toggles or links, only its sort glyph sorts and
+		/// the rest of it does the other thing.
+		/// </summary>
+		public bool IsUserSortClick(float px, float py)
+		{
+			if (userSortKey == null)
+				return false;
+			if (toggleKey == null && hyperlink == null && bookmarklink == null)
+				return true;
+			return UserSortGlyphContains(px, py);
+		}
+
+		/// <summary>
+		/// The triangles of the sort glyph of a sort header sorted <paramref name="direction"/>,
+		/// inside the square at (<paramref name="x"/>, <paramref name="y"/>) of side
+		/// <paramref name="size"/> (any unit, y growing down): one pointing up for Ascending, one
+		/// pointing down for Descending, and a small up one over a small down one when the report
+		/// is not sorted by it (None). Each triangle is { x1, y1, x2, y2, x3, y3 }.
+		/// </summary>
+		public static float[][] GetUserSortGlyphTriangles(UserSortDirection direction, float x, float y, float size)
+		{
+			float mid = x + size / 2;
+			float right = x + size;
+			float bottom = y + size;
+			switch (direction)
+			{
+				case UserSortDirection.Ascending:
+					return new[] { new[] { x, bottom, mid, y, right, bottom } };
+				case UserSortDirection.Descending:
+					return new[] { new[] { x, y, right, y, mid, bottom } };
+				default:
+					float gap = size / 7f;				// between the two
+					float half = (size - gap) / 2;
+					return new[]
+					{
+						new[] { x, y + half, mid, y, right, y + half },
+						new[] { x, bottom - half, right, bottom - half, mid, bottom },
+					};
+			}
+		}
+
 		#region ICloneable Members
 
 		public object Clone()

@@ -2237,16 +2237,30 @@ namespace Majorsilence.Reporting.RdlViewer
                 Hyperlink(this, hlea);
         }
 
-        bool _toggling;     // a toggle's pages are being built; further clicks wait for them
+        bool _toggling;     // a toggle's or a sort's pages are being built; further clicks wait for them
 
         /// <summary>
         /// Expands or collapses the drill-down toggle (Visibility/ToggleItem) instance
         /// <paramref name="toggleKey"/> (a <see cref="PageItem.ToggleKey"/>) and lays the report
         /// out again from the data already read, keeping the scroll position.
         /// </summary>
-        public async Task ToggleItem(string toggleKey)
+        public Task ToggleItem(string toggleKey) =>
+            toggleKey == null ? Task.CompletedTask : Relayout(r => r.Toggle(toggleKey));
+
+        /// <summary>
+        /// Sorts by the sort header (a textbox with a UserSort) <paramref name="userSortKey"/> (a
+        /// <see cref="PageItem.UserSortKey"/>), as a click on it does: ascending first, then flipping
+        /// each time. A plain click replaces the sort; <paramref name="additive"/> (a shift-click)
+        /// adds it after the sorts already chosen. Lays the report out again from the data already
+        /// read, keeping the scroll position.
+        /// </summary>
+        public Task SortItem(string userSortKey, bool additive = false) =>
+            userSortKey == null ? Task.CompletedTask : Relayout(r => r.ToggleUserSort(userSortKey, additive));
+
+        // Changes the report's interactive state and builds its pages again in place.
+        private async Task Relayout(Action<Report> change)
         {
-            if (_Report == null || _pgs == null || toggleKey == null || _toggling)
+            if (_Report == null || _pgs == null || _toggling)
                 return;
 
             _toggling = true;
@@ -2255,7 +2269,7 @@ namespace Majorsilence.Reporting.RdlViewer
                 int vScroll = _vScroll.Value;
                 int hScroll = _hScroll.Value;
 
-                _Report.Toggle(toggleKey);
+                change(_Report);
                 Pages pgs = await _Report.BuildPages();
                 if (pgs == null)
                     return;

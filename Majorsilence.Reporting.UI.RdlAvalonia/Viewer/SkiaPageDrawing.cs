@@ -241,6 +241,13 @@ namespace Majorsilence.Reporting.UI.RdlAvalonia.Viewer
                         Math.Max(0, textRect.Width - space), textRect.Height);
                     DrawToggleGlyph(pt, g);
                 }
+                if (pt.UserSortKey != null)
+                {   // the text keeps left of the sort glyph drawn after it
+                    int space = (int)(PageItem.UserSortGlyphSpace * _zoom);
+                    textRect = new System.Drawing.Rectangle(textRect.X, textRect.Y,
+                        Math.Max(0, textRect.Width - space), textRect.Height);
+                    DrawUserSortGlyph(pt, g);
+                }
                 g.DrawString(pt.Text, font, brush, textRect, stringFormat);
                 font.Dispose();
                 brush.Dispose();
@@ -267,6 +274,25 @@ namespace Majorsilence.Reporting.UI.RdlAvalonia.Viewer
             g.FillRectangle(mark, new System.Drawing.RectangleF(x + inset, y + (size - bar) / 2, size - 2 * inset, bar));
             if (!pt.ToggleExpanded)     // vertical bar: the plus
                 g.FillRectangle(mark, new System.Drawing.RectangleF(x + (size - bar) / 2, y + inset, bar, size - 2 * inset));
+        }
+
+        // The sort glyph of a sort header, after its text: an up triangle when the report is sorted
+        // by it ascending, a down one when descending, and both, smaller, when it is not.
+        private void DrawUserSortGlyph(PageText pt, Drawing.Graphics g)
+        {
+            pt.GetUserSortGlyphBounds(out float gx, out float gy, out float gsize);
+            float size = Math.Max(5f, gsize * _zoom);
+            float x = ConvertXtoPixels(gx) + (gsize * _zoom - size) / 2;
+            float y = ConvertYtoPixels(gy) + (gsize * _zoom - size) / 2;
+
+            var ink = pt.SI != null ? ToDrawingColor(pt.SI.Color) : DefaultBlack;
+            using var mark = new Drawing.SolidBrush(ink);
+            foreach (float[] t in PageItem.GetUserSortGlyphTriangles(pt.UserSortDirection, x, y, size))
+                g.FillPolygon(mark, new[]
+                {
+                    new System.Drawing.PointF(t[0], t[1]), new System.Drawing.PointF(t[2], t[3]),
+                    new System.Drawing.PointF(t[4], t[5]),
+                });
         }
 
         private System.Drawing.Rectangle ApplyPadding(System.Drawing.Rectangle rect, StyleInfo? si)
