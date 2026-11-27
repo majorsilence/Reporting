@@ -26,6 +26,7 @@
 //   WasmPdf | WasmRdl | WasmViewers
 //                     browser-wasm publishes (wasm-tools workloads installed first); the first two run under Node
 //   PdfValidationSamples  write the signed/encrypted sample PDFs that linux.yml checks with pyHanko
+//   PdfAValidationSamples write the PDF/A sample PDFs that linux.yml checks with veraPDF
 //   TestContainers    the container-backed database tests (needs Docker)
 //   Package           the designer/desktop/reader/rdlcmd/mapfile zips and the NuGet packages
 //
@@ -227,6 +228,20 @@ Task ("PdfValidationSamples")
         Configuration = configuration,
         Framework = framework,
         Filter = "TestCategory=PdfValidationSamples",
+        Verbosity = DotNetVerbosity.Normal,
+    });
+});
+
+// Writes PDF/A reports and Majorsilence.Pdf documents into $MAJORSILENCE_PDFA_VALIDATION_DIR for veraPDF
+// (in linux.yml). The unit tests only look for the entries known to be needed; veraPDF checks the standard.
+Task ("PdfAValidationSamples")
+    .Does (() =>
+{
+    DotNetTest ("ReportTests/ReportTests.csproj", new DotNetTestSettings
+    {
+        Configuration = configuration,
+        Framework = framework,
+        Filter = "TestCategory=PdfAValidationSamples",
         Verbosity = DotNetVerbosity.Normal,
     });
 });
