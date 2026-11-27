@@ -65,16 +65,20 @@ namespace ReportTests
 </Report>";
 
         // A 400pt page: a heading, the subreport 95pt down, and a page footer.
-        private static string Rdl(string subreport, bool firstPageOnly) => $@"<?xml version=""1.0"" encoding=""UTF-8""?>
+        // With framed, the subreport stands in a box with a border, as a framed subreport is written.
+        private static string Rdl(string subreport, bool firstPageOnly, bool framed = false) => $@"<?xml version=""1.0"" encoding=""UTF-8""?>
 <Report xmlns=""http://schemas.microsoft.com/sqlserver/reporting/2005/01/reportdefinition"">
   <Width>200pt</Width>
   <PageHeight>400pt</PageHeight><PageWidth>300pt</PageWidth>
   <TopMargin>0pt</TopMargin><BottomMargin>0pt</BottomMargin>
   <Body><Height>120pt</Height><ReportItems>
     <Textbox Name=""Head""><Top>0pt</Top><Left>0pt</Left><Width>100pt</Width><Height>20pt</Height><Value>HEAD</Value></Textbox>
+    {(framed ? @"<Rectangle Name=""Frame""><Top>95pt</Top><Left>0pt</Left><Width>200pt</Width><Height>20pt</Height>
+      <Style><BorderStyle><Default>Solid</Default></BorderStyle></Style><ReportItems>" : "")}
     <Subreport Name=""Sub""><ReportName>{subreport}</ReportName>
-      <Top>95pt</Top><Left>0pt</Left><Width>200pt</Width><Height>20pt</Height>
+      <Top>{(framed ? 0 : 95)}pt</Top><Left>0pt</Left><Width>200pt</Width><Height>20pt</Height>
       {(firstPageOnly ? "<Custom><FirstPageOnly>true</FirstPageOnly></Custom>" : "")}</Subreport>
+    {(framed ? "</ReportItems></Rectangle>" : "")}
   </ReportItems></Body>
   <PageFooter><Height>20pt</Height><PrintOnFirstPage>true</PrintOnFirstPage><PrintOnLastPage>true</PrintOnLastPage><ReportItems>
     <Textbox Name=""Foot""><Value>=""Page "" &amp; Globals!PageNumber &amp; "" of "" &amp; Globals!TotalPages</Value></Textbox>
@@ -122,6 +126,31 @@ namespace ReportTests
 
             Assert.That(pages, Has.Count.EqualTo(1));
             Assert.That(pages[0], Has.Member("ROW 3").And.Member("TOTAL"));
+        }
+
+        private async Task<float> FrameBottom(string rdl)
+        {
+            var report = await new RDLParser(rdl) { Folder = _folder }.Parse();
+            report.Folder = _folder;
+            await report.RunGetData(null);
+            using var pages = await report.BuildPages();
+            var frame = pages.Cast<Page>().First().Cast<PageItem>().OfType<PageRectangle>()
+                .Single(r => r.SI.BStyleBottom == BorderStyleEnum.Solid);
+            return frame.Y + frame.H;
+        }
+
+        [Test]
+        public async Task AFrameAroundACutSubreport_ReachesTheFootOfThePage()
+        {
+            // the page is 400pt and its footer 20pt
+            Assert.That(await FrameBottom(Rdl("Long", firstPageOnly: true, framed: true)), Is.EqualTo(380f).Within(0.5f));
+        }
+
+        [Test]
+        public async Task AFrameAroundOneThatFits_EndsWithIt()
+        {
+            // three rows and the total, 20pt each, from 95pt
+            Assert.That(await FrameBottom(Rdl("Short", firstPageOnly: true, framed: true)), Is.EqualTo(175f).Within(0.5f));
         }
     }
 }
