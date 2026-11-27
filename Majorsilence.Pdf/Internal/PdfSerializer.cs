@@ -389,7 +389,7 @@ namespace Majorsilence.Pdf.Internal
             for (int pi = 0, run = objects.Count; pi < _pages.Count; pi++)
             {
                 pageObjNums[pi] = run + 2;
-                run += 2 + _pages[pi].Annotations.Count;
+                run += 2 + WrittenAnnotations(_pages[pi], isPdfA).Count;
             }
             var namedDests = new Dictionary<string, (int Page, float X, float Y)>(StringComparer.Ordinal);
             for (int pi = 0; pi < _pages.Count; pi++)
@@ -418,11 +418,12 @@ namespace Majorsilence.Pdf.Internal
                     $"   /Contents {contentObjNum} 0 R\n" +
                     $"   /Resources << /Font << {fontResEntries} >> /XObject << {imageResEntries} >>{extGStatePart} >>\n";
 
-                if (page.Annotations.Count > 0)
+                var pageAnnotations = WrittenAnnotations(page, isPdfA);
+                if (pageAnnotations.Count > 0)
                 {
                     int firstAnnotObjNum = objects.Count + 2;
                     var annots = new StringBuilder("/Annots [ ");
-                    for (int ai = 0; ai < page.Annotations.Count; ai++)
+                    for (int ai = 0; ai < pageAnnotations.Count; ai++)
                         annots.Append($"{firstAnnotObjNum + ai} 0 R ");
                     annots.Append("]\n");
                     pageDict += annots.ToString();
@@ -430,7 +431,7 @@ namespace Majorsilence.Pdf.Internal
                 pageDict += ">>";
                 objects.Add(Latin1.GetBytes(pageDict));
 
-                foreach (var ann in page.Annotations)
+                foreach (var ann in pageAnnotations)
                     objects.Add(BuildAnnotationObj(ann, objects.Count + 1, pageObjNums, namedDests));
             }
 
@@ -590,16 +591,22 @@ namespace Majorsilence.Pdf.Internal
 
         // ── object builders ───────────────────────────────────────────────────
 
+        // An empty value is left out, as the XMP metadata leaves it out: PDF/A requires every Info entry
+        // to have its equivalent in the XMP, and an empty Title or Author has none there.
         private byte[] BuildInfoObj(int objNum)
         {
-            string auth  = EncStr(objNum, _author);
-            string title = EncStr(objNum, _title);
-            string subj  = EncStr(objNum, _subject);
-            string creat = EncStr(objNum, _creator);
-            string prod  = EncStr(objNum, "Majorsilence.Pdf");
-            return Latin1.GetBytes(
-                $"<< /Producer {prod} /Author {auth} " +
-                $"/Title {title} /Subject {subj} /Creator {creat} >>");
+            var info = new StringBuilder("<< /Producer ").Append(EncStr(objNum, "Majorsilence.Pdf"));
+            AppendInfoEntry(info, objNum, "Author",  _author);
+            AppendInfoEntry(info, objNum, "Title",   _title);
+            AppendInfoEntry(info, objNum, "Subject", _subject);
+            AppendInfoEntry(info, objNum, "Creator", _creator);
+            return Latin1.GetBytes(info.Append(" >>").ToString());
+        }
+
+        private void AppendInfoEntry(StringBuilder info, int objNum, string key, string value)
+        {
+            if (!string.IsNullOrEmpty(value))
+                info.Append(" /").Append(key).Append(' ').Append(EncStr(objNum, value));
         }
 
         private static byte[] BuildStandardFontObj(FontResource font) =>
@@ -676,8 +683,11 @@ namespace Majorsilence.Pdf.Internal
             }
 
             // ── CIDFont ───────────────────────────────────────────────────────
+            // The codes drawn are glyph ids, so a TrueType CIDFont maps them to glyphs one to one. Identity is
+            // the default, but PDF/A (ISO 19005-1 6.3.3.2, ISO 19005-2 6.2.11.3.2) requires it to be written.
+            string cidToGid = ttf.IsCff ? "" : "/CIDToGIDMap /Identity ";
             objects.Add(Latin1.GetBytes(
-                $"<< /Type /Font /Subtype /{(ttf.IsCff ? "CIDFontType0" : "CIDFontType2")} /BaseFont /{psName} " +
+                $"<< /Type /Font /Subtype /{(ttf.IsCff ? "CIDFontType0" : "CIDFontType2")} /BaseFont /{psName} {cidToGid}" +
                 $"/CIDSystemInfo << /Registry {EncLitStr(cidFontObjNum, "Adobe")} /Ordering {EncLitStr(cidFontObjNum, "Identity")} /Supplement 0 >> " +
                 $"/FontDescriptor {descriptorObjNum} 0 R /DW 1000 {wArray} >>"));
 
@@ -1082,6 +1092,15 @@ namespace Majorsilence.Pdf.Internal
             return sb.ToString();
         }
 
+        // PDF/A requires an appearance stream for every annotation but a link (ISO 19005-2 6.3.3), and a
+        // tooltip has none: it is a viewer's pop-up, not part of the printed page, so PDF/A leaves it out.
+        private static List<PageAnnotation> WrittenAnnotations(PageData page, bool isPdfA) =>
+            isPdfA
+                ? page.Annotations.FindAll(a => a.DestName != null || a.Uri != null)
+                : page.Annotations;
+
+        // A link has the Print flag (/F 4): PDF/A requires it on every annotation (ISO 19005-1 6.5.3,
+        // ISO 19005-2 6.3.2), and a link has no appearance to print, so nothing changes on paper.
         private byte[] BuildAnnotationObj(PageAnnotation ann, int objNum, int[] pageObjNums,
             Dictionary<string, (int Page, float X, float Y)> namedDests)
         {
@@ -1093,7 +1112,7 @@ namespace Majorsilence.Pdf.Internal
                 return Latin1.GetBytes(
                     $"<< /Type /Annot /Subtype /Link " +
                     $"/Rect [{Fmt(ann.X1)} {Fmt(ann.Y1)} {Fmt(ann.X2)} {Fmt(ann.Y2)}] " +
-                    $"/Border [0 0 0] /Dest [{pageObjNums[dest.Page]} 0 R /XYZ {Fmt(dest.X)} {Fmt(dest.Y)} null] >>");
+                    $"/Border [0 0 0] /F 4 /Dest [{pageObjNums[dest.Page]} 0 R /XYZ {Fmt(dest.X)} {Fmt(dest.Y)} null] >>");
             }
             if (ann.Uri != null)
             {
@@ -1103,7 +1122,7 @@ namespace Majorsilence.Pdf.Internal
                 return Latin1.GetBytes(
                     $"<< /Type /Annot /Subtype /Link " +
                     $"/Rect [{Fmt(ann.X1)} {Fmt(ann.Y1)} {Fmt(ann.X2)} {Fmt(ann.Y2)}] " +
-                    $"/Border [0 0 0] /A << /S /URI /URI {uriStr} >> >>");
+                    $"/Border [0 0 0] /F 4 /A << /S /URI /URI {uriStr} >> >>");
             }
             else
             {

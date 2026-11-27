@@ -88,6 +88,7 @@ namespace Majorsilence.Reporting.Rdl
             var shaper = HarfBuzzTextShaper.Instance;
             if (shaper != null) _doc.WithTextShaper(shaper);
 
+            if (r.PdfConformance != PdfConformance.None) _doc.WithConformance(r.PdfConformance);
             if (_security  != null) _doc.WithSecurity(_security);
             if (_signature != null) _doc.WithSignature(_signature);
         }

@@ -67,5 +67,32 @@ namespace ReportTests.Utils
             Assert.That(bytes[2], Is.EqualTo((byte)'D'), "PDF must start with '%PD'");
             Assert.That(bytes[3], Is.EqualTo((byte)'F'), "PDF must start with '%PDF'");
         }
+
+        [Test, TestCaseSource(nameof(TestCases))]
+        public async Task RenderPdf_Raw_WithPdfA2b_WritesTheConformanceClaim(string file2test, string cultureName,
+            Func<Dictionary<string, IEnumerable>> fillDatasets)
+        {
+            GeneralUtils.ChangeCurrentCultrue(cultureName);
+
+            Uri fileRdlUri = new Uri(_reportFolder, file2test);
+            System.IO.Directory.SetCurrentDirectory(_reportFolder.LocalPath);
+
+            Report rap = await RdlUtils.GetReport(fileRdlUri);
+            rap.Folder = _reportFolder.LocalPath;
+            rap.PdfConformance = Majorsilence.Pdf.PdfConformance.PdfA2b;
+            await rap.RunGetData();
+
+            string outFile = System.IO.Path.Combine(_outputFolder.LocalPath,
+                $"{file2test}_{cultureName}_RenderPdf_Raw_PdfA2b{Ext}");
+
+            using (var sg = new OneFileStreamGen(outFile, true))
+                await rap.RunRender(sg, OutputPresentationType.PDF);
+
+            string pdfText = System.Text.Encoding.Latin1.GetString(File.ReadAllBytes(outFile));
+            Assert.That(pdfText, Does.StartWith("%PDF-1.7"), "PDF/A-2b is based on PDF 1.7");
+            Assert.That(pdfText, Does.Contain("<pdfaid:part>2</pdfaid:part>"), "the XMP must claim PDF/A-2");
+            Assert.That(pdfText, Does.Contain("/OutputIntents"), "PDF/A requires an output intent");
+            Assert.That(pdfText, Does.Contain("/CIDToGIDMap /Identity"), "PDF/A requires CIDToGIDMap on TrueType CIDFonts");
+        }
     }
 }
