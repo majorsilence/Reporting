@@ -26,6 +26,7 @@ namespace Majorsilence.Reporting.RdlCmd
 		private int returnCode=0;				// return code
 		private string? _DataSourcePassword;
         private bool _ShowStats = false;        // show statistics
+        private bool _HtmlDocumentMap = false;  // html and mht start with a table of contents from the document map
 		private string? _StampInfo;	// PDF stamping information
         private string? _user; // Allow the user to be set via a command line param GJL AJM 12062008
 
@@ -83,6 +84,10 @@ namespace Majorsilence.Reporting.RdlCmd
                     case "/s":
                     case "-s":
                         rc._ShowStats = true;
+                        break;
+                    case "/d":
+                    case "-d":
+                        rc._HtmlDocumentMap = true;
                         break;
 					case "/i":
 					case "-i":
@@ -351,6 +356,7 @@ namespace Majorsilence.Reporting.RdlCmd
                 if (ext == "tifb")
                     FileName = FileName.Substring(0, FileName.Length - 1);      // get rid of the 'b'
 				sg = new OneFileStreamGen(FileName, true);	// overwrite with this name
+				report.HtmlDocumentMap = _HtmlDocumentMap;	// only html and mht output reads it
 				switch(ext)
 				{
 					case "pdf":
@@ -648,6 +654,8 @@ namespace Majorsilence.Reporting.RdlCmd
             Console.WriteLine("  This will overwrite the connection string in the report definition.");
             Console.WriteLine("/p is followed by the pass phrase needed by reports using a shared data source.");
 			Console.WriteLine("/s displays elapsed time statistics");
+			Console.WriteLine("/d starts html and mht output with a table of contents: links to the report");
+			Console.WriteLine("  items and groups that have a document map label (Label / DocumentMapLabel).");
 			Console.WriteLine("/i is followed by an image filename to be stamped onto first page of the PDF.");
 			Console.WriteLine("  Location arguments x, y, h, w can optionally be passed using '?'");
 			Console.WriteLine("  Arguments are separated by '&'.  Only pdf files support this option.");
