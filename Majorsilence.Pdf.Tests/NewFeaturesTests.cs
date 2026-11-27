@@ -493,6 +493,191 @@ namespace Majorsilence.Pdf.Tests
         }
 
         [Test]
+        public void PdfA_StandardFont_ThrowsWhenDrawn()
+        {
+            var doc = PdfDocument.Create().WithConformance(PdfConformance.PdfA2b);
+
+            var ex = Assert.Throws<InvalidOperationException>(() =>
+                doc.AddPage(PageSizes.A4, c => c.DrawText("Not embedded", 72, 72,
+                    TextStyle.Default.WithFamily("Helvetica").WithSize(12))));
+            Assert.That(ex!.Message, Does.Contain("embedded"));
+        }
+
+        [Test]
+        public void PdfA_StandardFontDrawnBeforeConformance_ThrowsAtSave()
+        {
+            var doc = PdfDocument.Create()
+                .AddPage(PageSizes.A4, c => c.DrawText("Not embedded", 72, 72,
+                    TextStyle.Default.WithFamily("Helvetica").WithSize(12)))
+                .WithConformance(PdfConformance.PdfA2b);
+
+            Assert.Throws<InvalidOperationException>(() => doc.ToBytes(),
+                "a PDF/A file must not contain a standard font that is not embedded");
+        }
+
+        [Test]
+        public void NoConformance_StandardFont_IsStillAllowed()
+        {
+            var bytes = PdfDocument.Create()
+                .AddPage(PageSizes.A4, c => c.DrawText("Standard", 72, 72,
+                    TextStyle.Default.WithFamily("Helvetica").WithSize(12)))
+                .ToBytes();
+
+            Assert.That(Encoding.Latin1.GetString(bytes), Does.Contain("/BaseFont /Helvetica"));
+        }
+
+        private static PdfImage HalfTransparentImage() =>
+            PdfImage.FromRgba(new byte[] { 255, 0, 0, 128, 0, 0, 255, 255, 0, 255, 0, 0, 0, 0, 0, 255 }, 2, 2);
+
+        private static void DrawTranslucentContent(PdfCanvas c) => c
+            .DrawImage(HalfTransparentImage(), 72, 72, 20, 20)
+            .DrawRectangle(72, 120, 50, 50, ShapeStyle.Filled(PdfColor.FromRgb(0, 0, 255)).WithFillOpacity(0.25f))
+            .DrawLine(72, 200, 200, 200, StrokeStyle.Default.WithOpacity(0.5f));
+
+        [Test]
+        public void PdfA1b_HasNoTransparency()
+        {
+            var bytes = PdfDocument.Create()
+                .WithConformance(PdfConformance.PdfA1b)
+                .AddPage(PageSizes.A4, DrawTranslucentContent)
+                .ToBytes();
+
+            string pdfText = Encoding.Latin1.GetString(bytes);
+            Assert.That(pdfText, Does.Not.Contain("/SMask"), "PDF/A-1 forbids soft masks: the image is composited onto white");
+            Assert.That(pdfText, Does.Not.Contain("/ExtGState"), "translucent colours are drawn blended with white, without an alpha state");
+            Assert.That(pdfText, Does.Contain("/Subtype /Image"), "the image is still drawn");
+        }
+
+        [Test]
+        public void PdfA1b_TransparencyAddedBeforeConformance_IsWrittenOpaque()
+        {
+            var bytes = PdfDocument.Create()
+                .AddPage(PageSizes.A4, DrawTranslucentContent)
+                .WithConformance(PdfConformance.PdfA1b)
+                .ToBytes();
+
+            string pdfText = Encoding.Latin1.GetString(bytes);
+            Assert.That(pdfText, Does.Not.Contain("/SMask"));
+            Assert.That(pdfText, Does.Not.Match(@"/(ca|CA) 0\."), "every alpha in a PDF/A-1 file must be 1");
+        }
+
+        [Test]
+        public void PdfA2b_KeepsTransparency()
+        {
+            var bytes = PdfDocument.Create()
+                .WithConformance(PdfConformance.PdfA2b)
+                .AddPage(PageSizes.A4, DrawTranslucentContent)
+                .ToBytes();
+
+            string pdfText = Encoding.Latin1.GetString(bytes);
+            Assert.That(pdfText, Does.Contain("/SMask"), "PDF/A-2 allows transparency");
+            Assert.That(pdfText, Does.Contain("/ca 0.25"));
+        }
+
+        private static FontRegistry BundledFonts()
+        {
+            string fontsDir = Majorsilence.Forms.Drawing.FontResourceLoader.GetFontDirectory();
+            Assume.That(Directory.Exists(fontsDir));
+            return new FontRegistry().AddDirectory(fontsDir);
+        }
+
+        private static string Inflate(string pdfText, int streamStart)
+        {
+            int begin = pdfText.IndexOf("stream\n", streamStart, StringComparison.Ordinal) + 7;
+            int end   = pdfText.IndexOf("\nendstream", begin, StringComparison.Ordinal);
+            byte[] zlib = Encoding.Latin1.GetBytes(pdfText.Substring(begin, end - begin));
+            using var input = new MemoryStream(zlib, 2, zlib.Length - 2);
+            using var deflate = new System.IO.Compression.DeflateStream(input, System.IO.Compression.CompressionMode.Decompress);
+            using var output = new MemoryStream();
+            deflate.CopyTo(output);
+            return Encoding.Latin1.GetString(output.ToArray());
+        }
+
+        [Test]
+        public void PdfA1b_SubsetFont_HasCidSetOfItsGlyphs()
+        {
+            var reg = BundledFonts();
+            var ttf = new TrueTypeFont(reg.Resolve("LiberationSans", false, false)!.Path);
+            var bytes = PdfDocument.Create()
+                .WithConformance(PdfConformance.PdfA1b)
+                .WithFontRegistry(reg)
+                .AddPage(PageSizes.A4, c => c.DrawText("Archived \u00e9t\u00e9", 72, 72,
+                    TextStyle.Default.WithFamily("LiberationSans").WithSize(12)))
+                .ToBytes();
+
+            string pdfText = Encoding.Latin1.GetString(bytes);
+            var m = System.Text.RegularExpressions.Regex.Match(pdfText, @"/CIDSet (\d+) 0 R");
+            Assert.That(m.Success, "PDF/A-1 asks a CIDFont subset for a CIDSet");
+
+            int objStart = pdfText.IndexOf($"\n{m.Groups[1].Value} 0 obj", StringComparison.Ordinal);
+            Assert.That(objStart, Is.GreaterThan(0));
+            byte[] cidSet = Encoding.Latin1.GetBytes(Inflate(pdfText, objStart));
+            bool Has(int gid) => gid / 8 < cidSet.Length && (cidSet[gid / 8] & (0x80 >> (gid % 8))) != 0;
+
+            Assert.That(Has(0), ".notdef is always in the subset");
+            foreach (char ch in "Archived \u00e9t")
+                Assert.That(Has(ttf.GetGlyphId(ch)), $"the glyph drawn for '{ch}' is in the CIDSet");
+        }
+
+        [Test]
+        public void PdfA2b_HasNoCidSet()
+        {
+            var bytes = PdfDocument.Create()
+                .WithConformance(PdfConformance.PdfA2b)
+                .WithFontRegistry(BundledFonts())
+                .AddPage(PageSizes.A4, c => c.DrawText("Archived", 72, 72,
+                    TextStyle.Default.WithFamily("LiberationSans").WithSize(12)))
+                .ToBytes();
+
+            Assert.That(Encoding.Latin1.GetString(bytes), Does.Not.Contain("/CIDSet"),
+                "optional in PDF/A-2, and only written where it is required");
+        }
+
+        private static X509Certificate2 SelfSignedCert()
+        {
+            using var rsa = RSA.Create(2048);
+            var req = new CertificateRequest("CN=Test Signer", rsa, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
+            var cert = req.CreateSelfSigned(DateTimeOffset.UtcNow.AddDays(-1), DateTimeOffset.UtcNow.AddDays(365));
+#pragma warning disable SYSLIB0057
+            return new X509Certificate2(cert.Export(X509ContentType.Pfx), (string?)null, X509KeyStorageFlags.Exportable);
+#pragma warning restore SYSLIB0057
+        }
+
+        [Test]
+        public void PdfA_VisibleSignature_DrawsItsTextInAnEmbeddedFont()
+        {
+            var opts = new PdfSignatureOptions(SelfSignedCert()).WithAppearance(50, 700, 200, 50);
+            var bytes = PdfDocument.Create()
+                .WithConformance(PdfConformance.PdfA2b)
+                .WithFontRegistry(BundledFonts())
+                .WithSignature(opts)
+                .AddPage(PageSizes.A4, c => c.DrawText("Signed doc", 72, 72,
+                    TextStyle.Default.WithFamily("LiberationSans").WithSize(12)))
+                .ToBytes();
+
+            string pdfText = Encoding.Latin1.GetString(bytes);
+            Assert.That(pdfText, Does.Contain("/BBox"), "the signature is still visible");
+            Assert.That(pdfText, Does.Not.Contain("/Helvetica"), "PDF/A forbids the standard font the appearance used");
+            Assert.That(pdfText, Does.Not.Contain("/Subtype /Type1"));
+            Assert.That(pdfText, Does.Not.Contain("(Digitally Signed)"), "the label is drawn as glyph ids of the embedded font");
+        }
+
+        [Test]
+        public void PdfA_VisibleSignature_WithoutAnEmbeddedFont_IsTheFrameAlone()
+        {
+            var opts = new PdfSignatureOptions(SelfSignedCert()).WithAppearance(50, 700, 200, 50);
+            var bytes = PdfDocument.Create()
+                .WithConformance(PdfConformance.PdfA2b)
+                .WithSignature(opts)
+                .AddPage(PageSizes.A4, _ => { })
+                .ToBytes();
+
+            string pdfText = Encoding.Latin1.GetString(bytes);
+            Assert.That(pdfText, Does.Contain("/BBox"));
+            Assert.That(pdfText, Does.Not.Contain("/Helvetica"));
+        }
+
+        [Test]
         public void Info_LeavesOutEmptyEntries_AsTheXmpDoes()
         {
             var bytes = PdfDocument.Create()

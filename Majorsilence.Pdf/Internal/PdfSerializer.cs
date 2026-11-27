@@ -153,6 +153,10 @@ namespace Majorsilence.Pdf.Internal
 
         internal void SetVersion(PdfVersion version) => _version = version;
         internal void SetConformance(PdfConformance conformance) => _conformance = conformance;
+        internal PdfConformance Conformance => _conformance;
+
+        // PDF/A-1 (ISO 19005-1 6.4) forbids transparency: no soft masks, no ExtGState alpha below 1.
+        internal bool ForbidsTransparency => _conformance == PdfConformance.PdfA1b;
         internal void SetEncryptor(IStreamEncryptor? enc) => _encryptor = enc;
         internal void SetSignatureHandler(ISignatureHandler? sig) => _sigHandler = sig;
 
@@ -296,6 +300,16 @@ namespace Majorsilence.Pdf.Internal
                 throw new InvalidOperationException(
                     "PDF/A documents cannot be encrypted. Remove WithSecurity() or set conformance to None.");
 
+            // PDF/A requires every font to be embedded (ISO 19005-1 6.3.4, ISO 19005-2 6.2.11.4.1); the
+            // standard Type-1 fonts are not. PdfCanvas refuses them once a conformance level is set; this
+            // catches text drawn before WithConformance() was called.
+            if (isPdfA)
+                foreach (var f in _fonts)
+                    if (f.IsStandard)
+                        throw new InvalidOperationException(
+                            $"PDF/A requires embedded fonts, but the standard font '{f.StandardName}' is not embedded. " +
+                            "Draw the text in a TrueType font (FontRegistry or TextStyle.WithFontFile()) or set conformance to None.");
+
             string versionStr = _version switch
             {
                 PdfVersion.Pdf20 => "%PDF-2.0",
@@ -334,6 +348,24 @@ namespace Majorsilence.Pdf.Internal
                 objects.Add(BuildOutputIntentsObj(outputIntentsObjNum, iccObjNum));
             }
 
+            // ── font for a visible signature's text under PDF/A ───────────────
+            // The appearance otherwise names the standard Helvetica font, which PDF/A forbids as it is
+            // not embedded. Its glyphs are added before the fonts are written, so the subset has them.
+            int sigFontIdx = -1;
+            string[]? sigLines = null;
+            var sigAppearance = hasSig ? _sigHandler!.VisibleAppearance : null;
+            if (isPdfA && sigAppearance.HasValue)
+            {
+                sigFontIdx = _fonts.FindIndex(f => f.Ttf != null && !f.Ttf.IsColorBitmapOnly);
+                if (sigFontIdx >= 0)
+                {
+                    var f = _fonts[sigFontIdx];
+                    sigLines = string.IsNullOrEmpty(sigAppearance.Value.SignerName)
+                        ? new[] { EncodePresentGlyphs("Digitally Signed", f) }
+                        : new[] { EncodePresentGlyphs("Digitally Signed", f), EncodePresentGlyphs(sigAppearance.Value.SignerName!, f) };
+                }
+            }
+
             // ── font objects ──────────────────────────────────────────────────
             var fontObjStart = new int[_fonts.Count];
             for (int fi = 0; fi < _fonts.Count; fi++)
@@ -350,7 +382,12 @@ namespace Majorsilence.Pdf.Internal
             for (int ii = 0; ii < _images.Count; ii++)
             {
                 imageObjIdx[ii] = objects.Count;
-                if (_images[ii].IsRgba)
+                if (_images[ii].IsRgba && ForbidsTransparency)
+                {
+                    // No soft mask in PDF/A-1: the image is composited onto white instead.
+                    objects.Add(BuildFlattenedRgbaImageObj(_images[ii], objects.Count + 1));
+                }
+                else if (_images[ii].IsRgba)
                 {
                     int mainObjNum = objects.Count + 1;
                     int maskObjNum = objects.Count + 2;
@@ -376,8 +413,12 @@ namespace Majorsilence.Pdf.Internal
 
             // ExtGState inline dicts (for opacity)
             var extGStateStr = new StringBuilder();
+            // In PDF/A-1 the alpha must be 1 (PdfCanvas blends the colours with white instead); this only
+            // matters for states added before WithConformance() was called.
             foreach (var (gsName, fa, sa) in _extGStates)
-                extGStateStr.Append($"/{gsName} << /Type /ExtGState /ca {Fmt(fa)} /CA {Fmt(sa)} >> ");
+                extGStateStr.Append(ForbidsTransparency
+                    ? $"/{gsName} << /Type /ExtGState /ca 1 /CA 1 >> "
+                    : $"/{gsName} << /Type /ExtGState /ca {Fmt(fa)} /CA {Fmt(sa)} >> ");
 
             // ── page content streams + page dicts ─────────────────────────────
             var pageContentIdx = new int[_pages.Count];
@@ -458,7 +499,11 @@ namespace Majorsilence.Pdf.Internal
                 if (appearance.HasValue)
                 {
                     int apObjNum = objects.Count + 1;
-                    objects.Add(BuildSigAppearanceObj(apObjNum, appearance.Value));
+                    objects.Add(isPdfA
+                        ? BuildEmbeddedSigAppearanceObj(apObjNum, appearance.Value,
+                            sigFontIdx >= 0 ? _fonts[sigFontIdx].PdfName : null,
+                            sigFontIdx >= 0 ? fontObjStart[sigFontIdx] + 5 : -1, sigLines)
+                        : BuildSigAppearanceObj(apObjNum, appearance.Value));
                     sigWidgetObjNum = objects.Count + 1;
                     objects.Add(BuildSigWidgetObjVisible(sigWidgetObjNum, sObjNum, pageObjNum,
                         apObjNum, appearance.Value));
@@ -627,14 +672,20 @@ namespace Majorsilence.Pdf.Internal
 
             var used = font.UsedGlyphs;
 
+            // PDF/A-1 (ISO 19005-1 6.3.5) asks a CIDFont subset for a CIDSet naming the glyphs it holds.
+            // Written after the Type0 font, so that the Type0 font stays the fifth object.
+            bool writeCidSet = _conformance == PdfConformance.PdfA1b && !ttf.IsCff && used != null && used.Count > 0;
+            int  cidSetObjNum = baseCount + 6;
+
             // The finished, unencrypted pieces depend only on the font and the glyphs used, so they are shared by
             // documents. With glyphs in use, the printable ASCII glyphs are always embedded too, so that
             // documents mostly ask for the same subset. A font nothing was drawn with is embedded whole.
             FontParts parts;
             var shaped = font.ShapedText;
+            HashSet<ushort>? glyphs = null;
             if (used != null && used.Count > 0)
             {
-                var glyphs = FontPartsCache.WithBaseGlyphs(ttf, used);
+                glyphs = FontPartsCache.WithBaseGlyphs(ttf, used);
                 parts = FontPartsCache.GetOrBuild(ttf, glyphs, shaped, () => BuildFontParts(ttf, glyphs, true, shaped));
             }
             else
@@ -666,7 +717,8 @@ namespace Majorsilence.Pdf.Internal
                 $"<< /Type /FontDescriptor /FontName /{psName} /Flags 32 " +
                 $"/FontBBox [{llx} {lly} {urx} {ury}] " +
                 $"/ItalicAngle 0 /Ascent {asc} /Descent {desc} " +
-                $"/CapHeight {asc} /StemV 80 /{(ttf.IsCff ? "FontFile3" : "FontFile2")} {fontFileObjNum} 0 R >>"));
+                $"/CapHeight {asc} /StemV 80 /{(ttf.IsCff ? "FontFile3" : "FontFile2")} {fontFileObjNum} 0 R" +
+                (writeCidSet ? $" /CIDSet {cidSetObjNum} 0 R" : "") + " >>"));
 
             // ── FontFile2 stream ───────────────────────────────────────────────
             if (_encryptor == null)
@@ -696,6 +748,66 @@ namespace Majorsilence.Pdf.Internal
                 $"<< /Type /Font /Subtype /Type0 /BaseFont /{psName} " +
                 $"/Encoding /Identity-H /DescendantFonts [{cidFontObjNum} 0 R] " +
                 $"/ToUnicode {toUnicodeObjNum} 0 R >>"));
+
+            if (writeCidSet)
+                objects.Add(BuildCidSetObj(parts.FontCompressed, glyphs!));
+        }
+
+        // A CIDSet stream: a bit per CID (here a glyph id), the high bit of the first byte for CID 0, set for
+        // .notdef, for every glyph asked for and for every glyph the subset holds an outline for (the
+        // components of composite glyphs among them).
+        private static PdfObj BuildCidSetObj(byte[] fontCompressed, HashSet<ushort> glyphs)
+        {
+            byte[] font = Inflate(fontCompressed);
+            var present = new HashSet<int>(GlyphsWithOutlines(font)) { 0 };
+            foreach (ushort g in glyphs) present.Add(g);
+
+            int max = 0;
+            foreach (int g in present) if (g > max) max = g;
+            byte[] bits = new byte[max / 8 + 1];
+            foreach (int g in present) bits[g >> 3] |= (byte)(0x80 >> (g & 7));
+
+            byte[] data = Compress(bits);
+            return new PdfObj(Latin1.GetBytes($"<< /Filter /FlateDecode /Length {data.Length} >>\nstream\n"), data, EndStream);
+        }
+
+        // The glyph ids a TrueType font file has outline data for, read from its loca table.
+        internal static IEnumerable<int> GlyphsWithOutlines(byte[] font)
+        {
+            static int U16(byte[] d, int o) => (d[o] << 8) | d[o + 1];
+            static int S32(byte[] d, int o) => (d[o] << 24) | (d[o + 1] << 16) | (d[o + 2] << 8) | d[o + 3];
+
+            int head = -1, maxp = -1, loca = -1;
+            int numTables = U16(font, 4);
+            for (int i = 0; i < numTables; i++)
+            {
+                int e = 12 + i * 16;
+                string tag = Encoding.ASCII.GetString(font, e, 4);
+                int off = S32(font, e + 8);
+                if (tag == "head") head = off; else if (tag == "maxp") maxp = off; else if (tag == "loca") loca = off;
+            }
+            if (head < 0 || maxp < 0 || loca < 0) yield break;
+
+            bool longLoca  = U16(font, head + 50) != 0;
+            int  numGlyphs = U16(font, maxp + 4);
+            for (int g = 0; g < numGlyphs; g++)
+            {
+                long start = longLoca ? (uint)S32(font, loca + g * 4)       : U16(font, loca + g * 2) * 2L;
+                long end   = longLoca ? (uint)S32(font, loca + (g + 1) * 4) : U16(font, loca + (g + 1) * 2) * 2L;
+                if (end > start) yield return g;
+            }
+        }
+
+        private static byte[] Inflate(byte[] zlib)
+        {
+            // zlib: a two-byte header, then deflate data (the Adler-32 trailer is not read).
+            using (var input = new MemoryStream(zlib, 2, zlib.Length - 2))
+            using (var deflate = new DeflateStream(input, CompressionMode.Decompress))
+            using (var output = new MemoryStream())
+            {
+                deflate.CopyTo(output);
+                return output.ToArray();
+            }
         }
 
         // The ToUnicode CMap, /W array and font program for the glyphs in used (every glyph when null or when
@@ -818,6 +930,26 @@ namespace Majorsilence.Pdf.Internal
                 $"<< /Type /XObject /Subtype /Image /Width {img.Width} /Height {img.Height} " +
                 $"/ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /FlateDecode " +
                 $"/SMask {sMaskPdfObjNum} 0 R /Length {data.Length} >>\nstream\n";
+            return new PdfObj(Latin1.GetBytes(hdr), data, EndStream);
+        }
+
+        // An RGBA image composited onto white, without a soft mask (PDF/A-1 allows no transparency).
+        private PdfObj BuildFlattenedRgbaImageObj(ImageResource img, int objNum)
+        {
+            byte[] rgba   = img.Data;
+            int    pixels = img.Width * img.Height;
+            byte[] rgb    = new byte[pixels * 3];
+            for (int i = 0; i < pixels; i++)
+            {
+                int a = rgba[i * 4 + 3];
+                for (int c = 0; c < 3; c++)
+                    rgb[i * 3 + c] = (byte)((rgba[i * 4 + c] * a + 255 * (255 - a) + 127) / 255);
+            }
+            byte[] compressed = Compress(rgb);
+            byte[] data       = _encryptor != null ? _encryptor.EncryptStream(objNum, 0, compressed) : compressed;
+            string hdr =
+                $"<< /Type /XObject /Subtype /Image /Width {img.Width} /Height {img.Height} " +
+                $"/ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /FlateDecode /Length {data.Length} >>\nstream\n";
             return new PdfObj(Latin1.GetBytes(hdr), data, EndStream);
         }
 
@@ -1194,6 +1326,58 @@ namespace Majorsilence.Pdf.Internal
                 $"/Resources {resources} " +
                 $"/Length {streamBytes.Length} >>\nstream\n";
             return new PdfObj(Latin1.GetBytes(hdr), streamBytes, EndStream);
+        }
+
+        // The glyph ids of text in an embedded font, as a hex string, recording them as used. Characters
+        // the font has no glyph for are left out: PDF/A forbids drawing .notdef (ISO 19005-2 6.2.11.8).
+        private static string EncodePresentGlyphs(string text, FontResource font)
+        {
+            var ttf = font.Ttf!;
+            var sb  = new StringBuilder("<");
+            for (int i = 0; i < text.Length; i++)
+            {
+                int cp = text[i];
+                if (char.IsHighSurrogate(text[i]) && i + 1 < text.Length && char.IsLowSurrogate(text[i + 1]))
+                    cp = char.ConvertToUtf32(text[i], text[++i]);
+                ushort gid = ttf.GetGlyphId(cp);
+                if (gid == 0) continue;
+                font.UsedGlyphs!.Add(gid);
+                sb.Append(gid.ToString("X4", CultureInfo.InvariantCulture));
+            }
+            return sb.Append('>').ToString();
+        }
+
+        // A visible signature's appearance under PDF/A: its text in a font the document embeds, or the
+        // frame alone when the document embeds none (a standard font would break conformance).
+        private PdfObj BuildEmbeddedSigAppearanceObj(int objNum,
+            (float X, float Y, float Width, float Height, string? SignerName) app,
+            string? fontName, int type0ObjNum, string[]? lines)
+        {
+            float w = app.Width, h = app.Height;
+            var content = new StringBuilder();
+            content.Append("q\n0.8 w\n").Append($"0 0 {Fmt(w)} {Fmt(h)} re S\n");
+            if (fontName != null && lines != null)
+            {
+                content.Append("BT\n").Append($"/{fontName} 8 Tf\n").Append($"2 {Fmt(h - 10)} Td\n");
+                for (int i = 0; i < lines.Length; i++)
+                {
+                    if (i > 0) content.Append("0 -10 Td\n");
+                    content.Append(lines[i]).Append(" Tj\n");
+                }
+                content.Append("ET\n");
+            }
+            content.Append("Q\n");
+
+            byte[] plain = Latin1.GetBytes(content.ToString());
+            string resources = fontName != null && lines != null
+                ? $"<< /Font << /{fontName} {type0ObjNum} 0 R >> >>"
+                : "<< >>";
+            string hdr =
+                $"<< /Type /XObject /Subtype /Form /FormType 1 " +
+                $"/BBox [0 0 {Fmt(w)} {Fmt(h)}] " +
+                $"/Resources {resources} " +
+                $"/Length {plain.Length} >>\nstream\n";
+            return new PdfObj(Latin1.GetBytes(hdr), plain, EndStream);
         }
 
         private static string EscapePdfLiteral(string s) =>
