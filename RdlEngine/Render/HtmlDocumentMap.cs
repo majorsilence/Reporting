@@ -89,6 +89,30 @@ namespace Majorsilence.Reporting.Rdl
 			}
 		}
 
+		// A matrix row group instance starts in the row header cell being written: its label goes
+		// on the next thing written, labelledAbove levels below the matrix (one per labelled row
+		// grouping outside it). It opens no scope: a matrix is laid out as a grid, not group by
+		// group, so nothing nests inside it by scope. Returns where the label waits, for
+		// DropPendingFrom, or -1 when there is none.
+		internal async Task<int> RowGroupStart(Report rpt, Grouping g, int labelledAbove, Row row)
+		{
+			if (_hidden > 0 || g?.Label == null || row == null || g.InPageHeaderOrFooter())
+				return -1;
+			string label = await g.Label.EvaluateString(rpt, row).ConfigureAwait(false);
+			if (string.IsNullOrEmpty(label))
+				return -1;
+			_pending.Add((label, _depth + labelledAbove));
+			return _pending.Count - 1;
+		}
+
+		// Labels from token on that nothing was written for are dropped rather than given to
+		// whatever is written next.
+		internal void DropPendingFrom(int token)
+		{
+			if (token >= 0 && _pending.Count > token)
+				_pending.RemoveRange(token, _pending.Count - token);
+		}
+
 		private void Begin(Scope scope, string label)
 		{
 			if (_hidden > 0 || string.IsNullOrEmpty(label))
