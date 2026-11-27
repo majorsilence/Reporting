@@ -68,12 +68,13 @@ namespace ReportTests.Utils
             Assert.That(bytes[3], Is.EqualTo((byte)'F'), "PDF must start with '%PDF'");
         }
 
-        [Test]
-        public async Task RenderPdf_Raw_WithPdfA2b_WritesTheConformanceClaim()
+        [Test, TestCaseSource(nameof(TestCases))]
+        public async Task RenderPdf_Raw_WithPdfA2b_WritesTheConformanceClaim(string file2test, string cultureName,
+            Func<Dictionary<string, IEnumerable>> fillDatasets)
         {
-            GeneralUtils.ChangeCurrentCultrue("en-US");
+            GeneralUtils.ChangeCurrentCultrue(cultureName);
 
-            Uri fileRdlUri = new Uri(_reportFolder, "ListReport.rdl");
+            Uri fileRdlUri = new Uri(_reportFolder, file2test);
             System.IO.Directory.SetCurrentDirectory(_reportFolder.LocalPath);
 
             Report rap = await RdlUtils.GetReport(fileRdlUri);
@@ -81,7 +82,8 @@ namespace ReportTests.Utils
             rap.PdfConformance = Majorsilence.Pdf.PdfConformance.PdfA2b;
             await rap.RunGetData();
 
-            string outFile = System.IO.Path.Combine(_outputFolder.LocalPath, $"ListReport_RenderPdf_Raw_PdfA2b{Ext}");
+            string outFile = System.IO.Path.Combine(_outputFolder.LocalPath,
+                $"{file2test}_{cultureName}_RenderPdf_Raw_PdfA2b{Ext}");
 
             using (var sg = new OneFileStreamGen(outFile, true))
                 await rap.RunRender(sg, OutputPresentationType.PDF);

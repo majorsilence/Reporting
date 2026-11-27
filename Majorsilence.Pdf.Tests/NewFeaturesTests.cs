@@ -467,6 +467,32 @@ namespace Majorsilence.Pdf.Tests
         }
 
         [Test]
+        public void PdfA_LinkHasPrintFlag_AndTooltipIsLeftOut()
+        {
+            var bytes = PdfDocument.Create()
+                .WithConformance(PdfConformance.PdfA2b)
+                .AddPage(PageSizes.A4, c => c
+                    .AddLink(72, 72, 100, 20, "https://example.com")
+                    .AddTooltip(72, 120, 100, 20, "Only a viewer pop-up"))
+                .ToBytes();
+
+            string pdfText = Encoding.Latin1.GetString(bytes);
+            Assert.That(pdfText, Does.Contain("/Subtype /Link /Rect"), "the link is kept");
+            Assert.That(pdfText, Does.Contain("/F 4 /A << /S /URI"), "PDF/A requires the Print flag on the link");
+            Assert.That(pdfText, Does.Not.Contain("/Subtype /Text"), "a tooltip has no appearance stream, which PDF/A requires");
+        }
+
+        [Test]
+        public void NoConformance_KeepsTooltip()
+        {
+            var bytes = PdfDocument.Create()
+                .AddPage(PageSizes.A4, c => c.AddTooltip(72, 120, 100, 20, "A viewer pop-up"))
+                .ToBytes();
+
+            Assert.That(Encoding.Latin1.GetString(bytes), Does.Contain("/Subtype /Text"));
+        }
+
+        [Test]
         public void Info_LeavesOutEmptyEntries_AsTheXmpDoes()
         {
             var bytes = PdfDocument.Create()

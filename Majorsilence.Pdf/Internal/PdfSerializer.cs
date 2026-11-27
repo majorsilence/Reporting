@@ -389,7 +389,7 @@ namespace Majorsilence.Pdf.Internal
             for (int pi = 0, run = objects.Count; pi < _pages.Count; pi++)
             {
                 pageObjNums[pi] = run + 2;
-                run += 2 + _pages[pi].Annotations.Count;
+                run += 2 + WrittenAnnotations(_pages[pi], isPdfA).Count;
             }
             var namedDests = new Dictionary<string, (int Page, float X, float Y)>(StringComparer.Ordinal);
             for (int pi = 0; pi < _pages.Count; pi++)
@@ -418,11 +418,12 @@ namespace Majorsilence.Pdf.Internal
                     $"   /Contents {contentObjNum} 0 R\n" +
                     $"   /Resources << /Font << {fontResEntries} >> /XObject << {imageResEntries} >>{extGStatePart} >>\n";
 
-                if (page.Annotations.Count > 0)
+                var pageAnnotations = WrittenAnnotations(page, isPdfA);
+                if (pageAnnotations.Count > 0)
                 {
                     int firstAnnotObjNum = objects.Count + 2;
                     var annots = new StringBuilder("/Annots [ ");
-                    for (int ai = 0; ai < page.Annotations.Count; ai++)
+                    for (int ai = 0; ai < pageAnnotations.Count; ai++)
                         annots.Append($"{firstAnnotObjNum + ai} 0 R ");
                     annots.Append("]\n");
                     pageDict += annots.ToString();
@@ -430,7 +431,7 @@ namespace Majorsilence.Pdf.Internal
                 pageDict += ">>";
                 objects.Add(Latin1.GetBytes(pageDict));
 
-                foreach (var ann in page.Annotations)
+                foreach (var ann in pageAnnotations)
                     objects.Add(BuildAnnotationObj(ann, objects.Count + 1, pageObjNums, namedDests));
             }
 
@@ -1091,6 +1092,15 @@ namespace Majorsilence.Pdf.Internal
             return sb.ToString();
         }
 
+        // PDF/A requires an appearance stream for every annotation but a link (ISO 19005-2 6.3.3), and a
+        // tooltip has none: it is a viewer's pop-up, not part of the printed page, so PDF/A leaves it out.
+        private static List<PageAnnotation> WrittenAnnotations(PageData page, bool isPdfA) =>
+            isPdfA
+                ? page.Annotations.FindAll(a => a.DestName != null || a.Uri != null)
+                : page.Annotations;
+
+        // A link has the Print flag (/F 4): PDF/A requires it on every annotation (ISO 19005-1 6.5.3,
+        // ISO 19005-2 6.3.2), and a link has no appearance to print, so nothing changes on paper.
         private byte[] BuildAnnotationObj(PageAnnotation ann, int objNum, int[] pageObjNums,
             Dictionary<string, (int Page, float X, float Y)> namedDests)
         {
@@ -1102,7 +1112,7 @@ namespace Majorsilence.Pdf.Internal
                 return Latin1.GetBytes(
                     $"<< /Type /Annot /Subtype /Link " +
                     $"/Rect [{Fmt(ann.X1)} {Fmt(ann.Y1)} {Fmt(ann.X2)} {Fmt(ann.Y2)}] " +
-                    $"/Border [0 0 0] /Dest [{pageObjNums[dest.Page]} 0 R /XYZ {Fmt(dest.X)} {Fmt(dest.Y)} null] >>");
+                    $"/Border [0 0 0] /F 4 /Dest [{pageObjNums[dest.Page]} 0 R /XYZ {Fmt(dest.X)} {Fmt(dest.Y)} null] >>");
             }
             if (ann.Uri != null)
             {
@@ -1112,7 +1122,7 @@ namespace Majorsilence.Pdf.Internal
                 return Latin1.GetBytes(
                     $"<< /Type /Annot /Subtype /Link " +
                     $"/Rect [{Fmt(ann.X1)} {Fmt(ann.Y1)} {Fmt(ann.X2)} {Fmt(ann.Y2)}] " +
-                    $"/Border [0 0 0] /A << /S /URI /URI {uriStr} >> >>");
+                    $"/Border [0 0 0] /F 4 /A << /S /URI /URI {uriStr} >> >>");
             }
             else
             {
