@@ -35,6 +35,7 @@ namespace Majorsilence.Reporting.Rdl
 		string _CSS;				// when ASP we put the CSS into a string
 		string _JavaScript;			//     as well as any required javascript
 		int _SkipMatrixCols=0;		// # of matrix columns to skip
+		HtmlDocumentMap _map;		// the table of contents, when Report.HtmlDocumentMap asks for one
 
 		public RenderHtml(Report rep, IStreamGen sg)
 		{
@@ -95,7 +96,35 @@ namespace Majorsilence.Reporting.Rdl
 
 		public void Start()		
 		{
+			if (r.HtmlDocumentMap)
+				_map = new HtmlDocumentMap(_Prefix);
 			return;
+		}
+
+		// The id of the anchor for what is written next for ri, or null when no document-map label
+		// points at it. ownLabel: ri's own label counts (a container's points at what it holds).
+		private async Task<string> DocumentMapAnchorId(ReportItem ri, Row row, bool ownLabel = true)
+		{
+			if (_map == null)
+				return null;
+			return await _map.Anchor(r, ri, row, ownLabel).ConfigureAwait(false);
+		}
+
+		// An empty anchor written before ri: in a grid it takes ri's grid area, so it neither
+		// shifts the items nor takes a cell of its own.
+		private string DocumentMapAnchor(ReportItem ri, string id)
+		{
+			if (id == null)
+				return "";
+			GridLayout grid = GridContaining(ri);
+			return grid == null
+				? string.Format("<a id='{0}'></a>", id)
+				: string.Format("<a id='{0}' style=\"{1}align-self: start; justify-self: start;\"></a>", id, grid.Placement(ri));
+		}
+
+		private async Task WriteDocumentMapAnchor(ReportItem ri, Row row)
+		{
+			tw.Write(DocumentMapAnchor(ri, await DocumentMapAnchorId(ri, row).ConfigureAwait(false)));
 		}
 
 		// Output to a single in-memory stream has no place to put sibling image files
@@ -845,14 +874,14 @@ function findObject(id) {
 			}
 
 			// Always want an HTML body - even if report doesn't have a body stmt
+			if (!this._Asp)
+				ftw.Write(bodyCssId != null ? string.Format("<body id='{0}'>", bodyCssId) : "<body>");
+			if (_map != null && _map.Count > 0)
+				_map.Write(ftw);		// the table of contents goes before the report
 			if (this._Asp)
-			{
 				ftw.WriteLine("<table style=\"position: relative;\">");
-			}
-			else if (bodyCssId != null)
-				ftw.WriteLine(@"<body id='{0}'><table>", bodyCssId);
 			else
-				ftw.WriteLine("<body><table>");
+				ftw.WriteLine("<table>");
 
 			foreach (ReadOnlyMemory<char> chunk in tw.GetStringBuilder().GetChunks())	// not copied into one (large object heap) string first
 				ftw.Write(chunk.Span);
@@ -930,6 +959,11 @@ function findObject(id) {
 				// handle any specified actions
 				t = await Action(tb.Action, row, t, await tb.ToolTipValue(r, row).ConfigureAwait(false)).ConfigureAwait(false);
 			}
+			// a document-map label points at the text: the anchor goes inside the cell or box with it
+			string anchorId = await DocumentMapAnchorId(tb, row).ConfigureAwait(false);
+			if (anchorId != null)
+				t = string.Format("<a id='{0}'></a>", anchorId) + t;
+
 			// determine if we're in a tablecell
 			Type tp = tb.Parent.Parent.GetType();
 			bool bCell;
@@ -972,6 +1006,12 @@ function findObject(id) {
 		{
 			if (noRowsMsg == null)
 				noRowsMsg = "";
+			if (_map != null)	// the message is what the data region's label points at
+			{
+				string anchorId = await DocumentMapAnchorId(d, null, false).ConfigureAwait(false);
+				if (anchorId != null)
+					noRowsMsg = string.Format("<a id='{0}'></a>", anchorId) + noRowsMsg;
+			}
 
 			bool bTableCell = d.Parent.Parent.GetType() == typeof(TableCell);
 
@@ -993,6 +1033,8 @@ function findObject(id) {
 		// Lists
 		public async Task<bool> ListStart(List l, Row r)
 		{
+			if (_map != null)
+				await _map.BeginItem(this.r, l, r).ConfigureAwait(false);
 			// identifiy reportitem it if necessary
 			string bookmark = await l.BookmarkValue(this.r, r).ConfigureAwait(false);
 			if (bookmark != null)	//
@@ -1010,6 +1052,7 @@ function findObject(id) {
 			string bookmark = await l.BookmarkValue(this.r, r).ConfigureAwait(false);
 			if (bookmark != null)
 				tw.WriteLine("</div>");
+			_map?.End();
 		}
 
 		public async Task ListEntryBegin(List l, Row r)
@@ -1017,10 +1060,13 @@ function findObject(id) {
 			string cssName = await CssAdd(l.Style, l, r, true).ConfigureAwait(false);	// get the style name for this item; force to be relative
 			tw.WriteLine();
 			tw.WriteLine("<div class={0}>", cssName);
+			if (_map != null)	// an entry of a grouped list is an instance of its group
+				await _map.BeginGroup(this.r, l.Grouping, r).ConfigureAwait(false);
 		}
 
 		public void ListEntryEnd(List l, Row r)
 		{
+			_map?.End();
 			tw.WriteLine();
 			tw.WriteLine("</div>");
 		}
@@ -1028,6 +1074,8 @@ function findObject(id) {
 		// Tables					// Report item table
 		public async Task<bool> TableStart(Table t, Row row)
 		{
+			if (_map != null)
+				await _map.BeginItem(r, t, row).ConfigureAwait(false);
 			string cssName = await CssAdd(t.Style, t, row).ConfigureAwait(false);	// get the style name for this item
 
 			// Determine if report custom defn want this table to be sortable
@@ -1082,6 +1130,7 @@ function findObject(id) {
 			if (bookmark != null)
 				tw.WriteLine("</div>"); 
 			tw.WriteLine("</table>");
+			_map?.End();
 			return;
 		}
  
@@ -1117,6 +1166,8 @@ function findObject(id) {
 
 		public async Task TableRowStart(TableRow tr, Row row)
 		{
+			if (_map != null)	// the groups begun since the last row take their labels from this one
+				await _map.ResolveGroups(r, row).ConfigureAwait(false);
 			tw.Write("\t<tr");
 			ReportLink rl = tr.Parent.Parent;
 			Visibility v=null;
@@ -1321,6 +1372,8 @@ function findObject(id) {
 
         public async Task<bool> MatrixStart(Matrix m, MatrixCellEntry[,] matrix, Row r, int headerRows, int maxRows, int maxCols)				// called first
 		{
+			if (_map != null)
+				await _map.BeginItem(this.r, m, r).ConfigureAwait(false);
 			string bookmark = await m.BookmarkValue(this.r, r).ConfigureAwait(false);
 			if (bookmark != null)
 				tw.WriteLine("<div id=\"{0}\">", bookmark);		// can't use the table id since we're using for css style
@@ -1404,6 +1457,7 @@ function findObject(id) {
 			string bookmark = await m.BookmarkValue(this.r, r).ConfigureAwait(false);
 			if (bookmark != null)
 				tw.WriteLine("</div>");		
+			_map?.End();
 			return;
 		}
 
@@ -1434,6 +1488,8 @@ function findObject(id) {
 
 				relativeName = FixupRelativeName(relativeName);
 			}
+
+			await WriteDocumentMapAnchor(c, r).ConfigureAwait(false);
 
 			// Create syntax in a string buffer
 			StringWriter sw = new StringWriter();
@@ -1512,6 +1568,7 @@ function findObject(id) {
             // Create syntax in a string buffer
             StringWriter sw = new StringWriter();
 
+            await WriteDocumentMapAnchor(i, r).ConfigureAwait(false);
             string bookmark = await i.BookmarkValue(this.r, r).ConfigureAwait(false);
             if (bookmark != null)
                 sw.WriteLine("<div id=\"{0}\">", bookmark);     // we're using for css style
@@ -1640,12 +1697,15 @@ function findObject(id) {
 			else
 				color = "black";
 			
+			await WriteDocumentMapAnchor(l, r).ConfigureAwait(false);
 			tw.WriteLine(t, width, left, top, height, color);
 			return;
 		}
 
 		public async Task<bool> RectangleStart(Rdl.Rectangle rect, Row r)
 		{
+			if (_map != null)
+				await _map.BeginItem(this.r, rect, r).ConfigureAwait(false);
 			string cssName = await CssAdd(rect.Style, rect, r).ConfigureAwait(false);	// get the style name for this item
 
 			string bookmark = await rect.BookmarkValue(this.r, r).ConfigureAwait(false);
@@ -1677,6 +1737,7 @@ function findObject(id) {
 			string bookmark = await rect.BookmarkValue(this.r, r).ConfigureAwait(false);
 			if (bookmark != null)
 				tw.WriteLine("</div>"); 
+			_map?.End();
 			return;
 		}
 
@@ -1687,7 +1748,10 @@ function findObject(id) {
 
 			tw.WriteLine("<div class='{0}'>", cssName);
 
+			if (_map != null)	// what the subreport writes nests beneath its label
+				await _map.BeginItem(this.r, s, r).ConfigureAwait(false);
             await s.ReportDefn.Run(this).ConfigureAwait(false);
+			_map?.End();
 			
 			tw.WriteLine("</div>");
             return;
@@ -1697,9 +1761,11 @@ function findObject(id) {
 		}
 		public void GroupingInstanceStart(Grouping g)	// called at start for each grouping instance
 		{
+			_map?.BeginGroup(g);
 		}
 		public void GroupingInstanceEnd(Grouping g)	// called at start for each grouping instance
 		{
+			_map?.End();
 		}
 		public void GroupingEnd(Grouping g)			// called at end of grouping
 		{
