@@ -398,6 +398,58 @@ function findObject(id) {
 			return result;
 		}
 
+		// A textbox with a UserSort (interactive sort, #636): a link that shows the direction it
+		// sorts in now (up, down, or both when it does not) and, followed, asks the host to render
+		// the report again sorted the next way: Report.UserSortUrl plus rs:SortId, rs:SortDirection
+		// and rs:SortState (the sorts already applied). A shift-click adds rs:SortAdditive=true, to
+		// add the sort to those rather than replace them. Null when the textbox has no usable UserSort.
+		private string UserSortLink(Textbox tb)
+		{
+			UserSort us = tb.UserSort;
+			if (us == null || us.SortExpression == null || tb.Name == null)
+				return null;
+
+			string key = us.Key;
+			UserSortState state = r.UserSort;
+			UserSortDirection current = state?.GetDirection(key) ?? UserSortDirection.None;
+			UserSortDirection next = current == UserSortDirection.Ascending ? UserSortDirection.Descending : UserSortDirection.Ascending;
+
+			string url = r.UserSortUrl ?? "";
+			var href = new StringBuilder(url);
+			if (url.IndexOf('?') < 0)
+				href.Append('?');
+			else if (!url.EndsWith("?") && !url.EndsWith("&"))
+				href.Append('&');
+			href.Append(UserSortState.SortIdParameter).Append('=').Append(Uri.EscapeDataString(key));
+			href.Append('&').Append(UserSortState.SortDirectionParameter).Append('=').Append(next.ToString());
+			string sorted = state?.ToString();
+			if (!string.IsNullOrEmpty(sorted))
+				href.Append('&').Append(UserSortState.SortStateParameter).Append('=').Append(Uri.EscapeDataString(sorted));
+
+			string glyph, label;
+			switch (current)
+			{
+				case UserSortDirection.Ascending:
+					glyph = "&#x25B2;";		// up triangle
+					label = "Sorted ascending; sort descending";
+					break;
+				case UserSortDirection.Descending:
+					glyph = "&#x25BC;";		// down triangle
+					label = "Sorted descending; sort ascending";
+					break;
+				default:
+					glyph = "&#x21C5;";		// up and down arrows
+					label = "Sort ascending";
+					break;
+			}
+
+			return string.Format(
+				"<a class=\"rdl-usersort\" data-sort-direction=\"{0}\" href=\"{1}\" title=\"{2}\" aria-label=\"{2}\" style=\"text-decoration:none;margin-left:0.3em\""
+				+ " onclick=\"if(event.shiftKey){{location.href=this.href+'&amp;{3}=true';return false;}}\">{4}</a>",
+				current.ToString().ToLowerInvariant(), System.Net.WebUtility.HtmlEncode(href.ToString()), label,
+				UserSortState.SortAdditiveParameter, glyph);
+		}
+
 		private string Bookmark(string bm, string t)
 		{
 			if (bm == null)
@@ -930,6 +982,10 @@ function findObject(id) {
 				// handle any specified actions
 				t = await Action(tb.Action, row, t, await tb.ToolTipValue(r, row).ConfigureAwait(false)).ConfigureAwait(false);
 			}
+			// an interactive sort header: its text, then the sort link (not inside an action's link)
+			string sortLink = UserSortLink(tb);
+			if (sortLink != null)
+				t = t + sortLink;
 			// determine if we're in a tablecell
 			Type tp = tb.Parent.Parent.GetType();
 			bool bCell;
@@ -1056,6 +1112,11 @@ function findObject(id) {
 				t.Details.TableRows == null || t.Details.TableRows.Items.Count != 1)		
 				return false;	// can't have tableGroups; must have 1 detail row
 
+			// A UserSort on any of its textboxes sorts it on the server instead (#636): the
+			// client-side sort from the Custom element is only the fallback for tables without one.
+			if (HasUserSort(t))
+				return false;
+
 			// Determine if report custom defn want this table to be sortable
 			bool bReturn = false;
 			if (t.Custom != null)
@@ -1074,6 +1135,20 @@ function findObject(id) {
 				}
 			}
 			return bReturn;
+		}
+
+		// True when a textbox in the table has a UserSort.
+		static bool HasUserSort(Table t)
+		{
+			var sorts = t.OwnerReport.UserSorts;
+			if (sorts == null)
+				return false;
+			foreach (UserSort us in sorts)
+			{
+				if (us.SortExpression != null && UserSort.RegionOf(us.Textbox) == t)
+					return true;
+			}
+			return false;
 		}
 
 		public async Task TableEnd(Table t, Row row)

@@ -1440,6 +1440,24 @@ namespace Majorsilence.Reporting.RdlDesign.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Interactive Sort.
+        /// </summary>
+        internal static string InteractivityCtl_Show_InteractiveSort {
+            get {
+                return ResourceManager.GetString("InteractivityCtl_Show_InteractiveSort", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to An interactive sort needs a sort expression..
+        /// </summary>
+        internal static string InteractivityCtl_Show_SortExpressionRequired {
+            get {
+                return ResourceManager.GetString("InteractivityCtl_Show_SortExpressionRequired", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Only HTML, MHT, XML, CSV, RTF, DOC, PPTX, Excel, TIF, SVG and PDF are allowed as Export types..
         /// </summary>
         internal static string MDIChild_Error_AllowedExportTypes {

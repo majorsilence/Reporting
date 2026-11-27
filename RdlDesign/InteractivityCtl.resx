@@ -447,7 +447,7 @@
     <value>System.Windows.Forms.ComboBox, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="$this.Size" type="System.Drawing.Size, System.Drawing">
-    <value>472, 288</value>
+    <value>472, 384</value>
   </data>
   <data name="bHyperlink.TabIndex" type="System.Int32, mscorlib">
     <value>1</value>
@@ -641,4 +641,109 @@
   <metadata name="$this.Localizable" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
     <value>True</value>
   </metadata>
+  <data name="grpUserSort.Location" type="System.Drawing.Point, System.Drawing">
+    <value>8, 284</value>
+  </data>
+  <data name="grpUserSort.Size" type="System.Drawing.Size, System.Drawing">
+    <value>432, 92</value>
+  </data>
+  <data name="grpUserSort.TabIndex" type="System.Int32, mscorlib">
+    <value>5</value>
+  </data>
+  <data name="grpUserSort.Text" xml:space="preserve">
+    <value>Interactive Sort</value>
+  </data>
+  <data name="chkUserSort.Location" type="System.Drawing.Point, System.Drawing">
+    <value>16, 16</value>
+  </data>
+  <data name="chkUserSort.Size" type="System.Drawing.Size, System.Drawing">
+    <value>400, 20</value>
+  </data>
+  <data name="chkUserSort.TabIndex" type="System.Int32, mscorlib">
+    <value>0</value>
+  </data>
+  <data name="chkUserSort.Text" xml:space="preserve">
+    <value>Sort the data when this textbox is clicked</value>
+  </data>
+  <data name="lSortExpression.Location" type="System.Drawing.Point, System.Drawing">
+    <value>16, 42</value>
+  </data>
+  <data name="lSortExpression.Size" type="System.Drawing.Size, System.Drawing">
+    <value>100, 20</value>
+  </data>
+  <data name="lSortExpression.TabIndex" type="System.Int32, mscorlib">
+    <value>1</value>
+  </data>
+  <data name="lSortExpression.Text" xml:space="preserve">
+    <value>Sort expression</value>
+  </data>
+  <data name="tbSortExpression.Location" type="System.Drawing.Point, System.Drawing">
+    <value>120, 40</value>
+  </data>
+  <data name="tbSortExpression.Size" type="System.Drawing.Size, System.Drawing">
+    <value>272, 20</value>
+  </data>
+  <data name="tbSortExpression.TabIndex" type="System.Int32, mscorlib">
+    <value>2</value>
+  </data>
+  <data name="bSortExpression.Location" type="System.Drawing.Point, System.Drawing">
+    <value>400, 42</value>
+  </data>
+  <data name="bSortExpression.Size" type="System.Drawing.Size, System.Drawing">
+    <value>22, 16</value>
+  </data>
+  <data name="bSortExpression.TabIndex" type="System.Int32, mscorlib">
+    <value>3</value>
+  </data>
+  <data name="bSortExpression.Text" xml:space="preserve">
+    <value>fx</value>
+  </data>
+  <data name="bSortExpression.Font" type="System.Drawing.Font, System.Drawing">
+    <value>Arial, 8.25pt, style=Bold, Italic</value>
+  </data>
+  <data name="bSortExpression.TextAlign" type="System.Drawing.ContentAlignment, System.Drawing">
+    <value>MiddleLeft</value>
+  </data>
+  <data name="lSortScope.Location" type="System.Drawing.Point, System.Drawing">
+    <value>16, 68</value>
+  </data>
+  <data name="lSortScope.Size" type="System.Drawing.Size, System.Drawing">
+    <value>48, 20</value>
+  </data>
+  <data name="lSortScope.TabIndex" type="System.Int32, mscorlib">
+    <value>4</value>
+  </data>
+  <data name="lSortScope.Text" xml:space="preserve">
+    <value>Scope</value>
+  </data>
+  <data name="cbSortScope.Location" type="System.Drawing.Point, System.Drawing">
+    <value>64, 66</value>
+  </data>
+  <data name="cbSortScope.Size" type="System.Drawing.Size, System.Drawing">
+    <value>152, 21</value>
+  </data>
+  <data name="cbSortScope.TabIndex" type="System.Int32, mscorlib">
+    <value>5</value>
+  </data>
+  <data name="lSortTarget.Location" type="System.Drawing.Point, System.Drawing">
+    <value>224, 68</value>
+  </data>
+  <data name="lSortTarget.Size" type="System.Drawing.Size, System.Drawing">
+    <value>48, 20</value>
+  </data>
+  <data name="lSortTarget.TabIndex" type="System.Int32, mscorlib">
+    <value>6</value>
+  </data>
+  <data name="lSortTarget.Text" xml:space="preserve">
+    <value>Target</value>
+  </data>
+  <data name="cbSortTarget.Location" type="System.Drawing.Point, System.Drawing">
+    <value>272, 66</value>
+  </data>
+  <data name="cbSortTarget.Size" type="System.Drawing.Size, System.Drawing">
+    <value>150, 21</value>
+  </data>
+  <data name="cbSortTarget.TabIndex" type="System.Int32, mscorlib">
+    <value>7</value>
+  </data>
 </root>

@@ -125,6 +125,46 @@ namespace Majorsilence.Reporting.RdlAsp
             return ld;
         }
 
+        private static bool IsUserSortKey(string key) =>
+            key == UserSortState.SortIdParameter || key == UserSortState.SortDirectionParameter
+            || key == UserSortState.SortStateParameter || key == UserSortState.SortAdditiveParameter;
+
+        /// <summary>
+        /// Interactive sorting (#636): applies the sort an HTML sort header link asked for
+        /// (rs:SortState, rs:SortId, rs:SortDirection, rs:SortAdditive) to the report, and points
+        /// its sort links back at this request's path and query, less those values.
+        /// </summary>
+        static internal void SetUserSort(Report r, HttpRequest request)
+        {
+            IQueryCollection q = request.Query;
+            r.UserSort = UserSortState.FromQuery(
+                q[UserSortState.SortStateParameter].ToString(),
+                q[UserSortState.SortIdParameter].ToString(),
+                q[UserSortState.SortDirectionParameter].ToString(),
+                q[UserSortState.SortAdditiveParameter].ToString());
+
+            var url = new StringBuilder(request.PathBase.Value + request.Path.Value);
+            char sep = '?';
+            foreach (var kvp in q)
+            {
+                if (IsUserSortKey(kvp.Key))
+                    continue;
+                foreach (string v in kvp.Value)
+                {
+                    url.Append(sep).Append(Uri.EscapeDataString(kvp.Key)).Append('=').Append(Uri.EscapeDataString(v ?? ""));
+                    sep = '&';
+                }
+            }
+            r.UserSortUrl = url.ToString();
+        }
+
+        // The sorts applied to the report, for the links and forms that run it again; null when none.
+        private static string UserSortText(Report r)
+        {
+            string s = r.UserSort?.ToString();
+            return string.IsNullOrEmpty(s) ? null : s;
+        }
+
         private static string H(string s)
         {
             return WebUtility.HtmlEncode(s ?? "");
@@ -206,7 +246,11 @@ namespace Majorsilence.Reporting.RdlAsp
                 AppendSubmitAndExports(pHtml, rpt, context, reportName, showReport);
                 pHtml.Append("</tr>");
             }
-            pHtml.Append("</table></form>");		// End of table, form
+            pHtml.Append("</table>");		// End of table
+            string sorted = UserSortText(rpt);		// keep the interactive sort when the report is run again
+            if (sorted != null)
+                pHtml.AppendFormat("<input type=\"hidden\" name=\"{0}\" value=\"{1}\"/>", H(UserSortState.SortStateParameter), H(sorted));
+            pHtml.Append("</form>");		// End of form
             return pHtml.ToString();
         }
 
@@ -214,11 +258,11 @@ namespace Majorsilence.Reporting.RdlAsp
         {
             pHtml.AppendFormat("<td><input type=\"submit\" value=\"Run Report\" tabindex=\"{0}\"/>", rpt.UserReportParameters.Count + 1);
             if (showReport)
-                AppendExports(pHtml, context, reportName);
+                AppendExports(pHtml, context, reportName, UserSortText(rpt));
             pHtml.Append("</td>");
         }
 
-        static private void AppendExports(StringBuilder pHtml, HttpContext context, string reportName)
+        static private void AppendExports(StringBuilder pHtml, HttpContext context, string reportName, string sorted)
         {
             StringBuilder args = new StringBuilder();
             foreach (var kvp in context.Request.Query)
@@ -229,6 +273,9 @@ namespace Majorsilence.Reporting.RdlAsp
                     args.AppendFormat("{0}{1}={2}", args.Length == 0 ? "?" : "&",
                         Uri.EscapeDataString(kvp.Key), Uri.EscapeDataString(v ?? ""));
             }
+            if (sorted != null)     // exported in the order the report is shown in
+                args.AppendFormat("{0}{1}={2}", args.Length == 0 ? "?" : "&",
+                    Uri.EscapeDataString(UserSortState.SortStateParameter), Uri.EscapeDataString(sorted));
             string sargs = args.ToString();
             string name = Uri.EscapeDataString(reportName);
 

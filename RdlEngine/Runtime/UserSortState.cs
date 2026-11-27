@@ -169,6 +169,37 @@ namespace Majorsilence.Reporting.Rdl
 			return state;
 		}
 
+		/// <summary>The query parameter an HTML sort link names the clicked sort header with (its escaped key).</summary>
+		public const string SortIdParameter = "rs:SortId";
+		/// <summary>The query parameter an HTML sort link carries the direction to sort in with: Ascending or Descending.</summary>
+		public const string SortDirectionParameter = "rs:SortDirection";
+		/// <summary>The query parameter an HTML sort link carries the sorts already applied with (<see cref="ToString"/>).</summary>
+		public const string SortStateParameter = "rs:SortState";
+		/// <summary>The query parameter a shift-click on an HTML sort link adds (true): add the sort rather than replace the others.</summary>
+		public const string SortAdditiveParameter = "rs:SortAdditive";
+
+		/// <summary>
+		/// The state an HTML sort link asks for, from its query values (<see cref="SortStateParameter"/>,
+		/// <see cref="SortIdParameter"/>, <see cref="SortDirectionParameter"/>, <see cref="SortAdditiveParameter"/>):
+		/// the sorts already applied, then the clicked one in its direction -- replacing them, as a
+		/// plain click does, or added after them (or flipped in its place) when additive. Any value
+		/// may be null or blank; null when there is no sort at all.
+		/// </summary>
+		public static UserSortState FromQuery(string sortState, string sortId, string sortDirection, string additive = null)
+		{
+			UserSortState state = Parse(sortState);
+			if (!string.IsNullOrEmpty(sortId)
+				&& Enum.TryParse(sortDirection, true, out UserSortDirection direction)
+				&& Enum.IsDefined(typeof(UserSortDirection), direction))
+			{
+				bool add = bool.TryParse(additive, out bool b) && b;
+				if (!add)
+					state.Clear();
+				state.Set(sortId, direction);
+			}
+			return state.IsEmpty ? null : state;
+		}
+
 		int IndexOf(string key)
 		{
 			for (int i = 0; i < _Entries.Count; i++)
