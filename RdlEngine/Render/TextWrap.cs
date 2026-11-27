@@ -11,6 +11,11 @@ namespace Majorsilence.Reporting.Rdl
     /// </summary>
     internal static class TextWrap
     {
+        // A line over its width by less than this fits. Sizes were once kept to the hundredth of a
+        // millimetre, 0.028pt, and a width written to fit its text to a hair was read a hair wider as
+        // often as not; read as written, such a line would break.
+        private const float Slack = 0.02f;
+
         /// <summary>
         /// Wraps one paragraph at its spaces to <paramref name="maxWidth"/>: a word goes on the line
         /// when the line with it, measured without the space after it, still fits. A word wider than
@@ -40,7 +45,7 @@ namespace Majorsilence.Reporting.Rdl
                 {
                     string indented = new string(' ', indent) + word;
                     indent = 0;
-                    if (width(indented) <= maxWidth)
+                    if (width(indented) <= maxWidth + Slack)
                     {
                         current = indented;
                         continue;
@@ -53,7 +58,7 @@ namespace Majorsilence.Reporting.Rdl
                 else
                 {
                     string candidate = current + " " + word;
-                    if (width(candidate) <= maxWidth)
+                    if (width(candidate) <= maxWidth + Slack)
                     {
                         current = candidate;
                     }
@@ -73,7 +78,7 @@ namespace Majorsilence.Reporting.Rdl
         // those lines added to output and what is left of it returned.
         private static string BreakWord(string word, float maxWidth, Func<string, float> width, List<string> output)
         {
-            while (word.Length > 1 && width(word) > maxWidth)
+            while (word.Length > 1 && width(word) > maxWidth + Slack)
             {
                 int fit = FittingPrefix(word, maxWidth, width);
                 if (fit >= word.Length)
@@ -97,7 +102,7 @@ namespace Majorsilence.Reporting.Rdl
             while (high - low > 1)
             {
                 int mid = low + (high - low) / 2;
-                if (width(word.Substring(0, mid)) <= maxWidth)
+                if (width(word.Substring(0, mid)) <= maxWidth + Slack)
                     low = mid;
                 else
                     high = mid;
@@ -138,7 +143,7 @@ namespace Majorsilence.Reporting.Rdl
         private static bool FitsOnALine(string paragraph, float maxWidth, Func<string, float> width, out string line)
         {
             line = paragraph.Length > 0 && paragraph[paragraph.Length - 1] == ' ' ? paragraph.TrimEnd(' ') : paragraph;
-            return line.Length == 0 || width(line) <= maxWidth;
+            return line.Length == 0 || width(line) <= maxWidth + Slack;
         }
     }
 }

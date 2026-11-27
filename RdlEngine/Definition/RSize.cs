@@ -25,6 +25,10 @@ namespace Majorsilence.Reporting.Rdl
 
 		int _Size;					// Normalized size in 1/100,000 meters
 		string _Original;			// save original string for recreation of syntax
+		// The size in points as it was written, where it was written: _Size holds it to the
+		// hundredth of a millimetre, so 12pt reads back as 11.99pt, and a list of rows or lines
+		// that size came out a little short for every one of them.
+		double _WrittenPoints = double.NaN;
 
 		internal RSize(ReportDefn r, string t)
 		{
@@ -103,18 +107,23 @@ namespace Majorsilence.Reporting.Rdl
 			{
                 case "in": //Inches
                     _Size = (int)decimal.Round(d * PARTS_PER_INCH);
+                    _WrittenPoints = (double)(d * 72m);
                     break;
                 case "cm": //Centimeters
                     _Size = (int)decimal.Round(d * PARTS_PER_CM);
+                    _WrittenPoints = (double)(d * 72m / 2.54m);
                     break;
                 case "mm": //Millimeters
                     _Size = (int)decimal.Round(d * PARTS_PER_MM);
+                    _WrittenPoints = (double)(d * 72m / 25.4m);
                     break;
                 case "pt": //Points
                     _Size = (int)decimal.Round(d * PARTS_PER_POINT);
+                    _WrittenPoints = (double)d;
                     break;
                 case "pc": //Picas
                     _Size = (int)decimal.Round(d * PARTS_PER_PICA);
+                    _WrittenPoints = (double)(d * 12m);
                     break;
                 default:
                     // Illegal unit
@@ -149,7 +158,7 @@ namespace Majorsilence.Reporting.Rdl
 		internal int Size
 		{
 			get { return  _Size; }
-			set {  _Size = value; }
+			set {  _Size = value; _WrittenPoints = double.NaN; }
 		}
 
 		// Return value as if specified as px
@@ -240,13 +249,15 @@ namespace Majorsilence.Reporting.Rdl
 		{
 			get
 			{	
-				return (float) ((double) _Size / 2540.0 * POINTSIZED);
+				return double.IsNaN(_WrittenPoints)
+					? (float) ((double) _Size / 2540.0 * POINTSIZED)
+					: (float) _WrittenPoints;
 			}
 		}
 
         internal float ToPoints()
         {
-            return RSize.ToPoints(_Size);
+            return Points;
         }
 
         static public float ToPoints(int size)
