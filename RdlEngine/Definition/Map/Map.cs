@@ -19,19 +19,22 @@ namespace Majorsilence.Reporting.Rdl
     /// and the other formats that run the report item by item. The map's Style is the item's, as
     /// for any image; the viewport's background is drawn inside the bitmap.
     ///
-    /// Parts of a map that are read but not drawn (legends, titles, scales, ...) are named in the
-    /// normaliser's warning, so they are passed over quietly here.
+    /// Legends, titles, the colour scale and the distance scale are drawn over the viewport, or
+    /// beside it with the viewport shrunk to make room (<see cref="MapDecorations"/>). Parts of a
+    /// map that are read but not drawn (border skins, ...) are named in the normaliser's warning,
+    /// so they are passed over quietly here.
     /// </remarks>
     internal sealed class Map : ReportItem
     {
         private MapViewport _viewport;
         private readonly List<MapDataRegion> _dataRegions = new List<MapDataRegion> ();
         private MapLayers _layers;
+        private readonly MapDecorations _decorations = new MapDecorations ();
         private readonly Image _presentAs;    // describes the drawn map to the renderers' Image method
 
         private static readonly HashSet<string> NotDrawn = new HashSet<string> (StringComparer.Ordinal)
         {
-            "MapLegends", "MapTitles", "MapDistanceScale", "MapColorScale", "MapBorderSkin", "PageBreak",
+            "MapBorderSkin", "PageBreak",
             "AntiAliasing", "TextAntiAliasingQuality", "ShadowIntensity", "MaximumSpatialElementCount",
             "MaximumTotalPointCount", "TileLanguage",
         };
@@ -55,7 +58,7 @@ namespace Majorsilence.Reporting.Rdl
                         _layers = new MapLayers (r, this, node);
                         break;
                     default:
-                        if (NotDrawn.Contains (node.LocalName) || ReportItemElement (node))
+                        if (_decorations.Read (r, this, node) || NotDrawn.Contains (node.LocalName) || ReportItemElement (node))
                             break;
                         OwnerReport.rl.LogError (4, "Unknown Map element '" + node.Name + "' ignored.");
                         break;
@@ -100,6 +103,8 @@ namespace Majorsilence.Reporting.Rdl
 
         internal MapViewport Viewport => _viewport;
 
+        internal MapDecorations Decorations => _decorations;
+
         internal IReadOnlyList<MapLayer> Layers => _layers?.Items ?? (IReadOnlyList<MapLayer>)Array.Empty<MapLayer> ();
 
         internal override async Task FinalPass ()
@@ -111,10 +116,11 @@ namespace Majorsilence.Reporting.Rdl
                 await region.FinalPass ().ConfigureAwait (false);
             if (_layers != null)
                 await _layers.FinalPass ().ConfigureAwait (false);
+            await _decorations.FinalPass ().ConfigureAwait (false);
             await _presentAs.FinalPass ().ConfigureAwait (false);
         }
 
-        /// <summary>Evaluates the map for one instance: every shown layer, in order, into one scene.</summary>
+        /// <summary>Evaluates the map for one instance: every shown layer, in order, into one scene, then the decorations over it.</summary>
         internal async Task<MapScene> BuildScene (Report rpt, Row row)
         {
             var scene = new MapScene (_viewport, WidthOrOwnerWidth (rpt), HeightOrOwnerHeight);
@@ -126,6 +132,8 @@ namespace Majorsilence.Reporting.Rdl
                 if (!layer.Hidden)
                     await layer.Build (rpt, row, scene).ConfigureAwait (false);
             }
+            // After the layers: the legends and colour scale show what their rules made of the values.
+            await _decorations.Build (rpt, row, scene).ConfigureAwait (false);
             return scene;
         }
 
