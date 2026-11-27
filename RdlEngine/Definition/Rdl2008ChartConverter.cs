@@ -211,6 +211,10 @@ namespace Majorsilence.Reporting.Rdl
                     return (type, "Plain");
                 case "Stock":
                     return (type, subtype is "HighLowClose" or "OpenHighLowClose" or "Candlestick" ? subtype : "HighLowClose");
+                case "TreeMap":
+                case "Sunburst":
+                    // 2016 types with no subtypes; the category hierarchy carries their levels.
+                    return (type, "Plain");
                 default:
                     unsupported.Add ($"the {type} chart type");
                     return ("Column", "Plain");
@@ -498,6 +502,11 @@ namespace Majorsilence.Reporting.Rdl
         private static (string Type, string Subtype) MapTypeFromEngine (string type, string subtype)
         {
             switch (type) {
+                // 2016 types (the 2008 and 2010 schemas have no word for them); written as they are,
+                // so the report reads back as the same chart.
+                case "TreeMap":
+                case "Sunburst":
+                    return (type, "Plain");
                 case "Pie": return ("Shape", subtype == "Exploded" ? "ExplodedPie" : "Pie");
                 case "Doughnut": return ("Shape", subtype == "Exploded" ? "ExplodedDoughnut" : "Doughnut");
                 case "Bubble": return ("Bubble", "Plain");

@@ -1132,7 +1132,7 @@ namespace Majorsilence.Reporting.RdlDesign
         public override StandardValuesCollection GetStandardValues(ITypeDescriptorContext context)
         {
             return new StandardValuesCollection(new string[] {
-                                    "Column", "Bar", "Line", "Map", "Pie", "Area", "Doughnut", "Bubble", "Scatter"});
+                                    "Column", "Bar", "Line", "Map", "Pie", "Area", "Doughnut", "Bubble", "Scatter", "TreeMap", "Sunburst"});
         }
     }
     #endregion

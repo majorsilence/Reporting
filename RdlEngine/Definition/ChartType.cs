@@ -18,6 +18,8 @@ namespace Majorsilence.Reporting.Rdl
 		Doughnut,
 		Stock,
         Map,
+		TreeMap,
+		Sunburst,
 		Unknown
 	}
 
@@ -73,6 +75,12 @@ namespace Majorsilence.Reporting.Rdl
                 case "Map":
                     ct = ChartTypeEnum.Map;
                     break;
+				case "TreeMap":
+					ct = ChartTypeEnum.TreeMap;
+					break;
+				case "Sunburst":
+					ct = ChartTypeEnum.Sunburst;
+					break;
 				default:		// unknown type
 					ct = ChartTypeEnum.Unknown;
 					break;

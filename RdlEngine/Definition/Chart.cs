@@ -365,7 +365,8 @@ namespace Majorsilence.Reporting.Rdl
             return p;
         }
 
-        async Task<ChartBase> RunChartBuild(Report rpt, Row row)
+        // internal so tests can build a chart as rendering does and look at its data (ChartHierarchyTests)
+        internal async Task<ChartBase> RunChartBuild(Report rpt, Row row)
 		{
 			// Get the matrix that defines the data; 
 			_ChartMatrix.SetMyData(rpt, GetMyData(rpt));	// set the data in the matrix
@@ -398,6 +399,12 @@ namespace Majorsilence.Reporting.Rdl
                     break;
                 case ChartTypeEnum.Map:
                     cb = new ChartMap(rpt, row, this, matrix, _showTooltips, _showTooltipsX, _ToolTipYFormat, _ToolTipXFormat);
+                    break;
+                case ChartTypeEnum.TreeMap:
+                    cb = new ChartTreeMap(rpt, row, this, matrix, _showTooltips, _showTooltipsX, _ToolTipYFormat, _ToolTipXFormat);
+                    break;
+                case ChartTypeEnum.Sunburst:
+                    cb = new ChartSunburst(rpt, row, this, matrix, _showTooltips, _showTooltipsX, _ToolTipYFormat, _ToolTipXFormat);
                     break;
                 case ChartTypeEnum.Stock:
 				default:
@@ -873,7 +880,7 @@ namespace Majorsilence.Reporting.Rdl
 			return rpt.Cache.Get(this, "data") as Rows;
 		}
 
-		private void SetMyData(Report rpt, Rows data)
+		internal void SetMyData(Report rpt, Rows data)
 		{
 			if (data == null)
 				rpt.Cache.Remove(this, "data");

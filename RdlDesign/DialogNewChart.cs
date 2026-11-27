@@ -463,6 +463,11 @@ namespace Majorsilence.Reporting.RdlDesign
                     subItems = new string[] { "Plain" };
                     bEnableData2 = bEnableData3 = true;
                     break;
+                case "TreeMap":
+                case "Sunburst":
+                    // one value per point; each category added is a level of the hierarchy
+                    subItems = new string[] { "Plain" };
+                    break;
                 case "Stock":
                 default:
                     subItems = new string[] { "Plain" };

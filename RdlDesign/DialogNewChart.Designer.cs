@@ -210,7 +210,9 @@ private System.ComponentModel.Container components = null;
             resources.GetString("cbChartType.Items4"),
             resources.GetString("cbChartType.Items5"),
             resources.GetString("cbChartType.Items6"),
-            resources.GetString("cbChartType.Items7")});
+            resources.GetString("cbChartType.Items7"),
+            resources.GetString("cbChartType.Items8"),
+            resources.GetString("cbChartType.Items9")});
 			this.cbChartType.Name = "cbChartType";
 			this.cbChartType.SelectedIndexChanged += this.cbChartType_SelectedIndexChanged;
 			// 

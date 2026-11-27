@@ -212,6 +212,12 @@
   <data name="cbChartType.Items8" xml:space="preserve">
     <value>Scatter</value>
   </data>
+  <data name="cbChartType.Items9" xml:space="preserve">
+    <value>TreeMap</value>
+  </data>
+  <data name="cbChartType.Items10" xml:space="preserve">
+    <value>Sunburst</value>
+  </data>
   <data name="&gt;&gt;lData1.Name" xml:space="preserve">
     <value>lData1</value>
   </data>
