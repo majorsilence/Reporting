@@ -94,5 +94,106 @@ namespace ReportTests.Utils
             Assert.That(pdfText, Does.Contain("/OutputIntents"), "PDF/A requires an output intent");
             Assert.That(pdfText, Does.Contain("/CIDToGIDMap /Identity"), "PDF/A requires CIDToGIDMap on TrueType CIDFonts");
         }
+
+        [Test]
+        public async Task RenderPdf_Raw_WithPdfA2b_EmbedsEveryFont()
+        {
+            Assume.That(Directory.Exists(Majorsilence.Forms.Drawing.FontResourceLoader.GetFontDirectory()),
+                "the bundled fonts stand in for the standard fonts under PDF/A");
+
+            // Faces that would otherwise fall back to the standard Helvetica font, which is not embedded.
+            Report rap = await ReportWithText("No Such Font Family", "Tahoma-Not-Installed");
+            rap.PdfConformance = Majorsilence.Pdf.PdfConformance.PdfA2b;
+            string pdfText = await RenderToText(rap);
+
+            Assert.That(pdfText, Does.Contain("<pdfaid:part>2</pdfaid:part>"));
+            Assert.That(pdfText, Does.Not.Contain("/Subtype /Type1"), "PDF/A requires every font to be embedded");
+            Assert.That(pdfText, Does.Contain("/FontFile2"), "the text is drawn in an embedded TrueType font");
+        }
+
+        [TestCase("Symbol")]
+        [TestCase("ZapfDingbats")]
+        public async Task RenderPdf_Raw_WithPdfA2b_SymbolFonts_AreEmbeddedOrRefused(string family)
+        {
+            // Without PDF/A these are always drawn in the standard Symbol / ZapfDingbats fonts.
+            Report rap = await ReportWithText(family);
+            rap.PdfConformance = Majorsilence.Pdf.PdfConformance.PdfA2b;
+
+            string pdfText;
+            try
+            {
+                pdfText = await RenderToText(rap);
+            }
+            catch (InvalidOperationException ex)
+            {
+                // No installed font of that name: refused rather than written as a false PDF/A claim.
+                Assert.That(ex.Message, Does.Contain(family).And.Contain("embedded"));
+                return;
+            }
+            Assert.That(pdfText, Does.Not.Contain("/Subtype /Type1"), "the installed TrueType font is embedded instead");
+            Assert.That(pdfText, Does.Contain("/FontFile2"));
+        }
+
+        [Test]
+        public async Task RenderPdf_Raw_WithoutConformance_StillUsesTheStandardFallback()
+        {
+            Report rap = await ReportWithText("No Such Font Family");
+            string pdfText = await RenderToText(rap);
+
+            // Liberation Sans is the default stand-in when bundled; the Helvetica fallback only
+            // shows where it is not. Either way no conformance level means no PDF/A claim.
+            Assert.That(pdfText, Does.Not.Contain("pdfaid"));
+        }
+
+        [Test]
+        public async Task RenderPdf_Raw_PdfAWithSecurity_ThrowsBeforeRendering()
+        {
+            Report rap = await ReportWithText("Arial");
+            rap.PdfConformance = Majorsilence.Pdf.PdfConformance.PdfA2b;
+
+            string outFile = Path.Combine(_outputFolder.LocalPath, "PdfAWithSecurity.pdf");
+            using var sg = new OneFileStreamGen(outFile, true);
+            var ex = Assert.ThrowsAsync<InvalidOperationException>(() => rap.RunRender(sg,
+                OutputPresentationType.PDF, Majorsilence.Pdf.Security.PdfSecurity.Protect("owner", "user")));
+            Assert.That(ex!.Message, Does.Contain("Report.PdfConformance"));
+        }
+
+        private static async Task<Report> ReportWithText(params string[] fontFamilies)
+        {
+            var boxes = new System.Text.StringBuilder();
+            float top = 0.1f;
+            foreach (string family in fontFamilies)
+            {
+                boxes.Append($@"
+        <Textbox Name=""T{boxes.Length}"">
+          <Top>{top.ToString(System.Globalization.CultureInfo.InvariantCulture)}in</Top><Left>0.1in</Left>
+          <Width>3in</Width><Height>0.3in</Height>
+          <Value>Text in {family}</Value>
+          <Style><FontFamily>{family}</FontFamily></Style>
+        </Textbox>");
+                top += 0.4f;
+            }
+            string rdl = $@"<?xml version=""1.0"" encoding=""UTF-8""?>
+<Report xmlns=""http://schemas.microsoft.com/sqlserver/reporting/2005/01/reportdefinition"">
+  <Width>8.5in</Width>
+  <Body>
+    <Height>3in</Height>
+    <ReportItems>{boxes}
+    </ReportItems>
+  </Body>
+</Report>";
+            var rap = await new RDLParser(rdl) { SkipDatabaseSchemaValidation = true }.Parse();
+            Assert.That(rap.ErrorMaxSeverity, Is.LessThanOrEqualTo(4), "the test report must parse");
+            await rap.RunGetData(null);
+            return rap;
+        }
+
+        private async Task<string> RenderToText(Report rap)
+        {
+            string outFile = Path.Combine(_outputFolder.LocalPath, $"PdfA_{Guid.NewGuid():N}{Ext}");
+            using (var sg = new OneFileStreamGen(outFile, true))
+                await rap.RunRender(sg, OutputPresentationType.PDF);
+            return System.Text.Encoding.Latin1.GetString(File.ReadAllBytes(outFile));
+        }
     }
 }

@@ -58,11 +58,17 @@ namespace Majorsilence.Pdf
         /// PDF 1.7 (for PDF/A-2b and PDF/A-3b) or PDF 1.4 (for PDF/A-1b), embeds an sRGB
         /// ICC output intent, and extends the XMP metadata with the PDF/A conformance claim.
         /// Only TrueType (embedded) fonts may be used; standard 14 fonts (Helvetica, Times,
-        /// Courier …) will raise an error when you attempt to draw text.
+        /// Courier …) raise an <see cref="InvalidOperationException"/> when you draw text in them.
+        /// Under PDF/A-1b, which allows no transparency, translucent colours are drawn as their
+        /// colour over white and images with alpha are composited onto white. Tooltips
+        /// (<see cref="PdfCanvas.AddTooltip"/>) are left out, as they have no appearance stream.
+        /// PDF/A cannot be combined with encryption: saving throws.
+        /// Call this before drawing pages, so that the rules apply to everything drawn.
         /// </summary>
         public PdfDocument WithConformance(PdfConformance conformance)
         {
             _conformance = conformance;
+            _ser.SetConformance(conformance);
             // PDF/A-1b must not exceed PDF 1.4; PDF/A-2b and -3b require at least PDF 1.7.
             if (conformance == PdfConformance.PdfA1b && _version > PdfVersion.Pdf14)
                 _version = PdfVersion.Pdf14;

@@ -230,6 +230,11 @@ namespace Majorsilence.Pdf
             {
                 // ── Standard Type-1 font path ─────────────────────────────────
                 string stdName = ResolveStandardName(style.FontFamily, style.IsBold, style.IsItalic);
+                if (_ser.Conformance != PdfConformance.None)
+                    throw new InvalidOperationException(
+                        $"PDF/A ({_ser.Conformance}) requires embedded fonts, but '{style.FontFamily}' would be drawn in " +
+                        $"the standard font '{stdName}', which is not embedded. Add the family to a FontRegistry or " +
+                        "use TextStyle.WithFontFile().");
                 var font = _ser.GetOrAddStandardFont(stdName);
 
                 string encoded = EscapeWinAnsi(text, out char? unmappable);
@@ -862,7 +867,11 @@ namespace Majorsilence.Pdf
             return this;
         }
 
-        /// <summary>Add a tooltip (text annotation) over the given area.</summary>
+        /// <summary>
+        /// Add a tooltip (text annotation) over the given area. Under PDF/A (see
+        /// <see cref="PdfDocument.WithConformance"/>) tooltips are left out of the file: a text
+        /// annotation has no appearance stream, which PDF/A requires of every annotation.
+        /// </summary>
         public PdfCanvas AddTooltip(float x, float y, float width, float height, string tooltip)
         {
             _page.Annotations.Add(new PageAnnotation(x, PdfY(y + height), x + width, PdfY(y), null, tooltip));
@@ -1255,12 +1264,14 @@ namespace Majorsilence.Pdf
         private void AppendStrokeState(StrokeStyle style)
         {
             var sb = Content;
-            if (style.Opacity < 0.9999f)
+            float opacity = style.Opacity;
+            if (opacity < 0.9999f && !_ser.ForbidsTransparency)
             {
-                string gsName = _ser.GetOrAddExtGState(1f, style.Opacity);
+                string gsName = _ser.GetOrAddExtGState(1f, opacity);
                 sb.Append($"/{gsName} gs\n");
+                opacity = 1f;
             }
-            sb.AppendNum(style.Color.Rf).Append(" ").AppendNum(style.Color.Gf).Append(" ").AppendNum(style.Color.Bf).Append(" RG\n");
+            AppendColor(sb, style.Color, opacity).Append(" RG\n");
             sb.AppendNum(style.Width).Append(" w\n");
             AppendDash(style.LineStyle);
         }
@@ -1270,7 +1281,14 @@ namespace Majorsilence.Pdf
             var sb = Content;
             bool hasFillOp   = style.HasFill   && style.FillOpacity   < 0.9999f;
             bool hasStrokeOp = style.HasStroke && style.StrokeOpacity < 0.9999f;
-            if (hasFillOp || hasStrokeOp)
+            // Without transparency (PDF/A-1) a translucent colour is drawn as the colour it has over white.
+            float fillOpacity = 1f, strokeOpacity = 1f;
+            if ((hasFillOp || hasStrokeOp) && _ser.ForbidsTransparency)
+            {
+                if (hasFillOp)   fillOpacity   = style.FillOpacity;
+                if (hasStrokeOp) strokeOpacity = style.StrokeOpacity;
+            }
+            else if (hasFillOp || hasStrokeOp)
             {
                 float fa = style.HasFill   ? style.FillOpacity   : 1f;
                 float sa = style.HasStroke ? style.StrokeOpacity : 1f;
@@ -1278,17 +1296,22 @@ namespace Majorsilence.Pdf
                 sb.Append($"/{gsName} gs\n");
             }
             if (style.HasFill)
-            {
-                var c = style.FillColor!.Value;
-                sb.AppendNum(c.Rf).Append(" ").AppendNum(c.Gf).Append(" ").AppendNum(c.Bf).Append(" rg\n");
-            }
+                AppendColor(sb, style.FillColor!.Value, fillOpacity).Append(" rg\n");
             if (style.HasStroke)
             {
-                var c = style.StrokeColor!.Value;
-                sb.AppendNum(c.Rf).Append(" ").AppendNum(c.Gf).Append(" ").AppendNum(c.Bf).Append(" RG\n");
+                AppendColor(sb, style.StrokeColor!.Value, strokeOpacity).Append(" RG\n");
                 sb.AppendNum(style.StrokeWidth).Append(" w\n");
                 AppendDash(style.LineStyle);
             }
+        }
+
+        // The colour's components, blended with white by (1 - opacity).
+        private static StringBuilder AppendColor(StringBuilder sb, PdfColor c, float opacity)
+        {
+            if (opacity >= 0.9999f)
+                return sb.AppendNum(c.Rf).Append(" ").AppendNum(c.Gf).Append(" ").AppendNum(c.Bf);
+            float a = Math.Max(0f, opacity), w = 1f - a;
+            return sb.AppendNum(c.Rf * a + w).Append(" ").AppendNum(c.Gf * a + w).Append(" ").AppendNum(c.Bf * a + w);
         }
 
         private static bool NeedsWrap(ShapeStyle style) =>

@@ -66,6 +66,13 @@ namespace Majorsilence.Reporting.Rdl
         {
             _security  = security;
             _signature = signature;
+
+            // PDF/A forbids encryption. Majorsilence.Pdf only finds out when the document is saved,
+            // after every page has been rendered, so the combination is refused here.
+            if (security != null && report.PdfConformance != PdfConformance.None)
+                throw new InvalidOperationException(
+                    $"Report.PdfConformance is {report.PdfConformance}, and PDF/A cannot be encrypted. " +
+                    "Render without PDF security or set Report.PdfConformance to None.");
         }
 
         // ── RenderBase abstract implementations ───────────────────────────────
@@ -1010,6 +1017,10 @@ namespace Majorsilence.Reporting.Rdl
             if (registryFamily != null)
                 return baseStyle.WithFamily(registryFamily);
 
+            // PDF/A requires every font to be embedded, and the standard Type-1 fonts below are not.
+            if (base.Report().PdfConformance != PdfConformance.None)
+                return baseStyle.WithFamily(EmbeddedStandIn(_fontRegistry, face));
+
             // Symbol and ZapfDingbats have no TTF equivalent — use standard Type-1
             if (face == "Symbol")       return baseStyle.WithFamily("Symbol");
             if (face == "ZapfDingbats" || face == "Wingdings") return baseStyle.WithFamily("ZapfDingbats");
@@ -1020,6 +1031,33 @@ namespace Majorsilence.Reporting.Rdl
                             : italic         ? "Helvetica-Oblique"
                                              : "Helvetica";
             return baseStyle.WithFamily(helvName);
+        }
+
+        /// <summary>
+        /// The registered family a face is drawn in under PDF/A where it would otherwise be drawn in
+        /// a standard Type-1 font: the Symbol or dingbats font itself when it is installed, the
+        /// bundled Liberation Sans (metric-compatible with Helvetica) for any other face.
+        /// </summary>
+        internal static string EmbeddedStandIn(FontRegistry registry, string face)
+        {
+            string[] candidates = face switch
+            {
+                "Symbol"       => new[] { "Symbol" },
+                "ZapfDingbats" => new[] { "ZapfDingbats", "Zapf Dingbats", "ZapfDingbatsITC" },
+                "Wingdings"    => new[] { "Wingdings" },
+                _              => new[] { "LiberationSans", "Arial" },
+            };
+            foreach (string family in candidates)
+                if (registry.Contains(family)) return family;
+
+            // A symbol font's characters stand for its own pictures, so another font would draw
+            // other text; and with no font found at all nothing can be embedded.
+            throw new InvalidOperationException(
+                $"Report.PdfConformance requires every font to be embedded, but no installed font can draw '{face}'" +
+                (candidates[0] == "LiberationSans"
+                    ? " (the bundled fonts were not found). "
+                    : $": install the {face} font, or use another font in the report. ") +
+                "Set Report.PdfConformance to None to draw it in a standard font that is not embedded.");
         }
 
         // ── private drawing helpers ───────────────────────────────────────────
