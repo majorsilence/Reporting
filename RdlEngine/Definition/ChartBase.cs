@@ -1219,39 +1219,48 @@ namespace Majorsilence.Reporting.Rdl
             Draw2.Brush[] b = new Draw2.Brush[SeriesCount];
 
             for (int i = 0; i < SeriesCount; i++)
-            {
-                // TODO: In general all the palettes could use a good going over
-                //   both in terms of the colors in the lists and their order
-                switch (ChartPalette.GetStyle(await ChartDefn.Palette.EvaluateString(rpt, row).ConfigureAwait(false), defn.rl))
-                {
-                    case ChartPaletteEnum.Default:
-                        b[i] = GetSeriesBrushesExcel(i); break;
-                    case ChartPaletteEnum.EarthTones:
-                        b[i] = GetSeriesBrushesEarthTones(i); break;
-                    case ChartPaletteEnum.Excel:
-                        b[i] = GetSeriesBrushesExcel(i); break;
-                    case ChartPaletteEnum.GrayScale:
-                        b[i] = GetSeriesBrushesGrayScale(i); break;
-                    case ChartPaletteEnum.Light:
-                        b[i] = GetSeriesBrushesLight(i); break;
-                    case ChartPaletteEnum.Pastel:
-                        b[i] = GetSeriesBrushesPastel(i); break;
-                    case ChartPaletteEnum.SemiTransparent:
-                        b[i] = GetSeriesBrushesExcel(i); break; // TODO
-                                                                // 20022008 AJM GJL - New black & white printer friendly palette (NOT TO RDL SPEC BUT REQUIRED!)
-                    case ChartPaletteEnum.Patterned:
-                        b[i] = GetSeriesBrushesPatterned(i); break;
-                    case ChartPaletteEnum.PatternedBlack:
-                        b[i] = GetSeriesBrushesPatternedBlack(i); break;
-                    case ChartPaletteEnum.Custom:
-
-                        b[i] = new Draw2.SolidBrush(System.Drawing.Color.FromName(getColour(rpt, 1, i + 1))); break;
-                    default:
-                        b[i] = GetSeriesBrushesExcel(i); break;
-                }
-            }
+                b[i] = await GetPaletteBrush(rpt, row, defn, i).ConfigureAwait(false);
 
             return b;
+        }
+
+        /// <summary>
+        /// The chart palette's brush at a position: a series index, or (for the hierarchical charts) a
+        /// top-level category index. A Custom palette's colours come from the series, so past the last
+        /// series it falls back to the default palette.
+        /// </summary>
+        protected async Task<Draw2.Brush> GetPaletteBrush(Report rpt, Row row, ReportDefn defn, int i)
+        {
+            // TODO: In general all the palettes could use a good going over
+            //   both in terms of the colors in the lists and their order
+            switch (ChartPalette.GetStyle(await ChartDefn.Palette.EvaluateString(rpt, row).ConfigureAwait(false), defn.rl))
+            {
+                case ChartPaletteEnum.Default:
+                    return GetSeriesBrushesExcel(i);
+                case ChartPaletteEnum.EarthTones:
+                    return GetSeriesBrushesEarthTones(i);
+                case ChartPaletteEnum.Excel:
+                    return GetSeriesBrushesExcel(i);
+                case ChartPaletteEnum.GrayScale:
+                    return GetSeriesBrushesGrayScale(i);
+                case ChartPaletteEnum.Light:
+                    return GetSeriesBrushesLight(i);
+                case ChartPaletteEnum.Pastel:
+                    return GetSeriesBrushesPastel(i);
+                case ChartPaletteEnum.SemiTransparent:
+                    return GetSeriesBrushesExcel(i); // TODO
+                // 20022008 AJM GJL - New black & white printer friendly palette (NOT TO RDL SPEC BUT REQUIRED!)
+                case ChartPaletteEnum.Patterned:
+                    return GetSeriesBrushesPatterned(i);
+                case ChartPaletteEnum.PatternedBlack:
+                    return GetSeriesBrushesPatternedBlack(i);
+                case ChartPaletteEnum.Custom:
+                    if (i >= SeriesCount)
+                        return GetSeriesBrushesExcel(i);
+                    return new Draw2.SolidBrush(System.Drawing.Color.FromName(getColour(rpt, 1, i + 1)));
+                default:
+                    return GetSeriesBrushesExcel(i);
+            }
         }
 
         Draw2.Brush GetSeriesBrushesEarthTones(int i)
