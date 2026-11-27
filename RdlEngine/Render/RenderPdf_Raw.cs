@@ -110,6 +110,10 @@ namespace Majorsilence.Reporting.Rdl
         protected internal override void AfterProcessPage() { }
         protected internal override void AddBookmark(PageText pt) { }
 
+        // The document map becomes the PDF outline (the bookmarks panel).
+        protected internal override void AddDocumentMapLabel(string label, int level, float y)
+            => _currentPage.AddBookmark(label, y, level);
+
         // ── lines ─────────────────────────────────────────────────────────────
 
         protected internal override void AddLine(float x, float y, float x2, float y2,

@@ -74,6 +74,13 @@ namespace Majorsilence.Reporting.Rdl
                || (name == "PageBreakCondition" && (parent == "Grouping" || parent == "Table" || parent == "Matrix" || parent == "List" || parent == "Chart"))
                || (name == "Source" && parent == "CustomReportItem");
 
+        // A report item's or group's document-map label is Label in 2005 and DocumentMapLabel in
+        // 2008+. Label elsewhere (a parameter value's, a chart member's) keeps its name.
+        private static readonly HashSet<string> DocumentMapLabelOwners = new HashSet<string> {
+            "Textbox", "Rectangle", "Image", "Line", "Subreport", "Chart", "CustomReportItem",
+            "List", "Table", "Matrix", "Tablix", "Grouping", "Group",
+        };
+
         private const string DesignerNamespace = "http://schemas.microsoft.com/SQLServer/reporting/reportdesigner";
 
         /// <summary>
@@ -133,6 +140,14 @@ namespace Majorsilence.Reporting.Rdl
                         while (e.FirstChild != null)
                             moved.AppendChild (e.FirstChild);
                         e.ParentNode.ReplaceChild (moved, e);
+                    }
+                } else if (e.LocalName == "Label" && DocumentMapLabelOwners.Contains (parentName)) {
+                    count++;
+                    if (apply) {
+                        var renamed = doc.CreateElement ("DocumentMapLabel", ns);
+                        while (e.FirstChild != null)
+                            renamed.AppendChild (e.FirstChild);
+                        e.ParentNode.ReplaceChild (renamed, e);
                     }
                 } else if (e.LocalName == "TypeName" && parentName == "Field") {
                     count++;

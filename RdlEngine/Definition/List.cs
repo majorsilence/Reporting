@@ -131,7 +131,22 @@ namespace Majorsilence.Reporting.Rdl
 			RemoveValue(r);
 		}
 
+		internal override bool IsDocumentMapContainer => true;
+
 		async override internal Task RunPage(Pages pgs, Row row)
+		{
+			int documentMap = await BeginDocumentMap(pgs.Report, row).ConfigureAwait(false);
+			try
+			{
+				await RunPageContents(pgs, row).ConfigureAwait(false);
+			}
+			finally
+			{
+				EndDocumentMap(pgs.Report, documentMap);
+			}
+		}
+
+		private async Task RunPageContents(Pages pgs, Row row)
 		{
 			Report r = pgs.Report;
 			if (await IsHidden(r, row).ConfigureAwait(false))
@@ -409,7 +424,17 @@ namespace Majorsilence.Reporting.Rdl
 
                     int firstItem = p.Count;
                     if (_ReportItems != null)
-                        await _ReportItems.RunPage(pgs, row, listoffset).ConfigureAwait(false);
+                    {
+                        int documentMap = await ge.Group.BeginDocumentMap(rpt, row).ConfigureAwait(false);
+                        try
+                        {
+                            await _ReportItems.RunPage(pgs, row, listoffset).ConfigureAwait(false);
+                        }
+                        finally
+                        {
+                            rpt.EndDocumentMapScope(documentMap);
+                        }
+                    }
 
 
                     if (p == pgs.CurrentPage)       // did subitems force new page?

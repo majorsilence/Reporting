@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace Majorsilence.Reporting.Rdl
 {
@@ -21,6 +22,7 @@ namespace Majorsilence.Reporting.Rdl
 		bool toggleExpanded;	//  whether the items it toggles are shown
 		string userSortKey;		//  the interactive sort this item is, when it is a textbox with a UserSort
 		UserSortDirection userSortDirection;	//  the direction it sorts in now
+		List<DocumentMapLabel> documentMap;	// document-map labels this item is the target of; null when none
 
 		/// <summary>
 		/// How far, in points, an interactive viewer moves a toggle textbox's text right to draw
@@ -100,6 +102,30 @@ namespace Majorsilence.Reporting.Rdl
 		{
 			get { return bookmark; }
 			set { bookmark = value; }
+		}
+
+		/// <summary>
+		/// The document-map labels that point at this item, outermost first: those of the labelled
+		/// containers and group instances it is the first item drawn in, then its own. Empty when
+		/// none do.
+		/// </summary>
+		public IReadOnlyList<DocumentMapLabel> DocumentMapLabels
+		{
+			get { return (IReadOnlyList<DocumentMapLabel>)documentMap ?? Array.Empty<DocumentMapLabel>(); }
+		}
+
+		internal void AddDocumentMapLabel(string label, int level)
+		{
+			if (string.IsNullOrEmpty(label))
+				return;
+			documentMap ??= new List<DocumentMapLabel>();
+			documentMap.Add(new DocumentMapLabel(label, level));
+		}
+
+		internal void InsertDocumentMapLabels(List<DocumentMapLabel> labels)
+		{
+			documentMap ??= new List<DocumentMapLabel>();
+			documentMap.InsertRange(0, labels);
 		}
 
 		public string Tooltip

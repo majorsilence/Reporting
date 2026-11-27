@@ -148,7 +148,22 @@ namespace Majorsilence.Reporting.Rdl
         // How far the container (a Rectangle) shifts the subreport right of the report margin
         internal float ContainerOffset { get; private set; }
 
+        internal override bool IsDocumentMapContainer => true;
+
         async override internal Task RunPage(Pages pgs, Row row)
+        {
+        	int documentMap = await BeginDocumentMap(pgs.Report, row).ConfigureAwait(false);
+        	try
+        	{
+        		await RunPageContents(pgs, row).ConfigureAwait(false);
+        	}
+        	finally
+        	{
+        		EndDocumentMap(pgs.Report, documentMap);
+        	}
+        }
+
+        private async Task RunPageContents(Pages pgs, Row row)
 		{
 			Report r = pgs.Report;
 			if (await IsHidden(r, row).ConfigureAwait(false))

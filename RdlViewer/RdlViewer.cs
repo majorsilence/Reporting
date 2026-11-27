@@ -168,6 +168,10 @@ namespace Majorsilence.Reporting.RdlViewer
         // page item to highlight
 
         private bool _ShowParameters = true;
+        private bool _ShowDocumentMap = true;
+        private int _DocumentMapWidth = 200;
+        private TreeView _DocumentMapTree;     // the report's document map, beside the pages; hidden when it has none
+        private bool _documentMapNavigating;    // a node is being selected in code, not by the user
         private bool _ShowWaitDialog = true;
         // show wait dialog when running report
 
@@ -235,6 +239,12 @@ namespace Majorsilence.Reporting.RdlViewer
             tip.SetToolTip(_WarningButton, "Click to see Report Warnings");
 
             _ParameterPanel = new ScrollableControl();
+
+            _DocumentMapTree = new TreeView();
+            _DocumentMapTree.Parent = this;
+            _DocumentMapTree.Visible = false;
+            _DocumentMapTree.HideSelection = false;
+            _DocumentMapTree.AfterSelect += DocumentMapAfterSelect;
 
             _FindCtl = new RdlViewerFind();
             _FindCtl.Height = 27;
@@ -314,6 +324,48 @@ namespace Majorsilence.Reporting.RdlViewer
                 RdlViewer_Layout(this, null);               // re layout based on new report
             }
         }
+
+        /// <summary>
+        /// True to show the report's document map (its Label / DocumentMapLabel entries) as a tree
+        /// beside the pages. It is shown only when the report has entries. Default true.
+        /// </summary>
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public bool ShowDocumentMap
+        {
+            get { return _ShowDocumentMap; }
+            set
+            {
+                _ShowDocumentMap = value;
+                RdlViewer_Layout(this, null);
+            }
+        }
+
+        /// <summary>
+        /// True when the report being viewed has a document map: whether <see cref="ShowDocumentMap"/>
+        /// has anything to show.
+        /// </summary>
+        public bool HasDocumentMap => _DocumentMapTree.Nodes.Count > 0;
+
+        /// <summary>The width, in pixels, of the document-map panel. Default 200.</summary>
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public int DocumentMapWidth
+        {
+            get { return _DocumentMapWidth; }
+            set
+            {
+                _DocumentMapWidth = Math.Max(0, value);
+                RdlViewer_Layout(this, null);
+            }
+        }
+
+        /// <summary>
+        /// The document map of the report being viewed (see <see cref="Pages.GetDocumentMap"/>);
+        /// empty before it is rendered or when it has no labels.
+        /// </summary>
+        public System.Collections.Generic.IReadOnlyList<DocumentMapEntry> DocumentMap =>
+            _pgs?.GetDocumentMap() ?? (System.Collections.Generic.IReadOnlyList<DocumentMapEntry>)System.Array.Empty<DocumentMapEntry>();
+
+        private bool DocumentMapVisible() => _ShowDocumentMap && HasDocumentMap;
 
         /// <summary>
         /// Causes the find panel to find the next item
@@ -491,7 +543,7 @@ namespace Majorsilence.Reporting.RdlViewer
             {
                 _pgs = await GetPages(_Report);
             }
-            _DrawPanel.Pgs = _pgs;
+            SetViewedPages(_pgs);
             _vScroll.Value = 0;
             CalcZoom();
             _DrawPanel.Invalidate();
@@ -589,7 +641,7 @@ namespace Majorsilence.Reporting.RdlViewer
             _vScroll.Value = _hScroll.Value = 0;
             _sourceVersion++;
             _pgs = null;                // reset pages, only if SourceRdl is also unavailable
-            _DrawPanel.Pgs = null;
+            SetViewedPages(null);
             _loadFailed = false;            // attempt to load the report
             if (this.Visible)
             {
@@ -614,7 +666,7 @@ namespace Majorsilence.Reporting.RdlViewer
                 _SourceFileName = null;
             _sourceVersion++;
             _pgs = null;                // reset pages
-            _DrawPanel.Pgs = null;
+            SetViewedPages(null);
             _loadFailed = false;            // attempt to load the report
             _vScroll.Value = _hScroll.Value = 0;
             if (this.Visible)
@@ -653,7 +705,7 @@ namespace Majorsilence.Reporting.RdlViewer
                     _SourceFileName = null;
                 _sourceVersion++;
                 _pgs = null;                // reset pages
-                _DrawPanel.Pgs = null;
+                SetViewedPages(null);
                 _loadFailed = false;            // attempt to load the report	
                 _vScroll.Value = _hScroll.Value = 0;
                 //if (this.Visible)
@@ -1034,6 +1086,71 @@ namespace Majorsilence.Reporting.RdlViewer
             }
 
             return found;
+        }
+
+        // The pages shown, and the document map built from them.
+        private void SetViewedPages(Pages pgs)
+        {
+            _DrawPanel.Pgs = pgs;
+            BuildDocumentMap(pgs);
+        }
+
+        private void BuildDocumentMap(Pages pgs)
+        {
+            bool wasVisible = _DocumentMapTree.Visible;
+            _DocumentMapTree.Nodes.Clear();
+            if (pgs != null)
+            {
+                foreach (DocumentMapNode n in DocumentMapNode.Build(pgs.GetDocumentMap()))
+                    _DocumentMapTree.Nodes.Add(DocumentMapTreeNode(n));
+                _DocumentMapTree.ExpandAll();
+            }
+            if (wasVisible != DocumentMapVisible())
+                RdlViewer_Layout(this, null);
+        }
+
+        private static TreeNode DocumentMapTreeNode(DocumentMapNode n)
+        {
+            var node = new TreeNode(n.Entry.Label) { Tag = n.Entry };
+            foreach (DocumentMapNode child in n.Children)
+                node.Nodes.Add(DocumentMapTreeNode(child));
+            return node;
+        }
+
+        private async void DocumentMapAfterSelect(object sender, TreeViewEventArgs e)
+        {
+            if (_documentMapNavigating || e.Node?.Tag is not DocumentMapEntry entry)
+                return;
+            await ScrollToDocumentMapEntry(entry);
+        }
+
+        /// <summary>
+        /// Scrolls the pages so the item a document-map entry points at is at the top of the view,
+        /// as clicking its node in the document map does.
+        /// </summary>
+        public async Task ScrollToDocumentMapEntry(DocumentMapEntry entry)
+        {
+            await LoadPageIfNeeded();
+            if (entry == null || _pgs == null || entry.PageIndex < 0 || entry.PageIndex >= _pgs.PageCount)
+                return;
+
+            // Page p is drawn from p * (page height + gap) + gap down (PageDrawing.Draw); a gap's
+            // worth above the item is left showing.
+            float top = entry.PageIndex * (_pgs.PageHeight + _pageGap) + entry.Y;
+            int maxV = Math.Max(_vScroll.Minimum, _vScroll.Maximum - _DrawPanel.Height);
+            _vScroll.Value = Math.Min(Math.Max(PixelsY(Math.Max(0, top)), _vScroll.Minimum), Math.Min(maxV, _vScroll.Maximum));
+            SetScrollControlsV();
+            OnVScroll(_vScroll, new ScrollEventArgs(ScrollEventType.ThumbPosition, _vScroll.Maximum + 1)); // position is intentionally wrong
+
+            // Horizontally only when the item's left is out of view.
+            int left = PixelsX(entry.X + _leftMargin);
+            if (!(_hScroll.Value <= left && left < _hScroll.Value + _DrawPanel.Width / this.Zoom))
+            {
+                int maxH = Math.Max(_hScroll.Minimum, _hScroll.Maximum - _DrawPanel.Width);
+                _hScroll.Value = Math.Min(Math.Max(left, _hScroll.Minimum), Math.Min(maxH, _hScroll.Maximum));
+                SetScrollControlsH();
+                OnHScroll(_hScroll, new ScrollEventArgs(ScrollEventType.ThumbPosition, _hScroll.Maximum + 1));
+            }
         }
 
         public async Task ScrollToPageItem(PageItem pi)
@@ -1659,7 +1776,7 @@ namespace Majorsilence.Reporting.RdlViewer
                 } while (version != _sourceVersion);
 
                 _pgs = pgs;
-                _DrawPanel.Pgs = _pgs;
+                SetViewedPages(_pgs);
                 CalcZoom();                         // this could affect zoom
                 _DrawPanel.Invalidate();
             }
@@ -1860,7 +1977,7 @@ namespace Majorsilence.Reporting.RdlViewer
                 showWait();
                   
                 _pgs = await GetPages(this._Report);
-                _DrawPanel.Pgs = _pgs;
+                SetViewedPages(_pgs);
                 _vScroll.Value = 0;
                 CalcZoom();
                 _WarningButton.Visible = WarningVisible();
@@ -2196,10 +2313,24 @@ namespace Majorsilence.Reporting.RdlViewer
                 _WarningButton.Visible = false;
                 _ParameterPanel.Visible = false;
             }
-            _DrawPanel.Location = new Point(0, pHeight);
-            _DrawPanel.Width = this.Width - _vScroll.Width;
+            // The document map, when there is one to show, takes the left of the room below the
+            // parameters; the pages and their scroll bars the rest.
+            int mWidth = 0;
+            if (DocumentMapVisible())
+            {
+                mWidth = Math.Min(_DocumentMapWidth, Math.Max(0, this.Width - _vScroll.Width - 20));
+                _DocumentMapTree.Location = new Point(0, pHeight);
+                _DocumentMapTree.Width = mWidth;
+                _DocumentMapTree.Height = Math.Max(0, this.Height - pHeight - fHeight);
+                _DocumentMapTree.Visible = true;
+            }
+            else
+                _DocumentMapTree.Visible = false;
+
+            _DrawPanel.Location = new Point(mWidth, pHeight);
+            _DrawPanel.Width = this.Width - _vScroll.Width - mWidth;
             _DrawPanel.Height = this.Height - _hScroll.Height - pHeight - fHeight;
-            _hScroll.Location = new Point(0, this.Height - _hScroll.Height - fHeight);
+            _hScroll.Location = new Point(mWidth, this.Height - _hScroll.Height - fHeight);
             _hScroll.Width = _DrawPanel.Width;
             _vScroll.Location = new Point(this.Width - _vScroll.Width, _DrawPanel.Location.Y);
             _vScroll.Height = _DrawPanel.Height;
@@ -2275,7 +2406,7 @@ namespace Majorsilence.Reporting.RdlViewer
                     return;
 
                 _pgs = pgs;
-                _DrawPanel.Pgs = _pgs;
+                SetViewedPages(_pgs);
                 CalcZoom();         // the page count may have changed: sets the scroll ranges
                 _vScroll.Value = Math.Max(_vScroll.Minimum, Math.Min(vScroll, _vScroll.Maximum));
                 _hScroll.Value = Math.Max(_hScroll.Minimum, Math.Min(hScroll, _hScroll.Maximum));

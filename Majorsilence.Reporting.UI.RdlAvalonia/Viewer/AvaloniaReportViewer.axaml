@@ -10,6 +10,7 @@
     <StreamGeometry x:Key="Icon.Print">F1 M4,2 H12 V5 H4 Z M2,6 H14 V12 H12 V10 H4 V12 H2 Z M5,11 H11 V14 H5 Z</StreamGeometry>
     <StreamGeometry x:Key="Icon.Copy">F1 M3,5 H10 V15 H3 Z M6,1 H13 V12 H11 V3 H6 Z</StreamGeometry>
     <StreamGeometry x:Key="Icon.SelectAll">F0 M2,2 H14 V14 H2 Z M4,4 V12 H12 V4 Z M6,6 H10 V10 H6 Z</StreamGeometry>
+    <StreamGeometry x:Key="Icon.Outline">F1 M1,2 H4 V4 H1 Z M5,2 H15 V4 H5 Z M4,7 H7 V9 H4 Z M8,7 H15 V9 H8 Z M4,12 H7 V14 H4 Z M8,12 H15 V14 H8 Z</StreamGeometry>
     <StreamGeometry x:Key="Icon.Pages">F1 M2,3 H14 V5 H2 Z M2,7 H14 V9 H2 Z M2,11 H14 V13 H2 Z</StreamGeometry>
     <StreamGeometry x:Key="Icon.Find">F0 M6.5,1 A5.5,5.5 0 1 0 6.5,12 A5.5,5.5 0 1 0 6.5,1 Z M6.5,3 A3.5,3.5 0 1 1 6.5,10 A3.5,3.5 0 1 1 6.5,3 Z M10.5,11.5 L12,10 L15,13 L13.5,14.5 Z</StreamGeometry>
     <StreamGeometry x:Key="Icon.Warning">F0 M8,1 L15,14 H1 Z M7.2,5.5 H8.8 V9.5 H7.2 Z M7.2,10.5 H8.8 V12 H7.2 Z</StreamGeometry>
@@ -149,6 +150,15 @@
         <Separator Width="1" Height="18" Margin="4,0"
                    Background="{DynamicResource SystemControlForegroundBaseLowBrush}"/>
 
+        <!-- Document map toggle (shown only for a report with a document map) -->
+        <ToggleButton x:Name="DocumentMapButton" Classes="toolbar" IsVisible="False" IsChecked="True"
+                      ToolTip.Tip="Toggle document map panel">
+          <StackPanel Orientation="Horizontal" Spacing="5">
+            <PathIcon Data="{StaticResource Icon.Outline}" Width="14" Height="14" VerticalAlignment="Center"/>
+            <TextBlock Text="Map" VerticalAlignment="Center"/>
+          </StackPanel>
+        </ToggleButton>
+
         <!-- Thumbnails toggle -->
         <ToggleButton x:Name="ThumbnailsButton" Classes="toolbar" ToolTip.Tip="Toggle page thumbnails panel">
           <StackPanel Orientation="Horizontal" Spacing="5">
@@ -267,13 +277,26 @@
     <Grid>
       <Grid.ColumnDefinitions>
         <ColumnDefinition Width="Auto"/>
+        <ColumnDefinition Width="Auto"/>
         <ColumnDefinition Width="*"/>
         <ColumnDefinition Width="Auto"/>
       </Grid.ColumnDefinitions>
 
-      <!-- Thumbnail sidebar (col 0) -->
-      <Border x:Name="ThumbnailPanel"
+      <!-- Document map sidebar (col 0): the report's Label / DocumentMapLabel entries -->
+      <Border x:Name="DocumentMapPanel"
               Grid.Column="0"
+              IsVisible="False"
+              Width="200"
+              BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}"
+              BorderThickness="0,0,1,0">
+        <TreeView x:Name="DocumentMapTree"
+                  ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                  FontSize="12"/>
+      </Border>
+
+      <!-- Thumbnail sidebar (col 1) -->
+      <Border x:Name="ThumbnailPanel"
+              Grid.Column="1"
               IsVisible="False"
               Width="140"
               BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}"
@@ -286,9 +309,9 @@
         </ScrollViewer>
       </Border>
 
-      <!-- Report canvas area (col 1) -->
+      <!-- Report canvas area (col 2) -->
       <ScrollViewer x:Name="ReportScrollViewer"
-                    Grid.Column="1"
+                    Grid.Column="2"
                     Background="#F0F0F0"
                     HorizontalScrollBarVisibility="Auto"
                     VerticalScrollBarVisibility="Auto">
@@ -303,9 +326,9 @@
         </Border>
       </ScrollViewer>
 
-      <!-- Empty state (col 1 overlay) -->
+      <!-- Empty state (col 2 overlay) -->
       <Border x:Name="EmptyStatePanel"
-              Grid.Column="1"
+              Grid.Column="2"
               IsVisible="True"
               IsHitTestVisible="False">
         <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="10">
@@ -317,9 +340,9 @@
         </StackPanel>
       </Border>
 
-      <!-- Loading overlay (col 1, topmost) -->
+      <!-- Loading overlay (col 2, topmost) -->
       <Border x:Name="LoadingOverlay"
-              Grid.Column="1"
+              Grid.Column="2"
               Background="#F0F0F0"
               IsVisible="False"
               IsHitTestVisible="False">
@@ -330,9 +353,9 @@
                    Opacity="0.6"/>
       </Border>
 
-      <!-- Errors panel (col 2) -->
+      <!-- Errors panel (col 3) -->
       <Border x:Name="ErrorsPanel"
-              Grid.Column="2"
+              Grid.Column="3"
               IsVisible="False"
               Width="300"
               BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}"

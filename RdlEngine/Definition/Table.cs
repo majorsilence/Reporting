@@ -330,7 +330,22 @@ namespace Majorsilence.Reporting.Rdl
 			return;
 		}
 
+		internal override bool IsDocumentMapContainer => true;
+
 		async override internal Task RunPage(Pages pgs, Row row)
+		{
+			int documentMap = await BeginDocumentMap(pgs.Report, row).ConfigureAwait(false);
+			try
+			{
+				await RunPageContents(pgs, row).ConfigureAwait(false);
+			}
+			finally
+			{
+				EndDocumentMap(pgs.Report, documentMap);
+			}
+		}
+
+		private async Task RunPageContents(Pages pgs, Row row)
 		{	
 			Report r = pgs.Report;
 			if (await IsHidden(r, row).ConfigureAwait(false))
@@ -1079,6 +1094,22 @@ namespace Majorsilence.Reporting.Rdl
 
 		// A group's header, the groups or detail rows it holds, and its footer.
 		private async Task RunGroupPage(Pages pgs, TableWorkClass wc, GroupEntry ge, TableGroup tg, int endRow, float groupHeight, GroupEntry next)
+		{
+			// The group instance's document-map label points at the first thing it draws. Run again
+			// on a new page (RunGroupKeptTogether), it starts again with what was taken off.
+			int documentMap = ge.Group == null ? -1
+				: await ge.Group.BeginDocumentMap(pgs.Report, wc.Data.Data[ge.StartRow]).ConfigureAwait(false);
+			try
+			{
+				await RunGroupPageContents(pgs, wc, ge, tg, endRow, groupHeight, next).ConfigureAwait(false);
+			}
+			finally
+			{
+				pgs.Report.EndDocumentMapScope(documentMap);
+			}
+		}
+
+		private async Task RunGroupPageContents(Pages pgs, TableWorkClass wc, GroupEntry ge, TableGroup tg, int endRow, float groupHeight, GroupEntry next)
 		{
 			// What the header draws beneath, the groups or detail rows within it print over; its
 			// footer prints below it.
