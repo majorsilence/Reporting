@@ -1395,8 +1395,11 @@ function findObject(id) {
 			{
 				if (_SkipMatrixCols == 0)
 					tw.Write("<td>");
+				_matrixRowGroupLabels.Push(-1);
 				return;
 			}
+
+			_matrixRowGroupLabels.Push(_map == null ? -1 : await MatrixRowGroupStart(m, ri, r).ConfigureAwait(false));
 
 			string cssName = await CssAdd(ri.Style, ri, r, false, h, w).ConfigureAwait(false);	// get the style name for this item
 
@@ -1426,6 +1429,8 @@ function findObject(id) {
 
 		public Task MatrixCellEnd(Matrix m, ReportItem ri, int row, int column, Row r)
 		{
+			if (_matrixRowGroupLabels.Count > 0)
+				_map?.DropPendingFrom(_matrixRowGroupLabels.Pop());
 			if (_SkipMatrixCols == 0)
 				tw.Write("</td>");
 			else if (_SkipMatrixCols < 0)
@@ -1436,6 +1441,34 @@ function findObject(id) {
 			else
 				_SkipMatrixCols--;
 			return Task.CompletedTask;
+		}
+
+		// Where a matrix row group label queued at each open matrix cell waits (-1 for none), so
+		// one the cell wrote nothing for is dropped at its end. A stack: a cell can hold a matrix.
+		readonly System.Collections.Generic.Stack<int> _matrixRowGroupLabels = new System.Collections.Generic.Stack<int>();
+
+		// A 2005 matrix's dynamic row header cell is the start of an instance of its row grouping,
+		// and r is the instance's first row: the instance's document-map label goes on what the
+		// cell writes. Column groups are not in the document map (an instance of one runs down
+		// every row), as in the paged document map. A Tablix run as a pivot is not handled here:
+		// its row headers do not say which group they belong to.
+		private async Task<int> MatrixRowGroupStart(Matrix m, ReportItem ri, Row r)
+		{
+			if (m is TablixPivot || m.RowGroupings == null)
+				return -1;
+			int labelledAbove = 0;
+			foreach (RowGrouping rg in m.RowGroupings.Items)
+			{
+				Grouping g = rg.DynamicRows?.Grouping;
+				if (g == null)
+					continue;
+				ReportItems header = rg.DynamicRows.ReportItems;
+				if (header != null && header.Items.Count > 0 && header.Items[0] == ri)
+					return await _map.RowGroupStart(this.r, g, labelledAbove, r).ConfigureAwait(false);
+				if (g.Label != null)
+					labelledAbove++;
+			}
+			return -1;
 		}
 
 		public void MatrixRowStart(Matrix m, int row, Row r)
