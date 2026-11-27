@@ -11,7 +11,8 @@ namespace Majorsilence.Reporting.Rdl
     /// <summary>
     /// One class of values an appearance rule gives a look to: a numeric range (From to To), or a
     /// single value (Category) when the rule's values are not numbers. A colour rule fills in
-    /// Color; the legend and colour scale draw from these.
+    /// Color, a size rule SizePoints and a marker rule Marker; the legend and colour scale draw
+    /// from these.
     /// </summary>
     internal sealed class MapBucket
     {
@@ -19,6 +20,8 @@ namespace Majorsilence.Reporting.Rdl
         internal double To;
         internal string Category;
         internal Color Color = Color.Empty;
+        internal float SizePoints = float.NaN;     // a size rule's marker size or line width
+        internal MapMarkerStyle? Marker;           // a marker rule's marker
 
         internal bool IsCategory => Category != null;
 
