@@ -791,7 +791,7 @@ namespace Majorsilence.Reporting.Rdl
 
 		// The box was measured by the graphics library wrapping the text with a "w" added to make room. It broke
 		// lines differently from the drawing - inside a word, and a "w" sooner - so a box whose text fits grew by
-		// a line it never drew. The height is still taken in whole pixels, as it was.
+		// a line it never drew. Without a line height the height is still taken in whole pixels, as it was.
 		// The widths are those of drawnFont, the font the PDF draws the text in, when it has every character of
 		// the text: the graphics library measures a family the machine lacks in the system's fallback font, so a
 		// box in a font only the PDF has, or in the PDF's substitute for a missing one, grew by other lines than
@@ -807,8 +807,12 @@ namespace Majorsilence.Reporting.Rdl
 				? line => drawnFont.GetWidthPoint(line, size, kerning)
 				: line => g.MeasureRunWidth(line, font) * pointsPerPixel;
 			int lines = TextWrap.LineCount(s, Math.Max(wrapPoints, 1), width);
-			float pitchPx = lineHeight > 0 ? lineHeight * g.DpiY / 72f : oneLinePx;
-			return RSize.PointsFromPixels(g, (int) Math.Ceiling(lines * pitchPx));
+			// With a line height the box is its lines at that height, to the point: taken up to a whole
+			// pixel, a box of four 9.25pt lines came out 37.5pt and each row of a list sat half a point
+			// lower than the one before.
+			if (lineHeight > 0)
+				return lines * lineHeight;
+			return RSize.PointsFromPixels(g, (int) Math.Ceiling(lines * oneLinePx));
 		}
 
 		private static bool Kerned(Report rpt) => rpt?.ReportDefinition?.Kerning ?? false;
