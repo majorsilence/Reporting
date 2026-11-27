@@ -1261,6 +1261,21 @@ class ReportDesigner extends HTMLElement {
           `<circle cx="6" cy="22" r="2" fill="#4285f4"/><circle cx="14" cy="12" r="2" fill="#4285f4"/>` +
           `<circle cx="22" cy="16" r="2" fill="#4285f4"/><circle cx="30" cy="6"  r="2" fill="#4285f4"/>` +
           `<circle cx="38" cy="10" r="2" fill="#4285f4"/>`;
+      } else if (t === 'TreeMap') {
+        svgContent =
+          `<rect x="2"  y="2"  width="20" height="26" fill="#4285f4" stroke="#fff"/>` +
+          `<rect x="22" y="2"  width="16" height="14" fill="#34a853" stroke="#fff"/>` +
+          `<rect x="22" y="16" width="9"  height="12" fill="#fbbc05" stroke="#fff"/>` +
+          `<rect x="31" y="16" width="7"  height="12" fill="#ea4335" stroke="#fff"/>`;
+      } else if (t === 'Sunburst') {
+        svgContent =
+          `<path d="M20,14 L20,0 A14,14 0 0,1 32,21 Z" fill="#a0c3ff"/>` +
+          `<path d="M20,14 L32,21 A14,14 0 0,1 6,14 Z"  fill="#8fd19e"/>` +
+          `<path d="M20,14 L6,14  A14,14 0 0,1 20,0 Z"  fill="#fde293"/>` +
+          `<path d="M20,14 L20,5 A9,9 0 0,1 28,18 Z" fill="#4285f4"/>` +
+          `<path d="M20,14 L28,18 A9,9 0 0,1 11,14 Z" fill="#34a853"/>` +
+          `<path d="M20,14 L11,14 A9,9 0 0,1 20,5 Z"  fill="#fbbc05"/>` +
+          `<circle cx="20" cy="14" r="4" fill="${item.style.backgroundColor||'#fff'}"/>`;
       } else if (t === 'Bar') {
         svgContent =
           `<rect y="2"  x="16" height="6" width="22" fill="#4285f4"/>` +
@@ -1491,7 +1506,7 @@ class ReportDesigner extends HTMLElement {
       const dsetOpts = ['', ...this._report.dataSets.map(d => d.name)];
       groups.push(`<div class="pgroup">
         <div class="pgroup-title">Chart</div>
-        ${row('Type',     sel('p-charttype',    item.chartType,    ['Column','Bar','Line','Pie','Area','Doughnut','Scatter']))}
+        ${row('Type',     sel('p-charttype',    item.chartType,    ['Column','Bar','Line','Pie','Area','Doughnut','Scatter','TreeMap','Sunburst']))}
         ${row('Subtype',  sel('p-chartsubtype', item.chartSubtype, ['Plain','Stacked','PercentStacked']))}
         ${row('DataSet',  sel('p-chartds',      item.dataSetName,  dsetOpts))}
         ${row('Category', txt('p-chartcat',     item.categoryField))}

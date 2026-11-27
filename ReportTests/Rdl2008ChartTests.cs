@@ -164,6 +164,8 @@ namespace ReportTests
         [TestCase ("Doughnut", "Plain", "Shape", "Doughnut")]
         [TestCase ("Line", "Smooth", "Line", "Smooth")]
         [TestCase ("Bar", "PercentStacked", "Bar", "PercentStacked")]
+        [TestCase ("TreeMap", "Plain", "TreeMap", "Plain")]
+        [TestCase ("Sunburst", "Plain", "Sunburst", "Plain")]
         public void ChartTypes_MapBothWays (string type, string subtype, string type2008, string subtype2008)
         {
             var xml = Chart2005.Replace ("<Type>Column</Type><Subtype>Stacked</Subtype>", $"<Type>{type}</Type><Subtype>{subtype}</Subtype>");
@@ -177,6 +179,70 @@ namespace ReportTests
             Rdl2008Normalizer.Normalize (doc, null);
             Assert.That (First (doc, "Chart")["Type", Rdl2008].InnerText, Is.EqualTo (type));
             Assert.That (First (doc, "Chart")["Subtype", Rdl2008].InnerText, Is.EqualTo (subtype));
+        }
+
+        private const string Rdl2016 = "http://schemas.microsoft.com/sqlserver/reporting/2016/01/reportdefinition";
+
+        /// <summary>A 2016 TreeMap or Sunburst as Report Builder writes it: three nested category groups.</summary>
+        private static string Hierarchy2016 (string type) => $@"
+<Chart Name=""Sales"">
+  <ChartCategoryHierarchy><ChartMembers><ChartMember>
+    <Group Name=""ByRegion""><GroupExpressions><GroupExpression>=Fields!Region.Value</GroupExpression></GroupExpressions></Group>
+    <Label>=Fields!Region.Value</Label>
+    <ChartMembers><ChartMember>
+      <Group Name=""ByName""><GroupExpressions><GroupExpression>=Fields!Name.Value</GroupExpression></GroupExpressions></Group>
+      <Label>=Fields!Name.Value</Label>
+      <ChartMembers><ChartMember>
+        <Group Name=""ByAmount""><GroupExpressions><GroupExpression>=Fields!Amount.Value</GroupExpression></GroupExpressions></Group>
+        <Label>=Fields!Amount.Value</Label>
+      </ChartMember></ChartMembers>
+    </ChartMember></ChartMembers>
+  </ChartMember></ChartMembers></ChartCategoryHierarchy>
+  <ChartSeriesHierarchy><ChartMembers><ChartMember><Label>Amount</Label></ChartMember></ChartMembers></ChartSeriesHierarchy>
+  <ChartData><ChartSeriesCollection><ChartSeries Name=""Amount"">
+    <ChartDataPoints><ChartDataPoint><ChartDataPointValues><Y>=Sum(Fields!Amount.Value)</Y></ChartDataPointValues><Style /></ChartDataPoint></ChartDataPoints>
+    <Type>{type}</Type><Style /><ValueAxisName>Primary</ValueAxisName><CategoryAxisName>Primary</CategoryAxisName>
+  </ChartSeries></ChartSeriesCollection></ChartData>
+  <ChartAreas><ChartArea Name=""Default""><ChartCategoryAxes><ChartAxis Name=""Primary""><Style /></ChartAxis></ChartCategoryAxes>
+    <ChartValueAxes><ChartAxis Name=""Primary""><Style /></ChartAxis></ChartValueAxes><Style /></ChartArea></ChartAreas>
+  <DataSetName>Data</DataSetName><Top>0in</Top><Left>0in</Left><Height>3in</Height><Width>5in</Width>
+</Chart>";
+
+        /// <summary>
+        /// TreeMap and Sunburst (#639) became Column with a warning; now they keep their type and
+        /// their category levels, and are written back as the same 2016 chart.
+        /// </summary>
+        [TestCase ("TreeMap")]
+        [TestCase ("Sunburst")]
+        public async Task HierarchyCharts2016_KeepTheirTypeAndLevels_BothWays (string type)
+        {
+            var doc = Load (ReportWith (Rdl2016, Hierarchy2016 (type)));
+
+            Rdl2008Normalizer.Normalize (doc, null);
+            var chart = First (doc, "Chart");
+            Assert.That (chart["Type", Rdl2016].InnerText, Is.EqualTo (type));
+            Assert.That (chart["Subtype", Rdl2016].InnerText, Is.EqualTo ("Plain"));
+            var levels = chart["CategoryGroupings", Rdl2016].ChildNodes.Cast<XmlElement> ()
+                .Select (g => g["DynamicCategories", Rdl2016]["Grouping", Rdl2016].GetAttribute ("Name")).ToArray ();
+            Assert.That (levels, Is.EqualTo (new[] { "ByRegion", "ByName", "ByAmount" }));
+
+            Rdl2008Exporter.ConvertToTablix (doc);
+            var series = First (doc, "ChartSeries");
+            Assert.That (series["Type", Rdl2016].InnerText, Is.EqualTo (type));
+            Assert.That (series["Subtype", Rdl2016].InnerText, Is.EqualTo ("Plain"));
+            var groups = doc.GetElementsByTagName ("ChartCategoryHierarchy").Cast<XmlElement> ().Single ()
+                .GetElementsByTagName ("Group").Cast<XmlElement> ().Select (g => g.GetAttribute ("Name")).ToArray ();
+            Assert.That (groups, Is.EqualTo (new[] { "ByRegion", "ByName", "ByAmount" }), "the levels nest again");
+
+            var parser = new RDLParser (ReportWith (Rdl2016, Hierarchy2016 (type))) { SkipDatabaseSchemaValidation = true };
+            using var report = await parser.Parse ();
+            Assert.That (Messages (report).Where (e => e.Contains ("Chart 'Sales'")), Is.Empty, "no longer reported as unsupported");
+            Assert.That (report.ErrorMaxSeverity, Is.LessThanOrEqualTo (4), string.Join (" | ", Messages (report)));
+            await report.DataSets["Data"].SetData (Data ());
+            await report.RunGetData (null);
+            using var memory = new MemoryStreamGen ();
+            await report.RunRender (memory, OutputPresentationType.HTML);
+            Assert.That (memory.GetText (), Does.Contain ("<img"));
         }
 
         [Test]

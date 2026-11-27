@@ -501,6 +501,12 @@
   <data name="cbChartType.Items7" xml:space="preserve">
     <value>Scatter</value>
   </data>
+  <data name="cbChartType.Items8" xml:space="preserve">
+    <value>TreeMap</value>
+  </data>
+  <data name="cbChartType.Items9" xml:space="preserve">
+    <value>Sunburst</value>
+  </data>
   <data name="&gt;&gt;lChartData2.Name" xml:space="preserve">
     <value>lChartData2</value>
   </data>

@@ -289,17 +289,7 @@ namespace Majorsilence.Reporting.Rdl
 				rect = new System.Drawing.Rectangle(rect.Left + adjX + offset, rect.Top + adjY + offset, side, side);
 			}
 
-			// A slice that is the whole pie is drawn as a circle: an arc swept a full turn ends
-			// where it starts, and was drawn as a single line from the centre.
-			if (endAngle - startAngle >= 360)
-			{
-				g.FillEllipse(brush, rect);
-				g.DrawEllipse(Draw2.Pens.Black, rect);
-				return;
-			}
-
-			g.FillPie(brush, rect, startAngle, endAngle - startAngle);
-			g.DrawPie(Draw2.Pens.Black, rect, startAngle, endAngle - startAngle);
+			DrawPieSlice(g, brush, rect, startAngle, endAngle - startAngle);
 
 			return;
 		}

@@ -1,6 +1,7 @@
 
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 using Draw2 = Majorsilence.Forms.Drawing;
@@ -732,9 +733,15 @@ namespace Majorsilence.Reporting.Rdl
 
         }
 
-        protected async Task<(object value, TypeCode tc)> GetCategoryValue(Report rpt, int row)
+        protected Task<(object value, TypeCode tc)> GetCategoryValue(Report rpt, int row)
         {
-            MatrixCellEntry mce = _DataDefn[row, 0];
+            return GetCategoryValue(rpt, row, 0);
+        }
+
+        /// <summary>The value of the category header at a level (0 the outermost) of a grid row.</summary>
+        protected async Task<(object value, TypeCode tc)> GetCategoryValue(Report rpt, int row, int level)
+        {
+            MatrixCellEntry mce = _DataDefn[row, level];
             TypeCode tc;
             if (mce == null)
             {
@@ -761,16 +768,129 @@ namespace Majorsilence.Reporting.Rdl
         /// a date but labelled with its month printed the whole date-time under every column,
         /// while the legend, which reads the series' Label the same way, showed the month.
         /// </summary>
-        protected async Task<(object value, TypeCode tc)> GetCategoryLabel(Report rpt, int row)
+        protected Task<(object value, TypeCode tc)> GetCategoryLabel(Report rpt, int row)
         {
-            MatrixCellEntry mce = _DataDefn[row, 0];
+            return GetCategoryLabel(rpt, row, 0);
+        }
+
+        /// <summary>What the category header at a level (0 the outermost) of a grid row prints as.</summary>
+        protected async Task<(object value, TypeCode tc)> GetCategoryLabel(Report rpt, int row, int level)
+        {
+            MatrixCellEntry mce = _DataDefn[row, level];
             if (mce == null || ((ChartExpression)mce.DisplayItem).ChartLabel == null)
-                return await GetCategoryValue(rpt, row).ConfigureAwait(false);
+                return await GetCategoryValue(rpt, row, level).ConfigureAwait(false);
 
             this._ChartDefn.ChartMatrix.SetMyData(rpt, mce.Data);       // Must set this for evaluation
             Row lrow = mce.Data.Data.Count > 0 ? mce.Data.Data[0] : null;
             ChartExpression ce = (ChartExpression)mce.DisplayItem;
             return (await ce.ChartLabel.EvaluateString(rpt, lrow).ConfigureAwait(false), TypeCode.String);
+        }
+
+        /// <summary>
+        /// The category levels of the chart: the grid has a header column per CategoryGrouping,
+        /// outermost first, and the data columns start after them. The other chart types read
+        /// column 0 as the category and columns 1 on as the series, so they assume one level.
+        /// </summary>
+        protected internal int CategoryLevelCount
+        {
+            get { return Math.Max(1, _ChartDefn.ChartMatrix.RowGroupings.Items.Count); }
+        }
+
+        /// <summary>The series header rows at the top of the grid: one per SeriesGrouping.</summary>
+        protected internal int SeriesHeaderRowCount
+        {
+            get { return Math.Max(1, _ChartDefn.ChartMatrix.ColumnGroupings.Items.Count); }
+        }
+
+        /// <summary>
+        /// The full category path (outermost level first) and value of every data point, for the
+        /// hierarchical charts. With <paramref name="seriesAsInnermostLevel"/> each series is a
+        /// level inside the innermost category; otherwise the series at a category add up.
+        /// </summary>
+        protected internal async Task<List<ChartHierarchyPoint>> GetHierarchyPointsAsync(Report rpt, bool seriesAsInnermostLevel = false)
+        {
+            int headerRows = SeriesHeaderRowCount;
+            Func<int, Task<string?>>? seriesLabel = null;
+            if (seriesAsInnermostLevel)
+                seriesLabel = col => GetSeriesLabelText(rpt, headerRows - 1, col);
+
+            return await ChartHierarchy.ReadGrid(_DataDefn, headerRows, CategoryLevelCount,
+                async (row, level) => LabelText((await GetCategoryLabel(rpt, row, level).ConfigureAwait(false)).value),
+                (row, col) => GetDataValue(rpt, row, col),
+                seriesLabel).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// The value tree of a TreeMap or Sunburst. Zero and negative values are left out, as SSRS
+        /// does, and that is logged once for the chart.
+        /// </summary>
+        protected internal async Task<ChartHierarchy> GetHierarchyAsync(Report rpt, bool seriesAsInnermostLevel = false)
+        {
+            ChartHierarchy h = ChartHierarchy.Build(await GetHierarchyPointsAsync(rpt, seriesAsInnermostLevel).ConfigureAwait(false));
+            if (h.AnyLeftOut)
+                rpt.rl.LogError(4, string.Format("Chart '{0}' leaves out {1} zero or negative value(s): a {2} chart cannot show them.",
+                    _ChartDefn.Name?.Nm, h.LeftOutCount, _ChartDefn.Type));
+            return h;
+        }
+
+        private async Task<string?> GetSeriesLabelText(Report rpt, int row, int col)
+        {
+            MatrixCellEntry mce = _DataDefn[row, col];
+            if (mce == null)
+                return string.Empty;
+            this._ChartDefn.ChartMatrix.SetMyData(rpt, mce.Data);       // Must set this for evaluation
+            Row? lrow = mce.Data.Data.Count > 0 ? mce.Data.Data[0] : null;
+            ChartExpression ce = (ChartExpression)mce.DisplayItem;
+            return ce.ChartLabel == null ?
+                await ce.Value.EvaluateString(rpt, lrow).ConfigureAwait(false) :
+                await ce.ChartLabel.EvaluateString(rpt, lrow).ConfigureAwait(false);
+        }
+
+        private static string LabelText(object? v)
+        {
+            return Convert.ToString(v, System.Globalization.CultureInfo.CurrentCulture) ?? string.Empty;
+        }
+
+        /// <summary>
+        /// Draws what every chart without axes draws around its plot: the background, the title,
+        /// the legend (only when the chart has series groupings) and the plot area's style, and
+        /// leaves Layout.PlotArea as the space for the plot. Pie draws the same, plus a category axis.
+        /// </summary>
+        protected async Task DrawFrameWithoutAxes(Report rpt, Draw2.Graphics g)
+        {
+            g.InterpolationMode = Draw2.Drawing2D.InterpolationMode.HighQualityBicubic;
+            g.SmoothingMode = Draw2.Drawing2D.SmoothingMode.HighQuality;
+            g.PixelOffsetMode = Draw2.Drawing2D.PixelOffsetMode.None;
+            g.CompositingQuality = Draw2.Drawing2D.CompositingQuality.HighQuality;
+
+            // Adjust the top margin to depend on the title height
+            System.Drawing.Size titleSize = await DrawTitleMeasure(rpt, g, ChartDefn.Title).ConfigureAwait(false);
+            Layout.TopMargin = titleSize.Height;
+
+            await DrawChartStyle(rpt, g).ConfigureAwait(false);
+            await DrawTitle(rpt, g, ChartDefn.Title, new System.Drawing.Rectangle(0, 0, _bm.Width, Layout.TopMargin)).ConfigureAwait(false);
+
+            System.Drawing.Rectangle lRect = await DrawLegend(rpt, g, false, true).ConfigureAwait(false);
+            AdjustMargins(lRect, rpt, g);     // Adjust margins based on legend.
+            await DrawPlotAreaStyle(rpt, g, lRect).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Fills and outlines one slice of a pie. A slice that is the whole pie is drawn as a
+        /// circle: an arc swept a full turn ends where it starts, and was drawn as a single line
+        /// from the centre. Shared by Pie, Doughnut and Sunburst.
+        /// </summary>
+        protected static void DrawPieSlice(Draw2.Graphics g, Draw2.Brush brush, System.Drawing.Rectangle rect, float startAngle, float sweepAngle)
+        {
+            if (sweepAngle >= 360)
+            {
+                g.FillEllipse(brush, rect);
+                g.DrawEllipse(Draw2.Pens.Black, rect);
+                return;
+            }
+
+            g.FillPie(brush, rect, startAngle, sweepAngle);
+            g.DrawPie(Draw2.Pens.Black, rect, startAngle, sweepAngle);
         }
 
         protected async Task<double> GetDataValue(Report rpt, int row, int col)
