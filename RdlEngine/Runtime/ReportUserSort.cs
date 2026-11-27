@@ -19,6 +19,16 @@ namespace Majorsilence.Reporting.Rdl
 		public UserSortState UserSort { get; set; }
 
 		/// <summary>
+		/// HTML output: the URL a sort header's link goes to. The link adds the sort to it as query
+		/// parameters (<see cref="UserSortState.SortIdParameter"/>, <see cref="UserSortState.SortDirectionParameter"/>
+		/// and, when something is sorted, <see cref="UserSortState.SortStateParameter"/>), after a '?'
+		/// or, when it already has a query, an '&amp;'. The host that renders the report again on the
+		/// request (<see cref="UserSortState.FromQuery"/>) sets it, e.g. to the request's path and
+		/// report parameters; null (the default) links to the same page with only the sort as its query.
+		/// </summary>
+		public string UserSortUrl { get; set; }
+
+		/// <summary>
 		/// A click on a sortable textbox (<see cref="PageItem.UserSortKey"/>): see
 		/// <see cref="UserSortState.Toggle"/>. Makes <see cref="UserSort"/> when there is none.
 		/// Takes effect the next time the pages are built.

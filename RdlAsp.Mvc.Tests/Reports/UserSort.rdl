@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Report Name="UserSort">
+  <Description>Issue #636: a table whose Name header sorts it on a click (UserSort).</Description>
+  <ReportParameters>
+    <ReportParameter Name="Who">
+      <DataType>String</DataType>
+      <DefaultValue><Values><Value>nobody</Value></Values></DefaultValue>
+      <Prompt>Who</Prompt>
+    </ReportParameter>
+  </ReportParameters>
+  <DataSources>
+    <DataSource Name="DS1">
+      <ConnectionProperties>
+        <DataProvider>Microsoft.Data.Sqlite</DataProvider>
+        <ConnectString>Data Source=:memory:</ConnectString>
+        <IntegratedSecurity>false</IntegratedSecurity>
+      </ConnectionProperties>
+    </DataSource>
+  </DataSources>
+  <DataSets>
+    <DataSet Name="Data">
+      <Query>
+        <DataSourceName>DS1</DataSourceName>
+        <CommandText>select 'c' as Name union all select 'a' union all select 'b'</CommandText>
+      </Query>
+      <Fields>
+        <Field Name="Name"><DataField>Name</DataField></Field>
+      </Fields>
+    </DataSet>
+  </DataSets>
+  <Body>
+    <Height>1in</Height>
+    <ReportItems>
+      <Table Name="T">
+        <DataSetName>Data</DataSetName>
+        <TableColumns><TableColumn><Width>2in</Width></TableColumn></TableColumns>
+        <Header><TableRows><TableRow><Height>0.25in</Height><TableCells>
+          <TableCell><ReportItems><Textbox Name="SortName"><Value>Name</Value>
+            <UserSort><SortExpression>=Fields!Name.Value</SortExpression></UserSort>
+          </Textbox></ReportItems></TableCell>
+        </TableCells></TableRow></TableRows></Header>
+        <Details><TableRows><TableRow><Height>0.25in</Height><TableCells>
+          <TableCell><ReportItems><Textbox Name="Line"><Value>="ROW-" &amp; Fields!Name.Value</Value></Textbox></ReportItems></TableCell>
+        </TableCells></TableRow></TableRows></Details>
+      </Table>
+    </ReportItems>
+  </Body>
+  <Width>6in</Width>
+  <PageWidth>8.5in</PageWidth>
+  <PageHeight>11in</PageHeight>
+</Report>

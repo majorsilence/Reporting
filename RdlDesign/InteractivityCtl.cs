@@ -20,7 +20,17 @@ namespace Majorsilence.Reporting.RdlDesign
 		private DesignXmlDraw _Draw;
         private List<DrillParameter> _DrillParameters;
 		// flags for controlling whether syntax changed for a particular property
-		private bool fBookmark, fAction, fHidden, fToggle;
+		private bool fBookmark, fAction, fHidden, fToggle, fUserSort;
+		private readonly bool _AllTextboxes;	// UserSort is only on a Textbox
+		private Majorsilence.Forms.GroupBox grpUserSort;
+		private Majorsilence.Forms.CheckBox chkUserSort;
+		private Majorsilence.Forms.Label lSortExpression;
+		private Majorsilence.Forms.TextBox tbSortExpression;
+		private Majorsilence.Forms.Button bSortExpression;
+		private Majorsilence.Forms.Label lSortScope;
+		private Majorsilence.Forms.ComboBox cbSortScope;
+		private Majorsilence.Forms.Label lSortTarget;
+		private Majorsilence.Forms.ComboBox cbSortTarget;
 		private Majorsilence.Forms.GroupBox groupBox1;
 		private Majorsilence.Forms.GroupBox grpBoxVisibility;
 		private Majorsilence.Forms.Label label1;
@@ -51,6 +61,7 @@ namespace Majorsilence.Reporting.RdlDesign
 		{
 			_ReportItems = reportItems;
 			_Draw = dxDraw;
+			_AllTextboxes = reportItems.Count > 0 && reportItems.TrueForAll(n => n.Name == "Textbox");
 			// This call is required by the Windows.Forms Form Designer.
 			InitializeComponent();
 
@@ -127,8 +138,67 @@ namespace Majorsilence.Reporting.RdlDesign
 						cbToggle.Items.Add(name.Value);
 				}
 			}
+			InitUserSort(node);
+
 			// nothing has changed now
-			fBookmark = fAction = fHidden = fToggle = false;
+			fBookmark = fAction = fHidden = fToggle = fUserSort = false;
+		}
+
+		// Interactive sort (#636): a textbox's UserSort -- SortExpression, and optionally the
+		// SortExpressionScope (a group or data region) and SortTarget (a data region or group).
+		private void InitUserSort(XmlNode node)
+		{
+			grpUserSort.Visible = _AllTextboxes;
+			if (!_AllTextboxes)
+				return;
+
+			// the groups and data regions it can name
+			var names = new List<string>();
+			IEnumerable regions = _Draw.GetReportItems("//Table|//List|//Matrix|//Tablix|//Chart");
+			if (regions != null)
+			{
+				foreach (XmlNode rNode in regions)
+				{
+					string name = _Draw.GetElementAttribute(rNode, "Name", "");
+					if (name.Length > 0 && !names.Contains(name))
+						names.Add(name);
+				}
+			}
+			object[] groups = _Draw.GroupingNames;
+			if (groups != null)
+			{
+				foreach (object g in groups)
+				{
+					string name = g as string;
+					if (!string.IsNullOrEmpty(name) && !names.Contains(name))
+						names.Add(name);
+				}
+			}
+			names.Sort(StringComparer.OrdinalIgnoreCase);
+			cbSortScope.Items.Add("");		// none: the detail rows
+			cbSortTarget.Items.Add("");		// none: the data region the textbox is in
+			foreach (string name in names)
+			{
+				cbSortScope.Items.Add(name);
+				cbSortTarget.Items.Add(name);
+			}
+
+			XmlNode usNode = _Draw.GetNamedChildNode(node, "UserSort");
+			chkUserSort.Checked = usNode != null;
+			if (usNode != null)
+			{
+				tbSortExpression.Text = _Draw.GetElementValue(usNode, "SortExpression", "");
+				cbSortScope.Text = _Draw.GetElementValue(usNode, "SortExpressionScope", "");
+				cbSortTarget.Text = _Draw.GetElementValue(usNode, "SortTarget", "");
+			}
+			EnableUserSort();
+		}
+
+		private void EnableUserSort()
+		{
+			bool on = chkUserSort.Checked;
+			tbSortExpression.Enabled = bSortExpression.Enabled = on;
+			cbSortScope.Enabled = cbSortTarget.Enabled = on;
 		}
 
 		/// <summary> 
@@ -176,8 +246,18 @@ namespace Majorsilence.Reporting.RdlDesign
 			this.label1 = new Majorsilence.Forms.Label();
 			this.tbBookmark = new Majorsilence.Forms.TextBox();
 			this.bBookmark = new Majorsilence.Forms.Button();
+			this.grpUserSort = new Majorsilence.Forms.GroupBox();
+			this.chkUserSort = new Majorsilence.Forms.CheckBox();
+			this.lSortExpression = new Majorsilence.Forms.Label();
+			this.tbSortExpression = new Majorsilence.Forms.TextBox();
+			this.bSortExpression = new Majorsilence.Forms.Button();
+			this.lSortScope = new Majorsilence.Forms.Label();
+			this.cbSortScope = new Majorsilence.Forms.ComboBox();
+			this.lSortTarget = new Majorsilence.Forms.Label();
+			this.cbSortTarget = new Majorsilence.Forms.ComboBox();
 			this.grpBoxVisibility.SuspendLayout();
 			this.groupBox1.SuspendLayout();
+			this.grpUserSort.SuspendLayout();
 			this.SuspendLayout();
 			// 
 			// grpBoxVisibility
@@ -323,9 +403,72 @@ namespace Majorsilence.Reporting.RdlDesign
 			this.bBookmark.Tag = "bookmark";
 			this.bBookmark.Click += this.bExpr_Click;
 			// 
+			// grpUserSort
+			// 
+			resources.ApplyResources(this.grpUserSort, "grpUserSort");
+			this.grpUserSort.Controls.Add(this.chkUserSort);
+			this.grpUserSort.Controls.Add(this.lSortExpression);
+			this.grpUserSort.Controls.Add(this.tbSortExpression);
+			this.grpUserSort.Controls.Add(this.bSortExpression);
+			this.grpUserSort.Controls.Add(this.lSortScope);
+			this.grpUserSort.Controls.Add(this.cbSortScope);
+			this.grpUserSort.Controls.Add(this.lSortTarget);
+			this.grpUserSort.Controls.Add(this.cbSortTarget);
+			this.grpUserSort.Name = "grpUserSort";
+			this.grpUserSort.TabStop = false;
+			// 
+			// chkUserSort
+			// 
+			resources.ApplyResources(this.chkUserSort, "chkUserSort");
+			this.chkUserSort.Name = "chkUserSort";
+			this.chkUserSort.CheckedChanged += this.chkUserSort_CheckedChanged;
+			// 
+			// lSortExpression
+			// 
+			resources.ApplyResources(this.lSortExpression, "lSortExpression");
+			this.lSortExpression.Name = "lSortExpression";
+			// 
+			// tbSortExpression
+			// 
+			resources.ApplyResources(this.tbSortExpression, "tbSortExpression");
+			this.tbSortExpression.Name = "tbSortExpression";
+			this.tbSortExpression.TextChanged += this.userSort_Changed;
+			// 
+			// bSortExpression
+			// 
+			resources.ApplyResources(this.bSortExpression, "bSortExpression");
+			this.bSortExpression.Name = "bSortExpression";
+			this.bSortExpression.Tag = "usersort";
+			this.bSortExpression.Click += this.bExpr_Click;
+			// 
+			// lSortScope
+			// 
+			resources.ApplyResources(this.lSortScope, "lSortScope");
+			this.lSortScope.Name = "lSortScope";
+			// 
+			// cbSortScope
+			// 
+			resources.ApplyResources(this.cbSortScope, "cbSortScope");
+			this.cbSortScope.Name = "cbSortScope";
+			this.cbSortScope.SelectedIndexChanged += this.userSort_Changed;
+			this.cbSortScope.TextChanged += this.userSort_Changed;
+			// 
+			// lSortTarget
+			// 
+			resources.ApplyResources(this.lSortTarget, "lSortTarget");
+			this.lSortTarget.Name = "lSortTarget";
+			// 
+			// cbSortTarget
+			// 
+			resources.ApplyResources(this.cbSortTarget, "cbSortTarget");
+			this.cbSortTarget.Name = "cbSortTarget";
+			this.cbSortTarget.SelectedIndexChanged += this.userSort_Changed;
+			this.cbSortTarget.TextChanged += this.userSort_Changed;
+			// 
 			// InteractivityCtl
 			// 
 			resources.ApplyResources(this, "$this");
+			this.Controls.Add(this.grpUserSort);
 			this.Controls.Add(this.bBookmark);
 			this.Controls.Add(this.tbBookmark);
 			this.Controls.Add(this.label1);
@@ -336,6 +479,8 @@ namespace Majorsilence.Reporting.RdlDesign
 			this.grpBoxVisibility.PerformLayout();
 			this.groupBox1.ResumeLayout(false);
 			this.groupBox1.PerformLayout();
+			this.grpUserSort.ResumeLayout(false);
+			this.grpUserSort.PerformLayout();
 			this.ResumeLayout(false);
 			this.PerformLayout();
 
@@ -345,6 +490,11 @@ namespace Majorsilence.Reporting.RdlDesign
  
         public bool IsValid()
 		{
+			if (_AllTextboxes && chkUserSort.Checked && string.IsNullOrWhiteSpace(tbSortExpression.Text))
+			{
+				MessageBox.Show(this, Strings.InteractivityCtl_Show_SortExpressionRequired, Strings.InteractivityCtl_Show_InteractiveSort);
+				return false;
+			}
 			return true;
 		}
 
@@ -359,11 +509,24 @@ namespace Majorsilence.Reporting.RdlDesign
 				ApplyChanges(riNode);
 
 			// nothing has changed now
-			fBookmark = fAction = fHidden = fToggle = false;
+			fBookmark = fAction = fHidden = fToggle = fUserSort = false;
 		}
 
 		private void ApplyChanges(XmlNode rNode)
 		{
+			if (fUserSort && rNode.Name == "Textbox")
+			{
+				if (!chkUserSort.Checked)
+					_Draw.RemoveElement(rNode, "UserSort");
+				else
+				{
+					XmlNode usNode = _Draw.SetElement(rNode, "UserSort", null);
+					_Draw.SetElement(usNode, "SortExpression", tbSortExpression.Text);
+					SetOptional(usNode, "SortExpressionScope", cbSortScope.Text);
+					SetOptional(usNode, "SortTarget", cbSortTarget.Text);
+				}
+			}
+
 			if (fBookmark)
 				_Draw.SetElement(rNode, "Bookmark", tbBookmark.Text);
 
@@ -421,6 +584,26 @@ namespace Majorsilence.Reporting.RdlDesign
 					_Draw.RemoveElement(rNode, "Action");	
 				}
 			}
+		}
+
+		// an optional element: set to the value, or removed when it is blank
+		private void SetOptional(XmlNode parent, string name, string value)
+		{
+			if (string.IsNullOrWhiteSpace(value))
+				_Draw.RemoveElement(parent, name);
+			else
+				_Draw.SetElement(parent, name, value.Trim());
+		}
+
+		private void chkUserSort_CheckedChanged(object sender, System.EventArgs e)
+		{
+			EnableUserSort();
+			fUserSort = true;
+		}
+
+		private void userSort_Changed(object sender, System.EventArgs e)
+		{
+			fUserSort = true;
 		}
 
 		private void tbBookmark_TextChanged(object sender, System.EventArgs e)
@@ -543,6 +726,9 @@ namespace Majorsilence.Reporting.RdlDesign
 				case "visibility":
 					c = tbHidden;
                     break;
+				case "usersort":
+					c = tbSortExpression;
+					break;
 			}
 
 			if (c == null)
@@ -559,6 +745,8 @@ namespace Majorsilence.Reporting.RdlDesign
                     c.Text = ee.Expression;
                     if ((string)(b.Tag) == "bookmark")
                         fBookmark = true;
+                    else if ((string)(b.Tag) == "usersort")
+                        fUserSort = true;
                     else
                         fAction = true;
                 }

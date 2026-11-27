@@ -72,6 +72,7 @@ namespace Majorsilence.Reporting.RdlAsp
                 if (report != null)
                 {
                     ReportHelper.SetUserContext(report, this.HttpContext, new NeedPassword(GetPassword));
+                    ReportHelper.SetUserSort(report, Request);
                     await report.RunGetData(parameters);
                     rendered = await Generate(report, format);
                 }

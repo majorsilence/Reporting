@@ -1055,6 +1055,12 @@ the website https://github.com/majorsilence/Reporting.</value>
   <data name="InteractivityCtl_bDrillthrough_Click_ReportFilesTitle" xml:space="preserve">
     <value>Specify Report File Name</value>
   </data>
+  <data name="InteractivityCtl_Show_SortExpressionRequired" xml:space="preserve">
+    <value>An interactive sort needs a sort expression.</value>
+  </data>
+  <data name="InteractivityCtl_Show_InteractiveSort" xml:space="preserve">
+    <value>Interactive Sort</value>
+  </data>
   <data name="RdlDesigner_menuFileOpen_Click_ReportFilesFilter" xml:space="preserve">
     <value>Report files (*.rdl;*rdlc)|*.rdl;*.rdlc|Encrypted RDL files (*.encrypted)|*.encrypted|All files (*.*)|*.*</value>
   </data>

@@ -74,6 +74,7 @@ namespace Majorsilence.Reporting.Rdl
 		}
 
 		internal string SortExpression => _SortExpression;
+		internal Textbox Textbox => _Textbox;
 		internal string SortExpressionScope => _SortExpressionScope;
 		internal string SortTarget => _SortTarget;
 
