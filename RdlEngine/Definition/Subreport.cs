@@ -225,7 +225,17 @@ namespace Majorsilence.Reporting.Rdl
                 float designedBottom = startPage.YOffset + (Height == null ? 0 : Height.Points);
                 await r.ReportDefinition.Body.RunPage(pgs).ConfigureAwait(false);		// create a the subreport items
                 if (firstPageOnly && pgs.CurrentPage != startPage)
+                {
                     pgs.CutBackTo(startPage, laterCounts);
+                    // A subreport cut at the foot of the page reaches the foot of the page: a
+                    // frame around it is drawn down to there, not to the last thing that fitted.
+                    // An empty box of that height stands for the room the cut rows had.
+                    float top = designedBottom - (Height == null ? 0 : Height.Points);
+                    var room = new PageRectangle { H = Math.Max(0, pgs.BottomOfPage - top), SI = new StyleInfo() };
+                    startPage.AddObject(room);
+                    room.X = 0;
+                    room.Y = top;       // AddObject moves an item by the page's offset
+                }
                 yOffset = pgs.CurrentPage.YOffset;
                 // A table row that holds the subreport ends no higher than its tables, lists
                 // and matrixes do. What else it drew the row counts for itself, the text and
