@@ -252,6 +252,18 @@ namespace Majorsilence.Reporting.RdlViewer
             this.Items.Add(this.pageCount);
             this.Items.Add(new ToolStripButton("Zoom In", (Image)null, ZoomInClicked));
             this.Items.Add(new ToolStripButton("Zoom Out", (Image)null, ZoomOutClicked));
+            this.Items.Add(new ToolStripButton("Document Map", (Image)null, DocumentMapClicked));
+        }
+
+        // Shows or hides the document map; it shows only for a report that has one.
+        private void DocumentMapClicked(object sender, System.EventArgs e)
+        {
+            if (Viewer == null)
+            {
+                return;
+            }
+
+            Viewer.ShowDocumentMap = !Viewer.ShowDocumentMap;
         }
 
 

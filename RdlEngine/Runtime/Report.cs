@@ -544,6 +544,7 @@ namespace Majorsilence.Reporting.Rdl
 
                 // Create all the pages
                 await _Report.Body.RunPage(pgs).ConfigureAwait(false);
+				EndDocumentMapBody();		// the page header and footer are not in the document map
 
 				if (pgs.LastPage.IsEmpty() && pgs.PageCount > 1) // get rid of extraneous pages which
 					pgs.RemoveLastPage();			//   can be caused by region page break at end
@@ -621,6 +622,14 @@ namespace Majorsilence.Reporting.Rdl
 		/// (the default) leaves the PDF as before. A conformance level cannot be combined with PDF security.
 		/// </summary>
 		public Majorsilence.Pdf.PdfConformance PdfConformance { get; set; } = Majorsilence.Pdf.PdfConformance.None;
+
+		/// <summary>
+		/// When true, HTML output (<see cref="OutputPresentationType.HTML"/>, ASPHTML and MHTML) starts
+		/// with a table of contents: a nested list of links to the report items and group instances
+		/// that have a document-map label (Label, or DocumentMapLabel in RDL 2008+). False (the
+		/// default) leaves the HTML as before. Nothing is written when the report has no labels.
+		/// </summary>
+		public bool HtmlDocumentMap { get; set; }
 
 		public string CSS
 		{

@@ -63,6 +63,7 @@ namespace Majorsilence.Reporting.Rdl
 		private void AddObjectInternal(PageItem pi)
 		{
 			pi.Page = this;
+			Owner?.Report.TakePendingDocumentMap(pi);
 			pi.ItemNumber = _items.Count;
 			if (_items.Count == 0)
 				_lastZIndex = pi.ZIndex;
@@ -97,6 +98,9 @@ namespace Majorsilence.Reporting.Rdl
 				}
 			}
 		}
+
+		// The pages this page belongs to; set by Pages.AddPage.
+		internal Pages Owner { get; set; }
 
 		public bool IsEmpty()
 		{

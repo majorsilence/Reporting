@@ -291,7 +291,22 @@ namespace Majorsilence.Reporting.Rdl
             RemoveValue(rpt);
         }
 
+        internal override bool IsDocumentMapContainer => true;
+
         async override internal Task RunPage(Pages pgs, Row row)
+        {
+        	int documentMap = await BeginDocumentMap(pgs.Report, row).ConfigureAwait(false);
+        	try
+        	{
+        		await RunPageContents(pgs, row).ConfigureAwait(false);
+        	}
+        	finally
+        	{
+        		EndDocumentMap(pgs.Report, documentMap);
+        	}
+        }
+
+        private async Task RunPageContents(Pages pgs, Row row)
         {
             Report r = pgs.Report;
             if (await IsHidden(r, row).ConfigureAwait(false))
@@ -334,6 +349,8 @@ namespace Majorsilence.Reporting.Rdl
                         p.YOffset += await HeightOfRow(pgs, matrix, aRow).ConfigureAwait(false);
                     }
                 }
+                if (iRow >= headerRows)
+                    await QueueRowGroupLabels(r, matrix, iRow).ConfigureAwait(false);
                 await RunPageColumns(pgs, wc, matrix, iRow, maxColumns).ConfigureAwait(false);
                 p.YOffset += h;
             }
@@ -343,6 +360,54 @@ namespace Majorsilence.Reporting.Rdl
             ResetInScope(r);
             RemoveValue(r);
             return;
+        }
+
+        // The document-map labels of the row group instances that start on a row of the built
+        // matrix, outer first, go on the first thing the row draws. Each nests beneath the matrix
+        // and the labelled row groups around it. Column groups take no part: an instance of one
+        // runs down every row, and has no single place in the document map.
+        private async Task QueueRowGroupLabels(Report rpt, MatrixCellEntry[,] matrix, int iRow)
+        {
+            foreach (var (grouping, row, labelledAbove) in RowGroupStarts(rpt, matrix, iRow))
+            {
+                if (grouping.Label == null || grouping.InPageHeaderOrFooter())
+                    continue;
+                string label = await grouping.Label.EvaluateString(rpt, row).ConfigureAwait(false);
+                rpt.QueueDocumentMapLabel(label, rpt.DocumentMapDepth + labelledAbove);
+            }
+        }
+
+        /// <summary>
+        /// The row group instances that start on a row of the built matrix, outer first: the
+        /// grouping, the first data row of the instance, and how many labelled row groupings it is
+        /// within. A dynamic row header cell is the start of an instance of its grouping.
+        /// </summary>
+        private protected virtual System.Collections.Generic.IEnumerable<(Grouping Grouping, Row Row, int LabelledAbove)>
+            RowGroupStarts(Report rpt, MatrixCellEntry[,] matrix, int iRow)
+        {
+            if (RowGroupings == null)
+                yield break;
+            int levels = RowGroupings.Items.Count;
+            int labelledAbove = 0;
+            for (int level = 0; level < levels; level++)
+            {
+                var rg = (RowGrouping)RowGroupings.Items[level];
+                Grouping grouping = rg.DynamicRows?.Grouping;
+                if (grouping == null)
+                    continue;
+                ReportItem header = rg.DynamicRows.ReportItems?.Items.Count > 0 ? rg.DynamicRows.ReportItems.Items[0] : null;
+                for (int iCol = 0; iCol < levels && iCol < matrix.GetLength(1); iCol++)
+                {
+                    MatrixCellEntry mce = matrix[iRow, iCol];
+                    if (mce != null && header != null && mce.DisplayItem == header && mce.Data?.Data.Count > 0)
+                    {
+                        yield return (grouping, mce.Data.Data[0], labelledAbove);
+                        break;
+                    }
+                }
+                if (grouping.Label != null)
+                    labelledAbove++;
+            }
         }
 
         internal void RunReset(Report rpt)

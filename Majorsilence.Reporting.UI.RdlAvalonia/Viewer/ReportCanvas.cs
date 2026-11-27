@@ -687,7 +687,7 @@ namespace Majorsilence.Reporting.UI.RdlAvalonia.Viewer
         // Renderer places items at points * effectiveZoom physical pixels,
         // where effectiveZoom = _zoom * dpi/72 and dpi = 96 * renderScaling.
         // Logical position = physical / renderScaling = points * _zoom * 96/72.
-        private double PointsToLogical(float points)
+        internal double PointsToLogical(float points)
         {
             return points * _zoom * (96.0 / 72.0);
         }

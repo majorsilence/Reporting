@@ -180,6 +180,15 @@ namespace Majorsilence.Reporting.Rdl
 		}
 
 		/// <summary>Names the page an instance starts on (PageName), evaluated on its first row.</summary>
+		// Starts the document-map scope of one instance of the group, its label evaluated on the
+		// instance's first row; pass what it returns to Report.EndDocumentMapScope after it.
+		internal async Task<int> BeginDocumentMap(Report rpt, Row row)
+		{
+			if (_Label == null || InPageHeaderOrFooter())
+				return -1;
+			return rpt.BeginDocumentMapScope(await _Label.EvaluateString(rpt, row).ConfigureAwait(false));
+		}
+
 		internal async Task RunPageName(Pages pgs, Row row)
 		{
 			if (_PageName != null)
