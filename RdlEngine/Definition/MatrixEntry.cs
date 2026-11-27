@@ -74,12 +74,12 @@ namespace Majorsilence.Reporting.Rdl
         /// sorted lists from many synchronous methods through <see cref="GetSortedData"/>, so they are
         /// sorted here once, after the entries are built, rather than lazily with a blocking comparer.
         /// </summary>
-        internal async Task PrepareSortedDataAsync(Report rpt)
+        internal async Task PrepareSortedDataAsync(Report rpt, Matrix m, Rows data)
         {
             if (_SortedData == null && _HashData != null && _HashData.Count > 0)
             {
                 var list = new List<MatrixEntry>(_HashData.Values);
-                await MatrixEntrySort.SortAsync(rpt, list, GetSortBy()).ConfigureAwait(false);
+                await MatrixEntrySort.SortAsync(rpt, list, GetSortBy(rpt), m, data).ConfigureAwait(false);
                 _SortedData = list;
                 _HashData = null;       // we only keep one
             }
@@ -87,7 +87,7 @@ namespace Majorsilence.Reporting.Rdl
             if (_SortedData != null)
             {
                 foreach (MatrixEntry child in _SortedData)
-                    await child.PrepareSortedDataAsync(rpt).ConfigureAwait(false);
+                    await child.PrepareSortedDataAsync(rpt, m, data).ConfigureAwait(false);
             }
         }
 
@@ -157,7 +157,8 @@ namespace Majorsilence.Reporting.Rdl
             get { return _r; }
         }
 
-        Sorting GetSortBy()
+        // The group's sort, with any interactive sort on it (Report.EffectiveSort).
+        List<SortBy> GetSortBy(Report rpt)
         {
             MatrixEntry me = null;
             foreach (MatrixEntry m in this.HashData.Values)
@@ -168,16 +169,18 @@ namespace Majorsilence.Reporting.Rdl
             if (me == null)
                 return null;
 
-            Sorting sb = null;
+            List<SortBy> sb = null;
             if (me.RowGroup != null)
             {
-                if (me.RowGroup.DynamicRows != null)
-                    sb = me.RowGroup.DynamicRows.Sorting;
+                DynamicRows dr = me.RowGroup.DynamicRows;
+                if (dr != null)
+                    sb = rpt.EffectiveSort(dr.Sorting, dr.Grouping);
             }
             else if (me.ColumnGroup != null)
             {
-                if (me.ColumnGroup.DynamicColumns != null)
-                    sb = me.ColumnGroup.DynamicColumns.Sorting;
+                DynamicColumns dc = me.ColumnGroup.DynamicColumns;
+                if (dc != null)
+                    sb = rpt.EffectiveSort(dc.Sorting, dc.Grouping);
             }
             return sb;
         }
@@ -191,15 +194,21 @@ namespace Majorsilence.Reporting.Rdl
         /// each entry's expressions evaluated once, awaited. A comparer is synchronous, so sorting with one
         /// meant two Task.Run(...).GetResult() hops per comparison.
         /// </summary>
-        internal static async Task SortAsync(Report rpt, List<MatrixEntry> list, Sorting sorting)
+        /// <remarks>
+        /// An interactive sort's (UserSort) expressions are evaluated over the entry's rows: the
+        /// matrix's data (an aggregate with no scope) and its group's rows are the entry's while they
+        /// are, as when its header is run. The report's own sort expressions are evaluated on the
+        /// entry's first row only, as they always have been (AsyncSortTests pins that).
+        /// </remarks>
+        internal static async Task SortAsync(Report rpt, List<MatrixEntry> list, List<SortBy> sorting, Matrix m, Rows data)
         {
-            if (sorting == null || list.Count < 2)
+            if (sorting == null || sorting.Count == 0 || list.Count < 2)
             {
                 list.Sort((a, b) => a.HashItem.CompareTo(b.HashItem));
                 return;
             }
 
-            var sortItems = sorting.Items;
+            var sortItems = sorting;
             var exprs = new IExpr[sortItems.Count];
             var types = new TypeCode[sortItems.Count];
             for (int k = 0; k < exprs.Length; k++)
@@ -209,6 +218,7 @@ namespace Majorsilence.Reporting.Rdl
             }
 
             var items = new Keyed[list.Count];
+            Rows saved = m?.GetMyData(rpt);
             for (int i = 0; i < items.Length; i++)
             {
                 MatrixEntry me = list[i];
@@ -217,8 +227,19 @@ namespace Majorsilence.Reporting.Rdl
                 int k = 0;
                 try
                 {
+                    bool entered = false;
                     for (; k < exprs.Length; k++)
+                    {
+                        if (!entered && sortItems[k].IsUserSort && m != null && data != null && me.Rows != null)
+                        {
+                            var rows = new Rows(rpt, data, me.FirstRow, me.LastRow, me.Rows);
+                            m.SetMyData(rpt, rows);
+                            Grouping g = me.RowGroup?.DynamicRows?.Grouping ?? me.ColumnGroup?.DynamicColumns?.Grouping;
+                            g?.SetRows(rpt, rows);
+                            entered = true;
+                        }
                         keys[k] = await exprs[k].Evaluate(rpt, me.R).ConfigureAwait(false);
+                    }
                 }
                 catch (Exception e)		// this really shouldn't happen
                 {
@@ -229,6 +250,8 @@ namespace Majorsilence.Reporting.Rdl
                 }
                 items[i] = new Keyed { Entry = me, Keys = keys, Failed = failed };
             }
+            if (m != null)
+                m.SetMyData(rpt, saved);
 
             Array.Sort(items, (a, b) =>
             {

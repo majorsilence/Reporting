@@ -19,6 +19,8 @@ namespace Majorsilence.Reporting.Rdl
 		bool allowselect = true;  // allow selection of this item
 		string toggleKey;		//  the toggle instance this item is, when it is a visibility toggle textbox
 		bool toggleExpanded;	//  whether the items it toggles are shown
+		string userSortKey;		//  the interactive sort this item is, when it is a textbox with a UserSort
+		UserSortDirection userSortDirection;	//  the direction it sorts in now
 
 		/// <summary>
 		/// How far, in points, an interactive viewer moves a toggle textbox's text right to draw
@@ -27,6 +29,13 @@ namespace Majorsilence.Reporting.Rdl
 		public const float ToggleGlyphSpace = 10f;
 		/// <summary>The side of the +/- glyph, in points.</summary>
 		public const float ToggleGlyphSize = 7f;
+		/// <summary>
+		/// How far, in points, an interactive viewer moves a sort header's text in from the right
+		/// to draw its sort glyph after it. The page item is laid out without it.
+		/// </summary>
+		public const float UserSortGlyphSpace = 10f;
+		/// <summary>The side of the sort glyph (an up or down triangle, or both), in points.</summary>
+		public const float UserSortGlyphSize = 7f;
 
 		public Page Page
 		{
@@ -143,6 +152,47 @@ namespace Majorsilence.Reporting.Rdl
 			x = this.x + padLeft + (ToggleGlyphSpace - size) / 2;
 			y = this.y + padTop + Math.Max(0, (room - size) / 2);
 		}
+
+		/// <summary>
+		/// Non-null when this item is an instance of a textbox with a UserSort (an interactive
+		/// sort header): pass it to <see cref="Report.ToggleUserSort"/> (or to
+		/// <see cref="UserSortState.Toggle"/> on <see cref="Report.UserSort"/>) on a click, then
+		/// build the pages again. Every instance of the textbox has the same key.
+		/// </summary>
+		public string UserSortKey
+		{
+			get { return userSortKey; }
+			set { userSortKey = value; }
+		}
+
+		/// <summary>
+		/// For a sort header (<see cref="UserSortKey"/> not null): the direction the report is
+		/// sorted by it now -- draw an up triangle, a down one, or (None) both.
+		/// </summary>
+		public UserSortDirection UserSortDirection
+		{
+			get { return userSortDirection; }
+			set { userSortDirection = value; }
+		}
+
+		/// <summary>
+		/// Where an interactive viewer draws the sort glyph of a sort header, in points on the page:
+		/// a square of <see cref="UserSortGlyphSize"/> inside the right padding, in the last
+		/// <see cref="UserSortGlyphSpace"/> of the text's room (the viewer keeps the text that much
+		/// further left), level with the first line. A click in it sorts.
+		/// </summary>
+		public void GetUserSortGlyphBounds(out float x, out float y, out float size)
+		{
+			size = UserSortGlyphSize;
+			float padRight = si != null ? si.PaddingRight : 0;
+			float padTop = si != null ? si.PaddingTop : 0;
+			float padBottom = si != null ? si.PaddingBottom : 0;
+			float line = si != null ? si.FontSize * 1.2f : 12f;
+			float room = Math.Min(h - padTop - padBottom, line);
+			x = this.x + w - padRight - UserSortGlyphSpace + (UserSortGlyphSpace - size) / 2;
+			y = this.y + padTop + Math.Max(0, (room - size) / 2);
+		}
+
 		#region ICloneable Members
 
 		public object Clone()

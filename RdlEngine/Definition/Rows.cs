@@ -91,7 +91,8 @@ namespace Majorsilence.Reporting.Rdl
             return or;
         }
 
-		internal Rows(Report rpt, TableGroups tg, Grouping g, Sorting s)
+		// s is the sort of the detail rows (or of g): Report.EffectiveSort's, with any interactive sort.
+		internal Rows(Report rpt, TableGroups tg, Grouping g, List<SortBy> s)
 		{
 			_Rpt = rpt;
             _SortBy = new List<RowsSortExpression>();
@@ -105,7 +106,7 @@ namespace Majorsilence.Reporting.Rdl
 			{
 				foreach(TableGroup t in tg.Items)
 				{
-					AddSortExpressions(t.Sorting);
+					AddSortExpressions(rpt != null ? rpt.EffectiveSort(t.Sorting, t.Grouping) : t.Sorting?.Items);
 					foreach(GroupExpression ge in t.Grouping.GroupExpressions.Items)
 					{
 						_SortBy.Add(new RowsSortExpression(ge.Expression));
@@ -137,11 +138,11 @@ namespace Majorsilence.Reporting.Rdl
             }
 		}
 
-		void AddSortExpressions(Sorting s)
+		void AddSortExpressions(List<SortBy> s)
 		{
 			if (s == null)
 				return;
-			foreach (SortBy sb in s.Items)
+			foreach (SortBy sb in s)
 			{
 				_SortBy.Add(new RowsSortExpression(sb.SortExpression, sb.Direction == SortDirectionEnum.Ascending));
 			}

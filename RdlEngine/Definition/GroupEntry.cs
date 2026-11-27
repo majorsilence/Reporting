@@ -12,12 +12,12 @@ namespace Majorsilence.Reporting.Rdl
 	internal class GroupEntry
 	{
 		Grouping _Group;		// Group this represents
-		Sorting _Sort;			// Sort cooresponding to this group
+		List<SortBy> _Sort;		// Sort cooresponding to this group (with any interactive sort; see Report.EffectiveSort)
 		int _StartRow;			// Starting row of the group (inclusive)
 		int _EndRow;			// Endding row of the group (inclusive)
 		List<GroupEntry> _NestedGroup;	// group one hierarchy below
 	
-		internal GroupEntry(Grouping g, Sorting s, int start)
+		internal GroupEntry(Grouping g, List<SortBy> s, int start)
 		{
 			_Group = g;
 			_Sort = s;
@@ -29,12 +29,18 @@ namespace Majorsilence.Reporting.Rdl
 			if (g == null || s == null)
 				return;			// nothing to check if either is null
 
-			if (s.Items.Count != g.GroupExpressions.Items.Count)
+			if (s.Count == 0)
+			{
+				_Sort = null;
+				return;
+			}
+
+			if (s.Count != g.GroupExpressions.Items.Count)
 				return;
 
-			for (int i = 0; i < s.Items.Count; i++)
+			for (int i = 0; i < s.Count; i++)
 			{
-				SortBy sb = s.Items[i] as SortBy;
+				SortBy sb = s[i];
 
 				if (sb.Direction == SortDirectionEnum.Descending)
 					return;			// TODO we could optimize this 
@@ -74,7 +80,7 @@ namespace Majorsilence.Reporting.Rdl
 			get { return  _Group; }
 		}
 
-		internal Sorting Sort
+		internal List<SortBy> Sort
 		{
 			get { return  _Sort; }
 		}

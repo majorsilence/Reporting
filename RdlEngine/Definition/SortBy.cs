@@ -48,6 +48,25 @@ namespace Majorsilence.Reporting.Rdl
 				OwnerReport.rl.LogError(8, "SortBy requires the SortExpression element.");
 		}
 
+		/// <summary>A sort made by the engine: an interactive sort (UserSort) on the level p sorts.</summary>
+		internal SortBy(ReportDefn r, ReportLink p, string sortExpression, SortDirectionEnum direction) : base(r, p)
+		{
+			_SortExpression = new Expression(r, this, sortExpression, ExpressionType.Variant);
+			_Direction = direction;
+			IsUserSort = true;
+		}
+
+		/// <summary>The same expression the other way.</summary>
+		internal SortBy(SortBy other, SortDirectionEnum direction) : base(other.OwnerReport, other.Parent)
+		{
+			_SortExpression = other._SortExpression;
+			_Direction = direction;
+			IsUserSort = other.IsUserSort;
+		}
+
+		/// <summary>An interactive sort's (UserSort), not one the report defines.</summary>
+		internal bool IsUserSort { get; }
+
 		// Handle parsing of function in final pass
 		async override internal Task FinalPass()
 		{

@@ -397,10 +397,8 @@ namespace Majorsilence.Reporting.Rdl
 				}
 				else if (m.IsDetails)
 				{
-					for (int i = 0; i < bits.Length; i++)
+					foreach (int i in await DetailOrder(rpt, full, bits, chain).ConfigureAwait(false))
 					{
-						if (!bits[i])
-							continue;
 						var one = new BitArray(bits.Length);
 						one[i] = true;
 						parts.Add((one, chain));
@@ -477,13 +475,13 @@ namespace Majorsilence.Reporting.Rdl
 				part[i] = true;
 			}
 
-			if (m.Sorting == null || keys.Count < 2)
+			List<SortBy> sortBy = rpt.EffectiveSort(m.Sorting, m.Grouping);	// with any interactive sort
+			if (sortBy == null || sortBy.Count == 0 || keys.Count < 2)
 			{
 				keys.Sort((a, b) => a.CompareTo(b));
 				return keys.ConvertAll(k => byKey[k]);
 			}
 
-			var sortBy = m.Sorting.Items;
 			var sortKeys = new Dictionary<string, object[]>();
 			foreach (string key in keys)
 			{
@@ -505,6 +503,42 @@ namespace Majorsilence.Reporting.Rdl
 				return a.CompareTo(b);
 			});
 			return keys.ConvertAll(k => byKey[k]);
+		}
+
+		/// <summary>
+		/// The detail rows among bits, in data order, or ordered by an interactive sort on this
+		/// tablix's detail rows (UserSort), evaluated within the instance of the groups around them.
+		/// </summary>
+		private async Task<List<int>> DetailOrder(Report rpt, Rows full, BitArray bits, Chain chain)
+		{
+			var order = new List<int>();
+			for (int i = 0; i < bits.Length; i++)
+				if (bits[i])
+					order.Add(i);
+			List<SortBy> sortBy = rpt.EffectiveSort(null, this);
+			if (sortBy == null || order.Count < 2)
+				return order;
+
+			Enter(rpt, full, bits, chain);
+			var sortKeys = new Dictionary<int, object[]>();
+			foreach (int i in order)
+			{
+				var values = new object[sortBy.Count];
+				for (int k = 0; k < sortBy.Count; k++)
+					values[k] = await sortBy[k].SortExpression.Evaluate(rpt, full.Data[i]).ConfigureAwait(false);
+				sortKeys[i] = values;
+			}
+			order.Sort((a, b) =>
+			{
+				for (int k = 0; k < sortBy.Count; k++)
+				{
+					int rc = Filter.ApplyCompare(sortBy[k].SortExpression.Expr.GetTypeCode(), sortKeys[a][k], sortKeys[b][k]);
+					if (rc != 0)
+						return sortBy[k].Direction == SortDirectionEnum.Ascending ? rc : -rc;
+				}
+				return a - b;
+			});
+			return order;
 		}
 
 		private protected override void SetGroupingValues(Report rpt, MatrixCellEntry mce)
