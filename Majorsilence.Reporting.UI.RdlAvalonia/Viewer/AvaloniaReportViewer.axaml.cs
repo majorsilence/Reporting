@@ -168,6 +168,7 @@ namespace Majorsilence.Reporting.UI.RdlAvalonia.Viewer
                 _pageCurrent = 1;
 
                 ReportCanvas.SetReport(_report, _pages);
+                UpdateDocumentMap();
                 UpdatePageUi();
                 UpdateErrorsUi();
                 await BuildParameterUiAsync();
@@ -183,6 +184,7 @@ namespace Majorsilence.Reporting.UI.RdlAvalonia.Viewer
                 _sourceFile = null;
                 _sourceRdl = null;
                 ReportCanvas.SetReport(null, null);
+                UpdateDocumentMap();
                 UpdatePageUi();
                 UpdateErrorsUi();
                 await ShowErrorAsync($"Failed to load report:\n\n{ex.Message}");
@@ -276,6 +278,8 @@ namespace Majorsilence.Reporting.UI.RdlAvalonia.Viewer
             ApplyParametersButton.Click += ApplyParametersButtonOnClick;
             ErrorsToggleButton.IsCheckedChanged += ErrorsToggleOnChanged;
             ThumbnailsButton.IsCheckedChanged += ThumbnailsButtonOnCheckedChanged;
+            DocumentMapButton.IsCheckedChanged += (_, _) => UpdateDocumentMapVisibility();
+            DocumentMapTree.SelectionChanged += DocumentMapTreeOnSelectionChanged;
 
             // Find bar
             FindButton.Click += (_, _) => OpenFindBar();
@@ -653,6 +657,7 @@ namespace Majorsilence.Reporting.UI.RdlAvalonia.Viewer
 
                 _pages = pages;
                 ReportCanvas.SetReport(_report, _pages);
+                UpdateDocumentMap();
                 UpdatePageUi();
                 SetPage(page);              // clamped to the new page count
                 UpdateErrorsUi();
@@ -809,6 +814,83 @@ namespace Majorsilence.Reporting.UI.RdlAvalonia.Viewer
         private void ErrorsToggleOnChanged(object? sender, RoutedEventArgs e)
         {
             ErrorsPanel.IsVisible = ErrorsToggleButton.IsChecked == true;
+        }
+
+        // ── Document map ─────────────────────────────────────────────
+
+        /// <summary>True when the report being viewed has a document map (Label / DocumentMapLabel entries).</summary>
+        public bool HasDocumentMap => DocumentMapTree.ItemCount > 0;
+
+        /// <summary>
+        /// True to show the document map beside the pages, as the toolbar's Map button does. It is
+        /// shown only for a report that has one. Default true.
+        /// </summary>
+        public bool ShowDocumentMap
+        {
+            get => DocumentMapButton.IsChecked == true;
+            set => DocumentMapButton.IsChecked = value;
+        }
+
+        // Rebuilds the tree from the pages shown; the panel and its button show only when there are entries.
+        private void UpdateDocumentMap()
+        {
+            DocumentMapTree.ItemsSource = null;
+            DocumentMapTree.Items.Clear();
+            if (_pages != null)
+            {
+                foreach (var node in DocumentMapNode.Build(_pages.GetDocumentMap()))
+                    DocumentMapTree.Items.Add(DocumentMapTreeItem(node));
+            }
+            UpdateDocumentMapVisibility();
+        }
+
+        private static TreeViewItem DocumentMapTreeItem(DocumentMapNode node)
+        {
+            var item = new TreeViewItem
+            {
+                Header = node.Entry.Label,
+                Tag = node.Entry,
+                IsExpanded = true,
+            };
+            foreach (var child in node.Children)
+                item.Items.Add(DocumentMapTreeItem(child));
+            return item;
+        }
+
+        private void UpdateDocumentMapVisibility()
+        {
+            bool has = HasDocumentMap;
+            DocumentMapButton.IsVisible = has;
+            DocumentMapPanel.IsVisible = has && ShowDocumentMap;
+        }
+
+        private void DocumentMapTreeOnSelectionChanged(object? sender, SelectionChangedEventArgs e)
+        {
+            if (DocumentMapTree.SelectedItem is TreeViewItem { Tag: DocumentMapEntry entry })
+                ScrollToDocumentMapEntry(entry);
+        }
+
+        /// <summary>
+        /// Shows the page a document-map entry points at, scrolled so its item is at the top of
+        /// the view, as selecting its node in the document map does.
+        /// </summary>
+        public void ScrollToDocumentMapEntry(DocumentMapEntry entry)
+        {
+            if (entry == null || _pages == null || entry.PageIndex < 0 || entry.PageIndex >= _pages.PageCount)
+                return;
+
+            SetPage(entry.PageIndex + 1);
+            // The page is laid out anew when it changes: scroll once it has been, below the
+            // margin around the page.
+            Avalonia.Threading.Dispatcher.UIThread.Post(() =>
+            {
+                double y = PageBorder.Margin.Top + ReportCanvas.PointsToLogical(entry.Y);
+                double x = ReportScrollViewer.Offset.X;
+                double left = PageBorder.Margin.Left + ReportCanvas.PointsToLogical(entry.X);
+                if (left < x || left > x + ReportScrollViewer.Viewport.Width)
+                    x = Math.Max(0, left - PageBorder.Margin.Left);
+                ReportScrollViewer.Offset = new Vector(x, Math.Max(0, y));
+            }, Avalonia.Threading.DispatcherPriority.Background);
         }
 
         // ── Thumbnails ───────────────────────────────────────────────
