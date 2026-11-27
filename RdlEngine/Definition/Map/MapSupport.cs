@@ -13,10 +13,12 @@ namespace Majorsilence.Reporting.Rdl
     /// Drawn: polygon layers whose shapes are embedded in the report (MapPolygons with VectorData),
     /// come from a dataset's spatial field (MapSpatialDataSet), or from the bound data region's
     /// spatial field (MapSpatialDataRegion), coloured by a colour range, palette or custom colour
-    /// rule; Planar or Geographic coordinates in the Equirectangular or Mercator projection.
+    /// rule; Planar or Geographic coordinates in the Equirectangular or Mercator projection;
+    /// legends, the colour scale, titles, and the distance scale for Geographic coordinates
+    /// (<see cref="MapDecorations"/>).
     /// Not drawn: tile layers (online map images, which need network access and a licence),
-    /// shapefiles, point and line layers, legends, colour scales, titles, distance scales,
-    /// meridians and parallels, border skins, polygon centre points and labels.
+    /// shapefiles, point and line layers, a distance scale on Planar coordinates (their unit is
+    /// not known), meridians and parallels, border skins, polygon centre points and labels.
     /// </remarks>
     internal static class MapSupport
     {
@@ -44,23 +46,18 @@ namespace Majorsilence.Reporting.Rdl
                 }
             }
 
-            if (HasVisible (Child (map, "MapLegends"), "MapLegend"))
-                notDrawn.Add ("a legend");
-            if (HasVisible (Child (map, "MapTitles"), "MapTitle"))
-                notDrawn.Add ("a title");
-            if (Shown (Child (map, "MapColorScale")))
-                notDrawn.Add ("a colour scale");
-            if (Shown (Child (map, "MapDistanceScale")))
-                notDrawn.Add ("a distance scale");
+            var viewport = Child (map, "MapViewport");
+            var geographic = string.Equals (Child (viewport, "MapCoordinateSystem")?.InnerText?.Trim (), "Geographic", StringComparison.OrdinalIgnoreCase);
+            // Legends, titles and the colour scale are drawn; a distance needs geographic coordinates.
+            if (!geographic && Shown (Child (map, "MapDistanceScale")))
+                notDrawn.Add ("a distance scale on planar coordinates");
             var skin = Child (Child (map, "MapBorderSkin"), "MapBorderSkinType")?.InnerText?.Trim ();
             if (!string.IsNullOrEmpty (skin) && !string.Equals (skin, "None", StringComparison.OrdinalIgnoreCase))
                 notDrawn.Add ("a border skin");
 
-            var viewport = Child (map, "MapViewport");
             if (Shown (Child (viewport, "MapMeridians")) || Shown (Child (viewport, "MapParallels")))
                 notDrawn.Add ("meridians and parallels");
             var projection = Child (viewport, "MapProjection")?.InnerText?.Trim ();
-            var geographic = string.Equals (Child (viewport, "MapCoordinateSystem")?.InnerText?.Trim (), "Geographic", StringComparison.OrdinalIgnoreCase);
             if (geographic && !MapViewport.IsDrawnProjection (projection))
                 notDrawn.Add ($"the {projection} projection (drawn as Equirectangular)");
 
@@ -125,17 +122,6 @@ namespace Majorsilence.Reporting.Rdl
         /// <summary>The element is there and not Hidden.</summary>
         private static bool Shown (XmlElement element)
             => element != null && !string.Equals (Child (element, "Hidden")?.InnerText?.Trim (), "true", StringComparison.OrdinalIgnoreCase);
-
-        private static bool HasVisible (XmlElement collection, string itemName)
-        {
-            if (collection == null)
-                return false;
-            foreach (XmlNode node in collection.ChildNodes) {
-                if (node is XmlElement e && e.LocalName == itemName && Shown (e))
-                    return true;
-            }
-            return false;
-        }
 
         private static XmlElement Child (XmlElement parent, string localName)
             => parent == null ? null : MapEmbeddedElement.Child (parent, localName);

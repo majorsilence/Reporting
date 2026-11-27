@@ -330,7 +330,8 @@ namespace ReportTests
             var mapMessages = Messages (report).Where (m => m.Contains ("Map")).ToArray ();
             Assert.That (mapMessages, Has.Length.EqualTo (1), string.Join (" | ", Messages (report)));
             Assert.That (mapMessages[0], Does.Contain ("drawn without"));
-            Assert.That (mapMessages[0], Does.Contain ("tile layer").And.Contain ("point layer").And.Contain ("legend"));
+            Assert.That (mapMessages[0], Does.Contain ("tile layer").And.Contain ("point layer"));
+            Assert.That (mapMessages[0], Does.Not.Contain ("legend"), "legends are drawn");
             Assert.That (mapMessages[0], Does.Not.Contain ("colour scale"), "a hidden colour scale is not missed");
             using var bitmap = await DrawnMap (report);
             AssertColour (bitmap, 100, 300, Red, "the polygon layer is still drawn");
