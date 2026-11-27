@@ -95,6 +95,17 @@ namespace Majorsilence.Reporting.Rdl
 				_pendingDocumentMap.RemoveRange(token, _pendingDocumentMap.Count - token);
 		}
 
+		// A label for the next page item drawn at a given level, outside any scope: a matrix row
+		// group instance, whose rows are laid out as a grid rather than group by group, so nothing
+		// nests inside it by scope.
+		internal void QueueDocumentMapLabel(string label, int level)
+		{
+			if (string.IsNullOrEmpty(label))
+				return;
+			_pendingDocumentMap ??= new List<DocumentMapLabel>();
+			_pendingDocumentMap.Add(new DocumentMapLabel(label, level));
+		}
+
 		// Called as a page item is put on a page: it takes the labels waiting for an item, ahead of
 		// any label of its own.
 		internal void TakePendingDocumentMap(PageItem pi)
