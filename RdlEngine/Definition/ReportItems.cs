@@ -86,6 +86,10 @@ namespace Majorsilence.Reporting.Rdl
                     case "customreportitem":
                         ri = new CustomReportItem(r, this, xNodeLoop);
                         break;
+					case "map":			// RDL 2010+: only maps the engine draws get here; the normaliser
+										// replaces the others with a placeholder (see MapSupport)
+						ri = new Map(r, this, xNodeLoop);
+						break;
 					default:
 						ri=null;		// don't know what this is
 						// don't know this element - log it

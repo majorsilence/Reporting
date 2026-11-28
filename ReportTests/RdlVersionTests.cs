@@ -95,10 +95,11 @@ namespace ReportTests
         public async Task Map_WarningNamesItsLayersAndRules ()
         {
             RdlEngineConfig.RdlEngineConfigInit ();
+            // A shapefile is not read, so this map keeps the placeholder (maps the engine draws: MapTests).
             var rdl = ReportWithItem (@"<Map Name=""Map1""><Top>0.5in</Top><Left>0in</Left><Height>1in</Height><Width>2in</Width>
                 <MapLayers>
                   <MapPolygonLayer Name=""Layer1"">
-                    <MapSpatialDataSet><DataSetName>Data</DataSetName><SpatialField>Shape</SpatialField></MapSpatialDataSet>
+                    <MapShapefile><Source>states.shp</Source></MapShapefile>
                     <MapPolygonRules><MapColorRangeRule><DataValue>=Sum(Fields!Name.Value)</DataValue></MapColorRangeRule></MapPolygonRules>
                   </MapPolygonLayer>
                 </MapLayers>
@@ -109,7 +110,7 @@ namespace ReportTests
 
             var warning = report.ErrorItems.Cast<string> ().First (e => e.Contains ("Map"));
             Assert.That (warning, Does.Contain ("polygon layer"));
-            Assert.That (warning, Does.Contain ("dataset's spatial field"));
+            Assert.That (warning, Does.Contain ("bound to a shapefile"));
             Assert.That (warning, Does.Contain ("colour-range rule"));
         }
 

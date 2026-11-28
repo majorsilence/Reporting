@@ -102,6 +102,14 @@ namespace Majorsilence.Reporting.Rdl
 				{
 					phpf = dr;
 				}
+				else if (dr is MapVectorLayer layer && layer.DataRegion != null)
+				{
+					// A map layer's binding, rule and template expressions run once per group of
+					// the map data region it is bound to (see MapDataRegion).
+					grp = layer.DataRegion.Grouping;
+					dr = layer.DataRegion;
+					break;
+				}
 				else if (dr is DataRegion || dr is DataSetDefn)
 					break;
 				below = dr;
