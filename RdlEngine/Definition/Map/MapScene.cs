@@ -31,11 +31,21 @@ namespace Majorsilence.Reporting.Rdl
         /// <summary>Items drawn over the whole map item after the viewport (legends, titles, scales).</summary>
         internal readonly List<MapOverlay> Overlays = new List<MapOverlay> ();
 
+        /// <summary>
+        /// Where the viewport is drawn, in percent of the map item: the MapViewport's location and
+        /// size, less the room decorations docked outside it take (see <see cref="MapDecorations"/>).
+        /// </summary>
+        internal double ViewLeft, ViewTop, ViewWidth, ViewHeight;
+
         internal MapScene (MapViewport viewport, float widthPoints, float heightPoints)
         {
             Viewport = viewport;
             WidthPoints = widthPoints;
             HeightPoints = heightPoints;
+            ViewLeft = viewport.Left;
+            ViewTop = viewport.Top;
+            ViewWidth = viewport.Width;
+            ViewHeight = viewport.Height;
         }
 
         /// <summary>The projected extent of every shape, or null when there is nothing to draw.</summary>
@@ -89,8 +99,8 @@ namespace Majorsilence.Reporting.Rdl
             };
             var v = Viewport;
             frame.Viewport = SKRect.Create (
-                (float)(width * v.Left / 100), (float)(height * v.Top / 100),
-                (float)(width * v.Width / 100), (float)(height * v.Height / 100));
+                (float)(width * ViewLeft / 100), (float)(height * ViewTop / 100),
+                (float)(width * ViewWidth / 100), (float)(height * ViewHeight / 100));
 
             var bounds = Bounds ();
             if (bounds == null)

@@ -135,6 +135,12 @@ namespace Majorsilence.Reporting.Rdl
         /// <summary>Elements of the specific rule; false for one it does not know.</summary>
         protected abstract bool SpecificElement (XmlNode node);
 
+        /// <summary>
+        /// What a legend shows for one of the rule's buckets: a box of the bucket's colour. A rule
+        /// that sizes or marks shapes overrides this with a marker of the bucket's size or shape.
+        /// </summary>
+        internal virtual MapLegendSwatch LegendSwatch (MapBucket bucket) => new MapColorSwatch (bucket.Color);
+
         internal override async Task FinalPass ()
         {
             if (DataValue != null)
