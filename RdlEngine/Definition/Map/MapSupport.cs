@@ -10,15 +10,16 @@ namespace Majorsilence.Reporting.Rdl
     /// with a placeholder, and name in one warning what is left out.
     /// </summary>
     /// <remarks>
-    /// Drawn: polygon layers whose shapes are embedded in the report (MapPolygons with VectorData),
-    /// come from a dataset's spatial field (MapSpatialDataSet), or from the bound data region's
-    /// spatial field (MapSpatialDataRegion), coloured by a colour range, palette or custom colour
-    /// rule; Planar or Geographic coordinates in the Equirectangular or Mercator projection;
-    /// legends, the colour scale, titles, and the distance scale for Geographic coordinates
-    /// (<see cref="MapDecorations"/>).
+    /// Drawn: polygon, line and point layers whose shapes are embedded in the report (MapPolygons,
+    /// MapLines, MapPoints with VectorData), come from a dataset's spatial field
+    /// (MapSpatialDataSet), or from the bound data region's spatial field (MapSpatialDataRegion);
+    /// coloured by a colour range, palette or custom colour rule, lines and points sized by a size
+    /// rule and points shaped by a marker rule; Planar or Geographic coordinates in the
+    /// Equirectangular or Mercator projection; legends, the colour scale, titles, and the distance
+    /// scale for Geographic coordinates (<see cref="MapDecorations"/>).
     /// Not drawn: tile layers (online map images, which need network access and a licence),
-    /// shapefiles, point and line layers, a distance scale on Planar coordinates (their unit is
-    /// not known), meridians and parallels, border skins, polygon centre points and labels.
+    /// shapefiles, a distance scale on Planar coordinates (their unit is not known), meridians and
+    /// parallels, border skins, polygon centre points and labels.
     /// </remarks>
     internal static class MapSupport
     {
@@ -73,20 +74,25 @@ namespace Majorsilence.Reporting.Rdl
         {
             switch (layer.LocalName) {
                 case "MapPolygonLayer":
-                    if (Child (layer, "MapShapefile") != null || Child (Child (layer, "MapSpatialData"), "MapShapefile") != null)
-                        return IsHidden (layer) ? string.Empty : "a polygon layer bound to a shapefile";
-                    if (HasSpatialData (layer, "MapPolygons"))
-                        return null;
-                    return IsHidden (layer) ? string.Empty : "a polygon layer without spatial data";
+                    return VectorLayerNotDrawn (layer, "a polygon layer", "MapPolygons");
+                case "MapLineLayer":
+                    return VectorLayerNotDrawn (layer, "a line layer", "MapLines");
+                case "MapPointLayer":
+                    return VectorLayerNotDrawn (layer, "a point layer", "MapPoints");
                 case "MapTileLayer":
                     return IsHidden (layer) ? string.Empty : "a tile layer of online map images";
-                case "MapPointLayer":
-                    return IsHidden (layer) ? string.Empty : "a point layer";
-                case "MapLineLayer":
-                    return IsHidden (layer) ? string.Empty : "a line layer";
                 default:
                     return "a " + layer.LocalName;
             }
+        }
+
+        private static string VectorLayerNotDrawn (XmlElement layer, string what, string embedded)
+        {
+            if (Child (layer, "MapShapefile") != null || Child (Child (layer, "MapSpatialData"), "MapShapefile") != null)
+                return IsHidden (layer) ? string.Empty : what + " bound to a shapefile";
+            if (HasSpatialData (layer, embedded))
+                return null;
+            return IsHidden (layer) ? string.Empty : what + " without spatial data";
         }
 
         /// <summary>What a drawn layer has that is not drawn.</summary>
@@ -98,6 +104,15 @@ namespace Majorsilence.Reporting.Rdl
                 var label = Child (Child (layer, "MapPolygonTemplate"), "Label")?.InnerText?.Trim ();
                 if (!string.IsNullOrEmpty (label))
                     yield return "polygon labels";
+            } else if (layer.LocalName == "MapPointLayer") {
+                var template = Child (layer, "MapMarkerTemplate") ?? Child (layer, "MapPointTemplate");
+                var label = (Child (template, "Label") ?? Child (Child (template, "MapMarkerTemplate"), "Label"))?.InnerText?.Trim ();
+                if (!string.IsNullOrEmpty (label))
+                    yield return "point labels";
+            } else if (layer.LocalName == "MapLineLayer") {
+                var label = Child (Child (layer, "MapLineTemplate"), "Label")?.InnerText?.Trim ();
+                if (!string.IsNullOrEmpty (label))
+                    yield return "line labels";
             }
         }
 

@@ -37,6 +37,10 @@ namespace Majorsilence.Reporting.Rdl
             switch (element.LocalName) {
                 case "MapPolygonLayer":
                     return new MapPolygonLayer (r, p, element);
+                case "MapLineLayer":
+                    return new MapLineLayer (r, p, element);
+                case "MapPointLayer":
+                    return new MapPointLayer (r, p, element);
                 default:
                     return null;
             }

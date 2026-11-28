@@ -107,6 +107,11 @@ namespace Majorsilence.Reporting.Rdl
                 return frame;
             var b = bounds.Value;
             var margin = Math.Min (frame.Viewport.Width, frame.Viewport.Height) * 0.03f;
+            // Markers and wide lines reach past their coordinates: keep them inside, up to a third of the viewport.
+            var overhang = 0f;
+            foreach (var d in Drawables)
+                overhang = Math.Max (overhang, d.OverhangPoints * frame.PixelsPerPoint);
+            margin = Math.Max (margin, Math.Min (overhang, Math.Min (frame.Viewport.Width, frame.Viewport.Height) / 3));
             var dx = Math.Max (b.MaxX - b.MinX, 1e-9);
             var dy = Math.Max (b.MaxY - b.MinY, 1e-9);
             var scale = Math.Min ((frame.Viewport.Width - 2 * margin) / dx, (frame.Viewport.Height - 2 * margin) / dy);
@@ -185,6 +190,9 @@ namespace Majorsilence.Reporting.Rdl
     {
         internal abstract MapBounds? Bounds ();
         internal abstract void Draw (SKCanvas canvas, MapFrame frame);
+
+        /// <summary>How far, in points, the drawing reaches past its bounds (half a marker, half a line's width).</summary>
+        internal virtual float OverhangPoints => 0;
     }
 
     /// <summary>Something drawn over the whole map item, in pixels of the bitmap: a legend, a title, a scale.</summary>
