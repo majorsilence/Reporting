@@ -466,5 +466,37 @@ namespace ReportTests
                 Assert.That (pdf.GetPage (1).GetImages ().Count (), Is.EqualTo (1), "the map and its decorations are one image");
             }
         }
-    }
+    
+        [Test]
+        public async Task DistanceScale_GoesInTheEmptyBandBesideAMapNarrowerThanTheViewport ()
+        {
+            // A 5in x 3in item round a square map: the map is limited by its height and leaves empty
+            // bands left and right. The scale at BottomLeft goes in the left band, clear of the shapes.
+            using var report = await Parse (MapItem (DistanceScale ()).Replace ("<Width>4in</Width>", "<Width>5in</Width>"));
+            var (_, scene) = await Scene (report);
+            var scale = scene.Overlays.OfType<MapDistanceScaleOverlay> ().Single ();
+            var view = SKRect.Create (0, 0, scene.WidthPoints, scene.HeightPoints);
+            var mapArea = MapDecorationLayout.MapArea (scene, scene.WidthPoints, scene.HeightPoints, view);
+
+            Assert.That (mapArea, Is.Not.Null);
+            Assert.That (mapArea.Value.Left, Is.GreaterThan (40), "the map leaves a band on the left");
+            Assert.That (scale.Bounds.Right, Is.LessThanOrEqualTo (mapArea.Value.Left + 0.01f), "the scale is beside the shapes, not over them");
+            Assert.That (scale.Bounds.Bottom, Is.EqualTo (view.Bottom - MapDecorationLayout.Gap).Within (0.01), "at the bottom");
+
+            using var bitmap = Draw (scene);
+            Assert.That (scale.Metric.Length, Is.GreaterThan (0).And.LessThanOrEqualTo (scale.Bounds.Width), "a round distance that fits the band");
+        }
+
+        [Test]
+        public async Task DistanceScale_WithNoRoomBesideTheMap_StaysAtTheViewportEdge ()
+        {
+            // A square item round a square map: no band is wide enough, so it goes over the map as before.
+            using var report = await Parse (MapItem (DistanceScale ()).Replace ("<Width>4in</Width>", "<Width>3in</Width>"));
+            var (_, scene) = await Scene (report);
+            var scale = scene.Overlays.OfType<MapDistanceScaleOverlay> ().Single ();
+
+            Assert.That (scale.Bounds.Left, Is.EqualTo (MapDecorationLayout.Gap).Within (0.01));
+            Assert.That (scale.Bounds.Bottom, Is.EqualTo (scene.HeightPoints - MapDecorationLayout.Gap).Within (0.01));
+        }
+}
 }

@@ -26,6 +26,12 @@ namespace Majorsilence.Reporting.Rdl
         /// <summary>The size the decoration wants, in points, within the room given.</summary>
         internal abstract SKSize Measure (float maxWidth, float maxHeight);
 
+        /// <summary>
+        /// The narrowest it can usefully be drawn in points, given that much height: by default the
+        /// width it wants.
+        /// </summary>
+        internal virtual float MinimumWidth (float maxHeight) => Measure (float.MaxValue, Math.Max (1, maxHeight)).Width;
+
         internal sealed override void Draw (SKCanvas canvas, MapFrame frame)
         {
             if (ItemWidthPoints <= 0 || ItemHeightPoints <= 0 || Bounds.Width <= 0 || Bounds.Height <= 0)
@@ -104,7 +110,8 @@ namespace Majorsilence.Reporting.Rdl
     /// <summary>
     /// The mark a legend entry shows for its bucket. A rule chooses its own with
     /// <see cref="MapAppearanceRule.LegendSwatch"/>: a colour rule a filled box (<see cref="MapColorSwatch"/>);
-    /// a size rule would return a marker of the bucket's size, a marker rule the bucket's marker shape.
+    /// a size rule a marker of the bucket's size, or a line of the bucket's width on a line layer
+    /// (<see cref="MapMarkerSwatch"/>, <see cref="MapLineSwatch"/>); a marker rule the bucket's marker shape.
     /// </summary>
     internal abstract class MapLegendSwatch
     {
@@ -135,6 +142,84 @@ namespace Majorsilence.Reporting.Rdl
             }
             using var stroke = new SKPaint { Color = SKColors.DimGray, IsStroke = true, StrokeWidth = 0.5f, IsAntialias = true };
             canvas.DrawRect (box, stroke);
+        }
+    }
+
+    /// <summary>
+    /// A marker of the bucket's shape and size (a size or marker rule on a point layer), centred in
+    /// its box. Size and marker rules have no colour of their own, so it is drawn in a neutral grey
+    /// unless the bucket has one.
+    /// </summary>
+    internal sealed class MapMarkerSwatch : MapLegendSwatch
+    {
+        // A legend entry stays readable however large the biggest marker is.
+        internal const float MaxPoints = 24f;
+        internal static readonly Color DefaultFill = Color.FromArgb (0x80, 0x80, 0x80);
+
+        internal readonly MapMarkerStyle Marker;
+        internal readonly float SizePoints;     // NaN: as tall as the text
+        internal readonly Color Fill;
+
+        internal MapMarkerSwatch (MapMarkerStyle marker, float sizePoints, Color fill)
+        {
+            Marker = marker;
+            SizePoints = sizePoints;
+            Fill = fill.IsEmpty ? DefaultFill : fill;
+        }
+
+        // The marker's size in points next to text of textPoints.
+        internal float MarkerPoints (float textPoints)
+            => float.IsNaN (SizePoints) || SizePoints <= 0 ? textPoints : Math.Min (SizePoints, MaxPoints);
+
+        internal override SKSize Size (float textPoints)
+        {
+            var marker = MarkerPoints (textPoints);
+            // a push-pin stands on its point, a marker above it
+            var height = Marker == MapMarkerStyle.PushPin ? marker * 1.5f : marker;
+            return new SKSize (Math.Max (textPoints * 1.8f, marker), Math.Max (textPoints * 1.1f, height));
+        }
+
+        internal override void Draw (SKCanvas canvas, SKRect box)
+        {
+            if (Marker == MapMarkerStyle.None)
+                return;
+            var size = MarkerPoints (Math.Min (box.Height / 1.1f, box.Width / 1.8f));
+            size = Math.Min (size, Math.Min (box.Width, Marker == MapMarkerStyle.PushPin ? box.Height / 1.5f : box.Height));
+            var y = Marker == MapMarkerStyle.PushPin ? box.MidY + size * 0.75f : box.MidY;
+            using var path = MapMarkerShape.Outline (Marker, box.MidX, y, size);
+            using var fill = new SKPaint { Color = MapScene.ToSk (Fill), IsStroke = false, IsAntialias = true };
+            canvas.DrawPath (path, fill);
+            using var stroke = new SKPaint { Color = SKColors.DimGray, IsStroke = true, StrokeWidth = 0.5f, IsAntialias = true };
+            canvas.DrawPath (path, stroke);
+        }
+    }
+
+    /// <summary>A line of the bucket's width (a size rule on a line layer) across its box.</summary>
+    internal sealed class MapLineSwatch : MapLegendSwatch
+    {
+        internal const float MaxPoints = 12f;
+
+        internal readonly float WidthPoints;    // NaN: a thin line
+        internal readonly Color Color;
+
+        internal MapLineSwatch (float widthPoints, Color color)
+        {
+            WidthPoints = widthPoints;
+            Color = color.IsEmpty ? MapMarkerSwatch.DefaultFill : color;
+        }
+
+        internal float LinePoints => float.IsNaN (WidthPoints) || WidthPoints <= 0 ? 1f : Math.Min (WidthPoints, MaxPoints);
+
+        internal override SKSize Size (float textPoints)
+            => new SKSize (textPoints * 1.8f, Math.Max (textPoints * 1.1f, LinePoints));
+
+        internal override void Draw (SKCanvas canvas, SKRect box)
+        {
+            using var paint = new SKPaint {
+                Color = MapScene.ToSk (Color), IsStroke = true, IsAntialias = true,
+                StrokeWidth = Math.Min (LinePoints, box.Height), StrokeCap = SKStrokeCap.Butt,
+            };
+            canvas.DrawLine (box.Left, box.MidY, box.Right, box.MidY, paint);
         }
     }
 
@@ -354,6 +439,7 @@ namespace Majorsilence.Reporting.Rdl
     {
         private const float BarHeight = 4;
         private const float PreferredWidth = 120;
+        private const float MinimumBar = 36;
 
         internal bool Mercator;
         internal MapTextStyle TextStyle = new MapTextStyle { Size = 7 };
@@ -365,6 +451,10 @@ namespace Majorsilence.Reporting.Rdl
 
         internal override SKSize Measure (float maxWidth, float maxHeight)
             => new SKSize (Math.Min (maxWidth, PreferredWidth), 2 * TextStyle.LineHeight + 2 * BarHeight + 2 * Padding);
+
+        // The bars pick a round distance that fits, so the scale is usable down to the width of its labels.
+        internal override float MinimumWidth (float maxHeight)
+            => Math.Max (MinimumBar, Math.Max (TextStyle.Width ("1,000 km"), TextStyle.Width ("1,000 mi"))) + 2 * Padding;
 
         protected override void DrawContent (SKCanvas canvas, MapFrame frame, SKRect content)
         {

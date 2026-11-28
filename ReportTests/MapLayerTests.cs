@@ -82,12 +82,15 @@ namespace ReportTests
             <MapPolygons>{Square ("A", -2, -2, 5, 5)}{Square ("B", 5, -2, 12, 5)}{Square ("C", -2, 5, 5, 12)}{Square ("D", 5, 5, 12, 12)}</MapPolygons>
           </MapPolygonLayer>";
 
-        private static string MapItem (string layers, string coordinates = "Planar") =>
+        private static string MapItem (string layers, string coordinates = "Planar", string decorations = "") =>
             $@"<Map Name=""TownMap""><Top>0.5in</Top><Left>0in</Left><Height>2in</Height><Width>2in</Width>
           <MapViewport><MapCoordinateSystem>{coordinates}</MapCoordinateSystem><MapProjection>Equirectangular</MapProjection><MapDataBoundView /></MapViewport>
           {DataRegion}
           <MapLayers>{layers}</MapLayers>
+          {decorations}
         </Map>";
+
+        private const string LegendRight = @"<MapLegends><MapLegend Name=""Legend1""><Position>RightTop</Position><DockOutsideViewport>true</DockOutsideViewport><Layout>Column</Layout></MapLegend></MapLegends>";
 
         private static string ReportWith (string item) => $@"<?xml version=""1.0"" encoding=""UTF-8""?>
 <Report xmlns=""{Rdl2010}"">
@@ -414,5 +417,70 @@ namespace ReportTests
                 Assert.That (pdf.GetPage (1).GetImages ().Count (), Is.EqualTo (1), "the map is an image on the page");
             }
         }
-    }
+    
+        [Test]
+        public async Task Legend_SizeRuleOnPoints_ShowsAMarkerOfEachSize ()
+        {
+            using var report = await Parse (MapItem (PointLayer (SizeRule), decorations: LegendRight));
+            AssertNoMapWarnings (report);
+            var scene = await Scene (report);
+            var swatches = scene.Overlays.OfType<MapLegendOverlay> ().Single ().Entries.Select (e => e.Swatch).ToArray ();
+
+            Assert.That (swatches, Has.Length.EqualTo (3).And.All.InstanceOf<MapMarkerSwatch> ());
+            var markers = swatches.Cast<MapMarkerSwatch> ().ToArray ();
+            Assert.That (markers.Select (m => m.Marker), Is.All.EqualTo (MapMarkerStyle.Circle));
+            Assert.That (markers.Select (m => m.SizePoints), Is.EqualTo (new[] { 6f, 12f, 18f }), "StartSize to EndSize across the buckets");
+            Assert.That (markers[2].Size (8).Height, Is.GreaterThan (markers[0].Size (8).Height), "a bigger bucket, a bigger swatch");
+        }
+
+        [Test]
+        public async Task Legend_MarkerRule_ShowsEachBucketsMarker ()
+        {
+            var rule = @"<MapMarkerRule><DataValue>#KIND</DataValue>
+                <MapMarkers><MapMarker><MapMarkerStyle>Square</MapMarkerStyle></MapMarker><MapMarker><MapMarkerStyle>Triangle</MapMarkerStyle></MapMarker><MapMarker><MapMarkerStyle>Star</MapMarkerStyle></MapMarker></MapMarkers>
+              </MapMarkerRule>";
+            using var report = await Parse (MapItem (PointLayer (rule), decorations: LegendRight));
+            AssertNoMapWarnings (report);
+            var scene = await Scene (report);
+            var swatches = scene.Overlays.OfType<MapLegendOverlay> ().Single ().Entries.Select (e => e.Swatch).ToArray ();
+
+            Assert.That (swatches, Is.All.InstanceOf<MapMarkerSwatch> ());
+            Assert.That (swatches.Cast<MapMarkerSwatch> ().Select (m => m.Marker),
+                Is.EqualTo (new[] { MapMarkerStyle.Rectangle, MapMarkerStyle.Triangle, MapMarkerStyle.Star }));
+
+            // The markers are drawn: grey inside each swatch.
+            using var bitmap = new SKBitmap (100, 30);
+            using (var canvas = new SKCanvas (bitmap)) {
+                canvas.Clear (SKColors.White);
+                for (var i = 0; i < swatches.Length; i++)
+                    swatches[i].Draw (canvas, SKRect.Create (5 + i * 30, 5, 20, 20));
+            }
+            for (var i = 0; i < swatches.Length; i++)
+                Assert.That (bitmap.GetPixel (15 + i * 30, 17), Is.Not.EqualTo (SKColors.White), swatches[i] + " is drawn");
+        }
+
+        [Test]
+        public async Task Legend_SizeRuleOnLines_ShowsALineOfEachWidth ()
+        {
+            using var report = await Parse (MapItem (LineLayer (), decorations: LegendRight.Replace ("</MapLegend>", "</MapLegend><MapLegend Name=\"Unused\"><Hidden>true</Hidden></MapLegend>")));
+            AssertNoMapWarnings (report);
+            var scene = await Scene (report);
+            var swatches = scene.Overlays.OfType<MapLegendOverlay> ().Single ().Entries.Select (e => e.Swatch).ToArray ();
+
+            // The size rule's two widths, then the colour rule's two colours.
+            var lines = swatches.OfType<MapLineSwatch> ().ToArray ();
+            Assert.That (lines.Select (l => l.WidthPoints), Is.EqualTo (new[] { 2f, 12f }));
+            Assert.That (swatches.OfType<MapColorSwatch> ().Count (), Is.EqualTo (2));
+            Assert.That (swatches.OfType<MapMarkerSwatch> (), Is.Empty, "a line layer's size rule is not drawn as markers");
+        }
+
+        [Test]
+        public void MarkerSwatch_IsCappedSoALegendStaysReadable ()
+        {
+            var huge = new MapMarkerSwatch (MapMarkerStyle.Circle, 200, System.Drawing.Color.Empty);
+            Assert.That (huge.Size (8).Height, Is.EqualTo (MapMarkerSwatch.MaxPoints));
+            Assert.That (huge.Fill, Is.EqualTo (MapMarkerSwatch.DefaultFill), "a size rule has no colour of its own");
+            Assert.That (new MapLineSwatch (float.NaN, System.Drawing.Color.Empty).LinePoints, Is.EqualTo (1f));
+        }
+}
 }

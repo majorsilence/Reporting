@@ -222,37 +222,93 @@ namespace Majorsilence.Reporting.Rdl
             scene.ViewWidth = view.Width / w * 100;
             scene.ViewHeight = view.Height / h * 100;
 
-            // Inside: over the viewport, stacked inwards from the edge at each position.
+            // Inside: over the viewport, stacked inwards from the edge at each position. When the
+            // fitted map leaves an empty band on the side a decoration is aligned to (a wide map item
+            // round a tall map, say), the decoration goes in that band if it fits there, rather than
+            // at the viewport's edge and over the shapes.
+            var mapArea = MapArea (scene, w, h, view);
             var offsets = new Dictionary<string, float> (StringComparer.Ordinal);
             foreach (var (overlay, p) in inside) {
+                var area = BandBeside (mapArea, view, p, overlay) ?? view;
                 offsets.TryGetValue (p.Slot, out var offset);
                 var horizontal = p.Edge == "Top" || p.Edge == "Bottom";
-                var maxW = Math.Max (1, view.Width - 2 * Gap - (horizontal ? 0 : offset));
-                var maxH = Math.Max (1, view.Height - 2 * Gap - (horizontal ? offset : 0));
+                var maxW = Math.Max (1, area.Width - 2 * Gap - (horizontal ? 0 : offset));
+                var maxH = Math.Max (1, area.Height - 2 * Gap - (horizontal ? offset : 0));
                 if (horizontal)
-                    maxH = Math.Max (1, Math.Min (maxH, view.Height / 2));
+                    maxH = Math.Max (1, Math.Min (maxH, area.Height / 2));
                 else
-                    maxW = Math.Max (1, Math.Min (maxW, view.Width / 2));
+                    maxW = Math.Max (1, Math.Min (maxW, area.Width / 2));
                 var s = Clamp (SizeOf (overlay, p, maxW, maxH), maxW, maxH);
                 switch (p.Edge) {
                     case "Top":
-                        overlay.Bounds = SKRect.Create (AlignX (view, s.Width, p.Align, Gap), view.Top + Gap + offset, s.Width, s.Height);
+                        overlay.Bounds = SKRect.Create (AlignX (area, s.Width, p.Align, Gap), area.Top + Gap + offset, s.Width, s.Height);
                         offsets[p.Slot] = offset + s.Height + Gap;
                         break;
                     case "Bottom":
-                        overlay.Bounds = SKRect.Create (AlignX (view, s.Width, p.Align, Gap), view.Bottom - Gap - offset - s.Height, s.Width, s.Height);
+                        overlay.Bounds = SKRect.Create (AlignX (area, s.Width, p.Align, Gap), area.Bottom - Gap - offset - s.Height, s.Width, s.Height);
                         offsets[p.Slot] = offset + s.Height + Gap;
                         break;
                     case "Left":
-                        overlay.Bounds = SKRect.Create (view.Left + Gap + offset, AlignY (view, s.Height, p.Align, Gap), s.Width, s.Height);
+                        overlay.Bounds = SKRect.Create (area.Left + Gap + offset, AlignY (area, s.Height, p.Align, Gap), s.Width, s.Height);
                         offsets[p.Slot] = offset + s.Width + Gap;
                         break;
                     default:
-                        overlay.Bounds = SKRect.Create (view.Right - Gap - offset - s.Width, AlignY (view, s.Height, p.Align, Gap), s.Width, s.Height);
+                        overlay.Bounds = SKRect.Create (area.Right - Gap - offset - s.Width, AlignY (area, s.Height, p.Align, Gap), s.Width, s.Height);
                         offsets[p.Slot] = offset + s.Width + Gap;
                         break;
                 }
             }
+        }
+
+        /// <summary>
+        /// Where the shapes are drawn in the viewport, in points of the item (with room for markers
+        /// and wide lines), or null when there is nothing drawn.
+        /// </summary>
+        internal static SKRect? MapArea (MapScene scene, float w, float h, SKRect view)
+        {
+            int width = Math.Max (1, (int)Math.Round (w)), height = Math.Max (1, (int)Math.Round (h));
+            var frame = scene.Frame (width, height);
+            var bounds = scene.Bounds ();
+            if (!frame.HasData || bounds == null)
+                return null;
+            var b = bounds.Value;
+            var topLeft = frame.ToPixel (new MapPoint (b.MinX, b.MaxY));
+            var bottomRight = frame.ToPixel (new MapPoint (b.MaxX, b.MinY));
+            float fx = w / width, fy = h / height;
+            var overhang = 0f;
+            foreach (var d in scene.Drawables)
+                overhang = Math.Max (overhang, d.OverhangPoints);
+            var area = new SKRect (topLeft.X * fx - overhang, topLeft.Y * fy - overhang,
+                bottomRight.X * fx + overhang, bottomRight.Y * fy + overhang);
+            return area.IntersectsWith (view) ? SKRect.Intersect (area, view) : (SKRect?)null;
+        }
+
+        /// <summary>
+        /// The empty band of the viewport beside the map on the side the decoration is aligned to,
+        /// when the decoration fits in it; otherwise null.
+        /// </summary>
+        private static SKRect? BandBeside (SKRect? mapArea, SKRect view, MapPlacement p, MapDecorationOverlay overlay)
+        {
+            if (mapArea == null)
+                return null;
+            var m = mapArea.Value;
+            var side = p.Edge == "Left" || p.Edge == "Right" ? p.Edge : p.Align == "Left" || p.Align == "Right" ? p.Align : null;
+            if (side != null) {
+                var band = side == "Left"
+                    ? new SKRect (view.Left, view.Top, m.Left, view.Bottom)
+                    : new SKRect (m.Right, view.Top, view.Right, view.Bottom);
+                if (band.Width - 2 * Gap >= overlay.MinimumWidth (band.Height - 2 * Gap))
+                    return band;
+            }
+            side = p.Edge == "Top" || p.Edge == "Bottom" ? p.Edge : p.Align == "Top" || p.Align == "Bottom" ? p.Align : null;
+            if (side != null) {
+                var band = side == "Top"
+                    ? new SKRect (view.Left, view.Top, view.Right, m.Top)
+                    : new SKRect (view.Left, m.Bottom, view.Right, view.Bottom);
+                if (band.Height - 2 * Gap >= overlay.Measure (Math.Max (1, band.Width - 2 * Gap), float.MaxValue).Height)
+                    return band;
+            }
+            return null;
         }
 
         /// <summary>The decoration's MapSize, or the size it wants; either way it lays out its content in that room.</summary>

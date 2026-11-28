@@ -70,10 +70,19 @@ namespace Majorsilence.Reporting.Rdl
     {
         private float? _start, _end;
 
+        // Whether it sizes the lines of a line layer (its legend shows a line of each width) or the
+        // markers of a point layer (a circle of each size).
+        internal bool SizesLines;
+
         internal MapSizeRule (ReportDefn r, ReportLink p, XmlNode xNode) : base (r, p)
         {
             Parse (xNode);
         }
+
+        internal override MapLegendSwatch LegendSwatch (MapBucket bucket)
+            => SizesLines
+                ? new MapLineSwatch (bucket.SizePoints, bucket.Color)
+                : new MapMarkerSwatch (MapMarkerStyle.Circle, bucket.SizePoints, bucket.Color);
 
         protected override bool SpecificElement (XmlNode node)
         {
@@ -118,6 +127,9 @@ namespace Majorsilence.Reporting.Rdl
             Parse (xNode);
         }
 
+        internal override MapLegendSwatch LegendSwatch (MapBucket bucket)
+            => new MapMarkerSwatch (bucket.Marker ?? MapMarkerStyle.Circle, float.NaN, bucket.Color);
+
         protected override bool SpecificElement (XmlNode node)
         {
             if (node.LocalName != "MapMarkers")
@@ -160,7 +172,7 @@ namespace Majorsilence.Reporting.Rdl
                     continue;
                 }
                 if (rule.LocalName == "MapSizeRule")
-                    Size ??= new MapSizeRule (r, p, rule);
+                    Size ??= new MapSizeRule (r, p, rule) { SizesLines = !markers };
                 else if (markers && rule.LocalName == "MapMarkerRule")
                     Marker ??= new MapMarkerRule (r, p, rule);
                 else
